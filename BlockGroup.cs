@@ -1,0 +1,195 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
+using BASeTris.TetrisBlocks;
+
+namespace BASeTris
+{
+    public class BlockGroup:IEnumerable<BlockGroupEntry>
+    {
+        
+ 
+
+       
+        public int FallSpeed { get; set; } = 250; //Higher is slower, number of ms between movements.
+        public int X { get; set; }
+        public int Y { get; set; }
+        private int XMin, XMax, YMin, YMax;
+        private Rectangle _GroupExtents = Rectangle.Empty;
+        public DateTime LastFall = DateTime.MinValue;
+        public Rectangle GroupExtents {  get { return _GroupExtents; } }
+        private List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
+
+        public override string ToString()
+        {
+
+            return "BlockGroup:" + BlockData.Count + " Blocks ";
+
+        }
+
+        public BlockGroup(BlockGroup sourcebg)
+        {
+            FallSpeed = sourcebg.FallSpeed;
+            X = sourcebg.X;
+            Y = sourcebg.Y;
+            foreach(var cloneentry in sourcebg.BlockData)
+            {
+                BlockData.Add(new BlockGroupEntry(cloneentry));
+            }
+
+        }
+        public BlockGroup()
+        {
+            XMin = YMin = int.MaxValue;
+            XMax = YMax = int.MinValue;
+        }
+        private void AddBlock(BlockGroupEntry bge)
+        {
+            if (bge.X < XMin) XMin = bge.X;
+            if (bge.X > XMax) XMax = bge.X;
+            if (bge.Y < YMin) YMin = bge.Y;
+            if (bge.Y > YMax) YMax = bge.Y;
+            _GroupExtents = new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
+            BlockData.Add(bge);
+        }
+        public void AddBlock(Point[] RotationPoints,TetrisBlock tb)
+        {
+            BlockGroupEntry bge = new BlockGroupEntry(RotationPoints, tb);
+            AddBlock(bge);
+            
+        }
+
+        public void Clamp(int RowCount,int ColCount)
+        {
+            //check X Coordinate.
+            int MinimumX=int.MaxValue, MinimumY=int.MaxValue;
+            int MaximumX=int.MinValue, MaximumY=int.MinValue;
+            foreach(var iterateentry in this)
+            {
+                if (iterateentry.X + X < MinimumX) MinimumX = iterateentry.X + X;
+                if (iterateentry.X + X > MaximumX) MaximumX = iterateentry.X + X;
+                if (iterateentry.Y + Y < MinimumY) MinimumY = iterateentry.Y + Y;
+                if (iterateentry.Y + Y > MaximumY) MaximumY = iterateentry.Y + Y;
+            }
+
+            if (MinimumX < 0) X = X + Math.Abs(MinimumX);
+            if (MaximumX > ColCount) X = X - (MaximumX - ColCount);
+
+            if (MinimumY < 0) Y = Y + Math.Abs(MinimumY);
+            if (MaximumY > RowCount) Y = Y - (MaximumY - RowCount);
+
+
+        }
+        public IEnumerator<BlockGroupEntry> GetEnumerator()
+        {
+            return BlockData.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+        public static BlockGroup GetTetromino_Array(Point[][] Source,Color pColor,Color pInnerColor)
+        {
+            BlockGroup bg = new BlockGroup();
+            int useColor = 0;
+            foreach (Point[] loopposdata in Source)
+            {
+                StandardColouredBlock CreateBlock = new StandardColouredBlock();
+
+                CreateBlock.BlockColor = pColor;
+                CreateBlock.InnerColor = pInnerColor;
+                useColor++;
+                bg.AddBlock(loopposdata, CreateBlock);
+            }
+            return bg;
+        }
+        public static BlockGroup GetTetromino_I()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_I_1, TetrominoData.Tetromino_I_2, TetrominoData.Tetromino_I_3, TetrominoData.Tetromino_I_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue );
+            
+        }
+
+        public static BlockGroup GetTetromino_J()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_J_1, TetrominoData.Tetromino_J_2, TetrominoData.Tetromino_J_3, TetrominoData.Tetromino_J_4 },Color.Blue, Color.Blue);
+           
+        }
+
+        public static BlockGroup GetTetromino_L()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_L_1, TetrominoData.Tetromino_L_2, TetrominoData.Tetromino_L_3, TetrominoData.Tetromino_L_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue);
+        }
+        public static BlockGroup GetTetromino_O()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_O_1, TetrominoData.Tetromino_O_2, TetrominoData.Tetromino_O_3, TetrominoData.Tetromino_O_4 },Color.DeepSkyBlue,Color.White);}
+        public static BlockGroup GetTetromino_S()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_S_1, TetrominoData.Tetromino_S_2, TetrominoData.Tetromino_S_3, TetrominoData.Tetromino_S_4 },Color.Blue,Color.Blue);
+        }
+        public static BlockGroup GetTetromino_T()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_T_1, TetrominoData.Tetromino_T_2, TetrominoData.Tetromino_T_3, TetrominoData.Tetromino_T_4 },Color.Blue,Color.White);
+        }
+
+        public static BlockGroup GetTetromino_Z()
+        {
+            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_Z_1, TetrominoData.Tetromino_Z_2, TetrominoData.Tetromino_Z_3, TetrominoData.Tetromino_Z_4 },Color.DeepSkyBlue,Color.DeepSkyBlue);
+        }
+
+        public static double GetAngle(PointF PointA, PointF PointB)
+        {
+            return Math.Atan2(PointB.Y - PointA.Y, PointB.X - PointA.X);
+            
+
+        }
+        public void Rotate(bool CCW)
+        {
+          foreach(var iterateblock in BlockData)
+          {
+                if (CCW) iterateblock.RotationModulo--;
+              else 
+                    iterateblock.RotationModulo++;
+
+              
+          }
+
+        }
+
+        public static float Distance(PointF PointA, PointF PointB)
+        {
+            return (float)Math.Sqrt(Math.Pow(PointB.X - PointA.X, 2) + Math.Pow(PointB.Y - PointA.Y, 2));
+        }
+
+    }
+    public class BlockGroupEntry
+    {
+        //Represents a single block within a group. the RotationPoints represent the positions this specific block will rotate/change to when rotated.
+        public int X { get { return Positions[RotationModulo % Positions.Length].X; } }
+        public int Y { get { return Positions[RotationModulo % Positions.Length].Y; } }
+
+        Point[] Positions = null;
+
+        public int RotationModulo = 0;
+
+        public TetrisBlock Block;
+        public BlockGroupEntry(Point[] RotationPoints,TetrisBlock pBlock)
+        {
+            if(RotationPoints.Length==0) throw new ArgumentException("RotationPoints");
+
+            Positions = RotationPoints;
+            Block = pBlock;
+        }
+        public BlockGroupEntry(BlockGroupEntry clonesource)
+        {
+            RotationModulo = clonesource.RotationModulo;
+            Positions = (from pt in clonesource.Positions select pt).ToArray();
+        }
+    }
+}
