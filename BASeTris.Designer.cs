@@ -29,7 +29,9 @@
         private void InitializeComponent()
         {
             this.picTetrisField = new System.Windows.Forms.PictureBox();
+            this.picStatistics = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).BeginInit();
             this.SuspendLayout();
             // 
             // picTetrisField
@@ -44,19 +46,30 @@
             this.picTetrisField.Paint += new System.Windows.Forms.PaintEventHandler(this.picTetrisField_Paint);
             this.picTetrisField.Resize += new System.EventHandler(this.picTetrisField_Resize);
             // 
-            // Form1
+            // picStatistics
+            // 
+            this.picStatistics.BackColor = System.Drawing.Color.White;
+            this.picStatistics.Location = new System.Drawing.Point(323, 13);
+            this.picStatistics.Name = "picStatistics";
+            this.picStatistics.Size = new System.Drawing.Size(237, 629);
+            this.picStatistics.TabIndex = 1;
+            this.picStatistics.TabStop = false;
+            // 
+            // BASeTris
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(572, 654);
+            this.Controls.Add(this.picStatistics);
             this.Controls.Add(this.picTetrisField);
             this.KeyPreview = true;
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "BASeTris";
+            this.Text = "BASeTris";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -64,6 +77,7 @@
         #endregion
 
         private System.Windows.Forms.PictureBox picTetrisField;
+        private System.Windows.Forms.PictureBox picStatistics;
     }
 }
 

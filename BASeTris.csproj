@@ -52,7 +52,9 @@
     <Compile Include="BASeTris.Designer.cs">
       <DependentUpon>BASeTris.cs</DependentUpon>
     </Compile>
+    <Compile Include="GameState.cs" />
     <Compile Include="GummyImage.cs" />
+    <Compile Include="IStateOwner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TetrisBlocks\StandardColouredBlock.cs" />

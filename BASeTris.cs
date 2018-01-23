@@ -12,9 +12,9 @@ using System.Windows.Forms;
 
 namespace BASeTris
 {
-    public partial class BASeTris : Form
+    public partial class BASeTris : Form, IStateOwner
     {
-        private TetrisField PlayField = null;
+        private GameState CurrentGameState = null;
         public BASeTris()
         {
             InitializeComponent();
@@ -27,15 +27,15 @@ namespace BASeTris
         BlockGroup testBG = null;
         private void StartGame()
         {
-            PlayField = new TetrisField(1);
-           
+            CurrentGameState = new StandardTetrisGameState();
+          
             if(GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
             GameThread.Start();
         }
 
         private Thread GameThread = null;
-        private DateTime lastHorizontalMove = DateTime.MinValue;
+        
         private ConcurrentQueue<Action> ProcThreadActions = new ConcurrentQueue<Action>();
         private void GameProc()
         {
@@ -49,27 +49,7 @@ namespace BASeTris
                 }
 
 
-                PlayField.AnimateFrame();
-                foreach(var iterate in PlayField.BlockGroups)
-                {
-                    if ((DateTime.Now - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
-                    {
-                        
-                            if(MoveGroupDown(iterate))
-                            {
-                                ProcThreadActions.Enqueue(() =>
-                                {
-                                    PlayField.ProcessLines();
-                                });
-                            }
-                            iterate.LastFall = DateTime.Now;
-                    }
-                }
-
-                if(PlayField.BlockGroups.Count==0)
-                {
-                    SpawnNewTetromino();
-                }
+               CurrentGameState.GameProc(this);
 
                 Invoke((MethodInvoker)(() =>
                 {
@@ -83,52 +63,12 @@ namespace BASeTris
 
         }
         static Random rgen = new Random();
-        public static T Choose<T>(IEnumerable<T> ChooseArray)
-        {
-            if (rgen == null) rgen = new Random();
-            SortedList<double, T> sorttest = new SortedList<double, T>();
-            foreach (T loopvalue in ChooseArray)
-            {
-                double rgg;
-                do
-                {
-                    rgg = rgen.NextDouble();
-                }
-                while (sorttest.ContainsKey(rgg));
-                sorttest.Add(rgg, loopvalue);
-
-            }
-
-            //return the first item.
-            return sorttest.First().Value;
-        }
-        private void SpawnNewTetromino()
-        {
-            Func<BlockGroup> GetTetrominoFunction;
-            Func<BlockGroup>[] GeneratorFunctions = new Func<BlockGroup>[]
-            {
-                BlockGroup.GetTetromino_Z,
-                BlockGroup.GetTetromino_I,
-                BlockGroup.GetTetromino_J,
-                BlockGroup.GetTetromino_L,
-                BlockGroup.GetTetromino_O,
-                BlockGroup.GetTetromino_S,
-                BlockGroup.GetTetromino_T
-            };
-            GetTetrominoFunction = Choose(GeneratorFunctions);
-            //GetTetrominoFunction = BlockGroup.GetTetromino_T;
-            BlockGroup newTetromino = GetTetrominoFunction();
-            newTetromino.X = 5-newTetromino.GroupExtents.Width/2;
-            newTetromino.Y = 0;
-            PlayField.AddBlockGroup(newTetromino);
-            
-        }
+       
+      
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
-            if(PlayField!=null)
-            {
-                PlayField.Draw(e.Graphics,new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
-            }
+            CurrentGameState.DrawProc(this,e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
+            
         }
 
         private void picTetrisField_Resize(object sender, EventArgs e)
@@ -143,69 +83,36 @@ namespace BASeTris
             picTetrisField.Invalidate();
             picTetrisField.Refresh();
         }
-        private bool MoveGroupDown(BlockGroup activeItem)
-        {
-            
-                if (PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1))
-                {
-                    activeItem.Y++;
-                }
-                else
-                {
-                    if ((DateTime.Now - lastHorizontalMove).TotalMilliseconds > 250)
-                    {
-                        PlayField.SetGroupToField(activeItem);
-                        return true;
-                    }
-                }
-            return false;
-        }
+       
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode==Keys.X)
             {
                 ProcThreadActions.Enqueue(() =>
                 {
-                    foreach (var activeitem in PlayField.BlockGroups)
-                    {
-                        if (PlayField.CanRotate(activeitem, false))
-                        {
-                            activeitem.Rotate(false);
-                            activeitem.Clamp(PlayField.RowCount, PlayField.ColCount);
-                        }
-                    }
+                    CurrentGameState.HandleGameKey(this,GameState.GameKeys.GameKey_RotateCW);
+                    
                 });
             }
             else if(e.KeyCode==Keys.Down)
             {
                 ProcThreadActions.Enqueue(() =>
                 {
-                    foreach (var activeitem in PlayField.BlockGroups)
-                    {
-                        if (MoveGroupDown(activeitem))
-                        {
-                            ProcThreadActions.Enqueue(() =>
-                            {
-                                PlayField.ProcessLines();
-                            });
-                        }
-                    }
+                    CurrentGameState.HandleGameKey(this,GameState.GameKeys.GameKey_Down);
                 });
             }
-            else if(e.KeyCode ==Keys.Right|| e.KeyCode == Keys.Left)
+            else if(e.KeyCode ==Keys.Right)
             {
-                
-                int XMove = e.KeyCode == Keys.Right ? 1 : -1;
                 ProcThreadActions.Enqueue(() =>
                 {
-                    foreach (var ActiveItem in PlayField.BlockGroups)
-                    {
-                        if (PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y))
-                        {
-                            lastHorizontalMove = DateTime.Now;
-                            ActiveItem.X += XMove;
-                        }
-                    }
+                    CurrentGameState.HandleGameKey(this,GameState.GameKeys.GameKey_Right);
+                });
+            }
+            else if(e.KeyCode == Keys.Left)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    CurrentGameState.HandleGameKey(this, GameState.GameKeys.GameKey_Left);
                 });
             }
             ProcThreadActions.Enqueue(() =>
@@ -222,6 +129,12 @@ namespace BASeTris
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             GameThread.Abort();
+        }
+
+        public GameState CurrentState { get { return CurrentGameState; } set{ CurrentGameState = value; } }
+        public void EnqueueAction(Action pAction)
+        {
+            ProcThreadActions.Enqueue(pAction);
         }
     }
 }
