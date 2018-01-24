@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
@@ -44,10 +45,9 @@ namespace BASeTris
 
                     if (MoveGroupDown(iterate))
                     {
-                        pOwner.EnqueueAction(() =>
-                        {
-                            PlayField.ProcessLines();
-                        });
+                        
+                        PlayField.ProcessLines();
+                        
                     }
                     iterate.LastFall = DateTime.Now;
                 }
@@ -83,17 +83,19 @@ namespace BASeTris
             Func<BlockGroup> GetTetrominoFunction;
             Func<BlockGroup>[] GeneratorFunctions = new Func<BlockGroup>[]
             {
-                BlockGroup.GetTetromino_Z,
-                BlockGroup.GetTetromino_I,
-                BlockGroup.GetTetromino_J,
-                BlockGroup.GetTetromino_L,
-                BlockGroup.GetTetromino_O,
-                BlockGroup.GetTetromino_S,
-                BlockGroup.GetTetromino_T
+                () => new Tetromino_Z(),
+                () => new Tetromino_I(),
+                () => new Tetromino_J(),
+                () => new Tetromino_L(),
+                () => new Tetromino_O(),
+                () => new Tetromino_S(),
+                () => new Tetromino_T()
+                
             };
             GetTetrominoFunction = Choose(GeneratorFunctions);
             //GetTetrominoFunction = BlockGroup.GetTetromino_T;
             BlockGroup newTetromino = GetTetrominoFunction();
+            PlayField.Theme.ApplyTheme(newTetromino,PlayField);
             newTetromino.X = 5 - newTetromino.GroupExtents.Width / 2;
             newTetromino.Y = 0;
             PlayField.AddBlockGroup(newTetromino);

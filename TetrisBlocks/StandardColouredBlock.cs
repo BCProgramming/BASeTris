@@ -12,8 +12,10 @@ namespace BASeTris.TetrisBlocks
     public class StandardColouredBlock : TetrisBlock
     {
         private Image GummyBitmap = null;
-        public Color BlockColor = Color.Red;
-        public Color InnerColor = Color.White;
+        public Color _BlockColor = Color.Red;
+        public Color _InnerColor = Color.White;
+        public Color BlockColor { get { return _BlockColor; } set { _BlockColor = value;GummyBitmap = null; } }
+        public Color InnerColor {   get { return _InnerColor; } set { _InnerColor = value;GummyBitmap = null; } }
         public Color BlockOutline = Color.Black;
         private Brush BlockBrush = null;
         private Pen BlockPen = null;
@@ -25,7 +27,7 @@ namespace BASeTris.TetrisBlocks
             {
                 if (!GummyBitmaps.ContainsKey(gummydata))
                 {
-                    GummyBitmaps.Add(gummydata,GummyImage.GetGummyImage(BlockColor,InnerColor, new Size(128, 128)));
+                    GummyBitmaps.Add(gummydata,GummyImage.GetGummyImage(BlockColor,InnerColor, new Size(256, 256)));
                 }
                 GummyBitmap = GummyBitmaps[gummydata];
             }

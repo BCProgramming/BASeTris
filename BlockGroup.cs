@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,8 +25,15 @@ namespace BASeTris
         private Rectangle _GroupExtents = Rectangle.Empty;
         public DateTime LastFall = DateTime.MinValue;
         public Rectangle GroupExtents {  get { return _GroupExtents; } }
-        private List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
+        protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
 
+        protected void SetBlockOwner()
+        {
+            foreach(var loopentry in BlockData)
+            {
+                loopentry.Block.Owner = this;
+            }
+        }
         public override string ToString()
         {
 
@@ -95,53 +103,27 @@ namespace BASeTris
         {
             return GetEnumerator();
         }
-        public static BlockGroup GetTetromino_Array(Point[][] Source,Color pColor,Color pInnerColor,String pName)
+        public static BlockGroup GetTetromino_Array(Point[][] Source,String pName)
         {
             BlockGroup bg = new BlockGroup();
             bg.SpecialName = pName;
-            int useColor = 0;
+            foreach(var bge in GetTetrominoEntries(Source))
+            {
+                bge.Block.Owner = bg;
+                bg.AddBlock(bge);
+            }
+            return bg;
+        }
+        public static IEnumerable<BlockGroupEntry> GetTetrominoEntries(Point[][] Source)
+        {
             foreach (Point[] loopposdata in Source)
             {
                 StandardColouredBlock CreateBlock = new StandardColouredBlock();
 
-                CreateBlock.BlockColor = pColor;
-                CreateBlock.InnerColor = pInnerColor;
-                useColor++;
-                bg.AddBlock(loopposdata, CreateBlock);
+              
+                yield return new BlockGroupEntry(loopposdata,CreateBlock);
+                
             }
-            return bg;
-        }
-        public static BlockGroup GetTetromino_I()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_I_1, TetrominoData.Tetromino_I_2, TetrominoData.Tetromino_I_3, TetrominoData.Tetromino_I_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue,"I Tetromino" );
-            
-        }
-
-        public static BlockGroup GetTetromino_J()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_J_1, TetrominoData.Tetromino_J_2, TetrominoData.Tetromino_J_3, TetrominoData.Tetromino_J_4 },Color.Blue, Color.Blue,"J Tetromino");
-           
-        }
-
-        public static BlockGroup GetTetromino_L()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_L_1, TetrominoData.Tetromino_L_2, TetrominoData.Tetromino_L_3, TetrominoData.Tetromino_L_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue,"L Tetromino");
-        }
-        public static BlockGroup GetTetromino_O()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_O_1, TetrominoData.Tetromino_O_2, TetrominoData.Tetromino_O_3, TetrominoData.Tetromino_O_4 },Color.DeepSkyBlue,Color.White,"O Tetromino");}
-        public static BlockGroup GetTetromino_S()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_S_1, TetrominoData.Tetromino_S_2, TetrominoData.Tetromino_S_3, TetrominoData.Tetromino_S_4 },Color.Blue,Color.Blue,"S Tetromino");
-        }
-        public static BlockGroup GetTetromino_T()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_T_1, TetrominoData.Tetromino_T_2, TetrominoData.Tetromino_T_3, TetrominoData.Tetromino_T_4 },Color.Blue,Color.White,"T Tetromino");
-        }
-
-        public static BlockGroup GetTetromino_Z()
-        {
-            return GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_Z_1, TetrominoData.Tetromino_Z_2, TetrominoData.Tetromino_Z_3, TetrominoData.Tetromino_Z_4 },Color.DeepSkyBlue,Color.DeepSkyBlue,"Z Tetromino");
         }
 
         public static double GetAngle(PointF PointA, PointF PointB)

@@ -2,47 +2,91 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.TetrisBlocks;
+using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
-    public class TetrominoTheme
+    public abstract class TetrominoTheme
     {
-        public static BlockGroup GetTetromino_I()
+        public abstract void ApplyTheme(BlockGroup Group, TetrisField Field);
+
+    }
+    public class NESTetrominoTheme : TetrominoTheme
+    {
+       
+
+        public NESTetrominoTheme()
         {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_I_1, TetrominoData.Tetromino_I_2, TetrominoData.Tetromino_I_3, TetrominoData.Tetromino_I_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue,"I Tetromino");
+           
 
         }
 
-        public static BlockGroup GetTetromino_J()
+        public override void ApplyTheme(BlockGroup Group, TetrisField Field)
         {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_J_1, TetrominoData.Tetromino_J_2, TetrominoData.Tetromino_J_3, TetrominoData.Tetromino_J_4 }, Color.Blue, Color.Blue,"J Tetromino");
+            Color[] useColorSet;
+            Color[][] ChooseColorSets = new Color[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
+            int ColorSet = (int)(Field.LineCount /10) %ChooseColorSets.Length;
+            useColorSet = ChooseColorSets[ColorSet];
+            ApplyColorSet(Group,useColorSet);
 
         }
 
-        public static BlockGroup GetTetromino_L()
+        private void ApplyColorSet(BlockGroup bg,Color[] set)
         {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_L_1, TetrominoData.Tetromino_L_2, TetrominoData.Tetromino_L_3, TetrominoData.Tetromino_L_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue,"L Tetromino");
-        }
-        public static BlockGroup GetTetromino_O()
-        {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_O_1, TetrominoData.Tetromino_O_2, TetrominoData.Tetromino_O_3, TetrominoData.Tetromino_O_4 }, Color.DeepSkyBlue, Color.White,"O Tetromino");
-        }
-        public static BlockGroup GetTetromino_S()
-        {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_S_1, TetrominoData.Tetromino_S_2, TetrominoData.Tetromino_S_3, TetrominoData.Tetromino_S_4 }, Color.Blue, Color.Blue,"S Tetromino");
-        }
-        public static BlockGroup GetTetromino_T()
-        {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_T_1, TetrominoData.Tetromino_T_2, TetrominoData.Tetromino_T_3, TetrominoData.Tetromino_T_4 }, Color.Blue, Color.White,"T Tetromino");
-        }
+            foreach(var iterate in bg)
+            {
+                Color[] Hollow = new Color[] { set[0], Color.MintCream };
+                Color[] Dark = new Color[] { set[0],set[0]};
+                Color[] Light = new Color[]{set[1],set[1]};
+                Color[] selected;
+                if (bg is Tetromino_I || bg is Tetromino_T || bg is Tetromino_O)
+                    selected = Hollow;
+                else if (bg is Tetromino_J || bg is Tetromino_Z)
+                    selected = Dark;
+                else
+                    selected = Light;
 
-        public static BlockGroup GetTetromino_Z()
-        {
-            return BlockGroup.GetTetromino_Array(new Point[][] { TetrominoData.Tetromino_Z_1, TetrominoData.Tetromino_Z_2, TetrominoData.Tetromino_Z_3, TetrominoData.Tetromino_Z_4 }, Color.DeepSkyBlue, Color.DeepSkyBlue,"Z Tetromino");
+                if(iterate.Block is StandardColouredBlock)
+                {
+                    var coloured = (StandardColouredBlock)iterate.Block;
+                    coloured.BlockColor = selected[0];
+                    coloured.InnerColor = selected[1];
+                }
+                
+            }
         }
+        public static Color[] Level0Colors = new Color[] { Color.Blue, Color.DeepSkyBlue };
+        public static Color[] Level1Colors = new Color[]{Color.Green,Color.GreenYellow};
+        public static Color[] Level2Colors = new Color[] { Color.Purple, Color.Magenta };
+        public static Color[] Level3Colors = new Color[] { Color.Blue, Color.GreenYellow };
+        public static Color[] Level4Colors = new Color[] {Color.MediumVioletRed,Color.Aquamarine};
+        public static Color[] Level5Colors = new Color[] { Color.Aquamarine, Color.DeepSkyBlue };
+        public static Color[] Level6Colors = new Color[] {Color.Red,Color.SlateGray};
+        public static Color[] Level7Colors = new Color[] {Color.Indigo,Color.Brown};
+        public static Color[] Level8Colors = new Color[] {Color.DarkBlue,Color.Red };
+        public static Color[] Level9Colors = new Color[] {Color.OrangeRed,Color.Orange };
+        //Level 0 style:
+
 
 
     }
+
+
+
+    public class TetrominoBlockTheme
+    {
+        public Color BlockColor;
+        public Color BlockInnerColor;
+
+        public TetrominoBlockTheme(Color BaseColor,Color InnerColor)
+        {
+            BlockColor = BaseColor;
+            BlockInnerColor = InnerColor;
+        }
+    }
+    
 }

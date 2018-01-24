@@ -60,7 +60,10 @@
     <Compile Include="TetrisBlocks\StandardColouredBlock.cs" />
     <Compile Include="TetrisBlocks\TetrisBlock.cs" />
     <Compile Include="TetrisField.cs" />
+    <Compile Include="TetrisGame.cs" />
     <Compile Include="TetrominoData.cs" />
+    <Compile Include="Tetrominoes\Tetrominoes.cs" />
+    <Compile Include="Tetrominoes\Tetromino.cs" />
     <Compile Include="TetrominoTheme.cs" />
     <EmbeddedResource Include="BASeTris.resx">
       <DependentUpon>BASeTris.cs</DependentUpon>

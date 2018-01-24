@@ -17,12 +17,15 @@ namespace BASeTris
         //The "tetris field" here just represents the "permanent" blocks. eg, blocks that have been dropped, and "set" in place.
         //these get evaluated to check for lines when a new block is placed, for example.
         //blocks that are still "controlled" and falling are handled separately, and are placed here when they are dropped.
-
+        public event EventHandler<LevelChangeEventArgs> LevelChanged;
         private TetrisBlock[][] FieldContents;
-
+        public long LineCount = 9;
+        public TetrominoTheme Theme = new NESTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
         const int ROWCOUNT = 22;
         const int COLCOUNT = 10;
+        //const int ROWCOUNT = 44;
+        //const int COLCOUNT = 20;
         Random rg = new Random();
         public int RowCount {  get { return ROWCOUNT; } }
         public int ColCount {  get { return COLCOUNT; } }
@@ -114,10 +117,7 @@ namespace BASeTris
         DateTime LastSetGroup = DateTime.MinValue;
         public void SetGroupToField(BlockGroup bg)
         {
-            if((DateTime.Now-LastSetGroup).TotalMilliseconds< 50)
-            {
-                ;
-            }
+          
             LastSetGroup = DateTime.Now;
             if(!ActiveBlockGroups.Contains(bg)) throw new ArgumentException("BlockGroup");
 
@@ -126,10 +126,6 @@ namespace BASeTris
             {
 
                 int RowPos = groupblock.Y+bg.Y;
-                if(RowPos < 17)
-                {
-                    ;
-                }
                 int ColPos = groupblock.X + bg.X;
                 if(FieldContents[RowPos][ColPos]==null)
                     FieldContents[RowPos][ColPos] = groupblock.Block;
@@ -213,6 +209,17 @@ namespace BASeTris
 
 
         }
+        private void SetFieldColors()
+        {
+            foreach(var iteraterow in FieldContents)
+            {
+                foreach(var iteratecell in iteraterow)
+                {
+                    if (iteratecell!=null)
+                    Theme.ApplyTheme(iteratecell.Owner,this);
+                }
+            }
+        }
         public int ProcessLines()
         {
             int rowsfound = 0;
@@ -234,7 +241,23 @@ namespace BASeTris
                     }
                 }
             }
+            long PreviousLineCount = LineCount;
+            LineCount += rowsfound;
+            if((PreviousLineCount%10)>(LineCount%10))
+            {
+                LevelChanged?.Invoke(this,new LevelChangeEventArgs((int)LineCount/10));
+                
+                SetFieldColors();
+            }
             return rowsfound;
+        }
+    }
+    public class LevelChangeEventArgs:EventArgs
+    {
+        private int LevelNumber = 0;
+        public LevelChangeEventArgs(int newLevel=0)
+        {
+
         }
     }
 }

@@ -12,70 +12,6 @@ namespace BASeTris
     public class TetrominoData
     {
 
-        
-            public enum Tetromino_Orientation
-            {
-                Normal,
-                CW90,
-                CW180,
-                CW270
-            }
-            public enum Standard_Tetrominoes
-            {
-                /// <summary>
-                /// The I-shaped piece
-                ///  ****
-                /// </summary>
-                Tetromino_i,
-                //**
-                //**
-                /// <summary>
-                /// The Square piece
-                /// </summary>
-                Tetromino_o,
-                // **
-                //**
-                /// <summary>
-                /// The S-shaped piece
-                ///      **
-                ///     **
-                /// </summary>
-                Tetromino_s,
-                /// <summary>
-                /// The T-shaped piece
-                ///      *
-                ///     ***
-                /// </summary>
-            Tetromino_t,
-            /// <summary>
-            /// The Z-shaped piece
-            ///      **
-            ///       **
-            /// </summary>
-
-
-            Tetromino_z,
-                //  *
-                //  ***
-                /// <summary>
-                /// The J-shaped piece
-                ///  *
-                ///  ***
-                /// </summary>
-                Tetromino_j,
-                /// <summary>
-                /// The L-shaped piece
-                ///  ***
-                ///  *
-                /// </summary>
-                Tetromino_l
-            }
-      
-
-
-      
-
-
             private static T[,] rotate<T>(T[,] matrix)
             {
 
@@ -94,13 +30,9 @@ namespace BASeTris
             }
 
 
-
-
-
-   
-
         //first block of I tetromino and it's positions.
         #region I Tetromino Point Data
+        
         public static Point[] Tetromino_I_1 = new Point[]
         {
             new Point(0,1),new Point(2,0),new Point(3,2),new Point(1,3)

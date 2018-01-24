@@ -37,7 +37,7 @@
             // picTetrisField
             // 
             this.picTetrisField.BackColor = System.Drawing.Color.White;
-            this.picTetrisField.Location = new System.Drawing.Point(2, 13);
+            this.picTetrisField.Location = new System.Drawing.Point(2, 12);
             this.picTetrisField.Name = "picTetrisField";
             this.picTetrisField.Size = new System.Drawing.Size(314, 629);
             this.picTetrisField.TabIndex = 0;
@@ -49,9 +49,9 @@
             // picStatistics
             // 
             this.picStatistics.BackColor = System.Drawing.Color.White;
-            this.picStatistics.Location = new System.Drawing.Point(323, 13);
+            this.picStatistics.Location = new System.Drawing.Point(323, 12);
             this.picStatistics.Name = "picStatistics";
-            this.picStatistics.Size = new System.Drawing.Size(237, 629);
+            this.picStatistics.Size = new System.Drawing.Size(237, 630);
             this.picStatistics.TabIndex = 1;
             this.picStatistics.TabStop = false;
             // 
@@ -59,6 +59,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(572, 654);
             this.Controls.Add(this.picStatistics);
             this.Controls.Add(this.picTetrisField);

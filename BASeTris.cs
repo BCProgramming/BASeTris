@@ -14,7 +14,8 @@ namespace BASeTris
 {
     public partial class BASeTris : Form, IStateOwner
     {
-        private GameState CurrentGameState = null;
+        private TetrisGame _Game;
+        
         public BASeTris()
         {
             InitializeComponent();
@@ -27,7 +28,8 @@ namespace BASeTris
         BlockGroup testBG = null;
         private void StartGame()
         {
-            CurrentGameState = new StandardTetrisGameState();
+            _Game = new TetrisGame(this);
+            
           
             if(GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
@@ -49,7 +51,7 @@ namespace BASeTris
                 }
 
 
-               CurrentGameState.GameProc(this);
+               _Game.GameProc();
 
                 Invoke((MethodInvoker)(() =>
                 {
@@ -67,7 +69,7 @@ namespace BASeTris
       
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
-            CurrentGameState.DrawProc(this,e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
+            _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
             
         }
 
@@ -90,7 +92,7 @@ namespace BASeTris
             {
                 ProcThreadActions.Enqueue(() =>
                 {
-                    CurrentGameState.HandleGameKey(this,GameState.GameKeys.GameKey_RotateCW);
+                    _Game.HandleGameKey(this,GameState.GameKeys.GameKey_RotateCW);
                     
                 });
             }
@@ -98,21 +100,21 @@ namespace BASeTris
             {
                 ProcThreadActions.Enqueue(() =>
                 {
-                    CurrentGameState.HandleGameKey(this,GameState.GameKeys.GameKey_Down);
+                    _Game.HandleGameKey(this,GameState.GameKeys.GameKey_Down);
                 });
             }
             else if(e.KeyCode ==Keys.Right)
             {
                 ProcThreadActions.Enqueue(() =>
                 {
-                    CurrentGameState.HandleGameKey(this,GameState.GameKeys.GameKey_Right);
+                    _Game.HandleGameKey(this,GameState.GameKeys.GameKey_Right);
                 });
             }
             else if(e.KeyCode == Keys.Left)
             {
                 ProcThreadActions.Enqueue(() =>
                 {
-                    CurrentGameState.HandleGameKey(this, GameState.GameKeys.GameKey_Left);
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Left);
                 });
             }
             ProcThreadActions.Enqueue(() =>
@@ -131,7 +133,7 @@ namespace BASeTris
             GameThread.Abort();
         }
 
-        public GameState CurrentState { get { return CurrentGameState; } set{ CurrentGameState = value; } }
+        public GameState CurrentState { get { return _Game.CurrentState; } set{ _Game.CurrentState = value; } }
         public void EnqueueAction(Action pAction)
         {
             ProcThreadActions.Enqueue(pAction);

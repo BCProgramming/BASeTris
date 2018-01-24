@@ -9,6 +9,7 @@ namespace BASeTris.TetrisBlocks
 {
     public abstract class TetrisBlock
     {
+        public BlockGroup Owner { get; set; }
         public virtual bool IsAnimated { get { return false; } }
         public abstract void DrawBlock(TetrisBlockDrawParameters parameters);
         public virtual void AnimateFrame()
