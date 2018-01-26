@@ -23,15 +23,18 @@ namespace BASeTris
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            StartGame();
+            TetrisGame.InitState();
+            
         }
         BlockGroup testBG = null;
         private void StartGame()
         {
             _Game = new TetrisGame(this);
-            
-          
-            if(GameThread!=null) GameThread.Abort();
+            var musicplay = TetrisGame.Soundman.PlayMusic(TetrisField.StandardMusic, 0.5f,true);
+            musicplay.Tempo = 1f;
+
+
+            if (GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
             GameThread.Start();
         }
@@ -57,6 +60,8 @@ namespace BASeTris
                 {
                     picTetrisField.Invalidate();
                     picTetrisField.Refresh();
+                    picStatistics.Invalidate();
+                    picStatistics.Refresh();
                 }));
 
                 Thread.Sleep(5);
@@ -69,6 +74,7 @@ namespace BASeTris
       
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
+            if (_Game == null) return;
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
             
         }
@@ -117,6 +123,13 @@ namespace BASeTris
                     _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Left);
                 });
             }
+            else if(e.KeyCode==Keys.Pause)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Pause);
+                });
+            }
             ProcThreadActions.Enqueue(() =>
             {
                 Invoke((MethodInvoker)(() =>
@@ -130,13 +143,24 @@ namespace BASeTris
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            GameThread.Abort();
+            if(GameThread!=null)
+                GameThread.Abort();
         }
 
-        public GameState CurrentState { get { return _Game.CurrentState; } set{ _Game.CurrentState = value; } }
+        public GameState CurrentState { get { return _Game?.CurrentState; } set{ _Game.CurrentState = value; } }
         public void EnqueueAction(Action pAction)
         {
             ProcThreadActions.Enqueue(pAction);
+        }
+
+        private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StartGame();
+        }
+
+        private void picStatistics_Paint(object sender, PaintEventArgs e)
+        {
+            if(CurrentState!=null) CurrentState.DrawStats(this,e.Graphics,picStatistics.ClientRectangle);
         }
     }
 }

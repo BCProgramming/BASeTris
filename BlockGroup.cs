@@ -27,6 +27,18 @@ namespace BASeTris
         public Rectangle GroupExtents {  get { return _GroupExtents; } }
         protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
 
+        protected void RecalcExtents()
+        {
+            foreach (var iterateentry in this)
+            {
+                if (iterateentry.X < XMin) XMin = iterateentry.X;
+                if (iterateentry.X > XMax) XMax = iterateentry.X;
+                if (iterateentry.Y < YMin) YMin = iterateentry.Y;
+                if (iterateentry.Y > YMax) YMax = iterateentry.Y; 
+                
+            }
+            _GroupExtents = new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
+        }
         protected void SetBlockOwner()
         {
             foreach(var loopentry in BlockData)
@@ -48,7 +60,7 @@ namespace BASeTris
             Y = sourcebg.Y;
             foreach(var cloneentry in sourcebg.BlockData)
             {
-                BlockData.Add(new BlockGroupEntry(cloneentry));
+                AddBlock(new BlockGroupEntry(cloneentry));
             }
 
         }
