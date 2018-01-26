@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.AssetManager;
 
 namespace BASeTris
 {
@@ -42,6 +43,10 @@ namespace BASeTris
         private Thread GameThread = null;
         
         private ConcurrentQueue<Action> ProcThreadActions = new ConcurrentQueue<Action>();
+        private void CheckInputs()
+        {
+            
+        }
         private void GameProc()
         {
             
@@ -55,7 +60,7 @@ namespace BASeTris
 
 
                _Game.GameProc();
-
+                CheckInputs();
                 Invoke((MethodInvoker)(() =>
                 {
                     picTetrisField.Invalidate();
@@ -87,7 +92,7 @@ namespace BASeTris
 
         private void picTetrisField_Click(object sender, EventArgs e)
         {
-            testBG.Rotate(false);
+            //testBG.Rotate(false);
             picTetrisField.Invalidate();
             picTetrisField.Refresh();
         }
@@ -100,6 +105,13 @@ namespace BASeTris
                 {
                     _Game.HandleGameKey(this,GameState.GameKeys.GameKey_RotateCW);
                     
+                });
+            }
+            else if (e.KeyCode==Keys.Up)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Drop);
                 });
             }
             else if(e.KeyCode==Keys.Down)

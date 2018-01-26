@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
+using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris
@@ -60,9 +63,34 @@ namespace BASeTris
                 GameOvered = true;
             }
         }
+        public BlockGroup GetGhostDrop(BlockGroup Source, out int dropLength, int CancelProximity = 3)
+        {
+            //routine returns the Ghost Drop representor of this BlockGroup.
+            //this function will also return null if the dropped block is CancelProximity or closer to the place it would be dropped.
+            BlockGroup Duplicator = new BlockGroup(Source);
 
+            dropLength = 0;
+            while (true) { 
+                if (PlayField.CanFit(Duplicator, Duplicator.X, Duplicator.Y+1))
+                {
+                    dropLength++;
+                    Duplicator.Y++;
+                }
+                else
+                {
+                    break;
+                }
+        }
+            if (dropLength < CancelProximity) return null;
+            return Duplicator;
+            
+
+
+            
+        }
         public override void GameProc(IStateOwner pOwner)
         {
+            //TODO: Animate line clears. Tetris should get some weird flashing thing or something too.
             PlayField.AnimateFrame();
             foreach (var iterate in PlayField.BlockGroups)
             {
@@ -163,29 +191,50 @@ namespace BASeTris
 
 
             var useStats = GameStats;
-            Font standardFont = new Font("Arial", 12, FontStyle.Bold);
+            Font standardFont = new Font(TetrisGame.RetroFont, 18, FontStyle.Bold);
 
-            String BuildStatString = "Score:" + useStats.Score.ToString() + "\n" +
-                                     "Lines:" + PlayField.LineCount + "\n" +
-                                     "I Tet:" + useStats.I_Piece_Count + "\n" +
-                                     "O Tet:" + useStats.O_Piece_Count + "\n" +
-                                     "J Tet:" + useStats.J_Piece_Count + "\n" +
-                                     "T Tet:" + useStats.T_Piece_Count + "\n" +
-                                     "L Tet:" + useStats.L_Piece_Count + "\n" +
-                                     "S Tet:" + useStats.S_Piece_Count + "\n" +
-                                     "Z Tet:" + useStats.Z_Piece_Count + "\n";
+            String BuildStatString = "Score: " + useStats.Score.ToString() + "\n" +
+                                     "Lines: " + PlayField.LineCount + "\n" +
+                                     "I Tet: " + useStats.I_Piece_Count + "\n" +
+                                     "O Tet: " + useStats.O_Piece_Count + "\n" +
+                                     "J Tet: " + useStats.J_Piece_Count + "\n" +
+                                     "T Tet: " + useStats.T_Piece_Count + "\n" +
+                                     "L Tet: " + useStats.L_Piece_Count + "\n" +
+                                     "S Tet: " + useStats.S_Piece_Count + "\n" +
+                                     "Z Tet: " + useStats.Z_Piece_Count + "\n";
 
 
             g.DrawString(BuildStatString, standardFont, Brushes.White, new Point(5, 5));
 
 
         }
+        private Brush GhostBrush = new SolidBrush(Color.FromArgb(75, Color.DarkBlue));
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             if (PlayField != null)
             {
                 PlayField.Draw(g, Bounds);
             }
+
+            foreach (var activeblock in PlayField.BlockGroups)
+            {
+                int dl = 0;
+                var GrabGhost = GetGhostDrop(activeblock, out dl, 3);
+                if (GrabGhost != null)
+                {
+                    var BlockWidth = PlayField.GetBlockWidth(Bounds);
+                    var BlockHeight = PlayField.GetBlockHeight(Bounds);
+
+                    foreach (var iterateblock in activeblock)
+                    {
+                        RectangleF BlockBounds = new RectangleF(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y-2), PlayField.GetBlockWidth(Bounds), PlayField.GetBlockHeight(Bounds));
+                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, GrabGhost);
+                        tbd.OverrideBrush = GhostBrush;
+                        iterateblock.Block.DrawBlock(tbd);
+                    }
+                }
+            }
+
         }
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
@@ -213,6 +262,21 @@ namespace BASeTris
                     }
                 }
             }
+            else if(g==GameKeys.GameKey_Drop)
+            {
+                //drop all active groups.
+                foreach(var activeitem in PlayField.BlockGroups)
+                {
+                    int dropqty = 0;
+                    var ghosted = GetGhostDrop(activeitem, out dropqty, 0);
+                    PlayField.SetGroupToField(ghosted);
+                    PlayField.RemoveBlockGroup(activeitem);
+                    GameStats.Score += (dropqty * (5 + (GameStats.LineCount / 10)));
+                }
+                TetrisGame.Soundman.PlaySound("block_place");
+                PlayField.ProcessLines();
+                
+            }
             else if (g == GameKeys.GameKey_Right || g == GameKeys.GameKey_Left)
             {
                 int XMove = g == GameKeys.GameKey_Right ? 1 : -1;
@@ -228,6 +292,15 @@ namespace BASeTris
             }
             else if (g == GameKeys.GameKey_Pause)
             {
+                if (g == GameKeys.GameKey_Pause)
+                {
+                    pOwner.CurrentState = new PauseGameState(this);
+
+                    var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
+                    playing.Pause();
+
+
+                }
                 //pOwner.CurrentState = new PauseGameState(this);
             }
         }
@@ -257,9 +330,12 @@ namespace BASeTris
 
             public int CoverBlocks = 0;
             private bool CompleteScroll = false;
+            private DateTime InitTime;
             public GameOverGameState(GameState paused)
             {
                 GameOveredState = paused;
+                InitTime = DateTime.Now;
+            TetrisGame.Soundman.PlaySound("mmdeath");
             }
             public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
             {
@@ -268,10 +344,12 @@ namespace BASeTris
             DateTime LastAdvance = DateTime.MinValue;
             public override void GameProc(IStateOwner pOwner)
             {
-                if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50)
+            if (((DateTime.Now - InitTime)).TotalMilliseconds < 1500) return;
+                if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)
                 {
                     LastAdvance = DateTime.Now;
-                    CoverBlocks++;
+                    TetrisGame.Soundman.PlaySound("shade_move");
+                CoverBlocks++;
                     StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
                     if (standardstate != null)
                     {
@@ -300,7 +378,7 @@ namespace BASeTris
 
                 if (CompleteScroll)
                 {
-                    Font GameOverFont = new Font("Arial", 24);
+                    Font GameOverFont = new Font(TetrisGame.RetroFont, 24);
                     String GameOverText = "GAME\nOVER";
                     var measured = g.MeasureString(GameOverText, GameOverFont);
                     g.DrawString(GameOverText, GameOverFont, Brushes.White, 5 + (Bounds.Width / 2) - measured.Width / 2, 5 + (Bounds.Height / 2) - measured.Height / 2);
@@ -317,7 +395,50 @@ namespace BASeTris
 
         }
 
+    public class PauseGameState:GameState
+    {
+        private GameState PausedState = null;
+        public PauseGameState(GameState pPausedState)
+        {
+            PausedState = pPausedState;
+        }
+        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
+        {
+            PausedState.DrawStats(pOwner,g,Bounds);
+        }
 
+        public override void GameProc(IStateOwner pOwner)
+        {
+            //no op!
+        }
+
+        Font usePauseFont = new Font(TetrisGame.RetroFont, 24);
+        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
+        {
+            String sPauseText = "Pause";
+            SizeF Measured = g.MeasureString(sPauseText, usePauseFont);
+            g.FillRectangle(Brushes.Gray,Bounds);
+            PointF DrawPos = new PointF(Bounds.Width/2-Measured.Width/2,Bounds.Height/2-Measured.Height/2);
+            g.DrawString(sPauseText,usePauseFont,Brushes.White,DrawPos);
+            
+            
+
+
+        }
+
+        public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
+        {
+            if(g==GameKeys.GameKey_Pause)
+            {
+                pOwner.CurrentState = PausedState;
+
+                var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
+                playing.UnPause();
+               
+                
+            }
+        }
+    }
 
     }
 

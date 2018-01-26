@@ -22,6 +22,11 @@ namespace BASeTris.TetrisBlocks
         private static Dictionary<ColouredBlockGummyIndexData, Image> GummyBitmaps = new Dictionary<ColouredBlockGummyIndexData, Image>();
         public override void DrawBlock(TetrisBlockDrawParameters parameters)
         {
+            if(parameters.OverrideBrush!=null)
+            {
+                parameters.g.FillRectangle(parameters.OverrideBrush,parameters.region);
+                return;
+            }
             ColouredBlockGummyIndexData gummydata = new ColouredBlockGummyIndexData(BlockColor, InnerColor, InnerColor != BlockColor);
             if(GummyBitmap==null)
             {

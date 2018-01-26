@@ -22,6 +22,7 @@ namespace BASeTris.TetrisBlocks
         public Graphics g;
         public RectangleF region;
         public BlockGroup GroupOwner = null;
+        public Brush OverrideBrush = null;
         public TetrisBlockDrawParameters(Graphics pG,RectangleF pRegion,BlockGroup pGroupOwner)
         {
             g = pG;

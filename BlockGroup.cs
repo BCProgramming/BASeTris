@@ -185,6 +185,7 @@ namespace BASeTris
         {
             RotationModulo = clonesource.RotationModulo;
             Positions = (from pt in clonesource.Positions select pt).ToArray();
+            Block = clonesource.Block;
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -23,8 +26,9 @@ namespace BASeTris
         private GameState CurrentGameState = null;
         private IStateOwner GameOwner = null;
         private static string _datfolder = null;
-       
-     
+
+        static PrivateFontCollection pfc = new PrivateFontCollection();
+        public static FontFamily RetroFont;
         public static void InitState()
         {
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -32,6 +36,21 @@ namespace BASeTris
             List<String> AssetsFolders = new List<string>() { Path.Combine(AppDataFolder, "Audio") };
             if(Directory.Exists(AssetsFolder)) AssetsFolders.Add(AssetsFolder);
                 Soundman = new cNewSoundManager(new BASSDriver(), AssetsFolders.ToArray());
+
+            Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BASeTris.Pixel.ttf");
+
+            byte[] fontdata = new byte[fontStream.Length];
+            fontStream.Read(fontdata, 0, (int)fontStream.Length);
+            fontStream.Close();
+            unsafe
+            {
+                fixed (byte* pFontData = fontdata)
+                {
+                    pfc.AddMemoryFont((System.IntPtr)pFontData, fontdata.Length);
+                }
+            }
+            RetroFont = pfc.Families[0];
+
         }
         public TetrisGame(IStateOwner pOwner)
         {
@@ -169,10 +188,18 @@ namespace BASeTris
                     }
 
                     if(String.IsNullOrEmpty(_datfolder) || !Directory.Exists(_datfolder))
-                    { 
-                    
+                    {
+                        String exepath;
+                        if (Debugger.IsAttached)
+                        {
+                            exepath = Path.Combine(new FileInfo(Application.ExecutablePath).DirectoryName, "..", "..");
+                        }
+                        else
+                        {
+                            exepath = (new FileInfo(Application.ExecutablePath).DirectoryName);
+                        }
                         //get the executable path.
-                        String exepath = (new FileInfo(Application.ExecutablePath).DirectoryName);
+                        
                         //append APPDATA to that exe path.
                         _datfolder = Path.Combine(exepath, "Assets");
 

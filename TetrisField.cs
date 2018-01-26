@@ -33,6 +33,7 @@ namespace BASeTris
         public int ColCount {  get { return COLCOUNT; } }
         public IList<BlockGroup> BlockGroups { get { return new List<BlockGroup>(ActiveBlockGroups); } }
 
+        
         public TetrisBlock[][] Contents {  get { return FieldContents; } }
         public void ClearContents()
         {
@@ -122,7 +123,7 @@ namespace BASeTris
             lock (ActiveBlockGroups)
             {
                 LastSetGroup = DateTime.Now;
-                if (!ActiveBlockGroups.Contains(bg)) throw new ArgumentException("BlockGroup");
+                
 
                 Debug.Print("Setting BlockGroup to Field:" + bg.ToString());
                 foreach (var groupblock in bg)
@@ -134,7 +135,7 @@ namespace BASeTris
                         FieldContents[RowPos][ColPos] = groupblock.Block;
                 }
                 BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
-                ActiveBlockGroups.Remove(bg);
+                if (ActiveBlockGroups.Contains(bg)) ActiveBlockGroups.Remove(bg);
             }
 
         }
@@ -164,6 +165,14 @@ namespace BASeTris
             return CanFit(duped, bg.X, bg.Y);
 
 
+        }
+        public float GetBlockWidth(RectangleF ForBounds)
+        {
+            return ForBounds.Width / COLCOUNT;
+        }
+        public float GetBlockHeight(RectangleF ForBounds)
+        {
+            return ForBounds.Height / (ROWCOUNT - 2);
         }
         Pen LinePen = new Pen(Color.Black,1){DashPattern= new float[]{4,1,3,1,2,1,3,1}};
         public void Draw(Graphics g, RectangleF Bounds)
