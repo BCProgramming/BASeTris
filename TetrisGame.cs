@@ -167,14 +167,17 @@ namespace BASeTris
                         _datfolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                             "BASeTris");
                     }
-                    else
-                    {
+
+                    if(String.IsNullOrEmpty(_datfolder) || !Directory.Exists(_datfolder))
+                    { 
+                    
                         //get the executable path.
                         String exepath = (new FileInfo(Application.ExecutablePath).DirectoryName);
                         //append APPDATA to that exe path.
-                        _datfolder = Path.Combine(exepath, "APPDATA");
+                        _datfolder = Path.Combine(exepath, "Assets");
 
                     }
+
                     return _datfolder;
                 }
             }

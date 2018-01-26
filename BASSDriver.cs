@@ -275,6 +275,10 @@ namespace BASeTris.AssetManager
 
             //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
             //or, the application data folder \Lib\x86...
+            if(!Directory.Exists(TetrisGame.AppDataFolder))
+            {
+
+            }
             String x86DLL = Path.Combine(TetrisGame.AppDataFolder, "Lib\\x86");
             String x64DLL = Path.Combine(TetrisGame.AppDataFolder, "Lib\\x64");
 
