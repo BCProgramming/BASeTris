@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using bcHighScores;
 using BaseTris.AssetManager;
 using BASeTris.AssetManager;
 
@@ -21,6 +22,7 @@ namespace BASeTris
     {
         public static cNewSoundManager Soundman;
         public static ImageManager Imageman;
+        public static HighScoreManager ScoreMan;
         public static Random rgen = new Random();
         public static bool PortableMode = false;
         private GameState CurrentGameState = null;
@@ -31,11 +33,23 @@ namespace BASeTris
         public static FontFamily RetroFont;
         public static void InitState()
         {
+            /*String ScoreFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "BASeTris");
+            if(!Directory.Exists(ScoreFolder))
+            {
+                Directory.CreateDirectory(ScoreFolder);
+            }
+            String ScoreFile = Path.Combine(ScoreFolder, "hi_score.dat");
+            //ScoreMan = new HighScoreManager(ScoreFile);
+            */
+
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
-            List<String> AssetsFolders = new List<string>() { Path.Combine(AppDataFolder, "Audio") };
-            if(Directory.Exists(AssetsFolder)) AssetsFolders.Add(AssetsFolder);
-                Soundman = new cNewSoundManager(new BASSDriver(), AssetsFolders.ToArray());
+
+            Imageman = new ImageManager(TetrisGame.GetSearchFolders());
+
+            String[] AudioAssets = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Audio")).ToArray();
+            Soundman = new cNewSoundManager(new BASSDriver(), AudioAssets);
 
             Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BASeTris.Pixel.ttf");
 
@@ -54,7 +68,7 @@ namespace BASeTris
         }
         public TetrisGame(IStateOwner pOwner)
         {
-            if(Soundman==null) InitState();
+            if (Soundman == null) InitState();
             else
             {
                 Soundman.StopMusic();
@@ -82,7 +96,7 @@ namespace BASeTris
             return Value;
 
         }
-        public GameState CurrentState { get{ return CurrentGameState; } set{ CurrentGameState = value; } }
+        public GameState CurrentState { get { return CurrentGameState; } set { CurrentGameState = value; } }
         public void EnqueueAction(Action pAction)
         {
             GameOwner.EnqueueAction(pAction);
@@ -93,11 +107,11 @@ namespace BASeTris
         }
         public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g)
         {
-            CurrentGameState.HandleGameKey(pOwner,g);
+            CurrentGameState.HandleGameKey(pOwner, g);
         }
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
-            CurrentGameState.DrawProc(this,g,Bounds);
+            CurrentGameState.DrawProc(this, g, Bounds);
         }
 
 
@@ -142,11 +156,33 @@ namespace BASeTris
 
         }
 
+        public static String[] GetSearchFolders()
+        {
+            return new String[] { GetLocalAssets(), AppDataFolder };
+        }
+        private static String GetLocalAssets()
+        {
+            String exepath;
+            if (Debugger.IsAttached)
+            {
+                exepath = Path.Combine(new FileInfo(Application.ExecutablePath).DirectoryName, "..", "..");
+            }
+            else
+            {
+                exepath = (new FileInfo(Application.ExecutablePath).DirectoryName);
+            }
+            //get the executable path.
+
+            //append APPDATA to that exe path.
+            return Path.Combine(exepath, "Assets");
+            
+        }
+
         public static String AppDataFolder
         {
             get
             {
-                if (_datfolder != null) return _datfolder;
+                String DataFolder = "";
 
                 //check for commandline...
                 var allargs = System.Environment.GetCommandLineArgs().ToList();
@@ -175,37 +211,21 @@ namespace BASeTris
                         if (endchar == -1) endchar = joined.Length;
                     }
 
-                    _datfolder = joined.Substring(firstchar, endchar - firstchar);
-                    return _datfolder;
+                    DataFolder = joined.Substring(firstchar, endchar - firstchar);
+                    return DataFolder;
 
                 }
                 else
                 {
                     if (!PortableMode)
                     {
-                        _datfolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        DataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                             "BASeTris");
                     }
 
-                    if(String.IsNullOrEmpty(_datfolder) || !Directory.Exists(_datfolder))
-                    {
-                        String exepath;
-                        if (Debugger.IsAttached)
-                        {
-                            exepath = Path.Combine(new FileInfo(Application.ExecutablePath).DirectoryName, "..", "..");
-                        }
-                        else
-                        {
-                            exepath = (new FileInfo(Application.ExecutablePath).DirectoryName);
-                        }
-                        //get the executable path.
-                        
-                        //append APPDATA to that exe path.
-                        _datfolder = Path.Combine(exepath, "Assets");
+                 
 
-                    }
-
-                    return _datfolder;
+                    return DataFolder;
                 }
             }
         }

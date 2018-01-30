@@ -11,7 +11,27 @@ namespace BASeTris.TetrisBlocks
     {
         public BlockGroup Owner { get; set; }
         public virtual bool IsAnimated { get { return false; } }
+        private int _GroupID = 0;
+        public int GroupID { get { return _GroupID; } set { _GroupID = value; } }
+        private int _Rotation = 0;
+        //rotation can be set but if owned by a BlockGroup we use it's rotation.
+        public virtual int Rotation
+        {
+            get
+            {
+                if(Owner!=null)
+                {
+                    BlockGroupEntry getbge = Owner.FindEntry(this);
+                    if (getbge != null) return getbge.RotationModulo;
+                }
+                return _Rotation;
+            }
+
+            set { _Rotation = value; }
+        }
+
         public abstract void DrawBlock(TetrisBlockDrawParameters parameters);
+
         public virtual void AnimateFrame()
         {
             //nothing by default. Well, for now anyway....

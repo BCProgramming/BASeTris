@@ -24,8 +24,11 @@ namespace BASeTris
         public long LineCount = 0;
         public TetrominoTheme Theme = new NESTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
+        public int Level {  get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;
         const int COLCOUNT = 10;
+        const int VISIBLEROWS = 20;
+        public int HIDDENROWS {  get { return ROWCOUNT - VISIBLEROWS; } }
         //const int ROWCOUNT = 44;
         //const int COLCOUNT = 20;
         Random rg = new Random();
@@ -86,7 +89,7 @@ namespace BASeTris
         }
         public void AnimateFrame()
         {
-            for (int drawRow = 2; drawRow < ROWCOUNT; drawRow++)
+            for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
             {
                 var currRow = FieldContents[drawRow];
                 //for each Tetris Row...
@@ -172,27 +175,27 @@ namespace BASeTris
         }
         public float GetBlockHeight(RectangleF ForBounds)
         {
-            return ForBounds.Height / (ROWCOUNT - 2);
+            return ForBounds.Height / (VISIBLEROWS);
         }
         Pen LinePen = new Pen(Color.Black,1){DashPattern= new float[]{4,1,3,1,2,1,3,1}};
         public void Draw(Graphics g, RectangleF Bounds)
         {
             //first how big is each block?
             float BlockWidth = Bounds.Width / COLCOUNT;
-            float BlockHeight = Bounds.Height / (ROWCOUNT - 2); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
+            float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
             for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
             {
                 float XPos = drawCol * BlockWidth;
                 g.DrawLine(LinePen,XPos,0,XPos,Bounds.Height);
             }
-            for(int drawRow =2;drawRow<ROWCOUNT;drawRow++)
+            for(int drawRow =HIDDENROWS;drawRow<ROWCOUNT;drawRow++)
             {
-                float YPos = (drawRow - 2) * BlockHeight;
+                float YPos = (drawRow - HIDDENROWS) * BlockHeight;
                 g.DrawLine(LinePen,0,YPos,Bounds.Width,YPos);
             }
-            for (int drawRow = 2;drawRow<ROWCOUNT;drawRow++)
+            for (int drawRow = HIDDENROWS;drawRow<ROWCOUNT;drawRow++)
             {
-                float YPos = (drawRow-2) * BlockHeight;
+                float YPos = (drawRow-HIDDENROWS) * BlockHeight;
                 var currRow = FieldContents[drawRow];
                 //for each Tetris Row...
                 for (int drawCol=0;drawCol<COLCOUNT;drawCol++)
@@ -221,7 +224,7 @@ namespace BASeTris
                     foreach (BlockGroupEntry bge in bg)
                     {
                         int DrawX = BaseXPos + bge.X;
-                        int DrawY = BaseYPos + bge.Y - 2;
+                        int DrawY = BaseYPos + bge.Y - HIDDENROWS;
                         if (DrawX >= 0 && DrawY >= 0 && DrawX < COLCOUNT && DrawY < ROWCOUNT)
                         {
                             float DrawXPx = DrawX * BlockWidth;
@@ -285,7 +288,7 @@ namespace BASeTris
             {
                 TetrisGame.Soundman.PlaySound("line_tetris",2.0f);
             }
-            int topmost = 22;
+            int topmost = ROWCOUNT;
             //find the topmost row with any blocks.
             for(int i=0;i<ROWCOUNT;i++)
             {
@@ -306,7 +309,7 @@ namespace BASeTris
                     {
 
 
-                        TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 68f;
+                        TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 90f;
                     }
                 }
             }

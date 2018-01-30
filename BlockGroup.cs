@@ -84,7 +84,10 @@ namespace BASeTris
             AddBlock(bge);
             
         }
-
+        public BlockGroupEntry FindEntry(TetrisBlock findBlock)
+        {
+            return BlockData.FirstOrDefault((w) => w.Block == findBlock);
+        }
         public void Clamp(int RowCount,int ColCount)
         {
             //check X Coordinate.
@@ -170,6 +173,25 @@ namespace BASeTris
         public int Y { get { return Positions[RotationModulo % Positions.Length].Y; } }
 
         Point[] Positions = null;
+
+        public static Point RotatePoint(Point pSource, Size AreaSize)
+        {
+            return new Point(AreaSize.Width-pSource.Y,pSource.X);
+        }
+        public static Point[] GetRotations(Point InitialPoint,Size AreaSize)
+        {
+            Point[] result = new Point[4];
+            result[0] = InitialPoint;
+            result[1] = RotatePoint(InitialPoint, AreaSize);
+            result[2] = RotatePoint(result[1], AreaSize);
+            result[3] = RotatePoint(result[2], AreaSize);
+
+            return result;
+
+
+
+        }
+
 
         public int RotationModulo = 0;
 

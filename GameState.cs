@@ -5,8 +5,10 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
+using BASeTris.AssetManager;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 
@@ -33,7 +35,7 @@ namespace BASeTris
     public class StandardTetrisGameState : GameState
     {
 
-
+        Bitmap useBackground = null;
         public Queue<BlockGroup> NextBlocks = new Queue<BlockGroup>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
@@ -58,7 +60,7 @@ namespace BASeTris
 
         private void PlayField_BlockGroupSet(object sender, BlockGroupSetEventArgs e)
         {
-            if (e._group.Y < 3)
+            if (e._group.Y < 1)
             {
                 GameOvered = true;
             }
@@ -116,11 +118,17 @@ namespace BASeTris
                 TetrisGame.Soundman.StopMusic();
                 pOwner.CurrentState = new GameOverGameState(this);
             }
-            if (PlayField.BlockGroups.Count == 0)
+            if (PlayField.BlockGroups.Count == 0 && !SpawnWait)
             {
+                SpawnWait = true;
+                pOwner.EnqueueAction(()=>{
+                Thread.Sleep(200);
                 SpawnNewTetromino();
+                SpawnWait = false;
+                });
             }
         }
+        static bool SpawnWait = false;
         static Random rgen = new Random();
         private const int BlockQueueLength = 5;
         private void RefillBlockQueue()
@@ -131,7 +139,7 @@ namespace BASeTris
                 NextBlocks.Enqueue(Generated);
             }
         }
-        private void SpawnNewTetromino()
+        protected virtual void SpawnNewTetromino()
         {
             if (NextBlocks.Count == 0)
             {
@@ -162,11 +170,14 @@ namespace BASeTris
                 GameStats.T_Piece_Count++;
             else if (nextget is Tetromino_Z)
                 GameStats.Z_Piece_Count++;
+            //FallSpeed is 1000 -50 for each level. Well, for now.
+            nextget.FallSpeed = Math.Max(1000 - (PlayField.Level * 100), 50);
+            
 
             PlayField.AddBlockGroup(nextget);
 
         }
-        public BlockGroup GenerateTetromino()
+        public virtual BlockGroup GenerateTetromino()
         {
             Func<BlockGroup> GetTetrominoFunction;
             Func<BlockGroup>[] GeneratorFunctions = new Func<BlockGroup>[]
@@ -187,6 +198,7 @@ namespace BASeTris
         }
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
+            //this one definitely needs improved. Too boring. Just some text? bah.
             g.Clear(Color.Black);
 
 
@@ -208,9 +220,27 @@ namespace BASeTris
 
 
         }
+        private RectangleF StoredBackground = RectangleF.Empty;
+        private void RefreshBackground(RectangleF buildSize)
+        {
+            StoredBackground = buildSize;
+            useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height);
+            Graphics bgg = Graphics.FromImage(useBackground);
+            Image drawbg = TetrisGame.Imageman["background"];
+            bgg.DrawImage(drawbg,0,0,buildSize.Width,buildSize.Height);
+        }
+
+
         private Brush GhostBrush = new SolidBrush(Color.FromArgb(75, Color.DarkBlue));
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
+            if(useBackground==null || !StoredBackground.Equals(Bounds))
+            {
+                RefreshBackground(Bounds);
+            }
+
+            g.DrawImage(useBackground,Bounds);
+
             if (PlayField != null)
             {
                 PlayField.Draw(g, Bounds);
@@ -298,6 +328,7 @@ namespace BASeTris
 
                     var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
                     playing.Pause();
+                    TetrisGame.Soundman.PlaySound("pause");
 
 
                 }
@@ -434,8 +465,8 @@ namespace BASeTris
 
                 var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
                 playing.UnPause();
-               
-                
+                TetrisGame.Soundman.PlaySound("pause");
+
             }
         }
     }

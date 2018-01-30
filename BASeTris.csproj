@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="AssetManager\AssetManager.cs" />
     <Compile Include="AssetManager\DeletionHelper.cs" />
+    <Compile Include="AssetManager\HiScores.cs" />
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="BlockGroup.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="GameState.cs" />
     <Compile Include="GummyImage.cs" />
     <Compile Include="IStateOwner.cs" />
+    <Compile Include="Pentominoes\Pentomino.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statistics.cs" />

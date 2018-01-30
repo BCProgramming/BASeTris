@@ -1529,6 +1529,7 @@ namespace BASeTris.AssetManager
         public void LoadSounds(DirectoryInfo loadfolder)
         {
             mCallback.ShowMessage("Loading sounds from:" + loadfolder.FullName);
+            if (!loadfolder.Exists) return;
             foreach (FileInfo loopfile in loadfolder.GetFiles())
             {
 

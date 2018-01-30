@@ -251,14 +251,14 @@ namespace BASeTris.AssetManager
         /// <param name="x86Path"></param>
         /// <param name="x64Path"></param>
         /// <returns>the path that was chosen</returns>
-        private string LoadProperDLL(String x86Path, String x64Path)
+        private string LoadProperDLL(String[] x86Path, String[] x64Path)
         {
             String dlltoload;
             //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
             if (Utils.Is64Bit)
-                dlltoload = x64Path;
+                dlltoload = x64Path.FirstOrDefault((a)=>Directory.Exists(a));
             else
-                dlltoload = x86Path;
+                dlltoload = x86Path.FirstOrDefault((a)=>Directory.Exists(a));
 
             Debug.Print("Loading bass.net from:" + dlltoload);
             Bass.LoadMe(dlltoload);
@@ -279,8 +279,8 @@ namespace BASeTris.AssetManager
             {
 
             }
-            String x86DLL = Path.Combine(TetrisGame.AppDataFolder, "Lib\\x86");
-            String x64DLL = Path.Combine(TetrisGame.AppDataFolder, "Lib\\x64");
+            String[] x86DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s,"Lib\\x86")).ToArray();
+            String[] x64DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x64")).ToArray();
 
             string pathuse = LoadProperDLL(x86DLL, x64DLL); //load the x64 or x86 version as needed
             loadedbassplugs = Bass.BASS_PluginLoadDirectory(pathuse);
