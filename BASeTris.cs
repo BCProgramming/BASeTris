@@ -16,7 +16,7 @@ namespace BASeTris
     public partial class BASeTris : Form, IStateOwner
     {
         private TetrisGame _Game;
-        
+        HashSet<Keys> PressedKeys = new HashSet<Keys>();
         public BASeTris()
         {
             InitializeComponent();
@@ -99,6 +99,8 @@ namespace BASeTris
        
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            if (PressedKeys.Contains(e.KeyCode)) return;
+            PressedKeys.Add(e.KeyCode);
             if(e.KeyCode==Keys.X)
             {
                 ProcThreadActions.Enqueue(() =>
@@ -173,6 +175,14 @@ namespace BASeTris
         private void picStatistics_Paint(object sender, PaintEventArgs e)
         {
             if(CurrentState!=null) CurrentState.DrawStats(this,e.Graphics,picStatistics.ClientRectangle);
+        }
+
+        private void BASeTris_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (PressedKeys.Contains(e.KeyCode))
+            {
+                PressedKeys.Remove(e.KeyCode);
+            }
         }
     }
 }

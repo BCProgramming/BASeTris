@@ -92,6 +92,12 @@ namespace BASeTris
         }
         public override void GameProc(IStateOwner pOwner)
         {
+            if (GameStartTime == DateTime.MinValue) GameStartTime = DateTime.Now;
+            if(LastPausedTime!=DateTime.MinValue)
+            {
+                GameStartTime += (DateTime.Now - LastPausedTime);
+                LastPausedTime = DateTime.MinValue;
+            }
             //TODO: Animate line clears. Tetris should get some weird flashing thing or something too.
             PlayField.AnimateFrame();
             foreach (var iterate in PlayField.BlockGroups)
@@ -116,6 +122,7 @@ namespace BASeTris
             if (GameOvered)
             {
                 TetrisGame.Soundman.StopMusic();
+                FinalGameTime = DateTime.Now - GameStartTime;
                 pOwner.CurrentState = new GameOverGameState(this);
             }
             if (PlayField.BlockGroups.Count == 0 && !SpawnWait)
@@ -130,6 +137,9 @@ namespace BASeTris
         }
         static bool SpawnWait = false;
         static Random rgen = new Random();
+        private DateTime GameStartTime = DateTime.MinValue;
+        private DateTime LastPausedTime = DateTime.MinValue;
+        private TimeSpan FinalGameTime = TimeSpan.MinValue;
         private const int BlockQueueLength = 5;
         private void RefillBlockQueue()
         {
@@ -205,7 +215,9 @@ namespace BASeTris
             var useStats = GameStats;
             Font standardFont = new Font(TetrisGame.RetroFont, 18, FontStyle.Bold);
 
-            String BuildStatString = "Score: " + useStats.Score.ToString() + "\n" +
+            String BuildStatString = "Time:" + FormatGameTime(pOwner) + "\n" + 
+                
+                "Score: " + useStats.Score.ToString() + "\n" +
                                      "Lines: " + PlayField.LineCount + "\n" +
                                      "I Tet: " + useStats.I_Piece_Count + "\n" +
                                      "O Tet: " + useStats.O_Piece_Count + "\n" +
@@ -219,6 +231,21 @@ namespace BASeTris
             g.DrawString(BuildStatString, standardFont, Brushes.White, new Point(5, 5));
 
 
+        }
+        private String FormatGameTime(IStateOwner stateowner)
+        {
+            TimeSpan useCalc = (DateTime.Now - GameStartTime);
+
+            if(FinalGameTime !=TimeSpan.MinValue)
+            {
+                useCalc = FinalGameTime;
+            }
+            if(stateowner.CurrentState is PauseGameState)
+            {
+                useCalc = LastPausedTime - GameStartTime;
+            }
+
+            return useCalc.ToString(@"hh\:mm\:ss");
         }
         private RectangleF StoredBackground = RectangleF.Empty;
         private void RefreshBackground(RectangleF buildSize)
@@ -234,6 +261,7 @@ namespace BASeTris
         private Brush GhostBrush = new SolidBrush(Color.FromArgb(75, Color.DarkBlue));
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
+
             if(useBackground==null || !StoredBackground.Equals(Bounds))
             {
                 RefreshBackground(Bounds);
@@ -266,6 +294,7 @@ namespace BASeTris
             }
 
         }
+
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             if (g == GameKeys.GameKey_RotateCW)
@@ -324,6 +353,7 @@ namespace BASeTris
             {
                 if (g == GameKeys.GameKey_Pause)
                 {
+                    LastPausedTime = DateTime.Now;
                     pOwner.CurrentState = new PauseGameState(this);
 
                     var playing = TetrisGame.Soundman.GetPlayingMusic_Active();

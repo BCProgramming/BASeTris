@@ -144,20 +144,34 @@ namespace BASeTris
         }
         public bool CanFit(BlockGroup bg,int X,int Y)
         {
+            IList<BlockGroupEntry> Contacts = new List<BlockGroupEntry>();
+            bool result = true;
             foreach(var checkblock in bg)
             {
                 int CheckRow = Y+checkblock.Y;
                 int CheckCol = X+checkblock.X;
-                if (CheckRow < 0 || CheckCol < 0) return false;
-                if (CheckRow >= ROWCOUNT || CheckCol >= COLCOUNT) return false;
-                var grabpos = FieldContents[CheckRow][CheckCol];
-                if(grabpos!=null)
+                if (CheckRow < 0 || CheckCol < 0)
                 {
-                    return false;
+                    result = false;
+                    Contacts.Add(checkblock);
+                }
+                else if (CheckRow >= ROWCOUNT || CheckCol >= COLCOUNT)
+                {
+                    result = false;
+                    Contacts.Add(checkblock);
+                }
+                else
+                {
+                    var grabpos = FieldContents[CheckRow][CheckCol];
+                    if (grabpos != null)
+                    {
+                        result = false;
+                        Contacts.Add(checkblock);
+                    }
                 }
 
             }
-            return true;
+            return result;
         }
         public bool CanRotate(BlockGroup bg,bool ccw)
         {
