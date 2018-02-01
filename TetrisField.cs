@@ -17,7 +17,7 @@ namespace BASeTris
         //The "tetris field" here just represents the "permanent" blocks. eg, blocks that have been dropped, and "set" in place.
         //these get evaluated to check for lines when a new block is placed, for example.
         //blocks that are still "controlled" and falling are handled separately, and are placed here when they are dropped.
-        public static String StandardMusic = "tetris_theme_A";
+        public static String StandardMusic = "tetris_a_theme_techno";
         public event EventHandler<LevelChangeEventArgs> LevelChanged;
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         private TetrisBlock[][] FieldContents;

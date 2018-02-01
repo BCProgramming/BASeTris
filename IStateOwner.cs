@@ -10,5 +10,7 @@ namespace BASeTris
     {
         GameState CurrentState { get; set; }
         void EnqueueAction(Action pAction);
+        
+        
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -55,9 +56,51 @@ namespace BASeTris
 
         private void PlayField_LevelChanged(object sender, LevelChangeEventArgs e)
         {
+            TetrominoImages = null;
             //throw new NotImplementedException();
         }
+        private bool f_RedrawTetrominoImages = false;
+        private bool f_RedrawStatusBitmap = false;
+        private Dictionary<System.Type, Image> TetrominoImages = null;
 
+        private void RedrawStatusbarTetrominoBitmaps(RectangleF Bounds)
+        {
+            TetrominoImages = new Dictionary<Type, Image>();
+            float useSize = 18 * ((float)Bounds.Height / 644f);
+            SizeF useTetSize = new SizeF(useSize,useSize);
+            Tetromino_I TetI = new Tetromino_I();
+            Tetromino_J TetJ = new Tetromino_J();
+            Tetromino_L TetL = new Tetromino_L();
+            Tetromino_O TetO = new Tetromino_O();
+            Tetromino_S TetS = new Tetromino_S();
+            Tetromino_T TetT = new Tetromino_T();
+            Tetromino_Z TetZ = new Tetromino_Z();
+
+            
+            PlayField.Theme.ApplyTheme(TetI,PlayField);
+            PlayField.Theme.ApplyTheme(TetJ, PlayField);
+            PlayField.Theme.ApplyTheme(TetL, PlayField);
+            PlayField.Theme.ApplyTheme(TetO, PlayField);
+            PlayField.Theme.ApplyTheme(TetS, PlayField);
+            PlayField.Theme.ApplyTheme(TetT, PlayField);
+            PlayField.Theme.ApplyTheme(TetZ, PlayField);
+            Image Image_I = TetI.GetImage(useTetSize);
+            Image Image_J = TetJ.GetImage(useTetSize);
+            Image Image_L = TetL.GetImage(useTetSize);
+            Image Image_O = TetO.GetImage(useTetSize);
+            Image Image_S = TetS.GetImage(useTetSize);
+            Image Image_T = TetT.GetImage(useTetSize);
+            Image Image_Z = TetZ.GetImage(useTetSize);
+
+            TetrominoImages.Add(typeof(Tetromino_I),Image_I);
+            TetrominoImages.Add(typeof(Tetromino_J), Image_J);
+            TetrominoImages.Add(typeof(Tetromino_L), Image_L);
+            TetrominoImages.Add(typeof(Tetromino_O), Image_O);
+            TetrominoImages.Add(typeof(Tetromino_S), Image_S);
+            TetrominoImages.Add(typeof(Tetromino_T), Image_T);
+            TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
+
+        }
         private void PlayField_BlockGroupSet(object sender, BlockGroupSetEventArgs e)
         {
             if (e._group.Y < 1)
@@ -92,6 +135,12 @@ namespace BASeTris
         }
         public override void GameProc(IStateOwner pOwner)
         {
+            if(NextAngleOffset != 0)
+            {
+                double AngleChange = ((Math.PI * 2 / 360)) * 5;
+                NextAngleOffset = Math.Sign(NextAngleOffset) * (Math.Abs(NextAngleOffset) - AngleChange);
+                if (NextAngleOffset < AngleChange) NextAngleOffset = 0;
+            }
             if (GameStartTime == DateTime.MinValue) GameStartTime = DateTime.Now;
             if(LastPausedTime!=DateTime.MinValue)
             {
@@ -182,11 +231,29 @@ namespace BASeTris
                 GameStats.Z_Piece_Count++;
             //FallSpeed is 1000 -50 for each level. Well, for now.
             nextget.FallSpeed = Math.Max(1000 - (PlayField.Level * 100), 50);
-            
+            NextAngleOffset += Math.PI * 2 / 5;
 
             PlayField.AddBlockGroup(nextget);
 
         }
+        private ImageAttributes GetShadowAttributes(float ShadowBrightness = 0.1f)
+        {
+            float brt = ShadowBrightness;
+            ImageAttributes resultAttr = new ImageAttributes();
+            System.Drawing.Imaging.ColorMatrix cm = new ColorMatrix(new float[][]
+            {
+                new float[]{brt,0f,0f,0f,0f},
+                new float[]{0f,brt,0f,0f,0f},
+                new float[]{0f,0f,brt,0f,0f},
+                new float[]{0f,0f,0f,1f,0f},
+                new float[]{0f,0f,0f,0f,1f}
+
+            });
+            resultAttr.SetColorMatrix(cm);
+            return resultAttr;
+        }
+
+
         public virtual BlockGroup GenerateTetromino()
         {
             Func<BlockGroup> GetTetrominoFunction;
@@ -206,32 +273,174 @@ namespace BASeTris
             BlockGroup newTetromino = GetTetrominoFunction();
             return newTetromino;
         }
+        Image StatisticsBackground = null;
+        public void GenerateStatisticsBackground()
+        {
+            Bitmap buildbg = new Bitmap(1120, 2576);
+            Size BlockSize = new Size(128, 128);
+            Color[] usePossibleColours = NESTetrominoTheme.AllThemeColors;
+            int ColumnCount = (buildbg.Width / BlockSize.Width) + 1;
+            int RowCount = (buildbg.Height / BlockSize.Height) + 1;
+            using (Graphics g = Graphics.FromImage(buildbg))
+            {
+                g.Clear(Color.Black);
+                for (int col = 0; col < ColumnCount; col++)
+                {
+                    for (int row = 0; row < RowCount; row++)
+                    {
+                        int DrawBlockX = col * BlockSize.Width;
+                        int DrawBlockY = row * BlockSize.Height;
+                        StandardColouredBlock GenerateColorBlock = new StandardColouredBlock();
+                        Color MainColor = TetrisGame.Choose(usePossibleColours);
+                        GenerateColorBlock.BlockColor = MainColor;
+                        if (TetrisGame.rgen.NextDouble() > 0.75)
+                        {
+                            GenerateColorBlock.InnerColor = Color.MintCream;
+                        }
+                        else
+                        {
+
+                            GenerateColorBlock.InnerColor = GenerateColorBlock.BlockColor;
+                        }
+                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
+                        GenerateColorBlock.DrawBlock(tbd);
+
+                    }
+                }
+            }
+            StatisticsBackground = buildbg;
+
+        }
+
+        RectangleF LastDrawStat = Rectangle.Empty;
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            //this one definitely needs improved. Too boring. Just some text? bah.
-            g.Clear(Color.Black);
 
+            bool RedrawsNeeded = !LastDrawStat.Equals(Bounds);
+            LastDrawStat = Bounds;
+            if(StatisticsBackground==null || RedrawsNeeded)
+            {
+                GenerateStatisticsBackground();
+            }
+            
+            g.DrawImage(StatisticsBackground,Bounds);
+            //g.Clear(Color.Black);
+            if (TetrominoImages == null || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(Bounds);
 
             var useStats = GameStats;
-            Font standardFont = new Font(TetrisGame.RetroFont, 18, FontStyle.Bold);
+            double Factor = Bounds.Height / 644d;
+            int DesiredFontPixelHeight = (int)(Bounds.Height * (23d / 644d));
 
-            String BuildStatString = "Time:" + FormatGameTime(pOwner) + "\n" + 
-                
+            Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold,GraphicsUnit.Pixel);
+
+            String BuildStatString = "Time:" + FormatGameTime(pOwner) + "\n" +
+
                 "Score: " + useStats.Score.ToString() + "\n" +
-                                     "Lines: " + PlayField.LineCount + "\n" +
-                                     "I Tet: " + useStats.I_Piece_Count + "\n" +
-                                     "O Tet: " + useStats.O_Piece_Count + "\n" +
-                                     "J Tet: " + useStats.J_Piece_Count + "\n" +
-                                     "T Tet: " + useStats.T_Piece_Count + "\n" +
-                                     "L Tet: " + useStats.L_Piece_Count + "\n" +
-                                     "S Tet: " + useStats.S_Piece_Count + "\n" +
-                                     "Z Tet: " + useStats.Z_Piece_Count + "\n";
+                                     "Lines: " + PlayField.LineCount + "\n";
+                                    
+
+            var measured = g.MeasureString(BuildStatString,standardFont);
 
 
-            g.DrawString(BuildStatString, standardFont, Brushes.White, new Point(5, 5));
+
+
+            g.FillRectangle(LightenBrush, 0, 5, Bounds.Width, (int)(450*Factor));
+            g.DrawString(BuildStatString, standardFont, Brushes.White, new Point((int)(7*Factor), (int)(7*Factor)));
+            g.DrawString(BuildStatString, standardFont, Brushes.Black, new Point((int)(5*Factor), (int)(5*Factor)));
+
+            Type[] useTypes = new Type[]{typeof(Tetromino_I),typeof(Tetromino_O),typeof(Tetromino_J),typeof(Tetromino_T),typeof(Tetromino_L),typeof(Tetromino_S),typeof(Tetromino_Z)};
+            int[] PieceCounts = new int[] { useStats.I_Piece_Count, useStats.O_Piece_Count, useStats.J_Piece_Count, useStats.T_Piece_Count, useStats.L_Piece_Count, useStats.S_Piece_Count, useStats.Z_Piece_Count };
+
+            int StartYPos = (int)(140*Factor);
+            int useXPos = (int)(30*Factor);
+            ImageAttributes ShadowTet = GetShadowAttributes();
+            for(int i=0;i<useTypes.Length;i++)
+            {
+                PointF BaseCoordinate = new PointF(useXPos,StartYPos + (int)((float)i*(40d*Factor)));
+                PointF TextPos = new PointF(useXPos+(int)(100d*Factor),BaseCoordinate.Y);
+                String StatText = "" + PieceCounts[i];
+                SizeF StatTextSize = g.MeasureString(StatText, standardFont);
+                Image TetrominoImage = TetrominoImages[useTypes[i]];
+                PointF ImagePos = new PointF(BaseCoordinate.X,BaseCoordinate.Y+(StatTextSize.Height/2 - TetrominoImage.Height/2));
+                int offset = 3;
+                foreach(Point shadowblob in new Point[] { new Point(offset,offset),new Point(-offset,offset),new Point(offset,-offset), new Point(-offset,-offset)})
+                {
+                    g.DrawImage(TetrominoImage, new Rectangle((int)ImagePos.X + shadowblob.X, (int)ImagePos.Y + shadowblob.Y, TetrominoImage.Width, TetrominoImage.Height), 0f, 0f, (float)TetrominoImage.Width, (float)TetrominoImage.Height, GraphicsUnit.Pixel, ShadowTet);
+                }
+
+                
+                g.DrawImage(TetrominoImage, ImagePos);
+                g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X+4,TextPos.Y+4));
+                g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
+            }
+
+            //now draw the "Next" Queue. For now we'll just show one "next" item.
+            if (NextBlocks.Count > 0)
+            {
+                var QueueList = NextBlocks.ToArray();
+                Image[] NextTetrominoes = (from t in QueueList select TetrominoImages[t.GetType()]).ToArray();
+                Image DisplayBox = TetrisGame.Imageman["display_box"];
+                //draw it at 40,420. (Scaled).
+                Point NextDrawPosition = new Point((int)(40f * Factor), (int)(420 * Factor));
+                Size NextSize = new Size((int)(200f * Factor), (int)(200f * Factor));
+                g.DrawImage(DisplayBox, new Rectangle(NextDrawPosition, NextSize), 0, 0, DisplayBox.Width, DisplayBox.Height, GraphicsUnit.Pixel);
+                for (int i = NextTetrominoes.Length-1; i > -1 ; i--)
+                {
+
+                    Point CenterPoint = new Point(NextDrawPosition.X+NextSize.Width/2,NextDrawPosition.Y+NextSize.Height/2);
+
+                    double StartAngle = Math.PI;
+                    double AngleIncrementSize = (Math.PI * 1.75) / (double)NextTetrominoes.Length;
+                    //we draw starting at StartAngle, in increments of AngleIncrementSize.
+                    //i is the index- we want to increase the angle by that amount (well, obviously, I suppose...
+
+                    double UseAngleCurrent = StartAngle + AngleIncrementSize * (float)i + NextAngleOffset;
+
+                    Double UseXPosition = CenterPoint.X + ((float)(NextSize.Width) / 3 * Math.Cos(UseAngleCurrent));
+                    double UseYPosition = CenterPoint.Y + ((float)(NextSize.Height) / 3 * Math.Sin(UseAngleCurrent));
+                    
+
+
+                    var NextTetromino = NextTetrominoes[i];
+                    
+                    float Deviation = (i - NextTetrominoes.Length / 2);
+                    Point Deviate = new Point((int)(Deviation * 20*Factor), (int)(Deviation * 20*Factor));
+                    
+                    Point DrawTetLocation = new Point((int)UseXPosition,(int)UseYPosition);
+                    //Point DrawTetLocation = new Point(Deviate.X + (int)(NextDrawPosition.X + ((float)NextSize.Width / 2) - ((float)NextTetromino.Width / 2)),
+                    //    Deviate.Y + (int)(NextDrawPosition.Y + ((float)NextSize.Height / 2) - ((float)NextTetromino.Height / 2)));
+                    Size DrawTetSize = new Size(
+                        (int)((float)NextTetromino.Width * (1 - ((float)i * 0.1f))),
+                        (int)((float)NextTetromino.Height * (1 - ((float)i * 0.1f))));
+                    ImageAttributes Shade = GetShadowAttributes(1.0f - ((float)i * 0.3f));
+                    int offset = 3;
+                    foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
+                    {
+                        g.DrawImage(NextTetromino, new Rectangle((int)DrawTetLocation.X + shadowblob.X, (int)DrawTetLocation.Y+shadowblob.Y, DrawTetSize.Width, DrawTetSize.Height), 0f, 0f,
+                            (float)NextTetromino.Width, (float)NextTetromino.Height, GraphicsUnit.Pixel, ShadowTet);
+                    }
+
+
+                        g.DrawImage(NextTetromino, new Rectangle((int)DrawTetLocation.X, (int)DrawTetLocation.Y, DrawTetSize.Width, DrawTetSize.Height), 0f, 0f,
+                        (float)NextTetromino.Width, (float)NextTetromino.Height, GraphicsUnit.Pixel, Shade);
+
+                    
+                }
+            }
+            //"I Tet: " + useStats.I_Piece_Count + "\n" +
+                //"O Tet: " + useStats.O_Piece_Count + "\n" +
+                //"J Tet: " + useStats.J_Piece_Count + "\n" +
+                //"T Tet: " + useStats.T_Piece_Count + "\n" +
+                //"L Tet: " + useStats.L_Piece_Count + "\n" +
+                //"S Tet: " + useStats.S_Piece_Count + "\n" +
+                //"Z Tet: " + useStats.Z_Piece_Count + "\n";
+
+
 
 
         }
+        double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
+        Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
         private String FormatGameTime(IStateOwner stateowner)
         {
             TimeSpan useCalc = (DateTime.Now - GameStartTime);
@@ -252,9 +461,12 @@ namespace BASeTris
         {
             StoredBackground = buildSize;
             useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height);
-            Graphics bgg = Graphics.FromImage(useBackground);
-            Image drawbg = TetrisGame.Imageman["background"];
-            bgg.DrawImage(drawbg,0,0,buildSize.Width,buildSize.Height);
+            using (Graphics bgg = Graphics.FromImage(useBackground))
+            {
+                Image drawbg = TetrisGame.Imageman["background"];
+                bgg.CompositingQuality = CompositingQuality.AssumeLinear;
+                bgg.DrawImage(drawbg, 0, 0, buildSize.Width, buildSize.Height);
+            }
         }
 
 
@@ -266,8 +478,9 @@ namespace BASeTris
             {
                 RefreshBackground(Bounds);
             }
-
+            
             g.DrawImage(useBackground,Bounds);
+            
 
             if (PlayField != null)
             {
@@ -391,6 +604,7 @@ namespace BASeTris
 
             public int CoverBlocks = 0;
             private bool CompleteScroll = false;
+        private DateTime CompleteScrollTime = DateTime.MaxValue; 
             private DateTime InitTime;
             public GameOverGameState(GameState paused)
             {
@@ -405,6 +619,11 @@ namespace BASeTris
             DateTime LastAdvance = DateTime.MinValue;
             public override void GameProc(IStateOwner pOwner)
             {
+                if((DateTime.Now-CompleteScrollTime).TotalMilliseconds>500)
+                {
+                CompleteScrollTime = DateTime.MaxValue;
+                TetrisGame.Soundman.PlaySound("tetris_game_over");
+                }
             if (((DateTime.Now - InitTime)).TotalMilliseconds < 1500) return;
                 if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)
                 {
@@ -417,7 +636,7 @@ namespace BASeTris
                         if (CoverBlocks >= standardstate.PlayField.RowCount)
                         {
                             CoverBlocks = standardstate.PlayField.RowCount;
-
+                        CompleteScrollTime = DateTime.Now;
                             CompleteScroll = true;
                         }
                     }

@@ -71,7 +71,7 @@ namespace BASeTris
         public static Color[] Level9Colors = new Color[] {Color.OrangeRed,Color.Orange };
         //Level 0 style:
 
-
+        public static Color[] AllThemeColors = new Color[] { Color.Blue, Color.DeepSkyBlue, Color.Green, Color.GreenYellow, Color.Purple, Color.Magenta, Color.MediumVioletRed, Color.Aquamarine, Color.Red, Color.SlateGray, Color.Indigo, Color.DarkBlue, Color.Orange, Color.OrangeRed };
 
     }
 

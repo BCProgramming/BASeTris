@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +24,15 @@ namespace BASeTris
             InitializeComponent();
         }
 
+        
+        double DefaultWidth = 643d;
+        double DefaultHeight = 734d;
+        public void SetScale(double factor)
+        {
+            Size = new Size((int)(DefaultWidth*factor),(int)(DefaultHeight*factor));
+            
+            
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             TetrisGame.InitState();
@@ -80,6 +91,7 @@ namespace BASeTris
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
             if (_Game == null) return;
+            e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
             
         }
@@ -171,10 +183,14 @@ namespace BASeTris
         {
             StartGame();
         }
-
+        
         private void picStatistics_Paint(object sender, PaintEventArgs e)
         {
-            if(CurrentState!=null) CurrentState.DrawStats(this,e.Graphics,picStatistics.ClientRectangle);
+            if(CurrentState!=null)
+            {
+                e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                CurrentState.DrawStats(this,e.Graphics,picStatistics.ClientRectangle);
+            }
         }
 
         private void BASeTris_KeyUp(object sender, KeyEventArgs e)
@@ -183,6 +199,39 @@ namespace BASeTris
             {
                 PressedKeys.Remove(e.KeyCode);
             }
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            SetScale(0.5f);
+        }
+
+        private void xToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetScale(1);
+        }
+
+        private void xToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            SetScale(1.5f);
+        }
+
+        private void xToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            SetScale(1.75f);
+        }
+
+        private void BASeTris_ResizeEnd(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void BASeTris_SizeChanged(object sender, EventArgs e)
+        {
+            picTetrisField.Width = (int)(picTetrisField.Height * (332f / 641f));
+            int statright = picStatistics.Right;
+            picStatistics.Left = picTetrisField.Right + 6;
+            picStatistics.Width = statright - picStatistics.Left;
         }
     }
 }

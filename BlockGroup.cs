@@ -53,6 +53,30 @@ namespace BASeTris
 
         }
 
+
+
+        public Image GetImage(SizeF BlockSize)
+        {
+            RecalcExtents();
+
+            Size BitmapSize = new Size((int)BlockSize.Width * (_GroupExtents.Width+1), (int)BlockSize.Height * (_GroupExtents.Height+1));
+
+            //generate a new image.
+            Bitmap BuiltRepresentation = new Bitmap(BitmapSize.Width,BitmapSize.Height);
+            using (Graphics DrawRep = Graphics.FromImage(BuiltRepresentation))
+            {
+                foreach (BlockGroupEntry bge in this)
+                {
+                    RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
+                    TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(DrawRep, DrawPos, this);
+                    bge.Block.DrawBlock(tbd);
+                }
+
+            }
+
+            return BuiltRepresentation;
+        }
+
         public BlockGroup(BlockGroup sourcebg)
         {
             FallSpeed = sourcebg.FallSpeed;

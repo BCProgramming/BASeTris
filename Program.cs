@@ -20,5 +20,9 @@ namespace BASeTris
             DebugLogger.EnableLogging = true;
             Application.Run(new BASeTris());
         }
+
+
+
+
     }
 }
