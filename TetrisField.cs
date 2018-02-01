@@ -87,6 +87,7 @@ namespace BASeTris
                 }
             }
         }
+        public bool HasChanged = false;
         public void AnimateFrame()
         {
             for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
@@ -103,6 +104,7 @@ namespace BASeTris
                         if (TetBlock.IsAnimated)
                         {
                             TetBlock.AnimateFrame();
+                            HasChanged = true;
                         }
 
                     }
@@ -139,6 +141,7 @@ namespace BASeTris
                 }
                 BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
                 if (ActiveBlockGroups.Contains(bg)) ActiveBlockGroups.Remove(bg);
+                HasChanged = true;
             }
 
         }
@@ -192,41 +195,62 @@ namespace BASeTris
             return ForBounds.Height / (VISIBLEROWS);
         }
         Pen LinePen = new Pen(Color.Black,1){DashPattern= new float[]{4,1,3,1,2,1,3,1}};
-        public void Draw(Graphics g, RectangleF Bounds)
+        RectangleF LastFieldSave = RectangleF.Empty;
+        Image FieldBitmap = null;
+
+        public void DrawFieldContents(Graphics g, RectangleF Bounds)
         {
-            //first how big is each block?
             float BlockWidth = Bounds.Width / COLCOUNT;
             float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
             for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
             {
                 float XPos = drawCol * BlockWidth;
-                g.DrawLine(LinePen,XPos,0,XPos,Bounds.Height);
+                g.DrawLine(LinePen, XPos, 0, XPos, Bounds.Height);
             }
-            for(int drawRow =HIDDENROWS;drawRow<ROWCOUNT;drawRow++)
+            for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
             {
                 float YPos = (drawRow - HIDDENROWS) * BlockHeight;
-                g.DrawLine(LinePen,0,YPos,Bounds.Width,YPos);
+                g.DrawLine(LinePen, 0, YPos, Bounds.Width, YPos);
             }
-            for (int drawRow = HIDDENROWS;drawRow<ROWCOUNT;drawRow++)
+            for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
             {
-                float YPos = (drawRow-HIDDENROWS) * BlockHeight;
+                float YPos = (drawRow - HIDDENROWS) * BlockHeight;
                 var currRow = FieldContents[drawRow];
                 //for each Tetris Row...
-                for (int drawCol=0;drawCol<COLCOUNT;drawCol++)
+                for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
                 {
                     float XPos = drawCol * BlockWidth;
                     var TetBlock = currRow[drawCol];
-                    if(TetBlock!=null)
+                    if (TetBlock != null)
                     {
-                        RectangleF BlockBounds = new RectangleF(XPos,YPos,BlockWidth,BlockHeight);
-                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds,null);
+                        RectangleF BlockBounds = new RectangleF(XPos, YPos, BlockWidth, BlockHeight);
+                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, null);
                         TetBlock.DrawBlock(tbd);
                     }
 
                 }
             }
+        }
 
-         
+        public void Draw(Graphics g, RectangleF Bounds)
+        {
+            //first how big is each block?
+            float BlockWidth = Bounds.Width / COLCOUNT;
+            float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
+            if(FieldBitmap==null || !LastFieldSave.Equals(Bounds) || HasChanged)
+            {
+                Bitmap BuildField = new Bitmap((int)Bounds.Width, (int)Bounds.Height);
+                using (Graphics gfield = Graphics.FromImage(BuildField))
+                {
+                    gfield.Clear(Color.Transparent);
+                    DrawFieldContents(gfield,Bounds);
+                    if(FieldBitmap!=null) FieldBitmap.Dispose();
+                    FieldBitmap = BuildField;
+                }
+                HasChanged = false;
+            }
+
+         g.DrawImageUnscaled(FieldBitmap,0,0);
 
 
             lock (ActiveBlockGroups)
@@ -264,6 +288,7 @@ namespace BASeTris
                     Theme.ApplyTheme(iteratecell.Owner,this);
                 }
             }
+            HasChanged = true;
         }
         public int ProcessLines()
         {
@@ -337,7 +362,7 @@ namespace BASeTris
                     if (grabbed != null) grabbed.Tempo = 1f;
                 }
             }
-
+            HasChanged = rowsfound> 0;
             return rowsfound;
         }
         private int currenttempo = 1;

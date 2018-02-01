@@ -156,6 +156,13 @@ namespace BASeTris
                     _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Pause);
                 });
             }
+            else if(e.KeyCode==Keys.Space)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Hold);
+                });
+            }
             ProcThreadActions.Enqueue(() =>
             {
                 Invoke((MethodInvoker)(() =>
