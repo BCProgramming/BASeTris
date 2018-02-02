@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using BaseTris;
+using BASeTris.AssetManager;
 
 namespace BASeTris.TetrisBlocks
 {
@@ -36,6 +37,7 @@ namespace BASeTris.TetrisBlocks
         private Image GummyBitmap = null;
         public Color _BlockColor = Color.Red;
         public Color _InnerColor = Color.White;
+        public bool UseBevel = false;
         public Color BlockColor { get { return _BlockColor; } set { _BlockColor = value; } }
         public Color InnerColor {   get { return _InnerColor; } set { _InnerColor = value; } }
         public Color BlockOutline = Color.Black;
@@ -62,19 +64,62 @@ namespace BASeTris.TetrisBlocks
 
         private void RebuildImage()
         {
-           
-                ColouredBlockGummyIndexData gummydata = new ColouredBlockGummyIndexData(BlockColor, InnerColor, InnerColor != BlockColor);
-                if (!GummyBitmaps.ContainsKey(gummydata))
+            Image AcquiredImage;
+            ColouredBlockGummyIndexData IndexData;
+            
+            {
+                IndexData = new ColouredBlockGummyIndexData(BlockColor, InnerColor, InnerColor != BlockColor);
+                if (!GummyBitmaps.ContainsKey(IndexData))
                 {
-                    GummyBitmaps.Add(gummydata, GummyImage.GetGummyImage(BlockColor, InnerColor, new Size(256, 256)));
+                    if (UseBevel)
+                    {
+                        AcquiredImage = GetBevelImage();
+                    }
+                    else
+                    {
+                        AcquiredImage = GummyImage.GetGummyImage(BlockColor, InnerColor, new Size(256, 256));
+                    }
+                    GummyBitmaps.Add(IndexData,AcquiredImage);
                 }
-                GummyBitmap = GummyBitmaps[gummydata];
+                GummyBitmap = GummyBitmaps[IndexData];
                 _RotationImages = new Image[] { GummyBitmap };
-                CurrentImageHash = gummydata.GetHashCode();
-
+                CurrentImageHash = IndexData.GetHashCode();
+            }
+            
+            
+            
 
         }
-        
+
+        static Dictionary<Color, Image> StandardColourBlocks = null;
+
+        private Image GetBevelImage()
+        {
+            if(StandardColourBlocks==null)
+            {
+                Size TargetSize= new Size(100,100);
+                StandardColourBlocks = new Dictionary<Color, Image>();
+                StandardColourBlocks.Add(Color.Cyan,ResizeImage(TetrisGame.Imageman["block_std_cyan"],TargetSize));
+                StandardColourBlocks.Add(Color.Yellow, ResizeImage(TetrisGame.Imageman["block_std_yellow"], TargetSize));
+                StandardColourBlocks.Add(Color.Purple, ResizeImage(TetrisGame.Imageman["block_std_purple"], TargetSize));
+                StandardColourBlocks.Add(Color.Green, ResizeImage(TetrisGame.Imageman["block_std_green"], TargetSize));
+                StandardColourBlocks.Add(Color.Red, ResizeImage(TetrisGame.Imageman["block_std_red"], TargetSize));
+                StandardColourBlocks.Add(Color.Blue, ResizeImage(TetrisGame.Imageman["block_std_blue"], TargetSize));
+                StandardColourBlocks.Add(Color.Orange, ResizeImage(TetrisGame.Imageman["block_std_orange"], TargetSize));
+            }
+
+            return StandardColourBlocks[BlockColor];
+            
+        }
+        private Image ResizeImage(Image Source, Size newSize)
+        {
+            Bitmap result = new Bitmap(newSize.Width,newSize.Height);
+            using (Graphics bgr = Graphics.FromImage(result))
+            {
+                bgr.DrawImage(Source,0,0,newSize.Width,newSize.Height);
+            }
+            return result;
+        }
         private class ColouredBlockGummyIndexData
         {
             public readonly Color MainColor;

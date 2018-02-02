@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.AssetManager;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 
@@ -88,5 +89,92 @@ namespace BASeTris
             BlockInnerColor = InnerColor;
         }
     }
-    
+
+    public class StandardTetrominoTheme : TetrominoTheme
+    {
+
+
+        public StandardTetrominoTheme()
+        {
+
+
+        }
+
+        public override void ApplyTheme(BlockGroup Group, TetrisField Field)
+        {
+            
+
+            int CurrLevel = (int)(Field.LineCount / 10);
+            ApplyColorSet(Group, CurrLevel);
+
+        }
+        private Color GetStandardColor(BlockGroup source,int Level)
+        {
+
+            Color[] Colors = new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.Orange };
+            int useIndex = 0;
+            if (source is Tetromino_I)
+            {
+                useIndex = 0;
+            }
+            else if (source is Tetromino_O)
+            {
+                useIndex = 1;
+            }
+            else if (source is Tetromino_T)
+            {
+                useIndex = 2;
+            }
+            else if (source is Tetromino_S)
+            {
+                useIndex = 3;
+            }
+            else if (source is Tetromino_Z)
+            {
+                useIndex = 4;
+            }
+            else if (source is Tetromino_J)
+                useIndex = 5;
+            else if (source is Tetromino_L)
+                useIndex = 6;
+
+            return Colors[(useIndex+Level)%Colors.Length];
+
+            return Color.DeepSkyBlue;
+        }
+        private void ApplyColorSet(BlockGroup bg, int Level)
+        {
+            foreach (var iterate in bg)
+            {
+
+                if(iterate.Block is StandardColouredBlock)
+                {
+                    StandardColouredBlock bl = iterate.Block as StandardColouredBlock;
+                    bl.UseBevel = true;
+                    Color useColor = GetStandardColor(bg,Level);
+                    bl.BlockColor = bl.InnerColor = useColor;
+                    /*QColorMatrix qc = new QColorMatrix();
+                    qc.RotateHue(Level * 50);
+                    
+                    useColor = HSLColor.RotateHue(useColor, Level * 50);
+                    bl.BlockColor = bl.InnerColor = useColor;
+                   */
+                }
+
+            
+
+            }
+        }
+      
+    }
+
+    //Cyan I
+    //Yellow O
+    //Purple T
+    //Green S
+    //Red Z
+    //Blue J
+    //Orange L
+
+
 }

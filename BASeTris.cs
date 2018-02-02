@@ -12,35 +12,66 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.AssetManager;
+using XInput.Wrapper;
 
 namespace BASeTris
 {
     public partial class BASeTris : Form, IStateOwner
     {
+        private List<Particle> ActiveParticles = new List<Particle>();
+        private List<GameObject> GameObjects = new List<GameObject>();
         private TetrisGame _Game;
         HashSet<Keys> PressedKeys = new HashSet<Keys>();
         public BASeTris()
         {
             InitializeComponent();
         }
+        public void AddGameObject(GameObject go)
+        {
+            GameObjects.Add(go);
+        }
+        public void AddParticle(Particle p)
+        {
+            ActiveParticles.Add(p);
+        }
 
-        
+        public Rectangle GameArea
+        {
+            get
+            {
+                return picTetrisField.ClientRectangle;
+            }
+        }
+
         double DefaultWidth = 643d;
         double DefaultHeight = 734d;
         public void SetScale(double factor)
         {
+            mnuScale_Tiny.Checked = mnuScale_Small.Checked = mnuScale_Large.Checked = mnuScale_Biggliest.Checked = false;
             Size = new Size((int)(DefaultWidth*factor),(int)(DefaultHeight*factor));
             
             
         }
+        public void Feedback(float Strength,int Length)
+        {
+            X.Gamepad_1.FFB_Vibrate(Strength,Strength,Length);
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             TetrisGame.InitState();
+           
             
         }
         BlockGroup testBG = null;
         private void StartGame()
         {
+            if (X.IsAvailable)
+            {
+                X.UpdatesPerSecond = 30;
+
+                X.StartPolling(X.Gamepad_1);
+                
+            }
             _Game = new TetrisGame(this);
             var musicplay = TetrisGame.Soundman.PlayMusic(TetrisField.StandardMusic, 0.5f,true);
             musicplay.Tempo = 1f;
@@ -49,14 +80,55 @@ namespace BASeTris
             if (GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
             GameThread.Start();
+            if(InputThread!=null) InputThread.Abort();
+            InputThread = new Thread(GamepadInputThread);
+            InputThread.Start();
         }
 
         private Thread GameThread = null;
-        
+        private Thread InputThread = null;
         private ConcurrentQueue<Action> ProcThreadActions = new ConcurrentQueue<Action>();
+        HashSet<GameState.GameKeys> ActiveKeys = new HashSet<GameState.GameKeys>();
         private void CheckInputs()
         {
+
             
+            
+                HandleKey(GameState.GameKeys.GameKey_RotateCW,X.Gamepad_1.A_down,X.Gamepad_1.A_up);
+                HandleKey(GameState.GameKeys.GameKey_RotateCCW, X.Gamepad_1.X_down, X.Gamepad_1.X_up);
+                HandleKey(GameState.GameKeys.GameKey_Left, X.Gamepad_1.Dpad_Left_down, X.Gamepad_1.Dpad_Left_up);
+            HandleKey(GameState.GameKeys.GameKey_Right, X.Gamepad_1.Dpad_Right_down, X.Gamepad_1.Dpad_Right_up);
+            HandleKey(GameState.GameKeys.GameKey_Down, X.Gamepad_1.Dpad_Down_down, X.Gamepad_1.Dpad_Down_up);
+            HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up);
+            HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up );
+            HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up);
+            
+
+
+        }
+        private void HandleKey(GameState.GameKeys key,bool DownState,bool UpState)
+        {
+            
+            if(ActiveKeys.Contains(key) && !DownState)
+            {
+                ActiveKeys.Remove(key);
+                return;
+            }
+            if (ActiveKeys.Contains(key)) return;
+            if (!DownState) return;
+            ActiveKeys.Add(key);
+            _Game.HandleGameKey(this,key);
+        }
+        private void GamepadInputThread()
+        {
+            while(true)
+            {
+                Thread.Sleep(3);
+                CheckInputs();
+            }
+
+
+
         }
         private void GameProc()
         {
@@ -71,7 +143,7 @@ namespace BASeTris
 
 
                _Game.GameProc();
-                CheckInputs();
+                
                 Invoke((MethodInvoker)(() =>
                 {
                     picTetrisField.Invalidate();
@@ -178,6 +250,16 @@ namespace BASeTris
         {
             if(GameThread!=null)
                 GameThread.Abort();
+            if(InputThread!=null)
+            {
+                InputThread.Abort();
+            }
+            if(X.IsAvailable)
+            {
+                X.StopPolling();
+            }
+            TetrisGame.Soundman.StopMusic();
+            Application.Exit();
         }
 
         public GameState CurrentState { get { return _Game?.CurrentState; } set{ _Game.CurrentState = value; } }
@@ -211,21 +293,25 @@ namespace BASeTris
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
             SetScale(0.5f);
+            ((ToolStripMenuItem)sender).Checked = true;
         }
 
         private void xToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetScale(1);
+            ((ToolStripMenuItem)sender).Checked = true;
         }
 
         private void xToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             SetScale(1.5f);
+            ((ToolStripMenuItem)sender).Checked = true;
         }
 
         private void xToolStripMenuItem2_Click(object sender, EventArgs e)
         {
             SetScale(1.75f);
+            ((ToolStripMenuItem)sender).Checked = true;
         }
 
         private void BASeTris_ResizeEnd(object sender, EventArgs e)

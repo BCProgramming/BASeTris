@@ -2666,7 +2666,13 @@ namespace BASeTris.AssetManager
             this.Saturation = saturation;
             this.Luminosity = luminosity;
         }
-
+        public static Color RotateHue(Color Source, int Amount)
+        {
+            Amount = Amount % 240;
+            HSLColor hs = new HSLColor(Source);
+            hs.Hue = (hs.Hue + Amount) % 240;
+            return hs;
+        }
 
         public static Color RandomHue(double useSat, double uselum)
         {

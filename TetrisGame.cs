@@ -31,6 +31,10 @@ namespace BASeTris
 
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
+        public static FontFamily GetMonospaceFont()
+        {
+            return RetroFont;
+        }
         public static void InitState()
         {
             /*String ScoreFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -101,6 +105,24 @@ namespace BASeTris
         {
             GameOwner.EnqueueAction(pAction);
         }
+
+        public Rectangle GameArea { get; }
+
+        public void Feedback(float Strength,int Length)
+        {
+            GameOwner?.Feedback(Strength,Length);
+        }
+
+        public void AddGameObject(GameObject Source)
+        {
+            GameOwner.AddGameObject(Source);
+        }
+
+        public void AddParticle(Particle pParticle)
+        {
+            GameOwner.AddParticle(pParticle);
+        }
+
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);

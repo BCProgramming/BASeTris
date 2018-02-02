@@ -22,6 +22,7 @@ namespace BASeTris
         public int X { get; set; }
         public int Y { get; set; }
         private int XMin, XMax, YMin, YMax;
+        public float RotateAngle = 0;
         private Rectangle _GroupExtents = Rectangle.Empty;
         public DateTime LastFall = DateTime.MinValue;
         public Rectangle GroupExtents {  get { return _GroupExtents; } }

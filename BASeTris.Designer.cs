@@ -35,10 +35,10 @@
             this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.xToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.xToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.xToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuScale_Tiny = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuScale_Small = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuScale_Large = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuScale_Biggliest = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -109,41 +109,41 @@
             // scaleToolStripMenuItem
             // 
             this.scaleToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.xToolStripMenuItem,
-            this.xToolStripMenuItem1,
-            this.xToolStripMenuItem2});
+            this.mnuScale_Tiny,
+            this.mnuScale_Small,
+            this.mnuScale_Large,
+            this.mnuScale_Biggliest});
             this.scaleToolStripMenuItem.Name = "scaleToolStripMenuItem";
             this.scaleToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.scaleToolStripMenuItem.Text = "Scale";
             // 
-            // toolStripMenuItem2
+            // mnuScale_Tiny
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(181, 26);
-            this.toolStripMenuItem2.Text = "1x";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
+            this.mnuScale_Tiny.Name = "mnuScale_Tiny";
+            this.mnuScale_Tiny.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Tiny.Text = "Tiny";
+            this.mnuScale_Tiny.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
-            // xToolStripMenuItem
+            // mnuScale_Small
             // 
-            this.xToolStripMenuItem.Name = "xToolStripMenuItem";
-            this.xToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.xToolStripMenuItem.Text = "2x";
-            this.xToolStripMenuItem.Click += new System.EventHandler(this.xToolStripMenuItem_Click);
+            this.mnuScale_Small.Name = "mnuScale_Small";
+            this.mnuScale_Small.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Small.Text = "Small";
+            this.mnuScale_Small.Click += new System.EventHandler(this.xToolStripMenuItem_Click);
             // 
-            // xToolStripMenuItem1
+            // mnuScale_Large
             // 
-            this.xToolStripMenuItem1.Name = "xToolStripMenuItem1";
-            this.xToolStripMenuItem1.Size = new System.Drawing.Size(181, 26);
-            this.xToolStripMenuItem1.Text = "3x";
-            this.xToolStripMenuItem1.Click += new System.EventHandler(this.xToolStripMenuItem1_Click);
+            this.mnuScale_Large.Name = "mnuScale_Large";
+            this.mnuScale_Large.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Large.Text = "Large";
+            this.mnuScale_Large.Click += new System.EventHandler(this.xToolStripMenuItem1_Click);
             // 
-            // xToolStripMenuItem2
+            // mnuScale_Biggliest
             // 
-            this.xToolStripMenuItem2.Name = "xToolStripMenuItem2";
-            this.xToolStripMenuItem2.Size = new System.Drawing.Size(181, 26);
-            this.xToolStripMenuItem2.Text = "4x";
-            this.xToolStripMenuItem2.Click += new System.EventHandler(this.xToolStripMenuItem2_Click);
+            this.mnuScale_Biggliest.Name = "mnuScale_Biggliest";
+            this.mnuScale_Biggliest.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Biggliest.Text = "Biggliest";
+            this.mnuScale_Biggliest.Click += new System.EventHandler(this.xToolStripMenuItem2_Click);
             // 
             // BASeTris
             // 
@@ -185,10 +185,10 @@
         private System.Windows.Forms.ToolStripMenuItem newGameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scaleToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem xToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem xToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem xToolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem mnuScale_Tiny;
+        private System.Windows.Forms.ToolStripMenuItem mnuScale_Small;
+        private System.Windows.Forms.ToolStripMenuItem mnuScale_Large;
+        private System.Windows.Forms.ToolStripMenuItem mnuScale_Biggliest;
     }
 }
 

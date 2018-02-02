@@ -22,7 +22,7 @@ namespace BASeTris
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
-        public TetrominoTheme Theme = new NESTetrominoTheme();
+        public TetrominoTheme Theme = new StandardTetrominoTheme(); //new NESTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
         public int Level {  get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;
@@ -325,6 +325,7 @@ namespace BASeTris
             }
             else if(rowsfound == 4)
             {
+                
                 TetrisGame.Soundman.PlaySound("line_tetris",2.0f);
             }
             int topmost = ROWCOUNT;
