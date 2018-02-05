@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -10,7 +11,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using bcHighScores;
 using BASeTris.AssetManager;
+using BASeTris.Choosers;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 
@@ -37,14 +40,114 @@ namespace BASeTris
 
     public class StandardTetrisGameState : GameState
     {
-
+        public String StandardMusic = "tetris_a_theme_techno";
         Bitmap useBackground = null;
         public Queue<BlockGroup> NextBlocks = new Queue<BlockGroup>();
         public BlockGroup HoldBlock = null;
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public Statistics GameStats = new Statistics();
-        public bool GameOvered = false;
+        public Choosers.BlockGroupChooser Chooser = new BagChooser(TetrisGame.rgen, new Func<BlockGroup>[]
+        {
+            () => new Tetromino_Z(),
+            () => new Tetromino_I(),
+            () => new Tetromino_J(),
+            () => new Tetromino_L(),
+            () => new Tetromino_O(),
+            () => new Tetromino_S(),
+            () => new Tetromino_T()
+
+        });
+        public virtual IHighScoreList GetLocalScores()
+        {
+            return TetrisGame.ScoreMan["Standard"];
+        }
+
+        public virtual int ProcessFieldChange()
+        {
+            //process lines for standard game.
+            int rowsfound = 0;
+            //checks the field contents for lines. If there are lines found, they are removed, and all rows above it are shifted down.
+            for (int r = 0; r < PlayField.RowCount; r++)
+            {
+                if (PlayField.Contents[r].All((d) => d != null))
+                {
+                    Debug.Print("Found completed row at row " + r);
+                    rowsfound++;
+                    for (int g = r; g > 0; g--)
+                    {
+                        Debug.Print("Moving row " + (g - 1).ToString() + " to row " + g);
+
+                        for (int i = 0; i < PlayField.ColCount; i++)
+                        {
+                            PlayField.Contents[g][i] = PlayField.Contents[g - 1][i];
+                        }
+                    }
+                }
+            }
+            long PreviousLineCount = PlayField.LineCount;
+            PlayField.LineCount += rowsfound;
+            if ((PreviousLineCount % 10) > (PlayField.LineCount % 10))
+            {
+                PlayField_LevelChanged(this,new TetrisField.LevelChangeEventArgs((int)PlayField.LineCount / 10));
+
+                
+                TetrisGame.Soundman.PlaySound("level_up");
+                PlayField.SetFieldColors();
+       
+            }
+            if (rowsfound > 0 && rowsfound < 4)
+            {
+                TetrisGame.Soundman.PlaySound("line_clear", 2.0f);
+            }
+            else if (rowsfound == 4)
+            {
+
+                TetrisGame.Soundman.PlaySound("line_tetris", 2.0f);
+            }
+            int topmost = PlayField.RowCount;
+            //find the topmost row with any blocks.
+            for (int i = 0; i < PlayField.RowCount; i++)
+            {
+                if (PlayField.Contents[i].Any((w) => w != null))
+                {
+                    topmost = i;
+                    break;
+                }
+            }
+            if (topmost < 9)
+            {
+                if (currenttempo == 1)
+                {
+                    currenttempo = 68;
+                    TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                    var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
+                    if (grabbed != null)
+                    {
+
+
+                        TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 90f;
+                    }
+                }
+            }
+            else
+            {
+                if (currenttempo != 1)
+                {
+                    currenttempo = 1;
+                    TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                    var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
+                    if (grabbed != null) grabbed.Tempo = 1f;
+                }
+            }
+            PlayField.HasChanged = rowsfound > 0;
+            return rowsfound;
+        }
+        private int currenttempo = 1;
+
+
+
+    public bool GameOvered = false;
         public BlockGroup GetNext()
         {
             if (NextBlocks.Count == 0) return null;
@@ -57,7 +160,7 @@ namespace BASeTris
             PlayField.LevelChanged += PlayField_LevelChanged;
         }
 
-        private void PlayField_LevelChanged(object sender, LevelChangeEventArgs e)
+        private void PlayField_LevelChanged(object sender, TetrisField.LevelChangeEventArgs e)
         {
             lock (LockTetImageRedraw)
             {
@@ -109,7 +212,7 @@ namespace BASeTris
                 TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
             }
         }
-        private void PlayField_BlockGroupSet(object sender, BlockGroupSetEventArgs e)
+        private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {
             if (e._group.Y < 1)
             {
@@ -141,8 +244,15 @@ namespace BASeTris
 
             
         }
+        private bool FirstRun = false;
         public override void GameProc(IStateOwner pOwner)
         {
+            if(!FirstRun)
+            {
+                var musicplay = TetrisGame.Soundman.PlayMusic(StandardMusic, 0.5f, true);
+                musicplay.Tempo = 1f;
+                FirstRun = true;
+            }
             if(NextAngleOffset != 0)
             {
                 double AngleChange = ((Math.PI * 2 / 360)) * 5;
@@ -164,7 +274,7 @@ namespace BASeTris
 
                     if (MoveGroupDown(iterate))
                     {
-                        ProcessLinesWithScore(pOwner);
+                        ProcessFieldChangeWithScore(pOwner);
                     }
                     iterate.LastFall = DateTime.Now;
                 }
@@ -191,9 +301,9 @@ namespace BASeTris
             }
         }
 
-        private void ProcessLinesWithScore(IStateOwner pOwner)
+        public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner)
         {
-            int result = PlayField.ProcessLines();
+            int result = ProcessFieldChange();
             if (result == 1) GameStats.Score += ((GameStats.LineCount / 10) + 1) * 10;
             else if (result == 2)
                 GameStats.Score += ((GameStats.LineCount / 10) + 2) * 15;
@@ -209,7 +319,7 @@ namespace BASeTris
         private DateTime GameStartTime = DateTime.MinValue;
         private DateTime LastPausedTime = DateTime.MinValue;
         private TimeSpan FinalGameTime = TimeSpan.MinValue;
-        private const int BlockQueueLength = 5;
+        private const int BlockQueueLength = 6;
         private void RefillBlockQueue()
         {
             while (BlockQueueLength > NextBlocks.Count)
@@ -282,7 +392,8 @@ namespace BASeTris
 
         public virtual BlockGroup GenerateTetromino()
         {
-            Func<BlockGroup> GetTetrominoFunction;
+            return Chooser.GetNext();
+            /*Func<BlockGroup> GetTetrominoFunction;
             Func<BlockGroup>[] GeneratorFunctions = new Func<BlockGroup>[]
             {
                 () => new Tetromino_Z(),
@@ -297,7 +408,7 @@ namespace BASeTris
             GetTetrominoFunction = TetrisGame.Choose(GeneratorFunctions);
             //GetTetrominoFunction = BlockGroup.GetTetromino_T;
             BlockGroup newTetromino = GetTetrominoFunction();
-            return newTetromino;
+            return newTetromino;*/
         }
         Image StatisticsBackground = null;
         public void GenerateStatisticsBackground()
@@ -591,7 +702,7 @@ namespace BASeTris
                     if (MoveGroupDown(activeitem))
                     {
                         pOwner.Feedback(0.4f, 100);
-                        ProcessLinesWithScore(pOwner);
+                        ProcessFieldChangeWithScore(pOwner);
 
                     }
                 }
@@ -609,7 +720,7 @@ namespace BASeTris
                 }
                 pOwner.Feedback(0.6f, 200);
                 TetrisGame.Soundman.PlaySound("block_place");
-                ProcessLinesWithScore(pOwner);
+                ProcessFieldChangeWithScore(pOwner);
                 
                 
             }
@@ -648,20 +759,22 @@ namespace BASeTris
                 {
                     //if there is a holdblock, take it and put it into the gamefield and make the first active blockgroup the new holdblock,
                     //then set BlockHold to block it from being used until the next Tetromino is spawned.
-                    BlockGroup FirstGroup = PlayField.BlockGroups.First();
-                    PlayField.RemoveBlockGroup(FirstGroup);
-                    
-                    PlayField.AddBlockGroup(HoldBlock);
-                    
+                    BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+                    if (FirstGroup != null)
+                    {
+                        PlayField.RemoveBlockGroup(FirstGroup);
 
-                    PlayField.Theme.ApplyTheme(HoldBlock,PlayField);
-                    HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
-                    HoldBlock.Y = 0;
-                    HoldBlock = FirstGroup;
-                    TetrisGame.Soundman.PlaySound("drop");
-                    pOwner.Feedback(0.9f, 40);
-                    BlockHold = true;
+                        PlayField.AddBlockGroup(HoldBlock);
 
+
+                        PlayField.Theme.ApplyTheme(HoldBlock, PlayField);
+                        HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
+                        HoldBlock.Y = 0;
+                        HoldBlock = FirstGroup;
+                        TetrisGame.Soundman.PlaySound("drop");
+                        pOwner.Feedback(0.9f, 40);
+                        BlockHold = true;
+                    }
                 }
                 else if(!BlockHold)
                 {

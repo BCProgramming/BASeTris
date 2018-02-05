@@ -28,6 +28,9 @@ namespace BASeTris
         public Rectangle GroupExtents {  get { return _GroupExtents; } }
         protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
 
+
+        
+
         protected void RecalcExtents()
         {
             foreach (var iterateentry in this)

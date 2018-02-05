@@ -107,6 +107,7 @@ namespace BASeTris.TetrisBlocks
                 StandardColourBlocks.Add(Color.Blue, ResizeImage(TetrisGame.Imageman["block_std_blue"], TargetSize));
                 StandardColourBlocks.Add(Color.Orange, ResizeImage(TetrisGame.Imageman["block_std_orange"], TargetSize));
             }
+            
 
             return StandardColourBlocks[BlockColor];
             

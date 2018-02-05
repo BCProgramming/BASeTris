@@ -62,6 +62,9 @@
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="BlockGroup.cs" />
+    <Compile Include="Choosers\BagChooser.cs" />
+    <Compile Include="Choosers\BlockGroupChooser.cs" />
+    <Compile Include="Choosers\FullRandomChooser.cs" />
     <Compile Include="Particles\cParticle.cs" />
     <Compile Include="DebugLog.cs" />
     <Compile Include="BASeTris.cs">

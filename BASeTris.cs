@@ -73,8 +73,8 @@ namespace BASeTris
                 
             }
             _Game = new TetrisGame(this);
-            var musicplay = TetrisGame.Soundman.PlayMusic(TetrisField.StandardMusic, 0.5f,true);
-            musicplay.Tempo = 1f;
+            
+            
 
 
             if (GameThread!=null) GameThread.Abort();

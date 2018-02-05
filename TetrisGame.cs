@@ -37,15 +37,15 @@ namespace BASeTris
         }
         public static void InitState()
         {
-            /*String ScoreFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            String ScoreFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "BASeTris");
             if(!Directory.Exists(ScoreFolder))
             {
                 Directory.CreateDirectory(ScoreFolder);
             }
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.dat");
-            //ScoreMan = new HighScoreManager(ScoreFile);
-            */
+            ScoreMan = new HighScoreManager(ScoreFile);
+            
 
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
@@ -201,6 +201,7 @@ namespace BASeTris
             
         }
 
+        
         public static String AppDataFolder
         {
             get

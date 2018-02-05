@@ -17,69 +17,69 @@ namespace BASeTris
         //The "tetris field" here just represents the "permanent" blocks. eg, blocks that have been dropped, and "set" in place.
         //these get evaluated to check for lines when a new block is placed, for example.
         //blocks that are still "controlled" and falling are handled separately, and are placed here when they are dropped.
-        public static String StandardMusic = "tetris_a_theme_techno";
+
         public event EventHandler<LevelChangeEventArgs> LevelChanged;
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
         public TetrominoTheme Theme = new StandardTetrominoTheme(); //new NESTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
-        public int Level {  get { return (int)LineCount / 10; } }
+        public int Level { get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;
         const int COLCOUNT = 10;
         const int VISIBLEROWS = 20;
-        public int HIDDENROWS {  get { return ROWCOUNT - VISIBLEROWS; } }
+        public int HIDDENROWS { get { return ROWCOUNT - VISIBLEROWS; } }
         //const int ROWCOUNT = 44;
         //const int COLCOUNT = 20;
         Random rg = new Random();
-        public int RowCount {  get { return ROWCOUNT; } }
-        public int ColCount {  get { return COLCOUNT; } }
+        public int RowCount { get { return ROWCOUNT; } }
+        public int ColCount { get { return COLCOUNT; } }
         public IList<BlockGroup> BlockGroups { get { return new List<BlockGroup>(ActiveBlockGroups); } }
 
-        
-        public TetrisBlock[][] Contents {  get { return FieldContents; } }
+
+        public TetrisBlock[][] Contents { get { return FieldContents; } }
         public void ClearContents()
         {
             ActiveBlockGroups.Clear();
-            foreach(var row in FieldContents)
+            foreach (var row in FieldContents)
             {
-                for(int i=0;i<COLCOUNT;i++)
+                for (int i = 0; i < COLCOUNT; i++)
                 {
                     row[i] = null;
                 }
             }
-          
+
         }
         public void AddBlockGroup(BlockGroup newGroup)
         {
             Debug.Print("Added:" + newGroup.ToString());
             ActiveBlockGroups.Add(newGroup);
-            
+
         }
         public void RemoveBlockGroup(BlockGroup oldGroup)
         {
             ActiveBlockGroups.Remove(oldGroup);
         }
-        public TetrisField(int GarbageRows=0)
+        public TetrisField(int GarbageRows = 0)
         {
             FieldContents = new TetrisBlock[ROWCOUNT][];
-            for(int row=0;row<ROWCOUNT;row++)
+            for (int row = 0; row < ROWCOUNT; row++)
             {
                 FieldContents[row] = new TetrisBlock[COLCOUNT];
             }
-            if(GarbageRows > 0)
+            if (GarbageRows > 0)
             {
-                for(int i=0;i<GarbageRows;i++)
+                for (int i = 0; i < GarbageRows; i++)
                 {
-                    var FillRow = FieldContents[ROWCOUNT - i-1];
-                    for(int fillcol=0;fillcol<COLCOUNT;fillcol++)
+                    var FillRow = FieldContents[ROWCOUNT - i - 1];
+                    for (int fillcol = 0; fillcol < COLCOUNT; fillcol++)
                     {
-                        if(rg.NextDouble()>0.5)
+                        if (rg.NextDouble() > 0.5)
                         {
                             var standardfilled = new StandardColouredBlock();
                             standardfilled.BlockColor = Color.FromArgb(rg.Next(255), rg.Next(255), rg.Next(255));
                             FillRow[fillcol] = standardfilled;
-                            
+
                         }
                     }
 
@@ -111,11 +111,11 @@ namespace BASeTris
 
                 }
             }
-            foreach(var bg in ActiveBlockGroups)
+            foreach (var bg in ActiveBlockGroups)
             {
-                foreach(var iterateblock in bg)
+                foreach (var iterateblock in bg)
                 {
-                    if(iterateblock.Block!=null && iterateblock.Block.IsAnimated)
+                    if (iterateblock.Block != null && iterateblock.Block.IsAnimated)
                     {
                         iterateblock.Block.AnimateFrame();
                     }
@@ -128,7 +128,7 @@ namespace BASeTris
             lock (ActiveBlockGroups)
             {
                 LastSetGroup = DateTime.Now;
-                
+
 
                 Debug.Print("Setting BlockGroup to Field:" + bg.ToString());
                 foreach (var groupblock in bg)
@@ -145,14 +145,14 @@ namespace BASeTris
             }
 
         }
-        public bool CanFit(BlockGroup bg,int X,int Y)
+        public bool CanFit(BlockGroup bg, int X, int Y)
         {
             IList<BlockGroupEntry> Contacts = new List<BlockGroupEntry>();
             bool result = true;
-            foreach(var checkblock in bg)
+            foreach (var checkblock in bg)
             {
-                int CheckRow = Y+checkblock.Y;
-                int CheckCol = X+checkblock.X;
+                int CheckRow = Y + checkblock.Y;
+                int CheckCol = X + checkblock.X;
                 if (CheckRow < 0 || CheckCol < 0)
                 {
                     result = false;
@@ -176,7 +176,7 @@ namespace BASeTris
             }
             return result;
         }
-        public bool CanRotate(BlockGroup bg,bool ccw)
+        public bool CanRotate(BlockGroup bg, bool ccw)
         {
 
             BlockGroup duped = new BlockGroup(bg);
@@ -194,7 +194,7 @@ namespace BASeTris
         {
             return ForBounds.Height / (VISIBLEROWS);
         }
-        Pen LinePen = new Pen(Color.Black,1){DashPattern= new float[]{4,1,3,1,2,1,3,1}};
+        Pen LinePen = new Pen(Color.Black, 1) { DashPattern = new float[] { 4, 1, 3, 1, 2, 1, 3, 1 } };
         RectangleF LastFieldSave = RectangleF.Empty;
         Image FieldBitmap = null;
 
@@ -237,20 +237,20 @@ namespace BASeTris
             //first how big is each block?
             float BlockWidth = Bounds.Width / COLCOUNT;
             float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
-            if(FieldBitmap==null || !LastFieldSave.Equals(Bounds) || HasChanged)
+            if (FieldBitmap == null || !LastFieldSave.Equals(Bounds) || HasChanged)
             {
                 Bitmap BuildField = new Bitmap((int)Bounds.Width, (int)Bounds.Height);
                 using (Graphics gfield = Graphics.FromImage(BuildField))
                 {
                     gfield.Clear(Color.Transparent);
-                    DrawFieldContents(gfield,Bounds);
-                    if(FieldBitmap!=null) FieldBitmap.Dispose();
+                    DrawFieldContents(gfield, Bounds);
+                    if (FieldBitmap != null) FieldBitmap.Dispose();
                     FieldBitmap = BuildField;
                 }
                 HasChanged = false;
             }
 
-         g.DrawImageUnscaled(FieldBitmap,0,0);
+            g.DrawImageUnscaled(FieldBitmap, 0, 0);
 
 
             lock (ActiveBlockGroups)
@@ -278,111 +278,35 @@ namespace BASeTris
 
 
         }
-        private void SetFieldColors()
+        public void SetFieldColors()
         {
-            foreach(var iteraterow in FieldContents)
+            foreach (var iteraterow in FieldContents)
             {
-                foreach(var iteratecell in iteraterow)
+                foreach (var iteratecell in iteraterow)
                 {
-                    if (iteratecell!=null)
-                    Theme.ApplyTheme(iteratecell.Owner,this);
+                    if (iteratecell != null)
+                        Theme.ApplyTheme(iteratecell.Owner, this);
                 }
             }
             HasChanged = true;
         }
-        public int ProcessLines()
+
+
+        public class LevelChangeEventArgs : EventArgs
         {
-            int rowsfound = 0;
-            //checks the field contents for lines. If there are lines found, they are removed, and all rows above it are shifted down.
-            for(int r = 0;r<ROWCOUNT;r++)
+            private int LevelNumber = 0;
+            public LevelChangeEventArgs(int newLevel = 0)
             {
-                if(FieldContents[r].All((d)=>d!=null))
-                {
-                    Debug.Print("Found completed row at row " + r);
-                    rowsfound++;
-                    for(int g=r;g>0;g--)
-                    {
-                        Debug.Print("Moving row " + (g-1).ToString() + " to row " + g);
 
-                        for(int i=0;i<COLCOUNT;i++)
-                        {
-                            FieldContents[g][i] = FieldContents[g - 1][i];
-                        }
-                    }
-                }
             }
-            long PreviousLineCount = LineCount;
-            LineCount += rowsfound;
-            if((PreviousLineCount%10)>(LineCount%10))
-            {
-                LevelChanged?.Invoke(this,new LevelChangeEventArgs((int)LineCount/10));
-                TetrisGame.Soundman.PlaySound("level_up");
-                SetFieldColors();
-            }
-            if(rowsfound > 0 && rowsfound < 4)
-            {
-                TetrisGame.Soundman.PlaySound("line_clear",2.0f);
-            }
-            else if(rowsfound == 4)
-            {
-                
-                TetrisGame.Soundman.PlaySound("line_tetris",2.0f);
-            }
-            int topmost = ROWCOUNT;
-            //find the topmost row with any blocks.
-            for(int i=0;i<ROWCOUNT;i++)
-            {
-                if(FieldContents[i].Any((w)=>w!=null))
-                {
-                    topmost = i;
-                    break;
-                }
-            }
-            if(topmost < 9)
-            {
-                if (currenttempo == 1)
-                {
-                    currenttempo = 68;
-                    TetrisGame.Soundman.PlayMusic(StandardMusic,0.75f,true);
-                    var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
-                    if (grabbed != null)
-                    {
-
-
-                        TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 90f;
-                    }
-                }
-            }
-            else
-            {
-                if (currenttempo != 1)
-                {
-                    currenttempo = 1;
-                    TetrisGame.Soundman.PlayMusic(StandardMusic,0.75f,true);
-                    var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
-                    if (grabbed != null) grabbed.Tempo = 1f;
-                }
-            }
-            HasChanged = rowsfound> 0;
-            return rowsfound;
         }
-        private int currenttempo = 1;
-    }
-    
-    public class LevelChangeEventArgs:EventArgs
-    {
-        private int LevelNumber = 0;
-        public LevelChangeEventArgs(int newLevel=0)
+        public class BlockGroupSetEventArgs : EventArgs
         {
-
-        }
-    }
-    public class BlockGroupSetEventArgs:EventArgs
-    {
-        public BlockGroup _group = null;
-        public BlockGroupSetEventArgs(BlockGroup bg)
-        {
-            _group = bg;
+            public BlockGroup _group = null;
+            public BlockGroupSetEventArgs(BlockGroup bg)
+            {
+                _group = bg;
+            }
         }
     }
 }
