@@ -12,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.AssetManager;
+using BASeTris.GameStates;
+using BASeTris.Tetrominoes;
 using XInput.Wrapper;
 
 namespace BASeTris
@@ -72,7 +74,7 @@ namespace BASeTris
                 X.StartPolling(X.Gamepad_1);
                 
             }
-            _Game = new TetrisGame(this);
+            _Game = new TetrisGame(this, new StandardTetrisGameState(Tetromino.BagTetrominoChooser(),null));
             
             
 
@@ -141,9 +143,10 @@ namespace BASeTris
                     pResult();
                 }
 
-
-               _Game.GameProc();
-                
+                if (_Game.CurrentState!=null && !_Game.CurrentState.GameProcSuspended)
+                {
+                    _Game.GameProc();
+                }
                 Invoke((MethodInvoker)(() =>
                 {
                     picTetrisField.Invalidate();
@@ -165,6 +168,9 @@ namespace BASeTris
             if (_Game == null) return;
             e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
+
+            
+
             
         }
 

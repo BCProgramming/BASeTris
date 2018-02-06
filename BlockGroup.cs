@@ -157,6 +157,15 @@ namespace BASeTris
             }
             return bg;
         }
+        public static IEnumerable<BlockGroupEntry> GetTetrominoEntries(Point[] Source,Size AreaSize)
+        {
+            //assumes a "single" set of blocks, we rotate it with the BlockGroupEntry Constructor for the needed rotation points.
+            foreach(Point BlockPos in Source)
+            {
+                StandardColouredBlock CreateBlock = new StandardColouredBlock();
+                yield return new BlockGroupEntry(BlockPos,AreaSize,CreateBlock);
+            }
+        }
         public static IEnumerable<BlockGroupEntry> GetTetrominoEntries(Point[][] Source)
         {
             foreach (Point[] loopposdata in Source)
@@ -182,8 +191,6 @@ namespace BASeTris
                 if (CCW) iterateblock.RotationModulo--;
               else 
                     iterateblock.RotationModulo++;
-
-              
           }
 
         }
@@ -224,6 +231,11 @@ namespace BASeTris
         public int RotationModulo = 0;
 
         public TetrisBlock Block;
+        public BlockGroupEntry(Point Point,Size AreaSize,TetrisBlock pBlock)
+        {
+            Positions = GetRotations(Point, AreaSize);
+            Block = pBlock;
+        }
         public BlockGroupEntry(Point[] RotationPoints,TetrisBlock pBlock)
         {
             if(RotationPoints.Length==0) throw new ArgumentException("RotationPoints");

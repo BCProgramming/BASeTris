@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -22,7 +23,7 @@ namespace BASeTris
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
-        public TetrominoTheme Theme = new StandardTetrominoTheme(); //new NESTetrominoTheme();
+        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_CloudBevel); //new NESTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
         public int Level { get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;
@@ -40,12 +41,15 @@ namespace BASeTris
         public TetrisBlock[][] Contents { get { return FieldContents; } }
         public void ClearContents()
         {
-            ActiveBlockGroups.Clear();
-            foreach (var row in FieldContents)
+            lock (ActiveBlockGroups)
             {
-                for (int i = 0; i < COLCOUNT; i++)
+                ActiveBlockGroups.Clear();
+                foreach (var row in FieldContents)
                 {
-                    row[i] = null;
+                    for (int i = 0; i < COLCOUNT; i++)
+                    {
+                        row[i] = null;
+                    }
                 }
             }
 
@@ -53,39 +57,27 @@ namespace BASeTris
         public void AddBlockGroup(BlockGroup newGroup)
         {
             Debug.Print("Added:" + newGroup.ToString());
-            ActiveBlockGroups.Add(newGroup);
+            lock (ActiveBlockGroups)
+            {
+                ActiveBlockGroups.Add(newGroup);
+            }
 
         }
         public void RemoveBlockGroup(BlockGroup oldGroup)
         {
-            ActiveBlockGroups.Remove(oldGroup);
+            lock (ActiveBlockGroups)
+            {
+                ActiveBlockGroups.Remove(oldGroup);
+            }
         }
-        public TetrisField(int GarbageRows = 0)
+        public TetrisField()
         {
             FieldContents = new TetrisBlock[ROWCOUNT][];
             for (int row = 0; row < ROWCOUNT; row++)
             {
                 FieldContents[row] = new TetrisBlock[COLCOUNT];
             }
-            if (GarbageRows > 0)
-            {
-                for (int i = 0; i < GarbageRows; i++)
-                {
-                    var FillRow = FieldContents[ROWCOUNT - i - 1];
-                    for (int fillcol = 0; fillcol < COLCOUNT; fillcol++)
-                    {
-                        if (rg.NextDouble() > 0.5)
-                        {
-                            var standardfilled = new StandardColouredBlock();
-                            standardfilled.BlockColor = Color.FromArgb(rg.Next(255), rg.Next(255), rg.Next(255));
-                            FillRow[fillcol] = standardfilled;
-
-                        }
-                    }
-
-
-                }
-            }
+            
         }
         public bool HasChanged = false;
         public void AnimateFrame()

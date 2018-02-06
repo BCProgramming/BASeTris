@@ -70,7 +70,7 @@ namespace BASeTris
             RetroFont = pfc.Families[0];
 
         }
-        public TetrisGame(IStateOwner pOwner)
+        public TetrisGame(IStateOwner pOwner,GameState InitialGameState)
         {
             if (Soundman == null) InitState();
             else
@@ -79,7 +79,7 @@ namespace BASeTris
                 Soundman.Stop();
             }
             GameOwner = pOwner;
-            CurrentGameState = new StandardTetrisGameState();
+            CurrentGameState = InitialGameState;
         }
         public static T ClampValue<T>(T Value, T min, T max) where T : IComparable
         {
@@ -122,7 +122,7 @@ namespace BASeTris
         {
             GameOwner.AddParticle(pParticle);
         }
-
+        
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);
@@ -134,6 +134,7 @@ namespace BASeTris
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
             CurrentGameState.DrawProc(this, g, Bounds);
+            CurrentGameState.DrawForegroundEffect(this,g,Bounds);
         }
       
 

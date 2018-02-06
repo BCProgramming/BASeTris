@@ -34,10 +34,17 @@ namespace BASeTris.TetrisBlocks
     }
     public class StandardColouredBlock : ImageBlock
     {
+        public enum BlockStyle
+        {
+            Style_Gummy,
+            Style_CloudBevel,
+            Style_HardBevel,
+            Style_Shine
+        }
         private Image GummyBitmap = null;
         public Color _BlockColor = Color.Red;
         public Color _InnerColor = Color.White;
-        public bool UseBevel = false;
+        public BlockStyle DisplayStyle = BlockStyle.Style_Gummy;
         public Color BlockColor { get { return _BlockColor; } set { _BlockColor = value; } }
         public Color InnerColor {   get { return _InnerColor; } set { _InnerColor = value; } }
         public Color BlockOutline = Color.Black;
@@ -71,7 +78,7 @@ namespace BASeTris.TetrisBlocks
                 IndexData = new ColouredBlockGummyIndexData(BlockColor, InnerColor, InnerColor != BlockColor);
                 if (!GummyBitmaps.ContainsKey(IndexData))
                 {
-                    if (UseBevel)
+                    if (DisplayStyle!=BlockStyle.Style_Gummy)
                     {
                         AcquiredImage = GetBevelImage();
                     }
@@ -91,26 +98,77 @@ namespace BASeTris.TetrisBlocks
 
         }
 
-        static Dictionary<Color, Image> StandardColourBlocks = null;
-
+        //static Dictionary<Color, Image> StandardColourBlocks = null;
+        static Dictionary<BlockStyle, Dictionary<Color, Image>> StandardColourBlocks = null;
         private Image GetBevelImage()
         {
-            if(StandardColourBlocks==null)
+            String baseimage= "block_lightbevel_red";
+            if (DisplayStyle == BlockStyle.Style_CloudBevel)
+                baseimage = "block_lightbevel_red";
+            else if (DisplayStyle == BlockStyle.Style_Shine)
             {
-                Size TargetSize= new Size(100,100);
-                StandardColourBlocks = new Dictionary<Color, Image>();
-                StandardColourBlocks.Add(Color.Cyan,ResizeImage(TetrisGame.Imageman["block_std_cyan"],TargetSize));
-                StandardColourBlocks.Add(Color.Yellow, ResizeImage(TetrisGame.Imageman["block_std_yellow"], TargetSize));
-                StandardColourBlocks.Add(Color.Purple, ResizeImage(TetrisGame.Imageman["block_std_purple"], TargetSize));
-                StandardColourBlocks.Add(Color.Green, ResizeImage(TetrisGame.Imageman["block_std_green"], TargetSize));
-                StandardColourBlocks.Add(Color.Red, ResizeImage(TetrisGame.Imageman["block_std_red"], TargetSize));
-                StandardColourBlocks.Add(Color.Blue, ResizeImage(TetrisGame.Imageman["block_std_blue"], TargetSize));
-                StandardColourBlocks.Add(Color.Orange, ResizeImage(TetrisGame.Imageman["block_std_orange"], TargetSize));
+                baseimage = "block_shine_red";
+            }
+            else if (DisplayStyle == BlockStyle.Style_HardBevel)
+                baseimage = "block_std_red";
+
+            Size TargetSize = new Size(100, 100);
+            if (StandardColourBlocks == null)
+            {
+
+                StandardColourBlocks = new Dictionary<BlockStyle, Dictionary<Color, Image>>();
+            }
+
+            if(!StandardColourBlocks.ContainsKey(DisplayStyle))
+            {
+                StandardColourBlocks.Add(DisplayStyle,new Dictionary<Color, Image>());
+            }
+
+            if (StandardColourBlocks[DisplayStyle].Count == 0)
+            {
+                foreach (Color c in new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Blue, Color.Red, Color.Orange })
+                {
+                    StandardColourBlocks[DisplayStyle].Add(c, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], c), TargetSize));
+                }
+            }  
+            
+            if(!StandardColourBlocks[DisplayStyle].ContainsKey(BlockColor))
+            {
+                StandardColourBlocks[DisplayStyle].Add(BlockColor, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], BlockColor), TargetSize));
             }
             
 
-            return StandardColourBlocks[BlockColor];
+            return StandardColourBlocks[DisplayStyle][BlockColor];
             
+        }
+        private Image RecolorImage(Image Source,Color Target)
+        {
+            float NormalizedR = (float)Target.R / 255;
+            float NormalizedG = (float)Target.G / 255;
+            float NormalizedB = (float)Target.B / 255;
+            float NormalizedA = (float)Target.A / 255;
+
+            //input image is assumed to use RED as it's dominant colour!
+            float[][] mat = new float[][]
+            {
+                new float[]{NormalizedR,NormalizedG,NormalizedB,NormalizedA,0},
+                new float[]{0,1,0,0,0},
+                new float[]{0,0,1,0,0},
+                new float[]{0,0,0,1,0},
+                new float[]{0,0,0,0,1},
+                
+            };
+            ColorMatrix cm = new ColorMatrix(mat);
+            ImageAttributes ia  = new ImageAttributes();
+            ia.SetColorMatrix(cm);
+            Bitmap result = new Bitmap(Source.Width,Source.Height);
+            using (Graphics gg = Graphics.FromImage(result))
+            {
+                gg.Clear(Color.Transparent);
+                gg.DrawImage(Source, new Rectangle(0,0,Source.Width,Source.Height), 0, 0, Source.Width, Source.Height, GraphicsUnit.Pixel, ia);
+            }
+
+            return result;
         }
         private Image ResizeImage(Image Source, Size newSize)
         {

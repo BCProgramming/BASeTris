@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using BASeTris.AssetManager;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
@@ -92,11 +93,11 @@ namespace BASeTris
 
     public class StandardTetrominoTheme : TetrominoTheme
     {
-
-
-        public StandardTetrominoTheme()
+        StandardColouredBlock.BlockStyle _Style;
+        public StandardColouredBlock.BlockStyle BlockStyle {  get { return _Style; } set { _Style = value; } }
+        public StandardTetrominoTheme(StandardColouredBlock.BlockStyle pBlockStyle)
         {
-
+            _Style = pBlockStyle;
 
         }
 
@@ -111,7 +112,7 @@ namespace BASeTris
         private Color GetStandardColor(BlockGroup source,int Level)
         {
 
-            Color[] Colors = new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.Orange };
+            Color[] Colors = new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
             int useIndex = 0;
             if (source is Tetromino_I)
             {
@@ -150,7 +151,7 @@ namespace BASeTris
                 if(iterate.Block is StandardColouredBlock)
                 {
                     StandardColouredBlock bl = iterate.Block as StandardColouredBlock;
-                    bl.UseBevel = true;
+                    bl.DisplayStyle = _Style; //TetrisGame.Choose(new StandardColouredBlock.BlockStyle[] { StandardColouredBlock.BlockStyle.Style_HardBevel, StandardColouredBlock.BlockStyle.Style_CloudBevel, StandardColouredBlock.BlockStyle.Style_Shine });
                     Color useColor = GetStandardColor(bg,Level);
                     bl.BlockColor = bl.InnerColor = useColor;
                     /*QColorMatrix qc = new QColorMatrix();

@@ -65,6 +65,12 @@
     <Compile Include="Choosers\BagChooser.cs" />
     <Compile Include="Choosers\BlockGroupChooser.cs" />
     <Compile Include="Choosers\FullRandomChooser.cs" />
+    <Compile Include="FieldInitializers\FieldInitializer.cs" />
+    <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
+    <Compile Include="GameStates\ClearActionGameState.cs" />
+    <Compile Include="GameStates\GameOverGameState.cs" />
+    <Compile Include="GameStates\PauseGameState.cs" />
+    <Compile Include="GameStates\StandardTetrisGameState.cs" />
     <Compile Include="Particles\cParticle.cs" />
     <Compile Include="DebugLog.cs" />
     <Compile Include="BASeTris.cs">
@@ -74,7 +80,7 @@
       <DependentUpon>BASeTris.cs</DependentUpon>
     </Compile>
     <Compile Include="GameObjects\GameObject.cs" />
-    <Compile Include="GameState.cs" />
+    <Compile Include="GameStates\GameState.cs" />
     <Compile Include="GraphicsPathExtensions.cs" />
     <Compile Include="GummyImage.cs" />
     <Compile Include="IStateOwner.cs" />
