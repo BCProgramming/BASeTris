@@ -100,6 +100,7 @@ namespace BASeTris.GameStates
                         break;
                     }
                 }
+                topmost = topmost + rowsfound; //subtract the rows that were cleared to get an accurate measurement.
                 if (topmost < 9)
                 {
                     if (currenttempo == 1)
@@ -285,7 +286,7 @@ namespace BASeTris.GameStates
                 });
 
             }
-            if (PlayField.BlockGroups.Count == 0 && !SpawnWait)
+            if (PlayField.BlockGroups.Count == 0 && !SpawnWait && !pOwner.CurrentState.GameProcSuspended)
             {
                 SpawnWait = true;
                 pOwner.EnqueueAction(() => {
@@ -471,6 +472,7 @@ namespace BASeTris.GameStates
                 String BuildStatString = "Time:" + FormatGameTime(pOwner) + "\n" +
 
                     "Score: " + useStats.Score.ToString() + "\n" +
+                                         "Top:     " + this.GetLocalScores().GetScores().First().Score + " \n" + 
                                          "Lines: " + PlayField.LineCount + "\n";
 
 

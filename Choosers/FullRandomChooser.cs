@@ -8,23 +8,17 @@ namespace BASeTris.Choosers
 {
     public class FullRandomChooser : BlockGroupChooser
     {
-        private Func<BlockGroup>[] Options = null;
-        private Random rgen;
-        public FullRandomChooser(Random rgenerator,Func<BlockGroup>[] SelectionFunctions)
+
+        public FullRandomChooser(Func<BlockGroup>[] SelectionFunctions):base(SelectionFunctions)
         {
-            rgen = rgenerator;
-            SetOptions(SelectionFunctions);
         }
 
-        public override void SetOptions(Func<BlockGroup>[] pAvailable)
-        {
-            Options = pAvailable;
-        }
+       
 
         public override BlockGroup GetNext()
         {
-            int RandomIndex = rgen.Next(Options.Length);
-            return Options[RandomIndex]();
+            int RandomIndex = rgen.Next(_Available.Length);
+            return _Available[RandomIndex]();
         }
     }
 }

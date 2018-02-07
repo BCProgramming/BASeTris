@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -31,7 +32,7 @@ namespace BASeTris
 
         
 
-        protected void RecalcExtents()
+        public void RecalcExtents()
         {
             foreach (var iterateentry in this)
             {
@@ -191,7 +192,12 @@ namespace BASeTris
                 if (CCW) iterateblock.RotationModulo--;
               else 
                     iterateblock.RotationModulo++;
-          }
+
+              if(iterateblock.RotationModulo==0)
+              {
+                    Debug.Print("Err");
+              }
+            }
 
         }
 
@@ -248,6 +254,7 @@ namespace BASeTris
             RotationModulo = clonesource.RotationModulo;
             Positions = (from pt in clonesource.Positions select pt).ToArray();
             Block = clonesource.Block;
+            Block.Rotation = clonesource.RotationModulo;
         }
     }
 }

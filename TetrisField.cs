@@ -23,7 +23,7 @@ namespace BASeTris
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
-        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_CloudBevel); //new NESTetrominoTheme();
+        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Chisel); //new NESTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
         public int Level { get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;

@@ -26,6 +26,7 @@ namespace BASeTris
         public virtual bool GameProcSuspended { get; set; } = false;
         public enum GameKeys
         {
+            GameKey_Null,
             GameKey_RotateCW,
             GameKey_RotateCCW,
             GameKey_Drop,

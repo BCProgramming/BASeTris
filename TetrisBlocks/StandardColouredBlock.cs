@@ -31,6 +31,8 @@ namespace BASeTris.TetrisBlocks
             parameters.g.DrawImage(useImage,new Rectangle((int)parameters.region.Left,(int)parameters.region.Top,(int)parameters.region.Width,(int)parameters.region.Height),0,0,useImage.Width,useImage.Height,GraphicsUnit.Pixel,useAttrib);
 
         }
+
+        
     }
     public class StandardColouredBlock : ImageBlock
     {
@@ -39,6 +41,7 @@ namespace BASeTris.TetrisBlocks
             Style_Gummy,
             Style_CloudBevel,
             Style_HardBevel,
+            Style_Chisel,
             Style_Shine
         }
         private Image GummyBitmap = null;
@@ -111,7 +114,8 @@ namespace BASeTris.TetrisBlocks
             }
             else if (DisplayStyle == BlockStyle.Style_HardBevel)
                 baseimage = "block_std_red";
-
+            else if (DisplayStyle == BlockStyle.Style_Chisel)
+                baseimage = "block_chisel_red";
             Size TargetSize = new Size(100, 100);
             if (StandardColourBlocks == null)
             {

@@ -344,7 +344,7 @@ namespace bcHighScores
                 while (erroroccured && Scores.Count < MaxScores)
                 {
                     String nameuse = Choose(RandomNames);
-                    int Scoresubmit = rgen.Next(0, 20000);
+                    int Scoresubmit = rgen.Next(0, 13000);
                     HighScoreEntry addentry = new HighScoreEntry(nameuse, Scoresubmit);
                     try
                     {

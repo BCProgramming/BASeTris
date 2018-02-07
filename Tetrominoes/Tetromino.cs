@@ -22,15 +22,35 @@ namespace BASeTris.Tetrominoes
                 () => new Tetromino_T()
 
             };
-        
+        private static float[] StandardTetrominoWeights = new float[]
+        {
+            1f,
+            3f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f
+        };
         public static Choosers.BlockGroupChooser BagTetrominoChooser()
         {
-            BlockGroupChooser Chooser = new BagChooser(TetrisGame.rgen,StandardTetrominoFunctions);
+            BlockGroupChooser Chooser = new BagChooser(StandardTetrominoFunctions);
             return Chooser;
         }
         public static Choosers.BlockGroupChooser RandomTetrominoChooser()
         {
-            BlockGroupChooser Chooser = new FullRandomChooser(TetrisGame.rgen, StandardTetrominoFunctions);
+            BlockGroupChooser Chooser = new FullRandomChooser(StandardTetrominoFunctions);
+            return Chooser;
+        }
+        public static Choosers.BlockGroupChooser GameBoyTetrominoChooser()
+        {
+            BlockGroupChooser Chooser = new GameBoyChooser(StandardTetrominoFunctions);
+            return Chooser;
+        }
+
+        public static Choosers.BlockGroupChooser WeightedTetrominoChooser()
+        {
+            BlockGroupChooser Chooser = new WeightedChooser(StandardTetrominoFunctions, StandardTetrominoWeights);
             return Chooser;
         }
 

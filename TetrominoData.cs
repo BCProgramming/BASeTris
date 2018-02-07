@@ -97,19 +97,19 @@ namespace BASeTris
         #region O Tetromino Data
         public static Point[] Tetromino_O_1 = new Point[]
         {
-            new Point(1,0),new Point(2,0),new Point(2,1),new Point(1,1) 
+            new Point(0,0),new Point(1,0),new Point(1,1),new Point(0,1) 
         };
         public static Point[] Tetromino_O_2 = new Point[]
         {
-            new Point(1,1),new Point(1,0),new Point(2,0),new Point(2,1)
+            new Point(0,1),new Point(0,0),new Point(1,0),new Point(1,1)
         };
         public static Point[] Tetromino_O_3 = new Point[]
         {
-            new Point(2,1),new Point(1,1),new Point(1,0),new Point(2,0)
+            new Point(1,1),new Point(0,1),new Point(0,0),new Point(1,0)
         };
         public static Point[] Tetromino_O_4 = new Point[]
         {
-            new Point(2,0),new Point(2,1),new Point(1,1),new Point(1,0)
+            new Point(1,0),new Point(1,1),new Point(0,1),new Point(0,0)
         };
         #endregion
 

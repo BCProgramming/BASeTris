@@ -11,7 +11,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.AI;
 using BASeTris.AssetManager;
+using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.Tetrominoes;
 using XInput.Wrapper;
@@ -74,7 +76,7 @@ namespace BASeTris
                 X.StartPolling(X.Gamepad_1);
                 
             }
-            _Game = new TetrisGame(this, new StandardTetrisGameState(Tetromino.BagTetrominoChooser(),null));
+            _Game = new TetrisGame(this, new StandardTetrisGameState(Tetromino.BagTetrominoChooser(),new GarbageFieldInitializer(new Random(),new NESTetrominoTheme(),1)));
             
             
 
@@ -85,8 +87,9 @@ namespace BASeTris
             if(InputThread!=null) InputThread.Abort();
             InputThread = new Thread(GamepadInputThread);
             InputThread.Start();
+            ai = new TetrisAI(this);
         }
-
+        private TetrisAI ai;
         private Thread GameThread = null;
         private Thread InputThread = null;
         private ConcurrentQueue<Action> ProcThreadActions = new ConcurrentQueue<Action>();

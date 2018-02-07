@@ -29,7 +29,8 @@ namespace BASeTris.TetrisBlocks
 
             set { _Rotation = value; }
         }
-
+        
+        
         public abstract void DrawBlock(TetrisBlockDrawParameters parameters);
 
         public virtual void AnimateFrame()

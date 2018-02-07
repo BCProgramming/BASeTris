@@ -40,6 +40,16 @@ namespace BASeTris.GameStates
             {
                 CompleteScrollTime = DateTime.MaxValue;
                 TetrisGame.Soundman.PlaySound("tetris_game_over");
+                StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
+                if(standardstate!=null)
+                {
+                    var grabposition = standardstate.GetLocalScores().Eligible("", standardstate.GameStats.Score);
+                    if(grabposition==1)
+                    {
+                        standardstate.GetLocalScores().Submit("", standardstate.GameStats.Score);
+                        TetrisGame.ScoreMan.Save();
+                    }
+                }
             }
             if (((DateTime.Now - InitTime)).TotalMilliseconds < 1500) return;
             if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)

@@ -145,6 +145,7 @@ namespace BASeTris
         }
         private void ApplyColorSet(BlockGroup bg, int Level)
         {
+            if (bg == null) return;
             foreach (var iterate in bg)
             {
 

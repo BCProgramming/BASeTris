@@ -45,7 +45,7 @@ namespace BASeTris.Tetrominoes
     {
         public Tetromino_O()
         {
-            base.BlockData = GetTetrominoEntries(new Point[] { TetrominoData.Tetromino_O_1[0], TetrominoData.Tetromino_O_2[0], TetrominoData.Tetromino_O_3[0], TetrominoData.Tetromino_O_4[0] }, new Size(3, 1)).ToList();
+            base.BlockData = GetTetrominoEntries(new Point[] { TetrominoData.Tetromino_O_1[0], TetrominoData.Tetromino_O_2[0], TetrominoData.Tetromino_O_3[0], TetrominoData.Tetromino_O_4[0] }, new Size(1, 1)).ToList();
             this.SpecialName = "O Tetromino";
             base.SetBlockOwner();
             RecalcExtents();
