@@ -40,9 +40,19 @@ namespace BASeTris.AssetManager
         {
             get
             {
-
+               
                 // return Bass.BASS_StreamGetFilePosition(SoundStream, BASSStreamFilePosition.BASS_FILEPOS_CURRENT);
                 return ((float)Bass.BASS_ChannelGetPosition(ActiveStream)) / ((float)Bass.BASS_ChannelGetLength(ActiveStream));
+            }
+        }
+        public float Level
+        {
+            get
+            {
+                int levelresult = Bass.BASS_ChannelGetLevel(ActiveStream);
+                int left = Utils.LowWord32(levelresult); // the left level
+                int right = Utils.HighWord32(levelresult); // the right level
+                return 32767f/(((float)left + (float)right) / 2);
             }
         }
         private IntPtr _UnmanagedBlock = IntPtr.Zero;

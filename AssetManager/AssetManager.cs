@@ -64,6 +64,7 @@ namespace BASeTris.AssetManager
         /// retrieves the current progress. This will be a ratio to Source.getLength.
         /// </summary>
         float Progress { get; }
+        float Level { get; }
         iSoundSourceObject Source { get; }
 
     }
@@ -219,6 +220,7 @@ namespace BASeTris.AssetManager
             public MultiMusicPlayMode PlayMode { get { return mmpmode; } set { mmpmode = value; } }
             public bool PlayLooped { get { return mPlayLooped; } set { mPlayLooped = value; } }
             public float Progress { get { return PlayingSound.Progress; } }
+            public float Level {  get { return PlayingSound.Level; } }
             private float _useTempo = -1;
             public iSoundSourceObject Source
             {

@@ -23,13 +23,19 @@ namespace BASeTris.GameStates
         {
             _BaseState.DrawStats(pOwner,g,Bounds);
         }
+        //we don't call the main State's GameProc here. We operate on the data (the field contents) to "clear" the given information but we operate on it separate from
+        //the standard game state. For example we replace blocks with "intermediate" forms, or remove them altogether, then when finished return control and allow the game to continue.
+        //The general approach ought to be to set this state, then enqueue a frameaction to be run for the next frame that "performs" the actual action, such as clearing rows or whatever.
 
-        public abstract override void GameProc(IStateOwner pOwner);
+        public override void GameProc(IStateOwner pOwner)
+        {
+            if(_BaseState is StandardTetrisGameState)
+            {
+                _BaseState.FrameUpdate();
+            }
+        }
         
-            //we don't call the main State's GameProc here. We operate on the data (the field contents) to "clear" the given information but we operate on it separate from
-            //the standard game state. For example we replace blocks with "intermediate" forms, or remove them altogether, then when finished return control and allow the game to continue.
-            //The general approach ought to be to set this state, then enqueue a frameaction to be run for the next frame that "performs" the actual action, such as clearing rows or whatever.
-
+          
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             _BaseState.DrawProc(pOwner,g,Bounds);
@@ -62,6 +68,7 @@ namespace BASeTris.GameStates
         DateTime LastOperation = DateTime.MaxValue;
         public override void GameProc(IStateOwner pOwner)
         {
+            base.GameProc(pOwner);
             if(StartOperation == DateTime.MaxValue)
             {
                 StartOperation = LastOperation = DateTime.Now;
@@ -102,6 +109,7 @@ namespace BASeTris.GameStates
                 //another way of doing this: we can just use DrawProc and draw the background over top, I suppose?
             }
         }
+        
         SolidBrush FlashBrush = new SolidBrush(Color.FromArgb(128,Color.White));
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)

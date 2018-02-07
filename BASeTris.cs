@@ -267,6 +267,7 @@ namespace BASeTris
             {
                 X.StopPolling();
             }
+            if(ai!=null) ai.AbortAI();
             TetrisGame.Soundman.StopMusic();
             Application.Exit();
         }
@@ -334,6 +335,20 @@ namespace BASeTris
             int statright = picStatistics.Right;
             picStatistics.Left = picTetrisField.Right + 6;
             picStatistics.Width = statright - picStatistics.Left;
+        }
+
+        private void aIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            aIToolStripMenuItem.Checked = !aIToolStripMenuItem.Checked;
+            if(ai==null)
+            {
+                ai = new TetrisAI(this);
+            }
+            else
+            {
+                ai.AbortAI();
+                ai = null;
+            }
         }
     }
 }

@@ -39,6 +39,8 @@
             this.mnuScale_Small = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuScale_Large = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuScale_Biggliest = new System.Windows.Forms.ToolStripMenuItem();
+            this.controlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -76,7 +78,8 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameToolStripMenuItem,
-            this.viewToolStripMenuItem});
+            this.viewToolStripMenuItem,
+            this.controlToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(625, 28);
@@ -114,36 +117,52 @@
             this.mnuScale_Large,
             this.mnuScale_Biggliest});
             this.scaleToolStripMenuItem.Name = "scaleToolStripMenuItem";
-            this.scaleToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.scaleToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
             this.scaleToolStripMenuItem.Text = "Scale";
             // 
             // mnuScale_Tiny
             // 
             this.mnuScale_Tiny.Name = "mnuScale_Tiny";
-            this.mnuScale_Tiny.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Tiny.Size = new System.Drawing.Size(142, 26);
             this.mnuScale_Tiny.Text = "Tiny";
             this.mnuScale_Tiny.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // mnuScale_Small
             // 
             this.mnuScale_Small.Name = "mnuScale_Small";
-            this.mnuScale_Small.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Small.Size = new System.Drawing.Size(142, 26);
             this.mnuScale_Small.Text = "Small";
             this.mnuScale_Small.Click += new System.EventHandler(this.xToolStripMenuItem_Click);
             // 
             // mnuScale_Large
             // 
             this.mnuScale_Large.Name = "mnuScale_Large";
-            this.mnuScale_Large.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Large.Size = new System.Drawing.Size(142, 26);
             this.mnuScale_Large.Text = "Large";
             this.mnuScale_Large.Click += new System.EventHandler(this.xToolStripMenuItem1_Click);
             // 
             // mnuScale_Biggliest
             // 
             this.mnuScale_Biggliest.Name = "mnuScale_Biggliest";
-            this.mnuScale_Biggliest.Size = new System.Drawing.Size(181, 26);
+            this.mnuScale_Biggliest.Size = new System.Drawing.Size(142, 26);
             this.mnuScale_Biggliest.Text = "Biggliest";
             this.mnuScale_Biggliest.Click += new System.EventHandler(this.xToolStripMenuItem2_Click);
+            // 
+            // controlToolStripMenuItem
+            // 
+            this.controlToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aIToolStripMenuItem});
+            this.controlToolStripMenuItem.Name = "controlToolStripMenuItem";
+            this.controlToolStripMenuItem.Size = new System.Drawing.Size(70, 24);
+            this.controlToolStripMenuItem.Text = "Control";
+            // 
+            // aIToolStripMenuItem
+            // 
+            this.aIToolStripMenuItem.Name = "aIToolStripMenuItem";
+            this.aIToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.aIToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.aIToolStripMenuItem.Text = "AI";
+            this.aIToolStripMenuItem.Click += new System.EventHandler(this.aIToolStripMenuItem_Click);
             // 
             // BASeTris
             // 
@@ -189,6 +208,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnuScale_Small;
         private System.Windows.Forms.ToolStripMenuItem mnuScale_Large;
         private System.Windows.Forms.ToolStripMenuItem mnuScale_Biggliest;
+        private System.Windows.Forms.ToolStripMenuItem controlToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aIToolStripMenuItem;
     }
 }
 

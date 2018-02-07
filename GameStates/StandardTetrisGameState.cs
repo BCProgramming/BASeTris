@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using bcHighScores;
+using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
 using BASeTris.TetrisBlocks;
@@ -240,6 +241,15 @@ namespace BASeTris.GameStates
 
 
         }
+        public void FrameUpdate()
+        {
+            if (NextAngleOffset != 0)
+            {
+                double AngleChange = ((Math.PI * 2 / 360)) * 5;
+                NextAngleOffset = Math.Sign(NextAngleOffset) * (Math.Abs(NextAngleOffset) - AngleChange);
+                if (NextAngleOffset < AngleChange) NextAngleOffset = 0;
+            }
+        }
         private bool FirstRun = false;
         public override void GameProc(IStateOwner pOwner)
         {
@@ -249,12 +259,7 @@ namespace BASeTris.GameStates
                 musicplay.Tempo = 1f;
                 FirstRun = true;
             }
-            if (NextAngleOffset != 0)
-            {
-                double AngleChange = ((Math.PI * 2 / 360)) * 5;
-                NextAngleOffset = Math.Sign(NextAngleOffset) * (Math.Abs(NextAngleOffset) - AngleChange);
-                if (NextAngleOffset < AngleChange) NextAngleOffset = 0;
-            }
+            FrameUpdate();
             if (GameStartTime == DateTime.MinValue) GameStartTime = DateTime.Now;
             if (LastPausedTime != DateTime.MinValue)
             {
@@ -315,10 +320,10 @@ namespace BASeTris.GameStates
         private DateTime GameStartTime = DateTime.MinValue;
         private DateTime LastPausedTime = DateTime.MinValue;
         private TimeSpan FinalGameTime = TimeSpan.MinValue;
-        private const int BlockQueueLength = 6;
+        private StandardGameOptions GameOptions = new StandardGameOptions();
         private void RefillBlockQueue()
         {
-            while (BlockQueueLength > NextBlocks.Count)
+            while (GameOptions.NextQueueSize > NextBlocks.Count)
             {
                 var Generated = GenerateTetromino();
                 NextBlocks.Enqueue(Generated);
@@ -333,7 +338,7 @@ namespace BASeTris.GameStates
             }
             var nextget = NextBlocks.Dequeue();
             PlayField.Theme.ApplyTheme(nextget, PlayField);
-            if (NextBlocks.Count < BlockQueueLength)
+            if (NextBlocks.Count < GameOptions.NextQueueSize)
             {
                 RefillBlockQueue();
             }
@@ -520,8 +525,22 @@ namespace BASeTris.GameStates
                     Image[] NextTetrominoes = (from t in QueueList select TetrominoImages[t.GetType()]).ToArray();
                     Image DisplayBox = TetrisGame.Imageman["display_box"];
                     //draw it at 40,420. (Scaled).
+                    float ScaleDiff = 0;
+                    iActiveSoundObject PlayingMusic;
+                    if ((PlayingMusic = TetrisGame.Soundman.GetPlayingMusic_Active()) != null)
+                        StoredLevels.Enqueue(PlayingMusic.Level);
+                    
+                    if(StoredLevels.Count >= 4)
+                    {
+                        ScaleDiff = Math.Min(10,10 * StoredLevels.Dequeue());
+                    }
+                    if(!TetrisGame.DJMode)
+                    {
+                        ScaleDiff = 0;
+                    }
 
-                    g.DrawImage(DisplayBox, new Rectangle(NextDrawPosition, NextSize), 0, 0, DisplayBox.Width, DisplayBox.Height, GraphicsUnit.Pixel);
+                    g.DrawImage(DisplayBox, 
+                        new Rectangle(new Point((int)(NextDrawPosition.X-ScaleDiff),(int)(NextDrawPosition.Y-ScaleDiff)), new Size((int)(NextSize.Width+(ScaleDiff*2)),(int)(NextSize.Height+(ScaleDiff*2)))), 0, 0, DisplayBox.Width, DisplayBox.Height, GraphicsUnit.Pixel);
 
                     g.FillEllipse(Brushes.Black, CenterPoint.X - 5, CenterPoint.Y - 5, 10, 10);
 
@@ -604,6 +623,7 @@ namespace BASeTris.GameStates
             }
 
         }
+        private Queue<float> StoredLevels = new Queue<float>();
         double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
         Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
         private String FormatGameTime(IStateOwner stateowner)
@@ -787,6 +807,7 @@ namespace BASeTris.GameStates
                     HoldBlock = FirstGroup;
                     BlockHold = true;
                     TetrisGame.Soundman.PlaySound("drop");
+                    
                 }
             }
         }
@@ -800,7 +821,7 @@ namespace BASeTris.GameStates
             }
             else
             {
-                if ((DateTime.Now - lastHorizontalMove).TotalMilliseconds > 250)
+                if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > 250)
                 {
                     PlayField.SetGroupToField(activeItem);
                     GameStats.Score += 25 - activeItem.Y;

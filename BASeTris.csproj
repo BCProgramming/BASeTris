@@ -74,6 +74,7 @@
     <Compile Include="GameStates\ClearActionGameState.cs" />
     <Compile Include="GameStates\GameOverGameState.cs" />
     <Compile Include="GameStates\PauseGameState.cs" />
+    <Compile Include="GameStates\StandardGameOptions.cs" />
     <Compile Include="GameStates\StandardTetrisGameState.cs" />
     <Compile Include="Particles\cParticle.cs" />
     <Compile Include="DebugLog.cs" />

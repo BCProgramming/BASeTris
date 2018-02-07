@@ -28,7 +28,7 @@ namespace BASeTris
         private GameState CurrentGameState = null;
         private IStateOwner GameOwner = null;
         private static string _datfolder = null;
-
+        public static bool DJMode { get; set; } = true;
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
         public static FontFamily GetMonospaceFont()
