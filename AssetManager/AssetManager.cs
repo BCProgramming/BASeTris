@@ -1027,10 +1027,10 @@ namespace BASeTris.AssetManager
 
         }
 
-        public iActiveSoundObject PlaySoundRnd(String key)
+        public iActiveSoundObject PlaySoundRnd(String key,float Volume)
         {
             iSoundSourceObject grabbed = GetSoundRnd(key);
-            return grabbed.Play(false);
+            return grabbed.Play(false,Volume);
 
 
         }

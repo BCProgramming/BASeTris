@@ -48,6 +48,8 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
     }
+    //standard "line clear" which clears out a given set of line rows via animation, then calls a set of actions to perform afterwards.
+    //This will use a "Tetris flash" when 4 or more rows are being cleared- this is a white overlay that is placed over top (well, for now- might be a gradient or some kind of pattern brush later!)
 
     public class ClearLineActionGameState : ClearActionGameState
     {
@@ -121,5 +123,94 @@ namespace BASeTris.GameStates
         }
 
         
+    }
+    public class InsertBlockRowsActionGameState:ClearActionGameState
+    {
+
+
+        private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
+        private Queue<TetrisBlock[]> RowInsertions = null;
+        //private TetrisBlock[][] InsertionData = null;
+        private int InsertionRow;
+        
+        
+        public InsertBlockRowsActionGameState(StandardTetrisGameState pBaseState, int InsertRow,TetrisBlock[][] RowData, IEnumerable<Action> pAfterClearActions) : base(pBaseState)
+        {
+            RowInsertions = new Queue<TetrisBlock[]>();
+            foreach(TetrisBlock[] AddRow in RowData)
+            {
+                RowInsertions.Enqueue(AddRow);
+            }
+            InsertionRow = InsertRow;
+            AfterClear = pAfterClearActions;
+        }
+
+        int MSLineAddTime = 30; //number of ms between blocks being removed/cleared.
+        int CurrentClearIndex = 0;
+        int InsertedCount = 0;
+        DateTime StartOperation = DateTime.MaxValue;
+        DateTime LastOperation = DateTime.MaxValue;
+        public override void GameProc(IStateOwner pOwner)
+        {
+            base.GameProc(pOwner);
+            if (StartOperation == DateTime.MaxValue)
+            {
+                StartOperation = LastOperation = DateTime.Now;
+            }
+
+            //for now we clear horizontally across...
+            if ((DateTime.Now - LastOperation).TotalMilliseconds > MSLineAddTime)
+            {
+                int InsertionIndex = _BaseState.PlayField.Contents.Length - 1 - InsertionRow-InsertedCount; //since high rows have lower indices, we want to "reverse" it.
+                //if the queue is empty, we are now finished.
+                if(RowInsertions.Count==0)
+                {
+                    //reset the original State.
+                    _BaseState.PlayField.HasChanged = true;
+
+                    pOwner.CurrentState = _BaseState;
+                    foreach (var iterate in AfterClear)
+                    {
+                        pOwner.EnqueueAction(iterate);
+                    }
+                }
+                else
+                {
+                    //dequeue the next line of blocks to insert.
+                    TetrisBlock[] NextRow = RowInsertions.Dequeue();
+
+                    //insert into the playfield at InsertionIndex.
+                    //This means moving All rows from InsertionIndex up one.
+                    for(int moverow=0;moverow<InsertionIndex;moverow++)
+                    {
+                        TetrisBlock[] ThisRow = _BaseState.PlayField.Contents[moverow+1];
+                        TetrisBlock[] TargetRow = _BaseState.PlayField.Contents[moverow];
+
+                        for(int copyCol =0;copyCol<ThisRow.Length;copyCol++)
+                        {
+                            TargetRow[copyCol] = ThisRow[copyCol];
+                        }
+                    }
+
+                    TetrisBlock[] InsertedRow = _BaseState.PlayField.Contents[InsertionIndex];
+                    for(int i=0;i<InsertedRow.Length;i++)
+                    {
+                        InsertedRow[i] = NextRow[i % NextRow.Length];
+                    }
+                    InsertedCount++;
+                    LastOperation = DateTime.Now;
+                }
+                
+
+
+           
+                //another way of doing this: we can just use DrawProc and draw the background over top, I suppose?
+            }
+        }
+
+        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
+        {
+            //throw new NotImplementedException();
+        }
     }
 }

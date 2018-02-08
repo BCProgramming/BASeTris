@@ -87,7 +87,7 @@ namespace BASeTris.GameStates
                 else if (rowsfound == 4)
                 {
 
-                    TetrisGame.Soundman.PlaySound("line_tetris", 2.0f);
+                    TetrisGame.Soundman.PlaySoundRnd("line_tetris", 2.0f);
                 }
 
 
@@ -168,6 +168,7 @@ namespace BASeTris.GameStates
         private bool f_RedrawStatusBitmap = false;
         private Dictionary<System.Type, Image> TetrominoImages = null;
 
+        public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
         private void RedrawStatusbarTetrominoBitmaps(RectangleF Bounds)
         {
             lock (LockTetImageRedraw)
@@ -305,14 +306,16 @@ namespace BASeTris.GameStates
         public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner)
         {
             int result = ProcessFieldChange(pOwner);
-            if (result == 1) GameStats.Score += ((GameStats.LineCount / 10) + 1) * 10;
-            else if (result == 2)
-                GameStats.Score += ((GameStats.LineCount / 10) + 2) * 15;
-            else if (result == 3)
-                GameStats.Score += ((GameStats.LineCount / 10) + 3) * 20;
-            else if (result == 4)
-                GameStats.Score += ((GameStats.LineCount / 10) + 5) * 50;
-            pOwner.Feedback(0.5f * (float)result, result * 300);
+            int AddScore = 0;
+            if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 10;
+            else if (result >= 2)
+                AddScore += ((GameStats.LineCount / 10) + 2) * 15;
+            else if (result >= 3)
+                AddScore += ((GameStats.LineCount / 10) + 3) * 20;
+            else if (result >= 4)
+                AddScore += AddScore+((GameStats.LineCount / 10) + 5) * 50;
+            GameStats.Score += AddScore;
+            pOwner.Feedback(0.9f * (float)result, result * 250);
         }
 
         static bool SpawnWait = false;
@@ -429,9 +432,12 @@ namespace BASeTris.GameStates
                         int DrawBlockX = col * BlockSize.Width;
                         int DrawBlockY = row * BlockSize.Height;
                         StandardColouredBlock GenerateColorBlock = new StandardColouredBlock();
-                        Color MainColor = TetrisGame.Choose(usePossibleColours);
-                        GenerateColorBlock.BlockColor = MainColor;
-                        if (TetrisGame.rgen.NextDouble() > 0.75)
+                        BlockGroup ArbitraryGroup = new BlockGroup();
+                        ArbitraryGroup.AddBlock(new Point[] { Point.Empty },GenerateColorBlock);
+                        this.PlayField.Theme.ApplyTheme(ArbitraryGroup,this.PlayField);
+                        //Color MainColor = TetrisGame.Choose(usePossibleColours);
+                        //GenerateColorBlock.BlockColor = MainColor;
+                        /*if (TetrisGame.rgen.NextDouble() > 0.75)
                         {
                             GenerateColorBlock.InnerColor = Color.MintCream;
                         }
@@ -439,7 +445,7 @@ namespace BASeTris.GameStates
                         {
 
                             GenerateColorBlock.InnerColor = GenerateColorBlock.BlockColor;
-                        }
+                        }*/
                         TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
                         GenerateColorBlock.DrawBlock(tbd);
 
@@ -532,7 +538,7 @@ namespace BASeTris.GameStates
                     
                     if(StoredLevels.Count >= 4)
                     {
-                        ScaleDiff = Math.Min(10,10 * StoredLevels.Dequeue());
+                        ScaleDiff = Math.Min(30,10 * StoredLevels.Dequeue());
                     }
                     if(!TetrisGame.DJMode)
                     {
@@ -767,7 +773,7 @@ namespace BASeTris.GameStates
                 if (g == GameKeys.GameKey_Pause)
                 {
                     LastPausedTime = DateTime.Now;
-                    pOwner.CurrentState = new PauseGameState(this);
+                    pOwner.CurrentState = new PauseGameState(pOwner, this);
 
                     var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
                     playing.Pause();

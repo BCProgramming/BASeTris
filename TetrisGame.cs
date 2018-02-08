@@ -44,7 +44,7 @@ namespace BASeTris
                 Directory.CreateDirectory(ScoreFolder);
             }
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.dat");
-            ScoreMan = new HighScoreManager(ScoreFile);
+            ScoreMan = HighScoreManager.FromFile(ScoreFile);
             
 
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);

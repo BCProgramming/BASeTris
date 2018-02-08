@@ -113,7 +113,7 @@ namespace BASeTris
         {
 
             Color[] Colors = new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
-            int useIndex = 0;
+            int useIndex = -1;
             if (source is Tetromino_I)
             {
                 useIndex = 0;
@@ -139,10 +139,17 @@ namespace BASeTris
             else if (source is Tetromino_L)
                 useIndex = 6;
 
+            if(useIndex==-1)
+            {
+
+                useIndex = rg.Next(Colors.Length);
+                return Colors[useIndex];
+            }
             return Colors[(useIndex+Level)%Colors.Length];
 
-            return Color.DeepSkyBlue;
+            
         }
+        private static Random rg = new Random();
         private void ApplyColorSet(BlockGroup bg, int Level)
         {
             if (bg == null) return;

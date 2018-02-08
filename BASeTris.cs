@@ -15,6 +15,7 @@ using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
+using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 using XInput.Wrapper;
 
@@ -87,7 +88,6 @@ namespace BASeTris
             if(InputThread!=null) InputThread.Abort();
             InputThread = new Thread(GamepadInputThread);
             InputThread.Start();
-            ai = new TetrisAI(this);
         }
         private TetrisAI ai;
         private Thread GameThread = null;
@@ -123,6 +123,7 @@ namespace BASeTris
             if (!DownState) return;
             ActiveKeys.Add(key);
             _Game.HandleGameKey(this,key);
+            
         }
         private void GamepadInputThread()
         {
@@ -140,7 +141,15 @@ namespace BASeTris
             
             while (true)
             {
-
+                if(!IsHandleCreated || IsDisposed)
+                {
+                    
+                    if(!this.Focused)
+                    {
+                        Thread.Sleep(250);
+                        continue;
+                    }
+                }
                 if(ProcThreadActions.TryDequeue(out Action pResult))
                 {
                     pResult();
@@ -192,6 +201,28 @@ namespace BASeTris
        
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+
+            if(e.KeyCode==Keys.G)
+            {
+                if(_Game.CurrentState is StandardTetrisGameState)
+                {
+                    StandardTetrisGameState gs = _Game.CurrentState as StandardTetrisGameState;
+                    TetrisBlock[][] inserts = new TetrisBlock[4][];
+                    for(int i=0;i<inserts.Length;i++)
+                    {
+                        inserts[i] = new TetrisBlock[gs.PlayField.ColCount];
+                        for(int c=1;c<inserts[i].Length;c++)
+                        {
+                            inserts[i][c] = new StandardColouredBlock() { BlockColor = Color.Red, DisplayStyle = StandardColouredBlock.BlockStyle.Style_CloudBevel };
+                        }
+
+                    }
+                    InsertBlockRowsActionGameState irs = new InsertBlockRowsActionGameState(gs,0,inserts,Enumerable.Empty<Action>());
+                    CurrentState = irs;
+                }
+                
+            }
+
             if (PressedKeys.Contains(e.KeyCode)) return;
             PressedKeys.Add(e.KeyCode);
             if(e.KeyCode==Keys.X)
