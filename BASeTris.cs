@@ -59,6 +59,7 @@ namespace BASeTris
         }
         public void Feedback(float Strength,int Length)
         {
+            if (IgnoreController) return;
             X.Gamepad_1.FFB_Vibrate(Strength,Strength,Length);
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -94,6 +95,7 @@ namespace BASeTris
         private Thread InputThread = null;
         private ConcurrentQueue<Action> ProcThreadActions = new ConcurrentQueue<Action>();
         HashSet<GameState.GameKeys> ActiveKeys = new HashSet<GameState.GameKeys>();
+        private bool IgnoreController = true;
         private void CheckInputs()
         {
 
@@ -102,11 +104,11 @@ namespace BASeTris
                 HandleKey(GameState.GameKeys.GameKey_RotateCW,X.Gamepad_1.A_down,X.Gamepad_1.A_up);
                 HandleKey(GameState.GameKeys.GameKey_RotateCCW, X.Gamepad_1.X_down, X.Gamepad_1.X_up);
                 HandleKey(GameState.GameKeys.GameKey_Left, X.Gamepad_1.Dpad_Left_down, X.Gamepad_1.Dpad_Left_up);
-            HandleKey(GameState.GameKeys.GameKey_Right, X.Gamepad_1.Dpad_Right_down, X.Gamepad_1.Dpad_Right_up);
-            HandleKey(GameState.GameKeys.GameKey_Down, X.Gamepad_1.Dpad_Down_down, X.Gamepad_1.Dpad_Down_up);
-            HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up);
-            HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up );
-            HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up);
+                HandleKey(GameState.GameKeys.GameKey_Right, X.Gamepad_1.Dpad_Right_down, X.Gamepad_1.Dpad_Right_up);
+                HandleKey(GameState.GameKeys.GameKey_Down, X.Gamepad_1.Dpad_Down_down, X.Gamepad_1.Dpad_Down_up);
+                HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up);
+                HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up );
+                HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up);
             
 
 
@@ -122,6 +124,7 @@ namespace BASeTris
             if (ActiveKeys.Contains(key)) return;
             if (!DownState) return;
             ActiveKeys.Add(key);
+            IgnoreController = false;
             _Game.HandleGameKey(this,key);
             
         }
@@ -201,7 +204,7 @@ namespace BASeTris
        
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-
+            IgnoreController = true;
             if(e.KeyCode==Keys.G)
             {
                 if(_Game.CurrentState is StandardTetrisGameState)
