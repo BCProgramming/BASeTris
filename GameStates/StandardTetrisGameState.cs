@@ -27,17 +27,19 @@ namespace BASeTris.GameStates
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public Statistics GameStats = new Statistics();
         public Choosers.BlockGroupChooser Chooser = null;
-
+        
 
 
 
         public virtual IHighScoreList GetLocalScores()
         {
+            
             return TetrisGame.ScoreMan["Standard"];
         }
 
         public virtual int ProcessFieldChange(IStateOwner pOwner)
         {
+            
             //process lines for standard game.
             GameProcSuspended = true;
             try
@@ -107,13 +109,14 @@ namespace BASeTris.GameStates
                     if (currenttempo == 1)
                     {
                         currenttempo = 68;
-                        TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                        if(GameOptions.MusicRestartsOnTempoChange)
+                            TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
                         var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
                         if (grabbed != null)
                         {
 
 
-                            TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 90f;
+                            TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 75f;
                         }
                     }
                 }
@@ -122,14 +125,22 @@ namespace BASeTris.GameStates
                     if (currenttempo != 1)
                     {
                         currenttempo = 1;
-                        TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                        if (GameOptions.MusicRestartsOnTempoChange)
+                            TetrisGame.Soundman.PlayMusic(StandardMusic, 1f, true);
                         var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
                         if (grabbed != null) grabbed.Tempo = 1f;
                     }
                 }
                 PlayField.HasChanged = rowsfound > 0;
 
-                if (rowsfound > 0) pOwner.CurrentState = new ClearLineActionGameState(this, CompletedRows.ToArray(), AfterClearActions);
+                if (rowsfound > 0)
+                {
+                    var ClearState = new ClearLineActionGameState(this, CompletedRows.ToArray(), AfterClearActions);
+                    ClearState.ClearStyle = TetrisGame.Choose((ClearLineActionGameState.LineClearStyle[])(Enum.GetValues(typeof(ClearLineActionGameState.LineClearStyle))));
+
+                    pOwner.CurrentState = ClearState;
+                }
+                //if(rowsfound > 0) pOwner.CurrentState = new ClearLineActionDissolve(this,CompletedRows.ToArray(),AfterClearActions);
                 return rowsfound;
             }
             finally
@@ -153,7 +164,7 @@ namespace BASeTris.GameStates
             PlayField = new TetrisField();
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
             PlayField.BlockGroupSet += PlayField_BlockGroupSet;
-            PlayField.LevelChanged += PlayField_LevelChanged;
+            
         }
 
         private void PlayField_LevelChanged(object sender, TetrisField.LevelChangeEventArgs e)
@@ -302,7 +313,8 @@ namespace BASeTris.GameStates
                 });
             }
         }
-
+        private int LastScoreCalc = 0;
+        private int LastScoreLines = 0;
         public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner)
         {
             int result = ProcessFieldChange(pOwner);
@@ -314,6 +326,15 @@ namespace BASeTris.GameStates
                 AddScore += ((GameStats.LineCount / 10) + 3) * 20;
             if (result >= 4)
                 AddScore += AddScore+((GameStats.LineCount / 10) + 5) * 75;
+
+            LastScoreCalc = AddScore;
+            
+            if(LastScoreLines==result)
+            {
+                AddScore *= 2;
+            }
+            LastScoreLines = result;
+
             GameStats.Score += AddScore;
             pOwner.Feedback(0.9f * (float)result, result * 250);
         }
@@ -556,7 +577,7 @@ namespace BASeTris.GameStates
 
 
                         double StartAngle = Math.PI;
-                        double AngleIncrementSize = (Math.PI * 1.75) / (double)NextTetrominoes.Length;
+                        double AngleIncrementSize = (Math.PI * 1.8) / (double)NextTetrominoes.Length;
                         //we draw starting at StartAngle, in increments of AngleIncrementSize.
                         //i is the index- we want to increase the angle by that amount (well, obviously, I suppose...
 
@@ -587,7 +608,7 @@ namespace BASeTris.GameStates
                         g.TranslateTransform(DrawTetLocation.X + DrawTetSize.Width / 2, DrawTetLocation.Y + DrawTetSize.Width / 2);
                         double DrawTetAngle = UseAngleCurrent;
                         DrawTetAngle += (Math.PI * AngleMovePercent);
-                        float useDegrees = (float)(DrawTetAngle * (180 / Math.PI));
+                        float useDegrees = 180 + (float)(DrawTetAngle * (180 / Math.PI));
 
                         g.RotateTransform((float)useDegrees);
                         g.TranslateTransform(-(DrawTetLocation.X + DrawTetSize.Width / 2), -(DrawTetLocation.Y + DrawTetSize.Height / 2));

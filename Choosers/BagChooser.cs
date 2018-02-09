@@ -13,7 +13,7 @@ namespace BASeTris.Choosers
         
         
 
-        private IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese)
+        public static IEnumerable<T> Shuffle<T>(Random rgen,IEnumerable<T> Shufflethese)
         {
             var sl = new SortedList<float, T>();
             foreach (T iterate in Shufflethese)
@@ -29,7 +29,7 @@ namespace BASeTris.Choosers
         }
         private void RefillQueue()
         {
-            var Shuffled = Shuffle(_Available).ToArray();
+            var Shuffled = Shuffle(rgen,_Available).ToArray();
             for(int i=0;i<Shuffled.Length;i++)
             {
                 WorkQueue.Enqueue(Shuffled[i]);

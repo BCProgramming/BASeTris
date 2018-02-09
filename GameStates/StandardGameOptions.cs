@@ -14,6 +14,8 @@ namespace BASeTris.GameStates
         public bool MoveResetsSetTimer = true;
         public bool RotateResetsSetTimer = true;
         public bool DrawGhostDrop = true;
+
+        public bool MusicRestartsOnTempoChange = false;
         
     }
 }

@@ -17,14 +17,13 @@ namespace BASeTris
         //standard tetris field is 10 blocks wide, and 22 blocks tall- (the top 2 rows aren't drawn usually).
         //The "tetris field" here just represents the "permanent" blocks. eg, blocks that have been dropped, and "set" in place.
         //these get evaluated to check for lines when a new block is placed, for example.
-        //blocks that are still "controlled" and falling are handled separately, and are placed here when they are dropped.
+        
 
-        public event EventHandler<LevelChangeEventArgs> LevelChanged;
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         public bool AnimateRotations = true;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
-        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Chisel); //new NESTetrominoTheme();
+        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Chisel);
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
         public int Level { get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;
