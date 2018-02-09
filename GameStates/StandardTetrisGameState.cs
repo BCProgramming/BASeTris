@@ -308,12 +308,12 @@ namespace BASeTris.GameStates
             int result = ProcessFieldChange(pOwner);
             int AddScore = 0;
             if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 10;
-            else if (result >= 2)
+            if (result >= 2)
                 AddScore += ((GameStats.LineCount / 10) + 2) * 15;
-            else if (result >= 3)
+            if (result >= 3)
                 AddScore += ((GameStats.LineCount / 10) + 3) * 20;
-            else if (result >= 4)
-                AddScore += AddScore+((GameStats.LineCount / 10) + 5) * 50;
+            if (result >= 4)
+                AddScore += AddScore+((GameStats.LineCount / 10) + 5) * 75;
             GameStats.Score += AddScore;
             pOwner.Feedback(0.9f * (float)result, result * 250);
         }

@@ -11,8 +11,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BaseTris;
 using BASeTris.AI;
 using BASeTris.AssetManager;
+using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.TetrisBlocks;
@@ -64,6 +66,11 @@ namespace BASeTris
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            menuStrip1.Font = new Font(menuStrip1.Font.FontFamily, 14, FontStyle.Regular);
+            Win10MenuRenderer buildrender = new Win10MenuRenderer(null,true);
+            
+            menuStrip1.Renderer = buildrender;
+            menuStrip1.BackColor = SystemColors.Control;
             TetrisGame.InitState();
            
             
@@ -78,7 +85,7 @@ namespace BASeTris
                 X.StartPolling(X.Gamepad_1);
                 
             }
-            _Game = new TetrisGame(this, new StandardTetrisGameState(Tetromino.BagTetrominoChooser(),new GarbageFieldInitializer(new Random(),new NESTetrominoTheme(),1)));
+            _Game = new TetrisGame(this, new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(),new NESTetrominoTheme(),1)));
             
             
 

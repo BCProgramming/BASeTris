@@ -106,6 +106,7 @@
     <Compile Include="TetrominoTheme.cs" />
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />
+    <Compile Include="Win10MenuRenderer.cs" />
     <EmbeddedResource Include="BASeTris.resx">
       <DependentUpon>BASeTris.cs</DependentUpon>
     </EmbeddedResource>

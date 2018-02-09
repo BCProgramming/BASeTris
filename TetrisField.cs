@@ -21,6 +21,7 @@ namespace BASeTris
 
         public event EventHandler<LevelChangeEventArgs> LevelChanged;
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
+        public bool AnimateRotations = true;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
         public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Chisel); //new NESTetrominoTheme();
@@ -251,6 +252,38 @@ namespace BASeTris
                 {
                     int BaseXPos = bg.X;
                     int BaseYPos = bg.Y;
+                    const float RotationTime = 100;
+                    double useAngle = 0;
+                    TimeSpan tsRotate = DateTime.Now  -bg.GetLastRotation();
+                    if(tsRotate.TotalMilliseconds > 0 && tsRotate.TotalMilliseconds < RotationTime)
+                    {
+                        if(!bg.LastRotateCCW)
+                            useAngle = -90 + ((tsRotate.TotalMilliseconds / RotationTime) * 90);
+                        else
+                        {
+                            useAngle = ((tsRotate.TotalMilliseconds / RotationTime) * 90);
+                        }
+                    }
+                    if(useAngle != 0 && AnimateRotations)
+                    {
+                        int MaxXBlock = (from p in bg select p.X).Max();
+                        int MaxYBlock = (from p in bg select p.Y).Max();
+                        int MinXBlock = (from p in bg select p.X).Min();
+                        int MinYBlock = (from p in bg select p.Y).Min();
+                        int BlocksWidth = MaxXBlock - MinXBlock+1;
+                        int BlocksHeight = MaxYBlock - MinYBlock+1;
+
+                        PointF UsePosition = new PointF((bg.X + MinXBlock) * BlockWidth,(bg.Y-HIDDENROWS + MinYBlock)*BlockHeight);
+
+
+                        SizeF tetronimosize = new Size((int)BlockWidth * (BlocksWidth ), (int)BlockHeight * (BlocksHeight));
+
+                        PointF useCenter = new PointF(UsePosition.X + tetronimosize.Width / 2, UsePosition.Y + tetronimosize.Height / 2);
+                       
+                        g.TranslateTransform(useCenter.X,useCenter.Y);
+                        g.RotateTransform((float)useAngle);
+                        g.TranslateTransform(-useCenter.X, -useCenter.Y);
+                    }
                     foreach (BlockGroupEntry bge in bg)
                     {
                         int DrawX = BaseXPos + bge.X;
@@ -259,11 +292,16 @@ namespace BASeTris
                         {
                             float DrawXPx = DrawX * BlockWidth;
                             float DrawYPx = DrawY * BlockHeight;
+                            
+
+                            
+
                             RectangleF BlockBounds = new RectangleF(DrawXPx, DrawYPx, BlockWidth, BlockHeight);
                             TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, bg);
                             bge.Block.DrawBlock(tbd);
                         }
                     }
+                    g.ResetTransform();
                 }
             }
 

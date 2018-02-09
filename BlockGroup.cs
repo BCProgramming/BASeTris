@@ -23,14 +23,13 @@ namespace BASeTris
         public int X { get; set; }
         public int Y { get; set; }
         private int XMin, XMax, YMin, YMax;
-        public float RotateAngle = 0;
         private Rectangle _GroupExtents = Rectangle.Empty;
         public DateTime LastFall = DateTime.MinValue;
         public Rectangle GroupExtents {  get { return _GroupExtents; } }
         protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
+        private DateTime LastRotationCall = DateTime.MinValue;
 
 
-        
 
         public void RecalcExtents()
         {
@@ -44,6 +43,7 @@ namespace BASeTris
             }
             _GroupExtents = new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
         }
+        
         protected void SetBlockOwner()
         {
             foreach(var loopentry in BlockData)
@@ -185,6 +185,10 @@ namespace BASeTris
             
 
         }
+        
+
+        public DateTime GetLastRotation() { return LastRotationCall; }
+        public bool LastRotateCCW = false;
         public void Rotate(bool CCW)
         {
           foreach(var iterateblock in BlockData)
@@ -197,7 +201,9 @@ namespace BASeTris
               {
                     Debug.Print("Err");
               }
-            }
+          }
+            LastRotateCCW = CCW;
+            LastRotationCall = DateTime.Now;
 
         }
 
