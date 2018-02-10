@@ -78,18 +78,18 @@ namespace BASeTris.GameStates
                     PlayField_LevelChanged(this, new TetrisField.LevelChangeEventArgs((int)PlayField.LineCount / 10));
 
 
-                    TetrisGame.Soundman.PlaySound("level_up");
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.LevelUp);
                     PlayField.SetFieldColors();
 
                 }
                 if (rowsfound > 0 && rowsfound < 4)
                 {
-                    TetrisGame.Soundman.PlaySound("line_clear", 2.0f);
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.ClearLine, 2.0f);
                 }
                 else if (rowsfound == 4)
                 {
 
-                    TetrisGame.Soundman.PlaySoundRnd("line_tetris", 2.0f);
+                    TetrisGame.Soundman.PlaySoundRnd(TetrisGame.AudioThemeMan.ClearTetris, 2.0f);
                 }
 
 
@@ -203,13 +203,16 @@ namespace BASeTris.GameStates
                 PlayField.Theme.ApplyTheme(TetS, PlayField);
                 PlayField.Theme.ApplyTheme(TetT, PlayField);
                 PlayField.Theme.ApplyTheme(TetZ, PlayField);
-                Image Image_I = TetI.GetImage(useTetSize);
-                Image Image_J = TetJ.GetImage(useTetSize);
-                Image Image_L = TetL.GetImage(useTetSize);
-                Image Image_O = TetO.GetImage(useTetSize);
-                Image Image_S = TetS.GetImage(useTetSize);
-                Image Image_T = TetT.GetImage(useTetSize);
-                Image Image_Z = TetZ.GetImage(useTetSize);
+                Image Image_I = OutLineImage(TetI.GetImage(useTetSize));
+                Image Image_J = OutLineImage(TetJ.GetImage(useTetSize));
+                Image Image_L = OutLineImage(TetL.GetImage(useTetSize));
+                Image Image_O = OutLineImage(TetO.GetImage(useTetSize));
+                Image Image_S = OutLineImage(TetS.GetImage(useTetSize));
+                Image Image_T = OutLineImage(TetT.GetImage(useTetSize));
+                Image Image_Z = OutLineImage(TetZ.GetImage(useTetSize));
+
+                
+
 
                 TetrominoImages.Add(typeof(Tetromino_I), Image_I);
                 TetrominoImages.Add(typeof(Tetromino_J), Image_J);
@@ -219,6 +222,25 @@ namespace BASeTris.GameStates
                 TetrominoImages.Add(typeof(Tetromino_T), Image_T);
                 TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
             }
+        }
+        private Image OutLineImage(Image Input)
+        {
+            Bitmap BuildImage = new Bitmap(Input.Width + 6, Input.Height + 6);
+            using (Graphics useG = Graphics.FromImage(BuildImage))
+            {
+                var shadowtet = GetShadowAttributes(0f);
+                 int offset = 2;
+                foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
+                {
+
+                    useG.DrawImage(Input, new Rectangle(3+shadowblob.X, 3+shadowblob.Y, Input.Width, Input.Height), 0, 0, Input.Width, Input.Height, GraphicsUnit.Pixel, shadowtet);
+                }
+                useG.DrawImage(Input,new Point(3,3));
+                
+                
+            }
+            return BuildImage;
+
         }
         private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {
@@ -285,7 +307,7 @@ namespace BASeTris.GameStates
                 if ((DateTime.Now - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
                 {
 
-                    if (MoveGroupDown(iterate))
+                    if (HandleGroupOperation(iterate))
                     {
                         ProcessFieldChangeWithScore(pOwner);
                     }
@@ -418,22 +440,6 @@ namespace BASeTris.GameStates
         public virtual BlockGroup GenerateTetromino()
         {
             return Chooser.GetNext();
-            /*Func<BlockGroup> GetTetrominoFunction;
-            Func<BlockGroup>[] GeneratorFunctions = new Func<BlockGroup>[]
-            {
-                () => new Tetromino_Z(),
-                () => new Tetromino_I(),
-                () => new Tetromino_J(),
-                () => new Tetromino_L(),
-                () => new Tetromino_O(),
-                () => new Tetromino_S(),
-                () => new Tetromino_T()
-
-            };
-            GetTetrominoFunction = TetrisGame.Choose(GeneratorFunctions);
-            //GetTetrominoFunction = BlockGroup.GetTetromino_T;
-            BlockGroup newTetromino = GetTetrominoFunction();
-            return newTetromino;*/
         }
         Image StatisticsBackground = null;
         public void GenerateStatisticsBackground()
@@ -456,17 +462,6 @@ namespace BASeTris.GameStates
                         BlockGroup ArbitraryGroup = new BlockGroup();
                         ArbitraryGroup.AddBlock(new Point[] { Point.Empty },GenerateColorBlock);
                         this.PlayField.Theme.ApplyTheme(ArbitraryGroup,this.PlayField);
-                        //Color MainColor = TetrisGame.Choose(usePossibleColours);
-                        //GenerateColorBlock.BlockColor = MainColor;
-                        /*if (TetrisGame.rgen.NextDouble() > 0.75)
-                        {
-                            GenerateColorBlock.InnerColor = Color.MintCream;
-                        }
-                        else
-                        {
-
-                            GenerateColorBlock.InnerColor = GenerateColorBlock.BlockColor;
-                        }*/
                         TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
                         GenerateColorBlock.DrawBlock(tbd);
 
@@ -531,12 +526,6 @@ namespace BASeTris.GameStates
                     SizeF StatTextSize = g.MeasureString(StatText, standardFont);
                     Image TetrominoImage = TetrominoImages[useTypes[i]];
                     PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
-                    int offset = 3;
-                    foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
-                    {
-                        g.DrawImage(TetrominoImage, new Rectangle((int)ImagePos.X + shadowblob.X, (int)ImagePos.Y + shadowblob.Y, TetrominoImage.Width, TetrominoImage.Height), 0f, 0f, (float)TetrominoImage.Width, (float)TetrominoImage.Height, GraphicsUnit.Pixel, ShadowTet);
-                    }
-
 
                     g.DrawImage(TetrominoImage, ImagePos);
                     g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
@@ -617,13 +606,9 @@ namespace BASeTris.GameStates
 
                         if (DrawTetSize.Width > 0 && DrawTetSize.Height > 0)
                         {
-                            ImageAttributes Shade = GetShadowAttributes(1.0f - ((float)i * 0.3f));
-                            int offset = 3;
-                            foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
-                            {
-                                g.DrawImage(NextTetromino, new Rectangle((int)DrawTetLocation.X + shadowblob.X, (int)DrawTetLocation.Y + shadowblob.Y, DrawTetSize.Width, DrawTetSize.Height), 0f, 0f,
-                                    (float)NextTetromino.Width, (float)NextTetromino.Height, GraphicsUnit.Pixel, ShadowTet);
-                            }
+                            //ImageAttributes Shade = GetShadowAttributes(1.0f - ((float)i * 0.3f));
+                            ImageAttributes Shade = new ImageAttributes();
+                            Shade.SetColorMatrix(ColorMatrices.GetFader(1.0f - ((float)i * 0.1f)));
 
 
                             g.DrawImage(NextTetromino, new Rectangle((int)DrawTetLocation.X, (int)DrawTetLocation.Y, DrawTetSize.Width, DrawTetSize.Height), 0f, 0f,
@@ -638,13 +623,7 @@ namespace BASeTris.GameStates
                     Image HoldTetromino = TetrominoImages[HoldBlock.GetType()];
                     g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                 }
-                //"I Tet: " + useStats.I_Piece_Count + "\n" +
-                //"O Tet: " + useStats.O_Piece_Count + "\n" +
-                //"J Tet: " + useStats.J_Piece_Count + "\n" +
-                //"T Tet: " + useStats.T_Piece_Count + "\n" +
-                //"L Tet: " + useStats.L_Piece_Count + "\n" +
-                //"S Tet: " + useStats.S_Piece_Count + "\n" +
-                //"Z Tet: " + useStats.Z_Piece_Count + "\n";
+
 
 
             }
@@ -740,7 +719,7 @@ namespace BASeTris.GameStates
                     if (PlayField.CanRotate(activeitem, false))
                     {
                         activeitem.Rotate(false);
-                        TetrisGame.Soundman.PlaySound("block_rotate");
+                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate);
                         pOwner.Feedback(0.3f, 100);
                         activeitem.Clamp(PlayField.RowCount, PlayField.ColCount);
                     }
@@ -750,7 +729,7 @@ namespace BASeTris.GameStates
             {
                 foreach (var activeitem in PlayField.BlockGroups)
                 {
-                    if (MoveGroupDown(activeitem))
+                    if (HandleGroupOperation(activeitem))
                     {
                         pOwner.Feedback(0.4f, 100);
                         ProcessFieldChangeWithScore(pOwner);
@@ -770,7 +749,7 @@ namespace BASeTris.GameStates
                     GameStats.Score += (dropqty * (5 + (GameStats.LineCount / 10)));
                 }
                 pOwner.Feedback(0.6f, 200);
-                TetrisGame.Soundman.PlaySound("block_place");
+                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
                 ProcessFieldChangeWithScore(pOwner);
 
 
@@ -784,7 +763,7 @@ namespace BASeTris.GameStates
                     {
                         lastHorizontalMove = DateTime.Now;
                         ActiveItem.X += XMove;
-                        TetrisGame.Soundman.PlaySound("block_move");
+                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupMove);
                         pOwner.Feedback(0.1f, 50);
                     }
                 }
@@ -798,7 +777,7 @@ namespace BASeTris.GameStates
 
                     var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
                     playing.Pause();
-                    TetrisGame.Soundman.PlaySound("pause");
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
 
 
                 }
@@ -822,7 +801,7 @@ namespace BASeTris.GameStates
                         HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
                         HoldBlock.Y = 0;
                         HoldBlock = FirstGroup;
-                        TetrisGame.Soundman.PlaySound("drop");
+                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Hold);
                         pOwner.Feedback(0.9f, 40);
                         BlockHold = true;
                     }
@@ -833,13 +812,13 @@ namespace BASeTris.GameStates
                     PlayField.RemoveBlockGroup(FirstGroup);
                     HoldBlock = FirstGroup;
                     BlockHold = true;
-                    TetrisGame.Soundman.PlaySound("drop");
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Hold);
                     
                 }
             }
         }
         bool BlockHold = false;
-        private bool MoveGroupDown(BlockGroup activeItem)
+        private bool HandleGroupOperation(BlockGroup activeItem)
         {
 
             if (PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1))
@@ -852,7 +831,7 @@ namespace BASeTris.GameStates
                 {
                     PlayField.SetGroupToField(activeItem);
                     GameStats.Score += 25 - activeItem.Y;
-                    TetrisGame.Soundman.PlaySound("block_place");
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
                     return true;
                 }
             }

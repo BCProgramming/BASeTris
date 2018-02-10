@@ -103,7 +103,9 @@
     <Compile Include="TetrominoData.cs" />
     <Compile Include="Tetrominoes\Tetrominoes.cs" />
     <Compile Include="Tetrominoes\Tetromino.cs" />
-    <Compile Include="TetrominoTheme.cs" />
+    <Compile Include="Theme\Audio\AudioTheme.cs" />
+    <Compile Include="Theme\Audio\AudioThemeManager.cs" />
+    <Compile Include="Theme\Block\TetrominoTheme.cs" />
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />
     <Compile Include="Win10MenuRenderer.cs" />

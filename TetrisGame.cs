@@ -15,6 +15,7 @@ using System.Windows.Forms.VisualStyles;
 using bcHighScores;
 using BaseTris.AssetManager;
 using BASeTris.AssetManager;
+using BASeTris.Theme.Audio;
 
 namespace BASeTris
 {
@@ -23,6 +24,7 @@ namespace BASeTris
         public static cNewSoundManager Soundman;
         public static ImageManager Imageman;
         public static HighScoreManager ScoreMan;
+        public static AudioThemeManager AudioThemeMan;
         public static Random rgen = new Random();
         public static bool PortableMode = false;
         private GameState CurrentGameState = null;
@@ -43,6 +45,8 @@ namespace BASeTris
             {
                 Directory.CreateDirectory(ScoreFolder);
             }
+            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
+
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.dat");
             ScoreMan = HighScoreManager.FromFile(ScoreFile);
             

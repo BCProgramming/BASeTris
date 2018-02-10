@@ -89,7 +89,7 @@ namespace BASeTris
             
             
 
-
+            TetrisGame.AudioThemeMan.ResetTheme();
             if (GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
             GameThread.Start();
