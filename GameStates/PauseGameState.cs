@@ -86,8 +86,8 @@ namespace BASeTris.GameStates
                 pOwner.CurrentState = PausedState;
 
                 var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
-                playing.UnPause();
-                TetrisGame.Soundman.PlaySound("pause");
+                playing?.UnPause();
+                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
 
             }
         }

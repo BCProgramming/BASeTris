@@ -75,13 +75,14 @@ namespace BASeTris
            
             
         }
+        bool XPolling = false;
         BlockGroup testBG = null;
         private void StartGame()
         {
-            if (X.IsAvailable)
+            if (X.IsAvailable && !XPolling)
             {
+                XPolling = true;
                 X.UpdatesPerSecond = 30;
-
                 X.StartPolling(X.Gamepad_1);
                 
             }
@@ -89,7 +90,7 @@ namespace BASeTris
             
             
 
-
+            TetrisGame.AudioThemeMan.ResetTheme();
             if (GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
             GameThread.Start();
