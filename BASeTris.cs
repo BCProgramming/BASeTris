@@ -75,13 +75,14 @@ namespace BASeTris
            
             
         }
+        bool XPolling = false;
         BlockGroup testBG = null;
         private void StartGame()
         {
-            if (X.IsAvailable)
+            if (X.IsAvailable && !XPolling)
             {
+                XPolling = true;
                 X.UpdatesPerSecond = 30;
-
                 X.StartPolling(X.Gamepad_1);
                 
             }

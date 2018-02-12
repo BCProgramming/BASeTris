@@ -16,6 +16,8 @@ namespace BASeTris.GameStates
         public bool DrawGhostDrop = true;
 
         public bool MusicRestartsOnTempoChange = false;
+        private bool _MusicEnabled = true;
+        public bool MusicEnabled { get { return _MusicEnabled; } set { _MusicEnabled = value; if(!_MusicEnabled) TetrisGame.Soundman.StopMusic(); }}
         
     }
 }

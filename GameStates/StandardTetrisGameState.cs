@@ -109,8 +109,10 @@ namespace BASeTris.GameStates
                     if (currenttempo == 1)
                     {
                         currenttempo = 68;
-                        if(GameOptions.MusicRestartsOnTempoChange)
-                            TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                        if (GameOptions.MusicRestartsOnTempoChange)
+                        {
+                            if (GameOptions.MusicEnabled) TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                        }
                         var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
                         if (grabbed != null)
                         {
@@ -126,7 +128,7 @@ namespace BASeTris.GameStates
                     {
                         currenttempo = 1;
                         if (GameOptions.MusicRestartsOnTempoChange)
-                            TetrisGame.Soundman.PlayMusic(StandardMusic, 1f, true);
+                            if (GameOptions.MusicEnabled) TetrisGame.Soundman.PlayMusic(StandardMusic, 1f, true);
                         var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
                         if (grabbed != null) grabbed.Tempo = 1f;
                     }
@@ -289,9 +291,12 @@ namespace BASeTris.GameStates
         {
             if (!FirstRun)
             {
-                var musicplay = TetrisGame.Soundman.PlayMusic(StandardMusic, 0.5f, true);
-                musicplay.Tempo = 1f;
-                FirstRun = true;
+                if (GameOptions.MusicEnabled)
+                {
+                    var musicplay = TetrisGame.Soundman.PlayMusic(StandardMusic, 0.5f, true);
+                    musicplay.Tempo = 1f;
+                    FirstRun = true;
+                }
             }
             FrameUpdate();
             if (GameStartTime == DateTime.MinValue) GameStartTime = DateTime.Now;
@@ -624,8 +629,6 @@ namespace BASeTris.GameStates
                     g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                 }
 
-
-
             }
 
         }
@@ -776,7 +779,7 @@ namespace BASeTris.GameStates
                     pOwner.CurrentState = new PauseGameState(pOwner, this);
 
                     var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
-                    playing.Pause();
+                    playing?.Pause();
                     TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
 
 
