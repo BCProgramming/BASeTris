@@ -75,14 +75,13 @@ namespace BASeTris
            
             
         }
-        bool XPolling = false;
         BlockGroup testBG = null;
         private void StartGame()
         {
-            if (X.IsAvailable && !XPolling)
+            if (X.IsAvailable)
             {
-                XPolling = true;
                 X.UpdatesPerSecond = 30;
+
                 X.StartPolling(X.Gamepad_1);
                 
             }
@@ -90,7 +89,7 @@ namespace BASeTris
             
             
 
-            TetrisGame.AudioThemeMan.ResetTheme();
+
             if (GameThread!=null) GameThread.Abort();
             GameThread = new Thread(GameProc);
             GameThread.Start();
@@ -272,7 +271,7 @@ namespace BASeTris
                     _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Left);
                 });
             }
-            else if(e.KeyCode==Keys.Pause || e.KeyCode == Keys.P)
+            else if(e.KeyCode==Keys.Pause)
             {
                 ProcThreadActions.Enqueue(() =>
                 {
@@ -356,7 +355,7 @@ namespace BASeTris
 
         private void xToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            SetScale(1.5f);
+            SetScale(1.3f);
             ((ToolStripMenuItem)sender).Checked = true;
         }
 
