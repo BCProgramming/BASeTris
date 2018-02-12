@@ -19,7 +19,6 @@ namespace BASeTris.GameStates
 {
     public class StandardTetrisGameState : GameState
     {
-        public String StandardMusic = "tetris_a_theme_techno";
         Bitmap useBackground = null;
         public Queue<BlockGroup> NextBlocks = new Queue<BlockGroup>();
         public BlockGroup HoldBlock = null;
@@ -111,7 +110,8 @@ namespace BASeTris.GameStates
                         currenttempo = 68;
                         if (GameOptions.MusicRestartsOnTempoChange)
                         {
-                            if (GameOptions.MusicEnabled) TetrisGame.Soundman.PlayMusic(StandardMusic, 0.75f, true);
+                            
+                            if (GameOptions.MusicEnabled)   TetrisGame.Soundman.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, 0.75f, true);
                         }
                         var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
                         if (grabbed != null)
@@ -128,7 +128,7 @@ namespace BASeTris.GameStates
                     {
                         currenttempo = 1;
                         if (GameOptions.MusicRestartsOnTempoChange)
-                            if (GameOptions.MusicEnabled) TetrisGame.Soundman.PlayMusic(StandardMusic, 1f, true);
+                            if (GameOptions.MusicEnabled) TetrisGame.Soundman.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, 1f, true);
                         var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
                         if (grabbed != null) grabbed.Tempo = 1f;
                     }
@@ -293,7 +293,7 @@ namespace BASeTris.GameStates
             {
                 if (GameOptions.MusicEnabled)
                 {
-                    var musicplay = TetrisGame.Soundman.PlayMusic(StandardMusic, 0.5f, true);
+                    var musicplay = TetrisGame.Soundman.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, 0.5f, true);
                     musicplay.Tempo = 1f;
                     FirstRun = true;
                 }
