@@ -356,13 +356,13 @@ namespace BASeTris
 
         private void xToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            SetScale(1.5f);
+            SetScale(1.3f);
             ((ToolStripMenuItem)sender).Checked = true;
         }
 
         private void xToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            SetScale(1.75f);
+            SetScale(1.6f);
             ((ToolStripMenuItem)sender).Checked = true;
         }
 
