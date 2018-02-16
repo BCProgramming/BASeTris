@@ -49,7 +49,7 @@ namespace BASeTris
 
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.dat");
             ScoreMan = HighScoreManager.FromFile(ScoreFile);
-            
+            if (ScoreMan == null) ScoreMan = new HighScoreManager(ScoreFile);
 
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
