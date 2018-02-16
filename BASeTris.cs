@@ -244,6 +244,14 @@ namespace BASeTris
                     
                 });
             }
+            else if(e.KeyCode==Keys.Z)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_RotateCCW);
+
+                });
+            }
             else if (e.KeyCode==Keys.Up)
             {
                 ProcThreadActions.Enqueue(() =>

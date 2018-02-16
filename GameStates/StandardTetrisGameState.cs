@@ -346,17 +346,17 @@ namespace BASeTris.GameStates
         {
             int result = ProcessFieldChange(pOwner);
             int AddScore = 0;
-            if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 10;
+            if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 15;
             if (result >= 2)
-                AddScore += ((GameStats.LineCount / 10) + 2) * 15;
+                AddScore += ((GameStats.LineCount / 10) + 2) * 30;
             if (result >= 3)
-                AddScore += ((GameStats.LineCount / 10) + 3) * 20;
+                AddScore += ((GameStats.LineCount / 10) + 3) * 45;
             if (result >= 4)
                 AddScore += AddScore+((GameStats.LineCount / 10) + 5) * 75;
 
             LastScoreCalc = AddScore;
             
-            if(LastScoreLines==result)
+            if(LastScoreLines==result) //getting the same lines in a row gives added score.
             {
                 AddScore *= 2;
             }
@@ -715,13 +715,14 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-            if (g == GameKeys.GameKey_RotateCW)
+            if (g == GameKeys.GameKey_RotateCW || g==GameKeys.GameKey_RotateCCW)
             {
+                bool ccw = g == GameKeys.GameKey_RotateCCW;
                 foreach (var activeitem in PlayField.BlockGroups)
                 {
-                    if (PlayField.CanRotate(activeitem, false))
+                    if (PlayField.CanRotate(activeitem, ccw))
                     {
-                        activeitem.Rotate(false);
+                        activeitem.Rotate(ccw);
                         TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate);
                         pOwner.Feedback(0.3f, 100);
                         activeitem.Clamp(PlayField.RowCount, PlayField.ColCount);

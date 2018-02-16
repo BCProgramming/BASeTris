@@ -23,7 +23,7 @@ namespace BASeTris
         public bool AnimateRotations = true;
         private TetrisBlock[][] FieldContents;
         public long LineCount = 0;
-        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Chisel);
+        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
         public int Level { get { return (int)LineCount / 10; } }
         const int ROWCOUNT = 22;
@@ -260,7 +260,7 @@ namespace BASeTris
                             useAngle = -90 + ((tsRotate.TotalMilliseconds / RotationTime) * 90);
                         else
                         {
-                            useAngle = ((tsRotate.TotalMilliseconds / RotationTime) * 90);
+                            useAngle = 90 - ((tsRotate.TotalMilliseconds / RotationTime) * 90);
                         }
                     }
                     if(useAngle != 0 && AnimateRotations)

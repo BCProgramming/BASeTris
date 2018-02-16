@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.AssetManager;
+using BASeTris.Choosers;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 
@@ -109,9 +110,22 @@ namespace BASeTris
             ApplyColorSet(Group, CurrLevel);
 
         }
-        private Color GetStandardColor(BlockGroup source,int Level)
+        private StandardColouredBlock.BlockStyle[] usabletypes = new StandardColouredBlock.BlockStyle[]{StandardColouredBlock.BlockStyle.Style_Chisel,StandardColouredBlock.BlockStyle.Style_CloudBevel,StandardColouredBlock.BlockStyle.Style_HardBevel,StandardColouredBlock.BlockStyle.Style_Shine};
+        private Dictionary<Type,StandardColouredBlock.BlockStyle> GetBlockStyleLookup(Type[] Types)
         {
 
+            Dictionary<Type, StandardColouredBlock.BlockStyle> Result = new Dictionary<Type, StandardColouredBlock.BlockStyle>();
+            foreach(var iterate in Types)
+            {
+                StandardColouredBlock.BlockStyle selectstyle = TetrisGame.Choose(usabletypes);
+                Result.Add(iterate,selectstyle);
+            }
+            return Result;
+
+        }
+        private Color GetStandardColor(BlockGroup source,int Level)
+        {
+            
             Color[] Colors = new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
             int useIndex = -1;
             if (source is Tetromino_I)
@@ -150,16 +164,24 @@ namespace BASeTris
             
         }
         private static Random rg = new Random();
+        private static Dictionary<Type, StandardColouredBlock.BlockStyle> UseStyles = null;
         private void ApplyColorSet(BlockGroup bg, int Level)
         {
             if (bg == null) return;
+
+            if (UseStyles == null) UseStyles = GetBlockStyleLookup(new Type[] { typeof(Tetromino_I), typeof(Tetromino_J), typeof(Tetromino_L), typeof(Tetromino_O), typeof(Tetromino_S), typeof(Tetromino_T), typeof(Tetromino_Z) });
+            StandardColouredBlock.BlockStyle applystyle = _Style;
+            if (UseStyles.ContainsKey(bg.GetType())) applystyle = UseStyles[bg.GetType()];
+
             foreach (var iterate in bg)
             {
 
                 if(iterate.Block is StandardColouredBlock)
                 {
                     StandardColouredBlock bl = iterate.Block as StandardColouredBlock;
-                    bl.DisplayStyle = _Style; //TetrisGame.Choose(new StandardColouredBlock.BlockStyle[] { StandardColouredBlock.BlockStyle.Style_HardBevel, StandardColouredBlock.BlockStyle.Style_CloudBevel, StandardColouredBlock.BlockStyle.Style_Shine });
+                    
+
+                    bl.DisplayStyle = applystyle; //TetrisGame.Choose(new StandardColouredBlock.BlockStyle[] { StandardColouredBlock.BlockStyle.Style_HardBevel, StandardColouredBlock.BlockStyle.Style_CloudBevel, StandardColouredBlock.BlockStyle.Style_Shine });
                     Color useColor = GetStandardColor(bg,Level);
                     bl.BlockColor = bl.InnerColor = useColor;
                     /*QColorMatrix qc = new QColorMatrix();

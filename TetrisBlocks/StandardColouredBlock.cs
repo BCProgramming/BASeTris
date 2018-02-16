@@ -14,6 +14,7 @@ namespace BASeTris.TetrisBlocks
 {
     public class ImageBlock : TetrisBlock
     {
+        protected bool DoRotateTransform = false; //if true, we'll RotateTransform the image based on this blocks rotation.
         protected Image[] _RotationImages; //array of images, indexed based on rotation.
         protected ImageAttributes[] useAttributes; //array of Attributes to apply to the image when drawing. Same indexing as above.
         protected virtual void NoImage(){}
@@ -28,7 +29,23 @@ namespace BASeTris.TetrisBlocks
             int usemodulo = Rotation;
             Image useImage = _RotationImages[usemodulo % _RotationImages.Length];
             ImageAttributes useAttrib = useAttributes == null ? null : useAttributes[usemodulo % useAttributes.Length];
-            parameters.g.DrawImage(useImage,new Rectangle((int)parameters.region.Left,(int)parameters.region.Top,(int)parameters.region.Width,(int)parameters.region.Height),0,0,useImage.Width,useImage.Height,GraphicsUnit.Pixel,useAttrib);
+            float Degrees = usemodulo * 90;
+            PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));
+            
+            
+            if (DoRotateTransform)
+            {
+                var original = parameters.g.Transform;
+                parameters.g.TranslateTransform(Center.X, Center.Y);
+                parameters.g.RotateTransform(Degrees);
+                parameters.g.TranslateTransform(-Center.X, -Center.Y);
+                parameters.g.DrawImage(useImage, new Rectangle((int)parameters.region.Left, (int)parameters.region.Top, (int)parameters.region.Width, (int)parameters.region.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                parameters.g.Transform = original;
+            }
+            else
+            {
+                parameters.g.DrawImage(useImage, new Rectangle((int)parameters.region.Left, (int)parameters.region.Top, (int)parameters.region.Width, (int)parameters.region.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+            }
 
         }
 

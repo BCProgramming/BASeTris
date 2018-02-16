@@ -193,7 +193,11 @@ namespace BASeTris
         {
           foreach(var iterateblock in BlockData)
           {
-                if (CCW) iterateblock.RotationModulo--;
+                if (CCW)
+                {
+                    iterateblock.RotationModulo--;
+
+                }
               else 
                     iterateblock.RotationModulo++;
 
@@ -216,8 +220,12 @@ namespace BASeTris
     public class BlockGroupEntry
     {
         //Represents a single block within a group. the RotationPoints represent the positions this specific block will rotate/change to when rotated.
-        public int X { get { return Positions[RotationModulo % Positions.Length].X; } }
-        public int Y { get { return Positions[RotationModulo % Positions.Length].Y; } }
+        private int sMod(int A,int B)
+        {
+            return (A % B + B) % B;
+        }
+        public int X { get { return Positions[sMod(RotationModulo,Positions.Length)].X; } }
+        public int Y { get { return Positions[sMod(RotationModulo, Positions.Length)].Y; } }
 
         Point[] Positions = null;
 
