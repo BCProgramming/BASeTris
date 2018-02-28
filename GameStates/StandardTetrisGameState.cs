@@ -14,6 +14,7 @@ using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
+using Microsoft.SqlServer.Server;
 
 namespace BASeTris.GameStates
 {
@@ -24,9 +25,8 @@ namespace BASeTris.GameStates
         public BlockGroup HoldBlock = null;
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
-        public Statistics GameStats = new Statistics();
         public Choosers.BlockGroupChooser Chooser = null;
-        
+        public Statistics GameStats {  get { return PlayField?.GameStats; } }
 
 
 
@@ -36,7 +36,7 @@ namespace BASeTris.GameStates
             return TetrisGame.ScoreMan["Standard"];
         }
 
-        public virtual int ProcessFieldChange(IStateOwner pOwner)
+        public virtual int ProcessFieldChange(IStateOwner pOwner,BlockGroup Trigger)
         {
             
             //process lines for standard game.
@@ -71,7 +71,11 @@ namespace BASeTris.GameStates
                     }
                 }
                 long PreviousLineCount = PlayField.LineCount;
-                PlayField.LineCount += rowsfound;
+                if(Trigger!=null)
+                {
+
+                    PlayField.GameStats.AddLineCount(Trigger.GetType(),rowsfound);
+                }
                 if ((PreviousLineCount % 10) > (PlayField.LineCount % 10))
                 {
                     PlayField_LevelChanged(this, new TetrisField.LevelChangeEventArgs((int)PlayField.LineCount / 10));
@@ -180,7 +184,10 @@ namespace BASeTris.GameStates
         private bool f_RedrawTetrominoImages = false;
         private bool f_RedrawStatusBitmap = false;
         private Dictionary<System.Type, Image> TetrominoImages = null;
-
+        public Image GetTetronimoImage(System.Type TetrominoType)
+        {
+            return TetrominoImages[TetrominoType];
+        }
         public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
         private void RedrawStatusbarTetrominoBitmaps(RectangleF Bounds)
         {
@@ -314,7 +321,7 @@ namespace BASeTris.GameStates
 
                     if (HandleGroupOperation(iterate))
                     {
-                        ProcessFieldChangeWithScore(pOwner);
+                        ProcessFieldChangeWithScore(pOwner,iterate);
                     }
                     iterate.LastFall = DateTime.Now;
                 }
@@ -342,9 +349,9 @@ namespace BASeTris.GameStates
         }
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
-        public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner)
+        public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner,BlockGroup Trigger)
         {
-            int result = ProcessFieldChange(pOwner);
+            int result = ProcessFieldChange(pOwner,Trigger);
             int AddScore = 0;
             if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 15;
             if (result >= 2)
@@ -505,7 +512,7 @@ namespace BASeTris.GameStates
 
                     "Score: " + useStats.Score.ToString() + "\n" +
                                          "Top:     " + this.GetLocalScores().GetScores().First().Score + " \n" + 
-                                         "Lines: " + PlayField.LineCount + "\n";
+                                         "Lines: " + GameStats.LineCount + "\n";
 
 
                 var measured = g.MeasureString(BuildStatString, standardFont);
@@ -736,7 +743,7 @@ namespace BASeTris.GameStates
                     if (HandleGroupOperation(activeitem))
                     {
                         pOwner.Feedback(0.4f, 100);
-                        ProcessFieldChangeWithScore(pOwner);
+                        ProcessFieldChangeWithScore(pOwner,activeitem);
 
                     }
                 }
@@ -744,6 +751,7 @@ namespace BASeTris.GameStates
             else if (g == GameKeys.GameKey_Drop)
             {
                 //drop all active groups.
+                BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                 foreach (var activeitem in PlayField.BlockGroups)
                 {
                     int dropqty = 0;
@@ -754,7 +762,7 @@ namespace BASeTris.GameStates
                 }
                 pOwner.Feedback(0.6f, 200);
                 TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
-                ProcessFieldChangeWithScore(pOwner);
+                ProcessFieldChangeWithScore(pOwner,FirstGroup);
 
 
             }

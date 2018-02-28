@@ -13,14 +13,19 @@ namespace BASeTris.GameStates
         private GameState GameOveredState = null;
 
         public int CoverBlocks = 0;
+        private bool CompleteSummary = false;
         private bool CompleteScroll = false;
+        private int ShowExtraLines = 0;
+        private int MaxExtraLines = 7;
         private DateTime CompleteScrollTime = DateTime.MaxValue;
+        private DateTime CompleteSummaryTime = DateTime.MaxValue;
         private DateTime InitTime;
         public GameOverGameState(GameState paused)
         {
             GameOveredState = paused;
             InitTime = DateTime.Now;
             TetrisGame.Soundman.PlaySound("mmdeath");
+
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -32,19 +37,19 @@ namespace BASeTris.GameStates
         {
             GameOveredState.DrawStats(pOwner, g, Bounds);
         }
-        
+
         DateTime LastAdvance = DateTime.MinValue;
         public override void GameProc(IStateOwner pOwner)
         {
-            if ((DateTime.Now - CompleteScrollTime).TotalMilliseconds > 500)
+            if ((DateTime.Now - CompleteSummaryTime).TotalMilliseconds > 500)
             {
-                CompleteScrollTime = DateTime.MaxValue;
+                CompleteSummaryTime = DateTime.MaxValue;
                 TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOver);
                 StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
-                if(standardstate!=null)
+                if (standardstate != null)
                 {
                     var grabposition = standardstate.GetLocalScores().Eligible("", standardstate.GameStats.Score);
-                    if(grabposition==1)
+                    if (grabposition == 1)
                     {
                         standardstate.GetLocalScores().Submit("", standardstate.GameStats.Score);
                         TetrisGame.ScoreMan.Save();
@@ -65,7 +70,25 @@ namespace BASeTris.GameStates
                         CoverBlocks = standardstate.PlayField.RowCount;
                         CompleteScrollTime = DateTime.Now;
                         CompleteScroll = true;
+                        CompleteSummary = false;
                     }
+                }
+            }
+            if (CompleteScroll && !CompleteSummary)
+            {
+                int calcresult = (int)((DateTime.Now - CompleteScrollTime).TotalMilliseconds) / 750;
+                if (calcresult > 0)
+                {
+                    if(ShowExtraLines!=calcresult)
+                    {
+                        TetrisGame.Soundman.PlaySound("block_place_2");
+                    }
+                    ShowExtraLines = calcresult;
+                }
+                if (ShowExtraLines > MaxExtraLines)
+                {
+                    CompleteSummary = true;
+                    CompleteSummaryTime = DateTime.Now;
                 }
             }
             //gameproc doesn't pass through!
@@ -85,20 +108,57 @@ namespace BASeTris.GameStates
 
             if (CompleteScroll)
             {
+
                 Font GameOverFont = new Font(TetrisGame.RetroFont, 24);
-                String GameOverText = "GAME\nOVER";
+                String GameOverText = "GAME\nOVER\n"; //+ ShowExtraLines.ToString();
                 var measured = g.MeasureString(GameOverText, GameOverFont);
-                g.DrawString(GameOverText, GameOverFont, Brushes.White, 5 + (Bounds.Width / 2) - measured.Width / 2, 5 + (Bounds.Height / 2) - measured.Height / 2);
-                g.DrawString(GameOverText, GameOverFont, Brushes.Black, (Bounds.Width / 2) - measured.Width / 2, (Bounds.Height / 2) - measured.Height / 2);
+                PointF GameOverPos = new PointF(Bounds.Width / 2 - measured.Width / 2, measured.Height);
+                g.DrawString(GameOverText, GameOverFont, Brushes.White, 5 + GameOverPos.X, 5 + GameOverPos.Y);
+                g.DrawString(GameOverText, GameOverFont, Brushes.Black, GameOverPos.X, GameOverPos.Y);
+
+                //draw each "line" of summary statistical information based on ShowExtraLines.
+
+                for (int i = 0; i < ShowExtraLines; i++)
+                {
+                    float XPosition = Bounds.Width * 0.25f;
+                    float YPosition = GameOverPos.Y + ((1+i) * measured.Height)+10;
+                    
+                    if(i==0)
+                    {
+                        var measuredmini = g.MeasureString("---Line Clears---", GameOverFont);
+                        g.DrawString("---Line Clears---",GameOverFont,Brushes.Black,Bounds.Width/2-measuredmini.Width/2,GameOverPos.Y+measured.Height);
+                    }
+                    if(i==1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I),new PointF(XPosition,YPosition),g,Bounds,GameOverFont);
+                    if(i==2) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_O), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                    if(i==3) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_T), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                    if(i==4) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_J), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                    if(i==5) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_L), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                    if(i==6) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_S), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                    if(i==7) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_Z), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                }
             }
-
-
         }
 
+
+
+
+
+
+
+        private void DrawTetrominoStat(Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)
+        {
+            StandardTetrisGameState standardgame = GameOveredState as StandardTetrisGameState;
+            Image I_Tet = standardgame.GetTetronimoImage(TetronimoType);
+            Target.DrawImage(I_Tet, new PointF(BasePosition.X - (float)(I_Tet.Width) / 2, BasePosition.Y));
+            PointF TextPos = new PointF(BasePosition.X + Bounds.Width / 2, BasePosition.Y-10);
+            Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.White, 5 + TextPos.X, 5 + TextPos.Y);
+            Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.Black, TextPos.X, TextPos.Y);
+        }
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
 
         }
 
-    }
+    } 
 }
+

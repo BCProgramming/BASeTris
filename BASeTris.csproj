@@ -94,6 +94,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameObjects\ProxyObject.cs" />
+    <Compile Include="StandardSettings.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="AssetManager\QColorMatrix.cs" />
     <Compile Include="TetrisBlocks\StandardColouredBlock.cs" />
@@ -136,6 +137,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Visual Studio 2008\Projects\BASeBlocks\XMLSerialization\Elementizer.csproj">
+      <Project>{850a1563-ac23-4b60-bbcf-503b2bb69547}</Project>
+      <Name>Elementizer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
