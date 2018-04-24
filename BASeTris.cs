@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BaseTris;
+using BASeCamp.BASeScores;
 using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
@@ -52,6 +53,15 @@ namespace BASeTris
 
         double DefaultWidth = 643d;
         double DefaultHeight = 734d;
+        public void SetDisplayMode(GameState.DisplayMode pMode)
+        {
+            if (picFullSize.Visible == (pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
+            picFullSize.Visible = pMode==GameState.DisplayMode.Full;
+            picTetrisField.Visible = pMode == GameState.DisplayMode.Partitioned;
+            picStatistics.Visible = pMode == GameState.DisplayMode.Partitioned;
+
+
+        }
         public void SetScale(double factor)
         {
             mnuScale_Tiny.Checked = mnuScale_Small.Checked = mnuScale_Large.Checked = mnuScale_Biggliest.Checked = false;
@@ -66,6 +76,10 @@ namespace BASeTris
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            //XMLHighScores<NoSpecialInfo> TestScores = new XMLHighScores<NoSpecialInfo>(35000,(r)=>new NoSpecialInfo());
+            //int Position1 = TestScores.IsEligible(12000);
+            //int Position2 = TestScores.IsEligible(3000);
+
             menuStrip1.Font = new Font(menuStrip1.Font.FontFamily, 14, FontStyle.Regular);
             Win10MenuRenderer buildrender = new Win10MenuRenderer(null,true);
             
@@ -147,6 +161,7 @@ namespace BASeTris
 
 
         }
+        private GameState LastFrameState = null;
         private void GameProc()
         {
             
@@ -165,17 +180,32 @@ namespace BASeTris
                 {
                     pResult();
                 }
-
+                if(LastFrameState!=_Game.CurrentState)
+                {
+                    Invoke((MethodInvoker)(() =>
+                    {
+                        SetDisplayMode(_Game.CurrentState.SupportedDisplayMode);
+                    }));
+                }
                 if (_Game.CurrentState!=null && !_Game.CurrentState.GameProcSuspended)
                 {
+                    
                     _Game.GameProc();
                 }
                 Invoke((MethodInvoker)(() =>
                 {
-                    picTetrisField.Invalidate();
-                    picTetrisField.Refresh();
-                    picStatistics.Invalidate();
-                    picStatistics.Refresh();
+                    if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                    {
+                        picTetrisField.Invalidate();
+                        picTetrisField.Refresh();
+                        picStatistics.Invalidate();
+                        picStatistics.Refresh();
+                    }
+                    else if(_Game.CurrentState.SupportedDisplayMode ==GameState.DisplayMode.Full)
+                    {
+                        picFullSize.Invalidate();
+                        picFullSize.Refresh();
+                    }
                 }));
 
                 Thread.Sleep(5);
@@ -184,11 +214,20 @@ namespace BASeTris
 
         }
         static Random rgen = new Random();
-       
-      
+
+        private void picFullSize_Paint(object sender, PaintEventArgs e)
+        {
+            if (_Game == null) return;
+            if (CurrentState.SupportedDisplayMode==GameState.DisplayMode.Full)
+            {
+                e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                _Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
+            }
+        }
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
             if (_Game == null) return;
+            if (picTetrisField.Visible == false) return;
             e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
 
@@ -294,6 +333,13 @@ namespace BASeTris
                     _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Hold);
                 });
             }
+            else if(e.KeyCode==Keys.F2)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Debug1);
+                });
+            }
             ProcThreadActions.Enqueue(() =>
             {
                 Invoke((MethodInvoker)(() =>
@@ -337,6 +383,7 @@ namespace BASeTris
         {
             if(CurrentState!=null)
             {
+                if (picStatistics.Visible == false) return;
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
                 CurrentState.DrawStats(this,e.Graphics,picStatistics.ClientRectangle);
             }
@@ -400,5 +447,7 @@ namespace BASeTris
                 ai = null;
             }
         }
+
+        
     }
 }

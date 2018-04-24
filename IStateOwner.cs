@@ -9,6 +9,7 @@ namespace BASeTris
 {
     public interface IStateOwner
     {
+        void SetDisplayMode(GameState.DisplayMode pMode);
         GameState CurrentState { get; set; }
         void EnqueueAction(Action pAction);
         Rectangle GameArea { get; }

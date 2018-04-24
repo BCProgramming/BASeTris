@@ -6,8 +6,15 @@ using System.Threading.Tasks;
 using BASeTris.Tetrominoes;
 namespace BASeTris
 {
+ 
     public class Statistics
     {
+        private TimeSpan[] LevelReachTimes = new TimeSpan[] { TimeSpan.Zero };
+        public TimeSpan TotalGameTime = TimeSpan.MinValue;
+        public void SetLevelTime(TimeSpan ReachedTime)
+        {
+            LevelReachTimes = LevelReachTimes.Concat(new TimeSpan[] { ReachedTime }).ToArray();
+        }
         public int LineCount {  get { return LineCounts.Sum((w) => w.Value); } }
         public int I_Piece_Count
         {
@@ -75,6 +82,10 @@ namespace BASeTris
         public void SetLineCount(Type TetrominoType,int pValue)
         {
             LineCounts[TetrominoType] = pValue;
+        }
+        public void AddScore(int AddScore)
+        {
+            this.Score += AddScore;
         }
         public void AddLineCount(Type TetronimoType,int AddLines)
         {

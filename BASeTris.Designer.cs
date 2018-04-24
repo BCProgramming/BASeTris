@@ -41,9 +41,11 @@
             this.mnuScale_Biggliest = new System.Windows.Forms.ToolStripMenuItem();
             this.controlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.picFullSize = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picFullSize)).BeginInit();
             this.SuspendLayout();
             // 
             // picTetrisField
@@ -160,9 +162,23 @@
             // 
             this.aIToolStripMenuItem.Name = "aIToolStripMenuItem";
             this.aIToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.aIToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.aIToolStripMenuItem.Size = new System.Drawing.Size(150, 26);
             this.aIToolStripMenuItem.Text = "AI";
             this.aIToolStripMenuItem.Click += new System.EventHandler(this.aIToolStripMenuItem_Click);
+            // 
+            // picFullSize
+            // 
+            this.picFullSize.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.picFullSize.BackColor = System.Drawing.Color.White;
+            this.picFullSize.Location = new System.Drawing.Point(4, 39);
+            this.picFullSize.Name = "picFullSize";
+            this.picFullSize.Size = new System.Drawing.Size(618, 644);
+            this.picFullSize.TabIndex = 3;
+            this.picFullSize.TabStop = false;
+            this.picFullSize.Visible = false;
+            this.picFullSize.Paint += new System.Windows.Forms.PaintEventHandler(this.picFullSize_Paint);
             // 
             // BASeTris
             // 
@@ -173,6 +189,7 @@
             this.Controls.Add(this.picStatistics);
             this.Controls.Add(this.picTetrisField);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.picFullSize);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
@@ -190,6 +207,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picFullSize)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -210,6 +228,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuScale_Biggliest;
         private System.Windows.Forms.ToolStripMenuItem controlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aIToolStripMenuItem;
+        private System.Windows.Forms.PictureBox picFullSize;
     }
 }
 

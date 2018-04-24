@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using bcHighScores;
+using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
@@ -30,7 +31,7 @@ namespace BASeTris.GameStates
 
 
 
-        public virtual IHighScoreList GetLocalScores()
+        public virtual IHighScoreList<HighScoreNullCustomData> GetLocalScores()
         {
             
             return TetrisGame.ScoreMan["Standard"];
@@ -79,7 +80,7 @@ namespace BASeTris.GameStates
                 if ((PreviousLineCount % 10) > (PlayField.LineCount % 10))
                 {
                     PlayField_LevelChanged(this, new TetrisField.LevelChangeEventArgs((int)PlayField.LineCount / 10));
-
+                    PlayField.GameStats.SetLevelTime(GetElapsedTime(pOwner));
 
                     TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.LevelUp);
                     PlayField.SetFieldColors();
@@ -330,6 +331,7 @@ namespace BASeTris.GameStates
             {
                 TetrisGame.Soundman.StopMusic();
                 FinalGameTime = DateTime.Now - GameStartTime;
+                PlayField.GameStats.TotalGameTime = FinalGameTime;
                 NextAngleOffset = 0;
                 pOwner.EnqueueAction(() =>
                 {
@@ -369,7 +371,8 @@ namespace BASeTris.GameStates
             }
             LastScoreLines = result;
 
-            GameStats.Score += AddScore;
+            GameStats.AddScore(AddScore);
+            
             pOwner.Feedback(0.9f * (float)result, result * 250);
         }
 
@@ -642,7 +645,8 @@ namespace BASeTris.GameStates
         private Queue<float> StoredLevels = new Queue<float>();
         double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
         Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
-        private String FormatGameTime(IStateOwner stateowner)
+
+        private TimeSpan GetElapsedTime(IStateOwner powner)
         {
             TimeSpan useCalc = (DateTime.Now - GameStartTime);
 
@@ -650,11 +654,18 @@ namespace BASeTris.GameStates
             {
                 useCalc = FinalGameTime;
             }
-            if (stateowner.CurrentState is PauseGameState)
+            if (powner.CurrentState is PauseGameState)
             {
                 useCalc = LastPausedTime - GameStartTime;
             }
+            return useCalc;
+        }
+        
 
+        private String FormatGameTime(IStateOwner stateowner)
+        {
+
+            TimeSpan useCalc = GetElapsedTime(stateowner);
             return useCalc.ToString(@"hh\:mm\:ss");
         }
         private RectangleF StoredBackground = RectangleF.Empty;
@@ -758,7 +769,7 @@ namespace BASeTris.GameStates
                     var ghosted = GetGhostDrop(activeitem, out dropqty, 0);
                     PlayField.SetGroupToField(ghosted);
                     PlayField.RemoveBlockGroup(activeitem);
-                    GameStats.Score += (dropqty * (5 + (GameStats.LineCount / 10)));
+                    GameStats.AddScore((dropqty * (5 + (GameStats.LineCount / 10))));
                 }
                 pOwner.Feedback(0.6f, 200);
                 TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
@@ -828,6 +839,10 @@ namespace BASeTris.GameStates
                     
                 }
             }
+            else if(g==GameKeys.GameKey_Debug1)
+            {
+                pOwner.CurrentState = new ShowHighScoresState(pOwner.CurrentState);
+            }
         }
         bool BlockHold = false;
         private bool HandleGroupOperation(BlockGroup activeItem)
@@ -842,7 +857,8 @@ namespace BASeTris.GameStates
                 if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > 250)
                 {
                     PlayField.SetGroupToField(activeItem);
-                    GameStats.Score += 25 - activeItem.Y;
+                    GameStats.AddScore(25 - activeItem.Y);
+                    
                     TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
                     return true;
                 }

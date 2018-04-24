@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using bcHighScores;
 using BaseTris.AssetManager;
+using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.Theme.Audio;
 
@@ -23,7 +24,8 @@ namespace BASeTris
     {
         public static cNewSoundManager Soundman;
         public static ImageManager Imageman;
-        public static HighScoreManager ScoreMan;
+        //public static HighScoreManager ScoreMan;
+        public static XMLScoreManager<HighScoreNullCustomData> ScoreMan;
         public static AudioThemeManager AudioThemeMan;
         public static Random rgen = new Random();
         public static bool PortableMode = false;
@@ -47,10 +49,9 @@ namespace BASeTris
             }
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
 
-            String ScoreFile = Path.Combine(ScoreFolder, "hi_score.dat");
-            ScoreMan = HighScoreManager.FromFile(ScoreFile);
-            if (ScoreMan == null) ScoreMan = new HighScoreManager(ScoreFile);
-
+            String ScoreFile = Path.Combine(ScoreFolder, "hi_score.xml");
+            ScoreMan = XMLScoreManager<HighScoreNullCustomData>.FromFile(ScoreFile);
+            if (ScoreMan == null) ScoreMan = new XMLScoreManager<HighScoreNullCustomData>(ScoreFile);
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
 
@@ -206,7 +207,11 @@ namespace BASeTris
             
         }
 
-        
+        public void SetDisplayMode(GameState.DisplayMode pMode)
+        {
+            GameOwner?.SetDisplayMode(pMode);
+        }
+
         public static String AppDataFolder
         {
             get

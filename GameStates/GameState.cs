@@ -24,6 +24,12 @@ namespace BASeTris
     public abstract class GameState
     {
         public virtual bool GameProcSuspended { get; set; } = false;
+
+        public enum DisplayMode
+        {
+            Partitioned,
+            Full
+        }
         public enum GameKeys
         {
             GameKey_Null,
@@ -34,8 +40,15 @@ namespace BASeTris
             GameKey_Right,
             GameKey_Down,
             GameKey_Pause,
-            GameKey_Hold
+            GameKey_Hold,
+            GameKey_Debug1,
+            GameKey_Debug2,
+            GameKey_Debug3,
+            GameKey_Debug4,
+            GameKey_Debug5,
+            GameKey_Debug6
         }
+        public virtual DisplayMode SupportedDisplayMode { get; }
         public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);
         public abstract void GameProc(IStateOwner pOwner);
         public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);

@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeCamp.BASeScores;
 
 namespace BASeTris.GameStates
 {
@@ -48,10 +49,10 @@ namespace BASeTris.GameStates
                 StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
                 if (standardstate != null)
                 {
-                    var grabposition = standardstate.GetLocalScores().Eligible("", standardstate.GameStats.Score);
+                    var grabposition = standardstate.GetLocalScores().IsEligible(standardstate.GameStats.Score);
                     if (grabposition == 1)
                     {
-                        standardstate.GetLocalScores().Submit("", standardstate.GameStats.Score);
+                        standardstate.GetLocalScores().Submit("", standardstate.GameStats.Score,new HighScoreNullCustomData(null));
                         TetrisGame.ScoreMan.Save();
                     }
                 }

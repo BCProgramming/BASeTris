@@ -40,6 +40,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>ThirdParty\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -72,8 +73,10 @@
     <Compile Include="FieldInitializers\FieldInitializer.cs" />
     <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
     <Compile Include="GameStates\ClearActionGameState.cs" />
+    <Compile Include="GameStates\EnterHighScoreState.cs" />
     <Compile Include="GameStates\GameOverGameState.cs" />
     <Compile Include="GameStates\PauseGameState.cs" />
+    <Compile Include="GameStates\ShowHighScoresState.cs" />
     <Compile Include="GameStates\StandardGameOptions.cs" />
     <Compile Include="GameStates\StandardTetrisGameState.cs" />
     <Compile Include="Particles\cParticle.cs" />
@@ -101,6 +104,7 @@
     <Compile Include="TetrisBlocks\TetrisBlock.cs" />
     <Compile Include="TetrisField.cs" />
     <Compile Include="TetrisGame.cs" />
+    <Compile Include="TetrisHighScoreData.cs" />
     <Compile Include="TetrominoData.cs" />
     <Compile Include="Tetrominoes\Tetrominoes.cs" />
     <Compile Include="Tetrominoes\Tetromino.cs" />
@@ -138,7 +142,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Visual Studio 2008\Projects\BASeBlocks\XMLSerialization\Elementizer.csproj">
+    <ProjectReference Include="..\BASeScores\BASeScores.csproj">
+      <Project>{7d03d6d6-4b21-4d87-ba1f-48ace062510d}</Project>
+      <Name>BASeScores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XMLSerialization\Elementizer.csproj">
       <Project>{850a1563-ac23-4b60-bbcf-503b2bb69547}</Project>
       <Name>Elementizer</Name>
     </ProjectReference>
