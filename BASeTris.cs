@@ -340,6 +340,13 @@ namespace BASeTris
                     _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Debug1);
                 });
             }
+            else if(e.KeyCode==Keys.F7)
+            {
+                ProcThreadActions.Enqueue(() =>
+                {
+                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Debug2);
+                });
+            }
             ProcThreadActions.Enqueue(() =>
             {
                 Invoke((MethodInvoker)(() =>

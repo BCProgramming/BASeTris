@@ -510,11 +510,16 @@ namespace BASeTris.GameStates
                 int DesiredFontPixelHeight = (int)(Bounds.Height * (23d / 644d));
 
                 Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
+                var TopScore = this.GetLocalScores().GetScores().First().Score;
+                int MaxScoreLength = Math.Max(TopScore.ToString().Length, useStats.Score.ToString().Length);
+
+                String CurrentScoreStr = useStats.Score.ToString().PadLeft(MaxScoreLength + 2);
+                String TopScoreStr = TopScore.ToString().PadLeft(MaxScoreLength + 2);
 
                 String BuildStatString = "Time:" + FormatGameTime(pOwner) + "\n" +
 
-                    "Score: " + useStats.Score.ToString() + "\n" +
-                                         "Top:     " + this.GetLocalScores().GetScores().First().Score + " \n" + 
+                    "Score: " + CurrentScoreStr + "\n" +
+                                         "Top:   " + TopScoreStr + " \n" + 
                                          "Lines: " + GameStats.LineCount + "\n";
 
 
@@ -842,6 +847,13 @@ namespace BASeTris.GameStates
             else if(g==GameKeys.GameKey_Debug1)
             {
                 pOwner.CurrentState = new ShowHighScoresState(pOwner.CurrentState);
+            }
+            else if(g==GameKeys.GameKey_Debug2)
+            {
+                if(pOwner.CurrentState is StandardTetrisGameState)
+                {
+                    ((StandardTetrisGameState)pOwner.CurrentState).GameStats.Score += 1000;
+                }
             }
         }
         bool BlockHold = false;

@@ -21,6 +21,8 @@ namespace BASeTris.GameStates
         private DateTime CompleteScrollTime = DateTime.MaxValue;
         private DateTime CompleteSummaryTime = DateTime.MaxValue;
         private DateTime InitTime;
+        //if the score is a high score, this will be changed to the position after the game stats are displayed.
+        int NewScorePosition = -1;
         public GameOverGameState(GameState paused)
         {
             GameOveredState = paused;
@@ -40,6 +42,7 @@ namespace BASeTris.GameStates
         }
 
         DateTime LastAdvance = DateTime.MinValue;
+        
         public override void GameProc(IStateOwner pOwner)
         {
             if ((DateTime.Now - CompleteSummaryTime).TotalMilliseconds > 500)
@@ -50,10 +53,9 @@ namespace BASeTris.GameStates
                 if (standardstate != null)
                 {
                     var grabposition = standardstate.GetLocalScores().IsEligible(standardstate.GameStats.Score);
-                    if (grabposition == 1)
+                    if(grabposition > 0)
                     {
-                        standardstate.GetLocalScores().Submit("", standardstate.GameStats.Score,new HighScoreNullCustomData(null));
-                        TetrisGame.ScoreMan.Save();
+                        NewScorePosition = grabposition;
                     }
                 }
             }
@@ -127,7 +129,8 @@ namespace BASeTris.GameStates
                     if(i==0)
                     {
                         var measuredmini = g.MeasureString("---Line Clears---", GameOverFont);
-                        g.DrawString("---Line Clears---",GameOverFont,Brushes.Black,Bounds.Width/2-measuredmini.Width/2,GameOverPos.Y+measured.Height);
+                        g.DrawString("---Line Clears---",GameOverFont,Brushes.White,Bounds.Width/2-measuredmini.Width/2,GameOverPos.Y+measured.Height);
+                        g.DrawString("---Line Clears---", GameOverFont, Brushes.Black, Bounds.Width / 2 - measuredmini.Width / 2-5, GameOverPos.Y + measured.Height-5);
                     }
                     if(i==1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I),new PointF(XPosition,YPosition),g,Bounds,GameOverFont);
                     if(i==2) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_O), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
@@ -136,6 +139,19 @@ namespace BASeTris.GameStates
                     if(i==5) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_L), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
                     if(i==6) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_S), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
                     if(i==7) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_Z), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                }
+                if(NewScorePosition> -1)
+                {
+                    //draw the awarded score position as well.
+                    float XPosition = Bounds.Width * .25f;
+                    float YPosition = GameOverPos.Y + ((1 + MaxExtraLines) * measured.Height) + 10;
+                    String ScoreText = "New High Score!";
+                    var MeasuredScoreText = g.MeasureString(ScoreText, GameOverFont);
+
+
+                    g.DrawString(ScoreText, GameOverFont, Brushes.White, Bounds.Width / 2 - MeasuredScoreText.Width / 2, YPosition + measured.Height);
+                    g.DrawString(ScoreText, GameOverFont, Brushes.Black, Bounds.Width / 2 - MeasuredScoreText.Width / 2 - 5, YPosition + measured.Height - 5);
+
                 }
             }
         }
@@ -157,7 +173,22 @@ namespace BASeTris.GameStates
         }
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-
+            if(g==GameKeys.GameKey_RotateCW)
+            {
+                if (NewScorePosition > -1)
+                {
+                    if(GameOveredState is StandardTetrisGameState)
+                    {
+                        EnterHighScoreState ehs = new EnterHighScoreState(GameOveredState,
+                            ((StandardTetrisGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<HighScoreNullCustomData>(n, s, new HighScoreNullCustomData())
+                            , ((StandardTetrisGameState)GameOveredState).GameStats);
+                        pOwner.CurrentState = ehs;
+                        TetrisGame.Soundman.PlayMusic("high_score_list");
+                    }
+                    
+                }
+            }
+            
         }
 
     } 
