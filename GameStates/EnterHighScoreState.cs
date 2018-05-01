@@ -4,12 +4,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 
 namespace BASeTris.GameStates
 {
-    class EnterHighScoreState : GameState
+    class EnterHighScoreState : GameState,IDirectKeyboardInputState
     {
         String[] HighScoreTitle = null;
         Statistics GameStatistics = null;
@@ -151,7 +152,8 @@ namespace BASeTris.GameStates
                 var submitscore = ScoreToEntryFunc(NameEntered.ToString().Replace("_"," ").Trim(), GameStatistics.Score);
                 ScoreListing.Submit(submitscore);
                 TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.ClearTetris);
-                pOwner.CurrentState = new ShowHighScoresState(null,new int[]{AchievedPosition});
+                TetrisGame.Soundman.PlayMusic("high_score_list");
+                pOwner.CurrentState = new ShowHighScoresState(ScoreListing,null,new int[]{AchievedPosition});
             }
             //throw new NotImplementedException();
         }
@@ -159,6 +161,37 @@ namespace BASeTris.GameStates
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //throw new NotImplementedException();
+        }
+
+        public void KeyPressed(IStateOwner pOwner, Keys pKey)
+        {
+            if(pKey==Keys.Enter) HandleGameKey(pOwner,GameKeys.GameKey_RotateCW);
+            else if(pKey==Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
+            else if (pKey == Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
+            else if (pKey == Keys.Left) HandleGameKey(pOwner, GameKeys.GameKey_Left);
+            else if (pKey == Keys.Right) HandleGameKey(pOwner, GameKeys.GameKey_Right);
+            else if(pKey==Keys.Back)
+            {
+                for(int i=CurrentPosition+1;i<NameEntered.Length-1;i++)
+                {
+                    NameEntered[i - 1] = NameEntered[i];
+                }
+                NameEntered[NameEntered.Length - 1] = '_';
+                CurrentPosition--;
+            }
+            else if (pKey == Keys.Delete)
+            {
+                for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
+                {
+                    NameEntered[i - 1] = NameEntered[i];
+                }
+                NameEntered[NameEntered.Length - 1] = '_';
+            }
+            else if(AvailableChars.Contains((char)pKey))
+            {
+                NameEntered[CurrentPosition] = (char)pKey;
+                HandleGameKey(pOwner, GameKeys.GameKey_Right);
+            }
         }
     }
 }

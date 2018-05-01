@@ -202,6 +202,7 @@
             this.ResizeEnd += new System.EventHandler(this.BASeTris_ResizeEnd);
             this.SizeChanged += new System.EventHandler(this.BASeTris_SizeChanged);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.BASeTris_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BASeTris_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).EndInit();

@@ -61,7 +61,6 @@
     <Compile Include="AI\TetrisAI.cs" />
     <Compile Include="AssetManager\AssetManager.cs" />
     <Compile Include="AssetManager\DeletionHelper.cs" />
-    <Compile Include="AssetManager\HiScores.cs" />
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="BlockGroup.cs" />
@@ -75,6 +74,7 @@
     <Compile Include="GameStates\ClearActionGameState.cs" />
     <Compile Include="GameStates\EnterHighScoreState.cs" />
     <Compile Include="GameStates\GameOverGameState.cs" />
+    <Compile Include="GameStates\IDirectKeyboardInputState.cs" />
     <Compile Include="GameStates\PauseGameState.cs" />
     <Compile Include="GameStates\ShowHighScoresState.cs" />
     <Compile Include="GameStates\StandardGameOptions.cs" />

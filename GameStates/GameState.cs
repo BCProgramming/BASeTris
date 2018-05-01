@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using bcHighScores;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using bcHighScores;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
@@ -846,7 +845,7 @@ namespace BASeTris.GameStates
             }
             else if(g==GameKeys.GameKey_Debug1)
             {
-                pOwner.CurrentState = new ShowHighScoresState(pOwner.CurrentState);
+                pOwner.CurrentState = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"],pOwner.CurrentState);
             }
             else if(g==GameKeys.GameKey_Debug2)
             {

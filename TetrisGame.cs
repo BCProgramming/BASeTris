@@ -12,16 +12,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using bcHighScores;
 using BaseTris.AssetManager;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
+using BASeTris.GameStates;
 using BASeTris.Theme.Audio;
 
 namespace BASeTris
 {
     public class TetrisGame : IStateOwner
     {
+        public enum KeyInputSource
+        {
+            Input_Keyboard,
+            Input_HID
+        }
         public static cNewSoundManager Soundman;
         public static ImageManager Imageman;
         //public static HighScoreManager ScoreMan;
@@ -35,6 +40,24 @@ namespace BASeTris
         public static bool DJMode { get; set; } = true;
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
+        private static Image _TiledCache = null;
+        public static Image StandardTiledTetrisBackground
+        {  get
+        {
+                if (_TiledCache == null) 
+            {
+                Image reduceit = Imageman["block_arrangement"];
+                    //reduce total size to 20%.
+                    Bitmap ReduceSize = new Bitmap((int)(reduceit.Width * .2), (int)(reduceit.Height * .2));
+                    using (Graphics greduce = Graphics.FromImage(ReduceSize))
+                    {
+                        greduce.DrawImage(reduceit,new Rectangle(0,0,ReduceSize.Width,ReduceSize.Height));
+                    }
+                    _TiledCache = ReduceSize;
+            }
+                return _TiledCache;
+        }
+        }
         public static FontFamily GetMonospaceFont()
         {
             return RetroFont;
@@ -132,8 +155,10 @@ namespace BASeTris
         {
             CurrentGameState.GameProc(GameOwner);
         }
-        public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g)
+        public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g,KeyInputSource pSource)
         {
+            if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState) return; //do nothing if it supports that interface.
+
             CurrentGameState.HandleGameKey(pOwner, g);
         }
         public void DrawProc(Graphics g, RectangleF Bounds)

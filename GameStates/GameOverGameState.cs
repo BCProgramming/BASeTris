@@ -183,7 +183,7 @@ namespace BASeTris.GameStates
                             ((StandardTetrisGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<HighScoreNullCustomData>(n, s, new HighScoreNullCustomData())
                             , ((StandardTetrisGameState)GameOveredState).GameStats);
                         pOwner.CurrentState = ehs;
-                        TetrisGame.Soundman.PlayMusic("high_score_list");
+                        TetrisGame.Soundman.PlayMusic("highscoreentry");
                     }
                     
                 }
