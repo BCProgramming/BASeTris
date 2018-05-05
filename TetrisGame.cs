@@ -48,7 +48,7 @@ namespace BASeTris
             {
                 Image reduceit = Imageman["block_arrangement"];
                     //reduce total size to 20%.
-                    Bitmap ReduceSize = new Bitmap((int)(reduceit.Width * .2), (int)(reduceit.Height * .2));
+                    Bitmap ReduceSize = new Bitmap((int)(reduceit.Width * .1), (int)(reduceit.Height * .1));
                     using (Graphics greduce = Graphics.FromImage(ReduceSize))
                     {
                         greduce.DrawImage(reduceit,new Rectangle(0,0,ReduceSize.Width,ReduceSize.Height));

@@ -10,10 +10,20 @@ namespace BASeTris
     public class Statistics
     {
         private TimeSpan[] LevelReachTimes = new TimeSpan[] { TimeSpan.Zero };
+        public TimeSpan[] LevelTimes {   get {  return new List<TimeSpan>(LevelReachTimes).ToArray(); } }
         public TimeSpan TotalGameTime = TimeSpan.MinValue;
         public void SetLevelTime(TimeSpan ReachedTime)
         {
             LevelReachTimes = LevelReachTimes.Concat(new TimeSpan[] { ReachedTime }).ToArray();
+        }
+        public Dictionary<String,int> GetPieceCounts()
+        {
+            Dictionary<String, int> BuildResult = new Dictionary<string, int>();
+            foreach(var kvp in PieceCounts)
+            {
+                BuildResult.Add(kvp.Key.Name,kvp.Value);
+            }
+            return BuildResult;
         }
         public int LineCount {  get { return LineCounts.Sum((w) => w.Value); } }
         public int I_Piece_Count

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using BASeCamp.BASeScores;
+using BASeCamp.Elementizer;
 
 namespace BASeTris
 {
@@ -35,16 +36,31 @@ namespace BASeTris
         /// <param name="InitializationData"></param>
         public TetrisHighScoreData(Statistics InitializationData)
         {
+            TotalLines = InitializationData.LineCount;
+            LevelReachedTimes = InitializationData.LevelTimes;
+            TetronimoPieceCounts = InitializationData.GetPieceCounts();
 
         }
 
         public TetrisHighScoreData(XElement Source,object PersistenceData)
         {
-
+            if(Source.HasElements)
+            {
+                XElement LevelTimeNode = Source.Element("LevelTimes");
+                XElement PieceCountsNode = Source.Element("PieceCounts");
+                TotalLines = Source.GetAttributeInt("Lines", 0);
+                LevelReachedTimes = (TimeSpan[])StandardHelper.ReadArray<TimeSpan>(LevelTimeNode, PersistenceData);
+                TetronimoPieceCounts = StandardHelper.ReadDictionary<String, int>(PieceCountsNode, PersistenceData);
+            }
         }
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
-            throw new NotImplementedException();
+            XElement BuildNode = new XElement(pNodeName);
+            BuildNode.Add(new XAttribute("Lines",TotalLines));
+            XElement LevelTimeNode = StandardHelper.SaveArray(LevelReachedTimes, "LevelTimes", PersistenceData);
+            XElement PieceCountNode = StandardHelper.SaveDictionary(TetronimoPieceCounts, "PieceCounts");
+            BuildNode.Add(LevelTimeNode,PieceCountNode);
+            return BuildNode;
         }
     }
     

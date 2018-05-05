@@ -44,7 +44,7 @@ namespace BASeTris.GameStates
             hs = _ScoreList.GetScores().ToList();
             HighlightedScorePositions = HighlightPositions;
             RevertState = ReversionState;
-            ScoreFont = new Font(TetrisGame.RetroFont,25,FontStyle.Bold); //This needs to change based on the actual gameplay area size.
+            
         }
         //This state Draws the High scores.
         //Note that this state "takes over" the full display- it doesn't use an underlying Standard State to handle drawing aspects like the Status bar.
@@ -80,63 +80,73 @@ namespace BASeTris.GameStates
         {
             float StartY = Bounds.Height * 0.175f;
             float MiddleX = Bounds.Width / 2;
-            float LineHeight = g.MeasureString("#", ScoreFont).Height + 5;
+            
             DrawBackground(pOwner,g, Bounds);
-            if(IncrementedDrawState >= 0)
+            float TextSize = Bounds.Height / 30f;
+            using (ScoreFont = new Font(TetrisGame.RetroFont, TextSize, FontStyle.Bold,GraphicsUnit.Pixel))
             {
-                //Draw HIGH SCORES
-                var Measured = g.MeasureString(HeaderText, ScoreFont);
-                PointF DrawPosition = new PointF(MiddleX - (Measured.Width/2),StartY);
-                g.DrawString(HeaderText, ScoreFont, Brushes.White, new PointF(DrawPosition.X+2,DrawPosition.Y+2));
-                g.DrawString(HeaderText,ScoreFont,Brushes.Black,DrawPosition);
-                
-            }
-            if(IncrementedDrawState >= 1)
-            {
-                float LineYPosition = StartY + LineHeight;
-
-                //draw a line underneath the High scores text
-                g.DrawLine(LinePen,20,LineYPosition,Bounds.Width-20,LineYPosition);
-            }
-
-            if(IncrementedDrawState >= 2)
-            {
-                //draw the high score listing entries.
-                //iterate from 2 to drawstate and draw the high score at position drawstate-2.
-                for(int scoreiterate=2;scoreiterate<IncrementedDrawState;scoreiterate++)
+                float LineHeight = g.MeasureString("#", ScoreFont).Height + 5;
+                //This needs to change based on the actual gameplay area size.)
+                if (IncrementedDrawState >= 0)
                 {
-                    int CurrentScoreIndex = scoreiterate - 2;
-                    int CurrentScorePosition = CurrentScoreIndex + 1;
-                    float useYPosition = StartY + (LineHeight * 2.5f) + LineHeight * CurrentScoreIndex;
-                    float UseXPosition = Bounds.Width * 0.19f;
-                    String sUseName = "N/A";
-                    int sUseScore = 0;
-                    IHighScoreEntry currentScore = hs.Count - 1 > CurrentScoreIndex ? hs[CurrentScoreIndex] : null;
-                    if(currentScore!=null)
-                    {
-                        sUseName = currentScore.Name;
-                        sUseScore = currentScore.Score;
-                    }
-                   
-                    var MeasureScore = g.MeasureString(sUseScore.ToString(), ScoreFont);
-                    var MeasureName  = g.MeasureString(sUseName, ScoreFont);
-                    float NameXPosition = Bounds.Width * 0.18f;
-                    float ScoreXPositionRight = Bounds.Width * (1 - 0.18f);
-                    Brush DrawScoreBrush = HighlightedScorePositions.Contains(CurrentScorePosition) ? GetHighlightBrush() : Brushes.Gray;
-
-                    g.DrawString(sUseName,ScoreFont,Brushes.Black,NameXPosition+2,useYPosition+2);
-                    g.DrawString(sUseName, ScoreFont, DrawScoreBrush, NameXPosition, useYPosition);
-                    
-                    float ScoreXPosition = ScoreXPositionRight - MeasureScore.Width;
-
-                    g.DrawString(sUseScore.ToString(),ScoreFont,Brushes.Black,ScoreXPosition+2,useYPosition+2);
-                    g.DrawString(sUseScore.ToString(), ScoreFont, DrawScoreBrush, ScoreXPosition , useYPosition );
-
-                    g.DrawLine(new Pen(DrawScoreBrush,3),NameXPosition+MeasureName.Width+15,useYPosition+MeasureName.Height/2, ScoreXPosition-15, useYPosition + MeasureName.Height / 2);
-
+                    //Draw HIGH SCORES
+                    var Measured = g.MeasureString(HeaderText, ScoreFont);
+                    PointF DrawPosition = new PointF(MiddleX - (Measured.Width / 2), StartY);
+                    g.DrawString(HeaderText, ScoreFont, Brushes.White, new PointF(DrawPosition.X + 2, DrawPosition.Y + 2));
+                    g.DrawString(HeaderText, ScoreFont, Brushes.Black, DrawPosition);
 
                 }
+                if (IncrementedDrawState >= 1)
+                {
+                    float LineYPosition = StartY + LineHeight;
 
+                    //draw a line underneath the High scores text
+                    g.DrawLine(LinePen, 20, LineYPosition, Bounds.Width - 20, LineYPosition);
+                }
+
+                if (IncrementedDrawState >= 2)
+                {
+                    //draw the high score listing entries.
+                    //iterate from 2 to drawstate and draw the high score at position drawstate-2.
+                    for (int scoreiterate = 2; scoreiterate < IncrementedDrawState; scoreiterate++)
+                    {
+                        int CurrentScoreIndex = scoreiterate - 2;
+                        int CurrentScorePosition = CurrentScoreIndex + 1;
+                        float useYPosition = StartY + (LineHeight * 2.5f) + LineHeight * CurrentScoreIndex;
+                        float UseXPosition = Bounds.Width * 0.19f;
+                        String sUseName = "N/A";
+                        int sUseScore = 0;
+                        IHighScoreEntry currentScore = hs.Count  > CurrentScoreIndex ? hs[CurrentScoreIndex] : null;
+                        if (currentScore != null)
+                        {
+                            sUseName = currentScore.Name;
+                            sUseScore = currentScore.Score;
+                        }
+
+                        var MeasureScore = g.MeasureString(sUseScore.ToString(), ScoreFont);
+                        var MeasureName = g.MeasureString(sUseName, ScoreFont);
+                        float PosXPosition = Bounds.Width * 0.1f;
+                        float NameXPosition = Bounds.Width * 0.20f;
+                        float ScoreXPositionRight = Bounds.Width * (1 - 0.20f);
+                        Brush DrawScoreBrush = HighlightedScorePositions.Contains(CurrentScorePosition) ? GetHighlightBrush() : Brushes.Gray;
+
+                        g.DrawString(CurrentScorePosition.ToString(), ScoreFont, Brushes.Black, PosXPosition + 2, useYPosition + 2);
+                        g.DrawString(CurrentScorePosition.ToString(), ScoreFont, DrawScoreBrush, PosXPosition, useYPosition);
+
+                        g.DrawString(sUseName, ScoreFont, Brushes.Black, NameXPosition + 2, useYPosition + 2);
+                        g.DrawString(sUseName, ScoreFont, DrawScoreBrush, NameXPosition, useYPosition);
+
+                        float ScoreXPosition = ScoreXPositionRight - MeasureScore.Width;
+
+                        g.DrawString(sUseScore.ToString(), ScoreFont, Brushes.Black, ScoreXPosition + 2, useYPosition + 2);
+                        g.DrawString(sUseScore.ToString(), ScoreFont, DrawScoreBrush, ScoreXPosition, useYPosition);
+
+                        g.DrawLine(new Pen(DrawScoreBrush, 3), NameXPosition + MeasureName.Width + 15, useYPosition + MeasureName.Height / 2, ScoreXPosition - 15, useYPosition + MeasureName.Height / 2);
+
+
+                    }
+
+                }
             }
         }
 
