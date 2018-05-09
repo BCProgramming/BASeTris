@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BaseDoku;
+using BASeCamp.BASeScores;
 
 namespace BASeTris
 {
@@ -15,6 +16,7 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
+          
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;

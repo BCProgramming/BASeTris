@@ -30,7 +30,7 @@ namespace BASeTris
         public static cNewSoundManager Soundman;
         public static ImageManager Imageman;
         //public static HighScoreManager ScoreMan;
-        public static XMLScoreManager<HighScoreNullCustomData> ScoreMan;
+        public static XMLScoreManager<TetrisHighScoreData> ScoreMan;
         public static AudioThemeManager AudioThemeMan;
         public static Random rgen = new Random();
         public static bool PortableMode = false;
@@ -73,8 +73,8 @@ namespace BASeTris
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
 
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.xml");
-            ScoreMan = XMLScoreManager<HighScoreNullCustomData>.FromFile(ScoreFile);
-            if (ScoreMan == null) ScoreMan = new XMLScoreManager<HighScoreNullCustomData>(ScoreFile);
+            ScoreMan = XMLScoreManager<TetrisHighScoreData>.FromFile(ScoreFile);
+            if (ScoreMan == null) ScoreMan = new XMLScoreManager<TetrisHighScoreData>(ScoreFile);
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
 

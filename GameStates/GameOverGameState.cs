@@ -180,10 +180,10 @@ namespace BASeTris.GameStates
                     if(GameOveredState is StandardTetrisGameState)
                     {
                         EnterHighScoreState ehs = new EnterHighScoreState(GameOveredState,
-                            ((StandardTetrisGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<HighScoreNullCustomData>(n, s, new HighScoreNullCustomData())
+                            ((StandardTetrisGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((StandardTetrisGameState)GameOveredState).GameStats))
                             , ((StandardTetrisGameState)GameOveredState).GameStats);
                         pOwner.CurrentState = ehs;
-                        TetrisGame.Soundman.PlayMusic("highscoreentry2");
+                        TetrisGame.Soundman.PlayMusic("highscoreentry");
                     }
                     
                 }

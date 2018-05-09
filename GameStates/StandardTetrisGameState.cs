@@ -30,7 +30,7 @@ namespace BASeTris.GameStates
 
 
 
-        public virtual IHighScoreList<HighScoreNullCustomData> GetLocalScores()
+        public virtual IHighScoreList<TetrisHighScoreData> GetLocalScores()
         {
             
             return TetrisGame.ScoreMan["Standard"];
@@ -835,12 +835,14 @@ namespace BASeTris.GameStates
                 }
                 else if (!BlockHold)
                 {
-                    BlockGroup FirstGroup = PlayField.BlockGroups.First();
-                    PlayField.RemoveBlockGroup(FirstGroup);
-                    HoldBlock = FirstGroup;
-                    BlockHold = true;
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Hold);
-                    
+                    BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+                    if (FirstGroup != null)
+                    {
+                        PlayField.RemoveBlockGroup(FirstGroup);
+                        HoldBlock = FirstGroup;
+                        BlockHold = true;
+                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Hold);
+                    }
                 }
             }
             else if(g==GameKeys.GameKey_Debug1)

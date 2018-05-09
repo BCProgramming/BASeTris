@@ -25,6 +25,15 @@ namespace BASeTris
             }
             return BuildResult;
         }
+        public Dictionary<String,int> GetLineCounts()
+        {
+            Dictionary<String, int> BuildResult = new Dictionary<string, int>();
+            foreach (var kvp in LineCounts)
+            {
+                BuildResult.Add(kvp.Key.Name, kvp.Value);
+            }
+            return BuildResult;
+        }
         public int LineCount {  get { return LineCounts.Sum((w) => w.Value); } }
         public int I_Piece_Count
         {

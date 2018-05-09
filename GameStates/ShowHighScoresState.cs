@@ -24,7 +24,8 @@ namespace BASeTris.GameStates
         public GameState RevertState = null; //if set, pressing the appropriate key will set the state back to this one. An integrated 'Menu' state could benefit from this- get rid of the Windows Menu bar and make it more gamey?)
         private int[] HighlightedScorePositions = new int[] { };
         private IHighScoreList _ScoreList = null;
-
+        private String PointerText = "►";
+        private int SelectedScorePosition = 1;
         private bool ScrollCompleted = false;
         DateTime LastIncrementTime = DateTime.MinValue;
         TimeSpan IncrementTimediff = new TimeSpan(0,0,0,0,300);
@@ -43,6 +44,7 @@ namespace BASeTris.GameStates
             _ScoreList = ScoreList;
             hs = _ScoreList.GetScores().ToList();
             HighlightedScorePositions = HighlightPositions;
+            SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First();
             RevertState = ReversionState;
             
         }
@@ -127,7 +129,7 @@ namespace BASeTris.GameStates
                         var MeasureName = g.MeasureString(sUseName, ScoreFont);
                         float PosXPosition = Bounds.Width * 0.1f;
                         float NameXPosition = Bounds.Width * 0.20f;
-                        float ScoreXPositionRight = Bounds.Width * (1 - 0.20f);
+                        float ScoreXPositionRight = Bounds.Width * (1 - 0.10f);
                         Brush DrawScoreBrush = HighlightedScorePositions.Contains(CurrentScorePosition) ? GetHighlightBrush() : Brushes.Gray;
 
                         g.DrawString(CurrentScorePosition.ToString(), ScoreFont, Brushes.Black, PosXPosition + 2, useYPosition + 2);
@@ -141,8 +143,18 @@ namespace BASeTris.GameStates
                         g.DrawString(sUseScore.ToString(), ScoreFont, Brushes.Black, ScoreXPosition + 2, useYPosition + 2);
                         g.DrawString(sUseScore.ToString(), ScoreFont, DrawScoreBrush, ScoreXPosition, useYPosition);
 
-                        g.DrawLine(new Pen(DrawScoreBrush, 3), NameXPosition + MeasureName.Width + 15, useYPosition + MeasureName.Height / 2, ScoreXPosition - 15, useYPosition + MeasureName.Height / 2);
+                        g.DrawLine(new Pen(DrawScoreBrush, 3), NameXPosition + MeasureName.Width + 15, useYPosition + LineHeight / 2, ScoreXPosition - 15, useYPosition + LineHeight / 2);
 
+                        if(SelectedScorePosition==CurrentScoreIndex)
+                        {
+                            //draw the selection arrow to the left of the NamePosition and useYPosition.
+                            var MeasureArrow = g.MeasureString(PointerText, ScoreFont);
+                            float ArrowX = PosXPosition - MeasureArrow.Width - 5;
+                            float ArrowY = useYPosition;
+                            g.DrawString(PointerText,ScoreFont,Brushes.Black,ArrowX+2,ArrowY+2);
+                            g.DrawString(PointerText, ScoreFont,DrawScoreBrush, ArrowX , ArrowY);
+                        }
+                        
 
                     }
 
@@ -174,7 +186,29 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-            if(!ScrollCompleted) IncrementTimediff = new TimeSpan(0,0,0,0,50);
+            GameKeys[] handledKeys = new GameKeys[] { GameKeys.GameKey_Down, GameKeys.GameKey_Drop, GameKeys.GameKey_RotateCW };
+            if (!ScrollCompleted) IncrementTimediff = new TimeSpan(0, 0, 0, 0, 50);
+
+            else if (ScrollCompleted && handledKeys.Contains(g))
+            {
+                if (g == GameKeys.GameKey_Drop)
+                {
+                    //move up...
+                    SelectedScorePosition--;
+                    if (SelectedScorePosition < 1) SelectedScorePosition = _ScoreList.MaximumSize;
+                }
+                else if (g == GameKeys.GameKey_Down)
+                {
+                    SelectedScorePosition++;
+                    if (SelectedScorePosition > _ScoreList.MaximumSize) SelectedScorePosition = 1;
+                }
+                else if (g == GameKeys.GameKey_RotateCW)
+                {
+                    //This is where we will enter a "HighscoreDetails" state passing along this one specific high score.
+                }
+                
+            }
+
             else if (RevertState != null) pOwner.CurrentState = RevertState;
         }
     }
