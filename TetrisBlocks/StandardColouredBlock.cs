@@ -21,14 +21,15 @@ namespace BASeTris.TetrisBlocks
         public override void DrawBlock(TetrisBlockDrawParameters parameters)
         {
             if(_RotationImages==null) NoImage();
-            if (parameters.OverrideBrush != null)
+            /*if (parameters.OverrideBrush != null)
             {
                 parameters.g.FillRectangle(parameters.OverrideBrush, parameters.region);
                 return;
-            }
+            }*/
             int usemodulo = Rotation;
             Image useImage = _RotationImages[usemodulo % _RotationImages.Length];
-            ImageAttributes useAttrib = useAttributes == null ? null : useAttributes[usemodulo % useAttributes.Length];
+            ImageAttributes useAttrib = parameters.ApplyAttributes?? (useAttributes == null ? null : useAttributes[usemodulo % useAttributes.Length]);
+            
             float Degrees = usemodulo * 90;
             PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));
             
@@ -44,7 +45,25 @@ namespace BASeTris.TetrisBlocks
             }
             else
             {
-                parameters.g.DrawImage(useImage, new Rectangle((int)parameters.region.Left, (int)parameters.region.Top, (int)parameters.region.Width, (int)parameters.region.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                //inset the region by the specified amount of percentage.
+                RectangleF DrawPosition = parameters.region;
+                if (parameters.FillPercent != 1)
+                {
+                    float totalWidth = parameters.region.Width;
+                    float totalHeight = parameters.region.Height;
+                    float CenterX = DrawPosition.Width / 2 + DrawPosition.Left;
+                    float CenterY = DrawPosition.Height / 2 + DrawPosition.Top;
+
+                    float desiredWidth = totalWidth * parameters.FillPercent;
+                    float desiredHeight = totalHeight * parameters.FillPercent;
+
+                    DrawPosition = new RectangleF(CenterX-desiredWidth/2,CenterY-desiredHeight/2,desiredWidth,desiredHeight);
+
+
+                }
+
+
+                parameters.g.DrawImage(useImage, new Rectangle((int)DrawPosition.Left, (int)DrawPosition.Top, (int)DrawPosition.Width, (int)DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
             }
 
         }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.GameStates
 {
@@ -21,7 +23,7 @@ namespace BASeTris.GameStates
         String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         int CurrentPosition = 0; //position of character being "edited"
         private int AchievedPosition;
-
+        private IBackgroundDraw _BG = null;
         public override DisplayMode SupportedDisplayMode { get { return DisplayMode.Full; } }
 
         public EnterHighScoreState(GameState pOwner,IHighScoreList ScoreList,Func<string,int,IHighScoreEntry> ScoreFunc, Statistics SourceStats)
@@ -31,6 +33,15 @@ namespace BASeTris.GameStates
             ScoreToEntryFunc = ScoreFunc; //function which takes the score and gives back an appropriate IHighScoreEntry implementation.
             GameStatistics = SourceStats;
             AchievedPosition = ScoreListing.IsEligible(GameStatistics.Score);
+
+            ImageAttributes useBGAttributes = new ImageAttributes();
+            useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.4f));
+            var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
+            double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            sib.Movement = new PointF((float)xpoint, (float)ypoint);
+            _BG = sib;
+
             HighScoreTitle = (" Congratulations, your score is\n at position " + AchievedPosition + " \n Enter your name.").Split('\n');
         }
 
@@ -42,6 +53,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
+            _BG.FrameProc();
             //throw new NotImplementedException();
         }
         Font useFont = null;
@@ -59,7 +71,7 @@ namespace BASeTris.GameStates
             Color UseHighLightingColor = HSLColor.RotateHue(Color.Red, RotateAmount);
             Color useLightRain = HSLColor.RotateHue(Color.LightPink, RotateAmount);
             //throw new NotImplementedException();
-            g.Clear(UseBackgroundColor);
+            _BG.DrawProc(g,Bounds);
             int StartYPosition = (int)(Bounds.Height * 0.15f);
             var MeasureBounds = g.MeasureString(HighScoreTitle[0], useFont);
             for (int i=0;i<HighScoreTitle.Length;i++)

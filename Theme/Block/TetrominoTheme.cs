@@ -32,7 +32,8 @@ namespace BASeTris
         {
             Color[] useColorSet;
             Color[][] ChooseColorSets = new Color[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
-            int ColorSet = (int)(Field.LineCount /10) %ChooseColorSets.Length;
+            long CurrLevel = (Field == null) ? 0 : (Field.LineCount / 10);
+            int ColorSet = (int)(CurrLevel) %ChooseColorSets.Length;
             useColorSet = ChooseColorSets[ColorSet];
             ApplyColorSet(Group,useColorSet);
 
@@ -106,7 +107,7 @@ namespace BASeTris
         {
             
 
-            int CurrLevel = (int)(Field.LineCount / 10);
+            int CurrLevel = Field==null?0:(int)(Field.LineCount / 10);
             ApplyColorSet(Group, CurrLevel);
 
         }

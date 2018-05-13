@@ -193,64 +193,10 @@ namespace BASeTris.GameStates
         {
             lock (LockTetImageRedraw)
             {
-                TetrominoImages = new Dictionary<Type, Image>();
-                float useSize = 18 * ((float)Bounds.Height / 644f);
-                SizeF useTetSize = new SizeF(useSize, useSize);
-                Tetromino_I TetI = new Tetromino_I();
-                Tetromino_J TetJ = new Tetromino_J();
-                Tetromino_L TetL = new Tetromino_L();
-                Tetromino_O TetO = new Tetromino_O();
-                Tetromino_S TetS = new Tetromino_S();
-                Tetromino_T TetT = new Tetromino_T();
-                Tetromino_Z TetZ = new Tetromino_Z();
-
-
-                PlayField.Theme.ApplyTheme(TetI, PlayField);
-                PlayField.Theme.ApplyTheme(TetJ, PlayField);
-                PlayField.Theme.ApplyTheme(TetL, PlayField);
-                PlayField.Theme.ApplyTheme(TetO, PlayField);
-                PlayField.Theme.ApplyTheme(TetS, PlayField);
-                PlayField.Theme.ApplyTheme(TetT, PlayField);
-                PlayField.Theme.ApplyTheme(TetZ, PlayField);
-                Image Image_I = OutLineImage(TetI.GetImage(useTetSize));
-                Image Image_J = OutLineImage(TetJ.GetImage(useTetSize));
-                Image Image_L = OutLineImage(TetL.GetImage(useTetSize));
-                Image Image_O = OutLineImage(TetO.GetImage(useTetSize));
-                Image Image_S = OutLineImage(TetS.GetImage(useTetSize));
-                Image Image_T = OutLineImage(TetT.GetImage(useTetSize));
-                Image Image_Z = OutLineImage(TetZ.GetImage(useTetSize));
-
-                
-
-
-                TetrominoImages.Add(typeof(Tetromino_I), Image_I);
-                TetrominoImages.Add(typeof(Tetromino_J), Image_J);
-                TetrominoImages.Add(typeof(Tetromino_L), Image_L);
-                TetrominoImages.Add(typeof(Tetromino_O), Image_O);
-                TetrominoImages.Add(typeof(Tetromino_S), Image_S);
-                TetrominoImages.Add(typeof(Tetromino_T), Image_T);
-                TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
+                TetrominoImages = TetrisGame.GetTetrominoBitmaps(Bounds, PlayField.Theme, PlayField);
             }
         }
-        private Image OutLineImage(Image Input)
-        {
-            Bitmap BuildImage = new Bitmap(Input.Width + 6, Input.Height + 6);
-            using (Graphics useG = Graphics.FromImage(BuildImage))
-            {
-                var shadowtet = GetShadowAttributes(0f);
-                 int offset = 2;
-                foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
-                {
-
-                    useG.DrawImage(Input, new Rectangle(3+shadowblob.X, 3+shadowblob.Y, Input.Width, Input.Height), 0, 0, Input.Width, Input.Height, GraphicsUnit.Pixel, shadowtet);
-                }
-                useG.DrawImage(Input,new Point(3,3));
-                
-                
-            }
-            return BuildImage;
-
-        }
+    
         private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {
             if (e._group.Y < 1)
@@ -433,22 +379,7 @@ namespace BASeTris.GameStates
         {
             group.FallSpeed = Math.Max(1000 - (PlayField.Level * 100), 50);
         }
-        private ImageAttributes GetShadowAttributes(float ShadowBrightness = 0.1f)
-        {
-            float brt = ShadowBrightness;
-            ImageAttributes resultAttr = new ImageAttributes();
-            System.Drawing.Imaging.ColorMatrix cm = new ColorMatrix(new float[][]
-            {
-                new float[]{brt,0f,0f,0f,0f},
-                new float[]{0f,brt,0f,0f,0f},
-                new float[]{0f,0f,brt,0f,0f},
-                new float[]{0f,0f,0f,1f,0f},
-                new float[]{0f,0f,0f,0f,1f}
-
-            });
-            resultAttr.SetColorMatrix(cm);
-            return resultAttr;
-        }
+   
 
 
         public virtual BlockGroup GenerateTetromino()
@@ -536,7 +467,7 @@ namespace BASeTris.GameStates
 
                 int StartYPos = (int)(140 * Factor);
                 int useXPos = (int)(30 * Factor);
-                ImageAttributes ShadowTet = GetShadowAttributes();
+                ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
                 for (int i = 0; i < useTypes.Length; i++)
                 {
                     PointF BaseCoordinate = new PointF(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
@@ -726,7 +657,10 @@ namespace BASeTris.GameStates
                     {
                         RectangleF BlockBounds = new RectangleF(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), PlayField.GetBlockWidth(Bounds), PlayField.GetBlockHeight(Bounds));
                         TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, GrabGhost);
-                        tbd.OverrideBrush = GhostBrush;
+                        ImageAttributes Shade = new ImageAttributes();
+                        Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
+                        tbd.ApplyAttributes = Shade;
+                        //tbd.OverrideBrush = GhostBrush;
                         iterateblock.Block.DrawBlock(tbd);
                     }
                 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,6 +45,8 @@ namespace BASeTris.TetrisBlocks
         public RectangleF region;
         public BlockGroup GroupOwner = null;
         public Brush OverrideBrush = null;
+        public ImageAttributes ApplyAttributes = null;
+        public float FillPercent = 1f;
         public TetrisBlockDrawParameters(Graphics pG,RectangleF pRegion,BlockGroup pGroupOwner)
         {
             g = pG;

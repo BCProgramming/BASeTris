@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.GameStates
 {
@@ -18,14 +19,14 @@ namespace BASeTris.GameStates
     //This will animate the display by drawing them one by one.
     //Scores can also be highlighted.
 
-    class ShowHighScoresState : GameState
+    public class ShowHighScoresState : GameState
     {
         Pen LinePen = new Pen(new LinearGradientBrush(new Rectangle(0, 0, 5, 25), Color.Black, Color.DarkGray, LinearGradientMode.Vertical), 25);
         public GameState RevertState = null; //if set, pressing the appropriate key will set the state back to this one. An integrated 'Menu' state could benefit from this- get rid of the Windows Menu bar and make it more gamey?)
         private int[] HighlightedScorePositions = new int[] { };
         private IHighScoreList _ScoreList = null;
         private String PointerText = "►";
-        private int SelectedScorePosition = 1;
+        private int SelectedScorePosition = 0;
         private bool ScrollCompleted = false;
         DateTime LastIncrementTime = DateTime.MinValue;
         TimeSpan IncrementTimediff = new TimeSpan(0,0,0,0,300);
@@ -38,14 +39,23 @@ namespace BASeTris.GameStates
         //"The added two lines are HIGH SCORES and the header line, which are also drawn".
         
         public override GameState.DisplayMode SupportedDisplayMode {  get { return GameState.DisplayMode.Full; } }
-
+        private IBackgroundDraw _BG = null;
         public ShowHighScoresState(IHighScoreList ScoreList,GameState ReversionState = null,int[] HighlightPositions = null)
         {
+            
             _ScoreList = ScoreList;
             hs = _ScoreList.GetScores().ToList();
             HighlightedScorePositions = HighlightPositions;
             SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First();
             RevertState = ReversionState;
+            ImageAttributes useBGAttributes = new ImageAttributes();
+            useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.25f));
+            var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
+            double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            sib.Movement = new PointF((float)xpoint,(float)ypoint);
+            _BG = sib;
+            
             
         }
         //This state Draws the High scores.
@@ -54,24 +64,15 @@ namespace BASeTris.GameStates
         {
             //throw new NotImplementedException();
         }
-        Brush useBackgroundBrush = null;
+        
         private void DrawBackground(IStateOwner pOwner,Graphics g,RectangleF Bounds)
         {
-            if(useBackgroundBrush==null)
-            {
-                ImageAttributes useBGAttributes = new ImageAttributes();
-                useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.25f));
-                useBackgroundBrush = new TextureBrush(TetrisGame.StandardTiledTetrisBackground,new Rectangle(0,0,TetrisGame.StandardTiledTetrisBackground.Width, TetrisGame.StandardTiledTetrisBackground.Height),useBGAttributes);
-                ((TextureBrush)useBackgroundBrush).WrapMode = WrapMode.Tile;
-            }
+           
             //ColorMatrices.GetFader(1.0f - ((float)i * 0.1f))
-            g.Clear(Color.Transparent);
-            //Windows 3.1 SETUP!...
-            using (LinearGradientBrush drawbgBrush = new LinearGradientBrush(new Rectangle((int)Bounds.Left - 1, (int)Bounds.Top - 1, (int)Bounds.Width + 1, (int)Bounds.Height + 1),Color.Aquamarine,Color.YellowGreen , LinearGradientMode.Vertical))
-            {
-                g.FillRectangle(drawbgBrush,Bounds);
-            }
-            g.FillRectangle(useBackgroundBrush,Bounds);
+            g.Clear(Color.White);
+          
+            
+            _BG.DrawProc(g,Bounds);
         }
         private Brush GetHighlightBrush()
         {
@@ -80,9 +81,9 @@ namespace BASeTris.GameStates
         
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
+            ;
             float StartY = Bounds.Height * 0.175f;
             float MiddleX = Bounds.Width / 2;
-            
             DrawBackground(pOwner,g, Bounds);
             float TextSize = Bounds.Height / 30f;
             using (ScoreFont = new Font(TetrisGame.RetroFont, TextSize, FontStyle.Bold,GraphicsUnit.Pixel))
@@ -170,6 +171,7 @@ namespace BASeTris.GameStates
         public override void GameProc(IStateOwner pOwner)
         {
 
+            _BG.FrameProc();
             if(DateTime.Now-LastIncrementTime > IncrementTimediff  && !ScrollCompleted)
             {
                 IncrementedDrawState++;
@@ -195,16 +197,19 @@ namespace BASeTris.GameStates
                 {
                     //move up...
                     SelectedScorePosition--;
-                    if (SelectedScorePosition < 1) SelectedScorePosition = _ScoreList.MaximumSize;
+                    if (SelectedScorePosition < 0) SelectedScorePosition = _ScoreList.MaximumSize;
                 }
                 else if (g == GameKeys.GameKey_Down)
                 {
                     SelectedScorePosition++;
-                    if (SelectedScorePosition > _ScoreList.MaximumSize) SelectedScorePosition = 1;
+                    if (SelectedScorePosition > _ScoreList.MaximumSize) SelectedScorePosition = 0;
                 }
                 else if (g == GameKeys.GameKey_RotateCW)
                 {
                     //This is where we will enter a "HighscoreDetails" state passing along this one specific high score.
+                    var SelectedScore = _ScoreList.GetScores().ToArray()[SelectedScorePosition];
+                    ViewScoreDetailsState vsd = new ViewScoreDetailsState(this, SelectedScore, _BG, SelectedScorePosition);
+                    pOwner.CurrentState = vsd;
                 }
                 
             }

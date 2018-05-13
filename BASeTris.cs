@@ -16,6 +16,7 @@ using BASeCamp.BASeScores;
 using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
+using BASeTris.Choosers.AIChoosers;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.TetrisBlocks;
@@ -100,7 +101,10 @@ namespace BASeTris
                 X.StartPolling(X.Gamepad_1);
                 
             }
-            _Game = new TetrisGame(this, new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(),new NESTetrominoTheme(),1)));
+            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
+            _Game = new TetrisGame(this, standardstate);
+            //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
+            
             
             
 

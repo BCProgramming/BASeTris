@@ -62,9 +62,12 @@
     <Compile Include="AssetManager\AssetManager.cs" />
     <Compile Include="AssetManager\DeletionHelper.cs" />
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
+    <Compile Include="BackgroundDrawers\IBackgroundDraw.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="BlockGroup.cs" />
+    <Compile Include="Choosers\AIChoosers\MeanChooser.cs" />
     <Compile Include="Choosers\BagChooser.cs" />
+    <Compile Include="Choosers\AIChoosers\BaseAIChooser.cs" />
     <Compile Include="Choosers\BlockGroupChooser.cs" />
     <Compile Include="Choosers\FullRandomChooser.cs" />
     <Compile Include="Choosers\GameBoyChooser.cs" />
@@ -79,6 +82,7 @@
     <Compile Include="GameStates\ShowHighScoresState.cs" />
     <Compile Include="GameStates\StandardGameOptions.cs" />
     <Compile Include="GameStates\StandardTetrisGameState.cs" />
+    <Compile Include="GameStates\ViewScoreDetailsState.cs" />
     <Compile Include="Particles\cParticle.cs" />
     <Compile Include="DebugLog.cs" />
     <Compile Include="BASeTris.cs">

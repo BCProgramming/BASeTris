@@ -9,7 +9,7 @@ namespace BASeTris.Tetrominoes
 {
     public class Tetromino : BlockGroup
     {
-        private static Func<BlockGroup>[] StandardTetrominoFunctions =
+        internal static Func<BlockGroup>[] StandardTetrominoFunctions =
         
             new Func<BlockGroup>[]
             {
