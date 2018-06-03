@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -15,14 +16,17 @@ namespace BASeTris.Choosers.AIChoosers
     //This utilizes the routines found in the TetrisAI routines. How convenient- I already wrote those!
     public class MeanChooser : BaseAIChooser
     {
+        
         public MeanChooser(StandardTetrisGameState _StandardState, Func<BlockGroup>[] pAvailable) : base(_StandardState, pAvailable)
         {
         }
         //when we evaluate the next group, we evaluate it based on it giving the worst results. This StoredBoardState
         //will represent the best outcome from that piece- we will use that to evaluate the next piece, which will store it's best possibility here, and so on.
         //so, we basically give the worst possible options, and base our next choice on that worst possible option being used in the most effective way.
-        private StoredBoardState BestCaseScenario = null; 
-        public override BlockGroup GetNext()
+        private StoredBoardState BestCaseScenario = null;
+        
+
+        public override BlockGroup PerformGetNext()
         {
             //First, we need to see what we CAN choose from.
             //We are slightly limited- if the functions give back varied results or something then it might act weird.
@@ -70,21 +74,28 @@ namespace BASeTris.Choosers.AIChoosers
                     BestStates[kvp.Key] = CurrentMaximum;
                     WorstStates[kvp.Key] = CurrentMinimum;
                     var Average = AllScores.Average();
-
-                    FinalScores.Add(kvp.Key, new double[] { Average, Maximum, Minimum }.Average());
+                    FinalScores.Add(kvp.Key,Maximum);
+                    //FinalScores.Add(kvp.Key, new double[] { Average, Maximum, Minimum }.Average());
                 }
             }
 
             var ordered = FinalScores.OrderBy((o) => o.Value).ToList();
             //select the "winning" FinalScore.
-            var crappiest = ordered.First();  //the lowest value.
-            BlockGroup ChosenGroup = crappiest.Key;
+            var crappiest = ordered.FirstOrDefault();  //the lowest value. This is the block with the lowest "maximum" in terms of positive aspects.
+            if (crappiest.Key == null)
+            {
+                BestCaseScenario = null;
+                return TetrisGame.Choose(availablegroups);
+            }
+            else
+            {
+                BlockGroup ChosenGroup = crappiest.Key;
 
-            //now, what was the best possible board state possible with this crappiest one?
-            BestCaseScenario = BestStates[ChosenGroup];
+                //now, what was the best possible board state possible with this crappiest one?
+                BestCaseScenario = BestStates[ChosenGroup];
 
-            return ChosenGroup;
-           
+                return ChosenGroup;
+            }
         }
     }
 }

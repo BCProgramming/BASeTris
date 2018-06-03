@@ -141,12 +141,12 @@ namespace BASeTris.GameStates
 
                 if (rowsfound > 0)
                 {
-                    var ClearState = new ClearLineActionGameState(this, CompletedRows.ToArray(), AfterClearActions);
-                    ClearState.ClearStyle = TetrisGame.Choose((ClearLineActionGameState.LineClearStyle[])(Enum.GetValues(typeof(ClearLineActionGameState.LineClearStyle))));
+                    var ClearState = new FieldLineActionGameState(this, CompletedRows.ToArray(), AfterClearActions);
+                    ClearState.ClearStyle = TetrisGame.Choose((FieldLineActionGameState.LineClearStyle[])(Enum.GetValues(typeof(FieldLineActionGameState.LineClearStyle))));
 
                     pOwner.CurrentState = ClearState;
                 }
-                //if(rowsfound > 0) pOwner.CurrentState = new ClearLineActionDissolve(this,CompletedRows.ToArray(),AfterClearActions);
+                //if(rowsfound > 0) pOwner.CurrentState = new FieldLineActionDissolve(this,CompletedRows.ToArray(),AfterClearActions);
                 return rowsfound;
             }
             finally
@@ -172,7 +172,10 @@ namespace BASeTris.GameStates
             PlayField.BlockGroupSet += PlayField_BlockGroupSet;
             
         }
-
+        ~StandardTetrisGameState()
+        {
+            if (Chooser != null) Chooser.Dispose();
+        }
         private void PlayField_LevelChanged(object sender, TetrisField.LevelChangeEventArgs e)
         {
             lock (LockTetImageRedraw)

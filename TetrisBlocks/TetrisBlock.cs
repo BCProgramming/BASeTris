@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace BASeTris.TetrisBlocks
 {
+    //TODO: All "drawable" class instances should have their drawing implementation moved to a separate helper class or series of helper classes
+    //which function as an "adapter" that will draw to certain outputs.
+    //For example, as it stands now, we'd create a class to draw things via System.Drawing/GDI+. Once we have the interface-based approach to select the
+    //"Drawing" implementation we can create additional implementations for drawing to other output types (openTK for example)).
+    
     public abstract class TetrisBlock
     {
         public BlockGroup Owner { get; set; }
@@ -39,7 +44,7 @@ namespace BASeTris.TetrisBlocks
             //nothing by default. Well, for now anyway....
         }
     }
-    public class TetrisBlockDrawParameters
+    public class TetrisBlockDrawParameters : DrawAdapter.DrawAdapterInfo
     {
         public Graphics g;
         public RectangleF region;

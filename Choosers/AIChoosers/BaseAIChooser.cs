@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using BASeTris.AI;
 using BASeTris.GameStates;
@@ -15,21 +19,72 @@ namespace BASeTris.Choosers.AIChoosers
         {
             _State = _StandardState;
         }
-
-        public double[] GetScores(BlockGroup WithGroup)
+        ~BaseAIChooser()
         {
-
-
-            var boardstate = TetrisAI.GetPossibleResults(_State.PlayField.Contents, WithGroup);
+            Dispose();
             
-            //Task is to take this block group, and get <all> the "AI Score" of all possible placement positions for it.
-            //we return that in an array.
+        }
 
-            return Enumerable.Empty<double>().ToArray();
+        public override void Dispose()
+        {
+            if (AIWorker != null)
+            {
+                AIWorker.Abort();
+                AIWorker = null;
+            }
+        }
+
+        bool Caughtup = false;
+        private void AIChooserWorker()
+        {
+            try
+            {
+                while (AIWorker != null)
+                {
+                    while (WorkQueue.Count < _MaxElements)
+                    {
+                        var Grabnext = PerformGetNext();
+                        WorkQueue.Enqueue(Grabnext);
+                    }
+                    if(!Caughtup)
+                    {
+                        Caughtup = true;
+                        AIWorker.Priority = ThreadPriority.Lowest;
+                    }
+                    Thread.Sleep(1000);
+
+                }
+            }
+            catch(ThreadAbortException tae)
+            {
+
+            }
         }
 
 
-        public abstract override BlockGroup GetNext();
+        Thread AIWorker = null;
+        private int _MaxElements = 15;
+        protected ConcurrentQueue<BlockGroup> WorkQueue = new ConcurrentQueue<BlockGroup>(); 
+        public abstract BlockGroup PerformGetNext();
+
+        public override BlockGroup GetNext()
+        {
+            if (AIWorker==null)
+            {
+                AIWorker = new Thread(AIChooserWorker);
+                AIWorker.Priority = ThreadPriority.Normal;
+                AIWorker.Start();
+            }
+            while(WorkQueue.IsEmpty)
+            {
+                Thread.Sleep(5);
+            }
+            BlockGroup getresult = null;
+            while (!WorkQueue.TryDequeue(out getresult))
+            { Thread.Sleep(15);}
+                return getresult;
+
+        }
         
     }
 }

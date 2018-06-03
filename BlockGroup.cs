@@ -27,6 +27,23 @@ namespace BASeTris
         public DateTime LastFall = DateTime.MinValue;
         public Rectangle GroupExtents {  get { return _GroupExtents; } }
         protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
+        private Dictionary<TetrisBlock, BlockGroupEntry> _DataLookup = null;
+        public Dictionary<TetrisBlock,BlockGroupEntry> BlockDataLookup
+        {
+            get
+            {
+                if(_DataLookup == null)
+                {
+                    _DataLookup = new Dictionary<TetrisBlock, BlockGroupEntry>();
+                    foreach(var addelement in this)
+                    {
+                        _DataLookup.Add(addelement.Block,addelement);
+                    }
+                    
+                }
+                return _DataLookup;
+            }
+        }
         private DateTime LastRotationCall = DateTime.MinValue;
 
 
@@ -115,7 +132,7 @@ namespace BASeTris
         }
         public BlockGroupEntry FindEntry(TetrisBlock findBlock)
         {
-            return BlockData.FirstOrDefault((w) => w.Block == findBlock);
+            return BlockDataLookup[findBlock];
         }
         public void Clamp(int RowCount,int ColCount)
         {
@@ -266,7 +283,8 @@ namespace BASeTris
         public BlockGroupEntry(BlockGroupEntry clonesource)
         {
             RotationModulo = clonesource.RotationModulo;
-            Positions = (from pt in clonesource.Positions select pt).ToArray();
+            Positions = new Point[clonesource.Positions.Length];
+            clonesource.Positions.CopyTo(Positions,0);
             Block = clonesource.Block;
             Block.Rotation = clonesource.RotationModulo;
         }

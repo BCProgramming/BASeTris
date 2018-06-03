@@ -34,7 +34,7 @@ namespace BASeTris.AI
         }
         public static IEnumerable<StoredBoardState> GetPossibleResults(TetrisBlock[][] Source, BlockGroup bg)
         {
-            Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
+            //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for(int useRotation = 0;useRotation<4;useRotation++)
             {
                 for(int x=-5;x<Source[0].Length+5;x++)
@@ -297,10 +297,6 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
         private void DropBlock(BlockGroup Source,ref TetrisBlock[][] FieldState,int XOffset)
         {
-            if(Source.Any((w)=>w.RotationModulo!=0))
-            {
-                Debug.Print("Rotated piece being dropped...");
-            }
             bool result = true;
             int YOffset = 0;
             bool neverfit = true;

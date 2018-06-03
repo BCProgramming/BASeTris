@@ -199,8 +199,10 @@ namespace BASeTris.GameStates
                 }
                 NameEntered[NameEntered.Length - 1] = '_';
             }
-            else if(AvailableChars.Contains((char)pKey))
+
+            else if(AvailableChars.Contains(Char.ToUpper((char)pKey)))
             {
+                
                 NameEntered[CurrentPosition] = (char)pKey;
                 HandleGameKey(pOwner, GameKeys.GameKey_Right);
             }

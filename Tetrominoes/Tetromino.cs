@@ -32,6 +32,11 @@ namespace BASeTris.Tetrominoes
             1f,
             1f
         };
+        public static Choosers.BlockGroupChooser  NESTetrominoChooser()
+        {
+            BlockGroupChooser Chooser = new NESChooser(StandardTetrominoFunctions);
+            return Chooser;
+        }
         public static Choosers.BlockGroupChooser BagTetrominoChooser()
         {
             BlockGroupChooser Chooser = new BagChooser(StandardTetrominoFunctions);

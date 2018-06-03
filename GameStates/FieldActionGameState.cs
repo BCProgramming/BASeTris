@@ -12,11 +12,11 @@ namespace BASeTris.GameStates
     //operates solely on a StandardTetrisGameState (or derived class- really anything with an appropriate TetrisField.
     //This is itself a base class for "Clear" actions. This would include actions like clearing a line in Tetris, clearing a set of blocks in Dr Mario or Tetris 2, etc.
     //also this could be used to ADD stuff to the field- so it's not strictly for CLEAR but "ActionGameState" seemed a bit silly as a name.
-    public abstract class ClearActionGameState : GameState
+    public abstract class FieldActionGameState : GameState
     {
         protected StandardTetrisGameState _BaseState;
 
-        public ClearActionGameState(StandardTetrisGameState pBaseState)
+        public FieldActionGameState(StandardTetrisGameState pBaseState)
         {
             _BaseState = pBaseState;
         }
@@ -52,7 +52,7 @@ namespace BASeTris.GameStates
     //standard "line clear" which clears out a given set of line rows via animation, then calls a set of actions to perform afterwards.
     //This will use a "Tetris flash" when 4 or more rows are being cleared- this is a white overlay that is placed over top (well, for now- might be a gradient or some kind of pattern brush later!)
 
-    public class ClearLineActionGameState : ClearActionGameState
+    public class FieldLineActionGameState : FieldActionGameState
     {
         public enum LineClearStyle
         {
@@ -68,7 +68,7 @@ namespace BASeTris.GameStates
         
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
         protected bool FlashState = false;
-        public ClearLineActionGameState(StandardTetrisGameState _BaseState,int[] ClearRows,IEnumerable<Action> pAfterClearActions):base(_BaseState)
+        public FieldLineActionGameState(StandardTetrisGameState _BaseState,int[] ClearRows,IEnumerable<Action> pAfterClearActions):base(_BaseState)
         {
             AfterClear = pAfterClearActions;
             RowNumbers = ClearRows;
@@ -125,7 +125,7 @@ namespace BASeTris.GameStates
                         var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[CurrentClearIndex];
                         if (FindClear != null)
                         {
-                            GrabRow[CurrentClearIndex] = null;
+                            PerformClearAct(GrabRow, CurrentClearIndex);
                         }
 
 
@@ -142,7 +142,7 @@ namespace BASeTris.GameStates
                         var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[useIndex];
                         if (FindClear != null)
                         {
-                            GrabRow[useIndex] = null;
+                            PerformClearAct(GrabRow, useIndex);
                         }
                     }
                     CurrentClearIndex++;
@@ -157,7 +157,7 @@ namespace BASeTris.GameStates
                             int i = GrabRow.Length>>1;
                             int useindex =i+ ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
                             if (useindex < GrabRow.Length && useindex >= 0)
-                                GrabRow[useindex] = null;
+                                PerformClearAct(GrabRow, useindex);
                     }
                     CurrentClearIndex++;
                     _BaseState.PlayField.HasChanged = true;
@@ -173,8 +173,10 @@ namespace BASeTris.GameStates
                             int processindex = GrabRow.Length - CurrentClearIndex;
                         int i = GrabRow.Length >> 1;
                         int useindex = i + ((processindex % 2 == 0) ? processindex / 2 : -(processindex / 2 + 1));
-                        if (useindex < GrabRow.Length && useindex >= 0)
-                            GrabRow[useindex] = null;
+                            if (useindex < GrabRow.Length && useindex >= 0)
+                            {
+                                PerformClearAct(GrabRow,useindex);
+                            }
                     }
                     CurrentClearIndex++;
                     _BaseState.PlayField.HasChanged = true;
@@ -185,7 +187,10 @@ namespace BASeTris.GameStates
             }
             return true;
         }
-
+        private void PerformClearAct(TetrisBlock[] FullRow, int index)
+        {
+            FullRow[index] = null;
+        }
 
         SolidBrush FlashBrush = new SolidBrush(Color.FromArgb(128,Color.White));
 
@@ -198,11 +203,11 @@ namespace BASeTris.GameStates
         }
        
     }
-    public class ClearLineActionDissolve: ClearLineActionGameState
+    public class FieldLineActionDissolve: FieldLineActionGameState
     {
         Queue<Point> ClearBlockList = null;
         int RowClearCount = 0;
-        public ClearLineActionDissolve(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState, ClearRows, pAfterClearActions)
+        public FieldLineActionDissolve(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState, ClearRows, pAfterClearActions)
         {
             List<Point> AllBlockPositions = new List<Point>();
             RowClearCount = ClearRows.Length;
@@ -240,7 +245,7 @@ namespace BASeTris.GameStates
 
         }
     }
-    public class InsertBlockRowsActionGameState:ClearActionGameState
+    public class InsertBlockRowsActionGameState:FieldActionGameState
     {
 
 

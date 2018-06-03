@@ -194,6 +194,7 @@ namespace BASeTris
         {
             float BlockWidth = Bounds.Width / COLCOUNT;
             float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
+#if false
             for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
             {
                 float XPos = drawCol * BlockWidth;
@@ -204,6 +205,7 @@ namespace BASeTris
                 float YPos = (drawRow - HIDDENROWS) * BlockHeight;
                 g.DrawLine(LinePen, 0, YPos, Bounds.Width, YPos);
             }
+#endif
             for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
             {
                 float YPos = (drawRow - HIDDENROWS) * BlockHeight;

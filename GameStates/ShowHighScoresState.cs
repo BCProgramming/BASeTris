@@ -46,7 +46,7 @@ namespace BASeTris.GameStates
             _ScoreList = ScoreList;
             hs = _ScoreList.GetScores().ToList();
             HighlightedScorePositions = HighlightPositions;
-            SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First();
+            SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First()-1;
             RevertState = ReversionState;
             ImageAttributes useBGAttributes = new ImageAttributes();
             useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.25f));
@@ -208,7 +208,7 @@ namespace BASeTris.GameStates
                 {
                     //This is where we will enter a "HighscoreDetails" state passing along this one specific high score.
                     var SelectedScore = _ScoreList.GetScores().ToArray()[SelectedScorePosition];
-                    ViewScoreDetailsState vsd = new ViewScoreDetailsState(this, SelectedScore, _BG, SelectedScorePosition);
+                    ViewScoreDetailsState vsd = new ViewScoreDetailsState(this, SelectedScore, _BG, SelectedScorePosition+1);
                     pOwner.CurrentState = vsd;
                 }
                 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Choosers
 {
-    public abstract class BlockGroupChooser
+    public abstract class BlockGroupChooser : IDisposable
     {
 
         protected Func<BlockGroup>[] _Available;
@@ -16,7 +16,10 @@ namespace BASeTris.Choosers
             _Available = pAvailable;
             rgen = new Random();
         }
+        public virtual void Dispose()
+        {
 
+        }
         public BlockGroupChooser(Func<BlockGroup>[] pAvailable,int Seed)
         {
             _Available = pAvailable;

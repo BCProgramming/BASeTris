@@ -10,6 +10,8 @@
     <AssemblyName>BASeTris</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Bass.Net, Version=2.4.10.3, Culture=neutral, PublicKeyToken=b7566c273e6ef480, processorArchitecture=MSIL">
@@ -71,10 +74,11 @@
     <Compile Include="Choosers\BlockGroupChooser.cs" />
     <Compile Include="Choosers\FullRandomChooser.cs" />
     <Compile Include="Choosers\GameBoyChooser.cs" />
+    <Compile Include="Choosers\NESChooser.cs" />
     <Compile Include="Choosers\WeightedChooser.cs" />
     <Compile Include="FieldInitializers\FieldInitializer.cs" />
     <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
-    <Compile Include="GameStates\ClearActionGameState.cs" />
+    <Compile Include="GameStates\FieldActionGameState.cs" />
     <Compile Include="GameStates\EnterHighScoreState.cs" />
     <Compile Include="GameStates\GameOverGameState.cs" />
     <Compile Include="GameStates\IDirectKeyboardInputState.cs" />
@@ -156,4 +160,39 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
+    <PropertyGroup>
+      <!-- temp file for the git version (lives in "obj" folder)-->
+      <VerFile>$(IntermediateOutputPath)gitver</VerFile>
+    </PropertyGroup>
+    <!-- write the hash to the temp file.-->
+    <Exec Command="git -C &quot;$(ProjectDir.TrimEnd('\'))&quot; describe --long --always --dirty &gt; $(VerFile)" />
+    <!-- read the version into the GitVersion itemGroup-->
+    <ReadLinesFromFile File="$(VerFile)">
+      <Output TaskParameter="Lines" ItemName="GitVersion" />
+    </ReadLinesFromFile>
+    <!-- Set the BuildHash property to contain the GitVersion, if it wasn't already set.-->
+    <PropertyGroup>
+      <BuildHash>@(GitVersion)</BuildHash>
+    </PropertyGroup>
+  </Target>
+  <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
+    <!-- names the obj/.../CustomAssemblyInfo.cs file -->
+    <PropertyGroup>
+      <CustomAssemblyInfoFile>$(IntermediateOutputPath)CustomAssemblyInfo.cs</CustomAssemblyInfoFile>
+    </PropertyGroup>
+    <!-- includes the CustomAssemblyInfo for compilation into your project -->
+    <ItemGroup>
+      <Compile Include="$(CustomAssemblyInfoFile)" />
+    </ItemGroup>
+    <!-- defines the AssemblyMetadata attribute that will be written -->
+    <ItemGroup>
+      <AssemblyAttributes Include="AssemblyMetadata">
+        <_Parameter1>GitHash</_Parameter1>
+        <_Parameter2>$(BuildHash)</_Parameter2>
+      </AssemblyAttributes>
+    </ItemGroup>
+    <!-- writes the attribute to the customAssemblyInfo file -->
+    <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
+  </Target>
 </Project>
