@@ -44,5 +44,20 @@ namespace BASeTris.TetrisBlocks
             //nothing by default. Well, for now anyway....
         }
     }
-   
+    public class TetrisBlockDrawParameters 
+    {
+        public Graphics g;
+        public RectangleF region;
+        public BlockGroup GroupOwner = null;
+        public Brush OverrideBrush = null;
+        public ImageAttributes ApplyAttributes = null;
+        public float FillPercent = 1f;
+        public TetrisBlockDrawParameters(Graphics pG, RectangleF pRegion, BlockGroup pGroupOwner)
+        {
+            g = pG;
+            region = pRegion;
+            GroupOwner = pGroupOwner;
+        }
+    }
+
 }
