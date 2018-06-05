@@ -100,6 +100,23 @@ done:
   File "${PROGPATH}\*.exe"
   File "${PROGPATH}\*.pdb"
   File "${PROGPATH}\*.exe.config"
+  ; Assets folder
+  SetOutPath "$INSTDIR\Assets"
+  File "${PROGPATH}\..\..\Assets\*.*"
+  
+  ;Sound files
+  SetOutPath "$INSTDIR\Assets\Audio"
+  File "${PROGPATH}\..\..\Assets\Audio\*.*"
+
+
+  ;X86 lib files
+  SetOutPath "$INSTDIR\Assets\Lib\x86"
+  File "${PROGPATH}\..\..\Assets\Lib\x86\*.*"
+  ;x64 lib files
+  SetOutPath "$INSTDIR\Assets\Lib\x64"
+  File "${PROGPATH}\..\..\Assets\Lib\x64\*.*"
+
+
 
 
   ; Write the installation path into the registry

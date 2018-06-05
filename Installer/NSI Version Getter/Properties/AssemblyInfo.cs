@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mainframe Associates")]
 [assembly: AssemblyProduct("!NSIS Version Getter")]
-[assembly: AssemblyCopyright("Copyright©2016 Mainframe Associates")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

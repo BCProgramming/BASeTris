@@ -10,9 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elementizer", "..\XMLSerialization\Elementizer.csproj", "{850A1563-AC23-4B60-BBCF-503B2BB69547}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -36,6 +33,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD13A3E1-5341-4CCD-B414-9AFBF9015465}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

@@ -72,7 +72,7 @@ namespace _NSIS_Version_Getter
             output.WriteLine("!define PROGVER \"" + fvi.ProductVersion + "\"");
             output.WriteLine("!define PROGDATE \"" + timestamp.ToString("yyyy-MM-dd") + "\"");
             output.WriteLine("!define COMPANY \"" + fvi.CompanyName + "\"");
-            output.WriteLine("!define PACKAGE \"The Controller Series\"");
+            output.WriteLine("!define PACKAGE \"BASeCamp\"");
             output.WriteLine("!define COPYRIGHT \"" + fvi.LegalCopyright + "\"");
             if (args.Length >= 2)
                 output.Close();
