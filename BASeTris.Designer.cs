@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BASeTris));
             this.picTetrisField = new System.Windows.Forms.PictureBox();
             this.picStatistics = new System.Windows.Forms.PictureBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -162,7 +163,7 @@
             // 
             this.aIToolStripMenuItem.Name = "aIToolStripMenuItem";
             this.aIToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.aIToolStripMenuItem.Size = new System.Drawing.Size(150, 26);
+            this.aIToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.aIToolStripMenuItem.Text = "AI";
             this.aIToolStripMenuItem.Click += new System.EventHandler(this.aIToolStripMenuItem_Click);
             // 
@@ -191,6 +192,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.picFullSize);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;

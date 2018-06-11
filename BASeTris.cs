@@ -83,7 +83,7 @@ namespace BASeTris
 
             menuStrip1.Font = new Font(menuStrip1.Font.FontFamily, 14, FontStyle.Regular);
             Win10MenuRenderer buildrender = new Win10MenuRenderer(null,true);
-            
+             
             menuStrip1.Renderer = buildrender;
             menuStrip1.BackColor = SystemColors.Control;
             TetrisGame.InitState();
@@ -466,6 +466,11 @@ namespace BASeTris
                 var Casted = (IDirectKeyboardInputState)_Game.CurrentState;
                 Casted.KeyPressed(this,(Keys)e.KeyChar);
             }
+        }
+
+        private void debugToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
         }
     }
 }

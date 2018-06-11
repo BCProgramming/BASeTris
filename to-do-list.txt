@@ -1,0 +1,17 @@
+﻿BASeTris- To-do list and ideas
+
+"Wall kicks"- when rotating, before failing, we check by moving to the left, then to the right, and seeing if we can rotate them. If so, we use that status.
+
+"Delayed-Auto-Shift" Basically key repeat for movement. We need to implement it manually. Allow for the ability to configure the delay before repeat and the repeat rate.
+
+A "get ready" state which can be used after unpausing.  It shows the normal game board but overlays it to darken it and has a countdown before actually unpausing. Sort of like BASeBlock does but less dumb.
+
+We need to move the "main game" interactions into a menu state, rather than use winforms menus. realistically we need a number of new states:
+
+-Title screen state. 
+
+-Main menu State
+
+-Settings Menu State (probably can derive from one class for both menus?)
+
+-Game Setup menu (eg starting level and stuff)

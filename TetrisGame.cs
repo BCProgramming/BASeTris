@@ -59,6 +59,11 @@ namespace BASeTris
                 return _TiledCache;
         }
         }
+        public static float GetDesiredEmSize(float emSize, Graphics g)
+        {
+            float realSize = (g.DpiY / 72) * emSize;
+            return realSize;
+        }
         public static FontFamily GetMonospaceFont()
         {
             return RetroFont;
