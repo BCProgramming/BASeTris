@@ -43,13 +43,19 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
         private String _DetailHeader = "---SCORE DETAILS---";
-        private Font HeaderFont = new Font(TetrisGame.RetroFont,24,FontStyle.Regular);
-        private Font PlacementFont = new Font(TetrisGame.RetroFont,18,FontStyle.Regular);
-        private Font DetailFont = new Font(TetrisGame.RetroFont,12,FontStyle.Regular);
+       
         private Pen Separator = new Pen(Color.Black,3);
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
+
+
+
             _BG.DrawProc(g,Bounds);
+
+            Font HeaderFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);
+            Font PlacementFont = TetrisGame.GetRetroFont(10, pOwner.ScaleFactor);
+            Font DetailFont = TetrisGame.GetRetroFont(8, pOwner.ScaleFactor);
+
 
             //One thing we draw in every case is the "--SCORE DETAILS--" header text. this is positioned at 5% from the top, centered in the middle of our bounds.
             float Millipercent = (float)DateTime.Now.Ticks / 5000f; //(float)DateTime.Now.Millisecond / 1000;

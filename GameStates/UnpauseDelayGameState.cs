@@ -34,7 +34,9 @@ namespace BASeTris.GameStates
                 InitialUnpauseTime = DateTime.Now;
                 LastSecond = PauseDelay.Seconds;
             }
-
+            
+          
+            
             timeremaining = PauseDelay - (DateTime.Now - InitialUnpauseTime);
             if (timeremaining.Ticks < 0)
             {
@@ -60,11 +62,11 @@ namespace BASeTris.GameStates
                 lastMillis = 1000;
             }
             double SecondsLeft = Math.Round(timeremaining.TotalSeconds, 1);
-            String sSecondsLeft = timeremaining.ToString("s");
+            String sSecondsLeft = timeremaining.ToString("%s");
             double Millis = (double)timeremaining.Milliseconds/1000d;  //millis in percent. We will use this to animate the unpause time left.
             Millis = Math.Min(Millis, lastMillis);
             float useSize = (float)(64f * (1 - (Millis)));
-            var SecondsFont = new Font(TetrisGame.RetroFont, TetrisGame.GetDesiredEmSize(useSize,g));
+            var SecondsFont = TetrisGame.GetRetroFont(useSize, pOwner.ScaleFactor);
             var MeasureText = g.MeasureString(sSecondsLeft, SecondsFont);
 
             PointF DrawPosition = new PointF(Bounds.Width/2-MeasureText.Width/2,Bounds.Height/2 - MeasureText.Height/2);

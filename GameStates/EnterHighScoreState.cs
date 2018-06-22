@@ -59,7 +59,7 @@ namespace BASeTris.GameStates
         Font useFont = null;
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            if(useFont==null) useFont = new Font(TetrisGame.RetroFont, 24);
+            if (useFont == null) useFont = TetrisGame.GetRetroFont(18, pOwner.ScaleFactor);
 
 
 

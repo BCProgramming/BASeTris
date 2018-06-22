@@ -111,10 +111,11 @@ namespace BASeTris.GameStates
 
             if (CompleteScroll)
             {
-
-                Font GameOverFont = new Font(TetrisGame.RetroFont, 24);
+                Font EntryFont = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+                Font GameOverFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);
                 String GameOverText = "GAME\nOVER\n"; //+ ShowExtraLines.ToString();
                 var measured = g.MeasureString(GameOverText, GameOverFont);
+                var measuremini = g.MeasureString(GameOverText, EntryFont);
                 PointF GameOverPos = new PointF(Bounds.Width / 2 - measured.Width / 2, measured.Height);
                 g.DrawString(GameOverText, GameOverFont, Brushes.White, 5 + GameOverPos.X, 5 + GameOverPos.Y);
                 g.DrawString(GameOverText, GameOverFont, Brushes.Black, GameOverPos.X, GameOverPos.Y);
@@ -124,21 +125,21 @@ namespace BASeTris.GameStates
                 for (int i = 0; i < ShowExtraLines; i++)
                 {
                     float XPosition = Bounds.Width * 0.25f;
-                    float YPosition = GameOverPos.Y + ((1+i) * measured.Height)+10;
+                    float YPosition = GameOverPos.Y + ((1+i) * measuremini.Height)+10;
                     
                     if(i==0)
                     {
-                        var measuredmini = g.MeasureString("---Line Clears---", GameOverFont);
-                        g.DrawString("---Line Clears---",GameOverFont,Brushes.White,Bounds.Width/2-measuredmini.Width/2,GameOverPos.Y+measured.Height);
-                        g.DrawString("---Line Clears---", GameOverFont, Brushes.Black, Bounds.Width / 2 - measuredmini.Width / 2-5, GameOverPos.Y + measured.Height-5);
+                        var measuredmini = g.MeasureString("---Line Clears---", EntryFont);
+                        g.DrawString("---Line Clears---", EntryFont, Brushes.White,Bounds.Width/2-measuredmini.Width/2,GameOverPos.Y+measured.Height);
+                        g.DrawString("---Line Clears---", EntryFont, Brushes.Black, Bounds.Width / 2 - measuredmini.Width / 2-5, GameOverPos.Y + measured.Height-5);
                     }
-                    if(i==1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I),new PointF(XPosition,YPosition),g,Bounds,GameOverFont);
-                    if(i==2) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_O), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
-                    if(i==3) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_T), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
-                    if(i==4) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_J), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
-                    if(i==5) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_L), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
-                    if(i==6) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_S), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
-                    if(i==7) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_Z), new PointF(XPosition, YPosition), g, Bounds, GameOverFont);
+                    if(i==1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I),new PointF(XPosition,YPosition),g,Bounds, EntryFont);
+                    if(i==2) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_O), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if(i==3) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_T), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if(i==4) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_J), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if(i==5) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_L), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if(i==6) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_S), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if(i==7) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_Z), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
                 }
                 if(NewScorePosition> -1)
                 {

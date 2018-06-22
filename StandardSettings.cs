@@ -18,6 +18,8 @@ namespace BASeTris
         public float DisplayScaleFactor = 1.6f;
         //TODO (?) Support additional Audio Drivers other than BASSDriver. Probably not worthwhile to be fair.
 
+        public long DASStartDelay = 450; //key repeat delay for DAS.
+        public long DASRate = 100;
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
             

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace BASeTris
         private List<Particle> ActiveParticles = new List<Particle>();
         private List<GameObject> GameObjects = new List<GameObject>();
         private TetrisGame _Game;
+        ControllerInputState CIS = null;
         HashSet<Keys> PressedKeys = new HashSet<Keys>();
         public BASeTris()
         {
@@ -43,6 +45,8 @@ namespace BASeTris
         {
             ActiveParticles.Add(p);
         }
+
+        public double ScaleFactor { get { return current_factor; } }
 
         public Rectangle GameArea
         {
@@ -63,8 +67,10 @@ namespace BASeTris
 
 
         }
+        private double current_factor = 1;
         public void SetScale(double factor)
         {
+            current_factor = factor;
             mnuScale_Tiny.Checked = mnuScale_Small.Checked = mnuScale_Large.Checked = mnuScale_Biggliest.Checked = false;
             Size = new Size((int)(DefaultWidth*factor),(int)(DefaultHeight*factor));
             
@@ -75,12 +81,23 @@ namespace BASeTris
             if (IgnoreController) return;
             X.Gamepad_1.FFB_Vibrate(Strength,Strength,Length);
         }
+        DASRepeatHandler repeatHandler = null;
         private void Form1_Load(object sender, EventArgs e)
         {
+
+
+
+
+            repeatHandler = new DASRepeatHandler((k) =>
+            {
+                if (_Game != null) _Game.HandleGameKey(this, k, TetrisGame.KeyInputSource.Input_HID);
+            });
             //XMLHighScores<NoSpecialInfo> TestScores = new XMLHighScores<NoSpecialInfo>(35000,(r)=>new NoSpecialInfo());
             //int Position1 = TestScores.IsEligible(12000);
             //int Position2 = TestScores.IsEligible(3000);
-
+            CIS = new ControllerInputState(X.Gamepad_1);
+            CIS.ButtonPressed += CIS_ButtonPressed;
+            CIS.ButtonReleased += CIS_ButtonReleased;
             menuStrip1.Font = new Font(menuStrip1.Font.FontFamily, 14, FontStyle.Regular);
             Win10MenuRenderer buildrender = new Win10MenuRenderer(null,true);
              
@@ -90,17 +107,32 @@ namespace BASeTris
            
             
         }
+        
+        private void CIS_ButtonPressed(Object sender,ControllerInputState.ControllerButtonEventArgs args)
+        {
+            Debug.Print("Button pressed:" + args.button);
+            var translated = TranslateKey(args.button);
+            if (translated != null)
+            {
+                _Game.HandleGameKey(this, translated.Value,TetrisGame.KeyInputSource.Input_HID);
+                GameKeyDown(translated.Value);
+            }
+            
+        }
+        private void CIS_ButtonReleased(Object sender,ControllerInputState.ControllerButtonEventArgs args)
+        {
+            Debug.Print("Button released:" + args.button);
+            var translated = TranslateKey(args.button);
+            if (translated != null)
+            {
+                GameKeyUp(translated.Value);
+            }
+        }
         bool XPolling = false;
         BlockGroup testBG = null;
         private void StartGame()
         {
-            if (X.IsAvailable && !XPolling)
-            {
-                XPolling = true;
-                X.UpdatesPerSecond = 30;
-                X.StartPolling(X.Gamepad_1);
-                
-            }
+           
             var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
             _Game = new TetrisGame(this, standardstate);
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
@@ -125,9 +157,10 @@ namespace BASeTris
         private void CheckInputs()
         {
 
-            
-            
-                HandleKey(GameState.GameKeys.GameKey_RotateCW,X.Gamepad_1.A_down,X.Gamepad_1.A_up,TetrisGame.KeyInputSource.Input_HID);
+
+            if (X.Gamepad_1.Update())
+            {
+                HandleKey(GameState.GameKeys.GameKey_RotateCW, X.Gamepad_1.A_down, X.Gamepad_1.A_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_RotateCCW, X.Gamepad_1.X_down, X.Gamepad_1.X_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Left, X.Gamepad_1.Dpad_Left_down, X.Gamepad_1.Dpad_Left_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Right, X.Gamepad_1.Dpad_Right_down, X.Gamepad_1.Dpad_Right_up, TetrisGame.KeyInputSource.Input_HID);
@@ -135,9 +168,22 @@ namespace BASeTris
                 HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up, TetrisGame.KeyInputSource.Input_HID);
-            
+            }
+        }
 
 
+
+
+        //GameKeyUp and GameKeyDown are used for Key repeat.
+        //We implement key repeat manually. Typematic rate doesn't work for that anyway.
+        
+        private void GameKeyUp(GameState.GameKeys key)
+        {
+            repeatHandler.GameKeyUp(key);
+        }
+        private void GameKeyDown(GameState.GameKeys key)
+        {
+            repeatHandler.GameKeyDown(key);
         }
         private void HandleKey(GameState.GameKeys key,bool DownState,bool UpState,TetrisGame.KeyInputSource pSource)
         {
@@ -145,11 +191,13 @@ namespace BASeTris
             if(ActiveKeys.Contains(key) && !DownState)
             {
                 ActiveKeys.Remove(key);
+                GameKeyUp(key);
                 return;
             }
             if (ActiveKeys.Contains(key)) return;
             if (!DownState) return;
             ActiveKeys.Add(key);
+            GameKeyDown(key);
             IgnoreController = false;
             _Game.HandleGameKey(this,key,pSource);
             
@@ -159,7 +207,8 @@ namespace BASeTris
             while(true)
             {
                 Thread.Sleep(3);
-                CheckInputs();
+                CIS.CheckState();
+                //CheckInputs();
             }
 
 
@@ -277,91 +326,42 @@ namespace BASeTris
                 
             }
 
-            if (PressedKeys.Contains(e.KeyCode)) return;
-            PressedKeys.Add(e.KeyCode);
-            if(e.KeyCode==Keys.X)
+            Debug.Print("Button pressed:" + e.KeyCode);
+            var translated = TranslateKey(e.KeyCode);
+            if (translated != null)
             {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this,GameState.GameKeys.GameKey_RotateCW, TetrisGame.KeyInputSource.Input_Keyboard);
-                    
-                });
+                _Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
+                GameKeyDown(translated.Value);
             }
-            else if(e.KeyCode==Keys.Z)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_RotateCCW, TetrisGame.KeyInputSource.Input_Keyboard);
 
-                });
-            }
-            else if (e.KeyCode==Keys.Up)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Drop, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode==Keys.Down)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this,GameState.GameKeys.GameKey_Down, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode ==Keys.Right)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this,GameState.GameKeys.GameKey_Right, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode == Keys.Left)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Left, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode==Keys.Pause || e.KeyCode == Keys.P)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Pause, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode==Keys.Space)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Hold, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode==Keys.F2)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Debug1, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            else if(e.KeyCode==Keys.F7)
-            {
-                ProcThreadActions.Enqueue(() =>
-                {
-                    _Game.HandleGameKey(this, GameState.GameKeys.GameKey_Debug2, TetrisGame.KeyInputSource.Input_Keyboard);
-                });
-            }
-            ProcThreadActions.Enqueue(() =>
-            {
-                Invoke((MethodInvoker)(() =>
-            {
-                picTetrisField.Refresh();
-                picTetrisField.Invalidate();
-            }));
-                    });
-            
         }
+        private GameState.GameKeys? TranslateKey(Keys source)
+        {
+            if(_Game!=null)
+            {
+                return _Game.TranslateKey(source);
+            }
+            return null;
 
+
+        }
+        Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys> ControllerKeyLookup = new Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys>()
+        {
+            { X.Gamepad.GamepadButtons.A,GameState.GameKeys.GameKey_RotateCW },
+            { X.Gamepad.GamepadButtons.X,GameState.GameKeys.GameKey_RotateCCW },
+            { X.Gamepad.GamepadButtons.RBumper,GameState.GameKeys.GameKey_Hold },
+            { X.Gamepad.GamepadButtons.Dpad_Left,GameState.GameKeys.GameKey_Left },
+            { X.Gamepad.GamepadButtons.Dpad_Right,GameState.GameKeys.GameKey_Right },
+            { X.Gamepad.GamepadButtons.Dpad_Down,GameState.GameKeys.GameKey_Down },
+            { X.Gamepad.GamepadButtons.Dpad_Up,GameState.GameKeys.GameKey_Drop },
+            { X.Gamepad.GamepadButtons.Start,GameState.GameKeys.GameKey_Pause }
+        };
+        private GameState.GameKeys? TranslateKey(X.Gamepad.GamepadButtons Button)
+        {
+            if(ControllerKeyLookup.ContainsKey(Button))
+                return ControllerKeyLookup[Button];
+            return null;
+        }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if(GameThread!=null)
@@ -402,10 +402,14 @@ namespace BASeTris
 
         private void BASeTris_KeyUp(object sender, KeyEventArgs e)
         {
-            if (PressedKeys.Contains(e.KeyCode))
+
+            Debug.Print("Button released:" + e.KeyCode);
+            var translated = TranslateKey(e.KeyCode);
+            if (translated != null)
             {
-                PressedKeys.Remove(e.KeyCode);
+                GameKeyUp(translated.Value);
             }
+
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)

@@ -86,7 +86,7 @@ namespace BASeTris.GameStates
             float MiddleX = Bounds.Width / 2;
             DrawBackground(pOwner,g, Bounds);
             float TextSize = Bounds.Height / 30f;
-            using (ScoreFont = new Font(TetrisGame.RetroFont, TextSize, FontStyle.Bold,GraphicsUnit.Pixel))
+            using (ScoreFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor,FontStyle.Bold,GraphicsUnit.Pixel))
             {
                 float LineHeight = g.MeasureString("#", ScoreFont).Height + 5;
                 //This needs to change based on the actual gameplay area size.)

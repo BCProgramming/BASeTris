@@ -94,6 +94,8 @@
     <Compile Include="Choosers\GameBoyChooser.cs" />
     <Compile Include="Choosers\NESChooser.cs" />
     <Compile Include="Choosers\WeightedChooser.cs" />
+    <Compile Include="ControllerInputHelper.cs" />
+    <Compile Include="DASRepeatHandler.cs" />
     <Compile Include="FieldInitializers\FieldInitializer.cs" />
     <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
     <Compile Include="GameStates\FieldActionGameState.cs" />

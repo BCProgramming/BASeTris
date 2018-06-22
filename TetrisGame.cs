@@ -64,6 +64,11 @@ namespace BASeTris
             float realSize = (g.DpiY / 72) * emSize;
             return realSize;
         }
+        public static Font GetRetroFont(float desiredSize,double ScaleFactor,FontStyle desiredStyle = FontStyle.Regular,GraphicsUnit GUnit = GraphicsUnit.Point)
+        {
+            return new Font(RetroFont, (float)(desiredSize * ScaleFactor), desiredStyle, GUnit);
+            
+        }
         public static FontFamily GetMonospaceFont()
         {
             return RetroFont;
@@ -156,10 +161,38 @@ namespace BASeTris
         {
             GameOwner.AddParticle(pParticle);
         }
-        
+
+        public double ScaleFactor { get { return this.GameOwner.ScaleFactor; } }
+
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);
+        }
+        Dictionary<Keys, GameState.GameKeys> KeyMapping = new Dictionary<Keys, GameState.GameKeys>()
+        {
+            {Keys.Left,GameState.GameKeys.GameKey_Left },
+            {Keys.Right,GameState.GameKeys.GameKey_Right },
+            {Keys.Down,GameState.GameKeys.GameKey_Down },
+            {Keys.Up,GameState.GameKeys.GameKey_Drop },
+            {Keys.X,GameState.GameKeys.GameKey_RotateCW },
+            {Keys.Z,GameState.GameKeys.GameKey_RotateCCW },
+            {Keys.Pause,GameState.GameKeys.GameKey_Pause },
+            {Keys.P,GameState.GameKeys.GameKey_Pause },
+            {Keys.Space,GameState.GameKeys.GameKey_Hold },
+            {Keys.F2,GameState.GameKeys.GameKey_Debug1 },
+            {Keys.F7,GameState.GameKeys.GameKey_Debug2 }
+        };
+
+
+        public GameState.GameKeys? TranslateKey(Keys source)
+        {
+            if(KeyMapping.ContainsKey(source))
+            {
+                return KeyMapping[source];
+            }
+            return null;
+
+
         }
         public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g,KeyInputSource pSource)
         {

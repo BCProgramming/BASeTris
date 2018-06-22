@@ -59,10 +59,11 @@ namespace BASeTris.GameStates
             //no op!
         }
 
-        Font usePauseFont = new Font(TetrisGame.RetroFont, 24);
+        
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-         
+
+            Font usePauseFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);
             String sPauseText = "Pause";
             SizeF Measured = g.MeasureString(sPauseText, usePauseFont);
             g.FillRectangle(Brushes.Gray, Bounds);
@@ -85,11 +86,15 @@ namespace BASeTris.GameStates
             {
                 var unpauser = new UnpauseDelayGameState(PausedState,()=>
                 {
-                    var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
-                    playing?.UnPause();
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
+                    var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
+                    playing2?.UnPause();
+                    playing2?.setVolume(1.0f);
                 });
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
 
+                var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
+                playing?.UnPause();
+                playing?.setVolume(0.5f);
 
 
                 pOwner.CurrentState = unpauser;

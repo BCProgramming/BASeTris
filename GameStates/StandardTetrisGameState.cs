@@ -326,8 +326,8 @@ namespace BASeTris.GameStates
 
         static bool SpawnWait = false;
         static Random rgen = new Random();
-        private DateTime GameStartTime = DateTime.MinValue;
-        private DateTime LastPausedTime = DateTime.MinValue;
+        public DateTime GameStartTime = DateTime.MinValue;
+        public DateTime LastPausedTime = DateTime.MinValue;
         private TimeSpan FinalGameTime = TimeSpan.MinValue;
         private StandardGameOptions GameOptions = new StandardGameOptions();
         private void RefillBlockQueue()
@@ -441,7 +441,6 @@ namespace BASeTris.GameStates
                 var useStats = GameStats;
                 double Factor = Bounds.Height / 644d;
                 int DesiredFontPixelHeight = (int)(Bounds.Height * (23d / 644d));
-
                 Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
                 var TopScore = this.GetLocalScores().GetScores().First().Score;
                 int MaxScoreLength = Math.Max(TopScore.ToString().Length, useStats.Score.ToString().Length);
@@ -592,7 +591,7 @@ namespace BASeTris.GameStates
             {
                 useCalc = FinalGameTime;
             }
-            if (powner.CurrentState is PauseGameState)
+            if (powner.CurrentState is PauseGameState || powner.CurrentState is UnpauseDelayGameState)
             {
                 useCalc = LastPausedTime - GameStartTime;
             }

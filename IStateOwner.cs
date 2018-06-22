@@ -17,5 +17,6 @@ namespace BASeTris
 
         void AddGameObject(GameObject Source);
         void AddParticle(Particle pParticle);
+        double ScaleFactor { get; }
     }
 }
