@@ -670,7 +670,13 @@ namespace BASeTris.GameStates
          
 
         }
-
+        private void PerformRotation(IStateOwner pOwner,BlockGroup grp,bool ccw)
+        {
+            grp.Rotate(ccw);
+            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate);
+            pOwner.Feedback(0.3f, 100);
+            grp.Clamp(PlayField.RowCount, PlayField.ColCount);
+        }
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             if (g == GameKeys.GameKey_RotateCW || g==GameKeys.GameKey_RotateCCW)
@@ -680,10 +686,39 @@ namespace BASeTris.GameStates
                 {
                     if (PlayField.CanRotate(activeitem, ccw))
                     {
-                        activeitem.Rotate(ccw);
-                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate);
-                        pOwner.Feedback(0.3f, 100);
-                        activeitem.Clamp(PlayField.RowCount, PlayField.ColCount);
+                        PerformRotation(pOwner,activeitem,ccw);
+                    }
+                    else if(this.GameOptions.AllowWallKicks)
+
+                    {
+                        //we will add up to 3 and subtract up to 3 to the X coordinate. if any say we can rotate then we proceed with allowing the rotation.
+
+                        int[] checkoffsets = new int[] { 1, -1, 2, -2, 3, -3 };
+                        
+                        
+
+                        int OriginalPos = activeitem.X;
+                        Boolean revertpos = true;
+
+                        foreach (int currentoffset in checkoffsets)
+                        {
+
+
+                            if (currentoffset == 0) continue;
+                            activeitem.X = OriginalPos + currentoffset;
+                            if (PlayField.CanRotate(activeitem, ccw))
+                            {
+                                PerformRotation(pOwner, activeitem, ccw);
+                                revertpos = false;
+                                break;
+                            }
+                        }
+                        
+                        if(revertpos)
+                        {
+                            activeitem.X = OriginalPos;
+                        }
+
                     }
                 }
             }
