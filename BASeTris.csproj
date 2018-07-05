@@ -86,6 +86,8 @@
     <Compile Include="BackgroundDrawers\IBackgroundDraw.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="BlockGroup.cs" />
+    <Compile Include="Cheats\Cheat.cs" />
+    <Compile Include="Cheats\DebugCheat.cs" />
     <Compile Include="Choosers\AIChoosers\MeanChooser.cs" />
     <Compile Include="Choosers\BagChooser.cs" />
     <Compile Include="Choosers\AIChoosers\BaseAIChooser.cs" />
@@ -98,6 +100,8 @@
     <Compile Include="DASRepeatHandler.cs" />
     <Compile Include="FieldInitializers\FieldInitializer.cs" />
     <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
+    <Compile Include="GameStates\EnterCheatState.cs" />
+    <Compile Include="GameStates\EnterTextState.cs" />
     <Compile Include="GameStates\FieldActionGameState.cs" />
     <Compile Include="GameStates\EnterHighScoreState.cs" />
     <Compile Include="GameStates\GameOverGameState.cs" />

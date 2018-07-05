@@ -45,7 +45,7 @@ namespace BASeTris.GameStates
             
             _ScoreList = ScoreList;
             hs = _ScoreList.GetScores().ToList();
-            HighlightedScorePositions = HighlightPositions;
+            HighlightedScorePositions = HighlightPositions??new int[] { };
             SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First()-1;
             RevertState = ReversionState;
             ImageAttributes useBGAttributes = new ImageAttributes();

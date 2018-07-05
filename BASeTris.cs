@@ -325,6 +325,14 @@ namespace BASeTris
                 }
                 
             }
+            else if(e.KeyCode==Keys.C)
+            {
+                if(e.Shift && e.Control)
+                {
+                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Game, 16);
+                    CurrentState = cheatstate;
+                }
+            }
 
             Debug.Print("Button pressed:" + e.KeyCode);
             var translated = TranslateKey(e.KeyCode);
