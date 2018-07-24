@@ -16,7 +16,7 @@ namespace BASeTris.GameStates
         StringBuilder NameEntered = new StringBuilder("__________");
         String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         int CurrentPosition = 0; //position of character being "edited"
-        private IBackgroundDraw _BG = null;
+        public IBackgroundDraw _BG = null;
         public override DisplayMode SupportedDisplayMode { get { return DisplayMode.Full; } }
 
         public EnterTextState(IStateOwner pOwner,int EntryLength,String PossibleChars= "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
@@ -79,7 +79,7 @@ namespace BASeTris.GameStates
 
             float nameEntryY = StartYPosition + (MeasureBounds.Height + 5) * (EntryPrompt.Length + 1);
 
-
+            
             var AllCharacterBounds = (from c in NameEntered.ToString().ToCharArray() select g.MeasureString(c.ToString(), useFont)).ToArray();
             float useCharWidth = g.MeasureString("_", useFont).Width;
             float TotalWidth = (useCharWidth + 5) * NameEntered.Length;

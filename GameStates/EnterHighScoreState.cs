@@ -13,7 +13,7 @@ namespace BASeTris.GameStates
         IHighScoreList ScoreListing = null;
         Func<string,int, IHighScoreEntry> ScoreToEntryFunc = null;
         private int AchievedPosition;
-        private IBackgroundDraw _BG = null;
+        //private IBackgroundDraw _BG = null;
         public override DisplayMode SupportedDisplayMode { get { return DisplayMode.Full; } }
 
         public EnterHighScoreState(GameState pOriginalState,IStateOwner pStateOwner,IHighScoreList ScoreList,Func<string,int,IHighScoreEntry> ScoreFunc, Statistics SourceStats)
@@ -37,12 +37,7 @@ namespace BASeTris.GameStates
             //OwnerState.DrawStats(pOwner,g,Bounds);
         }
 
-        public override void GameProc(IStateOwner pOwner)
-        {
-            _BG.FrameProc();
-            //throw new NotImplementedException();
-        }
-        Font useFont = null;
+      Font useFont = null;
 
 
         public override bool ValidateEntry(IStateOwner pOwner,string sCurrentEntry)
