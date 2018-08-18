@@ -9,11 +9,9 @@ namespace BASeTris.Pentominoes
 {
     public class Pentomino : BlockGroup
     {
-      
     }
 
     public class Pentomino_L
     {
-
     }
 }

@@ -20,9 +20,10 @@ namespace BASeTris.GameStates
         {
             _BaseState = pBaseState;
         }
+
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            _BaseState.DrawStats(pOwner,g,Bounds);
+            _BaseState.DrawStats(pOwner, g, Bounds);
         }
         //we don't call the main State's GameProc here. We operate on the data (the field contents) to "clear" the given information but we operate on it separate from
         //the standard game state. For example we replace blocks with "intermediate" forms, or remove them altogether, then when finished return control and allow the game to continue.
@@ -30,16 +31,16 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
-            if(_BaseState is StandardTetrisGameState)
+            if (_BaseState is StandardTetrisGameState)
             {
                 _BaseState.FrameUpdate();
             }
         }
-        
-          
+
+
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            _BaseState.DrawProc(pOwner,g,Bounds);
+            _BaseState.DrawProc(pOwner, g, Bounds);
         }
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
@@ -60,57 +61,64 @@ namespace BASeTris.GameStates
             LineClear_Right_To_Left,
             LineClear_Middle_Out,
             LineClear_Outside_In
-
         }
+
         private LineClearStyle _ClearStyle = LineClearStyle.LineClear_Middle_Out;
-        public LineClearStyle ClearStyle {  get { return _ClearStyle; } set { _ClearStyle = value; } }
+
+        public LineClearStyle ClearStyle
+        {
+            get { return _ClearStyle; }
+            set { _ClearStyle = value; }
+        }
+
         private int[] RowNumbers = null;
-        
+
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
         protected bool FlashState = false;
-        public FieldLineActionGameState(StandardTetrisGameState _BaseState,int[] ClearRows,IEnumerable<Action> pAfterClearActions):base(_BaseState)
+
+        public FieldLineActionGameState(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState)
         {
             AfterClear = pAfterClearActions;
             RowNumbers = ClearRows;
-
-            
-
         }
+
         int MSBlockClearTime = 20; //number of ms between blocks being removed/cleared.
         int CurrentClearIndex = 0;
         DateTime StartOperation = DateTime.MaxValue;
         DateTime LastOperation = DateTime.MaxValue;
+
         public override void GameProc(IStateOwner pOwner)
         {
             base.GameProc(pOwner);
-            if(StartOperation == DateTime.MaxValue)
+            if (StartOperation == DateTime.MaxValue)
             {
                 StartOperation = LastOperation = DateTime.Now;
             }
 
             //for now we clear horizontally across...
-            if((DateTime.Now - LastOperation).TotalMilliseconds> MSBlockClearTime)
+            if ((DateTime.Now - LastOperation).TotalMilliseconds > MSBlockClearTime)
             {
                 //clear another block on each row.
                 var ClearResult = ClearFrame();
-                if(RowNumbers.Length>=4)
+                if (RowNumbers.Length >= 4)
                 {
                     FlashState = !FlashState;
                 }
+
                 LastOperation = DateTime.Now;
-              
-                if(ClearResult)
+
+                if (ClearResult)
                 {
                     //reset the original State.
                     pOwner.CurrentState = _BaseState;
-                    foreach(var iterate in AfterClear)
+                    foreach (var iterate in AfterClear)
                     {
                         pOwner.EnqueueAction(iterate);
                     }
                 }
-         
             }
         }
+
         //The actual "Frame" operation. This implementation clears one block and returns true when it clears all the blocks on each line.
         //derived classes can override pretty much just this one to clear the lines in different ways.        
         protected virtual bool ClearFrame()
@@ -127,9 +135,8 @@ namespace BASeTris.GameStates
                         {
                             PerformClearAct(GrabRow, CurrentClearIndex);
                         }
-
-
                     }
+
                     CurrentClearIndex++;
                     _BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
@@ -137,7 +144,7 @@ namespace BASeTris.GameStates
                     foreach (int rowClear in RowNumbers)
                     {
                         var GrabRow = _BaseState.PlayField.Contents[rowClear];
-                        int useIndex = GrabRow.Length - CurrentClearIndex-1;
+                        int useIndex = GrabRow.Length - CurrentClearIndex - 1;
                         //find the block, and clear it out if needed.
                         var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[useIndex];
                         if (FindClear != null)
@@ -145,6 +152,7 @@ namespace BASeTris.GameStates
                             PerformClearAct(GrabRow, useIndex);
                         }
                     }
+
                     CurrentClearIndex++;
                     _BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
@@ -153,46 +161,46 @@ namespace BASeTris.GameStates
                     foreach (int rowClear in RowNumbers)
                     {
                         var GrabRow = _BaseState.PlayField.Contents[rowClear];
-                        
-                            int i = GrabRow.Length>>1;
-                            int useindex =i+ ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
-                            if (useindex < GrabRow.Length && useindex >= 0)
-                                PerformClearAct(GrabRow, useindex);
+
+                        int i = GrabRow.Length >> 1;
+                        int useindex = i + ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
+                        if (useindex < GrabRow.Length && useindex >= 0)
+                            PerformClearAct(GrabRow, useindex);
                     }
+
                     CurrentClearIndex++;
                     _BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
                 case LineClearStyle.LineClear_Outside_In:
                 {
-                    
                     //middle out
                     foreach (int rowClear in RowNumbers)
                     {
-                        
-                            var GrabRow = _BaseState.PlayField.Contents[rowClear];
-                            int processindex = GrabRow.Length - CurrentClearIndex;
+                        var GrabRow = _BaseState.PlayField.Contents[rowClear];
+                        int processindex = GrabRow.Length - CurrentClearIndex;
                         int i = GrabRow.Length >> 1;
                         int useindex = i + ((processindex % 2 == 0) ? processindex / 2 : -(processindex / 2 + 1));
-                            if (useindex < GrabRow.Length && useindex >= 0)
-                            {
-                                PerformClearAct(GrabRow,useindex);
-                            }
+                        if (useindex < GrabRow.Length && useindex >= 0)
+                        {
+                            PerformClearAct(GrabRow, useindex);
+                        }
                     }
+
                     CurrentClearIndex++;
                     _BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
-
                 }
-
             }
+
             return true;
         }
+
         private void PerformClearAct(TetrisBlock[] FullRow, int index)
         {
             FullRow[index] = null;
         }
 
-        SolidBrush FlashBrush = new SolidBrush(Color.FromArgb(128,Color.White));
+        SolidBrush FlashBrush = new SolidBrush(Color.FromArgb(128, Color.White));
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
@@ -201,35 +209,36 @@ namespace BASeTris.GameStates
                 g.FillRectangle(FlashBrush, Bounds);
             }
         }
-       
     }
-    public class FieldLineActionDissolve: FieldLineActionGameState
+
+    public class FieldLineActionDissolve : FieldLineActionGameState
     {
         Queue<Point> ClearBlockList = null;
         int RowClearCount = 0;
+
         public FieldLineActionDissolve(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState, ClearRows, pAfterClearActions)
         {
             List<Point> AllBlockPositions = new List<Point>();
             RowClearCount = ClearRows.Length;
-            foreach(int grabrow in ClearRows)
+            foreach (int grabrow in ClearRows)
             {
                 var rowcontent = _BaseState.PlayField.Contents[grabrow];
-                for (int addblock=0;addblock<rowcontent.Length;addblock++)
+                for (int addblock = 0; addblock < rowcontent.Length; addblock++)
                 {
-                    if(rowcontent[addblock]!=null)
+                    if (rowcontent[addblock] != null)
                     {
-                        AllBlockPositions.Add(new Point(grabrow,addblock));
+                        AllBlockPositions.Add(new Point(grabrow, addblock));
                     }
                 }
             }
+
             ClearBlockList = new Queue<Point>();
-            foreach(var choosernd in BagChooser.Shuffle(new Random(),AllBlockPositions))
+            foreach (var choosernd in BagChooser.Shuffle(new Random(), AllBlockPositions))
             {
                 ClearBlockList.Enqueue(choosernd);
             }
-            
-
         }
+
         protected override bool ClearFrame()
         {
             for (int clearblock = 0; clearblock < RowClearCount; clearblock++)
@@ -239,29 +248,29 @@ namespace BASeTris.GameStates
                 _BaseState.PlayField.Contents[grabnext.X][grabnext.Y] = null;
                 _BaseState.PlayField.HasChanged = true;
             }
-            
+
             return false;
-
-
         }
     }
-    public class InsertBlockRowsActionGameState:FieldActionGameState
+
+    public class InsertBlockRowsActionGameState : FieldActionGameState
     {
-
-
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
+
         private Queue<TetrisBlock[]> RowInsertions = null;
+
         //private TetrisBlock[][] InsertionData = null;
         private int InsertionRow;
-        
-        
-        public InsertBlockRowsActionGameState(StandardTetrisGameState pBaseState, int InsertRow,TetrisBlock[][] RowData, IEnumerable<Action> pAfterClearActions) : base(pBaseState)
+
+
+        public InsertBlockRowsActionGameState(StandardTetrisGameState pBaseState, int InsertRow, TetrisBlock[][] RowData, IEnumerable<Action> pAfterClearActions) : base(pBaseState)
         {
             RowInsertions = new Queue<TetrisBlock[]>();
-            foreach(TetrisBlock[] AddRow in RowData)
+            foreach (TetrisBlock[] AddRow in RowData)
             {
                 RowInsertions.Enqueue(AddRow);
             }
+
             InsertionRow = InsertRow;
             AfterClear = pAfterClearActions;
         }
@@ -271,6 +280,7 @@ namespace BASeTris.GameStates
         int InsertedCount = 0;
         DateTime StartOperation = DateTime.MaxValue;
         DateTime LastOperation = DateTime.MaxValue;
+
         public override void GameProc(IStateOwner pOwner)
         {
             base.GameProc(pOwner);
@@ -282,9 +292,9 @@ namespace BASeTris.GameStates
             //for now we clear horizontally across...
             if ((DateTime.Now - LastOperation).TotalMilliseconds > MSLineAddTime)
             {
-                int InsertionIndex = _BaseState.PlayField.Contents.Length - 1 - InsertionRow-InsertedCount; //since high rows have lower indices, we want to "reverse" it.
+                int InsertionIndex = _BaseState.PlayField.Contents.Length - 1 - InsertionRow - InsertedCount; //since high rows have lower indices, we want to "reverse" it.
                 //if the queue is empty, we are now finished.
-                if(RowInsertions.Count==0)
+                if (RowInsertions.Count == 0)
                 {
                     //reset the original State.
                     _BaseState.PlayField.HasChanged = true;
@@ -302,29 +312,28 @@ namespace BASeTris.GameStates
 
                     //insert into the playfield at InsertionIndex.
                     //This means moving All rows from InsertionIndex up one.
-                    for(int moverow=0;moverow<InsertionIndex;moverow++)
+                    for (int moverow = 0; moverow < InsertionIndex; moverow++)
                     {
-                        TetrisBlock[] ThisRow = _BaseState.PlayField.Contents[moverow+1];
+                        TetrisBlock[] ThisRow = _BaseState.PlayField.Contents[moverow + 1];
                         TetrisBlock[] TargetRow = _BaseState.PlayField.Contents[moverow];
 
-                        for(int copyCol =0;copyCol<ThisRow.Length;copyCol++)
+                        for (int copyCol = 0; copyCol < ThisRow.Length; copyCol++)
                         {
                             TargetRow[copyCol] = ThisRow[copyCol];
                         }
                     }
 
                     TetrisBlock[] InsertedRow = _BaseState.PlayField.Contents[InsertionIndex];
-                    for(int i=0;i<InsertedRow.Length;i++)
+                    for (int i = 0; i < InsertedRow.Length; i++)
                     {
                         InsertedRow[i] = NextRow[i % NextRow.Length];
                     }
+
                     InsertedCount++;
                     LastOperation = DateTime.Now;
                 }
-                
 
 
-           
                 //another way of doing this: we can just use DrawProc and draw the background over top, I suppose?
             }
         }

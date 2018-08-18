@@ -10,15 +10,15 @@ namespace BASeTris.GameStates
     public class EnterCheatState : EnterTextState
     {
         GameState _PreviousState = null;
-        public EnterCheatState(GameState pOriginalState,IStateOwner pOwner, int EntryLength, string PossibleChars = " _ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") : base(pOwner, EntryLength, PossibleChars)
+
+        public EnterCheatState(GameState pOriginalState, IStateOwner pOwner, int EntryLength, string PossibleChars = " _ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") : base(pOwner, EntryLength, PossibleChars)
         {
             _PreviousState = pOriginalState;
-            EntryPrompt = new string[] { "Enter Cheat Code" };
+            EntryPrompt = new string[] {"Enter Cheat Code"};
         }
 
         public override bool ValidateEntry(IStateOwner pOwner, string sCurrentEntry)
         {
-
             return true;
         }
 
@@ -32,9 +32,7 @@ namespace BASeTris.GameStates
             else
             {
                 TetrisGame.Soundman.PlaySound("wrong");
-                
             }
-            
         }
     }
 }

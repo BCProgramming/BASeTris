@@ -19,8 +19,15 @@ namespace BASeTris.GameStates
         public bool AllowWallKicks = true;
         private bool _MusicEnabled = true;
 
-        
-        public bool MusicEnabled { get { return _MusicEnabled; } set { _MusicEnabled = value; if(!_MusicEnabled) TetrisGame.Soundman.StopMusic(); }}
-        
+
+        public bool MusicEnabled
+        {
+            get { return _MusicEnabled; }
+            set
+            {
+                _MusicEnabled = value;
+                if (!_MusicEnabled) TetrisGame.Soundman.StopMusic();
+            }
+        }
     }
 }

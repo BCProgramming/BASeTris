@@ -12,17 +12,18 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Choosers.AIChoosers
 {
-    public abstract class BaseAIChooser : BlockGroupChooser 
+    public abstract class BaseAIChooser : BlockGroupChooser
     {
         protected StandardTetrisGameState _State;
+
         public BaseAIChooser(StandardTetrisGameState _StandardState, Func<BlockGroup>[] pAvailable) : base(pAvailable)
         {
             _State = _StandardState;
         }
+
         ~BaseAIChooser()
         {
             Dispose();
-            
         }
 
         public override void Dispose()
@@ -35,6 +36,7 @@ namespace BASeTris.Choosers.AIChoosers
         }
 
         bool Caughtup = false;
+
         private void AIChooserWorker()
         {
             try
@@ -46,45 +48,48 @@ namespace BASeTris.Choosers.AIChoosers
                         var Grabnext = PerformGetNext();
                         WorkQueue.Enqueue(Grabnext);
                     }
-                    if(!Caughtup)
+
+                    if (!Caughtup)
                     {
                         Caughtup = true;
                         AIWorker.Priority = ThreadPriority.Lowest;
                     }
-                    Thread.Sleep(1000);
 
+                    Thread.Sleep(1000);
                 }
             }
-            catch(ThreadAbortException tae)
+            catch (ThreadAbortException tae)
             {
-
             }
         }
 
 
         Thread AIWorker = null;
         private int _MaxElements = 15;
-        protected ConcurrentQueue<BlockGroup> WorkQueue = new ConcurrentQueue<BlockGroup>(); 
+        protected ConcurrentQueue<BlockGroup> WorkQueue = new ConcurrentQueue<BlockGroup>();
         public abstract BlockGroup PerformGetNext();
 
         public override BlockGroup GetNext()
         {
-            if (AIWorker==null)
+            if (AIWorker == null)
             {
                 AIWorker = new Thread(AIChooserWorker);
                 AIWorker.Priority = ThreadPriority.Normal;
                 AIWorker.Start();
             }
-            while(WorkQueue.IsEmpty)
+
+            while (WorkQueue.IsEmpty)
             {
                 Thread.Sleep(5);
             }
+
             BlockGroup getresult = null;
             while (!WorkQueue.TryDequeue(out getresult))
-            { Thread.Sleep(15);}
-                return getresult;
+            {
+                Thread.Sleep(15);
+            }
 
+            return getresult;
         }
-        
     }
 }

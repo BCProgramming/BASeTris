@@ -14,18 +14,21 @@ namespace BASeTris.FieldInitializers
         private Random rgen = null;
         private Func<int, int, TetrisBlock> GenerateBlock = null;
         private TetrominoTheme _Theme;
+
         private TetrisBlock DefaultGenerateBlock(int x, int y)
         {
             var standardfilled = new StandardColouredBlock();
             standardfilled.BlockColor = Color.FromArgb(rgen.Next(255), rgen.Next(255), rgen.Next(255));
             return standardfilled;
         }
+
         public GarbageFieldInitializer(Random prgen, TetrominoTheme pTheme, int NumRows)
         {
             rgen = prgen;
             GarbageRows = NumRows;
             GenerateBlock = DefaultGenerateBlock;
         }
+
         public override void Initialize(TetrisField Target)
         {
             if (GarbageRows > 0)
@@ -38,13 +41,9 @@ namespace BASeTris.FieldInitializers
                     {
                         if (rgen.NextDouble() > 0.5)
                         {
-
                             FillRow[fillcol] = GenerateBlock(fillcol, CurrRow);
-
                         }
                     }
-
-
                 }
             }
         }

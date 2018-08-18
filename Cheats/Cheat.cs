@@ -14,28 +14,32 @@ namespace BASeTris.Cheats
         public static LoadedTypeManager CheatManager = null;
 
         private static Dictionary<String, Cheat> CheatDictionary = new Dictionary<String, Cheat>(StringComparer.OrdinalIgnoreCase);
+
         static Cheat()
         {
-            CheatManager = new LoadedTypeManager(new Assembly[] { Assembly.GetExecutingAssembly() },typeof(Cheat),null);
-            foreach(var iterate in CheatManager.ManagedTypes)
+            CheatManager = new LoadedTypeManager(new Assembly[] {Assembly.GetExecutingAssembly()}, typeof(Cheat), null);
+            foreach (var iterate in CheatManager.ManagedTypes)
             {
                 ConstructorInfo findconstructor = iterate.GetConstructor(new Type[] { });
-                if(findconstructor!=null)
+                if (findconstructor != null)
                 {
-                    Cheat CheatInstance = (Cheat)findconstructor.Invoke(new object[] { });
-                    CheatDictionary.Add(CheatInstance.CheatName,CheatInstance);
+                    Cheat CheatInstance = (Cheat) findconstructor.Invoke(new object[] { });
+                    CheatDictionary.Add(CheatInstance.CheatName, CheatInstance);
                 }
             }
         }
+
         public static bool ProcessCheat(String[] cheattext, IStateOwner pStateOwner)
         {
             bool AllTrue = true;
-            foreach(String sCheat in cheattext)
+            foreach (String sCheat in cheattext)
             {
                 AllTrue &= ProcessCheat(sCheat, pStateOwner);
             }
+
             return AllTrue;
         }
+
         public static Cheat GetCheat(String pCheatName)
         {
             if (CheatDictionary.ContainsKey(pCheatName))
@@ -43,14 +47,15 @@ namespace BASeTris.Cheats
 
             return null;
         }
-        public static bool ProcessCheat(String cheattext,IStateOwner pStateOwner)
+
+        public static bool ProcessCheat(String cheattext, IStateOwner pStateOwner)
         {
             //same recursive definition for semicolons as well.
             if (cheattext.Contains(";"))
             {
-                return ProcessCheat(cheattext.Split(';'),pStateOwner);
-
+                return ProcessCheat(cheattext.Split(';'), pStateOwner);
             }
+
             String[] splitcheat = cheattext.Split(' ');
             Cheat acquirecheat = Cheat.GetCheat(splitcheat[0]);
             if (acquirecheat == null) return false;
@@ -64,15 +69,21 @@ namespace BASeTris.Cheats
         public abstract String CheatName { get; }
 
 
-        public abstract bool CheatAction(IStateOwner pStateOwner,String[] CheatParameters);
-        
-
+        public abstract bool CheatAction(IStateOwner pStateOwner, String[] CheatParameters);
     }
-    
-    public class NullCheat :Cheat
+
+    public class NullCheat : Cheat
     {
-        public override string DisplayName { get { return " Null Cheat. Performs no action"; } }
-        public override string CheatName { get{ return "NULL"; } }
+        public override string DisplayName
+        {
+            get { return " Null Cheat. Performs no action"; }
+        }
+
+        public override string CheatName
+        {
+            get { return "NULL"; }
+        }
+
         public override bool CheatAction(IStateOwner pStateOwner, string[] CheatParameters)
         {
             return true;

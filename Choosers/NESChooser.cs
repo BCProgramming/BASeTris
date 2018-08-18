@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Choosers
 {
-    public class NESChooser:BlockGroupChooser 
+    public class NESChooser : BlockGroupChooser
     {
         /*public class NintendoRandomizer extends Randomizer {
 
@@ -37,6 +37,7 @@ namespace BASeTris.Choosers
 
 }*/
         int prev, roll;
+
         public NESChooser(Func<BlockGroup>[] pAvailable) : base(pAvailable)
         {
         }
@@ -44,20 +45,23 @@ namespace BASeTris.Choosers
         public NESChooser(Func<BlockGroup>[] pAvailable, int Seed) : base(pAvailable, Seed)
         {
         }
+
         private bool IsInitialized = false;
+
         private void Init()
         {
-            
             prev = _Available.Length;
             roll = _Available.Length + 1;
         }
+
         public override BlockGroup GetNext()
         {
             int id = rgen.Next(roll);
-            if(id == prev || id == _Available.Length)
+            if (id == prev || id == _Available.Length)
             {
                 id = rgen.Next(_Available.Length);
             }
+
             prev = id;
             return _Available.ElementAt(id)();
         }

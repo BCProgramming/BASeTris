@@ -28,8 +28,11 @@ namespace BASeTris
             Input_Keyboard,
             Input_HID
         }
+
         public static cNewSoundManager Soundman;
+
         public static ImageManager Imageman;
+
         //public static HighScoreManager ScoreMan;
         public static XMLScoreManager<TetrisHighScoreData> ScoreMan;
         public static AudioThemeManager AudioThemeMan;
@@ -42,45 +45,54 @@ namespace BASeTris
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
         private static Image _TiledCache = null;
+
         public static Image StandardTiledTetrisBackground
-        {  get
         {
-                if (_TiledCache == null) 
+            get
             {
-                Image reduceit = Imageman["block_arrangement"];
+                if (_TiledCache == null)
+                {
+                    Image reduceit = Imageman["block_arrangement"];
                     //reduce total size to 20%.
-                    Bitmap ReduceSize = new Bitmap((int)(reduceit.Width * .1), (int)(reduceit.Height * .1));
+                    Bitmap ReduceSize = new Bitmap((int) (reduceit.Width * .1), (int) (reduceit.Height * .1));
                     using (Graphics greduce = Graphics.FromImage(ReduceSize))
                     {
-                        greduce.DrawImage(reduceit,new Rectangle(0,0,ReduceSize.Width,ReduceSize.Height));
+                        greduce.DrawImage(reduceit, new Rectangle(0, 0, ReduceSize.Width, ReduceSize.Height));
                     }
+
                     _TiledCache = ReduceSize;
-            }
+                }
+
                 return _TiledCache;
+            }
         }
-        }
+
         public static float GetDesiredEmSize(float emSize, Graphics g)
         {
             float realSize = (g.DpiY / 72) * emSize;
             return realSize;
         }
-        public static Font GetRetroFont(float desiredSize,double ScaleFactor,FontStyle desiredStyle = FontStyle.Regular,GraphicsUnit GUnit = GraphicsUnit.Point)
+
+        public static Font GetRetroFont(float desiredSize, double ScaleFactor, FontStyle desiredStyle = FontStyle.Regular, GraphicsUnit GUnit = GraphicsUnit.Point)
         {
-            return new Font(RetroFont, (float)(desiredSize * ScaleFactor), desiredStyle, GUnit);
-            
+            return new Font(RetroFont, (float) (desiredSize * ScaleFactor), desiredStyle, GUnit);
         }
+
         public static FontFamily GetMonospaceFont()
         {
             return RetroFont;
         }
+
         public static void InitState()
         {
-            String ScoreFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            String ScoreFolder = Path.Combine
+            (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "BASeTris");
-            if(!Directory.Exists(ScoreFolder))
+            if (!Directory.Exists(ScoreFolder))
             {
                 Directory.CreateDirectory(ScoreFolder);
             }
+
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
 
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.xml");
@@ -97,19 +109,20 @@ namespace BASeTris
             Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BASeTris.Pixel.ttf");
 
             byte[] fontdata = new byte[fontStream.Length];
-            fontStream.Read(fontdata, 0, (int)fontStream.Length);
+            fontStream.Read(fontdata, 0, (int) fontStream.Length);
             fontStream.Close();
             unsafe
             {
                 fixed (byte* pFontData = fontdata)
                 {
-                    pfc.AddMemoryFont((System.IntPtr)pFontData, fontdata.Length);
+                    pfc.AddMemoryFont((System.IntPtr) pFontData, fontdata.Length);
                 }
             }
-            RetroFont = pfc.Families[0];
 
+            RetroFont = pfc.Families[0];
         }
-        public TetrisGame(IStateOwner pOwner,GameState InitialGameState)
+
+        public TetrisGame(IStateOwner pOwner, GameState InitialGameState)
         {
             if (Soundman == null) InitState();
             else
@@ -117,15 +130,17 @@ namespace BASeTris
                 Soundman.StopMusic();
                 Soundman.Stop();
             }
+
             GameOwner = pOwner;
             CurrentGameState = InitialGameState;
         }
+
         public static T ClampValue<T>(T Value, T min, T max) where T : IComparable
         {
             //cast to IComparable
-            IComparable cvalue = (IComparable)Value;
-            IComparable cmin = (IComparable)min;
-            IComparable cmax = (IComparable)max;
+            IComparable cvalue = (IComparable) Value;
+            IComparable cmin = (IComparable) min;
+            IComparable cmax = (IComparable) max;
 
             //return (T)(cvalue.CompareTo(cmin)< 0 ?cmin:cvalue.CompareTo(cmax)>0?max:Value);
             if (cvalue.CompareTo(cmin) < 0)
@@ -136,10 +151,16 @@ namespace BASeTris
             {
                 return max;
             }
-            return Value;
 
+            return Value;
         }
-        public GameState CurrentState { get { return CurrentGameState; } set { CurrentGameState = value; } }
+
+        public GameState CurrentState
+        {
+            get { return CurrentGameState; }
+            set { CurrentGameState = value; }
+        }
+
         public void EnqueueAction(Action pAction)
         {
             GameOwner.EnqueueAction(pAction);
@@ -147,9 +168,9 @@ namespace BASeTris
 
         public Rectangle GameArea { get; }
 
-        public void Feedback(float Strength,int Length)
+        public void Feedback(float Strength, int Length)
         {
-            GameOwner?.Feedback(Strength,Length);
+            GameOwner?.Feedback(Strength, Length);
         }
 
         public void AddGameObject(GameObject Source)
@@ -162,51 +183,54 @@ namespace BASeTris
             GameOwner.AddParticle(pParticle);
         }
 
-        public double ScaleFactor { get { return this.GameOwner.ScaleFactor; } }
+        public double ScaleFactor
+        {
+            get { return this.GameOwner.ScaleFactor; }
+        }
 
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);
         }
+
         Dictionary<Keys, GameState.GameKeys> KeyMapping = new Dictionary<Keys, GameState.GameKeys>()
         {
-            {Keys.Left,GameState.GameKeys.GameKey_Left },
-            {Keys.Right,GameState.GameKeys.GameKey_Right },
-            {Keys.Down,GameState.GameKeys.GameKey_Down },
-            {Keys.Up,GameState.GameKeys.GameKey_Drop },
-            {Keys.X,GameState.GameKeys.GameKey_RotateCW },
-            {Keys.Z,GameState.GameKeys.GameKey_RotateCCW },
-            {Keys.Pause,GameState.GameKeys.GameKey_Pause },
-            {Keys.P,GameState.GameKeys.GameKey_Pause },
-            {Keys.Space,GameState.GameKeys.GameKey_Hold },
-            {Keys.F2,GameState.GameKeys.GameKey_Debug1 },
-            {Keys.F7,GameState.GameKeys.GameKey_Debug2 }
+            {Keys.Left, GameState.GameKeys.GameKey_Left},
+            {Keys.Right, GameState.GameKeys.GameKey_Right},
+            {Keys.Down, GameState.GameKeys.GameKey_Down},
+            {Keys.Up, GameState.GameKeys.GameKey_Drop},
+            {Keys.X, GameState.GameKeys.GameKey_RotateCW},
+            {Keys.Z, GameState.GameKeys.GameKey_RotateCCW},
+            {Keys.Pause, GameState.GameKeys.GameKey_Pause},
+            {Keys.P, GameState.GameKeys.GameKey_Pause},
+            {Keys.Space, GameState.GameKeys.GameKey_Hold},
+            {Keys.F2, GameState.GameKeys.GameKey_Debug1},
+            {Keys.F7, GameState.GameKeys.GameKey_Debug2}
         };
 
 
         public GameState.GameKeys? TranslateKey(Keys source)
         {
-            if(KeyMapping.ContainsKey(source))
+            if (KeyMapping.ContainsKey(source))
             {
                 return KeyMapping[source];
             }
+
             return null;
-
-
         }
-        public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g,KeyInputSource pSource)
+
+        public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g, KeyInputSource pSource)
         {
             if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState) return; //do nothing if it supports that interface.
 
             CurrentGameState.HandleGameKey(pOwner, g);
         }
+
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
             CurrentGameState.DrawProc(this, g, Bounds);
-            CurrentGameState.DrawForegroundEffect(this,g,Bounds);
+            CurrentGameState.DrawForegroundEffect(this, g, Bounds);
         }
-      
-
 
 
         public static T Choose<T>(IEnumerable<T> ChooseArray)
@@ -219,15 +243,15 @@ namespace BASeTris
                 do
                 {
                     rgg = rgen.NextDouble();
-                }
-                while (sorttest.ContainsKey(rgg));
-                sorttest.Add(rgg, loopvalue);
+                } while (sorttest.ContainsKey(rgg));
 
+                sorttest.Add(rgg, loopvalue);
             }
 
             //return the first item.
             return sorttest.First().Value;
         }
+
         public static Image ApplyImageAttributes(Image applyto, ImageAttributes applyattribs)
         {
             Image newimage = new Bitmap(applyto.Width, applyto.Height);
@@ -241,18 +265,18 @@ namespace BASeTris
         }
 
         private static List<DeletionHelper> QueuedDeletions = new List<DeletionHelper>();
+
         public static void QueueDelete(String foldername)
         {
             if (!QueuedDeletions.Exists((q) => (q.DeleteThis == foldername)))
                 QueuedDeletions.Add(new DeletionHelper(foldername));
-
-
         }
 
         public static String[] GetSearchFolders()
         {
-            return new String[] { GetLocalAssets(), AppDataFolder };
+            return new String[] {GetLocalAssets(), AppDataFolder};
         }
+
         private static String GetLocalAssets()
         {
             String exepath;
@@ -268,7 +292,6 @@ namespace BASeTris
 
             //append APPDATA to that exe path.
             return Path.Combine(exepath, "Assets");
-            
         }
 
         public void SetDisplayMode(GameState.DisplayMode pMode)
@@ -289,7 +312,8 @@ namespace BASeTris
 
                 int hyphenfind = joined.IndexOf("-datafolder:", StringComparison.OrdinalIgnoreCase);
                 int slashfind = joined.IndexOf("/datafolder:", StringComparison.OrdinalIgnoreCase);
-                if (hyphenfind > -1) usefoundlocation = hyphenfind; else if (slashfind > -1) usefoundlocation = slashfind;
+                if (hyphenfind > -1) usefoundlocation = hyphenfind;
+                else if (slashfind > -1) usefoundlocation = slashfind;
 
 
                 if (usefoundlocation > -1)
@@ -311,22 +335,22 @@ namespace BASeTris
 
                     DataFolder = joined.Substring(firstchar, endchar - firstchar);
                     return DataFolder;
-
                 }
                 else
                 {
                     if (!PortableMode)
                     {
-                        DataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                                            "BASeTris");
+                        DataFolder = Path.Combine
+                        (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                            "BASeTris");
                     }
 
-                 
 
                     return DataFolder;
                 }
             }
         }
+
         public static String FancyNumber(int number)
         {
             String sNumber = number.ToString().Trim();
@@ -338,48 +362,47 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
-        public static Dictionary<Type,Image> GetTetrominoBitmaps(RectangleF Bounds,TetrominoTheme UseTheme,TetrisField PlayField=null)
+
+        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null)
         {
-            
-                Dictionary<Type,Image> TetrominoImages = new Dictionary<Type, Image>();
-                float useSize = 18 * ((float)Bounds.Height / 644f);
-                SizeF useTetSize = new SizeF(useSize, useSize);
-                Tetromino_I TetI = new Tetromino_I();
-                Tetromino_J TetJ = new Tetromino_J();
-                Tetromino_L TetL = new Tetromino_L();
-                Tetromino_O TetO = new Tetromino_O();
-                Tetromino_S TetS = new Tetromino_S();
-                Tetromino_T TetT = new Tetromino_T();
-                Tetromino_Z TetZ = new Tetromino_Z();
+            Dictionary<Type, Image> TetrominoImages = new Dictionary<Type, Image>();
+            float useSize = 18 * ((float) Bounds.Height / 644f);
+            SizeF useTetSize = new SizeF(useSize, useSize);
+            Tetromino_I TetI = new Tetromino_I();
+            Tetromino_J TetJ = new Tetromino_J();
+            Tetromino_L TetL = new Tetromino_L();
+            Tetromino_O TetO = new Tetromino_O();
+            Tetromino_S TetS = new Tetromino_S();
+            Tetromino_T TetT = new Tetromino_T();
+            Tetromino_Z TetZ = new Tetromino_Z();
 
 
-                UseTheme.ApplyTheme(TetI, PlayField);
-                UseTheme.ApplyTheme(TetJ, PlayField);
-                UseTheme.ApplyTheme(TetL, PlayField);
-                UseTheme.ApplyTheme(TetO, PlayField);
-                UseTheme.ApplyTheme(TetS, PlayField);
-                UseTheme.ApplyTheme(TetT, PlayField);
-                UseTheme.ApplyTheme(TetZ, PlayField);
-                Image Image_I = OutLineImage(TetI.GetImage(useTetSize));
-                Image Image_J = OutLineImage(TetJ.GetImage(useTetSize));
-                Image Image_L = OutLineImage(TetL.GetImage(useTetSize));
-                Image Image_O = OutLineImage(TetO.GetImage(useTetSize));
-                Image Image_S = OutLineImage(TetS.GetImage(useTetSize));
-                Image Image_T = OutLineImage(TetT.GetImage(useTetSize));
-                Image Image_Z = OutLineImage(TetZ.GetImage(useTetSize));
+            UseTheme.ApplyTheme(TetI, PlayField);
+            UseTheme.ApplyTheme(TetJ, PlayField);
+            UseTheme.ApplyTheme(TetL, PlayField);
+            UseTheme.ApplyTheme(TetO, PlayField);
+            UseTheme.ApplyTheme(TetS, PlayField);
+            UseTheme.ApplyTheme(TetT, PlayField);
+            UseTheme.ApplyTheme(TetZ, PlayField);
+            Image Image_I = OutLineImage(TetI.GetImage(useTetSize));
+            Image Image_J = OutLineImage(TetJ.GetImage(useTetSize));
+            Image Image_L = OutLineImage(TetL.GetImage(useTetSize));
+            Image Image_O = OutLineImage(TetO.GetImage(useTetSize));
+            Image Image_S = OutLineImage(TetS.GetImage(useTetSize));
+            Image Image_T = OutLineImage(TetT.GetImage(useTetSize));
+            Image Image_Z = OutLineImage(TetZ.GetImage(useTetSize));
 
 
-
-
-                TetrominoImages.Add(typeof(Tetromino_I), Image_I);
-                TetrominoImages.Add(typeof(Tetromino_J), Image_J);
-                TetrominoImages.Add(typeof(Tetromino_L), Image_L);
-                TetrominoImages.Add(typeof(Tetromino_O), Image_O);
-                TetrominoImages.Add(typeof(Tetromino_S), Image_S);
-                TetrominoImages.Add(typeof(Tetromino_T), Image_T);
-                TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
+            TetrominoImages.Add(typeof(Tetromino_I), Image_I);
+            TetrominoImages.Add(typeof(Tetromino_J), Image_J);
+            TetrominoImages.Add(typeof(Tetromino_L), Image_L);
+            TetrominoImages.Add(typeof(Tetromino_O), Image_O);
+            TetrominoImages.Add(typeof(Tetromino_S), Image_S);
+            TetrominoImages.Add(typeof(Tetromino_T), Image_T);
+            TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
             return TetrominoImages;
         }
+
         private static Image OutLineImage(Image Input)
         {
             Bitmap BuildImage = new Bitmap(Input.Width + 6, Input.Height + 6);
@@ -387,31 +410,29 @@ namespace BASeTris
             {
                 var shadowtet = GetShadowAttributes(0f);
                 int offset = 2;
-                foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
+                foreach (Point shadowblob in new Point[] {new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset)})
                 {
-
                     useG.DrawImage(Input, new Rectangle(3 + shadowblob.X, 3 + shadowblob.Y, Input.Width, Input.Height), 0, 0, Input.Width, Input.Height, GraphicsUnit.Pixel, shadowtet);
                 }
+
                 useG.DrawImage(Input, new Point(3, 3));
-
-
             }
-            return BuildImage;
 
+            return BuildImage;
         }
 
         public static ImageAttributes GetShadowAttributes(float ShadowBrightness = 0.1f)
         {
             float brt = ShadowBrightness;
             ImageAttributes resultAttr = new ImageAttributes();
-            System.Drawing.Imaging.ColorMatrix cm = new ColorMatrix(new float[][]
+            System.Drawing.Imaging.ColorMatrix cm = new ColorMatrix
+            (new float[][]
             {
-                new float[]{brt,0f,0f,0f,0f},
-                new float[]{0f,brt,0f,0f,0f},
-                new float[]{0f,0f,brt,0f,0f},
-                new float[]{0f,0f,0f,1f,0f},
-                new float[]{0f,0f,0f,0f,1f}
-
+                new float[] {brt, 0f, 0f, 0f, 0f},
+                new float[] {0f, brt, 0f, 0f, 0f},
+                new float[] {0f, 0f, brt, 0f, 0f},
+                new float[] {0f, 0f, 0f, 1f, 0f},
+                new float[] {0f, 0f, 0f, 0f, 1f}
             });
             resultAttr.SetColorMatrix(cm);
             return resultAttr;

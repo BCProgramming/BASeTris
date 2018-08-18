@@ -16,15 +16,10 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-          
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;
             Application.Run(new BASeTris());
         }
-
-
-
-
     }
 }

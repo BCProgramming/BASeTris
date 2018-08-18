@@ -11,11 +11,6 @@ namespace BASeTris.FieldInitializers
 {
     public abstract class FieldInitializer
     {
-
         public abstract void Initialize(TetrisField Target);
-
     }
-
-    
-
 }

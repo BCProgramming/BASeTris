@@ -8,7 +8,6 @@ using Microsoft.Win32.SafeHandles;
 
 namespace BaseTris.AssetManager
 {
-
     public class DeletionHelperAPI : IDisposable
     {
         private const int FILE_FLAG_DELETE_ON_CLOSE = 0x4000000;
@@ -19,9 +18,11 @@ namespace BaseTris.AssetManager
         private const int FILE_SHARE_DELETE = 0x4;
 
         private List<DeletionHelperAPI> Subdeletors = new List<DeletionHelperAPI>();
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto,
-    CallingConvention = CallingConvention.StdCall,
-    SetLastError = true)]
+
+        [DllImport
+        ("kernel32.dll", CharSet = CharSet.Auto,
+            CallingConvention = CallingConvention.StdCall,
+            SetLastError = true)]
         public static extern SafeFileHandle CreateFile(
             string lpFileName,
             uint dwDesiredAccess,
@@ -33,6 +34,7 @@ namespace BaseTris.AssetManager
         );
 
         SafeFileHandle FileHandle = null;
+
         public DeletionHelperAPI(String FileOrFolder)
         {
             //if it's a folder, create subobjects.
@@ -47,12 +49,10 @@ namespace BaseTris.AssetManager
             }
             else
             {
-                FileHandle = CreateFile(FileOrFolder, ACCESS_NONE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, IntPtr.Zero,
+                FileHandle = CreateFile
+                (FileOrFolder, ACCESS_NONE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, IntPtr.Zero,
                     OPEN_EXISTING, FILE_FLAG_DELETE_ON_CLOSE, IntPtr.Zero);
             }
-
-
-
         }
 
         public void Dispose()
@@ -64,6 +64,7 @@ namespace BaseTris.AssetManager
                     iterate.Dispose();
                 }
             }
+
             if (FileHandle != null)
             {
                 FileHandle.Dispose();
@@ -82,30 +83,38 @@ namespace BaseTris.AssetManager
         //helper native methods.
         private static readonly Queue<DeletionHelper> QueuedDeletions = new Queue<DeletionHelper>();
         private readonly String mDeleteThis = "";
+
         public DeletionHelper(String deletefolder)
         {
             mDeleteThis = deletefolder;
         }
+
         public String DeleteThis
         {
             get { return mDeleteThis; }
         }
+
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern bool MoveFileEx(
             string lpExistingFileName,
             string lpNewFileName,
             MoveFileFlags dwFlags);
+
         public static void QueueDeletion(String FileOrDir)
         {
             var dh = new DeletionHelper(FileOrDir);
             QueuedDeletions.Enqueue(dh);
         }
+
         ~DeletionHelper()
         {
             Dispose();
         }
+
         #region IDisposable Members
+
         private int delaycount;
+
         public void Dispose()
         {
             try
@@ -130,6 +139,7 @@ namespace BaseTris.AssetManager
                         {
                             return; //give up!
                         }
+
                         Thread.Sleep(250);
                     }
                 }
@@ -143,21 +153,23 @@ namespace BaseTris.AssetManager
                     ScheduleRebootDeletion();
                     return;
                 }
+
                 DelayCall(new TimeSpan(0, 0, 0, delaycount), Dispose);
             }
         }
 
         private static void DelayInvokeThread(Object parameters)
         {
-            var acquireparam = (Object[])parameters;
+            var acquireparam = (Object[]) parameters;
 
             var useaction = acquireparam[1] as Action;
-            var waittime = (TimeSpan)acquireparam[2];
-            var startdelay = (DateTime)acquireparam[3];
+            var waittime = (TimeSpan) acquireparam[2];
+            var startdelay = (DateTime) acquireparam[3];
             while (DateTime.Now - startdelay < waittime)
             {
                 Thread.Sleep(0);
             }
+
             if (useaction == null) return;
             useaction();
         }
@@ -165,7 +177,7 @@ namespace BaseTris.AssetManager
         private static void DelayCall(TimeSpan waittime, Action routine)
         {
             var usethread = new Thread(DelayInvokeThread);
-            usethread.Start(new Object[] { usethread, routine, waittime, DateTime.Now });
+            usethread.Start(new Object[] {usethread, routine, waittime, DateTime.Now});
         }
 
         private void ScheduleRebootDeletion()

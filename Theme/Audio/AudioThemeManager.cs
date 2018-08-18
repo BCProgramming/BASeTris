@@ -18,15 +18,16 @@ namespace BASeTris.Theme.Audio
         {
             CachedStatics = new Dictionary<AudioThemeElement, string>();
         }
+
         public AudioThemeManager(AudioTheme UseTheme)
         {
             CurrentTheme = UseTheme;
         }
-        
+
         private String GetThemeProperty(String pProp)
         {
-            PropertyInfo grabprop = CurrentTheme.GetType().GetProperty(pProp,typeof(AudioThemeElement));
-            Object result = grabprop.GetGetMethod().Invoke(CurrentTheme,new object[]{});
+            PropertyInfo grabprop = CurrentTheme.GetType().GetProperty(pProp, typeof(AudioThemeElement));
+            Object result = grabprop.GetGetMethod().Invoke(CurrentTheme, new object[] { });
             AudioThemeElement CastResult = result as AudioThemeElement;
             if (CastResult.AudioKeys.Length == 1) return CastResult.AudioKeys[0];
             if (CastResult.ChooseStatic)
@@ -35,13 +36,13 @@ namespace BASeTris.Theme.Audio
                 {
                     CachedStatics[CastResult] = TetrisGame.Choose(CastResult.AudioKeys);
                 }
+
                 return CachedStatics[CastResult];
             }
             else
             {
                 return TetrisGame.Choose(CastResult.AudioKeys);
             }
-            
         }
 
         public String BlockGroupMove => GetThemeProperty(nameof(this.BlockGroupMove));
@@ -62,7 +63,7 @@ namespace BASeTris.Theme.Audio
         public String LevelUp => GetThemeProperty(nameof(this.LevelUp));
 
         public String Hold => GetThemeProperty(nameof(this.Hold));
-        
+
         /*  public String[] BlockGroupMove;
         public String[] BlockGroupPlace;
         public String[] BlockGroupRotate;
@@ -72,8 +73,5 @@ namespace BASeTris.Theme.Audio
         public String[] GameOverShade;
         public String[] Pause;
         public String[] GameOver;*/
-
-
-
     }
 }

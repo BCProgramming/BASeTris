@@ -14,7 +14,7 @@ namespace BASeTris.AssetManager
 
         private const int MatrixLength = 5;
         private float[,] m = new float[MatrixLength, MatrixLength];
-        private const float rad = (float)(Math.PI / 180.0);
+        private const float rad = (float) (Math.PI / 180.0);
 
         /*
         QColorMatrix rotates hues while preserving the luminance. In other words: only the color information is modified, not the black-and-white levels. If you would remove the color from an image (by setting the saturation to zero), rotating the hue has no effect.
@@ -40,7 +40,11 @@ namespace BASeTris.AssetManager
         /// <summary>
         /// gdi+ type
         /// </summary>
-        public enum MatrixOrder { MatrixOrderPrepend = 0, MatrixOrderAppend = 1 };
+        public enum MatrixOrder
+        {
+            MatrixOrderPrepend = 0,
+            MatrixOrderAppend = 1
+        };
 
         #region ctors
 
@@ -56,6 +60,7 @@ namespace BASeTris.AssetManager
                 Reset();
                 return;
             }
+
             Copy(m);
         }
 
@@ -76,7 +81,10 @@ namespace BASeTris.AssetManager
 
         #endregion ctors
 
-        public float[,] Matrix { get { return m; } }
+        public float[,] Matrix
+        {
+            get { return m; }
+        }
 
         #region conversions
 
@@ -87,12 +95,14 @@ namespace BASeTris.AssetManager
             {
                 return;
             }
+
             for (int i = 0; i < m.Length; i++)
             {
                 if (m[i] == null)
                 {
                     throw new ArgumentException();
                 }
+
                 for (int j = 0; j < m[i].Length; j++)
                 {
                     this.m[i, j] = m[i][j];
@@ -111,6 +121,7 @@ namespace BASeTris.AssetManager
                     t[i][j] = this.m[i, j];
                 }
             }
+
             return t;
         }
 
@@ -121,6 +132,7 @@ namespace BASeTris.AssetManager
                 Reset();
                 return;
             }
+
             for (int i = 0; i < MatrixLength; i++)
             {
                 for (int j = 0; j < MatrixLength; j++)
@@ -140,6 +152,7 @@ namespace BASeTris.AssetManager
                     cm[i, j] = m[i, j];
                 }
             }
+
             return cm;
         }
 
@@ -175,10 +188,10 @@ namespace BASeTris.AssetManager
         {
             if (c == null) return null;
             float[] p = new float[4];
-            p[0] = (float)c.R;
-            p[1] = (float)c.G;
-            p[2] = (float)c.B;
-            p[3] = (float)c.A;
+            p[0] = (float) c.R;
+            p[1] = (float) c.G;
+            p[2] = (float) c.B;
+            p[3] = (float) c.A;
             return p;
         }
 
@@ -188,7 +201,8 @@ namespace BASeTris.AssetManager
             {
                 throw new ArgumentException();
             }
-            return Color.FromArgb((int)p[3], (int)p[0], (int)p[1], (int)p[2]);
+
+            return Color.FromArgb((int) p[3], (int) p[0], (int) p[1], (int) p[2]);
         }
 
         public float[] TransformVector(float[] v, bool normalize)
@@ -197,6 +211,7 @@ namespace BASeTris.AssetManager
             {
                 throw new ArgumentException();
             }
+
             float[] temp = new float[4];
             for (int x = 0; x < 4; x++)
             {
@@ -206,6 +221,7 @@ namespace BASeTris.AssetManager
                     temp[x] += v[y] * m[y, x];
                 }
             }
+
             for (int x = 0; x < 4; x++)
             {
                 v[x] = temp[x];
@@ -215,6 +231,7 @@ namespace BASeTris.AssetManager
                     else if (v[x] > 255.0f) v[x] = 255.0f;
                 }
             }
+
             return v;
         }
 
@@ -226,10 +243,13 @@ namespace BASeTris.AssetManager
             if (colors == null) return null;
             for (int i = 0; i < colors.Length; i++)
             {
-                colors[i] = Vector2Color(
-                    TransformVector(
+                colors[i] = Vector2Color
+                (
+                    TransformVector
+                    (
                         Color2Vector(colors[i]), true));
             }
+
             return colors;
         }
 
@@ -269,9 +289,11 @@ namespace BASeTris.AssetManager
                     {
                         t += b[y, i] * a[i, x];
                     }
+
                     temp[y, x] = t;
                 }
             }
+
             for (int y = 0; y < MatrixLength; y++)
             {
                 for (int x = 0; x < MatrixLength; x++)
@@ -291,7 +313,8 @@ namespace BASeTris.AssetManager
         public void Scale(float scaleRed, float scaleGreen, float scaleBlue,
             float scaleOpacity)
         {
-            Scale(scaleRed, scaleGreen, scaleBlue,
+            Scale
+            (scaleRed, scaleGreen, scaleBlue,
                 scaleOpacity, MatrixOrder.MatrixOrderPrepend);
         }
 
@@ -339,7 +362,8 @@ namespace BASeTris.AssetManager
         public void Translate(float offsetRed, float offsetGreen, float offsetBlue,
             float offsetOpacity)
         {
-            Translate(offsetRed, offsetGreen, offsetBlue,
+            Translate
+            (offsetRed, offsetGreen, offsetBlue,
                 offsetOpacity, MatrixOrder.MatrixOrderPrepend);
         }
 
@@ -386,22 +410,27 @@ namespace BASeTris.AssetManager
         {
             RotateRed(phi, MatrixOrder.MatrixOrderPrepend);
         }
+
         public void RotateGreen(float phi)
         {
             RotateGreen(phi, MatrixOrder.MatrixOrderPrepend);
         }
+
         public void RotateBlue(float phi)
         {
             RotateBlue(phi, MatrixOrder.MatrixOrderPrepend);
         }
+
         public void RotateRed(float phi, MatrixOrder order)
         {
             RotateColor(phi, 2, 1, order);
         }
+
         public void RotateGreen(float phi, MatrixOrder order)
         {
             RotateColor(phi, 0, 2, order);
         }
+
         public void RotateBlue(float phi, MatrixOrder order)
         {
             RotateColor(phi, 1, 0, order);
@@ -468,11 +497,11 @@ namespace BASeTris.AssetManager
 
             float[,] tm = new float[,]
             {
-                {satComplR + saturation,    satComplR,  satComplR,  0.0f, 0.0f} ,
-                {satComplG, satComplG + saturation, satComplG,  0.0f, 0.0f},
-                {satComplB, satComplB,  satComplB + saturation, 0.0f, 0.0f},
-                {0.0f,  0.0f,   0.0f,   1.0f,   0.0f},
-                {0.0f,  0.0f,   0.0f,   0.0f,   1.0f}
+                {satComplR + saturation, satComplR, satComplR, 0.0f, 0.0f},
+                {satComplG, satComplG + saturation, satComplG, 0.0f, 0.0f},
+                {satComplB, satComplB, satComplB + saturation, 0.0f, 0.0f},
+                {0.0f, 0.0f, 0.0f, 1.0f, 0.0f},
+                {0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
             };
 
             QColorMatrix qm = new QColorMatrix(tm);
@@ -547,7 +576,7 @@ namespace BASeTris.AssetManager
 
                 // Hue rotations keep the color luminations constant, so that only the hues change
                 // visible. To accomplish that, we shear the blue plane.
-                float[] lum = new float[] { lumR, lumG, lumB, 1.0f };
+                float[] lum = new float[] {lumR, lumG, lumB, 1.0f};
 
                 // Transform the luminance vector.
                 preHue.TransformVector(lum);
@@ -576,9 +605,9 @@ namespace BASeTris.AssetManager
             phi *= rad;
             QColorMatrix qm = new QColorMatrix();
 
-            qm.m[x, x] = qm.m[y, y] = (float)Math.Cos(phi);
+            qm.m[x, x] = qm.m[y, y] = (float) Math.Cos(phi);
 
-            float s = (float)Math.Sin(phi);
+            float s = (float) Math.Sin(phi);
             qm.m[y, x] = s;
             qm.m[x, y] = -s;
 
@@ -600,6 +629,7 @@ namespace BASeTris.AssetManager
                 Reset();
                 return;
             }
+
             Copy(qm.m);
         }
 
@@ -609,10 +639,10 @@ namespace BASeTris.AssetManager
             {
                 throw new ArgumentException();
             }
+
             Array.Copy(m, this.m, m.Length);
         }
 
         #endregion private
-
-    }//EOC
+    } //EOC
 }

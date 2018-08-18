@@ -9,7 +9,6 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
-
 using Microsoft.VisualBasic;
 
 public static class StringExtensions
@@ -71,19 +70,20 @@ namespace System.Reflection.BASeCamp
     [Serializable]
     public struct VersionInfo : IComparable<VersionInfo>, IComparable<System.Version>, ISerializable
     {
-
         public readonly int BuildNumber;
         public readonly int Major;
         public readonly int Minor;
         public readonly int Revision;
+
         /// <summary>
         /// Initialize this VersionInfo with a given string source.
         /// </summary>
         /// <param name="pSource"></param>
         public VersionInfo(String pSource)
-            : this(pSource, new char[] { '.' })
+            : this(pSource, new char[] {'.'})
         {
         }
+
         /// <summary>
         /// Initialize this VersionInfo structure with the given fields.
         /// </summary>
@@ -98,6 +98,7 @@ namespace System.Reflection.BASeCamp
             Revision = pRevision;
             BuildNumber = pBuildNumber;
         }
+
         /// <summary>
         /// Read This VersionInfo from a Serialization Stream.
         /// </summary>
@@ -122,8 +123,10 @@ namespace System.Reflection.BASeCamp
                 {
                     gotresult = AsciiValue(splitresult[i]);
                 }
+
                 Values[i] = gotresult;
             }
+
             this.Major = Values[0];
             this.Minor = Values[1];
             this.Revision = Values[2];
@@ -141,7 +144,6 @@ namespace System.Reflection.BASeCamp
 
         public int CompareTo(Version other)
         {
-
             return CompareTo(new VersionInfo(other));
         }
 
@@ -165,6 +167,7 @@ namespace System.Reflection.BASeCamp
             {
                 gotresult <<= iterate;
             }
+
             return gotresult;
         }
 
@@ -188,8 +191,9 @@ namespace System.Reflection.BASeCamp
         {
             if (obj is VersionInfo)
             {
-                return CompareTo((VersionInfo)obj) == 0;
+                return CompareTo((VersionInfo) obj) == 0;
             }
+
             return false;
         }
 
@@ -281,6 +285,7 @@ namespace System.Reflection.BASeCamp
             {
                 throw new ArgumentNullException("Failed to resolve assembly named " + _VersionOf);
             }
+
             VersionInfo actualver = testassembly.GetName().Version;
             if (actualver >= vi)
                 return true;
@@ -307,6 +312,7 @@ namespace System.Reflection.BASeCamp
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -318,9 +324,9 @@ namespace System.Reflection.BASeCamp
         /// <returns></returns>
         private static Assembly GetAssemblyFromName(String pName, AppDomain pDomain)
         {
-            return pDomain.GetAssemblies().
-                           FirstOrDefault(
-                               iterate => iterate.GetName().Name.Equals(pName, StringComparison.OrdinalIgnoreCase));
+            return pDomain.GetAssemblies().FirstOrDefault
+            (
+                iterate => iterate.GetName().Name.Equals(pName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static Assembly GetAssemblyFromName(String pName)
@@ -352,24 +358,24 @@ namespace System.Reflection.BASeCamp
         private Assembly[] useassemblies;
 
         public MultiTypeManager(String[] lookfolders, Type[] typesload,
-                                iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
-                                TypeManagerLoadProgressCallback pp, Assembly[] preloadedassemblies)
+            iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
+            TypeManagerLoadProgressCallback pp, Assembly[] preloadedassemblies)
             : this(AssembliesFromStrings(lookfolders), typesload, pcallback, TestAssembly, pp, preloadedassemblies)
         {
         }
 
         public MultiTypeManager(IEnumerable<Assembly> lookassemblies, IEnumerable<Type> typesload,
-                                iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
-                                TypeManagerLoadProgressCallback pprog, IEnumerable<Assembly> preloadedassemblies)
+            iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
+            TypeManagerLoadProgressCallback pprog, IEnumerable<Assembly> preloadedassemblies)
             : this(lookassemblies, typesload, pcallback, TestAssembly, pprog, null, preloadedassemblies)
         {
         }
 
         public MultiTypeManager(IEnumerable<Assembly> lookassemblies, IEnumerable<Type> typesload,
-                                iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
-                                TypeManagerLoadProgressCallback pprog,
-                                LoadedTypeManager.TypeManagerInspectTypeCallback pinspectioncallback,
-                                IEnumerable<Assembly> preloadedassemblies)
+            iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
+            TypeManagerLoadProgressCallback pprog,
+            LoadedTypeManager.TypeManagerInspectTypeCallback pinspectioncallback,
+            IEnumerable<Assembly> preloadedassemblies)
         {
             lookassemblies = LoadedTypeManager.RemoveDuplicates(lookassemblies, pcallback).AsParallel();
             //each Type corresponds to a new LoadedTypeManager to load for that type.
@@ -386,6 +392,7 @@ namespace System.Reflection.BASeCamp
                         buildcheck.Add(addassembly);
                 }
             }
+
             if (lookassemblies != null)
             {
                 foreach (var addassembly in lookassemblies)
@@ -411,7 +418,7 @@ namespace System.Reflection.BASeCamp
             //now that we have the LoadedTypeManager objects, uninitialized- we can iterate through each assembly and the types
             //in each assembly for matches.
             //assemblyprogressincrement: the amount of progress we will go through after checking each assembly.
-            float assemblyprogressincrement = 1f / (float)checkassemblies.Count();
+            float assemblyprogressincrement = 1f / (float) checkassemblies.Count();
             float currprogress = 0;
 
             foreach (Assembly loopassembly in checkassemblies)
@@ -425,6 +432,7 @@ namespace System.Reflection.BASeCamp
                 {
                     Debug.Print("test");
                 }
+
                 //
                 if (TestAssembly(loopassembly))
                 {
@@ -438,18 +446,22 @@ namespace System.Reflection.BASeCamp
                     }
                     catch (ReflectionTypeLoadException rtle)
                     {
-                        pcallback.ShowMessage("ReflectionTypeLoadException occured;" + rtle.StackTrace +
-                                              " InnerExceptions:");
+                        pcallback.ShowMessage
+                        ("ReflectionTypeLoadException occured;" + rtle.StackTrace +
+                         " InnerExceptions:");
                         foreach (Exception loopexception in rtle.LoaderExceptions)
                         {
-                            pcallback.ShowMessage("RTLE Loader Exception:" + loopexception.Message + " Source:" +
-                                                  loopexception.Source + "stack Trace:" + loopexception.StackTrace);
+                            pcallback.ShowMessage
+                            ("RTLE Loader Exception:" + loopexception.Message + " Source:" +
+                             loopexception.Source + "stack Trace:" + loopexception.StackTrace);
                         }
+
                         pcallback.ShowMessage("End of RTLE Loader Exceptions");
                         currprogress += assemblyprogressincrement;
                         pprog(currprogress);
                         typesiterate = null;
                     }
+
                     if (typesiterate != null)
                     {
                         //iterate through each type...
@@ -470,8 +482,9 @@ namespace System.Reflection.BASeCamp
                             {
                                 if (LoadedTypeManager.CheckType(looptype, checkmanager.Key, pcallback))
                                 {
-                                    pcallback.ShowMessage("Type:" + looptype.FullName + " is a, or implements, " +
-                                                          checkmanager.Key.Name);
+                                    pcallback.ShowMessage
+                                    ("Type:" + looptype.FullName + " is a, or implements, " +
+                                     checkmanager.Key.Name);
 
                                     //add it to that manager...
                                     if (inspectioncallback != null) inspectioncallback(looptype);
@@ -492,13 +505,15 @@ namespace System.Reflection.BASeCamp
             //at the conclusion of the loop, show a summary.
             if (!(pcallback is Nullcallback))
             {
-                pcallback.ShowMessage("Assembly enumeration complete.(" + checkassemblies.Count().ToString() +
-                                      " Assemblies ");
+                pcallback.ShowMessage
+                ("Assembly enumeration complete.(" + checkassemblies.Count().ToString() +
+                 " Assemblies ");
                 //^save time by not doing this for a Nullcallback...
                 foreach (var loopltm in loadeddata)
                 {
-                    pcallback.ShowMessage(" found " + loopltm.Value.ManagedTypes.Count + " instances of type " +
-                                          loopltm.Key.Name);
+                    pcallback.ShowMessage
+                    (" found " + loopltm.Value.ManagedTypes.Count + " instances of type " +
+                     loopltm.Key.Name);
                 }
             }
         }
@@ -513,6 +528,7 @@ namespace System.Reflection.BASeCamp
                     loadeddata.Add(index, new LoadedTypeManager(useassemblies, index, null));
                     //throw new ApplicationException("Type " + index.FullName + " not enumerated...");
                 }
+
                 return loadeddata[index];
             }
         }
@@ -525,7 +541,6 @@ namespace System.Reflection.BASeCamp
 
         public static IEnumerable<Assembly> AssembliesFromStrings(IEnumerable<String> foldernames, iManagerCallback datahook)
         {
-
             yield return Assembly.GetExecutingAssembly();
             foreach (String loopfolder in foldernames)
             {
@@ -533,7 +548,7 @@ namespace System.Reflection.BASeCamp
                 {
                     foreach (
                         FileInfo loopfile in
-                            new DirectoryInfo(loopfolder).GetFiles("*.dll", SearchOption.TopDirectoryOnly))
+                        new DirectoryInfo(loopfolder).GetFiles("*.dll", SearchOption.TopDirectoryOnly))
                     {
                         Assembly testassembly = null;
                         try
@@ -542,21 +557,20 @@ namespace System.Reflection.BASeCamp
                             {
                                 Debug.Print("Dragon");
                             }
-                            testassembly = Assembly.LoadFile(loopfile.FullName);
 
+                            testassembly = Assembly.LoadFile(loopfile.FullName);
                         }
                         catch (Exception err)
                         {
                             //Debug.Print("failed to load assembly:" + loopfile.FullName + " " + err.Message);
                             datahook.ShowMessage("failed to load assembly:" + loopfile.FullName + " " + err.Message);
                         }
+
                         if (testassembly != null)
                             yield return testassembly;
                     }
                 }
             }
-
-
         }
     }
 
@@ -580,11 +594,12 @@ namespace System.Reflection.BASeCamp
         private List<Type> _ManagedTypes = new List<Type>();
 
         public TypeManagerInspectTypeCallback inspectioncallback = null;
+
         //called for each type.
         private iManagerCallback mcallback = new Nullcallback();
 
         public LoadedTypeManager(String lookfolder, Type lookfor, iManagerCallback pcallback)
-            : this(new string[] { lookfolder }, lookfor, pcallback)
+            : this(new string[] {lookfolder}, lookfor, pcallback)
         {
         }
 
@@ -701,13 +716,13 @@ namespace System.Reflection.BASeCamp
         }
 
         public LoadedTypeManager(Assembly[] lookassemblies, Type lookfor, IEnumerable<string> ignoreassemblynames,
-                                 iManagerCallback pcallback)
+            iManagerCallback pcallback)
             : this(lookassemblies, lookfor, ignoreassemblynames, pcallback, null)
         {
         }
 
         public LoadedTypeManager(Assembly[] lookassemblies, Type lookfor, IEnumerable<string> ignoreassemblynames,
-                                 iManagerCallback pcallback, TypeManagerInspectTypeCallback pinspectioncallback)
+            iManagerCallback pcallback, TypeManagerInspectTypeCallback pinspectioncallback)
         {
             TypeManage = lookfor;
             this.inspectioncallback = pinspectioncallback;
@@ -721,7 +736,7 @@ namespace System.Reflection.BASeCamp
         }
 
         public LoadedTypeManager(string[] slookfolders, Type lookfor, IEnumerable<string> ignoreassemblynames,
-                                 iManagerCallback pcallback)
+            iManagerCallback pcallback)
         {
             //alright, iterate through all the folders..
             mcallback = pcallback;
@@ -758,13 +773,15 @@ namespace System.Reflection.BASeCamp
                         if (LoadAssembly != null)
                         {
                             if (
-                                !ignoreassemblynames.Any<String>(
+                                !ignoreassemblynames.Any<String>
+                                (
                                     (y) => y.Equals(LoadAssembly.GetName().Name, StringComparison.OrdinalIgnoreCase)))
                                 AssemblyList.Add(LoadAssembly);
                         }
                     }
                 }
             }
+
             mcallback.ShowMessage("Found " + AssemblyList.Count.ToString() + " Assemblies.");
             AssemblyList.Add(Assembly.GetExecutingAssembly()); //add this assembly, so it can find the default builder.
             LoadTypes(AssemblyList.ToArray());
@@ -779,8 +796,8 @@ namespace System.Reflection.BASeCamp
 
         public static List<Type> GetTypesFromAssembly(Assembly lookassembly, Type derivedFrom)
         {
-            LoadedTypeManager ltm = new LoadedTypeManager(new Assembly[] { lookassembly }, derivedFrom, new Nullcallback());
-            ltm.LoadTypes(new Assembly[] { lookassembly });
+            LoadedTypeManager ltm = new LoadedTypeManager(new Assembly[] {lookassembly}, derivedFrom, new Nullcallback());
+            ltm.LoadTypes(new Assembly[] {lookassembly});
             return ltm.ManagedTypes;
         }
 
@@ -831,9 +848,6 @@ namespace System.Reflection.BASeCamp
                     }
                 }
             }
-
-
-
         }
 
         private void LoadTypes(Assembly[] useassemblies)
@@ -846,7 +860,7 @@ namespace System.Reflection.BASeCamp
             //strip duplicates first.
             //Notice: this code is mostly dead! consult MultiTypeManager...
             ManagedTypes = new List<Type>();
-            if (ignoreassemblies == null) ignoreassemblies = new String[] { "" };
+            if (ignoreassemblies == null) ignoreassemblies = new String[] {""};
             useassemblies = RemoveDuplicates<Assembly>(useassemblies, mcallback);
             foreach (var LoadAssembly in useassemblies.AsParallel())
             {
@@ -856,6 +870,7 @@ namespace System.Reflection.BASeCamp
                 {
                     Debug.Print("test");
                 }
+
                 if ((!assembly.GetName().Name.StartsWith("script_", StringComparison.OrdinalIgnoreCase)) &&
                     ignoreassemblies.Any((y) => (assembly.GetName().Name.TestRegex(y) && !String.IsNullOrEmpty(y))))
                 {
@@ -873,13 +888,16 @@ namespace System.Reflection.BASeCamp
                     }
                     catch (ReflectionTypeLoadException rtle)
                     {
-                        mcallback.ShowMessage("ReflectionTypeLoadException occured;" + rtle.StackTrace +
-                                              " InnerExceptions:");
+                        mcallback.ShowMessage
+                        ("ReflectionTypeLoadException occured;" + rtle.StackTrace +
+                         " InnerExceptions:");
                         foreach (Exception loopexception in rtle.LoaderExceptions)
                         {
-                            mcallback.ShowMessage("RTLE Loader Exception:" + loopexception.Message + " Source:" +
-                                                  loopexception.Source + "stack Trace:" + loopexception.StackTrace);
+                            mcallback.ShowMessage
+                            ("RTLE Loader Exception:" + loopexception.Message + " Source:" +
+                             loopexception.Source + "stack Trace:" + loopexception.StackTrace);
                         }
+
                         mcallback.ShowMessage("End of RTLE Loader Exceptions");
 
                         //continue enumerating.. we could see some of them...
@@ -893,13 +911,16 @@ namespace System.Reflection.BASeCamp
                         mcallback.ShowMessage(ex.Message + " stack:" + ex.StackTrace);
                     }
                 }
-                mcallback.ShowMessage("Found " + CountInFile.ToString() + " " + TypeManage.Name + " Implementations in " +
-                                      LoadAssembly.GetName());
+
+                mcallback.ShowMessage
+                ("Found " + CountInFile.ToString() + " " + TypeManage.Name + " Implementations in " +
+                 LoadAssembly.GetName());
                 foreach (Type looptype in ManagedTypes)
                 {
                     mcallback.ShowMessage(TypeManage.Name + " Implemented by:" + looptype.Name);
                 }
             }
+
             mcallback.ShowMessage("Assembly enumeration complete. Removing duplicates...");
             _ManagedTypes = RemoveDuplicates(_ManagedTypes, mcallback).ToList();
         }
@@ -912,6 +933,7 @@ namespace System.Reflection.BASeCamp
                 Trace.WriteLine("RequiredVersionAttribute returned false for type " + looptype.FullName);
                 return false;
             }
+
             if (inspectioncallback != null) inspectioncallback(looptype);
             if (CheckType(looptype, TypeManage, mcallback))
             {
@@ -929,7 +951,6 @@ namespace System.Reflection.BASeCamp
             int CountInFile = 0;
 
 
-
             if (!looptype.IsAbstract)
             {
                 //if this is the type we want already, then we add it.
@@ -940,8 +961,9 @@ namespace System.Reflection.BASeCamp
                 //added more recently: check wether it is a class derived from the given type.
                 if (looptype.IsSubclassOf(TypeManage))
                 {
-                    mcallback.ShowMessage("Found " + TypeManage.Name + " Derivation:" +
-                                          looptype.Name);
+                    mcallback.ShowMessage
+                    ("Found " + TypeManage.Name + " Derivation:" +
+                     looptype.Name);
 
                     //ManagedTypes.Add(looptype);
                     CountInFile++;
@@ -955,8 +977,9 @@ namespace System.Reflection.BASeCamp
                         {
                             if (loopinterface.Equals(TypeManage))
                             {
-                                mcallback.ShowMessage("Found " + TypeManage.Name + " Implementor:" +
-                                                      looptype.Name);
+                                mcallback.ShowMessage
+                                ("Found " + TypeManage.Name + " Implementor:" +
+                                 looptype.Name);
 
                                 //ManagedTypes.Add(looptype);
                                 CountInFile++;
@@ -975,6 +998,7 @@ namespace System.Reflection.BASeCamp
             {
                 // Debug.Print("Skipped Abstract class:" + looptype.FullName);
             }
+
             return CountInFile > 0;
         }
     }

@@ -29,6 +29,7 @@ namespace BASeTris
             Partitioned,
             Full
         }
+
         public enum GameKeys
         {
             GameKey_Null,
@@ -47,6 +48,7 @@ namespace BASeTris
             GameKey_Debug5,
             GameKey_Debug6
         }
+
         public virtual DisplayMode SupportedDisplayMode { get; }
         public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);
         public abstract void GameProc(IStateOwner pOwner);
@@ -55,9 +57,4 @@ namespace BASeTris
 
         public abstract void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds);
     }
-
-
-
-
-    }
-
+}

@@ -17,7 +17,6 @@ namespace BASeTris
     public interface iLocatable
     {
         PointF Location { get; set; }
-
     }
 
 
@@ -38,16 +37,23 @@ namespace BASeTris
         protected PointF _GravityAcceleration = PointF.Empty;
         protected PointF _VelocityDecay = new PointF(1f, 1f); //default is to not decay at all.
 
-        public Object Tag { get { return _Tag; } set { _Tag = value; } }
+        public Object Tag
+        {
+            get { return _Tag; }
+            set { _Tag = value; }
+        }
 
-        public PointF VelocityDecay { get { return _VelocityDecay; } set { _VelocityDecay = value; } }
+        public PointF VelocityDecay
+        {
+            get { return _VelocityDecay; }
+            set { _VelocityDecay = value; }
+        }
 
         protected Particle(PointF plocation) : base(plocation)
         {
             Location = plocation;
-
-
         }
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
             float speedmult = 1;
@@ -56,35 +62,44 @@ namespace BASeTris
             //Location = new PointF(Location.X+Velocity.X,Location.Y+Velocity.Y);
             Velocity = new PointF(Velocity.X * VelocityDecay.X, Velocity.Y * VelocityDecay.Y);
             return false;
-
         }
+
         public abstract override void Draw(Graphics g);
-
-        
-
-
-
-
-
     }
 
     public abstract class BaseParticle : iLocatable
     {
-
         protected int _Precedence = 0; //higher means less important to draw first, order-wise.
 
         protected PointF _Location, _Velocity;
-        public PointF Location { get { return _Location; } set { _Location = value; } }
-        public PointF Velocity { get { return _Velocity; } set { _Velocity = value; } }
+
+        public PointF Location
+        {
+            get { return _Location; }
+            set { _Location = value; }
+        }
+
+        public PointF Velocity
+        {
+            get { return _Velocity; }
+            set { _Velocity = value; }
+        }
+
         /// <summary>
         /// Precedence of this Particle in the draw order. a Higher value means it should be drawn later (thus appearing on top).
         /// </summary>
-        public int Precedence { get { return _Precedence; } set { _Precedence = value; } }
+        public int Precedence
+        {
+            get { return _Precedence; }
+            set { _Precedence = value; }
+        }
+
         /// <summary>
         /// Draw this particle.
         /// </summary>
         /// <param name="g"></param>
         public abstract void Draw(Graphics g);
+
         /// <summary>
         /// performs a single frame of this particles animation,
         /// </summary>
@@ -96,75 +111,50 @@ namespace BASeTris
         protected BaseParticle(PointF plocation)
         {
             Location = plocation;
-
-
         }
-        
-
-
-
-
-
-
-
     }
+
     public abstract class SizedParticle : Particle
     {
         protected SizeF _ParticleSize;
         protected PointF _SizeAnimation = PointF.Empty;
+
         public PointF SizeAnimation
         {
-            get
-            {
-                return _SizeAnimation;
-            }
+            get { return _SizeAnimation; }
             set { _SizeAnimation = value; }
         }
 
         public virtual SizeF ParticleSize
         {
-            get
-            {
-                return _ParticleSize;
-            }
+            get { return _ParticleSize; }
             set { _ParticleSize = value; }
         }
 
 
         protected SizedParticle(PointF pLocation, SizeF pParticleSize) : base(pLocation)
         {
-
             ParticleSize = pParticleSize;
-
         }
 
         protected SizedParticle(PointF pLocation)
             : this(pLocation, new SizeF(16, 16))
         {
-
-
         }
 
         public abstract override void Draw(Graphics g);
-        
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
-
-            Rectangle centered = new Rectangle((int)(Location.X - _ParticleSize.Width / 2), (int)(Location.Y - _ParticleSize.Height / 2), (int)_ParticleSize.Width, (int)_ParticleSize.Height);
+            Rectangle centered = new Rectangle((int) (Location.X - _ParticleSize.Width / 2), (int) (Location.Y - _ParticleSize.Height / 2), (int) _ParticleSize.Width, (int) _ParticleSize.Height);
 
 
             _ParticleSize = new SizeF(_ParticleSize.Width + _SizeAnimation.X, _ParticleSize.Height + _SizeAnimation.Y);
             base.PerformFrame(gamestate);
             return !gamestate.GameArea.Contains(centered);
         }
-
-
-
-
-
-
-
     }
+
     //a animated particle. Can be set to repeat the image frames, or it can be set to die when it 
     //goes through all the frames.
     public class AnimatedImageParticle : SizedParticle
@@ -175,43 +165,56 @@ namespace BASeTris
         private int _LiveTime;
 
 
-        public Image[] ImageFrames { get { return _ImageFrames; } set { _ImageFrames = value; } }
-        public int TTL { get { return _TTL; } set { _TTL = value; } }
-        public ImageAttributes DrawAttributes { get { return _DrawAttributes; } set { _DrawAttributes = value; } }
+        public Image[] ImageFrames
+        {
+            get { return _ImageFrames; }
+            set { _ImageFrames = value; }
+        }
+
+        public int TTL
+        {
+            get { return _TTL; }
+            set { _TTL = value; }
+        }
+
+        public ImageAttributes DrawAttributes
+        {
+            get { return _DrawAttributes; }
+            set { _DrawAttributes = value; }
+        }
+
         private int getCurrentFrame()
         {
-            return TrigFunctions.ClampValue((int)((((float)_LiveTime) / (float)_TTL) * _ImageFrames.Length)
+            return TrigFunctions.ClampValue
+            ((int) ((((float) _LiveTime) / (float) _TTL) * _ImageFrames.Length)
                 , 0, _ImageFrames.Length - 1);
-
         }
+
         public override SizeF ParticleSize
         {
-            get
-            {
-                return _ImageFrames[getCurrentFrame()].Size;
-            }
+            get { return _ImageFrames[getCurrentFrame()].Size; }
             set
             {
                 //cannot set size...
             }
         }
-        
+
         public AnimatedImageParticle()
             : this(PointF.Empty)
         {
         }
+
         public AnimatedImageParticle(PointF pLocation)
             : this(pLocation, TetrisGame.Imageman.getImageFrames("smoke"), 45)
         {
-
         }
 
         public AnimatedImageParticle(PointF pLocation, Image[] ImageFrames, int TTL) : base(pLocation)
         {
             _ImageFrames = ImageFrames;
             _TTL = TTL;
-
         }
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
             _LiveTime++;
@@ -219,47 +222,48 @@ namespace BASeTris
 
             return _LiveTime > _TTL || base.PerformFrame(gamestate);
         }
+
         public override void Draw(Graphics g)
         {
-
             //retrieve current image...
             Image useimage = _ImageFrames[getCurrentFrame()];
             SizeF usesize = useimage.Size;
-            Rectangle drawLocation = new Rectangle((int)(base.Location.X - usesize.Width / 2),
-                (int)(base.Location.Y - usesize.Height / 2), (int)usesize.Width, (int)usesize.Height);
+            Rectangle drawLocation = new Rectangle
+            ((int) (base.Location.X - usesize.Width / 2),
+                (int) (base.Location.Y - usesize.Height / 2), (int) usesize.Width, (int) usesize.Height);
             g.DrawImage(useimage, drawLocation, 0, 0, useimage.Width, useimage.Height, GraphicsUnit.Pixel, _DrawAttributes);
-
         }
-
     }
+
     public class ImageParticle : SizedParticle
     {
         protected Image _ParticleImage = null;
-        public Image ParticleImage { get { return _ParticleImage; } set { _ParticleImage = value; } }
+
+        public Image ParticleImage
+        {
+            get { return _ParticleImage; }
+            set { _ParticleImage = value; }
+        }
+
         public ImageParticle(PointF pLocation, Image pParticleImage, SizeF useSize) : base(pLocation, useSize)
         {
             ParticleImage = pParticleImage;
-
-
         }
+
         public ImageParticle(PointF pLocation, Image pParticleImage) : this(pLocation, pParticleImage, pParticleImage.Size)
         {
-
-
         }
-       
+
         public override void Draw(Graphics g)
         {
             PointF uselocation = new PointF(Location.X - _ParticleSize.Width / 2, Location.Y - _ParticleSize.Height / 2);
-            g.DrawImage(_ParticleImage, new RectangleF(uselocation, _ParticleSize),
-                new RectangleF(0f, 0f, _ParticleSize.Width,
+            g.DrawImage
+            (_ParticleImage, new RectangleF(uselocation, _ParticleSize),
+                new RectangleF
+                (0f, 0f, _ParticleSize.Width,
                     _ParticleSize.Height), GraphicsUnit.Pixel);
-
         }
-
-
     }
-
 
 
     public class BubbleParticle : ImageParticle
@@ -270,38 +274,31 @@ namespace BASeTris
         {
             //Velocity = new PointF(0,(float)TetrisGame.rgen.NextDouble()*-0.5f);
             _SizeAnimation = new PointF(0.05f, 0.05f);
-
-
-
         }
+
         public BubbleParticle(PointF Location, PointF velocity)
             : base(Location, _BubbleImage, new SizeF(16, 16))
         {
             Velocity = velocity;
-
         }
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
             Velocity = new PointF(Velocity.X * .95f, Velocity.Y * 1.05f);
 
 
-
             return base.PerformFrame(gamestate);
         }
-
-       
-
-
     }
+
     public class CharacterDebris : PolyDebris
     {
         private char _UseCharacter = '*';
         private Font _useFont = new Font(TetrisGame.GetMonospaceFont(), 14);
+
         public CharacterDebris(PointF pLocation, PointF pVelocity, Color puseColor, double pSizeMin, double pSizeMax)
             : base(pLocation, pVelocity, puseColor, pSizeMin, pSizeMax, 5, 10)
         {
-
-
         }
 
         protected override void GenPoly(double RadiusMin, double RadiusMax, int minpoints, int maxpoints)
@@ -310,7 +307,7 @@ namespace BASeTris
             //base.GenPoly(RadiusMin, RadiusMax, minpoints, maxpoints);
             //create PolyPoints from the Polygon representation of a character.
             GraphicsPath gpfont = new GraphicsPath();
-            Font buildfont = new Font(_useFont.Name, (float)TetrisGame.rgen.NextDouble(RadiusMin, RadiusMax));
+            Font buildfont = new Font(_useFont.Name, (float) TetrisGame.rgen.NextDouble(RadiusMin, RadiusMax));
             gpfont.AddString(_UseCharacter.ToString(), buildfont, new PointF(0, 0), StringFormat.GenericDefault);
             gpfont.Flatten(); //flatten to a series of lines...
             //acquire the point data...
@@ -325,26 +322,11 @@ namespace BASeTris
 
             for (int i = 0; i < PolyPoints.Length; i++)
             {
-
                 PolyPoints[i] = new PointF(PolyPoints[i].X - gotcenter.X, PolyPoints[i].Y - gotcenter.Y);
-
-
             }
+
             //and blam, problem solved.
-
-
-
-
-
-
-
-
-
         }
-
-
-
-
     }
 
 
@@ -355,7 +337,6 @@ namespace BASeTris
     /// </summary>
     public class BrickDebris : PolyDebris
     {
-
         private TextureBrush useBrickBrush = null;
 
         /// <summary>
@@ -376,37 +357,33 @@ namespace BASeTris
             Graphics usecanvas;
             List<RectangleF> OriginRect = new List<RectangleF>();
             RectangleF templocation = BlockPosition;
-            Bitmap BuildImage = new Bitmap((int)BlockPosition.Width,(int)BlockPosition.Height);
+            Bitmap BuildImage = new Bitmap((int) BlockPosition.Width, (int) BlockPosition.Height);
             using (Graphics g = Graphics.FromImage(BuildImage))
             {
-                TetrisBlockDrawParameters tbdp = new TetrisBlockDrawParameters(g,new RectangleF(0,0,templocation.Width,templocation.Height),null);
+                TetrisBlockDrawParameters tbdp = new TetrisBlockDrawParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null);
                 sourceblock.DrawBlock(tbdp);
 
                 //now we need to chop it into 'cols' columns and 'rows' rows.
                 //first, how big will each "piece" be?
-                if (cols > templocation.Width) cols = (int)templocation.Width;
-                if (rows > templocation.Height) rows = (int)templocation.Height;
+                if (cols > templocation.Width) cols = (int) templocation.Width;
+                if (rows > templocation.Height) rows = (int) templocation.Height;
                 if (cols == 0 || rows == 0) return null;
-                float Xsize = templocation.Width / (float)cols;
-                float ysize = templocation.Height / (float)rows;
+                float Xsize = templocation.Width / (float) cols;
+                float ysize = templocation.Height / (float) rows;
                 SizeF usesize = new SizeF(Xsize, ysize);
 
                 for (int currcol = 0; currcol < cols; currcol++)
                 {
                     //calculate X coordinate to use.
-                    float useX = usesize.Width * (float)currcol;
+                    float useX = usesize.Width * (float) currcol;
 
                     for (int currrow = 0; currrow < rows; currrow++)
                     {
-                        float useY = usesize.Height * (float)currrow;
+                        float useY = usesize.Height * (float) currrow;
                         OriginRect.Add(new RectangleF(new PointF(useX, useY), usesize));
-
-
                     }
-
-
-
                 }
+
                 Random rg = TetrisGame.rgen;
                 var properoffset = (from m in OriginRect select new RectangleF(m.Left + templocation.Left, m.Top + templocation.Top, m.Width, m.Height)).ToArray();
                 var creationarray = OriginRect.ToArray();
@@ -416,29 +393,17 @@ namespace BASeTris
                     PointF usevel = TrigFunctions.GetRandomVelocity(RandomFactor);
 
 
-                    createdebris[i] = new BrickDebris(creationarray[i], BuildImage, new PointF(properoffset[i].Left, properoffset[i].Top), usevel, (float)(rg.NextDouble() - 0.5));
-
-
-
-
+                    createdebris[i] = new BrickDebris(creationarray[i], BuildImage, new PointF(properoffset[i].Left, properoffset[i].Top), usevel, (float) (rg.NextDouble() - 0.5));
                 }
+
                 return createdebris;
-
             }
-
-
-
-
-
-
-
         }
+
         public static BrickDebris[] GenerateQuadBricks(TetrisBlock sourceblock, RectangleF BlockRect, PointF BallSpeed)
         {
             return GenerateQuadBricks(sourceblock, BlockRect, BallSpeed, 2);
-
         }
-
 
 
         /// <summary>
@@ -449,17 +414,16 @@ namespace BASeTris
         /// <param name="sourceblock">Block to create Bricks on</param>
         /// <param name="BallSpeed">Speed of ball that destroyed the block, or null.</param>
         /// <returns>the four BrickDebris objects created</returns>
-        public static BrickDebris[] GenerateQuadBricks(TetrisBlock sourceblock, RectangleF BlockRect,PointF? BallSpeed, float RandomFactor)
+        public static BrickDebris[] GenerateQuadBricks(TetrisBlock sourceblock, RectangleF BlockRect, PointF? BallSpeed, float RandomFactor)
         {
             if (BallSpeed == null) BallSpeed = PointF.Empty;
-
 
 
             //First step: create the bitmap.
             Bitmap BlockImage;
             Graphics usecanvas;
             RectangleF templocation = BlockRect;
-            BlockImage = new Bitmap((int)BlockRect.Width,(int)BlockRect.Height);
+            BlockImage = new Bitmap((int) BlockRect.Width, (int) BlockRect.Height);
             using (Graphics g = Graphics.FromImage(BlockImage))
             {
                 TetrisBlockDrawParameters tb = new TetrisBlockDrawParameters(g, BlockRect, null);
@@ -478,9 +442,9 @@ namespace BASeTris
             RectangleF lowerleft = new RectangleF(templocation.Left, templocation.Top + halfh, halfw, halfh);
             RectangleF lowerright = new RectangleF(templocation.X + halfw, templocation.Top + halfh, halfw, halfh);
             //                                              0              1           2           3
-            RectangleF[] posrectangles = new RectangleF[] { upperleft, upperright, lowerleft, lowerright };
+            RectangleF[] posrectangles = new RectangleF[] {upperleft, upperright, lowerleft, lowerright};
             //            PointF[] Velocitymultiplier = new PointF[] { new PointF(-1, -1), new PointF(1, -1), new PointF(-1, 1), new PointF(1, 1) }; 
-            PointF[] Velocitymultiplier = new PointF[] { new PointF(-2, -1), new PointF(2, -1), new PointF(-1, -0.5f), new PointF(1, -0.5f) };
+            PointF[] Velocitymultiplier = new PointF[] {new PointF(-2, -1), new PointF(2, -1), new PointF(-1, -0.5f), new PointF(1, -0.5f)};
             BrickDebris[] builddebris = new BrickDebris[4];
 
             PointF DoAddVelocity = new PointF(Math.Abs(BallSpeed.Value.X * 0.2f), Math.Abs(BallSpeed.Value.Y * 0.2f));
@@ -497,26 +461,9 @@ namespace BASeTris
 
 
                 builddebris[i] = new BrickDebris(posrectangles[i], BlockImage, posrectangles[i].Location, usevelocity, rotatespeed);
-
-
-
-
-
             }
 
             return builddebris;
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
         public BrickDebris(RectangleF DebrisPosition, Bitmap SourceImage, PointF sourceimageOrigin, PointF pVelocity, double pRotationSpeed)
@@ -534,10 +481,10 @@ namespace BASeTris
             TextureOrigin = sourceimageOrigin;
             DrawPen = new Pen(DrawBrush, 1); //use the same brush for the pen, so there isn't a border between adjacent blocks.
             mTTL = 50; //by that time, it should be long gone from the stage/level.
-
-
         }
+
         private int BottomBounceTimes = 0;
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
             Velocity = new PointF(Velocity.X, Velocity.Y + 0.15f); //gravity...
@@ -550,51 +497,41 @@ namespace BASeTris
             {
                 Velocity = new PointF(Velocity.X, Velocity.Y * -0.8f);
                 Location = new PointF(Location.X, gamestate.GameArea.Top);
-
             }
             else if (Location.Y > gamestate.GameArea.Bottom && BottomBounceTimes < 4)
             {
                 BottomBounceTimes++;
                 Velocity = new PointF(Velocity.X, Velocity.Y * -0.8f);
                 Location = new PointF(Location.X, gamestate.GameArea.Bottom);
-
             }
+
             //sides.
             if (Location.X < gamestate.GameArea.Left)
             {
                 Velocity = new PointF(Velocity.X * -0.8f, Velocity.Y);
                 Location = new PointF(gamestate.GameArea.Left, Location.Y);
-
             }
             else if (Location.X > gamestate.GameArea.Right)
             {
                 Velocity = new PointF(Velocity.X * -0.8f, Velocity.Y);
-
             }
 
 
             //gamestate.GameArea.Contains(PolyPoints)
-            return base.PerformFrame(gamestate) || !gamestate.GameArea.Contains(new Point((int)Location.X, (int)Location.Y));
+            return base.PerformFrame(gamestate) || !gamestate.GameArea.Contains(new Point((int) Location.X, (int) Location.Y));
             // return base.PerformFrame(gamestate) || !gamestate.GameArea.Contains(PolyPoints);
         }
+
         private void initRect(RectangleF rectangleobj)
         {
-
             Location = TrigFunctions.CenterPoint(rectangleobj);
             SizeF oursize = rectangleobj.Size;
             PointF UpperLeft = new PointF(-oursize.Width / 2, -oursize.Height / 2);
             PointF UpperRight = new PointF(oursize.Width / 2, -oursize.Height / 2);
             PointF LowerLeft = new PointF(-oursize.Width / 2, oursize.Height / 2);
             PointF LowerRight = new PointF(oursize.Width / 2, oursize.Height / 2);
-            PolyPoints = new PointF[] { UpperLeft, UpperRight, LowerRight, LowerLeft };
-
-
-
-
-
-
+            PolyPoints = new PointF[] {UpperLeft, UpperRight, LowerRight, LowerLeft};
         }
-
     }
 
     /// <summary>
@@ -627,7 +564,13 @@ namespace BASeTris
 
         protected TextureBrush useFillTexture = null;
         protected PointF TextureOrigin = PointF.Empty;
-        public int TTL { get { return mTTL; } set { mTTL = value; } }
+
+        public int TTL
+        {
+            get { return mTTL; }
+            set { mTTL = value; }
+        }
+
         public Color PenColor
         {
             get { return _PenColor; }
@@ -637,6 +580,7 @@ namespace BASeTris
                 DrawPen = new Pen(_PenColor);
             }
         }
+
         public Color BrushColor
         {
             get { return _BrushColor; }
@@ -651,78 +595,65 @@ namespace BASeTris
         public Brush DrawBrush { get; set; }
         public Pen DrawPen { get; set; }
         private Polygon _Poly = null;
+
         protected virtual void GenPoly(double RadiusMin, double RadiusMax, int minpoints, int maxpoints)
         {
-
             int PointCount = TetrisGame.rgen.Next(minpoints, maxpoints);
 
             PolyPoints = new PointF[PointCount];
-            float Angle = (float)((Math.PI * 2) / PointCount);
+            float Angle = (float) ((Math.PI * 2) / PointCount);
             for (int i = 0; i < PointCount; i++)
             {
                 //generate this point...
-                float RadiusUse = (float)((TetrisGame.rgen.NextDouble() * (RadiusMax - RadiusMin)) + RadiusMin);
+                float RadiusUse = (float) ((TetrisGame.rgen.NextDouble() * (RadiusMax - RadiusMin)) + RadiusMin);
                 float useangle = Angle * i;
-                PointF newPoint = new PointF((float)Math.Sin(useangle) * RadiusUse, (float)Math.Cos(useangle) * RadiusUse);
+                PointF newPoint = new PointF((float) Math.Sin(useangle) * RadiusUse, (float) Math.Cos(useangle) * RadiusUse);
 
                 PolyPoints[i] = newPoint;
-
-
             }
+
             _Poly = new Polygon(PolyPoints);
-
-
-
-
-
-
         }
+
         private static PointF getRandomVelocity(double speed)
         {
             double angle = TetrisGame.rgen.NextDouble() * (Math.PI * 2);
-            return new PointF((float)(Math.Cos(angle) * speed), (float)(Math.Sin(angle) * speed));
-
-
-
+            return new PointF((float) (Math.Cos(angle) * speed), (float) (Math.Sin(angle) * speed));
         }
 
         public PolyDebris(PointF pLocation, double speed, Color useColor)
             : this(pLocation, getRandomVelocity(speed), useColor)
         {
-
-
-
         }
+
         public PolyDebris(PointF pLocation, double speed, Color usecolor, double RadiusMin, double RadiusMax, int MinPoints, int MaxPoints)
-            : this(pLocation, getRandomVelocity(speed), usecolor,
+            : this
+            (pLocation, getRandomVelocity(speed), usecolor,
                 RadiusMin, RadiusMax, MinPoints, MaxPoints)
         {
-
         }
+
         public PolyDebris(PointF pLocation, double speed, Image pieceimage, double RadiusMin, double RadiusMax, int MinPoints, int MaxPoints)
-            : this(pLocation, getRandomVelocity(speed), pieceimage,
+            : this
+            (pLocation, getRandomVelocity(speed), pieceimage,
                 RadiusMin, RadiusMax, MinPoints, MaxPoints, null, null)
         {
-
         }
 
         public PolyDebris(PointF pLocation, double speed, Image pieceimage) : this(pLocation, getRandomVelocity(speed), pieceimage, 2, 6, 3, 8, null, null)
         {
-
-
-
         }
+
         public PolyDebris(PointF pLocation, PointF Velocity, Image pieceimage)
             : this(pLocation, Velocity, pieceimage, 2, 6, 3, 8, null, null)
         {
-
         }
+
         public PolyDebris(PointF pLocation, float speed, Image ppieceimage, double RadiusMin, double RadiusMax, int MinPoints, int MaxPoints, Point? ClipTopLeft, Size? ClipSize)
             : this(pLocation, TrigFunctions.GetRandomVelocity(speed), ppieceimage, RadiusMin, RadiusMax, MinPoints, MaxPoints, ClipTopLeft, ClipSize)
         {
-
-
         }
+
         /// <summary>
         /// Creates a PolyDebris Object that uses the given image.
         /// </summary>
@@ -740,9 +671,7 @@ namespace BASeTris
 
             if (ClipTopLeft != null && ClipSize != null)
             {
-
                 pieceimage = ppieceimage.ClipImage(ClipTopLeft.Value, ClipSize.Value);
-
             }
             else
             {
@@ -762,9 +691,8 @@ namespace BASeTris
                     catch (InvalidOperationException eex)
                     {
                         //Object in use elsewhere... maybe clone it?
-                        Image duplicate = (Image)pieceimage.Clone();
+                        Image duplicate = (Image) pieceimage.Clone();
                         useFillTexture = new TextureBrush(duplicate, WrapMode.Tile);
-
                     }
                 }
             }
@@ -776,9 +704,10 @@ namespace BASeTris
                 pieceimage = maketexturemap; //bugfix: pieceimage was null below for the PointF() constructor and caused of course a nullreferenceexception.
                 useFillTexture = new TextureBrush(maketexturemap, WrapMode.Tile);
             }
+
             //choose a random origin point within the image.
             Random rr = TetrisGame.rgen;
-            TextureOrigin = new PointF((float)(pieceimage.Width * rr.NextDouble()), (float)(pieceimage.Height * rr.NextDouble()));
+            TextureOrigin = new PointF((float) (pieceimage.Width * rr.NextDouble()), (float) (pieceimage.Height * rr.NextDouble()));
             useFillTexture.TranslateTransform(TextureOrigin.X, TextureOrigin.Y);
             DrawBrush = useFillTexture;
             DrawPen = new Pen(Color.Black);
@@ -788,9 +717,8 @@ namespace BASeTris
             const double RadiusMin = 2, RadiusMax = 6;
              * */
             GenPoly(RadiusMin, RadiusMax, MinPoints, MaxPoints);
-
-
         }
+
         public PolyDebris(PointF pLocation, PointF pVelocity, Color UseColor)
             : this(pLocation, pVelocity, UseColor, 2, 6, 3, 8)
         {
@@ -809,22 +737,17 @@ namespace BASeTris
 
             //generate the polygon points.
             GenPoly(RadiusMin, RadiusMax, MinPoints, MaxPoints);
-
-
-
-
-
         }
+
         protected PolyDebris() : base(PointF.Empty)
         {
-
-
         }
+
         public static explicit operator Polygon(PolyDebris src)
         {
             return src._Poly;
-
         }
+
         //static method that draws the given GameObject as it currently is and creates numfragments "pieces" of that GameObject, returned
         //as PolyDebris. Somewhat similar to the code that does this for blocks.
         public static IEnumerable<PolyDebris> Fragment(iImagable source, int numfragments, Func<float> SpeedFunc)
@@ -837,8 +760,8 @@ namespace BASeTris
             //solution would be to use getRectangle and set the location to the the negative of the left and top values.
 
 
-            if (SpeedFunc == null) SpeedFunc = (() => (float)((TetrisGame.rgen.NextDouble() * 2) + 1));
-            Bitmap createimage = new Bitmap((int)source.Size.Width, source.Size.Height);
+            if (SpeedFunc == null) SpeedFunc = (() => (float) ((TetrisGame.rgen.NextDouble() * 2) + 1));
+            Bitmap createimage = new Bitmap((int) source.Size.Width, source.Size.Height);
             Graphics useg = Graphics.FromImage(createimage);
             //draw it...
             lock (source)
@@ -854,6 +777,7 @@ namespace BASeTris
                 //revert to original location.
                 source.Location = tempgrab;
             }
+
             Image useimage = TrigFunctions.ScaleImage(createimage, 3);
             //now, we create the pieces.
             float useradius = Math.Max(source.Size.Width, source.Size.Height) / 9;
@@ -862,34 +786,31 @@ namespace BASeTris
             PointF usevelocity = TrigFunctions.GetRandomVelocity(SpeedFunc());
             for (int i = 0; i < numfragments; i++)
             {
-                int startrange = Math.Min(5, (int)maxradius / 5);
-                int endrange = Math.Max(5, (int)maxradius / 5);
+                int startrange = Math.Min(5, (int) maxradius / 5);
+                int endrange = Math.Max(5, (int) maxradius / 5);
                 int genWidth = source.Size.Width;
                 int genHeight = source.Size.Height;
                 Size ClipSize = new Size(genWidth, genHeight);
-                Point clipspot = new Point(TetrisGame.rgen.Next((int)(source.Size.Width / 2)), TetrisGame.rgen.Next((int)(source.Size.Width / 2)));
+                Point clipspot = new Point(TetrisGame.rgen.Next((int) (source.Size.Width / 2)), TetrisGame.rgen.Next((int) (source.Size.Width / 2)));
                 PolyDebris newdebris = new PolyDebris(TrigFunctions.CenterPoint(source.getRectangle()), usevelocity, useimage, minradius, maxradius, 3, 8, new Point?(clipspot), new Size?(ClipSize));
                 newdebris.DrawPen = Pens.Transparent;
                 yield return newdebris;
-
-
             }
-
-
         }
-       
+
         Matrix rotationmatrix = new Matrix();
+
         public override void Draw(Graphics g)
         {
             //throw new NotImplementedException();
 
-            int Alpha = (int)(((float)mAliveFrames / (float)mTTL) * 255);
+            int Alpha = (int) (((float) mAliveFrames / (float) mTTL) * 255);
 
 
             Matrix cached = g.Transform;
             rotationmatrix.Reset();
             rotationmatrix.Scale(SizeScale.Width, SizeScale.Height);
-            rotationmatrix.RotateAt((float)currentRotation, PointF.Empty, MatrixOrder.Append);
+            rotationmatrix.RotateAt((float) currentRotation, PointF.Empty, MatrixOrder.Append);
             rotationmatrix.Translate(Location.X, Location.Y, MatrixOrder.Append);
             try
             {
@@ -905,7 +826,6 @@ namespace BASeTris
                     Color pcolor = Color.FromArgb(Alpha, PenColor);
                     DrawBrush = new SolidBrush(bcolor);
                     DrawPen = new Pen(DrawBrush);
-
                 }
                 else
                 {
@@ -913,7 +833,6 @@ namespace BASeTris
                     //we can do this by creating a new TextureBrush, using the same image, but passing in an Alpha-modified
                     //ImageAttributes.
 #if EXPERIMENTALPOLYDEBRIS
-
                     var tweakalpha = ColorMatrices.GetFader(Alpha);
                     var dAttributes = new ImageAttributes();
                     dAttributes.SetColorMatrix(tweakalpha);
@@ -922,24 +841,22 @@ namespace BASeTris
                     //create a new one.
                     useFillTexture = new TextureBrush(oldBrush.Image, new Rectangle(Point.Empty, oldBrush.Image.Size), dAttributes);
                     //tada!
-#endif                    
+#endif
                 }
+
                 g.FillPolygon(DrawBrush, PolyPoints);
                 g.DrawPolygon(DrawPen, PolyPoints);
             }
             catch (ArgumentException p)
             {
-
                 Debug.Print("argexcept:" + p.Message + " Trace:" + p.StackTrace);
-
             }
             finally
             {
                 g.Transform = cached;
             }
-
-
         }
+
         private void ScalePoly(double expandfactor, double increaseamount)
         {
             PointF CenterSpot = _Poly.Center;
@@ -947,22 +864,17 @@ namespace BASeTris
             for (int i = 0; i < PolyPoints.Length; i++)
             {
                 //get x and y difference from this point to the center...
-                PointF difference = new PointF(
-                    (float)expandfactor * (PolyPoints[i].X - CenterSpot.X),
-                    (float)expandfactor * (PolyPoints[i].Y - CenterSpot.Y));
+                PointF difference = new PointF
+                (
+                    (float) expandfactor * (PolyPoints[i].X - CenterSpot.X),
+                    (float) expandfactor * (PolyPoints[i].Y - CenterSpot.Y));
 
 
                 //increase the difference by the factor.
                 PolyPoints[i] = new PointF(CenterSpot.X + difference.X, CenterSpot.Y + difference.Y);
-
-
             }
-
-
-
-
-
         }
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
             base.PerformFrame(gamestate);
@@ -975,24 +887,15 @@ namespace BASeTris
 
 
                 //this.PolyPoints 
-
-
             }
 
             Velocity = new PointF(Velocity.X * 0.97f, Velocity.Y * 0.97f);
             mAliveFrames--;
 
 
-
             return (0 >= mAliveFrames);
-
         }
-
-     
     }
-
-
-
 
 
     //LineParticle is a "particle" that holds two aggregate particles; It will call the 
@@ -1004,22 +907,38 @@ namespace BASeTris
         [Flags]
         public enum LineParticleDrawModeConstants
         {
-
             LPDM_Line = 2,
             LPDM_ParticleA = 4,
             LPDM_ParticleB = 8
-
-
         }
+
         //defaults to drawing it all.
         private LineParticleDrawModeConstants LineParticleDrawMode = LineParticleDrawModeConstants.LPDM_Line | LineParticleDrawModeConstants.LPDM_ParticleA | LineParticleDrawModeConstants.LPDM_ParticleB;
         private Particle[] _EndPoints = new Particle[2];
-        public Particle ParticleA { get { return _EndPoints[0]; } set { _EndPoints[0] = value; } }
-        public Particle ParticleB { get { return _EndPoints[1]; } set { _EndPoints[1] = value; } }
+
+        public Particle ParticleA
+        {
+            get { return _EndPoints[0]; }
+            set { _EndPoints[0] = value; }
+        }
+
+        public Particle ParticleB
+        {
+            get { return _EndPoints[1]; }
+            set { _EndPoints[1] = value; }
+        }
+
         private Pen _linePen = new Pen(Color.Black); //may as well default to something.
         private int _TTL = 10000; //ms
-        public int TTL { get { return TTL; } set { _TTL = value; } }
+
+        public int TTL
+        {
+            get { return TTL; }
+            set { _TTL = value; }
+        }
+
         private DateTime? LiveTime;
+
         private TimeSpan getAliveTime
         {
             get
@@ -1028,20 +947,22 @@ namespace BASeTris
                 else return DateTime.Now - LiveTime.Value;
             }
         }
+
         private Color mPenColor;
         private bool usecolor = false;
-        public Pen LinePen { get { return _linePen; } set { _linePen = value; } }
+
+        public Pen LinePen
+        {
+            get { return _linePen; }
+            set { _linePen = value; }
+        }
 
 
         private int CalculateAlpha()
         {
             //get percentage of our TTL we have been alive...
-            float percentage = ((float)getAliveTime.TotalMilliseconds) / (float)_TTL;
-            return TrigFunctions.ClampValue(255 - (int)(255f * percentage), 0, 255);
-
-
-
-
+            float percentage = ((float) getAliveTime.TotalMilliseconds) / (float) _TTL;
+            return TrigFunctions.ClampValue(255 - (int) (255f * percentage), 0, 255);
         }
 
         public LineParticle(Particle EndPointA, Particle EndPointB, Color linecolor)
@@ -1051,21 +972,14 @@ namespace BASeTris
             ParticleB = EndPointB;
             usecolor = true;
             mPenColor = linecolor;
-
         }
 
         public LineParticle(Particle EndPointA, Particle EndPointB, Pen LinePen) : base(TrigFunctions.MidPoint(EndPointA.Location, EndPointB.Location))
         {
-
             ParticleA = EndPointA;
             ParticleB = EndPointB;
             _linePen = LinePen;
-
-
         }
-
-
-
 
 
         public override void Draw(Graphics g)
@@ -1074,14 +988,11 @@ namespace BASeTris
             {
                 //particleA...
                 ParticleA.Draw(g);
-
-
             }
 
             if ((LineParticleDrawMode & LineParticleDrawModeConstants.LPDM_ParticleB) == LineParticleDrawModeConstants.LPDM_ParticleB)
             {
                 ParticleB.Draw(g);
-
             }
 
             if ((LineParticleDrawMode & LineParticleDrawModeConstants.LPDM_Line) == LineParticleDrawModeConstants.LPDM_Line)
@@ -1089,17 +1000,10 @@ namespace BASeTris
                 if (usecolor)
                 {
                     _linePen = new Pen(Color.FromArgb(CalculateAlpha(), mPenColor), 10);
-
-
-
-
                 }
+
                 g.DrawLine(_linePen, ParticleA.Location, ParticleB.Location);
-
-
-
             }
-
         }
 
         public override bool PerformFrame(IStateOwner gamestate)
@@ -1110,8 +1014,8 @@ namespace BASeTris
             Location = TrigFunctions.MidPoint(ParticleA.Location, ParticleB.Location);
             return getAliveTime.TotalMilliseconds > _TTL;
         }
-        
     }
+
     /// <summary>
     /// DebrisParticle: a particle of debris, starts with Location, Velocity, Rotation Angle and Rotation speed; and a few other values.
     /// </summary>
@@ -1119,12 +1023,13 @@ namespace BASeTris
     {
         protected int mAliveFrames = 0;
         public Image[] DebrisImageFrames;
+
         public int currframe = 0;
+
         //public PointF Velocity { get; set; }
         public double currentRotation = 0;
         public double RotationSpeed = 0.5;
         public SizeF SizeScale = new SizeF(.25f, .25f);
-
 
 
         public DebrisParticle(Image[] ImageFrames, PointF pLocation, PointF pVelocity, double pRotation, double pRotationSpeed) : base(pLocation)
@@ -1134,25 +1039,20 @@ namespace BASeTris
             Velocity = pVelocity;
             currentRotation = pRotation;
             RotationSpeed = pRotationSpeed;
-
         }
-       
-
-
 
 
         protected Image GetCurrentFrame()
         {
-
             return DebrisImageFrames[currframe];
-
         }
+
         protected void IncrementFrame()
         {
-            if (currframe == DebrisImageFrames.Length) currframe = 0; else currframe++;
-
-
+            if (currframe == DebrisImageFrames.Length) currframe = 0;
+            else currframe++;
         }
+
         private PointF CenterPoint()
         {
             Image currframe = GetCurrentFrame();
@@ -1160,27 +1060,25 @@ namespace BASeTris
             SizeF actualsize = new SizeF(currframe.Width * SizeScale.Width, currframe.Height * SizeScale.Height);
 
 
-
-
             return new PointF(Location.X + (actualsize.Width / 2), Location.Y + (actualsize.Height / 2));
-
-
-
         }
+
         //TODO: add ImageAttributes...
         Matrix rotationmatrix = new Matrix();
+
         public override void Draw(Graphics g)
         {
             //draw the image; here we should also set image attributes so it fades out.
             Image drawthis = GetCurrentFrame();
-            SizeF truesize = new SizeF((float)SizeScale.Width * drawthis.Width, (float)SizeScale.Height * drawthis.Height);
+            SizeF truesize = new SizeF((float) SizeScale.Width * drawthis.Width, (float) SizeScale.Height * drawthis.Height);
 
             Matrix cached = g.Transform;
             rotationmatrix.Reset();
-            rotationmatrix.RotateAt((float)currentRotation, CenterPoint());
+            rotationmatrix.RotateAt((float) currentRotation, CenterPoint());
             //rotationmatrix.Scale(SizeScale.Width, SizeScale.Height);
             g.Transform = rotationmatrix;
-            g.DrawImage(drawthis, new Rectangle((int)Location.X, (int)Location.Y, (int)truesize.Width, (int)truesize.Height),
+            g.DrawImage
+            (drawthis, new Rectangle((int) Location.X, (int) Location.Y, (int) truesize.Width, (int) truesize.Height),
                 0, 0, drawthis.Width, drawthis.Height, GraphicsUnit.Pixel);
             g.Transform = cached;
             //FIX THIS DAMMIT.
@@ -1218,16 +1116,13 @@ namespace BASeTris
             mAliveFrames--;
             return (0 >= mAliveFrames);
         }
-     
     }
-
 
 
     //water particle
     //descends from starting position to bottom of playing area.
     public class WaterParticle : Particle
     {
-
         private static Color DefBaseColour = Color.Blue;
         private Color BaseColour;
         private Color ParticleColour;
@@ -1236,13 +1131,10 @@ namespace BASeTris
         private Brush ParticleBrush;
         private long mTTL, InitialTTL;
         private float macceleration = 0;
+
         public WaterParticle(PointF ParticleLocation, Color PColor)
             : this(ParticleLocation, PointF.Empty, PColor)
         {
-
-
-
-
         }
 
         public WaterParticle(PointF ParticleLocation, PointF InitialVelocity, Color PColor)
@@ -1254,16 +1146,13 @@ namespace BASeTris
             ParticleBrush = new SolidBrush(ParticleColour);
             mTTL = 75;
             InitialTTL = mTTL;
-
-
         }
 
         public WaterParticle(PointF ParticleLocation, PointF InitialVelocity) : this(ParticleLocation, InitialVelocity, DefBaseColour)
         {
-
         }
 
-      
+
         public override void Draw(Graphics g)
         {
             if (ParticleBrush == null) ParticleBrush = new SolidBrush(ParticleColour);
@@ -1275,7 +1164,7 @@ namespace BASeTris
         {
             base.PerformFrame(gamestate);
             //select a new alpha based on the value of mTTL; basically, a percentage of InitialTTL:
-            int newalpha = (int)((((float)mTTL) / InitialTTL) * 255);
+            int newalpha = (int) ((((float) mTTL) / InitialTTL) * 255);
 
             if (newalpha < 0) newalpha = 0;
             if (newalpha > 255) newalpha = 255;
@@ -1284,8 +1173,6 @@ namespace BASeTris
             ParticleColour = BaseColour;
             mTTL--;
             ParticleBrush = new SolidBrush(ParticleColour);
-
-
 
 
             //IStateOwner.IncrementLocation(gamestate, ref Location, mVelocity);
@@ -1311,71 +1198,65 @@ namespace BASeTris
             _GravityAcceleration = new PointF(_GravityAcceleration.X, _GravityAcceleration.Y + 0.1f);
             return (mTTL < 0);
         }
-
-     
     }
 
     //basic implementation (used for testing by being generated by balls)
 
     public class DustParticle : Particle
     {
-
-
         private Color mDustColor = Color.Brown;
+
         //public PointF Velocity { get; set; }
         //private PointF Velocity;
         private int minitialAliveFrames = 45;
         private int mAliveFrames = 45;
+
         public int TTL
         {
             set
             {
                 minitialAliveFrames = value;
                 mAliveFrames = value;
-
             }
-
         }
-        private static Random rGen { get { return TetrisGame.rgen; } }
+
+        private static Random rGen
+        {
+            get { return TetrisGame.rgen; }
+        }
+
         public DustParticle(PointF pLocation, int TTL) : this(pLocation)
         {
             minitialAliveFrames = TTL;
             mAliveFrames = TTL;
-
-
         }
+
         public DustParticle(PointF pLocation, float maxspeed, int TTL, Color dustcolor) : this(pLocation, maxspeed)
         {
             minitialAliveFrames = TTL;
             mAliveFrames = TTL;
             mDustColor = dustcolor;
-
         }
 
         public DustParticle(PointF pLocation, float maxspeed) : base(pLocation)
         {
             float halfmax = maxspeed / 2;
-            Velocity = new PointF((float)(TetrisGame.rgen.NextDouble() * maxspeed) - halfmax, (float)(TetrisGame.rgen.NextDouble() * maxspeed) - halfmax);
+            Velocity = new PointF((float) (TetrisGame.rgen.NextDouble() * maxspeed) - halfmax, (float) (TetrisGame.rgen.NextDouble() * maxspeed) - halfmax);
         }
+
         public DustParticle() : base(PointF.Empty)
         {
-
         }
+
         public DustParticle(PointF pLocation) : base(pLocation)
         {
-            Velocity = new PointF((float)(TetrisGame.rgen.NextDouble() * 2) - 1, (float)(TetrisGame.rgen.NextDouble() * 2) - 1);
-
-
+            Velocity = new PointF((float) (TetrisGame.rgen.NextDouble() * 2) - 1, (float) (TetrisGame.rgen.NextDouble() * 2) - 1);
         }
-        
 
-      
 
         public DustParticle(PointF plocation, PointF pVelocity) : base(plocation)
         {
             Velocity = pVelocity;
-
-
         }
 
         public override void Draw(Graphics g)
@@ -1387,7 +1268,6 @@ namespace BASeTris
 
         public override bool PerformFrame(IStateOwner gamestate)
         {
-
             Location = new PointF(Location.X + Velocity.X, Location.Y + Velocity.Y);
 
             //Velocity = new PointF((float)Math.Sqrt(Math.Abs(Velocity.X)) * Math.Sign(Velocity.X),
@@ -1401,11 +1281,8 @@ namespace BASeTris
 
             return (0 >= mAliveFrames);
         }
-
-
-
-        
     }
+
     public class Sparkle : Particle
     {
         //protected PointF _Location;
@@ -1434,11 +1311,14 @@ namespace BASeTris
         */
 
 
-
         public Brush SparkleBrush
         {
             get { return _SparkleBrush; }
-            set { _SparkleBrush = value; _SparklePen = new Pen(_SparkleBrush); }
+            set
+            {
+                _SparkleBrush = value;
+                _SparklePen = new Pen(_SparkleBrush);
+            }
         }
 
         public TimeSpan LifeTime
@@ -1455,22 +1335,16 @@ namespace BASeTris
         public Sparkle(PointF Pos)
             : this(Pos, new PointF(0, 0))
         {
-
-
-
         }
+
         public Sparkle(PointF pLocation, PointF pVelocity)
             : this(pLocation, pVelocity, DefaultSparkleBrush)
         {
-
-
         }
 
         public Sparkle(PointF pLocation, PointF pVelocity, Color sparklecolor)
             : this(pLocation, pVelocity, new SolidBrush(sparklecolor))
         {
-
-
         }
 
         public Sparkle(PointF Pos, PointF pVelocity, Brush pSparkleBrush) : base(Pos)
@@ -1491,20 +1365,23 @@ namespace BASeTris
         /// <returns>true to indicate that this gameobject should be removed. False otherwise.</returns>
         /// 
         private float _maxradius = 12;
-        public float MaxRadius { get { return _maxradius; } set { _maxradius = value; } }
+
+        public float MaxRadius
+        {
+            get { return _maxradius; }
+            set { _maxradius = value; }
+        }
+
         public override bool PerformFrame(IStateOwner gamestate)
         {
             _Location = new PointF(_Location.X + _Velocity.X, _Location.Y + _Velocity.Y);
             //get total ticks...
             long livingticks = (DateTime.Now - StartLife).Ticks;
-            float percentage = ((float)livingticks) / (float)LifeTicks;
+            float percentage = ((float) livingticks) / (float) LifeTicks;
             if (percentage < 0.5f)
                 currentRadius = percentage * 2 * _maxradius;
             else
                 currentRadius = (1 - (Math.Abs(0.5f - percentage))) * _maxradius;
-
-
-
 
 
             _Velocity = new PointF(_Velocity.X * _VelocityDecay.X, _Velocity.Y * _VelocityDecay.Y);
@@ -1517,47 +1394,34 @@ namespace BASeTris
             //throw new NotImplementedException();
             g.DrawLine(_SparklePen, Location.X - currentRadius / 2, Location.Y, Location.X + currentRadius / 2, Location.Y);
             g.DrawLine(_SparklePen, Location.X, Location.Y - currentRadius, Location.X, Location.Y + currentRadius);
-
         }
-
-       
     }
-
 
 
     public class FireParticle : Particle
     {
-
-
         public int mFrameCount = 0;
         public int TTL = 15;
-      
+
         public FireParticle(PointF Location) : base(Location)
         {
-            Velocity = new PointF((float)(TetrisGame.rgen.NextDouble() * .4f) - .2f, (float)(TetrisGame.rgen.NextDouble() * .4f) - .2f);
-
+            Velocity = new PointF((float) (TetrisGame.rgen.NextDouble() * .4f) - .2f, (float) (TetrisGame.rgen.NextDouble() * .4f) - .2f);
         }
 
         public Color MixColor(Color ColorA, Color ColorB, float percentage)
         {
-            float[] ColorAValues = new float[] { (float)ColorA.A, (float)ColorA.R, (float)ColorA.G, (float)ColorA.B };
-            float[] ColorBValues = new float[] { (float)ColorB.A, (float)ColorB.R, (float)ColorB.G, (float)ColorB.B };
+            float[] ColorAValues = new float[] {(float) ColorA.A, (float) ColorA.R, (float) ColorA.G, (float) ColorA.B};
+            float[] ColorBValues = new float[] {(float) ColorB.A, (float) ColorB.R, (float) ColorB.G, (float) ColorB.B};
             float[] ColorCValues = new float[4];
 
 
             for (int i = 0; i <= 3; i++)
             {
                 ColorCValues[i] = (ColorAValues[i] * percentage) + (ColorBValues[i] * (1 - percentage));
-
-
-
             }
 
 
-
-
-            return Color.FromArgb((int)ColorCValues[0], (int)ColorCValues[1], (int)ColorCValues[2], (int)ColorCValues[3]);
-
+            return Color.FromArgb((int) ColorCValues[0], (int) ColorCValues[1], (int) ColorCValues[2], (int) ColorCValues[3]);
         }
 
         public Color GetFireColor()
@@ -1571,17 +1435,18 @@ namespace BASeTris
             //80% (BLACK (alpha=100%))
             //100% BLACK, 0 ALPHA.
 
-            Color[] firecolors = new Color[] {
+            Color[] firecolors = new Color[]
+            {
                 Color.Blue,
-                Color.FromArgb(230,Color.Yellow),
-                Color.FromArgb(200,Color.Orange),
-                Color.FromArgb(150,Color.DarkOrange),
-                Color.FromArgb(150,Color.Red),
-                Color.FromArgb(0,Color.DarkRed)};
+                Color.FromArgb(230, Color.Yellow),
+                Color.FromArgb(200, Color.Orange),
+                Color.FromArgb(150, Color.DarkOrange),
+                Color.FromArgb(150, Color.Red),
+                Color.FromArgb(0, Color.DarkRed)
+            };
 
 
-
-            float currentpercentage = (float)mFrameCount / (float)TTL;
+            float currentpercentage = (float) mFrameCount / (float) TTL;
             Blend x = new Blend();
             float innerpercent = 0;
             Color ColorA = Color.Red, ColorB = Color.Black;
@@ -1591,44 +1456,34 @@ namespace BASeTris
                 innerpercent = currentpercentage / 0.1f;
                 ColorA = firecolors[0];
                 ColorB = firecolors[1];
-
-
-
             }
             else if (currentpercentage <= .25f)
             {
                 innerpercent = ((currentpercentage - 0.1f) / .15f);
                 ColorA = firecolors[1];
                 ColorB = firecolors[2];
-
             }
             else if (currentpercentage <= .35f)
             {
                 innerpercent = ((currentpercentage - 0.25f) / .10f);
                 ColorA = firecolors[2];
                 ColorB = firecolors[3];
-
             }
             else if (currentpercentage <= .8f)
             {
                 innerpercent = ((currentpercentage - 0.35f) / .45f);
                 ColorA = firecolors[3];
                 ColorB = firecolors[4];
-
-
             }
             else if (currentpercentage == 1)
             {
-
                 innerpercent = ((currentpercentage - .8f) / .2f);
                 ColorA = firecolors[4];
                 ColorB = firecolors[5];
-
-
             }
+
             return MixColor(ColorA, ColorB, innerpercent);
             //mix ColorA and ColorB, with "innerpercent" of ColorB.
-
         }
 
 
@@ -1639,36 +1494,33 @@ namespace BASeTris
 
         public override bool PerformFrame(IStateOwner gamestate)
         {
-
             mFrameCount++;
 
             Location = new PointF(Location.X + Velocity.X, Location.Y + Velocity.Y);
 
             return (mFrameCount >= TTL);
         }
-
-       
     }
+
     /// <summary>
     /// EmitterParticle: a "dummy" particle that emits other particles during it's lifetime.
     /// </summary>
     public class EmitterParticle : Particle
     {
-
         protected const int LiveTime = 20;
         protected int TTL = LiveTime;
         protected int FrameNum = 0;
         protected int GenerateDelay = 5;
+
         public delegate Particle EmissionRoutine(IStateOwner gstate, EmitterParticle Source, int FrameNum, int TTL);
+
         private Random rGen = TetrisGame.rgen;
         protected EmissionRoutine EmissionFunction;
-        
+
 
         public EmitterParticle(PointF pLocation, EmissionRoutine emitroutine) : base(pLocation)
         {
             EmissionFunction = emitroutine;
-
-
         }
 
         public override void Draw(Graphics g)
@@ -1676,6 +1528,7 @@ namespace BASeTris
             //throw new NotImplementedException();
             //nothing.
         }
+
         private bool proxyaddparticle(ProxyObject sourceobject, IStateOwner gamestate)
         {
             Particle addit = sourceobject.Tag as Particle;
@@ -1684,7 +1537,6 @@ namespace BASeTris
 
 
             return true;
-
         }
 
         public override bool PerformFrame(IStateOwner pOwner)
@@ -1696,23 +1548,22 @@ namespace BASeTris
             addproxy.Tag = addme;
 
             pOwner.AddGameObject(addproxy);
-            
+
 
             return base.PerformFrame(pOwner) || TTL < 0;
         }
+
         private Particle DefaultEmissionRoutine(IStateOwner pStateOwner, EmitterParticle Source, int FrameNum, int TTL)
         {
             if (FrameNum % GenerateDelay == 0)
             {
                 return new DustParticle(Source.Location, 3, 50, Color.Red);
             }
+
             return null;
         }
-
-     
-
-
     }
+
     /// <summary>
     /// Generic particle class that accepts a particle as a type argument, derives from EmitterParticle, and 
     /// creates that particle.
@@ -1720,15 +1571,13 @@ namespace BASeTris
     /// <typeparam name="T"></typeparam>
     public class GenericEmitter<T> : EmitterParticle where T : Particle
     {
-
-
         private Particle DefaultEmissionRoutine(IStateOwner gs, EmitterParticle Source, int FrameNum, int TTL)
         {
             if (FrameNum % GenerateDelay == 0)
             {
-
-                return (T)Activator.CreateInstance(typeof(T), new object[] { Source.Location });
+                return (T) Activator.CreateInstance(typeof(T), new object[] {Source.Location});
             }
+
             return null;
         }
 
@@ -1736,26 +1585,23 @@ namespace BASeTris
             : base(pLocation, null)
         {
             EmissionFunction = DefaultEmissionRoutine;
-
-
         }
+
         public override void Draw(Graphics g)
         {
             //base.Draw(g);
         }
+
         public override bool PerformFrame(IStateOwner pStateOwner)
         {
             return base.PerformFrame(pStateOwner);
         }
-    
-
     }
+
     public class LightOrb : Particle
     {
-
         //'lightorb' is a (attempt) to simulate a "light". Since GameObjects are drawn last... (iirc) it seemed reasonable to do it this way.
         //the basic idea is the light is just a radial gradient going from 50% alpha of the colour to 100% alpha (transparent) on the edges, with the given radius.
-
 
 
         private float _Radius;
@@ -1766,48 +1612,52 @@ namespace BASeTris
         private const int MaxAlpha = 100;
         private const int MinAlpha = 0;
         private float _RadiusDecay = 0.99f;
-        public float RadiusDecay { get { return _RadiusDecay; } set { _RadiusDecay = value; } }
-        public int TTL { get { return _TTL; } set { _TTL = value; } }
+
+        public float RadiusDecay
+        {
+            get { return _RadiusDecay; }
+            set { _RadiusDecay = value; }
+        }
+
+        public int TTL
+        {
+            get { return _TTL; }
+            set { _TTL = value; }
+        }
+
         public LightOrb(PointF pLocation, Color LightColor, float LightRadius)
             : base(pLocation)
         {
             _Radius = LightRadius;
             _LightColor = LightColor;
-
-
-
-
-
         }
+
         private Rectangle LightRect()
         {
-            return new Rectangle((int)(Location.X - _Radius), (int)(Location.Y - _Radius), (int)(_Radius * 2), (int)(_Radius * 2));
-
+            return new Rectangle((int) (Location.X - _Radius), (int) (Location.Y - _Radius), (int) (_Radius * 2), (int) (_Radius * 2));
         }
+
         public override bool PerformFrame(IStateOwner StateOwner)
         {
-
             //decay the colour...
             LiveTime++;
             _Radius *= _RadiusDecay;
             return base.PerformFrame(StateOwner) || LiveTime >= TTL;
         }
-   
+
         public static Image DrawLightOrb(Size DrawSize, Color usecolor)
         {
-
             //cheat... create a new LightOrb object...
             LightOrb lo = new LightOrb(new PointF(DrawSize.Width / 2, DrawSize.Height / 2), usecolor, Math.Min(DrawSize.Width, DrawSize.Height) / 2);
             Bitmap usebitmap = new Bitmap(DrawSize.Width, DrawSize.Height);
             Graphics useg = Graphics.FromImage(usebitmap);
             lo.Draw(useg);
             return usebitmap;
-
-
         }
+
         public override void Draw(Graphics g)
         {
-            float LivePercent = (float)LiveTime / (float)TTL;
+            float LivePercent = (float) LiveTime / (float) TTL;
             GraphicsPath gp = new GraphicsPath();
 
             Rectangle glr = LightRect();
@@ -1822,24 +1672,15 @@ namespace BASeTris
             {
                 Debug.Print("Out of Memory...");
                 return;
-
             }
+
             pgb.CenterPoint = TrigFunctions.CenterPoint(glr);
-            pgb.CenterColor = Color.FromArgb((int)(MaxAlpha * (1 - LivePercent)), _LightColor);
-            pgb.SurroundColors = new Color[] { Color.FromArgb(0, _LightColor) };
+            pgb.CenterColor = Color.FromArgb((int) (MaxAlpha * (1 - LivePercent)), _LightColor);
+            pgb.SurroundColors = new Color[] {Color.FromArgb(0, _LightColor)};
 
             g.FillPath(pgb, gp);
             pgb.Dispose();
             gp.Dispose();
-
-
-
         }
-
-
-
-
     }
-
-
 }

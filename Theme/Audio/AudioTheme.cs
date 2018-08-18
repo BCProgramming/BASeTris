@@ -24,41 +24,43 @@ namespace BASeTris.Theme.Audio
         public AudioThemeElement LevelUp { get; set; }
 
         public AudioThemeElement Hold { get; set; }
+
         public static AudioTheme GetDefault()
         {
             return new AudioTheme()
             {
-                BackgroundMusic = new AudioThemeElement(new[] { "tetris_theme_A", "tetris_a_theme_techno" },true),
-                BlockGroupMove = new AudioThemeElement(new String[] { "block_move_2","block_move" },true),
-                BlockGroupPlace = new AudioThemeElement(new String[] { "block_place_2", "block_place" }, false),
-                BlockGroupRotate = new AudioThemeElement(new String[] { "block_rotate_2", "block_rotate" }, true),
-                ClearLine = new AudioThemeElement(new String[] { "line_clear", "line_clear_2" },false ),
-                ClearTetris = new AudioThemeElement(new String[] { "line_tetris", "line_tetris_2" },false),
-                GameOver = new AudioThemeElement( "tetris_game_over" ),
-                GameOverShade = new AudioThemeElement("shade_move" ),
+                BackgroundMusic = new AudioThemeElement(new[] {"tetris_theme_A", "tetris_a_theme_techno"}, true),
+                BlockGroupMove = new AudioThemeElement(new String[] {"block_move_2", "block_move"}, true),
+                BlockGroupPlace = new AudioThemeElement(new String[] {"block_place_2", "block_place"}, false),
+                BlockGroupRotate = new AudioThemeElement(new String[] {"block_rotate_2", "block_rotate"}, true),
+                ClearLine = new AudioThemeElement(new String[] {"line_clear", "line_clear_2"}, false),
+                ClearTetris = new AudioThemeElement(new String[] {"line_tetris", "line_tetris_2"}, false),
+                GameOver = new AudioThemeElement("tetris_game_over"),
+                GameOverShade = new AudioThemeElement("shade_move"),
                 Pause = new AudioThemeElement("pause"),
                 LevelUp = new AudioThemeElement("level_up"),
                 Hold = new AudioThemeElement("drop")
             };
         }
     }
+
     public class AudioThemeElement
     {
         public String[] AudioKeys;
         public bool ChooseStatic; //if multiple keys are entered this means that one will be initially chosen and returned fro that point on until the Theme is reset.
-        public AudioThemeElement(String[] pAudioKeys,bool pStatic)
+
+        public AudioThemeElement(String[] pAudioKeys, bool pStatic)
         {
             AudioKeys = pAudioKeys;
             ChooseStatic = pStatic;
         }
-        public AudioThemeElement(String pAudioKey):this(pAudioKey,false)
-        {
 
-        }
-        public AudioThemeElement(String pAudioKey,bool pStatic):this(new string[] { pAudioKey }, pStatic)
+        public AudioThemeElement(String pAudioKey) : this(pAudioKey, false)
         {
-
         }
-            
+
+        public AudioThemeElement(String pAudioKey, bool pStatic) : this(new string[] {pAudioKey}, pStatic)
+        {
+        }
     }
 }

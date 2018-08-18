@@ -9,7 +9,7 @@ using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.GameStates
 {
-    public abstract class EnterTextState : GameState,IDirectKeyboardInputState
+    public abstract class EnterTextState : GameState, IDirectKeyboardInputState
     {
         protected String[] EntryPrompt = null;
         IStateOwner Owner = null;
@@ -17,25 +17,30 @@ namespace BASeTris.GameStates
         String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         int CurrentPosition = 0; //position of character being "edited"
         public IBackgroundDraw _BG = null;
-        public override DisplayMode SupportedDisplayMode { get { return DisplayMode.Full; } }
 
-        public EnterTextState(IStateOwner pOwner,int EntryLength,String PossibleChars= "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+        public override DisplayMode SupportedDisplayMode
+        {
+            get { return DisplayMode.Full; }
+        }
+
+        public EnterTextState(IStateOwner pOwner, int EntryLength, String PossibleChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
         {
             Owner = pOwner;
             AvailableChars = PossibleChars;
-            NameEntered = new StringBuilder(new String(Enumerable.Repeat('_',EntryLength).ToArray()));
+            NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));
             ImageAttributes useBGAttributes = new ImageAttributes();
             useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.4f));
             var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            sib.Movement = new PointF((float)xpoint, (float)ypoint);
+            sib.Movement = new PointF((float) xpoint, (float) ypoint);
             _BG = sib;
-
         }
-        public abstract bool ValidateEntry(IStateOwner pOwner,String sCurrentEntry);
 
-        public abstract void CommitEntry(IStateOwner pOwner,String sCurrentEntry);
+        public abstract bool ValidateEntry(IStateOwner pOwner, String sCurrentEntry);
+
+        public abstract void CommitEntry(IStateOwner pOwner, String sCurrentEntry);
+
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //never called...
@@ -47,39 +52,38 @@ namespace BASeTris.GameStates
             _BG.FrameProc();
             //throw new NotImplementedException();
         }
+
         Font useFont = null;
+
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             if (useFont == null) useFont = TetrisGame.GetRetroFont(15, pOwner.ScaleFactor);
 
 
+            float Millipercent = (float) DateTime.Now.Ticks / 5000f; //(float)DateTime.Now.Millisecond / 1000;
 
-            float Millipercent = (float)DateTime.Now.Ticks / 5000f; //(float)DateTime.Now.Millisecond / 1000;
-
-            int RotateAmount = (int)(Millipercent * 240);
+            int RotateAmount = (int) (Millipercent * 240);
 
             Color UseBackgroundColor = HSLColor.RotateHue(Color.DarkBlue, RotateAmount);
             Color UseHighLightingColor = HSLColor.RotateHue(Color.Red, RotateAmount);
             Color useLightRain = HSLColor.RotateHue(Color.LightPink, RotateAmount);
             //throw new NotImplementedException();
             _BG.DrawProc(g, Bounds);
-            int StartYPosition = (int)(Bounds.Height * 0.15f);
+            int StartYPosition = (int) (Bounds.Height * 0.15f);
             var MeasureBounds = g.MeasureString(EntryPrompt[0], useFont);
             for (int i = 0; i < EntryPrompt.Length; i++)
             {
                 //draw this line centered at StartYPosition+Height*i...
 
-                int useYPosition = (int)(StartYPosition + (MeasureBounds.Height + 5) * i);
-                int useXPosition = (int)(Bounds.Width / 2 - MeasureBounds.Width / 2);
+                int useYPosition = (int) (StartYPosition + (MeasureBounds.Height + 5) * i);
+                int useXPosition = (int) (Bounds.Width / 2 - MeasureBounds.Width / 2);
                 g.DrawString(EntryPrompt[i], useFont, Brushes.Black, new PointF(useXPosition + 5, useYPosition + 5));
                 g.DrawString(EntryPrompt[i], useFont, new SolidBrush(useLightRain), new PointF(useXPosition, useYPosition));
-
-
             }
 
             float nameEntryY = StartYPosition + (MeasureBounds.Height + 5) * (EntryPrompt.Length + 1);
 
-            
+
             var AllCharacterBounds = (from c in NameEntered.ToString().ToCharArray() select g.MeasureString(c.ToString(), useFont)).ToArray();
             float useCharWidth = g.MeasureString("_", useFont).Width;
             float TotalWidth = (useCharWidth + 5) * NameEntered.Length;
@@ -93,15 +97,14 @@ namespace BASeTris.GameStates
                 Brush ShadowBrush = (CurrentPosition == charpos) ? new SolidBrush(useLightRain) : Brushes.Black;
                 g.DrawString(thischar.ToString(), useFont, ShadowBrush, new PointF(useX + 2, nameEntryY + 2));
                 g.DrawString(thischar.ToString(), useFont, DisplayBrush, new PointF(useX, nameEntryY));
-
             }
-
-
         }
+
         String Char_Change_Up_Sound = "char_change";
         String Char_Change_Down_Sound = "char_change";
         String Char_Pos_Left = "switch_inactive";
         String Char_Pos_Right = "switch_active";
+
         protected void ChangeChar(int direction)
         {
             char changechar = NameEntered[CurrentPosition];
@@ -115,11 +118,10 @@ namespace BASeTris.GameStates
                 else if (currentordinal > AvailableChars.Length - 1) currentordinal = 0;
                 NameEntered[CurrentPosition] = AvailableChars[currentordinal];
             }
-
         }
+
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-
             if (g == GameKeys.GameKey_Drop)
             {
                 ChangeChar(1);
@@ -153,11 +155,12 @@ namespace BASeTris.GameStates
             else if (g == GameKeys.GameKey_RotateCW)
             {
                 String sEntry = NameEntered.ToString().Replace("_", " ").Trim();
-                if (ValidateEntry(pOwner,sEntry))
+                if (ValidateEntry(pOwner, sEntry))
                 {
-                    CommitEntry(pOwner,sEntry);
+                    CommitEntry(pOwner, sEntry);
                 }
             }
+
             //throw new NotImplementedException();
         }
 
@@ -179,8 +182,9 @@ namespace BASeTris.GameStates
                 {
                     NameEntered[i - 1] = NameEntered[i];
                 }
+
                 NameEntered[NameEntered.Length - 1] = '_';
-                if(CurrentPosition > 0)
+                if (CurrentPosition > 0)
                     CurrentPosition--;
             }
             else if (pKey == Keys.Delete)
@@ -189,13 +193,13 @@ namespace BASeTris.GameStates
                 {
                     NameEntered[i - 1] = NameEntered[i];
                 }
+
                 NameEntered[NameEntered.Length - 1] = '_';
             }
 
-            else if (AvailableChars.Contains(Char.ToUpper((char)pKey)))
+            else if (AvailableChars.Contains(Char.ToUpper((char) pKey)))
             {
-
-                NameEntered[CurrentPosition] = (char)pKey;
+                NameEntered[CurrentPosition] = (char) pKey;
                 HandleGameKey(pOwner, GameKeys.GameKey_Right);
             }
         }

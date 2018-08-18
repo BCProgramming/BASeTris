@@ -17,14 +17,12 @@ namespace BASeTris
         Size Size { get; set; }
         Point Location { get; set; }
         Rectangle getRectangle();
-
-
-
-
     }
+
     public abstract class GameObject
     {
         public delegate void GameObjectFrameFunction(GameObject sourceobject, IStateOwner gamestate);
+
         public event GameObjectFrameFunction ObjectFrame;
 
         protected void InvokeFrameEvent(IStateOwner gamestate)
@@ -32,21 +30,17 @@ namespace BASeTris
             var copied = ObjectFrame;
             if (copied != null)
                 copied(this, gamestate);
-
-
         }
+
         protected GameObject()
         {
-
-
         }
 
 
         public override string ToString()
         {
             return base.ToString() + "\n" +
-                "Frozen:" + this.Frozen + "\n";
-
+                   "Frozen:" + this.Frozen + "\n";
         }
 
 
@@ -59,36 +53,38 @@ namespace BASeTris
         /// <returns>true to indicate that this gameobject should be removed. False otherwise.</returns>
         public virtual bool PerformFrame(IStateOwner gamestate)
         {
-
             InvokeFrameEvent(gamestate);
             return false;
-
         }
+
         private bool _frozen = false;
 
         public virtual bool getFrozen()
         {
-
             return _frozen;
-
         }
+
         public virtual void setFrozen(bool newvalue)
         {
             _frozen = newvalue;
-
         }
+
         /// <summary>
         /// if True, means this Object will not animate while the game is paused (enemies, for example).
         /// false means it will, which could be desirable for other effects. Derived classes can hook get/set access by overriding
         /// the virtual setFrozen and getFrozen methods.
         /// </summary>
         /// <returns></returns>
-        public bool Frozen { get { return getFrozen(); } set { setFrozen(value); } }
+        public bool Frozen
+        {
+            get { return getFrozen(); }
+            set { setFrozen(value); }
+        }
 
         public abstract void Draw(Graphics g);
+
         public static double Angle(double px1, double py1, double px2, double py2)
         {
-
             // Negate X and Y values
             double pxRes = px2 - px1;
 
@@ -109,7 +105,6 @@ namespace BASeTris
 
                 else
                     angle = System.Math.PI * 3.0 / 2.0;
-
             }
             else if (pyRes == 0.0)
             {
@@ -119,7 +114,6 @@ namespace BASeTris
 
                 else
                     angle = System.Math.PI;
-
             }
 
             else
@@ -131,86 +125,85 @@ namespace BASeTris
 
                 else
                     angle = System.Math.Atan(pyRes / pxRes);
-
             }
 
             // Convert to degrees
             return angle;
-
-
-
         }
-
     }
+
     public abstract class SizeableGameObject : GameObject, iLocatable
     {
         protected PointF _Location;
         public SizeF Size { get; set; }
-        public PointF Location { get { return _Location; } set { _Location = value; } }
+
+        public PointF Location
+        {
+            get { return _Location; }
+            set { _Location = value; }
+        }
 
         protected SizeableGameObject(PointF pLocation, SizeF objectsize)
         {
             Size = objectsize;
             Location = pLocation;
-
         }
 
         public PointF CenterPoint()
         {
             return new PointF(Location.X + (Size.Width / 2), Location.Y + (Size.Height / 2));
-
-
-
         }
+
         public RectangleF getRectangle()
         {
             return new RectangleF(Location, Size);
-
-
         }
-
     }
+
     public class AnimatedImageObject : SizeableGameObject
     {
-
         public Image[] ObjectImages;
         protected int frameadvancedelay = 3;
         protected int countframe = 0;
         protected int currimageframe = 0;
         protected PointF _Velocity;
-        public PointF Velocity { get { return _Velocity; } set { _Velocity = value; } }
+
+        public PointF Velocity
+        {
+            get { return _Velocity; }
+            set { _Velocity = value; }
+        }
+
         protected VelocityChanger _VelocityChange = new VelocityChangerLinear();
 
         public VelocityChanger VelocityChange
         {
             get { return _VelocityChange; }
             set { _VelocityChange = value; }
-
-
         }
 
-        public int CurrentFrame { get { return currimageframe; } set { currimageframe = value; } }
+        public int CurrentFrame
+        {
+            get { return currimageframe; }
+            set { currimageframe = value; }
+        }
+
         public Image CurrentFrameImage
         {
             get
             {
                 try
                 {
-
                     return ObjectImages[CurrentFrame];
-
-
                 }
                 catch (IndexOutOfRangeException erange)
                 {
                     Debug.Print("stop");
-
                 }
+
                 return null;
             }
         }
-
-
 
 
         public AnimatedImageObject(PointF Location, SizeF ObjectSize, Image[] pObjectImages, int pframeadvancedelay)
@@ -218,13 +211,11 @@ namespace BASeTris
         {
             ObjectImages = pObjectImages;
             frameadvancedelay = pframeadvancedelay;
-
         }
 
         public AnimatedImageObject(PointF Location, SizeF ObjectSize, Image[] pObjectImages)
             : this(Location, ObjectSize, pObjectImages, 3)
         {
-
         }
 
         public override bool PerformFrame(IStateOwner gamestate)
@@ -242,18 +233,15 @@ namespace BASeTris
                     countframe = 0;
                 }
             }
+
             return false;
-
-
         }
+
         public override void Draw(Graphics g)
         {
             g.DrawImage(ObjectImages[currimageframe], Location.X, Location.Y, Size.Width, Size.Height);
         }
-
     }
-
-
 
 
     public class GameImageObject : SizeableGameObject
@@ -264,13 +252,12 @@ namespace BASeTris
             : base(Location, ObjectSize)
         {
             ObjectImage = ImageUse;
-
         }
+
         public GameImageObject(PointF Location, Image ImageUse)
             : base(Location, ImageUse.Size)
         {
             ObjectImage = ImageUse;
-
         }
 
         public override bool PerformFrame(IStateOwner gamestate)

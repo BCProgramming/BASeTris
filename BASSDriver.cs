@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.Misc;
 using Un4seen.Bass.AddOn.Wma;
@@ -14,37 +15,34 @@ namespace BASeTris.AssetManager
 {
     public class BASSSound : iSoundSourceObject, iActiveSoundObject, IDisposable
     {
+        //TODO: more SYNCPROC events...
+        public delegate void BASS_SoundStoppedFunc(BASSSound sourcesound);
 
-        private int ActiveStream
-        {
-            get
-            {
-                return _tempoStream != 0 ? _tempoStream : _soundStream;
+        //flag so that after we fail at TempoCreate we don't continue to fail over and over, instead
+        //we skip creating the tempostream.
+        static bool _noFx;
 
-            }
-
-
-
-        }
-
-        private readonly int _soundStream = 0;
-        private readonly int _tempoStream = 0;
-        private bool _paused = false;
+        private readonly int _soundStream;
+        private readonly int _tempoStream;
         private readonly SYNCPROC soundstopproc;
+        private bool _disposed;
+        private bool _paused = false;
+        private IntPtr _UnmanagedBlock = IntPtr.Zero;
 
         public iSoundSourceObject Source
         {
             get { return this; }
         }
+
         public float Progress
         {
             get
             {
-               
                 // return Bass.BASS_StreamGetFilePosition(SoundStream, BASSStreamFilePosition.BASS_FILEPOS_CURRENT);
-                return ((float)Bass.BASS_ChannelGetPosition(ActiveStream)) / ((float)Bass.BASS_ChannelGetLength(ActiveStream));
+                return Bass.BASS_ChannelGetPosition(ActiveStream) / ((float) Bass.BASS_ChannelGetLength(ActiveStream));
             }
         }
+
         public float Level
         {
             get
@@ -52,12 +50,50 @@ namespace BASeTris.AssetManager
                 int levelresult = Bass.BASS_ChannelGetLevel(ActiveStream);
                 int left = Utils.LowWord32(levelresult); // the left level
                 int right = Utils.HighWord32(levelresult); // the right level
-                return 32767f/(((float)left + (float)right) / 2);
+                return 32767f / ((left + (float) right) / 2);
             }
         }
-        private IntPtr _UnmanagedBlock = IntPtr.Zero;
-        //TODO: more SYNCPROC events...
-        public delegate void BASS_SoundStoppedFunc(BASSSound sourcesound);
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            //if we have an unmanaged block, free it now.
+            if (_UnmanagedBlock != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_UnmanagedBlock);
+            }
+        }
+
+        public BASSSound(int streamnum, IntPtr freeblock) : this(streamnum)
+        {
+            _UnmanagedBlock = freeblock;
+        }
+
+        public BASSSound(int streamnum)
+        {
+            soundstopproc = BASSCallbackStop;
+            _soundStream = streamnum;
+            if (!_noFx)
+            {
+                try
+                {
+                    _tempoStream = BassFx.BASS_FX_TempoCreate(streamnum, BASSFlag.BASS_FX_FREESOURCE);
+                }
+                catch (DllNotFoundException exx)
+                {
+                    _noFx = true;
+                    //grrr...
+                    //oh well. Seems like BASS.NET ignores the call if it doesn't understand the tempo stuff.
+                    _tempoStream = 0;
+                }
+            }
+        }
+
+        private int ActiveStream
+        {
+            get { return _tempoStream != 0 ? _tempoStream : _soundStream; }
+        }
 
         public event BASS_SoundStoppedFunc BASS_SoundStopped;
 
@@ -67,76 +103,25 @@ namespace BASeTris.AssetManager
             if (copy != null)
             {
                 copy(this);
-
-
             }
-
-
-
         }
-        public BASSSound(int streamnum, IntPtr freeblock) : this(streamnum)
-        {
-            _UnmanagedBlock = freeblock;
 
-
-        }
-        //flag so that after we fail at TempoCreate we don't continue to fail over and over, instead
-        //we skip creating the tempostream.
-        static bool _noFx = false;
-        public BASSSound(int streamnum)
-        {
-            soundstopproc = BASSCallbackStop;
-            _soundStream = streamnum;
-            if (!_noFx)
-            {
-                try
-                {
-                    _tempoStream = Un4seen.Bass.AddOn.Fx.BassFx.BASS_FX_TempoCreate(streamnum, BASSFlag.BASS_FX_FREESOURCE);
-
-                }
-                catch (DllNotFoundException exx)
-                {
-                    _noFx = true;
-                    //grrr...
-                    //oh well. Seems like BASS.NET ignores the call if it doesn't understand the tempo stuff.
-                    _tempoStream = 0;
-
-                }
-            }
-
-        }
-        private bool _disposed = false;
         public void Dispose(bool parameter)
         {
             Dispose();
         }
-        public void Dispose()
-        {
-            if (_disposed) return;
-            _disposed = true;
-            //if we have an unmanaged block, free it now.
-            if (_UnmanagedBlock != IntPtr.Zero)
-            {
 
-                Marshal.FreeHGlobal(_UnmanagedBlock);
-
-
-            }
-
-        }
         ~BASSSound()
         {
-
-
         }
 
 
         #region iSoundSourceObject Members
+
         public float getLength()
         {
-
             var len = Bass.BASS_ChannelGetLength(ActiveStream, BASSMode.BASS_POS_BYTES);
-            float result = (float)Bass.BASS_ChannelBytes2Seconds(ActiveStream, len);
+            float result = (float) Bass.BASS_ChannelBytes2Seconds(ActiveStream, len);
             return result;
             //QWORD len = BASS_ChannelGetLength(channel, BASS_POS_BYTE); // the length in bytes
             //double time = BASS_ChannelBytes2Seconds(channel, len); // the length in seconds
@@ -148,11 +133,10 @@ namespace BASeTris.AssetManager
 
             return Play(playlooped, 1.0f);
         }
+
         private void BASSCallbackStop(int handle, int channel, int data, IntPtr uservalue)
         {
             InvokeSoundStopped();
-
-
         }
 
         public iActiveSoundObject Play(bool playlooped, float volume)
@@ -162,11 +146,10 @@ namespace BASeTris.AssetManager
             if (playlooped) Bass.BASS_ChannelFlags(ActiveStream, BASSFlag.BASS_SAMPLE_LOOP, BASSFlag.BASS_SAMPLE_LOOP);
             Bass.BASS_ChannelSetSync(ActiveStream, BASSSync.BASS_SYNC_END | BASSSync.BASS_SYNC_ONETIME, 0, soundstopproc, IntPtr.Zero);
             Bass.BASS_ChannelPlay(ActiveStream, true);
-            
+
             return this;
         }
 
-        
         #endregion
 
         #region iActiveSoundObject Members
@@ -190,38 +173,32 @@ namespace BASeTris.AssetManager
         {
             Bass.BASS_ChannelPlay(ActiveStream, false);
         }
+
         public float Tempo
         {
-
             get
             {
-              
                 float result = 0;
                 Bass.BASS_ChannelGetAttribute(_tempoStream, BASSAttribute.BASS_ATTRIB_TEMPO, ref result);
                 if (result == 0)
                     Bass.BASS_ChannelGetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, ref result);
                 return result;
-
             }
             set
             {
                 Debug.Print("Setting Tempo of Channel ID" + _soundStream + " (Tempo ID#" + _tempoStream + ")to " + value);
                 Bass.BASS_ChannelSetAttribute(_tempoStream, BASSAttribute.BASS_ATTRIB_TEMPO, value);
                 int CalculatedValue;
-                CalculatedValue = TetrisGame.ClampValue((int)(value * 128), 0, 255);
+                CalculatedValue = TetrisGame.ClampValue((int) (value * 128), 0, 255);
 
 
-
-               // Bass.BASS_ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, CalculatedValue);
+                // Bass.BASS_ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, CalculatedValue);
             }
-
         }
+
         public bool Paused
         {
-            get
-            {
-                return (Bass.BASS_ChannelIsActive(ActiveStream) == BASSActive.BASS_ACTIVE_PAUSED);
-            }
+            get { return (Bass.BASS_ChannelIsActive(ActiveStream) == BASSActive.BASS_ACTIVE_PAUSED); }
             set
             {
                 if (value)
@@ -237,59 +214,51 @@ namespace BASeTris.AssetManager
 
         public void setVolume(float volumeset)
         {
-
             Bass.BASS_ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_VOL_CHAN, volumeset);
         }
 
         #endregion
     }
+
     class BASSDriver : iSoundEngineDriver
     {
+        public static string DrvName = "NBASS";
 
-        Un4seen.Bass.Bass _bassInstance;
+        Bass _bassInstance;
+        private Dictionary<int, String> loadedbassplugs;
 
-
-        private void BasssoundStop(BASSSound soundstopped)
+        public override string ToString()
         {
-            FireSoundStop(soundstopped);
-
-
+            return Name;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="x86Path"></param>
-        /// <param name="x64Path"></param>
-        /// <returns>the path that was chosen</returns>
-        private string LoadProperDLL(String[] x86Path, String[] x64Path)
+
+        public String Name
         {
-            String dlltoload;
-            //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
-            if (Utils.Is64Bit)
-                dlltoload = x64Path.FirstOrDefault((a)=>Directory.Exists(a));
-            else
-                dlltoload = x86Path.FirstOrDefault((a)=>Directory.Exists(a));
-
-            Debug.Print("Loading bass.net from:" + dlltoload);
-            Bass.LoadMe(dlltoload);
-            BassMix.LoadMe(dlltoload);
-            //Don't forget BassFX too!
-            Un4seen.Bass.AddOn.Fx.BassFx.LoadMe(dlltoload);
-            return dlltoload;
-
+            get { return "NBASS"; }
         }
-        private Dictionary<int, String> loadedbassplugs = null;
+
+        public void Dispose()
+        {
+            // Bass.BASS_Free();
+            Bass.FreeMe();
+            BassMix.FreeMe();
+            foreach (var disposeplugin in loadedbassplugs)
+            {
+                Bass.BASS_PluginFree(disposeplugin.Key);
+            }
+        }
+
         public BASSDriver(String pluginFolder)
         {
             SupportedExtensions = ".MP3|.WAV|.OGG|.MID|.IT|.S3M|.XM";
 
             //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
             //or, the application data folder \Lib\x86...
-            if(!Directory.Exists(TetrisGame.AppDataFolder))
+            if (!Directory.Exists(TetrisGame.AppDataFolder))
             {
-
             }
-            String[] x86DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s,"Lib\\x86")).ToArray();
+
+            String[] x86DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x86")).ToArray();
             String[] x64DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x64")).ToArray();
 
             string pathuse = LoadProperDLL(x86DLL, x64DLL); //load the x64 or x86 version as needed
@@ -301,7 +270,6 @@ namespace BASeTris.AssetManager
             // default buffer size = update period + 'minbuf' + 1ms extra margin
 
             //buflen = BASS_GetConfig(BASS_CONFIG_BUFFER);
-
 
 
             /*
@@ -324,57 +292,66 @@ namespace BASeTris.AssetManager
                       }
                   }
               }*/
-
         }
-
 
 
         public BASSDriver()
             : this(Path.Combine(TetrisGame.AppDataFolder, "SoundPlugin"))
         {
-
-
         }
-        public override string ToString()
+
+
+        private void BasssoundStop(BASSSound soundstopped)
         {
-            return Name;
+            FireSoundStop(soundstopped);
         }
-        public String Name
-        {
-            get { return "NBASS"; }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="x86Path"></param>
+        /// <param name="x64Path"></param>
+        /// <returns>the path that was chosen</returns>
+        private string LoadProperDLL(String[] x86Path, String[] x64Path)
+        {
+            String dlltoload;
+            //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
+            if (Utils.Is64Bit)
+                dlltoload = x64Path.FirstOrDefault(a => Directory.Exists(a));
+            else
+                dlltoload = x86Path.FirstOrDefault(a => Directory.Exists(a));
+
+            Debug.Print("Loading bass.net from:" + dlltoload);
+            Bass.LoadMe(dlltoload);
+            BassMix.LoadMe(dlltoload);
+            //Don't forget BassFX too!
+            BassFx.LoadMe(dlltoload);
+            return dlltoload;
         }
-        public static string DrvName = "NBASS";
 
         #region iSoundEngineDriver Members
 
         public event OnSoundStopDelegate OnSoundStop;
 
         public event OnSoundPlayDelegate OnSoundPlay;
+
         public void FireSoundPlay(iActiveSoundObject soundPlayed)
         {
             OnSoundPlayDelegate temp = OnSoundPlay;
             if (temp != null)
                 temp(soundPlayed);
-
-
-
         }
+
         public void FireSoundStop(iActiveSoundObject soundStopped)
         {
             OnSoundStopDelegate temp = OnSoundStop;
             if (temp != null)
                 temp(soundStopped);
-
-
-
         }
+
         public iSoundSourceObject LoadSound(Stream fromstream)
         {
-
             //int stmake = Bass.BASS_StreamCreateFile(
             return null;
-
         }
 
         public iSoundSourceObject LoadSound(byte[] data, string sName, string fileextension)
@@ -383,9 +360,8 @@ namespace BASeTris.AssetManager
             if (extension.Equals(".xm", StringComparison.OrdinalIgnoreCase))
             {
                 Debug.Print("xm file...");
-
-
             }
+
             int stmake = 0;
 
             //we need to allocate some unmanaged memory.
@@ -393,10 +369,8 @@ namespace BASeTris.AssetManager
             Marshal.Copy(data, 0, unmanagedPointer, data.Length);
 
 
-
-            if (new String[] { ".xm", ".it" }.Contains(extension.ToLower()))
+            if (new[] {".xm", ".it"}.Contains(extension.ToLower()))
             {
-
                 stmake = Bass.BASS_MusicLoad(unmanagedPointer, 0, 0, BASSFlag.BASS_DEFAULT, 0);
             }
             else
@@ -410,8 +384,8 @@ namespace BASeTris.AssetManager
                 BASSSound returnsound = new BASSSound(stmake, unmanagedPointer);
                 returnsound.BASS_SoundStopped += BasssoundStop;
                 return returnsound;
-
             }
+
             return null;
         }
 
@@ -421,19 +395,17 @@ namespace BASeTris.AssetManager
             if (extension.Equals(".xm", StringComparison.OrdinalIgnoreCase))
             {
                 Debug.Print("xm file...");
-
-
             }
+
             int stmake = 0;
 
-            if (new String[] { ".xm", ".it", ".mod" }.Contains(extension.ToLower()))
+            if (new[] {".xm", ".it", ".mod"}.Contains(extension.ToLower()))
             {
                 stmake = Bass.BASS_MusicLoad(filename, 0, 0, BASSFlag.BASS_DEFAULT, 0);
             }
             else
             {
                 stmake = Bass.BASS_StreamCreateFile(filename, 0, 0, BASSFlag.BASS_STREAM_DECODE);
-
             }
 
             if (stmake != 0)
@@ -441,8 +413,8 @@ namespace BASeTris.AssetManager
                 BASSSound returnsound = new BASSSound(stmake);
                 returnsound.BASS_SoundStopped += BasssoundStop;
                 return returnsound;
-
             }
+
             return null;
         }
 
@@ -451,19 +423,8 @@ namespace BASeTris.AssetManager
             return SupportedExtensions.Split('|');
         }
 
-        readonly String SupportedExtensions = null;
+        readonly String SupportedExtensions;
+
         #endregion
-
-        public void Dispose()
-        {
-            // Bass.BASS_Free();
-            Bass.FreeMe();
-            BassMix.FreeMe();
-            foreach (var disposeplugin in loadedbassplugs)
-            {
-                Bass.BASS_PluginFree(disposeplugin.Key);
-
-            }
-        }
     }
 }

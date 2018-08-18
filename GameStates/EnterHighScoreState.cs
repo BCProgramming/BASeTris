@@ -11,22 +11,24 @@ namespace BASeTris.GameStates
     {
         Statistics GameStatistics = null;
         IHighScoreList ScoreListing = null;
-        Func<string,int, IHighScoreEntry> ScoreToEntryFunc = null;
-        private int AchievedPosition;
-        //private IBackgroundDraw _BG = null;
-        public override DisplayMode SupportedDisplayMode { get { return DisplayMode.Full; } }
+        Func<string, int, IHighScoreEntry> ScoreToEntryFunc = null;
 
-        public EnterHighScoreState(GameState pOriginalState,IStateOwner pStateOwner,IHighScoreList ScoreList,Func<string,int,IHighScoreEntry> ScoreFunc, Statistics SourceStats)
-            :base(pStateOwner,10)
+        private int AchievedPosition;
+
+        //private IBackgroundDraw _BG = null;
+        public override DisplayMode SupportedDisplayMode
         {
-            
-            
+            get { return DisplayMode.Full; }
+        }
+
+        public EnterHighScoreState(GameState pOriginalState, IStateOwner pStateOwner, IHighScoreList ScoreList, Func<string, int, IHighScoreEntry> ScoreFunc, Statistics SourceStats)
+            : base(pStateOwner, 10)
+        {
             ScoreListing = ScoreList;
             ScoreToEntryFunc = ScoreFunc; //function which takes the score and gives back an appropriate IHighScoreEntry implementation.
             GameStatistics = SourceStats;
             AchievedPosition = ScoreListing.IsEligible(GameStatistics.Score);
 
-   
 
             EntryPrompt = (" Congratulations, your score is\n at position " + AchievedPosition + " \n Enter your name.").Split('\n');
         }
@@ -37,10 +39,10 @@ namespace BASeTris.GameStates
             //OwnerState.DrawStats(pOwner,g,Bounds);
         }
 
-      Font useFont = null;
+        Font useFont = null;
 
 
-        public override bool ValidateEntry(IStateOwner pOwner,string sCurrentEntry)
+        public override bool ValidateEntry(IStateOwner pOwner, string sCurrentEntry)
         {
             return true;
         }
@@ -51,14 +53,12 @@ namespace BASeTris.GameStates
             ScoreListing.Submit(submitscore);
             TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.ClearTetris);
             TetrisGame.Soundman.PlayMusic("high_score_list");
-            pOwner.CurrentState = new ShowHighScoresState(ScoreListing, null, new int[] { AchievedPosition });
+            pOwner.CurrentState = new ShowHighScoresState(ScoreListing, null, new int[] {AchievedPosition});
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //throw new NotImplementedException();
         }
-
-       
     }
 }

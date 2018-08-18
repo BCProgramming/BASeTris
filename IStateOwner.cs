@@ -13,7 +13,7 @@ namespace BASeTris
         GameState CurrentState { get; set; }
         void EnqueueAction(Action pAction);
         Rectangle GameArea { get; }
-        void Feedback(float Strength,int Length);
+        void Feedback(float Strength, int Length);
 
         void AddGameObject(GameObject Source);
         void AddParticle(Particle pParticle);

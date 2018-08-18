@@ -8,12 +8,10 @@ namespace BASeTris.Choosers
 {
     public class FullRandomChooser : BlockGroupChooser
     {
-
-        public FullRandomChooser(Func<BlockGroup>[] SelectionFunctions):base(SelectionFunctions)
+        public FullRandomChooser(Func<BlockGroup>[] SelectionFunctions) : base(SelectionFunctions)
         {
         }
 
-       
 
         public override BlockGroup GetNext()
         {

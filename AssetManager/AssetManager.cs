@@ -1,5 +1,4 @@
-﻿
-/*
+﻿/*
  * BASeCamp BASeBlock
 Copyright (c) 2011, Michael Burgwin
 All rights reserved.
@@ -23,7 +22,6 @@ using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Imaging;
 using System.IO;
-
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -37,22 +35,17 @@ using Ionic.Zip;
 using Ionic.Zlib;
 
 
-
 namespace BASeTris.AssetManager
 {
-
-
-
-
     /// <summary>
 
     #region Sound Manager
+
     /// <summary>
     /// represents and manipulates a sound object that is in use/playing.
     /// </summary>
     public interface iActiveSoundObject
     {
-
         bool Finished { get; }
         float Tempo { get; set; }
         void Stop();
@@ -60,25 +53,28 @@ namespace BASeTris.AssetManager
         void UnPause();
         bool Paused { get; set; }
         void setVolume(float volumeset);
+
         /// <summary>
         /// retrieves the current progress. This will be a ratio to Source.getLength.
         /// </summary>
         float Progress { get; }
+
         float Level { get; }
         iSoundSourceObject Source { get; }
-
     }
+
     public interface iSoundSourceObject
     {
         iActiveSoundObject Play(bool playlooped);
-        
+
         iActiveSoundObject Play(bool playlooped, float volume);
         float getLength();
-
     }
 
     public delegate void OnSoundStopDelegate(iActiveSoundObject objstop);
+
     public delegate void OnSoundPlayDelegate(iActiveSoundObject objplay);
+
     public interface iSoundEngineDriver : IDisposable
     {
         event OnSoundStopDelegate OnSoundStop;
@@ -88,20 +84,19 @@ namespace BASeTris.AssetManager
         String Name { get; }
         IEnumerable<string> GetSupportedExtensions();
         String ToString();
-
     }
-
-
-
-
-
 
 
     public class cNewSoundManager : IDisposable
     {
         // public event Action<iSoundSourceObject, String> SoundStopped;
         private iSoundEngineDriver mDriver;
-        public iSoundEngineDriver Driver { get { return mDriver; } }
+
+        public iSoundEngineDriver Driver
+        {
+            get { return mDriver; }
+        }
+
         private Dictionary<String, iSoundSourceObject> mSoundSources = new Dictionary<string, iSoundSourceObject>();
         private List<iActiveSoundObject> PlayingSounds = new List<iActiveSoundObject>();
         private iActiveSoundObject _mPlayingMusic;
@@ -109,48 +104,46 @@ namespace BASeTris.AssetManager
 
         private static iManagerCallback _callback = new Nullcallback();
 
-        public static iManagerCallback Callback { get { return _callback; } set { _callback = value; } }
+        public static iManagerCallback Callback
+        {
+            get { return _callback; }
+            set { _callback = value; }
+        }
 
         //private iActiveSoundObject mPlayingMusic { set { _mPlayingMusic = value; } get { return _mPlayingMusic; } }
 
         private iActiveSoundObject mPlayingMusic
         {
-
-
-
             set
             {
                 if (mPlayingMusic != null)
                 {
-                    Debug.Print("mPlayingMusic: " + getKeyForSound(mPlayingMusic.Source) + "\n" +
-                        "Stacktrace:" + new StackTrace().ToString());
+                    Debug.Print
+                    ("mPlayingMusic: " + getKeyForSound(mPlayingMusic.Source) + "\n" +
+                     "Stacktrace:" + new StackTrace().ToString());
                 }
+
                 _mPlayingMusic = value;
-
-
-
-
             }
             get { return _mPlayingMusic; }
         }
+
         protected String getKeyForSound(iSoundSourceObject sourceobject)
         {
-
             foreach (String key in mSoundSources.Keys)
             {
-
                 if (mSoundSources[key] == sourceobject)
                 {
                     return key;
-
                 }
-
-
             }
+
             return "";
         }
+
         private iSoundSourceObject mPlayingMusicSource;
         public String scurrentPlayingMusic = "";
+
         private iManagerCallback mCallback = new Nullcallback();
         /* public void FireSoundStopped(iSoundSourceObject Soundobj,String SoundName)
          {
@@ -175,24 +168,21 @@ namespace BASeTris.AssetManager
         {
             //mDriver.Dispose();
             //mDriver=null;
-
-
         }
 
         public iSoundSourceObject GetPlayingMusic()
         {
             return mPlayingMusicSource;
-
-
         }
+
         public void SetPlayingMusic(iActiveSoundObject revertmusic)
         {
             mPlayingMusicSource = revertmusic as iSoundSourceObject;
         }
+
         public iActiveSoundObject GetPlayingMusic_Active()
         {
             return mPlayingMusic;
-
         }
 
         protected cNewSoundManager(iSoundEngineDriver sounddriver, iManagerCallback mancallback)
@@ -216,26 +206,49 @@ namespace BASeTris.AssetManager
             private bool mPlayLooped = false;
             private iActiveSoundObject PlayingSound;
             private iSoundSourceObject PlayingSource;
-            public Queue<iSoundSourceObject> SoundQueue { get { return mSoundQueue; } set { mSoundQueue = value; } }
-            public MultiMusicPlayMode PlayMode { get { return mmpmode; } set { mmpmode = value; } }
-            public bool PlayLooped { get { return mPlayLooped; } set { mPlayLooped = value; } }
-            public float Progress { get { return PlayingSound.Progress; } }
-            public float Level {  get { return PlayingSound.Level; } }
+
+            public Queue<iSoundSourceObject> SoundQueue
+            {
+                get { return mSoundQueue; }
+                set { mSoundQueue = value; }
+            }
+
+            public MultiMusicPlayMode PlayMode
+            {
+                get { return mmpmode; }
+                set { mmpmode = value; }
+            }
+
+            public bool PlayLooped
+            {
+                get { return mPlayLooped; }
+                set { mPlayLooped = value; }
+            }
+
+            public float Progress
+            {
+                get { return PlayingSound.Progress; }
+            }
+
+            public float Level
+            {
+                get { return PlayingSound.Level; }
+            }
+
             private float _useTempo = -1;
+
             public iSoundSourceObject Source
             {
                 get { return this; }
             }
+
             public float Tempo
             {
                 set
                 {
-
                     _useTempo = value;
                     if (PlayingSound != null)
                         PlayingSound.Tempo = _useTempo;
-
-
                 }
 
                 get
@@ -244,11 +257,9 @@ namespace BASeTris.AssetManager
                         _useTempo = PlayingSound.Tempo;
 
                     return _useTempo;
-
                 }
-
-
             }
+
             private iSoundEngineDriver driverobj = null;
 
 
@@ -259,8 +270,6 @@ namespace BASeTris.AssetManager
                 PlayLooped = pplaylooped;
                 foreach (String loadkey in keys)
                 {
-
-
                     try
                     {
                         iSoundSourceObject sourceobj = csound.GetSoundRnd(loadkey);
@@ -275,47 +284,26 @@ namespace BASeTris.AssetManager
                                 SoundQueue.Enqueue(sourceobj);
                                 //ss.Add(sourceobj);
                             }
-
                         }
                     }
                     catch
                     {
-
-
                     }
-
-
-
-
-
-
                 }
 
 
-
-
-
                 sdriver.OnSoundStop += new OnSoundStopDelegate(sdriver_OnSoundStop);
-
-
-
-
-
-
             }
+
             public float getLength()
             {
                 float returnvalue = 0;
                 foreach (var loopitem in SoundQueue)
                 {
                     returnvalue += loopitem.getLength();
-
-
-
                 }
 
                 return returnvalue;
-
             }
 
             public void Pause()
@@ -324,11 +312,9 @@ namespace BASeTris.AssetManager
                 {
                     //  if (PlayingSound.Paused) PlayingSound.UnPause(); else PlayingSound.Pause();
                     Paused = !Paused;
-
-
-
                 }
             }
+
             public void Skip()
             {
                 //skips to the next track.
@@ -336,14 +322,14 @@ namespace BASeTris.AssetManager
                 //PlayingSound.Stop(); 
                 PlayingSound.Stop();
                 sdriver_OnSoundStop(PlayingSound);
-
             }
+
             public iActiveSoundObject Play(bool pPlayLooped)
             {
                 //PlayLooped = pPlayLooped;
                 return Play(pPlayLooped, 1.0f);
-
             }
+
             public void Stop()
             {
                 //unhook first, otherwise the event fires and we play another sound right away (depending on the mode)
@@ -352,17 +338,16 @@ namespace BASeTris.AssetManager
                     driverobj.OnSoundStop -= sdriver_OnSoundStop;
                     driverobj = null;
                 }
+
                 if (PlayingSound != null) PlayingSound.Stop();
                 //PlayingSource=null;
                 playedqueue = new Queue<iSoundSourceObject>();
-
-
-
             }
+
             Queue<iSoundSourceObject> playedqueue = new Queue<iSoundSourceObject>();
+
             void sdriver_OnSoundStop(iActiveSoundObject objstop)
             {
-
                 String stoppedkey = TetrisGame.Soundman.getKeyForSound(objstop.Source);
                 Debug.Print("QueuedSoundManager detected stop of " + stoppedkey);
 
@@ -384,21 +369,12 @@ namespace BASeTris.AssetManager
                             //drain playedqueue back into the main queue.
                             while (playedqueue.Any())
                                 SoundQueue.Enqueue(playedqueue.Dequeue());
-
-
-
-
-
                         }
                         else
                         {
                             //if we aren't set to loop, we're done.
                             driverobj.OnSoundStop -= sdriver_OnSoundStop;
-
-
                         }
-
-
                     }
 
 
@@ -410,12 +386,9 @@ namespace BASeTris.AssetManager
                         if (mmpmode == MultiMusicPlayMode.MultiMusic_Order)
                         {
                             playit = SoundQueue.Dequeue();
-
-
                         }
                         else
                         {
-
                             var Listeq = SoundQueue.ToList();
 
                             //select a random element
@@ -426,25 +399,17 @@ namespace BASeTris.AssetManager
                             Listeq.RemoveAt(randomindex);
                             //create a new queue from the list...
                             SoundQueue = new Queue<iSoundSourceObject>(Listeq);
-
                         }
+
                         String getname = TetrisGame.Soundman.getKeyForSound(playit);
                         Debug.Print("QueuedSoundManager about to play " + getname + ".");
                         PlayingSource = playit;
                         PlayingSound = PlayingSource.Play(false);
                         if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
-
-
-
                     }
-
-
-
-
                 }
-
-
             }
+
             void sdriver_OnSoundStopOld(iActiveSoundObject objstop)
             {
                 //throw new NotImplementedException();
@@ -465,13 +430,10 @@ namespace BASeTris.AssetManager
                                 SoundQueue.Enqueue(playedqueue.Dequeue());
 
                             PlayingSound = PlayingSource.Play(false);
-
                         }
+
                         driverobj.OnSoundStop -= sdriver_OnSoundStop;
                         driverobj = null;
-
-
-
                     }
                     else
                     {
@@ -479,7 +441,6 @@ namespace BASeTris.AssetManager
                         //sounds left; dequeue the next one...
                         if (mmpmode == MultiMusicPlayMode.MultiMusic_Order)
                         {
-
                             var deq = SoundQueue.Dequeue();
 
                             //play it...
@@ -512,22 +473,10 @@ namespace BASeTris.AssetManager
                             PlayingSound = grabbeditem.Play(false);
                             //play the grabbed item.
                             ///Play(false);
-
-
-
                         }
                     }
-
                 }
             }
-
-
-
-
-
-
-
-
 
 
             #region iActiveSoundObject Members
@@ -544,10 +493,7 @@ namespace BASeTris.AssetManager
 
             public bool Paused
             {
-                get
-                {
-                    return (PlayingSound != null && PlayingSound.Paused);
-                }
+                get { return (PlayingSound != null && PlayingSound.Paused); }
                 set
                 {
                     Debug.Print("Setting PlayingSound Pause state to " + value);
@@ -563,9 +509,6 @@ namespace BASeTris.AssetManager
             #endregion
 
             #region iSoundSourceObject Members
-
-
-
 
             #endregion
 
@@ -593,37 +536,28 @@ namespace BASeTris.AssetManager
 
             bool iActiveSoundObject.Paused
             {
-                get
-                {
-                    return PlayingSound.Paused;
-                }
-                set
-                {
-                    PlayingSound.Paused = value;
-                }
+                get { return PlayingSound.Paused; }
+                set { PlayingSound.Paused = value; }
             }
 
             #endregion
 
             #region iSoundSourceObject Members
 
-
             public iActiveSoundObject Play(bool playlooped, float volume)
             {
-
                 //PlayLooped = pPlayLooped;
                 if (PlayingSound != null && PlayingSound.Paused)
                 {
                     PlayingSound.UnPause();
-
                 }
                 else
                 {
                     PlayingSound = PlayingSource.Play(false, volume); //the looping argument is ignored...
                     if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
                 }
-                return this;
 
+                return this;
             }
 
             #endregion
@@ -640,6 +574,7 @@ namespace BASeTris.AssetManager
         {
             PlayingSounds.Add(objplay);
         }
+
         //When the sound driver indicates a sound stopped, we need to do some special processing for the case
         //where we were told to play a series of sounds.
         void mDriver_OnSoundStop(iActiveSoundObject objstop)
@@ -668,15 +603,11 @@ namespace BASeTris.AssetManager
 
             }
             */
-
-
-
         }
 
         public cNewSoundManager(iSoundEngineDriver sounddriver, String[] SoundFilePaths)
             : this(sounddriver, SoundFilePaths, new Nullcallback())
         {
-
         }
 
         public cNewSoundManager(iSoundEngineDriver sounddriver, String[] SoundFilePaths, iManagerCallback mancallback)
@@ -684,14 +615,11 @@ namespace BASeTris.AssetManager
         {
             mCallback = mancallback;
             LoadSounds(SoundFilePaths);
-
-
         }
+
         public cNewSoundManager(iSoundEngineDriver sounddriver, DirectoryInfo[] DirsUse)
             : this(sounddriver, DirsUse, new Nullcallback())
         {
-
-
         }
 
         public cNewSoundManager(iSoundEngineDriver sounddriver, DirectoryInfo[] DirsUse, iManagerCallback mancallback)
@@ -699,49 +627,33 @@ namespace BASeTris.AssetManager
         {
             mCallback = mancallback;
             LoadSounds(DirsUse);
-
-
         }
+
         public cNewSoundManager(iSoundEngineDriver sounddriver, String SoundFilePath) : this(sounddriver, SoundFilePath, new Nullcallback())
         {
-
-
         }
 
         public cNewSoundManager(iSoundEngineDriver sounddriver, String SoundFilePath, iManagerCallback mancallback)
             : this(sounddriver, mancallback)
         {
             LoadSounds(SoundFilePath);
-
-
         }
+
         public bool IsSupportedSound(String testfile)
         {
             //return return supportedtypes.Contains(Path.GetExtension(filename).ToUpper());
             return mDriver.GetSupportedExtensions().Contains(Path.GetExtension(testfile).ToUpper()) ||
-                Path.GetExtension(testfile).ToUpper().Equals(".DFS");
-
+                   Path.GetExtension(testfile).ToUpper().Equals(".DFS");
         }
 
         public void LoadSounds(IEnumerable<DirectoryInfo> loadfromdirs)
         {
-
-
-
             foreach (DirectoryInfo loopdir in loadfromdirs)
             {
                 LoadSounds(loopdir);
-
-
             }
-
-
-
-
-
-
-
         }
+
         /// <summary>
         /// returns whether all the sound keys present exist.
         /// </summary>
@@ -752,10 +664,9 @@ namespace BASeTris.AssetManager
             foreach (String loopstring in key)
             {
                 if (!HasSound(loopstring)) return false;
-
             }
-            return true;
 
+            return true;
         }
 
         public bool HasSound(String key)
@@ -766,11 +677,10 @@ namespace BASeTris.AssetManager
             }
             else
             {
-
-
                 return mSoundSources.Keys.Contains(key.ToUpper());
             }
         }
+
         /// <summary>
         /// retrieves a array
         /// </summary>
@@ -781,7 +691,6 @@ namespace BASeTris.AssetManager
             SortedList<String, String> acquiredkeys = new SortedList<String, String>();
             foreach (String iteratek in mSoundSources.Keys)
             {
-
                 if (iteratek.StartsWith(basename, StringComparison.OrdinalIgnoreCase))
                 {
                     //make sure the remainder of the name is a number.
@@ -790,20 +699,11 @@ namespace BASeTris.AssetManager
                     if (Int32.TryParse(remainder, out resultint))
                     {
                         acquiredkeys.Add(remainder, iteratek);
-
                     }
-
-
-
-
                 }
-
-
-
             }
+
             return (from p in acquiredkeys select p.Value).ToArray();
-
-
         }
 
         public iSoundSourceObject GetSound(String key)
@@ -813,9 +713,6 @@ namespace BASeTris.AssetManager
                 QueuedSoundManager qsm = new QueuedSoundManager(this, key.Split('|'), mDriver, false);
 
                 return qsm;
-
-
-
             }
 
             if (mSoundSources.ContainsKey(key.ToUpper()))
@@ -828,10 +725,10 @@ namespace BASeTris.AssetManager
             {
                 throw new KeyNotFoundException(key);
             }
+
             //return GetSoundRnd(key);
-
-
         }
+
         public String getRandomSound(String keyprefix)
         {
             keyprefix = keyprefix.Trim().Replace('|', ':');
@@ -839,23 +736,19 @@ namespace BASeTris.AssetManager
             //special code: allow in form of sound1:sound2:sound3 to choose one of those three randomly.
             if (keyprefix.Contains(":"))
             {
-                String[] splitopt = keyprefix.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                String[] splitopt = keyprefix.Split(new char[] {':'}, StringSplitOptions.RemoveEmptyEntries);
                 //choose a random index.
                 int randomidex = TetrisGame.rgen.Next(splitopt.Length);
                 keyprefix = splitopt[randomidex];
-
-
-
             }
 
 
             String[] gotkeys = (from w in mSoundSources.Keys
-                                where w.ToUpper().StartsWith(keyprefix.ToUpper())
-                                select w).ToArray();
+                where w.ToUpper().StartsWith(keyprefix.ToUpper())
+                select w).ToArray();
             if (gotkeys.Length == 0) return "";
             int randomindex = TetrisGame.rgen.Next(0, gotkeys.Length);
             return gotkeys[randomindex];
-
         }
 
         public iSoundSourceObject GetSoundRnd(String key)
@@ -869,12 +762,9 @@ namespace BASeTris.AssetManager
             //so.... iterate through all of our keys, get those keys that start with the passed key, and choose a random one from that set.
 
 
-
             return mSoundSources[getRandomSound(key)];
-
-
-
         }
+
         /// <summary>
         /// copies the input stream to the output stream in chunks of chunksize.
         /// </summary>
@@ -899,20 +789,17 @@ namespace BASeTris.AssetManager
 
                 //only continue as long as the returned amount is equal to the chunk size.
                 continuereading = amountread == buffer.Length;
-
             }
-
-
-
         }
+
         public static String GetTempPath()
         {
             String tpath = Path.GetTempPath();
             tpath = Path.Combine(tpath, "BASeTris");
             if (!Directory.Exists(tpath)) Directory.CreateDirectory(tpath);
             return tpath;
-
         }
+
         public static String GetTempFile(String useextension)
         {
             String tpath = GetTempPath();
@@ -921,9 +808,8 @@ namespace BASeTris.AssetManager
             tpath = tpath.Replace('\0', ' ').Trim();
             String destfilename = Guid.NewGuid().ToString() + useextension;
             return Path.Combine(tpath, destfilename);
-
         }
-      
+
         //"preprocesses" the sound file. Certain extensions are recognized as "speshul" and
         //we extract that file to a temporary location as the proper, recognizable type.
         private void ProcessSoundFile(ref String filename)
@@ -945,32 +831,23 @@ namespace BASeTris.AssetManager
                     //use a DeflateStream...
                     using (Stream doreadstream = new DeflateStream(indata, CompressionMode.Decompress))
                     {
-
                         //open the output...
                         using (Stream outputdata = new FileStream(tempfilename, FileMode.Create))
                         {
-
                             CopyStream(doreadstream, outputdata, 8192);
-
                         }
                     }
+
                     //change the filename to point to the decompressed wav data.
                     filename = tempfilename;
                     TetrisGame.QueueDelete(tempfilename); //queue up the temporary file to be cleaned up.
                 }
-
-
             }
-
-
-
-
         }
 
 
         public String AddSound(byte[] sounddata, String key, String type)
         {
-
             //get a temporary file.
             key = key.ToUpper();
             String outfile = GetTempFile(type);
@@ -984,7 +861,6 @@ namespace BASeTris.AssetManager
             //now we can load "properly" (normally)...
             String returnkey = AddSound(outfile, key);
             return returnkey;
-
         }
 
         public String AddSound(String filename)
@@ -994,8 +870,8 @@ namespace BASeTris.AssetManager
             iSoundSourceObject ss = mDriver.LoadSound(filename);
             string usekey = Path.GetFileNameWithoutExtension(filename).ToUpper();
             return AddSound(filename, usekey);
-
         }
+
         /// <summary>
         /// Adds a given Sound file with the specified key
         /// </summary>
@@ -1017,30 +893,22 @@ namespace BASeTris.AssetManager
             }
             else
             {
-
-
                 mSoundSources.Add(usekey, ss);
             }
+
             return usekey;
-
-
-
         }
 
-        public iActiveSoundObject PlaySoundRnd(String key,float Volume)
+        public iActiveSoundObject PlaySoundRnd(String key, float Volume)
         {
             iSoundSourceObject grabbed = GetSoundRnd(key);
-            return grabbed.Play(false,Volume);
-
-
+            return grabbed.Play(false, Volume);
         }
+
         public iActiveSoundObject PlaySound(String key, bool playlooped)
         {
             iSoundSourceObject grabbed = GetSound(key);
             return grabbed.Play(playlooped);
-
-
-
         }
 
         //TODO: add PlaySound() that supports array if String[] for key.
@@ -1049,27 +917,27 @@ namespace BASeTris.AssetManager
         {
             iSoundSourceObject grabbed = GetSound(key);
             return grabbed.Play(false);
-
         }
+
         public iActiveSoundObject PlaySound(String key, float volume)
         {
             iSoundSourceObject grabbed = GetSound(key);
             return grabbed.Play(false);
-
         }
+
         private MultiMusicPlayMode MultipleMusicPlayMode;
+
         public enum MultiMusicPlayMode
         {
             /// <summary>
             /// Play all Items in order.
             /// </summary>
             MultiMusic_Order,
+
             //Shuffle
             MultiMusic_Random,
-
-
-
         }
+
         /// <summary>
         /// new, dubious feature: play multiple musics, in a loop.
         /// </summary>
@@ -1080,32 +948,24 @@ namespace BASeTris.AssetManager
         {
             iSoundSourceObject[] outret;
             return PlayMusic(key, mplaymode, out outret);
-
-
         }
 
         public iActiveSoundObject PlayMusic(String[] key, MultiMusicPlayMode mplaymode, out iSoundSourceObject[] ssources)
         {
-
             //stop any playing sounds.
             //QueuedMusic = new Queue<iSoundSourceObject>();
             ssources = new iSoundSourceObject[key.Length];
             for (int i = 0; i < ssources.Length; i++)
             {
-
                 ssources[i] = GetSound(key[i]);
-
-
             }
 
             iActiveSoundObject retobj = PlayMusic(String.Join("|", key), 1.0f, true);
             if (retobj is QueuedSoundManager)
             {
-
                 (retobj as QueuedSoundManager).PlayMode = mplaymode;
-
-
             }
+
             return retobj;
 
             /*
@@ -1116,33 +976,31 @@ namespace BASeTris.AssetManager
             musicqueue.Play(false, 1.0f);
             return musicqueue;
             */
-
         }
 
 
         public iActiveSoundObject PlayMusic(String key)
         {
             return PlayMusic(key, 1.0f, true);
-
         }
+
         public iActiveSoundObject PlayMusic(String key, bool loop)
         {
             return PlayMusic(key, 0, loop);
-
         }
+
         private class ActiveMusicData
         {
             public string Name;
             public iActiveSoundObject ActiveSound { get; set; }
             public iSoundSourceObject Source { get; set; }
+
             public ActiveMusicData(String pName, iActiveSoundObject pActiveSound, iSoundSourceObject pSource)
             {
                 ActiveSound = pActiveSound;
                 Source = pSource;
                 Name = pName;
-
             }
-
         }
 
         /// <summary>
@@ -1154,13 +1012,10 @@ namespace BASeTris.AssetManager
         {
             public TemporaryMusicData(String pName, iActiveSoundObject pActiveSound, iSoundSourceObject pSource) : base(pName, pActiveSound, pSource)
             {
-
-
-
             }
-            public int Occurences; //reference count; we add one to this when a "temporary" music is played. and subtract one when it is "stopped".
-                                   //we play the music with the highest "reference count"; items are removed when their "reference count" is zero.
 
+            public int Occurences; //reference count; we add one to this when a "temporary" music is played. and subtract one when it is "stopped".
+            //we play the music with the highest "reference count"; items are removed when their "reference count" is zero.
 
 
             public int CompareTo(TemporaryMusicData other)
@@ -1168,11 +1023,13 @@ namespace BASeTris.AssetManager
                 return Occurences.CompareTo(other.Occurences);
             }
         }
+
         private String OriginalSoundName; //allocated when TemporaryMusicData is empty when music is pushed.
+
         private iSoundSourceObject OriginalSoundObject = null;
+
         //private SortedList<TemporaryMusicData, TemporaryMusicData> TempMusicData = new SortedList<TemporaryMusicData, TemporaryMusicData>();
         private Dictionary<String, TemporaryMusicData> TempMusicData = new Dictionary<string, TemporaryMusicData>();
-
 
 
         /// <summary>
@@ -1190,8 +1047,6 @@ namespace BASeTris.AssetManager
 
             if (incrementData.Occurences == 0) TempMusicData.Remove(MusicName);
             return PlayMax(1.0f, true);
-
-
         }
 
         /// <summary>
@@ -1217,9 +1072,8 @@ namespace BASeTris.AssetManager
                 //empty list. Initialize OriginalSoundName...
                 OriginalSoundObject = mPlayingMusicSource;
                 OriginalSoundName = scurrentPlayingMusic;
-
-
             }
+
             //step two: is there an element in the sorted list for MusicName?
             TemporaryMusicData incrementData = getTemporaryMusicData(MusicName);
             incrementData.Occurences++; //add one to occurences.
@@ -1241,6 +1095,7 @@ namespace BASeTris.AssetManager
                 incrementData = new TemporaryMusicData(MusicName, null, GrabSound(MusicName));
                 TempMusicData.Add(MusicName, incrementData);
             }
+
             return incrementData;
         }
 
@@ -1257,8 +1112,6 @@ namespace BASeTris.AssetManager
                 mPlayingMusic = OriginalSoundObject.Play(loop, volume);
 
                 return mPlayingMusic;
-
-
             }
 
             int currentmax = int.MinValue;
@@ -1271,6 +1124,7 @@ namespace BASeTris.AssetManager
                     tmduse = iterate.Value;
                 }
             }
+
             if (scurrentPlayingMusic != tmduse.Name)
             {
                 if (scurrentPlayingMusic == OriginalSoundName)
@@ -1372,17 +1226,16 @@ namespace BASeTris.AssetManager
             Debug.Print("setting mPlayingMusic volume to " + amount);
             if (mPlayingMusic != null)
                 mPlayingMusic.setVolume(amount);
-
-
         }
 
         public iActiveSoundObject PlayMusic(String key, float volume, bool loop)
         {
             if (mPlayingMusicSource is QueuedSoundManager)
             {
-                ((QueuedSoundManager)mPlayingMusicSource).Stop();
+                ((QueuedSoundManager) mPlayingMusicSource).Stop();
                 Debug.Print("queued");
             }
+
             iSoundSourceObject getsource = null;
             if (key.Contains("|"))
             {
@@ -1390,10 +1243,9 @@ namespace BASeTris.AssetManager
             }
             else
             {
-
                 getsource = GrabSound(key);
-
             }
+
             if (mPlayingMusic != null)
             {
                 if (getsource == mPlayingMusicSource && mPlayingMusic.Paused)
@@ -1409,13 +1261,11 @@ namespace BASeTris.AssetManager
             TempMusicData = new Dictionary<string, TemporaryMusicData>();
 
 
-            iActiveSoundObject soundobj = getsource.Play(loop,volume);
+            iActiveSoundObject soundobj = getsource.Play(loop, volume);
             mPlayingMusicSource = getsource;
             mPlayingMusic = soundobj;
             scurrentPlayingMusic = key;
             return soundobj;
-
-
         }
 
         private iSoundSourceObject GrabSound(string key)
@@ -1424,75 +1274,63 @@ namespace BASeTris.AssetManager
             if (File.Exists(key))
             {
                 getsource = mDriver.LoadSound(key);
-
-
             }
             else
             {
-
-
                 getsource = GetSoundRnd(key);
             }
+
             return getsource;
         }
+
         public void Stop()
         {
-
             foreach (var iterate in PlayingSounds)
             {
                 iterate.Stop();
-
             }
-
-
         }
+
         public iActiveSoundObject PlayMusic()
         {
             if (mPlayingMusic != null)
                 mPlayingMusic.UnPause();
 
             return mPlayingMusic;
-
         }
+
         public void PauseMusic()
         {
             if (mPlayingMusic != null)
             {
-
                 if (mPlayingMusic.Paused)
                     mPlayingMusic.UnPause();
                 else
                 {
                     mPlayingMusic.Pause();
                 }
-
             }
-
-
         }
 
         public void PauseMusic(bool pausestate)
         {
             if (mPlayingMusic is QueuedSoundManager)
             {
-
                 Debug.Print("Queued...");
             }
+
             if (mPlayingMusic != null)
             {
                 if (pausestate)
                 {
                     mPlayingMusic.Pause();
-
                 }
                 else
                 {
                     mPlayingMusic.UnPause();
                 }
             }
-
         }
-
 
 
         public void StopMusic()
@@ -1513,28 +1351,22 @@ namespace BASeTris.AssetManager
                 try
                 {
                     makeinfo[i] = new DirectoryInfo(loadfromfolders[i]);
-
-
                 }
                 catch
                 {
                     //ignore exceptions...
                 }
-
-
-
             }
 
             LoadSounds(makeinfo);
-
         }
+
         public void LoadSounds(DirectoryInfo loadfolder)
         {
             mCallback.ShowMessage("Loading sounds from:" + loadfolder.FullName);
             if (!loadfolder.Exists) return;
             foreach (FileInfo loopfile in loadfolder.GetFiles())
             {
-
                 if (IsSupportedSound(loopfile.FullName))
                 {
                     mCallback.ShowMessage("Loading Sound:" + loopfile.Name);
@@ -1543,27 +1375,13 @@ namespace BASeTris.AssetManager
                     iSoundSourceObject ss = mDriver.LoadSound(usefilename);
                     //use loopfile.Fullname for the key.
                     mSoundSources.Add(Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper(), ss);
-
-
-
-
-
-
                 }
-
-
-
-
             }
-
-
         }
 
         public void LoadSounds(String loadfolder)
         {
-
             LoadSounds(new DirectoryInfo(loadfolder));
-
         }
 
 
@@ -1571,42 +1389,40 @@ namespace BASeTris.AssetManager
         {
             mSoundSources.Remove(key);
         }
-
-
     }
 
     #endregion
 
 
-
-
     public class ScriptObject : ISerializable
     {
-
-
-
         private String _Language = "C#";
         private String _Code = "";
 
-        public String Language { get { return _Language; } set { _Language = value; } }
-        public String Code { get { return _Code; } set { _Code = value; } }
+        public String Language
+        {
+            get { return _Language; }
+            set { _Language = value; }
+        }
+
+        public String Code
+        {
+            get { return _Code; }
+            set { _Code = value; }
+        }
 
         public ScriptObject(SerializationInfo info, StreamingContext context)
         {
             _Language = info.GetString("Language");
             _Code = info.GetString("Code");
-
         }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Language", _Language);
             info.AddValue("Code", _Code);
         }
-
-
-
     }
-
 
 
     //a class for serialization of images in conjunction with the ImageManager class...
@@ -1620,6 +1436,7 @@ namespace BASeTris.AssetManager
         {
             Serialize_Null, //image was null for some reason.
             Serialize_String, //only the name, to be used to access the proper image in the imagemanager, was stored.
+
             Serialize_ImageData
             //the actual Image object was stored (because no match was found in the imagemanager, presumably)
         }
@@ -1634,7 +1451,7 @@ namespace BASeTris.AssetManager
 
         public SerializableImage(SerializationInfo information, StreamingContext context)
         {
-            ImageSerializationMode modetype = (ImageSerializationMode)information.GetInt32(SerialImageModeName);
+            ImageSerializationMode modetype = (ImageSerializationMode) information.GetInt32(SerialImageModeName);
             switch (modetype)
             {
                 case ImageSerializationMode.Serialize_Null:
@@ -1644,7 +1461,7 @@ namespace BASeTris.AssetManager
                     ActualImage = TetrisGame.Imageman.getLoadedImage(information.GetString(SerialImageDataName));
                     break;
                 case ImageSerializationMode.Serialize_ImageData:
-                    ActualImage = (Image)information.GetValue(SerialImageDataName, typeof(Image));
+                    ActualImage = (Image) information.GetValue(SerialImageDataName, typeof(Image));
                     break;
             }
         }
@@ -1657,19 +1474,19 @@ namespace BASeTris.AssetManager
             if (ActualImage == null)
             {
                 //null... so, write... well, not much, really.
-                info.AddValue(SerialImageModeName, (Int32)ImageSerializationMode.Serialize_Null);
+                info.AddValue(SerialImageModeName, (Int32) ImageSerializationMode.Serialize_Null);
             }
             else
             {
                 String foundkey = TetrisGame.Imageman.FindImage(ActualImage);
                 if (foundkey != "")
                 {
-                    info.AddValue(SerialImageModeName, (int)ImageSerializationMode.Serialize_String);
+                    info.AddValue(SerialImageModeName, (int) ImageSerializationMode.Serialize_String);
                     info.AddValue(SerialImageDataName, foundkey);
                 }
                 else
                 {
-                    info.AddValue(SerialImageModeName, (int)ImageSerializationMode.Serialize_ImageData);
+                    info.AddValue(SerialImageModeName, (int) ImageSerializationMode.Serialize_ImageData);
                     info.AddValue(SerialImageDataName, ActualImage);
                 }
             }
@@ -1683,7 +1500,6 @@ namespace BASeTris.AssetManager
     /// </summary>
     public class ImageManager
     {
-
         public delegate Stream NameToStreamFunc(String filename, FileMode OpenMode);
 
         private iManagerCallback mcallback = new Nullcallback();
@@ -1691,11 +1507,11 @@ namespace BASeTris.AssetManager
         private Dictionary<String, Image> loadedimages = new Dictionary<String, Image>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
+
         public Image this[String man_key]
         {
             get
             {
-
                 man_key = man_key.ToUpper();
                 //return loadedimages[man_key];
                 if (loadedimages.ContainsKey(man_key))
@@ -1707,27 +1523,19 @@ namespace BASeTris.AssetManager
                     mcallback.FlagError("Lookup of Image " + man_key + " Failed.", null);
 
                 return null;
-
             }
-            set
-            {
-                loadedimages[man_key] = value;
-
-
-            }
-
-
+            set { loadedimages[man_key] = value; }
         }
+
         //default "name to stream" implementation.
         public Stream DefaultNameToStream(String filename, FileMode OpenMode)
         {
             return new FileStream(filename, OpenMode);
         }
+
         public ImageManager(String imagepath)
             : this(imagepath, new Nullcallback())
         {
-
-
         }
 
         public ImageManager(String imagepath, iManagerCallback mancallback)
@@ -1735,19 +1543,18 @@ namespace BASeTris.AssetManager
             mcallback = mancallback;
             LoadImages(imagepath);
         }
+
         public ImageManager(String[] imagepaths)
             : this(imagepaths, new Nullcallback())
         {
-
-
         }
 
         public ImageManager(String[] imagepaths, iManagerCallback mancallback)
         {
             mcallback = mancallback;
             LoadImages(imagepaths);
-
         }
+
         /// <summary>
         /// given a two dimensional array of a given type and a mapping function,
         /// creates a bitmap of the pixel size of the matrix and maps the colour of each pixel
@@ -1768,10 +1575,7 @@ namespace BASeTris.AssetManager
                     for (int y = 0; y < Values[x].Length; y++)
                     {
                         buildbitmap.SetPixel(y, x, colormapping(Values[x][y], x, y));
-
                     }
-
-
                 }
 
                 return buildbitmap;
@@ -1779,10 +1583,11 @@ namespace BASeTris.AssetManager
             catch (Exception exx)
             {
                 Debug.Print(exx.ToString());
-
             }
+
             return null;
         }
+
         public String FindImage(Image findthis)
         {
             foreach (String loopkey in loadedimages.Keys)
@@ -1790,6 +1595,7 @@ namespace BASeTris.AssetManager
                 if (loadedimages[loopkey] == findthis)
                     return loopkey;
             }
+
             return "";
         }
 
@@ -1797,14 +1603,14 @@ namespace BASeTris.AssetManager
         {
             LoadImages(frompath.Split(';'));
         }
+
         public String AddFromFile(String filename)
         {
             return AddFromFile(filename, null);
-
         }
+
         public String AddFromFile(String filename, String Usekey)
         {
-
             FileStream readimagestream = new FileStream(filename, FileMode.Open);
             Image readimage = Image.FromStream(readimagestream);
             //add to the imagelist.
@@ -1813,9 +1619,10 @@ namespace BASeTris.AssetManager
             readimagestream.Close();
             return Usekey;
         }
+
         public static bool isFileSupported(String filename)
         {
-            String[] goodext = new string[] { ".BMP", ".PNG", ".JPG", ".GIF", ".GZI", ".ICO" };
+            String[] goodext = new string[] {".BMP", ".PNG", ".JPG", ".GIF", ".GZI", ".ICO"};
             foreach (string currext in goodext)
             {
                 if (Path.GetExtension(filename).ToUpper().Equals(currext))
@@ -1823,6 +1630,7 @@ namespace BASeTris.AssetManager
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -1833,8 +1641,8 @@ namespace BASeTris.AssetManager
             FrameCount = gotframes.Length;
 
             return gotframes;
-
         }
+
         public String[] getImageFramesString(String BaseImageName)
         {
             List<String> returnnames = new List<string>();
@@ -1853,42 +1661,32 @@ namespace BASeTris.AssetManager
                     returnnames.Add(findthis);
                     foundframes++;
                 }
-
-
             }
 
             return returnnames.ToArray();
-
         }
+
         public bool Exists(String key)
         {
-
             //change: need to support "commands" which are basically instructions before a colon.
             if (key.Contains(":"))
             {
                 return Exists(key.Substring(key.IndexOf(":") + 1));
-
             }
             //return loadedimages.ContainsKey(key.SubString(key.LastIndexOf(":")))
 
             return loadedimages.ContainsKey(key);
-
-
-
         }
+
         public Image[] getImageFrames(String[] Framenames)
         {
             Image[] result = new Image[Framenames.Length];
             for (int i = 0; i < result.Length; i++)
             {
                 result[i] = getLoadedImage(Framenames[i]);
-
-
             }
+
             return result;
-
-
-
         }
 
         public Image[] getImageFrames(String ImageName)
@@ -1916,44 +1714,36 @@ namespace BASeTris.AssetManager
                     // }
                 }
             }
+
             return returnframes.ToArray();
         }
+
         public Icon getLoadedIcon(String iconindex, Size desiredSize)
         {
-
             string useindex = iconindex.ToUpper();
             if (loadedicons.ContainsKey(iconindex))
             {
                 Icon iconobj = loadedicons[iconindex];
                 return iconobj;
-
-
             }
+
             return null;
-
-
         }
+
         public Image getImageRandom(String Prefix)
         {
-
             Image[] choosefrom = (from m in loadedimages
-                                  where m.Key.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)
-                                  select m.Value).ToArray();
+                where m.Key.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)
+                select m.Value).ToArray();
 
             if (choosefrom.Length > 0)
                 return TetrisGame.Choose(choosefrom);
             else
                 return TetrisGame.Imageman.getLoadedImage(Prefix);
-
-
-
-
-
         }
+
         public Image getLoadedImage(String searchindex)
         {
-
-
             String index = searchindex.ToUpper();
             if (loadedimages.ContainsKey(index)) return loadedimages[index.ToUpper()];
 
@@ -1973,7 +1763,7 @@ namespace BASeTris.AssetManager
                 if (!loadedimages.ContainsKey(paramvalue)) throw new KeyNotFoundException("Key \"" + paramvalue + "\" not found.");
                 //Image acquiredimage = loadedimages[paramvalue];
                 Image acquiredimage = getLoadedImage(paramvalue);
-                Image changedimage = (Image)acquiredimage.Clone();
+                Image changedimage = (Image) acquiredimage.Clone();
 
                 //commandcode could have parameters- check for parens.
                 String[] parameters = null;
@@ -1989,13 +1779,12 @@ namespace BASeTris.AssetManager
 
                     String argumentstring = commandcode.Substring(startparen + 1, endparen - startparen - 1);
 
-                    parameters = argumentstring.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    parameters = argumentstring.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                     //
 
                     paramcount = parameters.Length;
 
                     commandcode = commandcode.Substring(0, startparen);
-
                 }
 
 
@@ -2019,9 +1808,9 @@ namespace BASeTris.AssetManager
                         int reduse, greenuse, blueuse, alphause = 255;
                         if (paramcount >= 4)
                         {
-
                             alphause = Int32.Parse(parameters[3]);
                         }
+
                         reduse = Int32.Parse(parameters[0]);
                         greenuse = Int32.Parse(parameters[1]);
                         blueuse = Int32.Parse(parameters[2]);
@@ -2032,31 +1821,18 @@ namespace BASeTris.AssetManager
                         changedimage = TetrisGame.ApplyImageAttributes(changedimage, applyattributes);
 
 
-
-
                         break;
-
                 }
-
-
 
 
                 //add it using the passed key.
                 loadedimages.Add(index, changedimage);
                 return changedimage;
-
-
-
-
             }
             else
             {
                 return loadedimages[index];
             }
-
-
-
-
         }
 
         //load images from a zip file.
@@ -2093,37 +1869,30 @@ namespace BASeTris.AssetManager
             //MemoryStream readto = new MemoryStream();
             long fullength = gzipper.TotalOut;
             byte[] readit = new byte[fullength];
-            readfrom.Read(readit, 0, (int)fullength);
+            readfrom.Read(readit, 0, (int) fullength);
             WriteTo.Write(readit, 0, readit.Length);
-
-
-
-
         }
+
         public void encodegzi(Stream readfrom, Stream writeto)
         {
             var gzipper = new GZipStream(readfrom, CompressionMode.Compress);
             long newlength = gzipper.TotalOut;
             byte[] readit = new byte[newlength];
-            readfrom.Read(readit, 0, (int)newlength);
+            readfrom.Read(readit, 0, (int) newlength);
             writeto.Write(readit, 0, readit.Length);
-
-
-
-
         }
+
         /// <summary>
         /// Reads a Zip File Image pack. Each image file is added or replaced in our set of images, using the base filename as the key.
         /// </summary>
         /// <param name="sFileName"></param>
         /// <returns></returns>
-
         public int ReadImagePack(String sFileName)
         {
             if (!File.Exists(sFileName)) throw new FileNotFoundException(sFileName);
             //open the ZipFile. we let Exceptions bubble up to the calling method.
             ZipFile zf = new ZipFile(sFileName);
-            String[] validExtensions = new string[] { "*.png", "*.ico" };
+            String[] validExtensions = new string[] {"*.png", "*.ico"};
             //go through each entry.
             int totalcount = 0;
             foreach (var entry in zf)
@@ -2133,7 +1902,6 @@ namespace BASeTris.AssetManager
 
                 if (validExtensions.Contains(Extensionget))
                 {
-
                     //grab a stream...
                     MemoryStream ms = new MemoryStream();
                     entry.Extract(ms);
@@ -2143,17 +1911,11 @@ namespace BASeTris.AssetManager
                     int lastdot = entry.FileName.LastIndexOf(".", StringComparison.Ordinal);
                     String gotbasename = entry.FileName.Substring(lastdirsep, lastdot - lastdirsep);
                     totalcount += AddImage(ms, gotbasename) ? 1 : 0;
-
-
                 }
-
             }
 
 
             return totalcount;
-
-
-
         }
 
         public int LoadImages(IEnumerable<string> paths)
@@ -2175,7 +1937,7 @@ namespace BASeTris.AssetManager
                         if (isFileSupported(loopentry.FileName))
                         {
                             byte[] readbuffer = new byte[loopentry.CompressedSize];
-                            loopentry.InputStream.Read(readbuffer, 0, (int)loopentry.CompressedSize);
+                            loopentry.InputStream.Read(readbuffer, 0, (int) loopentry.CompressedSize);
                             //MemoryStream streamread = new MemoryStream(new StreamReader(loopentry.InputStream));
                             MemoryStream streamread = new MemoryStream(readbuffer);
                             String basenameonly = Path.GetFileNameWithoutExtension(loopentry.FileName).ToUpper();
@@ -2184,8 +1946,6 @@ namespace BASeTris.AssetManager
                                 MemoryStream resultstream = new MemoryStream();
                                 decodegzi(streamread, resultstream);
                                 streamread = resultstream;
-
-
                             }
 
                             if ((Path.GetExtension(loopentry.FileName).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
@@ -2194,28 +1954,17 @@ namespace BASeTris.AssetManager
                                 Icon geticon = new Icon(streamread, 16, 16);
                                 loadedicons.Add(basenameonly, geticon);
                                 countaccum++;
-
                             }
                             else
                             {
-
-
-
                                 if (AddImage(streamread, basenameonly))
                                     countaccum++;
                             }
-
                         }
-
-
-
                     }
-
                 }
                 else
                 {
-
-
                     try
                     {
                         currentdir = new DirectoryInfo(currpath);
@@ -2230,7 +1979,6 @@ namespace BASeTris.AssetManager
                     {
                         if (isFileSupported(loopfile.FullName))
                         {
-
                             String basenameonly = Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper();
                             if (Path.GetExtension(loopfile.FullName).Equals(".ico", StringComparison.OrdinalIgnoreCase))
                             {
@@ -2238,20 +1986,15 @@ namespace BASeTris.AssetManager
                                 Icon geticon = new Icon(streamread, 16, 16);
                                 loadedicons.Add(basenameonly, geticon);
                                 countaccum++;
-
                             }
                             else
                             {
-
-
-
                                 mcallback.ShowMessage("Loading image:" + loopfile.Name);
 
                                 MemoryStream streamread = new MemoryStream(File.ReadAllBytes(loopfile.FullName));
 
                                 if (AddImage(streamread, basenameonly))
                                     countaccum++;
-
                             }
                         }
                     }
@@ -2260,27 +2003,24 @@ namespace BASeTris.AssetManager
 
             return countaccum;
         }
+
         /// <summary>
         /// Adds an image to the list.
         /// </summary>
         /// <param name="addkey">key to add the image as</param>
         /// <param name="addimage">image to add</param>
         /// <remarks>Adds a given image to the list of images using the given key. If the key already exists, the existing image will be replaced with the new one.</remarks>
-
         public void AddImage(String addkey, Image addimage)
         {
             addkey = addkey.ToUpper();
             if (loadedimages.ContainsKey(addkey))
             {
                 loadedimages.Remove(addkey);
-
-
             }
 
             loadedimages.Add(addkey, addimage);
-
-
         }
+
         public bool AddImage(String filename)
         {
             String keyuse = Path.GetFileName(filename);
@@ -2291,9 +2031,7 @@ namespace BASeTris.AssetManager
             using (FileStream imagestream = new FileStream(filename, FileMode.Open))
             {
                 return AddImage(imagestream, keyuse);
-
             }
-
         }
 
         private bool AddImage(Stream streamread, string basenameonly)
@@ -2310,20 +2048,18 @@ namespace BASeTris.AssetManager
             {
                 Debug.Print("image already loaded with key " + basenameonly);
             }
+
             return false;
         }
 
         public Dictionary<String, Image> GetImages()
         {
-
             return loadedimages;
-
-
         }
+
         public bool HasImage(String key)
         {
             return loadedimages.ContainsKey(key);
-
         }
 
         public String Remove(string key)
@@ -2350,8 +2086,6 @@ namespace BASeTris.AssetManager
                 foreach (String loopkey in TetrisGame.Imageman.GetImages().Keys)
                 {
                     this.Items.Add(loopkey);
-
-
                 }
 
                 // this.Items.Add("None");
@@ -2361,12 +2095,7 @@ namespace BASeTris.AssetManager
                 // Not setting the border to none just doesn't look good.
                 this.BorderStyle = BorderStyle.None;
             }
-
-
-
         }
-
-
 
 
         public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
@@ -2374,7 +2103,6 @@ namespace BASeTris.AssetManager
             Debug.Print("In GetEditStyle for ObjectTypeEditor");
 
             return UITypeEditorEditStyle.DropDown;
-
         }
 
         public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
@@ -2382,7 +2110,7 @@ namespace BASeTris.AssetManager
             if (provider != null)
             {
                 // This service is in charge of popping our ListBox.
-                IWindowsFormsEditorService service1 = ((IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService)));
+                IWindowsFormsEditorService service1 = ((IWindowsFormsEditorService) provider.GetService(typeof(IWindowsFormsEditorService)));
 
                 if (service1 != null)
                 {
@@ -2402,94 +2130,89 @@ namespace BASeTris.AssetManager
                     service1.CloseDropDown();
                 }
             }
+
             return value;
         }
-
-
-
-
-
     }
 
 
     public static class ColorMatrices
     {
-        private static float[][] _colorMatrixElements = {
-   new float[] {1,  0,  0,  0, 0},        // red scaling factor of 2
-   new float[] {0,  1,  0,  0, 0},        // green scaling factor of 1
-   new float[] {0,  0,  2,  0, 0},        // blue scaling factor of 1
-   new float[] {0,  0,  0,  1, 0},        // alpha scaling factor of 1
-   new float[] {-0.5f, -0.5f, .8f, 0, 1}};    // three translations of 0.2
+        private static float[][] _colorMatrixElements =
+        {
+            new float[] {1, 0, 0, 0, 0}, // red scaling factor of 2
+            new float[] {0, 1, 0, 0, 0}, // green scaling factor of 1
+            new float[] {0, 0, 2, 0, 0}, // blue scaling factor of 1
+            new float[] {0, 0, 0, 1, 0}, // alpha scaling factor of 1
+            new float[] {-0.5f, -0.5f, .8f, 0, 1}
+        }; // three translations of 0.2
 
         public static ColorMatrix GetFader(float alpha)
         {
-
-            return new ColorMatrix(new float[][] {
-                new float[]{1,0,0,0,0},
-                new float[]{0,1,0,0,0},
-                new float[]{0,0,1,0,0},
-                new float[]{0,0,0,alpha,0},
-                new float[]{0,0,0,0,1}});
-
-
-
+            return new ColorMatrix
+            (new float[][]
+            {
+                new float[] {1, 0, 0, 0, 0},
+                new float[] {0, 1, 0, 0, 0},
+                new float[] {0, 0, 1, 0, 0},
+                new float[] {0, 0, 0, alpha, 0},
+                new float[] {0, 0, 0, 0, 1}
+            });
         }
 
         public static ColorMatrix GetColourizer(Color fromcolor)
         {
             return GetColourizer(fromcolor.R, fromcolor.G, fromcolor.B, fromcolor.A);
-
-
-
         }
+
         public static ColorMatrix GetColourizer(float red, float green, float blue)
         {
             return GetColourizer(red, green, blue, 1);
-
         }
+
         public static void AddColourizer(ImageAttributes toia, Color usecolor)
         {
             ColorMatrix grayscaler = GrayScale();
             toia.SetColorMatrices(GetColourizer(usecolor), grayscaler);
-
-
-
         }
 
 
         public static ColorMatrix GrayScale()
         {
-            return new ColorMatrix(
-      new float[][]
-      {
-         new float[] {.3f, .3f, .3f, 0, 0},
-         new float[] {.59f, .59f, .59f, 0, 0},
-         new float[] {.11f, .11f, .11f, 0, 0},
-         new float[] {0, 0, 0, 1, 0},
-         new float[] {0, 0, 0, 0, 1}
-      });
-
+            return new ColorMatrix
+            (
+                new float[][]
+                {
+                    new float[] {.3f, .3f, .3f, 0, 0},
+                    new float[] {.59f, .59f, .59f, 0, 0},
+                    new float[] {.11f, .11f, .11f, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] {0, 0, 0, 0, 1}
+                });
         }
+
         public static float[][] GetIdentity()
         {
             return new float[][]
-      {
-         new float[] {1, 0, 0, 0, 0},
-         new float[] {0, 1, 0, 0, 0},
-         new float[] {0, 0, 1, 0, 0},
-         new float[] {0, 0, 0, 1, 0},
-         new float[] {0, 0, 0, 0, 1}
-      };
-
+            {
+                new float[] {1, 0, 0, 0, 0},
+                new float[] {0, 1, 0, 0, 0},
+                new float[] {0, 0, 1, 0, 0},
+                new float[] {0, 0, 0, 1, 0},
+                new float[] {0, 0, 0, 0, 1}
+            };
         }
+
         public static ColorMatrix GetRedColourizer(float red, float green, float blue, float alpha)
         {
-            float[][] matElement =  {
-   new float[] {red,  0,  0,  0, 0},        //red scaling factor
-   new float[] {0,  green,  0,  0, 0},        // green scaling factor of 1
-   new float[] {0,  0,  blue,  0, 0},        // blue scaling factor of 1
-   new float[] {0,  0,  0,  alpha, 0},        // alpha scaling factor of 1
-   new float[] {0, 0, 0, 0, 1}};    // three translations of 0.2
+            float[][] matElement =
+            {
+                new float[] {red, 0, 0, 0, 0}, //red scaling factor
+                new float[] {0, green, 0, 0, 0}, // green scaling factor of 1
+                new float[] {0, 0, blue, 0, 0}, // blue scaling factor of 1
+                new float[] {0, 0, 0, alpha, 0}, // alpha scaling factor of 1
+                new float[] {0, 0, 0, 0, 1}
+            }; // three translations of 0.2
             //change the appropriate elements to match....
             matElement[0][0] = red;
             matElement[1][1] = green;
@@ -2497,17 +2220,10 @@ namespace BASeTris.AssetManager
             matElement[3][3] = alpha;
             matElement[4][4] = 1;
             return new ColorMatrix(matElement);
-
-
         }
 
         public static ColorMatrix GetColourizer(float red, float green, float blue, float alpha)
         {
-
-
-
-
-
             /*
             float[][] MatElement =  { 
    new float[] {red,  0,  0,  0, 0},        //red scaling factor
@@ -2516,12 +2232,14 @@ namespace BASeTris.AssetManager
    new float[] {0,  0,  0,  alpha, 0},        // alpha scaling factor of 1
    new float[] {-0.5f, -0.5f, .8f, 0, alpha}};    // three translations of 0.2
              */
-            float[][] matElement =  {
-   new float[] {red,  0,  0,  0, 0},        //red scaling factor
-   new float[] {0,  green,  0,  0, 0},        // green scaling factor of 1
-   new float[] {0,  0,  blue,  0, 0},        // blue scaling factor of 1
-   new float[] {0,  0,  0,  alpha, 0},        // alpha scaling factor of 1
-   new float[] {0, 0, 0, 0, 1}};    // three translations of 0.2
+            float[][] matElement =
+            {
+                new float[] {red, 0, 0, 0, 0}, //red scaling factor
+                new float[] {0, green, 0, 0, 0}, // green scaling factor of 1
+                new float[] {0, 0, blue, 0, 0}, // blue scaling factor of 1
+                new float[] {0, 0, 0, alpha, 0}, // alpha scaling factor of 1
+                new float[] {0, 0, 0, 0, 1}
+            }; // three translations of 0.2
             //change the appropriate elements to match....
             matElement[0][0] = red;
             matElement[1][1] = green;
@@ -2529,12 +2247,11 @@ namespace BASeTris.AssetManager
             matElement[3][3] = alpha;
             matElement[4][4] = 1;
             return new ColorMatrix(matElement);
-
         }
-
-
     }
+
     #region HSLColor
+
     /// <summary>
     /// Class used to convert to and from Hue,Saturation, and Luminousity.
     /// </summary>
@@ -2553,11 +2270,13 @@ namespace BASeTris.AssetManager
             get { return _hue * Scale; }
             set { _hue = CheckRange(value / Scale); }
         }
+
         public double Saturation
         {
             get { return _saturation * Scale; }
             set { _saturation = CheckRange(value / Scale); }
         }
+
         public double Luminosity
         {
             get { return _luminosity * Scale; }
@@ -2580,11 +2299,12 @@ namespace BASeTris.AssetManager
 
         public string ToRGBString()
         {
-            Color color = (Color)this;
+            Color color = (Color) this;
             return String.Format("R: {0:#0.##} G: {1:#0.##} B: {2:#0.##}", color.R, color.G, color.B);
         }
 
         #region Casts to/from System.Drawing.Color
+
         public static implicit operator Color(HSLColor hslColor)
         {
             double r = 0, g = 0, b = 0;
@@ -2602,7 +2322,8 @@ namespace BASeTris.AssetManager
                     b = GetColorComponent(temp1, temp2, hslColor._hue - 1.0 / 3.0);
                 }
             }
-            return Color.FromArgb((int)(255 * r), (int)(255 * g), (int)(255 * b));
+
+            return Color.FromArgb((int) (255 * r), (int) (255 * g), (int) (255 * b));
         }
 
         private static double GetColorComponent(double temp1, double temp2, double temp3)
@@ -2617,6 +2338,7 @@ namespace BASeTris.AssetManager
             else
                 return temp1;
         }
+
         private static double MoveIntoRange(double temp3)
         {
             if (temp3 < 0.0)
@@ -2625,10 +2347,11 @@ namespace BASeTris.AssetManager
                 temp3 -= 1.0;
             return temp3;
         }
+
         private static double GetTemp2(HSLColor hslColor)
         {
             double temp2;
-            if (hslColor._luminosity < 0.5)  //<=??
+            if (hslColor._luminosity < 0.5) //<=??
                 temp2 = hslColor._luminosity * (1.0 + hslColor._saturation);
             else
                 temp2 = hslColor._luminosity + hslColor._saturation - (hslColor._luminosity * hslColor._saturation);
@@ -2643,31 +2366,38 @@ namespace BASeTris.AssetManager
             hslColor._saturation = color.GetSaturation();
             return hslColor;
         }
+
         #endregion
 
         public void SetRGB(int red, int green, int blue)
         {
-            HSLColor hslColor = (HSLColor)Color.FromArgb(red, green, blue);
+            HSLColor hslColor = (HSLColor) Color.FromArgb(red, green, blue);
             this._hue = hslColor._hue;
             this._saturation = hslColor._saturation;
             this._luminosity = hslColor._luminosity;
         }
 
-        public HSLColor() { }
+        public HSLColor()
+        {
+        }
+
         public HSLColor(Color color)
         {
             SetRGB(color.R, color.G, color.B);
         }
+
         public HSLColor(int red, int green, int blue)
         {
             SetRGB(red, green, blue);
         }
+
         public HSLColor(double hue, double saturation, double luminosity)
         {
             this.Hue = hue;
             this.Saturation = saturation;
             this.Luminosity = luminosity;
         }
+
         public static Color RotateHue(Color Source, int Amount)
         {
             Amount = Amount % 240;
@@ -2681,8 +2411,8 @@ namespace BASeTris.AssetManager
             return new HSLColor(new Random().NextDouble() * 240, useSat, uselum);
         }
     }
-    #endregion
 
+    #endregion
 
 
     /// <summary>
@@ -2690,22 +2420,24 @@ namespace BASeTris.AssetManager
     /// </summary>
     public class KeyboardInfo
     {
-        private KeyboardInfo() { }
+        private KeyboardInfo()
+        {
+        }
 
         [DllImport("user32.dll")]
         public static extern Int16 GetAsyncKeyState(int vKey);
 
         public static bool IsPressed(Keys key)
         {
-            return GetAsyncKeyState((int)key) < 0;
-
+            return GetAsyncKeyState((int) key) < 0;
         }
 
         [DllImport("user32")]
         private static extern short GetKeyState(int vKey);
+
         public static KeyStateInfo GetKeyState(Keys key)
         {
-            short keyState = GetKeyState((int)key);
+            short keyState = GetKeyState((int) key);
             byte[] bits = BitConverter.GetBytes(keyState);
             bool toggled = bits[0] == 1, pressed = bits[1] == 1;
             return new KeyStateInfo(key, pressed, toggled);
@@ -2716,33 +2448,40 @@ namespace BASeTris.AssetManager
     public struct KeyStateInfo
     {
         Keys _key;
+
         bool _isPressed,
             _isToggled;
+
         public KeyStateInfo(Keys key,
-                        bool ispressed,
-                        bool istoggled)
+            bool ispressed,
+            bool istoggled)
         {
             _key = key;
             _isPressed = ispressed;
             _isToggled = istoggled;
         }
+
         public static KeyStateInfo Default
         {
             get
             {
-                return new KeyStateInfo(Keys.None,
-                                            false,
-                                            false);
+                return new KeyStateInfo
+                (Keys.None,
+                    false,
+                    false);
             }
         }
+
         public Keys Key
         {
             get { return _key; }
         }
+
         public bool IsPressed
         {
             get { return _isPressed; }
         }
+
         public bool IsToggled
         {
             get { return _isToggled; }
@@ -2763,16 +2502,6 @@ namespace BASeTris.AssetManager
 
             cmPicture.Matrix22 = -1;
             return cmPicture;
-
         }
-
-
-
-
     }
-
-
-
 }
-
-

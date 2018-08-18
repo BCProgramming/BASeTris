@@ -19,9 +19,9 @@ namespace BaseTris
         protected static Color DarkColor = Color.FromArgb(110, 50, 35, 10);
         protected static Brush DarkBrush = new SolidBrush(DarkColor);
         protected static Brush DarkBrushOpaque = new SolidBrush(Color.FromArgb(DarkColor.R, DarkColor.G, DarkColor.B));
+
         public Win10MenuRenderer(Color? pAccentColor = null, bool pBlur = true)
         {
-
             _Blur = pBlur;
             if (pAccentColor != null)
             {
@@ -40,11 +40,12 @@ namespace BaseTris
             DWMNativeMethods.DwmGetColorizationParameters(ref parms);
 
             //Color.FromArgb(parms.ColorizationColor);
-            return Color.FromArgb(
-                (byte)(opaque ? 255 : (parms.ColorizationColor >> 24) / 2),
-                (byte)(parms.ColorizationColor >> 16),
-                (byte)(parms.ColorizationColor >> 8),
-                (byte)parms.ColorizationColor
+            return Color.FromArgb
+            (
+                (byte) (opaque ? 255 : (parms.ColorizationColor >> 24) / 2),
+                (byte) (parms.ColorizationColor >> 16),
+                (byte) (parms.ColorizationColor >> 8),
+                (byte) parms.ColorizationColor
             );
         }
 
@@ -86,8 +87,10 @@ namespace BaseTris
 
             e.Graphics.DrawLine(new Pen(Color.White, 2), useBounds.Left + 25, useBounds.Top + useBounds.Height / 2, useBounds.Right - 25, useBounds.Top + useBounds.Height / 2);
         }
+
         private static Size? CachedLargestImageSize = null;
         private static Size? CachedLargestTextSize = null;
+
         protected void CalcBoundaries(ToolStripItem item, Graphics g, out Rectangle TextBounds, out Rectangle ImageBounds)
         {
             //First: The Image size we want to consider is going to be the largest image size of the siblings.
@@ -114,15 +117,14 @@ namespace BaseTris
                         {
                             var MeasureSize = g.MeasureString(castToolItem.Text, castToolItem.Font);
                             if (CachedLargestTextSize == null)
-                                CachedLargestTextSize = new Size((int)MeasureSize.Width, (int)MeasureSize.Height);
+                                CachedLargestTextSize = new Size((int) MeasureSize.Width, (int) MeasureSize.Height);
                             else
                             {
                                 if (CachedLargestTextSize.Value.Width < MeasureSize.Width)
-                                    CachedLargestTextSize = new Size((int)MeasureSize.Width, CachedLargestTextSize.Value.Height);
+                                    CachedLargestTextSize = new Size((int) MeasureSize.Width, CachedLargestTextSize.Value.Height);
                                 if (CachedLargestTextSize.Value.Height < MeasureSize.Height)
-                                    CachedLargestTextSize = new Size(CachedLargestTextSize.Value.Width, (int)MeasureSize.Height);
+                                    CachedLargestTextSize = new Size(CachedLargestTextSize.Value.Width, (int) MeasureSize.Height);
                             }
-
                         }
                     }
                 }
@@ -143,6 +145,7 @@ namespace BaseTris
             {
                 e.Graphics.FillRectangle(DarkBrush, useBounds);
             }
+
             Brush useBrush = null;
 
             if (e.Item.Selected)
@@ -156,18 +159,18 @@ namespace BaseTris
                 e.Graphics.FillRectangle(DarkBrush, useBounds);
             }
             else if ((
-                e.Item.BackColor.R != SystemColors.Menu.R ||
-                e.Item.BackColor.G != SystemColors.Menu.G ||
-                e.Item.BackColor.B != SystemColors.Menu.B)
-                )
+                    e.Item.BackColor.R != SystemColors.Menu.R ||
+                    e.Item.BackColor.G != SystemColors.Menu.G ||
+                    e.Item.BackColor.B != SystemColors.Menu.B)
+            )
             {
                 e.Graphics.SetClip(useBounds);
                 e.Graphics.Clear(e.Item.BackColor);
 
 
-
                 //e.Graphics.FillRectangle(new SolidBrush(e.Item.BackColor),useBounds);
             }
+
             if (useBrush != null) e.Graphics.FillRectangle(useBrush, useBounds);
 
             if (e.Item.Selected) useBrush.Dispose();
@@ -179,8 +182,8 @@ namespace BaseTris
             e.Graphics.CompositingQuality = CompositingQuality.AssumeLinear;
             Color originalColor = e.TextColor;
             if (e.Item.ForeColor.R == SystemColors.MenuText.R &&
-               e.Item.ForeColor.G == SystemColors.MenuText.G &&
-               e.Item.ForeColor.B == SystemColors.MenuText.B)
+                e.Item.ForeColor.G == SystemColors.MenuText.G &&
+                e.Item.ForeColor.B == SystemColors.MenuText.B)
 
                 e.TextColor = e.Item.Selected ? e.TextColor : Color.LightGray;
             if (!e.Item.Enabled)
@@ -196,6 +199,7 @@ namespace BaseTris
             {
                 base.OnRenderItemText(e);
             }
+
             e.TextColor = originalColor;
         }
 
@@ -211,7 +215,6 @@ namespace BaseTris
 
                     //e.Graphics.DrawString("b",new FontFamily("Marlett"),useBounds.Height,FontStyle.Bold),  GraphicsUnit.Pixel);
                     e.Graphics.DrawString("b", new Font(new FontFamily("Marlett"), useBounds.Height, FontStyle.Bold, GraphicsUnit.Pixel), new SolidBrush(Color.White), 0, 0);
-
                 }
             }
         }
@@ -225,6 +228,7 @@ namespace BaseTris
                 BlurRegion = 2,
                 TransitionMaximized = 4
             }
+
             internal enum WindowCompositionAttribute
             {
                 WCA_ACCENT_POLICY = 19
@@ -287,11 +291,12 @@ namespace BaseTris
             }
 
 
-
             [DllImport("user32.dll")]
             private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+
             [DllImport("user32.dll")]
             private static extern int SetLayeredWindowAttributes(IntPtr hwnd, int crKey, byte bAlpha, int dwFlags);
+
             private const int LWA_ALPHA = 0x2;
             private const int LWA_COLORKEY = 0x1;
             private const int WS_EX_LAYERED = 0x80000;

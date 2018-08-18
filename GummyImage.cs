@@ -7,7 +7,7 @@ namespace BaseTris
 {
     internal class GummyImage
     {
-        public static Image GetGummyImage(Color usecolor,Color useInnerColor, Size RectDrawSize)
+        public static Image GetGummyImage(Color usecolor, Color useInnerColor, Size RectDrawSize)
         {
             Bitmap DrawGummy = new Bitmap(RectDrawSize.Width, RectDrawSize.Height);
             using (Graphics GummyCanvas = Graphics.FromImage(DrawGummy))
@@ -24,14 +24,13 @@ namespace BaseTris
                 ReflectionPath.AddRectangle(ReflectionEllipse);
                 PathGradientBrush ReflectionGradient = new PathGradientBrush(ReflectionPath);
                 ReflectionGradient.CenterColor = usecolor;
-                ReflectionGradient.SurroundColors = new[] { Color.FromArgb(255, Color.Black) };
-                ReflectionGradient.CenterPoint = new PointF((float)(BaseEllipse.Width / 1.5), BaseEllipse.Top - Convert.ToInt16(BaseEllipse.Height * 2));
+                ReflectionGradient.SurroundColors = new[] {Color.FromArgb(255, Color.Black)};
+                ReflectionGradient.CenterPoint = new PointF((float) (BaseEllipse.Width / 1.5), BaseEllipse.Top - Convert.ToInt16(BaseEllipse.Height * 2));
 
                 Blend ReflectionBlend = new Blend(5);
-                ReflectionBlend.Factors = new[] { 0.5f, 1.0f, 1.0f, 1.0f, 1.0f };
-                ReflectionBlend.Positions = new[] { 0.0f, 0.05f, 0.5f, 0.75f, 1.0f };
+                ReflectionBlend.Factors = new[] {0.5f, 1.0f, 1.0f, 1.0f, 1.0f};
+                ReflectionBlend.Positions = new[] {0.0f, 0.05f, 0.5f, 0.75f, 1.0f};
                 ReflectionGradient.Blend = ReflectionBlend;
-
 
 
                 GummyCanvas.FillPath(ReflectionGradient, ReflectionPath);
@@ -44,7 +43,6 @@ namespace BaseTris
                     LinearGradientBrush lgb = new LinearGradientBrush(inset, useInnerColor, Color.LightGray, LinearGradientMode.Horizontal);
 
                     GummyCanvas.FillRectangle(lgb, inset);
-
                 }
 
 
@@ -65,7 +63,6 @@ namespace BaseTris
 
                 Color HighlightColour = Color.White;
                 Color HighlightFade = Color.Transparent;
-
 
 
                 LinearGradientBrush HighlightBrush = new LinearGradientBrush(HighlightEllipse, HighlightColour, HighlightFade, 90);
@@ -93,6 +90,7 @@ namespace BaseTris
 
                 br3.Dispose();
             }
+
             return DrawGummy;
         }
     }

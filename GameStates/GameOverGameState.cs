@@ -20,15 +20,17 @@ namespace BASeTris.GameStates
         private int MaxExtraLines = 7;
         private DateTime CompleteScrollTime = DateTime.MaxValue;
         private DateTime CompleteSummaryTime = DateTime.MaxValue;
+
         private DateTime InitTime;
+
         //if the score is a high score, this will be changed to the position after the game stats are displayed.
         int NewScorePosition = -1;
+
         public GameOverGameState(GameState paused)
         {
             GameOveredState = paused;
             InitTime = DateTime.Now;
             TetrisGame.Soundman.PlaySound("mmdeath");
-
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -42,7 +44,7 @@ namespace BASeTris.GameStates
         }
 
         DateTime LastAdvance = DateTime.MinValue;
-        
+
         public override void GameProc(IStateOwner pOwner)
         {
             if ((DateTime.Now - CompleteSummaryTime).TotalMilliseconds > 500)
@@ -53,12 +55,13 @@ namespace BASeTris.GameStates
                 if (standardstate != null)
                 {
                     var grabposition = standardstate.GetLocalScores().IsEligible(standardstate.GameStats.Score);
-                    if(grabposition > 0)
+                    if (grabposition > 0)
                     {
                         NewScorePosition = grabposition;
                     }
                 }
             }
+
             if (((DateTime.Now - InitTime)).TotalMilliseconds < 1500) return;
             if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)
             {
@@ -77,36 +80,41 @@ namespace BASeTris.GameStates
                     }
                 }
             }
+
             if (CompleteScroll && !CompleteSummary)
             {
-                int calcresult = (int)((DateTime.Now - CompleteScrollTime).TotalMilliseconds) / 750;
+                int calcresult = (int) ((DateTime.Now - CompleteScrollTime).TotalMilliseconds) / 750;
                 if (calcresult > 0)
                 {
-                    if(ShowExtraLines!=calcresult)
+                    if (ShowExtraLines != calcresult)
                     {
                         TetrisGame.Soundman.PlaySound("block_place_2");
                     }
+
                     ShowExtraLines = calcresult;
                 }
+
                 if (ShowExtraLines > MaxExtraLines)
                 {
                     CompleteSummary = true;
                     CompleteSummaryTime = DateTime.Now;
                 }
             }
+
             //gameproc doesn't pass through!
         }
+
         Brush useCoverBrush = null;
+
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-
             if (GameOveredState is StandardTetrisGameState)
             {
                 StandardTetrisGameState standardgame = GameOveredState as StandardTetrisGameState;
-                SizeF BlockSize = new SizeF(Bounds.Width / (float)standardgame.PlayField.ColCount, Bounds.Height / (float)standardgame.PlayField.RowCount);
-                useCoverBrush = new LinearGradientBrush(new Rectangle(0, 0, (int)Bounds.Width, (int)BlockSize.Height), Color.DarkSlateGray, Color.MintCream, LinearGradientMode.Vertical);
+                SizeF BlockSize = new SizeF(Bounds.Width / (float) standardgame.PlayField.ColCount, Bounds.Height / (float) standardgame.PlayField.RowCount);
+                useCoverBrush = new LinearGradientBrush(new Rectangle(0, 0, (int) Bounds.Width, (int) BlockSize.Height), Color.DarkSlateGray, Color.MintCream, LinearGradientMode.Vertical);
                 GameOveredState.DrawProc(pOwner, g, Bounds);
-                g.FillRectangle(useCoverBrush, 0f, 0f, (float)Bounds.Width, (float)BlockSize.Height * CoverBlocks);
+                g.FillRectangle(useCoverBrush, 0f, 0f, (float) Bounds.Width, (float) BlockSize.Height * CoverBlocks);
             }
 
             if (CompleteScroll)
@@ -125,23 +133,25 @@ namespace BASeTris.GameStates
                 for (int i = 0; i < ShowExtraLines; i++)
                 {
                     float XPosition = Bounds.Width * 0.25f;
-                    float YPosition = GameOverPos.Y + ((1+i) * measuremini.Height)+10;
-                    
-                    if(i==0)
+                    float YPosition = GameOverPos.Y + ((1 + i) * measuremini.Height) + 10;
+
+                    if (i == 0)
                     {
                         var measuredmini = g.MeasureString("---Line Clears---", EntryFont);
-                        g.DrawString("---Line Clears---", EntryFont, Brushes.White,Bounds.Width/2-measuredmini.Width/2,GameOverPos.Y+measured.Height);
-                        g.DrawString("---Line Clears---", EntryFont, Brushes.Black, Bounds.Width / 2 - measuredmini.Width / 2-5, GameOverPos.Y + measured.Height-5);
+                        g.DrawString("---Line Clears---", EntryFont, Brushes.White, Bounds.Width / 2 - measuredmini.Width / 2, GameOverPos.Y + measured.Height);
+                        g.DrawString("---Line Clears---", EntryFont, Brushes.Black, Bounds.Width / 2 - measuredmini.Width / 2 - 5, GameOverPos.Y + measured.Height - 5);
                     }
-                    if(i==1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I),new PointF(XPosition,YPosition),g,Bounds, EntryFont);
-                    if(i==2) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_O), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
-                    if(i==3) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_T), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
-                    if(i==4) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_J), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
-                    if(i==5) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_L), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
-                    if(i==6) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_S), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
-                    if(i==7) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_Z), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+
+                    if (i == 1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if (i == 2) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_O), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if (i == 3) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_T), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if (i == 4) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_J), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if (i == 5) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_L), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if (i == 6) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_S), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
+                    if (i == 7) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_Z), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
                 }
-                if(NewScorePosition> -1)
+
+                if (NewScorePosition > -1)
                 {
                     //draw the awarded score position as well.
                     float XPosition = Bounds.Width * .25f;
@@ -152,46 +162,38 @@ namespace BASeTris.GameStates
 
                     g.DrawString(ScoreText, GameOverFont, Brushes.White, Bounds.Width / 2 - MeasuredScoreText.Width / 2, YPosition + measured.Height);
                     g.DrawString(ScoreText, GameOverFont, Brushes.Black, Bounds.Width / 2 - MeasuredScoreText.Width / 2 - 5, YPosition + measured.Height - 5);
-
                 }
             }
         }
-
-
-
-
-
 
 
         private void DrawTetrominoStat(Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)
         {
             StandardTetrisGameState standardgame = GameOveredState as StandardTetrisGameState;
             Image I_Tet = standardgame.GetTetronimoImage(TetronimoType);
-            Target.DrawImage(I_Tet, new PointF(BasePosition.X - (float)(I_Tet.Width) / 2, BasePosition.Y));
-            PointF TextPos = new PointF(BasePosition.X + Bounds.Width / 2, BasePosition.Y-10);
+            Target.DrawImage(I_Tet, new PointF(BasePosition.X - (float) (I_Tet.Width) / 2, BasePosition.Y));
+            PointF TextPos = new PointF(BasePosition.X + Bounds.Width / 2, BasePosition.Y - 10);
             Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.White, 5 + TextPos.X, 5 + TextPos.Y);
             Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.Black, TextPos.X, TextPos.Y);
         }
+
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-            if(g==GameKeys.GameKey_RotateCW)
+            if (g == GameKeys.GameKey_RotateCW)
             {
                 if (NewScorePosition > -1)
                 {
-                    if(GameOveredState is StandardTetrisGameState)
+                    if (GameOveredState is StandardTetrisGameState)
                     {
-                        EnterHighScoreState ehs = new EnterHighScoreState(GameOveredState,pOwner,
-                            ((StandardTetrisGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((StandardTetrisGameState)GameOveredState).GameStats))
-                            , ((StandardTetrisGameState)GameOveredState).GameStats);
+                        EnterHighScoreState ehs = new EnterHighScoreState
+                        (GameOveredState, pOwner,
+                            ((StandardTetrisGameState) GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((StandardTetrisGameState) GameOveredState).GameStats))
+                            , ((StandardTetrisGameState) GameOveredState).GameStats);
                         pOwner.CurrentState = ehs;
                         TetrisGame.Soundman.PlayMusic("highscoreentry");
                     }
-                    
                 }
             }
-            
         }
-
-    } 
+    }
 }
-

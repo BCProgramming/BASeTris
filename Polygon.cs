@@ -12,7 +12,6 @@ namespace BASeTris
     [Serializable]
     public class Polygon : ICloneable, ISerializable
     {
-
         private List<Vector> points = new List<Vector>();
         private List<Vector> edges = new List<Vector>();
 
@@ -35,9 +34,6 @@ namespace BASeTris
          * */
 
 
-
-
-
         /*You need to determine which points lie inside. 
          * After removing these points, you can insert one set of "outside" points into the other. 
          * Your insertion points (e.g. where you have the arrow in the picture on the right) 
@@ -47,31 +43,27 @@ namespace BASeTris
         public bool Contains(Vector Location)
         {
             return PointInPoly(Location);
-
-
         }
+
         public bool Contains(Polygon Otherpoly)
         {
-
-
             return Otherpoly.Points.All(this.Contains);
-
         }
+
         //returns an array representing the distances of each point from the center point of this polygon.
         public float[] Radii()
         {
             PointF CenterP = Center;
             return (from m in points select TrigFunctions.Distance(CenterP, m)).ToArray();
-
-
         }
+
         public float AverageRadius()
         {
             return Radii().Average();
         }
+
         public bool PointInPoly(PointF checkpoint)
         {
-
             int i, j;
             bool c = false;
             //iterate through all the points...
@@ -81,17 +73,14 @@ namespace BASeTris
             for (i = 0, j = npol - 1; i < npol; j = i++)
             {
                 if ((((points[i].Y <= Y) && (Y < points[j].Y)) ||
-                    ((points[j].Y <= Y) && (Y < points[i].Y))) &&
-                (X < (points[j].X - points[i].X) * (Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X))
+                     ((points[j].Y <= Y) && (Y < points[i].Y))) &&
+                    (X < (points[j].X - points[i].X) * (Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X))
                     c = !c;
-
-
-
             }
+
             return c;
-
-
         }
+
         /*
         public Polygon Union(Polygon otherunion)
         {
@@ -103,73 +92,62 @@ namespace BASeTris
 
 
         }*/
-        public Polygon(IEnumerable<PointF> points) : this(from p in points select (Vector)p)
+        public Polygon(IEnumerable<PointF> points) : this(from p in points select (Vector) p)
         {
-
         }
+
         public Polygon(params PointF[] polypoints)
         {
-
-
             foreach (PointF looppoint in polypoints)
             {
                 points.Add(new Vector(looppoint.X, looppoint.Y));
-
-
             }
 
             BuildEdges();
-
         }
+
         public Polygon(SerializationInfo info, StreamingContext context)
         {
-
-            points = (List<Vector>)info.GetValue("points", typeof(List<Vector>));
-
+            points = (List<Vector>) info.GetValue("points", typeof(List<Vector>));
         }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-
             info.AddValue("points", points);
-
         }
+
         public RectangleF GetBounds()
         {
             PointF TopLeft = new PointF(Points.Min((t) => t.X), Points.Min((t) => t.Y));
             PointF BottomRight = new PointF(Points.Max((t) => t.X), Points.Max((t) => t.Y));
             return new RectangleF(TopLeft, new SizeF(BottomRight.X - TopLeft.X, BottomRight.Y - TopLeft.Y));
-
-
-
-
-
         }
+
         public bool IntersectsWith(Polygon otherpoly)
         {
             return (GeometryHelper.PolygonCollision(this, otherpoly, new Vector(0, 0)).Intersect);
-
-
         }
+
         public Polygon(RectangleF rf)
         {
-
             points.Add(new Vector(rf.Left, rf.Top));
             points.Add(new Vector(rf.Right, rf.Top));
             points.Add(new Vector(rf.Right, rf.Bottom));
             points.Add(new Vector(rf.Left, rf.Bottom));
             BuildEdges();
-
         }
+
         public Polygon(Vector CenterSpot, int NumSides, double Radius, double startingAngle)
         {
             double currentangle = startingAngle;
-            double anglediff = (Math.PI * 2) / (float)NumSides;
+            double anglediff = (Math.PI * 2) / (float) NumSides;
 
 
             for (int i = 0; i < NumSides; i++)
             {
-                Vector newpoint = new Vector((float)(Math.Sin(currentangle) * Radius + CenterSpot.X),
-                                            (float)(Math.Cos(currentangle) * Radius + CenterSpot.Y));
+                Vector newpoint = new Vector
+                ((float) (Math.Sin(currentangle) * Radius + CenterSpot.X),
+                    (float) (Math.Cos(currentangle) * Radius + CenterSpot.Y));
 
                 Points.Add(newpoint);
                 currentangle += anglediff;
@@ -177,22 +155,18 @@ namespace BASeTris
 
 
             BuildEdges();
-
         }
+
         public Polygon(List<Vector> frompoints)
         {
-
             points = frompoints;
             BuildEdges();
-
-
         }
+
         public Polygon(IEnumerable<Vector> frompoints) : this(frompoints.ToList())
         {
-
-
-
         }
+
         public void BuildEdges()
         {
             Vector p1;
@@ -209,6 +183,7 @@ namespace BASeTris
                 {
                     p2 = points[i + 1];
                 }
+
                 edges.Add(p2 - p1);
             }
         }
@@ -222,10 +197,12 @@ namespace BASeTris
         {
             get { return points; }
         }
+
         public List<PointF> getPoints()
         {
             return new List<PointF>(from pp in Points select new PointF(pp.X, pp.Y));
         }
+
         public Vector Center
         {
             get
@@ -238,7 +215,7 @@ namespace BASeTris
                     totalY += points[i].Y;
                 }
 
-                return new Vector(totalX / (float)points.Count, totalY / (float)points.Count);
+                return new Vector(totalX / (float) points.Count, totalY / (float) points.Count);
             }
         }
 
@@ -270,7 +247,6 @@ namespace BASeTris
         }
 
 
-
         //splits this polygon into triangular sectors, each of which is returned as a new polygon in the return array.
 
         public Polygon[] Split()
@@ -278,61 +254,56 @@ namespace BASeTris
             Polygon[] returnpoly = new Polygon[Points.Count];
             for (int i = 0; i < Points.Count - 1; i++)
             {
-
                 //First, second, Center will be the polygon order.
-                Polygon pg = new Polygon(new PointF[] { Points[i], Points[i + 1], Center });
+                Polygon pg = new Polygon(new PointF[] {Points[i], Points[i + 1], Center});
 
                 returnpoly[i] = pg;
             }
 
             // add last poly. Last-First-Center
-            returnpoly[returnpoly.Length - 1] = new Polygon(new PointF[] { Points.Last(), Points.First(), Center });
+            returnpoly[returnpoly.Length - 1] = new Polygon(new PointF[] {Points.Last(), Points.First(), Center});
 
 
             return returnpoly;
-
         }
+
         public static Polygon operator +(Polygon pg, Vector Addthis)
         {
-            Polygon pclone = (Polygon)pg.Clone();
+            Polygon pclone = (Polygon) pg.Clone();
             for (int i = 0; i < pclone.Points.Count; i++)
             {
-
                 pclone.Points[i] += Addthis;
             }
 
 
             return pclone;
         }
+
         public static Polygon operator -(Polygon pg, Vector Addthis)
         {
-
             return pg + (new Vector(-Addthis.X, -Addthis.Y));
-
         }
+
         public static implicit operator List<Vector>(Polygon pg)
         {
-
             return pg.Points;
         }
-        public static implicit operator Vector[] (Polygon pg)
-        {
 
+        public static implicit operator Vector[](Polygon pg)
+        {
             return pg.Points.ToArray();
-
         }
-        public static implicit operator PointF[] (Polygon pg)
+
+        public static implicit operator PointF[](Polygon pg)
         {
-
-            return (from p in pg.Points select (PointF)p).ToArray();
-
+            return (from p in pg.Points select (PointF) p).ToArray();
         }
+
         public static implicit operator Polygon(RectangleF fromrect)
         {
-
             return new Polygon(fromrect);
-
         }
+
         #region ICloneable Members
 
         public object Clone()
@@ -341,6 +312,7 @@ namespace BASeTris
         }
 
         #endregion
+
         public double Area()
         {
             double accum = 0;
@@ -356,21 +328,17 @@ namespace BASeTris
                 //width is distance between the two points.
                 double W = TrigFunctions.Distance(firstpoint, secondpoint);
                 accum += (W * H) / 2;
-
             }
 
-            return (float)accum;
-
+            return (float) accum;
         }
 
 
         private PointF rescale(PointF center, PointF target, float scale)
         {
-            return new PointF((target.X - center.X) * scale + center.X,
+            return new PointF
+            ((target.X - center.X) * scale + center.X,
                 (target.Y - center.Y) * scale + center.Y);
-
-
-
         }
 
         public Polygon Scale(float scaleamount)
@@ -385,7 +353,6 @@ namespace BASeTris
     [Serializable]
     public struct Vector : ICloneable, ISerializable
     {
-
         public float X;
         public float Y;
         public static readonly Vector Empty = new Vector(0, 0);
@@ -398,15 +365,13 @@ namespace BASeTris
 
         static public Vector FromPoint(int x, int y)
         {
-            return new Vector((float)x, (float)y);
+            return new Vector((float) x, (float) y);
         }
 
         public void Offset(Vector useoffset)
         {
-
             X += useoffset.X;
             Y += useoffset.Y;
-
         }
 
         public Vector(float x, float y)
@@ -414,31 +379,29 @@ namespace BASeTris
             this.X = x;
             this.Y = y;
         }
+
         public Vector(SerializationInfo info, StreamingContext context)
         {
             X = info.GetSingle("X");
             Y = info.GetSingle("Y");
-
         }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("X", X);
             info.AddValue("Y", Y);
-
         }
+
         public float Magnitude
         {
-            get { return (float)Math.Sqrt(X * X + Y * Y); }
+            get { return (float) Math.Sqrt(X * X + Y * Y); }
         }
+
         public Vector Rotate90()
         {
-
-
             return new Vector(Y, -X);
-
-
-
         }
+
         public void Normalize()
         {
             float magnitude = Magnitude;
@@ -460,29 +423,29 @@ namespace BASeTris
 
         public float DistanceTo(Vector vector)
         {
-            return (float)Math.Sqrt(Math.Pow(vector.X - this.X, 2) + Math.Pow(vector.Y - this.Y, 2));
+            return (float) Math.Sqrt(Math.Pow(vector.X - this.X, 2) + Math.Pow(vector.Y - this.Y, 2));
         }
 
         public static implicit operator Point(Vector p)
         {
-            return new Point((int)p.X, (int)p.Y);
+            return new Point((int) p.X, (int) p.Y);
         }
 
         public static implicit operator PointF(Vector p)
         {
             return new PointF(p.X, p.Y);
         }
+
         public static implicit operator Vector(PointF p)
         {
             return new Vector(p.X, p.Y);
-
         }
+
         public static implicit operator Vector(Point p)
         {
-
             return new Vector(p.X, p.Y);
-
         }
+
         public static Vector operator +(Vector a, Vector b)
         {
             return new Vector(a.X + b.X, a.Y + b.Y);
@@ -510,12 +473,12 @@ namespace BASeTris
 
         public static Vector operator *(Vector a, double b)
         {
-            return new Vector((float)(a.X * b), (float)(a.Y * b));
+            return new Vector((float) (a.X * b), (float) (a.Y * b));
         }
 
         public override bool Equals(object obj)
         {
-            Vector v = (Vector)obj;
+            Vector v = (Vector) obj;
 
             return X == v.X && Y == v.Y;
         }
@@ -549,14 +512,13 @@ namespace BASeTris
         {
             if (rounded)
             {
-                return (int)Math.Round(X) + ", " + (int)Math.Round(Y);
+                return (int) Math.Round(X) + ", " + (int) Math.Round(Y);
             }
             else
             {
                 return ToString();
             }
         }
-
 
 
         #region ICloneable Members
@@ -570,11 +532,9 @@ namespace BASeTris
     }
 
 
-
     class GeometryHelper
     {
         // Structure that stores the results of the PolygonCollision function
-
 
 
         // Calculate the projection of a polygon on an axis
@@ -591,16 +551,14 @@ namespace BASeTris
         }
 
 
-
-
         // Check if polygon A is going to collide with polygon B for the given velocity
         public static PolygonCollisionResult PolygonCollision(Polygon polygonA, Polygon polygonB, Vector velocity)
         {
             if (polygonA == null || polygonB == null)
             {
                 Debug.Print("balls");
-
             }
+
             PolygonCollisionResult result = new PolygonCollisionResult();
             result.Intersect = true;
             result.WillIntersect = true;
@@ -630,7 +588,10 @@ namespace BASeTris
                 axis.Normalize();
 
                 // Find the projection of the polygon on the current axis
-                float minA = 0; float minB = 0; float maxA = 0; float maxB = 0;
+                float minA = 0;
+                float minB = 0;
+                float maxA = 0;
+                float maxB = 0;
                 ProjectPolygon(axis, polygonA, ref minA, ref maxA);
                 ProjectPolygon(axis, polygonB, ref minB, ref maxB);
 
@@ -694,6 +655,7 @@ namespace BASeTris
                 return minA - maxB;
             }
         }
+
         public static PointF PercentLine(PointF PointA, PointF PointB, float Percentage)
         {
             //get the point that is Percentage between PointA and PointB.
@@ -702,10 +664,8 @@ namespace BASeTris
             PointF diff = new PointF(Percentage * (PointB.X - PointA.X), Percentage * (PointB.Y - PointA.Y));
             //return PointA + diff
             return new PointF(PointA.X + diff.X, PointA.Y + diff.Y);
-
-
-
         }
+
         // Calculate the projection of a polygon on an axis and returns it as a [min, max] interval
         public static void ProjectPolygon(Vector axis, Polygon polygon, ref float min, ref float max)
         {
@@ -729,7 +689,5 @@ namespace BASeTris
                 }
             }
         }
-
-
     }
 }

@@ -16,15 +16,15 @@ namespace BASeTris.Choosers.AIChoosers
     //This utilizes the routines found in the TetrisAI routines. How convenient- I already wrote those!
     public class MeanChooser : BaseAIChooser
     {
-        
         public MeanChooser(StandardTetrisGameState _StandardState, Func<BlockGroup>[] pAvailable) : base(_StandardState, pAvailable)
         {
         }
+
         //when we evaluate the next group, we evaluate it based on it giving the worst results. This StoredBoardState
         //will represent the best outcome from that piece- we will use that to evaluate the next piece, which will store it's best possibility here, and so on.
         //so, we basically give the worst possible options, and base our next choice on that worst possible option being used in the most effective way.
         private StoredBoardState BestCaseScenario = null;
-        
+
 
         public override BlockGroup PerformGetNext()
         {
@@ -35,53 +35,54 @@ namespace BASeTris.Choosers.AIChoosers
             TetrisBlock[][] CurrentState = BestCaseScenario != null ? BestCaseScenario.State : _State.PlayField.Contents;
             //alrighty. Now, we take those available groups and get available board states for each one.
             Dictionary<BlockGroup, IEnumerable<StoredBoardState>> StateEvaluation = new Dictionary<BlockGroup, IEnumerable<StoredBoardState>>();
-            
-            foreach(BlockGroup b in availablegroups)
-            {
 
-                StateEvaluation.Add(b,TetrisAI.GetPossibleResults(CurrentState,b));
+            foreach (BlockGroup b in availablegroups)
+            {
+                StateEvaluation.Add(b, TetrisAI.GetPossibleResults(CurrentState, b));
             }
-            
+
             Dictionary<BlockGroup, double> FinalScores = new Dictionary<BlockGroup, double>();
             Dictionary<BlockGroup, StoredBoardState> BestStates = new Dictionary<BlockGroup, StoredBoardState>();
             Dictionary<BlockGroup, StoredBoardState> WorstStates = new Dictionary<BlockGroup, StoredBoardState>();
             //OK, now we need to evaluate the possibilities returned by each. Basically turn them into an array of scores and create the appropriate data in the Dictionaries.
-            foreach(var kvp in StateEvaluation)
+            foreach (var kvp in StateEvaluation)
             {
-
                 List<double> AllScores = new List<double>();
                 double Maximum = double.MinValue;
                 double Minimum = double.MaxValue;
                 StoredBoardState CurrentMaximum = null;
                 StoredBoardState CurrentMinimum = null;
-                foreach(var iterate in kvp.Value)
+                foreach (var iterate in kvp.Value)
                 {
                     double GrabScore = iterate.GetScore();
-                    if(GrabScore > Maximum)
+                    if (GrabScore > Maximum)
                     {
                         Maximum = GrabScore;
                         CurrentMaximum = iterate;
                     }
-                    if(GrabScore < Minimum)
+
+                    if (GrabScore < Minimum)
                     {
                         Minimum = GrabScore;
                         CurrentMinimum = iterate;
                     }
+
                     AllScores.Add(GrabScore);
                 }
+
                 if (AllScores.Count > 0)
                 {
                     BestStates[kvp.Key] = CurrentMaximum;
                     WorstStates[kvp.Key] = CurrentMinimum;
                     var Average = AllScores.Average();
-                    FinalScores.Add(kvp.Key,Maximum);
+                    FinalScores.Add(kvp.Key, Maximum);
                     //FinalScores.Add(kvp.Key, new double[] { Average, Maximum, Minimum }.Average());
                 }
             }
 
             var ordered = FinalScores.OrderBy((o) => o.Value).ToList();
             //select the "winning" FinalScore.
-            var crappiest = ordered.FirstOrDefault();  //the lowest value. This is the block with the lowest "maximum" in terms of positive aspects.
+            var crappiest = ordered.FirstOrDefault(); //the lowest value. This is the block with the lowest "maximum" in terms of positive aspects.
             if (crappiest.Key == null)
             {
                 BestCaseScenario = null;
