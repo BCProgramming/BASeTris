@@ -24,6 +24,7 @@ namespace BASeTris.TetrisBlocks
 
         public override void DrawBlock(TetrisBlockDrawParameters parameters)
         {
+            base.DrawBlock(parameters);
             if (_RotationImages == null) NoImage();
             /*if (parameters.OverrideBrush != null)
             {

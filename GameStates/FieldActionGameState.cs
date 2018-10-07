@@ -63,7 +63,8 @@ namespace BASeTris.GameStates
             LineClear_Outside_In
         }
 
-        private LineClearStyle _ClearStyle = LineClearStyle.LineClear_Middle_Out;
+        protected LineClearStyle _ClearStyle = LineClearStyle.LineClear_Middle_Out;
+        public FieldBlockClearAction ClearAction { get; set; } = new FieldBlockClearShrinkAction(new TimeSpan(0,0,0,0,100));
 
         public LineClearStyle ClearStyle
         {
@@ -71,7 +72,7 @@ namespace BASeTris.GameStates
             set { _ClearStyle = value; }
         }
 
-        private int[] RowNumbers = null;
+        protected int[] RowNumbers = null;
 
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
         protected bool FlashState = false;
@@ -82,8 +83,8 @@ namespace BASeTris.GameStates
             RowNumbers = ClearRows;
         }
 
-        int MSBlockClearTime = 20; //number of ms between blocks being removed/cleared.
-        int CurrentClearIndex = 0;
+        protected int MSBlockClearTime = 20; //number of ms between blocks being removed/cleared.
+        protected int CurrentClearIndex = 0;
         DateTime StartOperation = DateTime.MaxValue;
         DateTime LastOperation = DateTime.MaxValue;
 
@@ -94,7 +95,18 @@ namespace BASeTris.GameStates
             {
                 StartOperation = LastOperation = DateTime.Now;
             }
-
+            if(ClearActivities.Count > 0)
+            {
+                DateTime useNowTime = DateTime.Now;
+                foreach(var ClearActivity in ClearActivities)
+                {
+                    var elapsed = useNowTime - ClearActivity.StartClearTime;
+                    foreach(var block in ClearActivity.Blocks)
+                    {
+                        ClearActivity.ClearAction.ProcessBlock(pOwner,block,elapsed);
+                    }
+                }
+            }
             //for now we clear horizontally across...
             if ((DateTime.Now - LastOperation).TotalMilliseconds > MSBlockClearTime)
             {
@@ -103,6 +115,13 @@ namespace BASeTris.GameStates
                 if (RowNumbers.Length >= 4)
                 {
                     FlashState = !FlashState;
+                }
+
+                if(ClearActivities.Count > 0)
+                {
+                    DateTime NowTime = DateTime.Now;
+                    //if there are entries in ClearActivities, we want to make sure those are cleared as well. This is the case if the cleartime has elapsed for each.
+                    ClearResult |= ClearActivities.All((kvp) => { return NowTime - kvp.StartClearTime > kvp.ClearAction.ClearTime; });
                 }
 
                 LastOperation = DateTime.Now;
@@ -195,11 +214,21 @@ namespace BASeTris.GameStates
             return true;
         }
 
-        private void PerformClearAct(TetrisBlock[] FullRow, int index)
+        protected void PerformClearAct(TetrisBlock[] FullRow, int index)
         {
-            FullRow[index] = null;
+            if(ClearAction==null)
+                FullRow[index] = null;
+            else
+            {
+                //if we have a clear action, then we want to create a new instance and set it up here, then add it to the ClearActivities Dictionary.
+                //Remember- this is separate from our line clear style, and is used to animate each block "clearing" (shrinking away, fading, etc)
+                FieldBlockClearTask fbct = new FieldBlockClearTask(ClearAction, new TetrisBlock[] { FullRow[index] });
+                ClearActivities.Add(fbct);
+            }
         }
-
+        List<FieldBlockClearTask> ClearActivities = new List<FieldBlockClearTask>();
+        
+            
         SolidBrush FlashBrush = new SolidBrush(Color.FromArgb(128, Color.White));
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -208,6 +237,21 @@ namespace BASeTris.GameStates
             {
                 g.FillRectangle(FlashBrush, Bounds);
             }
+        }
+    }
+
+    public class FieldBlockClearTask
+    {
+        //used by main line clear state when needed to track progress of each individual block being cleared.
+        //since the FieldBlockClearAction is stateless (or at least tries to be) it has no block references, so we keep track of those here
+        public DateTime StartClearTime;
+        public FieldBlockClearAction ClearAction;
+        public IEnumerable<TetrisBlock> Blocks;
+        public FieldBlockClearTask(FieldBlockClearAction pClearAction,IEnumerable<TetrisBlock> pBlocks)
+        {
+            ClearAction = pClearAction;
+            Blocks = pBlocks;
+            StartClearTime = DateTime.Now;
         }
     }
 

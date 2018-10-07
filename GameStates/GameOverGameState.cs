@@ -133,13 +133,12 @@ namespace BASeTris.GameStates
                 for (int i = 0; i < ShowExtraLines; i++)
                 {
                     float XPosition = Bounds.Width * 0.25f;
-                    float YPosition = GameOverPos.Y + ((1 + i) * measuremini.Height) + 10;
+                    float YPosition = GameOverPos.Y + ((1 + i) * measuremini.Height) + measuremini.Height;
 
                     if (i == 0)
                     {
                         var measuredmini = g.MeasureString("---Line Clears---", EntryFont);
-                        g.DrawString("---Line Clears---", EntryFont, Brushes.White, Bounds.Width / 2 - measuredmini.Width / 2, GameOverPos.Y + measured.Height);
-                        g.DrawString("---Line Clears---", EntryFont, Brushes.Black, Bounds.Width / 2 - measuredmini.Width / 2 - 5, GameOverPos.Y + measured.Height - 5);
+                        TetrisGame.DrawText(g,EntryFont, "---Line Clears---",Brushes.Black,Brushes.White, Bounds.Width / 2 - measuredmini.Width / 2, GameOverPos.Y + measured.Height);
                     }
 
                     if (i == 1) DrawTetrominoStat(typeof(Tetrominoes.Tetromino_I), new PointF(XPosition, YPosition), g, Bounds, EntryFont);
@@ -155,17 +154,17 @@ namespace BASeTris.GameStates
                 {
                     //draw the awarded score position as well.
                     float XPosition = Bounds.Width * .25f;
-                    float YPosition = GameOverPos.Y + ((1 + MaxExtraLines) * measured.Height) + 10;
+                    float YPosition = Bounds.Height - measured.Height - 10;
                     String ScoreText = "New High Score!";
                     var MeasuredScoreText = g.MeasureString(ScoreText, GameOverFont);
-
-
-                    g.DrawString(ScoreText, GameOverFont, Brushes.White, Bounds.Width / 2 - MeasuredScoreText.Width / 2, YPosition + measured.Height);
-                    g.DrawString(ScoreText, GameOverFont, Brushes.Black, Bounds.Width / 2 - MeasuredScoreText.Width / 2 - 5, YPosition + measured.Height - 5);
+                    using (Brush RainbowBrush = new SolidBrush(TetrisGame.GetRainbowColor(Color.Lime, 0.1d)))
+                    {
+                        TetrisGame.DrawText(g, GameOverFont, ScoreText, Brushes.Black, RainbowBrush, Bounds.Width / 2 - MeasuredScoreText.Width / 2, YPosition + measuremini.Height);
+                    }
                 }
             }
         }
-
+        
 
         private void DrawTetrominoStat(Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)
         {

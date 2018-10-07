@@ -82,6 +82,28 @@ namespace BASeTris
         {
             return RetroFont;
         }
+        public static Color GetRainbowColor(Color Source,double Multiplier)
+        {
+            long usetick = DateTime.Now.Ticks;
+            double usepercent = 240/((double)(usetick%240)*Multiplier);
+            return GetRainbowColor(Source, (float)usepercent);
+        }
+        public static Color GetRainbowColor(Color Source,float PercentOffset)
+        {
+            int useRotation = (int)(PercentOffset * 240) % 240;
+            return HSLColor.RotateHue(Source, useRotation);
+            
+        }
+        public static void DrawText(Graphics g, Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition)
+        {
+            DrawText(g,UseFont,sText,ForegroundBrush,ShadowBrush,XPosition,YPosition,5,5);
+        }
+        public static void DrawText(Graphics g,Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition,float ShadowXOffset,float ShadowYOffset)
+        {
+            
+            g.DrawString(sText, UseFont, ShadowBrush, XPosition+ShadowXOffset,YPosition+ShadowYOffset);
+            g.DrawString(sText, UseFont, ForegroundBrush, XPosition,YPosition);
+        }
 
         public static void InitState()
         {

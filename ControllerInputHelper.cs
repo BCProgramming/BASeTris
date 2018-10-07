@@ -9,6 +9,9 @@ namespace BASeTris
 {
     public class ControllerInputState
     {
+        //tracks button state. Basically can be used to detect rising and falling edges of button presses.
+        public EventHandler<ControllerButtonEventArgs> ButtonPressed;
+        public EventHandler<ControllerButtonEventArgs> ButtonReleased;
         public X.Gamepad Pad { get; set; } = null;
 
         private HashSet<X.Gamepad.GamepadButtons> PressedButtons = new HashSet<X.Gamepad.GamepadButtons>();
@@ -18,7 +21,14 @@ namespace BASeTris
         {
             Pad = pPad;
         }
-
+        /// <summary>
+        /// returns the set of currently pressed buttons as a HashSet.
+        /// </summary>
+        /// <returns></returns>
+        public ISet<X.Gamepad.GamepadButtons> GetPressedButtons()
+        {
+            return new HashSet<X.Gamepad.GamepadButtons>(PressedButtons);
+        }
         public void CheckState()
         {
             if (Pad.Update())
@@ -40,18 +50,11 @@ namespace BASeTris
                 }
             }
         }
-
         private bool GetButtonState(X.Gamepad pad, X.Gamepad.GamepadButtons button)
         {
             return (((short) pad.Buttons & (short) button) == (short) button);
         }
-
-        //tracks button state. Basically can be used to detect rising and falling edges of button presses.
-        public EventHandler<ControllerButtonEventArgs> ButtonPressed;
-        public EventHandler<ControllerButtonEventArgs> ButtonReleased;
-
-
-        public class ControllerButtonEventArgs : EventArgs
+       public class ControllerButtonEventArgs : EventArgs
         {
             public X.Gamepad.GamepadButtons button;
 

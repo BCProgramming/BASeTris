@@ -15,6 +15,7 @@ namespace BASeTris.TetrisBlocks
 
     public abstract class TetrisBlock
     {
+        public Action<TetrisBlockDrawParameters> BeforeDraw = null;
         public BlockGroup Owner { get; set; }
 
         public virtual bool IsAnimated
@@ -50,7 +51,10 @@ namespace BASeTris.TetrisBlocks
         }
 
 
-        public abstract void DrawBlock(TetrisBlockDrawParameters parameters);
+        public virtual void DrawBlock(TetrisBlockDrawParameters parameters)
+        {
+            BeforeDraw?.Invoke(parameters);
+        }
 
         public virtual void AnimateFrame()
         {
