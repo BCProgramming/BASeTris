@@ -28,12 +28,8 @@ namespace BASeTris.GameStates
             Owner = pOwner;
             AvailableChars = PossibleChars;
             NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));
-            ImageAttributes useBGAttributes = new ImageAttributes();
-            useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.4f));
-            var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
-            double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            sib.Movement = new PointF((float) xpoint, (float) ypoint);
+            var sib = StandardImageBackgroundDraw.GetStandardBackgroundDrawer();
+           
             _BG = sib;
         }
 

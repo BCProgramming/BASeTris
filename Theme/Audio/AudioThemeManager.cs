@@ -30,7 +30,7 @@ namespace BASeTris.Theme.Audio
             Object result = grabprop.GetGetMethod().Invoke(CurrentTheme, new object[] { });
             AudioThemeElement CastResult = result as AudioThemeElement;
             if (CastResult.AudioKeys.Length == 1) return CastResult.AudioKeys[0];
-            if (CastResult.ChooseStatic)
+            if (CastResult.ChooseFlag==AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static)
             {
                 if (!CachedStatics.ContainsKey(CastResult))
                 {
@@ -50,6 +50,11 @@ namespace BASeTris.Theme.Audio
 
         public String BlockGroupRotate => GetThemeProperty(nameof(this.BlockGroupRotate));
 
+        public String BlockStopped => GetThemeProperty(nameof(this.BlockStopped));
+
+        public String MenuItemSelected => GetThemeProperty(nameof(this.MenuItemSelected));
+
+        public String MenuItemActivated =>GetThemeProperty(nameof(this.MenuItemActivated));
         public String ClearLine => GetThemeProperty(nameof(this.ClearLine));
         public String ClearTetris => GetThemeProperty(nameof(this.ClearTetris));
 

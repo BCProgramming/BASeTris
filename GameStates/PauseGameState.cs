@@ -73,7 +73,7 @@ namespace BASeTris.GameStates
 
             g.ResetTransform();
             PointF DrawPos = new PointF(Bounds.Width / 2 - Measured.Width / 2, Bounds.Height / 2 - Measured.Height / 2);
-            g.DrawString(sPauseText, usePauseFont, Brushes.White, DrawPos);
+            TetrisGame.DrawText(g,usePauseFont,sPauseText,Brushes.White,Brushes.Black,DrawPos.X,DrawPos.Y);
         }
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)

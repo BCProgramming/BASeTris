@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BASeTris.GameStates.Menu
 {
@@ -32,7 +33,7 @@ namespace BASeTris.GameStates.Menu
         /// <returns></returns>
         public virtual MenuEventResultConstants OnDeselected() { return MenuEventResultConstants.Unhandled; }
         /// <summary>
-        /// Called when the Menu Item is activated (with enter).
+        /// Called when the Menu Item is activated (with CW).
         /// </summary>
         /// <returns></returns>
         public virtual MenuEventResultConstants OnActivated() { return MenuEventResultConstants.Unhandled; }
@@ -61,11 +62,16 @@ namespace BASeTris.GameStates.Menu
         }
 
     }
-
-    //Standard Item in a menu for a Menu State.
-    public class MenuStateTextMenuItem:MenuStateMenuItem
+    public abstract class MenuStateSizedMenuItem : MenuStateMenuItem
     {
+        public abstract SizeF GetSize();
         
+    }
+    //Standard Item in a menu for a Menu State.
+    public class MenuStateTextMenuItem: MenuStateSizedMenuItem
+    {
+        Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
+        public HorizontalAlignment TextAlignment { get; set; } = HorizontalAlignment.Center;
         public String Text { get; set; }
 
         public Font Font { get; set; }
@@ -74,19 +80,54 @@ namespace BASeTris.GameStates.Menu
 
         public Color BackColor { get; set; } = Color.Transparent;
 
+        public Color ShadowColor { get; set; } = Color.Gray;
+        public override SizeF GetSize()
+        {
+            var MeasureText = Temp.MeasureString(Text, Font);
+            return MeasureText.ToSize();
+        }
+        private float GetDrawX(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
+        {
+            switch(pAlign)
+            {
+                case HorizontalAlignment.Center:
+                    return (pBounds.Left + pBounds.Width / 2) - DrawSize.Width / 2;
+                case HorizontalAlignment.Left:
+                    return pBounds.Left;
+                case HorizontalAlignment.Right:
+                    return pBounds.Right - DrawSize.Width;
+            }
+            return 0;
+        }
+        private PointF GetDrawPosition(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
+        {
+            float useX = GetDrawX(pBounds, DrawSize, pAlign);
+            float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Height / 2));
+            return new PointF(useX,useY);
+        }
+
         public override void Draw(Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
         {
             //basically just draw the Text centered within the Bounds.
             var MeasureText = Target.MeasureString(Text, Font);
 
-            PointF DrawPosition = new PointF(((Bounds.Left + Bounds.Width / 2) - MeasureText.Width / 2),( Bounds.Top + Bounds.Height / 2 - (MeasureText.Height / 2)));
-
-            using (Brush BackBrush = new SolidBrush(BackColor))
+            PointF DrawPosition = GetDrawPosition(Bounds, MeasureText, TextAlignment);
+            Color useBackColor = DrawState == StateMenuItemState.State_Selected ? Color.DarkBlue : BackColor;
+            using (Brush BackBrush = new SolidBrush(useBackColor))
             {
                 Target.FillRectangle(BackBrush,Bounds);
-                using (Brush ForeBrush = new SolidBrush(ForeColor))
+
+                Color useForeColor = DrawState == StateMenuItemState.State_Selected ? Color.Aqua : ForeColor;
+                
+                StringFormat central = new StringFormat();
+                central.Alignment = StringAlignment.Center;
+                central.LineAlignment = StringAlignment.Center;
+                using (Brush ForeBrush = new SolidBrush(useForeColor))
                 {
-                    Target.DrawString(Text,Font,ForeBrush,DrawPosition);
+                    using (Brush ShadowBrush = new SolidBrush(ShadowColor))
+                    {
+                        TetrisGame.DrawText(Target, Font, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y);
+                    }
                 }
             }
         }

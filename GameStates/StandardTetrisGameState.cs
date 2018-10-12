@@ -12,6 +12,7 @@ using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
+using BASeTris.GameStates.Menu;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
@@ -23,15 +24,43 @@ namespace BASeTris.GameStates
         Bitmap useBackground = null;
         public Queue<BlockGroup> NextBlocks = new Queue<BlockGroup>();
         public BlockGroup HoldBlock = null;
+        private List<Particle> Particles = new List<Particle>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public Choosers.BlockGroupChooser Chooser = null;
 
+        //given a value, translates from an unscaled horizontal coordinate in the default width to the appropriate size of the playing field based on the presented bounds.
+        public double GetScaledHorizontal(RectangleF Bounds,double Value)
+        {
+            return Value * (Bounds.Width / BASeTris.DefaultWidth);
+        }
+        public double GetScaledVertical(RectangleF Bounds,double Value)
+        {
+            return Value * (Bounds.Height / BASeTris.DefaultHeight);
+        }
+
+        public double GetUnScaledHorizontal(RectangleF Bounds,double ScaledValue)
+        {
+            return ScaledValue / (Bounds.Width / BASeTris.DefaultWidth);
+        }
+        public double GetUnscaledVertical(RectangleF Bounds,double ScaledValue)
+        {
+            return ScaledValue / (Bounds.Height / BASeTris.DefaultHeight);
+        }
+        public PointF GetScaledPoint(RectangleF Bounds,PointF Value)
+        {
+            return new PointF((float)(GetUnScaledHorizontal(Bounds,Value.X)),(float)(GetUnscaledVertical(Bounds,Value.Y)));
+        }
+
+        public PointF GetUnscaledPoint(RectangleF Bounds,PointF Value)
+        {
+            return new PointF((float)(GetScaledHorizontal(Bounds, Value.X)), (float)(GetScaledVertical(Bounds, Value.Y)));
+        }
         public Statistics GameStats
         {
             get { return PlayField?.GameStats; }
         }
-
+        
 
         public virtual IHighScoreList<TetrisHighScoreData> GetLocalScores()
         {
@@ -204,11 +233,11 @@ namespace BASeTris.GameStates
 
         public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
 
-        private void RedrawStatusbarTetrominoBitmaps(RectangleF Bounds)
+        private void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,RectangleF Bounds)
         {
             lock (LockTetImageRedraw)
             {
-                TetrominoImages = TetrisGame.GetTetrominoBitmaps(Bounds, PlayField.Theme, PlayField);
+                TetrominoImages = TetrisGame.GetTetrominoBitmaps(Bounds, PlayField.Theme, PlayField,(float)Owner.ScaleFactor);
             }
         }
 
@@ -275,7 +304,18 @@ namespace BASeTris.GameStates
                 GameStartTime += (DateTime.Now - LastPausedTime);
                 LastPausedTime = DateTime.MinValue;
             }
-
+            List<Particle> RemoveParticles = new List<Particle>();
+            foreach(var iterate in Particles)
+            {
+                if(iterate.PerformFrame(pOwner))
+                {
+                    RemoveParticles.Add(iterate);
+                }
+            }
+            foreach(var removeit in RemoveParticles)
+            {
+                Particles.Remove(removeit);
+            }
             //TODO: Animate line clears. Tetris should get some weird flashing thing or something too.
             PlayField.AnimateFrame();
             foreach (var iterate in PlayField.BlockGroups)
@@ -456,7 +496,7 @@ namespace BASeTris.GameStates
 
             g.DrawImage(StatisticsBackground, Bounds);
             //g.Clear(Color.Black);
-            if (TetrominoImages == null || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(Bounds);
+            if (TetrominoImages == null || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(pOwner,Bounds);
 
             lock (LockTetImageRedraw)
             {
@@ -469,19 +509,41 @@ namespace BASeTris.GameStates
 
                 String CurrentScoreStr = useStats.Score.ToString().PadLeft(MaxScoreLength + 2);
                 String TopScoreStr = TopScore.ToString().PadLeft(MaxScoreLength + 2);
+                //TODO: redo this segment separately, so we can have the labels left-aligned and the values right-aligned.
+               // String BuildStatString = "Time:  " + FormatGameTime(pOwner).ToString().PadLeft(MaxScoreLength + 2) + "\n" +
+               //                          "Score: " + CurrentScoreStr + "\n" +
+               //                          "Top:   " + TopScoreStr + " \n" +
+               //                          "Lines: " + GameStats.LineCount.ToString().PadLeft(MaxScoreLength+2);
 
-                String BuildStatString = "Time:" + FormatGameTime(pOwner) + "\n" +
-                                         "Score: " + CurrentScoreStr + "\n" +
-                                         "Top:   " + TopScoreStr + " \n" +
-                                         "Lines: " + GameStats.LineCount + "\n";
+                g.FillRectangle(LightenBrush, 0, 5, Bounds.Width, (int)(450 * Factor));
+                String[] StatLabels = new string[]{"Time:","Score:","Top:","Lines:"};
+                String[] StatValues = new string[]{FormatGameTime(pOwner),useStats.Score.ToString(),TopScore.ToString(), GameStats.LineCount.ToString() };
+                Point StatPosition = new Point((int)(7 * Factor), (int)(7 * Factor));
+
+                int CurrentYPosition = StatPosition.Y;
+                for(int statindex=0;statindex<StatLabels.Length;statindex++)
+                {
+                    var MeasureLabel = g.MeasureString(StatLabels[statindex], standardFont);
+                    var MeasureValue = g.MeasureString(StatValues[statindex], standardFont);
+                    float LargerHeight = Math.Max(MeasureLabel.Height, MeasureValue.Height);
+
+                    //we want to draw the current stat label at position StatPosition.X,CurrentYPosition...
+
+                    TetrisGame.DrawText(g,standardFont,StatLabels[statindex],Brushes.Black,Brushes.White,StatPosition.X,CurrentYPosition);
+                    
+                    //we want to draw the current stat value at Bounds.Width-ValueWidth.
+                    TetrisGame.DrawText(g,standardFont,StatValues[statindex],Brushes.Black,Brushes.White,(float)(Bounds.Width-MeasureValue.Width-(5*Factor)),CurrentYPosition);
+
+                    //add the larger of the two heights to the current Y Position.
+                    CurrentYPosition += (int)LargerHeight;
+                    CurrentYPosition += 2;
+
+                }
 
 
-                var measured = g.MeasureString(BuildStatString, standardFont);
 
 
-                g.FillRectangle(LightenBrush, 0, 5, Bounds.Width, (int) (450 * Factor));
-                g.DrawString(BuildStatString, standardFont, Brushes.White, new Point((int) (7 * Factor), (int) (7 * Factor)));
-                g.DrawString(BuildStatString, standardFont, Brushes.Black, new Point((int) (5 * Factor), (int) (5 * Factor)));
+     
 
                 Type[] useTypes = new Type[] {typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z)};
                 int[] PieceCounts = new int[] {useStats.I_Piece_Count, useStats.O_Piece_Count, useStats.J_Piece_Count, useStats.T_Piece_Count, useStats.L_Piece_Count, useStats.S_Piece_Count, useStats.Z_Piece_Count};
@@ -777,6 +839,11 @@ namespace BASeTris.GameStates
                         TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupMove);
                         pOwner.Feedback(0.1f, 50);
                     }
+                    else
+                    {
+                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockStopped);
+                        pOwner.Feedback(0.4f,75);
+                    }
                 }
             }
             else if (g == GameKeys.GameKey_Pause)
@@ -838,6 +905,42 @@ namespace BASeTris.GameStates
                 {
                     ((StandardTetrisGameState) pOwner.CurrentState).GameStats.Score += 1000;
                 }
+            }
+            else if(g==GameKeys.GameKey_Debug3)
+            {
+                int DesiredFontPixelHeight = (int)(pOwner.GameArea.Height * (23d / 644d));
+                Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
+                Font ItemFont = new Font(TetrisGame.RetroFont, (int)((float)DesiredFontPixelHeight*(3f/4f)), FontStyle.Bold, GraphicsUnit.Pixel);
+                //set state to a testing menu state.
+
+                MenuState ms = new MenuState(BackgroundDrawers.StandardImageBackgroundDraw.GetStandardBackgroundDrawer());
+                ms.StateHeader = "This is a Menu";
+                ms.HeaderFont = standardFont;
+                MenuStateTextMenuItem returnitem = new MenuStateTextMenuItem();
+                returnitem.Font = ItemFont;
+                returnitem.Text = "Return";
+                returnitem.BackColor = Color.Transparent;
+                returnitem.ForeColor = Color.DarkBlue;
+                var OriginalState = pOwner.CurrentState;
+                ms.MenuElements.Add(returnitem);
+                ms.MenuItemActivated += (obj, e) =>
+                {
+                    if(e.MenuElement==returnitem)
+                    {
+                        pOwner.CurrentState = OriginalState;
+                    }
+                };
+                for (int i=0;i<8;i++)
+                {
+                    MenuStateTextMenuItem mts = new MenuStateTextMenuItem();
+                    mts.Font = ItemFont;
+                    mts.BackColor = Color.Transparent;
+                    mts.ForeColor = Color.Black;
+                    mts.Text = " Item " + i.ToString();
+                    ms.MenuElements.Add(mts);
+                }
+                pOwner.CurrentState = ms;
+                
             }
         }
 

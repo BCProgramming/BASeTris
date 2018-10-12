@@ -1532,8 +1532,8 @@ namespace BASeTris
         private bool proxyaddparticle(ProxyObject sourceobject, IStateOwner gamestate)
         {
             Particle addit = sourceobject.Tag as Particle;
-            if (addit != null)
-                gamestate.AddParticle(addit);
+            //if (addit != null)
+                //gamestate.  AddParticle(addit);
 
 
             return true;

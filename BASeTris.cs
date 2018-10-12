@@ -28,7 +28,7 @@ namespace BASeTris
 {
     public partial class BASeTris : Form, IStateOwner
     {
-        private List<Particle> ActiveParticles = new List<Particle>();
+        
         private List<GameObject> GameObjects = new List<GameObject>();
         private TetrisGame _Game;
         ControllerInputState CIS = null;
@@ -44,10 +44,7 @@ namespace BASeTris
             GameObjects.Add(go);
         }
 
-        public void AddParticle(Particle p)
-        {
-            ActiveParticles.Add(p);
-        }
+      
 
         public double ScaleFactor
         {
@@ -59,8 +56,8 @@ namespace BASeTris
             get { return picTetrisField.ClientRectangle; }
         }
 
-        double DefaultWidth = 643d;
-        double DefaultHeight = 734d;
+        public static readonly double DefaultWidth = 643d;
+        public static readonly double DefaultHeight = 734d;
 
         public void SetDisplayMode(GameState.DisplayMode pMode)
         {

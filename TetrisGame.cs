@@ -94,15 +94,14 @@ namespace BASeTris
             return HSLColor.RotateHue(Source, useRotation);
             
         }
-        public static void DrawText(Graphics g, Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition)
+        public static void DrawText(Graphics g,Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition,float ShadowXOffset=5,float ShadowYOffset=5,StringFormat sf = null)
         {
-            DrawText(g,UseFont,sText,ForegroundBrush,ShadowBrush,XPosition,YPosition,5,5);
-        }
-        public static void DrawText(Graphics g,Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition,float ShadowXOffset,float ShadowYOffset)
-        {
-            
-            g.DrawString(sText, UseFont, ShadowBrush, XPosition+ShadowXOffset,YPosition+ShadowYOffset);
-            g.DrawString(sText, UseFont, ForegroundBrush, XPosition,YPosition);
+            if (sf == null)
+            {
+                sf = new StringFormat();
+            }
+            g.DrawString(sText, UseFont, ShadowBrush, XPosition+ShadowXOffset,YPosition+ShadowYOffset,sf);
+            g.DrawString(sText, UseFont, ForegroundBrush, XPosition,YPosition,sf);
         }
 
         public static void InitState()
@@ -200,10 +199,7 @@ namespace BASeTris
             GameOwner.AddGameObject(Source);
         }
 
-        public void AddParticle(Particle pParticle)
-        {
-            GameOwner.AddParticle(pParticle);
-        }
+       
 
         public double ScaleFactor
         {
@@ -227,7 +223,8 @@ namespace BASeTris
             {Keys.P, GameState.GameKeys.GameKey_Pause},
             {Keys.Space, GameState.GameKeys.GameKey_Hold},
             {Keys.F2, GameState.GameKeys.GameKey_Debug1},
-            {Keys.F7, GameState.GameKeys.GameKey_Debug2}
+            {Keys.F7, GameState.GameKeys.GameKey_Debug2},
+            {Keys.F11,GameState.GameKeys.GameKey_Debug3}
         };
 
 
@@ -385,10 +382,10 @@ namespace BASeTris
             return sNumber + sEnder;
         }
 
-        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null)
+        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null,float ScaleFactor=1)
         {
             Dictionary<Type, Image> TetrominoImages = new Dictionary<Type, Image>();
-            float useSize = 18 * ((float) Bounds.Height / 644f);
+            float useSize = 18 * ScaleFactor;
             SizeF useTetSize = new SizeF(useSize, useSize);
             Tetromino_I TetI = new Tetromino_I();
             Tetromino_J TetJ = new Tetromino_J();

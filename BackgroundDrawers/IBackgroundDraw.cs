@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.AssetManager;
 
 namespace BASeTris.BackgroundDrawers
 {
@@ -83,6 +84,16 @@ namespace BASeTris.BackgroundDrawers
         {
             theAttributes = useAttributes;
             BackgroundImage = pImage;
+        }
+        public static StandardImageBackgroundDraw GetStandardBackgroundDrawer(float fade=0.4f)
+        {
+            ImageAttributes useBGAttributes = new ImageAttributes();
+            useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(fade));
+            var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
+            double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            sib.Movement = new PointF((float)xpoint, (float)ypoint);
+            return sib;
         }
     }
 }

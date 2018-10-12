@@ -16,7 +16,6 @@ namespace BASeTris
         void Feedback(float Strength, int Length);
 
         void AddGameObject(GameObject Source);
-        void AddParticle(Particle pParticle);
         double ScaleFactor { get; }
     }
 }

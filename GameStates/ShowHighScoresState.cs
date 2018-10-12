@@ -51,9 +51,7 @@ namespace BASeTris.GameStates
             HighlightedScorePositions = HighlightPositions ?? new int[] { };
             SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First() - 1;
             RevertState = ReversionState;
-            ImageAttributes useBGAttributes = new ImageAttributes();
-            useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(0.25f));
-            var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
+            var sib = StandardImageBackgroundDraw.GetStandardBackgroundDrawer();
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             sib.Movement = new PointF((float) xpoint, (float) ypoint);

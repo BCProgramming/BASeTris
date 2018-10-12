@@ -124,7 +124,7 @@ namespace BASeTris.GameStates
                 String GameOverText = "GAME\nOVER\n"; //+ ShowExtraLines.ToString();
                 var measured = g.MeasureString(GameOverText, GameOverFont);
                 var measuremini = g.MeasureString(GameOverText, EntryFont);
-                PointF GameOverPos = new PointF(Bounds.Width / 2 - measured.Width / 2, measured.Height);
+                PointF GameOverPos = new PointF(Bounds.Width / 2 - measured.Width / 2, measured.Height/4);
                 g.DrawString(GameOverText, GameOverFont, Brushes.White, 5 + GameOverPos.X, 5 + GameOverPos.Y);
                 g.DrawString(GameOverText, GameOverFont, Brushes.Black, GameOverPos.X, GameOverPos.Y);
 
@@ -152,11 +152,12 @@ namespace BASeTris.GameStates
 
                 if (NewScorePosition > -1)
                 {
+                    Font HighScoreEntryFont = new Font(GameOverFont.FontFamily, (float)(8 * pOwner.ScaleFactor), FontStyle.Regular);
                     //draw the awarded score position as well.
                     float XPosition = Bounds.Width * .25f;
                     float YPosition = Bounds.Height - measured.Height - 10;
                     String ScoreText = "New High Score!";
-                    var MeasuredScoreText = g.MeasureString(ScoreText, GameOverFont);
+                    var MeasuredScoreText = g.MeasureString(ScoreText, HighScoreEntryFont);
                     using (Brush RainbowBrush = new SolidBrush(TetrisGame.GetRainbowColor(Color.Lime, 0.1d)))
                     {
                         TetrisGame.DrawText(g, GameOverFont, ScoreText, Brushes.Black, RainbowBrush, Bounds.Width / 2 - MeasuredScoreText.Width / 2, YPosition + measuremini.Height);

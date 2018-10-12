@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,8 +63,10 @@ namespace BASeTris.GameStates
             LineClear_Middle_Out,
             LineClear_Outside_In
         }
-
+        private bool _Stagger = true;
+        public bool Stagger {  get { return _Stagger; } set { _Stagger = value; } }
         protected LineClearStyle _ClearStyle = LineClearStyle.LineClear_Middle_Out;
+        
         public FieldBlockClearAction ClearAction { get; set; } = new FieldBlockClearShrinkAction(new TimeSpan(0,0,0,0,100));
 
         public LineClearStyle ClearStyle
@@ -142,18 +145,17 @@ namespace BASeTris.GameStates
         //derived classes can override pretty much just this one to clear the lines in different ways.        
         protected virtual bool ClearFrame()
         {
-            switch (_ClearStyle)
+
+            var useStyle = _ClearStyle;
+            
+            switch (useStyle)
             {
                 case LineClearStyle.LineClear_Left_To_Right:
                     foreach (int rowClear in RowNumbers)
                     {
-                        var GrabRow = _BaseState.PlayField.Contents[rowClear];
-                        //find the block, and clear it out if needed.
-                        var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[CurrentClearIndex];
-                        if (FindClear != null)
-                        {
-                            PerformClearAct(GrabRow, CurrentClearIndex);
-                        }
+                        if(_Stagger && rowClear%2==0) ClearFrame_Right_To_Left(rowClear);
+                        else
+                            ClearFrame_Left_To_Right(rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -162,14 +164,9 @@ namespace BASeTris.GameStates
                 case LineClearStyle.LineClear_Right_To_Left:
                     foreach (int rowClear in RowNumbers)
                     {
-                        var GrabRow = _BaseState.PlayField.Contents[rowClear];
-                        int useIndex = GrabRow.Length - CurrentClearIndex - 1;
-                        //find the block, and clear it out if needed.
-                        var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[useIndex];
-                        if (FindClear != null)
-                        {
-                            PerformClearAct(GrabRow, useIndex);
-                        }
+                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Left_To_Right(rowClear);
+                        else
+                            ClearFrame_Right_To_Left(rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -179,12 +176,9 @@ namespace BASeTris.GameStates
                     //middle out
                     foreach (int rowClear in RowNumbers)
                     {
-                        var GrabRow = _BaseState.PlayField.Contents[rowClear];
-
-                        int i = GrabRow.Length >> 1;
-                        int useindex = i + ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
-                        if (useindex < GrabRow.Length && useindex >= 0)
-                            PerformClearAct(GrabRow, useindex);
+                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(rowClear);
+                        else
+                            ClearFrame_Middle_Out(rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -195,14 +189,9 @@ namespace BASeTris.GameStates
                     //middle out
                     foreach (int rowClear in RowNumbers)
                     {
-                        var GrabRow = _BaseState.PlayField.Contents[rowClear];
-                        int processindex = GrabRow.Length - CurrentClearIndex;
-                        int i = GrabRow.Length >> 1;
-                        int useindex = i + ((processindex % 2 == 0) ? processindex / 2 : -(processindex / 2 + 1));
-                        if (useindex < GrabRow.Length && useindex >= 0)
-                        {
-                            PerformClearAct(GrabRow, useindex);
-                        }
+                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(rowClear);
+                                else
+                            ClearFrame_Outside_In(rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -212,6 +201,51 @@ namespace BASeTris.GameStates
             }
 
             return true;
+        }
+
+        private void ClearFrame_Outside_In(int rowClear)
+        {
+            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            int processindex = GrabRow.Length - CurrentClearIndex;
+            int i = GrabRow.Length >> 1;
+            int useindex = i + ((processindex % 2 == 0) ? processindex / 2 : -(processindex / 2 + 1));
+            if (useindex < GrabRow.Length && useindex >= 0)
+            {
+                PerformClearAct(GrabRow, useindex);
+            }
+        }
+
+        private void ClearFrame_Middle_Out(int rowClear)
+        {
+            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+
+            int i = GrabRow.Length >> 1;
+            int useindex = i + ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
+            if (useindex < GrabRow.Length && useindex >= 0)
+                PerformClearAct(GrabRow, useindex);
+        }
+
+        private void ClearFrame_Right_To_Left(int rowClear)
+        {
+            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            int useIndex = GrabRow.Length - CurrentClearIndex - 1;
+            //find the block, and clear it out if needed.
+            var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[useIndex];
+            if (FindClear != null)
+            {
+                PerformClearAct(GrabRow, useIndex);
+            }
+        }
+
+        private void ClearFrame_Left_To_Right(int rowClear)
+        {
+            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            //find the block, and clear it out if needed.
+            var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[CurrentClearIndex];
+            if (FindClear != null)
+            {
+                PerformClearAct(GrabRow, CurrentClearIndex);
+            }
         }
 
         protected void PerformClearAct(TetrisBlock[] FullRow, int index)
