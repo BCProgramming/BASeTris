@@ -75,12 +75,30 @@ namespace BASeTris.GameStates.Menu
         public String Text { get; set; }
 
         public Font Font { get; set; }
+        private Color _ForeColor;
+        private Color _BackColor = Color.Transparent;
+        public Color ForeColor { get{ return _ForeColor; } set{ _ForeColor = value;ForeBrush = new SolidBrush(value); } }
 
-        public Color ForeColor { get; set; }
+        public Color BackColor { get { return _BackColor; } set { _BackColor = value; BackBrush = new SolidBrush(value); } }
 
-        public Color BackColor { get; set; } = Color.Transparent;
 
-        public Color ShadowColor { get; set; } = Color.Gray;
+        protected Brush ForeBrush { get; set; }
+
+        protected  Brush BackBrush { get; set; }
+
+        protected Brush ShadowBrush { get; set; }
+        private Color _ShadowColor = Color.Gray;
+        public Color ShadowColor { get { return _ShadowColor; } set { _ShadowColor = value;ShadowBrush = new SolidBrush(value); } }
+            
+
+        public MenuStateTextMenuItem()
+        {
+            ForeColor = Color.Black;
+            BackColor = Color.Transparent;
+            ShadowColor = Color.Gray;
+
+        }
+
         public override SizeF GetSize()
         {
             var MeasureText = Temp.MeasureString(Text, Font);
@@ -112,24 +130,26 @@ namespace BASeTris.GameStates.Menu
             var MeasureText = Target.MeasureString(Text, Font);
 
             PointF DrawPosition = GetDrawPosition(Bounds, MeasureText, TextAlignment);
-            Color useBackColor = DrawState == StateMenuItemState.State_Selected ? Color.DarkBlue : BackColor;
-            using (Brush BackBrush = new SolidBrush(useBackColor))
-            {
-                Target.FillRectangle(BackBrush,Bounds);
+            Brush BackBrush = this.BackBrush;
+            if (DrawState == StateMenuItemState.State_Selected)
+                BackBrush = Brushes.DarkBlue;
+            
+            Target.FillRectangle(BackBrush,Bounds);
 
-                Color useForeColor = DrawState == StateMenuItemState.State_Selected ? Color.Aqua : ForeColor;
-                
-                StringFormat central = new StringFormat();
-                central.Alignment = StringAlignment.Center;
-                central.LineAlignment = StringAlignment.Center;
-                using (Brush ForeBrush = new SolidBrush(useForeColor))
-                {
-                    using (Brush ShadowBrush = new SolidBrush(ShadowColor))
-                    {
-                        TetrisGame.DrawText(Target, Font, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y);
-                    }
-                }
-            }
+            StringFormat central = new StringFormat();
+            central.Alignment = StringAlignment.Near;
+            central.LineAlignment = StringAlignment.Near;
+            Brush ForeBrush = this.ForeBrush;
+            if (DrawState == StateMenuItemState.State_Selected)
+                ForeBrush = Brushes.Aqua;
+            Brush ShadowBrush = this.ShadowBrush;
+            //if(Text.IndexOf("ITEM 3",0,StringComparison.OrdinalIgnoreCase)>-1)
+            //{
+            //    ;
+            //
+            //}
+            TetrisGame.DrawText(Target, Font, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y,5f,5f,central);
+            
         }
     }
 

@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BASeTris.GameStates.Menu
+{
+    /// <summary>
+    /// A text Menu item that can be activated to select/change between a set of options.
+    /// </summary>
+    public class MenuStateMultiOption<T> :MenuStateTextMenuItem
+    {
+        protected IMultiOptionManager<T> OptionManager = null;
+        public EventHandler<OptionActivated<T>> OnActivateOption;
+        public T CurrentOption = default(T);
+        private bool _Activated = false;
+        private bool _Selected = false;
+        public MenuStateMultiOption(IMultiOptionManager<T> pOptionManager)
+        {
+            OptionManager = pOptionManager;
+        }
+
+        public override MenuEventResultConstants OnSelected()
+        {
+            _Selected = true;
+            return base.OnSelected();
+        }
+
+        public override MenuEventResultConstants OnDeselected()
+        {
+            _Selected = false;
+            return base.OnDeselected();
+        }
+
+        public override MenuEventResultConstants OnActivated()
+        {
+            _Activated = !_Activated;
+            return MenuEventResultConstants.Handled;
+        }
+
+        public override void Draw(Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        {
+            //draw < and > just outside the bounds using our font.
+            String sLeftCover = "< ";
+            String sRightCover = ">";
+            var MeasureLeft = Target.MeasureString(sLeftCover, this.Font);
+            var MeasureRight = Target.MeasureString(sRightCover, this.Font);
+
+            PointF LeftPos = new PointF(Bounds.Left - MeasureLeft.Width, Bounds.Top + (Bounds.Height / 2) - MeasureLeft.Height / 2);
+            PointF RightPos = new PointF(Bounds.Right,Bounds.Top + (Bounds.Height/2) - MeasureRight.Height/2);
+
+            if (_Activated)
+            {
+                TetrisGame.DrawText(Target, this.Font, sLeftCover, this.ForeBrush, ShadowBrush, LeftPos.X, LeftPos.Y);
+                TetrisGame.DrawText(Target, this.Font, sRightCover, this.ForeBrush, ShadowBrush, RightPos.X, RightPos.Y);
+            }
+
+            base.Draw(Target, Bounds, DrawState);
+        }
+
+        public override void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
+        {
+            if (_Activated)
+            {
+                if (pKey == GameState.GameKeys.GameKey_Left)
+                {
+                    CurrentOption = OptionManager.MovePrevious();
+                    OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption));
+                }
+                else if (pKey == GameState.GameKeys.GameKey_Right)
+                {
+                    CurrentOption = OptionManager.MoveNext();
+                    OnActivateOption?.Invoke(this,new OptionActivated<T>(CurrentOption));
+                }
+
+                if (OptionManager != null && CurrentOption!=null)
+                    base.Text = OptionManager.GetText(CurrentOption);
+                base.ProcessGameKey(pStateOwner, pKey);
+            }
+        }
+    }
+    public class OptionActivated<T> : EventArgs
+    {
+        public T Option;
+        public OptionActivated(T pOption)
+        {
+            Option = pOption;
+        }
+    }
+    public interface IMultiOptionManager<T>
+    {
+        T MovePrevious();
+        T MoveNext();
+
+        T PeekPrevious();
+        T PeekNext();
+
+        String GetText(T Item);
+    }
+    public class MultiOptionManagerList<T>:IMultiOptionManager<T>
+    {
+        private int SelectedIndex;
+        private T[] Options;
+
+        public MultiOptionManagerList(T[] pOptions,int pStartingIndex)
+        {
+            Options = pOptions;
+            SelectedIndex = pStartingIndex;
+        }
+        public string GetText(T Value)
+        {
+            return Value.ToString();
+        }
+
+        public T PeekPrevious()
+        {
+            var TestIndex = SelectedIndex - 1;
+            if (TestIndex < 0) TestIndex = Options.Length - 1;
+            return Options[TestIndex];
+        }
+
+        public T PeekNext()
+        {
+            var TestIndex = SelectedIndex + 1;
+            if (TestIndex > Options.Length-1) TestIndex = 0;
+            return Options[TestIndex];
+        }
+
+        public T MovePrevious()
+        {
+            SelectedIndex--;
+            if (SelectedIndex < 0) SelectedIndex = Options.Length - 1;
+            return Options[SelectedIndex];
+        }
+        public T MoveNext()
+        {
+            SelectedIndex++;
+            if (SelectedIndex > Options.Length-1) SelectedIndex = 0;
+            return Options[SelectedIndex];
+        }
+    }
+}

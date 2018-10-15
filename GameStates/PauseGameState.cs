@@ -4,15 +4,17 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates.Menu;
 
 namespace BASeTris.GameStates
 {
-    public class PauseGameState : GameState
+    public class PauseGameState : MenuState
     {
         private GameState PausedState = null;
         int NumFallingItems = 65;
         private List<PauseFallImage> FallImages = null;
         Random rgen = new Random();
+        public override DisplayMode SupportedDisplayMode { get{ return DisplayMode.Partitioned; } }
 
         public PauseGameState(IStateOwner pOwner, GameState pPausedState)
         {
@@ -37,6 +39,24 @@ namespace BASeTris.GameStates
                     FallImages.Add(pfi);
                 }
             }
+            PopulatePauseMenu(pOwner);
+        }
+        private void PopulatePauseMenu(IStateOwner pOwner)
+        {
+            MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume" };
+            MenuItemActivated += (o, e) =>
+            {
+                ResumeGame(pOwner);
+            };
+            ResumeOption.Font = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+            MenuElements.Add(ResumeOption);
+        }
+
+        protected override float DrawHeader(Graphics Target, RectangleF Bounds)
+        {
+            //for the pause screen, we don't draw the header. We return half the size of the screen though.
+            //return base.DrawHeader(Target, Bounds);
+            return (float)Bounds.Height *0.6f;
         }
 
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -55,7 +75,7 @@ namespace BASeTris.GameStates
             {
                 iterate.Proc(pOwner.GameArea);
             }
-
+            base.GameProc(pOwner);
             //no op!
         }
 
@@ -74,28 +94,41 @@ namespace BASeTris.GameStates
             g.ResetTransform();
             PointF DrawPos = new PointF(Bounds.Width / 2 - Measured.Width / 2, Bounds.Height / 2 - Measured.Height / 2);
             TetrisGame.DrawText(g,usePauseFont,sPauseText,Brushes.White,Brushes.Black,DrawPos.X,DrawPos.Y);
+
+            base.DrawProc(pOwner,g,Bounds); //draw the menu itself.
         }
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             if (g == GameKeys.GameKey_Pause)
             {
-                var unpauser = new UnpauseDelayGameState
-                (PausedState, () =>
-                {
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
-                    var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
-                    playing2?.UnPause();
-                    playing2?.setVolume(1.0f);
-                });
-
-                var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
-                playing?.UnPause();
-                playing?.setVolume(0.5f);
-
-
-                pOwner.CurrentState = unpauser;
+                ResumeGame(pOwner);
             }
+            else
+            {
+                base.HandleGameKey(pOwner,g);
+            }
+        }
+
+        private void ResumeGame(IStateOwner pOwner)
+        {
+            var unpauser = new UnpauseDelayGameState
+                (PausedState, () => { UnPause(); });
+
+            var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
+            playing?.UnPause();
+            playing?.setVolume(0.5f);
+
+
+            pOwner.CurrentState = unpauser;
+        }
+
+        private static void UnPause()
+        {
+            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
+            var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
+            playing2?.UnPause();
+            playing2?.setVolume(1.0f);
         }
 
         private class PauseFallImage

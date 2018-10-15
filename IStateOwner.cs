@@ -17,5 +17,6 @@ namespace BASeTris
 
         void AddGameObject(GameObject Source);
         double ScaleFactor { get; }
+        void SetScale(double pScale);
     }
 }

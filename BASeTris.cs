@@ -73,7 +73,10 @@ namespace BASeTris
         {
             current_factor = factor;
             mnuScale_Tiny.Checked = mnuScale_Small.Checked = mnuScale_Large.Checked = mnuScale_Biggliest.Checked = false;
-            Size = new Size((int) (DefaultWidth * factor), (int) (DefaultHeight * factor));
+            Invoke((MethodInvoker)(()=>
+            {
+                Size = new Size((int) (DefaultWidth * factor), (int) (DefaultHeight * factor));
+            }));
         }
 
         public void Feedback(float Strength, int Length)

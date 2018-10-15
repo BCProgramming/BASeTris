@@ -61,7 +61,7 @@ namespace BASeTris.GameStates.Menu
             //throw new NotImplementedException();
             _BG?.FrameProc();
         }
-        private float DrawHeader(Graphics Target,RectangleF Bounds)
+        protected virtual float DrawHeader(Graphics Target,RectangleF Bounds)
         {
             var HeaderSize = Target.MeasureString(StateHeader, HeaderFont);
             float UseX = Bounds.Width / 2 - HeaderSize.Width / 2;
@@ -109,6 +109,7 @@ namespace BASeTris.GameStates.Menu
         {
             //handle up and down to change the currently selected menu item.
             //Other game keys we pass on to the currently selected item itself for additional handling.
+            bool triggered = false;
             var OriginalIndex = SelectedIndex;
             if(g==GameKeys.GameKey_Down)
             {
@@ -119,6 +120,7 @@ namespace BASeTris.GameStates.Menu
                 {
                     SelectedIndex = 0;
                 }
+                triggered = true;
                 //should also skip if disabled...
             }
             else if(g==GameKeys.GameKey_Drop)
@@ -126,15 +128,17 @@ namespace BASeTris.GameStates.Menu
                 //move selected index downwards.
                 SelectedIndex--;
                 if (SelectedIndex < 0) SelectedIndex = MenuElements.Count - 1;
+                triggered = true;
             }
 
-            if(g==GameKeys.GameKey_RotateCW)
+            if(g==GameKeys.GameKey_RotateCW || g==GameKeys.GameKey_MenuActivate || g==GameKeys.GameKey_Pause)
             {
                 //Activate the currently selected item.
                 var currentitem = MenuElements[SelectedIndex];
                 TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated);
                 MenuItemActivated?.Invoke(this,new MenuStateMenuItemActivatedEventArgs(currentitem));
                 currentitem.OnActivated();
+                triggered = true;
             }
 
             else if (OriginalIndex != SelectedIndex)
@@ -146,6 +150,13 @@ namespace BASeTris.GameStates.Menu
                 MenuItemSelected?.Invoke(this,new MenuStateMenuItemSelectedEventArgs(currentitem));
                 previousitem.OnDeselected();
                 currentitem.OnSelected();
+            }
+
+            if(!triggered)
+            {
+                var currentitem = MenuElements[SelectedIndex];
+                currentitem.ProcessGameKey(pOwner,g);
+                
             }
             //throw new NotImplementedException();
         }

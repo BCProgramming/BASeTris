@@ -205,7 +205,10 @@ namespace BASeTris
         {
             get { return this.GameOwner.ScaleFactor; }
         }
-
+        public void SetScale(double pScale)
+        {
+            this.GameOwner.SetScale(pScale);
+        }
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);
@@ -222,6 +225,7 @@ namespace BASeTris
             {Keys.Pause, GameState.GameKeys.GameKey_Pause},
             {Keys.P, GameState.GameKeys.GameKey_Pause},
             {Keys.Space, GameState.GameKeys.GameKey_Hold},
+            {Keys.Return,GameState.GameKeys.GameKey_MenuActivate },
             {Keys.F2, GameState.GameKeys.GameKey_Debug1},
             {Keys.F7, GameState.GameKeys.GameKey_Debug2},
             {Keys.F11,GameState.GameKeys.GameKey_Debug3}

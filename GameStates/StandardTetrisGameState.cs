@@ -923,6 +923,11 @@ namespace BASeTris.GameStates
                 returnitem.ForeColor = Color.DarkBlue;
                 var OriginalState = pOwner.CurrentState;
                 ms.MenuElements.Add(returnitem);
+
+                var scaleitem = new MenuStateScaleMenuItem(pOwner);
+                scaleitem.Font = ItemFont;
+                ms.MenuElements.Add(scaleitem);
+
                 ms.MenuItemActivated += (obj, e) =>
                 {
                     if(e.MenuElement==returnitem)
@@ -936,7 +941,7 @@ namespace BASeTris.GameStates
                     mts.Font = ItemFont;
                     mts.BackColor = Color.Transparent;
                     mts.ForeColor = Color.Black;
-                    mts.Text = " Item " + i.ToString();
+                    mts.Text = "Item " + i.ToString();
                     ms.MenuElements.Add(mts);
                 }
                 pOwner.CurrentState = ms;

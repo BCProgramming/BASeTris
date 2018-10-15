@@ -109,6 +109,8 @@
     <Compile Include="GameStates\IDirectKeyboardInputState.cs" />
     <Compile Include="GameStates\Menu\MenuState.cs" />
     <Compile Include="GameStates\Menu\MenuStateMenuItem.cs" />
+    <Compile Include="GameStates\Menu\MenuStateMultiOption.cs" />
+    <Compile Include="GameStates\Menu\MenuStateScaleMenuItem.cs" />
     <Compile Include="GameStates\PauseGameState.cs" />
     <Compile Include="GameStates\ShowHighScoresState.cs" />
     <Compile Include="GameStates\StandardGameOptions.cs" />

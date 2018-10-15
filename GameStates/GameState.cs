@@ -41,6 +41,7 @@ namespace BASeTris
             GameKey_Down,
             GameKey_Pause,
             GameKey_Hold,
+            GameKey_MenuActivate,
             GameKey_Debug1,
             GameKey_Debug2,
             GameKey_Debug3,
