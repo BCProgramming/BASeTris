@@ -85,7 +85,7 @@ namespace BASeTris.GameStates.Menu
             {
                 if(searchitem is MenuStateSizedMenuItem mss)
                 {
-                    var grabsize = mss.GetSize();
+                    var grabsize = mss.GetSize(pOwner);
                     if (grabsize.Height > MaxHeight) MaxHeight = grabsize.Height;
                     if (grabsize.Width > MaxWidth) MaxWidth = grabsize.Width;
                 }
@@ -98,7 +98,7 @@ namespace BASeTris.GameStates.Menu
                 var drawitem = MenuElements[menuitemindex];
                 Rectangle TargetBounds = new Rectangle((int)(Bounds.Width / 2 - ItemSize.Width / 2), (int)CurrentY, (int)(ItemSize.Width), (int)(ItemSize.Height));
                 MenuStateMenuItem.StateMenuItemState useState = menuitemindex == SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
-                    drawitem.Draw(g, TargetBounds, useState);
+                    drawitem.Draw(pOwner,g, TargetBounds, useState);
                 CurrentY += ItemSize.Height + 5;
             }
          

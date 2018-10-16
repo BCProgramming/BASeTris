@@ -21,7 +21,7 @@ namespace BASeTris.GameStates.Menu
             Unhandled,
             Handled
         }
-        public abstract void Draw(Graphics Target, Rectangle Bounds, StateMenuItemState DrawState);
+        public abstract void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState);
         /// <summary>
         /// Method called when this menu item is selected.
         /// </summary>
@@ -64,7 +64,7 @@ namespace BASeTris.GameStates.Menu
     }
     public abstract class MenuStateSizedMenuItem : MenuStateMenuItem
     {
-        public abstract SizeF GetSize();
+        public abstract SizeF GetSize(IStateOwner pOwner);
         
     }
     //Standard Item in a menu for a Menu State.
@@ -73,8 +73,8 @@ namespace BASeTris.GameStates.Menu
         Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
         public HorizontalAlignment TextAlignment { get; set; } = HorizontalAlignment.Center;
         public String Text { get; set; }
-
-        public Font Font { get; set; }
+        private Font _Font;
+        public Font Font { get{ return _Font; } set{ _Font = value; lock(FontSizeData){FontSizeData = new Dictionary<double, Font>();} } }
         private Color _ForeColor;
         private Color _BackColor = Color.Transparent;
         public Color ForeColor { get{ return _ForeColor; } set{ _ForeColor = value;ForeBrush = new SolidBrush(value); } }
@@ -99,9 +99,10 @@ namespace BASeTris.GameStates.Menu
 
         }
 
-        public override SizeF GetSize()
+        public override SizeF GetSize(IStateOwner pOwner)
         {
-            var MeasureText = Temp.MeasureString(Text, Font);
+            var testfont = GetScaledFont(pOwner);
+            var MeasureText = Temp.MeasureString(Text, testfont);
             return MeasureText.ToSize();
         }
         private float GetDrawX(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
@@ -123,11 +124,24 @@ namespace BASeTris.GameStates.Menu
             float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Height / 2));
             return new PointF(useX,useY);
         }
-
-        public override void Draw(Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        Dictionary<double, Font> FontSizeData = new Dictionary<double, Font>();
+        public Font GetScaledFont(IStateOwner pOwner)
+        {
+            lock (FontSizeData)
+            {
+                if (!FontSizeData.ContainsKey(pOwner.ScaleFactor))
+                {
+                    Font buildfont = new Font(this.Font.FontFamily, (float)(this.Font.Size * pOwner.ScaleFactor), this.Font.Style);
+                    FontSizeData.Add(pOwner.ScaleFactor, buildfont);
+                }
+                return FontSizeData[pOwner.ScaleFactor];
+            }
+        }
+        public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
         {
             //basically just draw the Text centered within the Bounds.
-            var MeasureText = Target.MeasureString(Text, Font);
+            var useFont = GetScaledFont(pOwner);
+            var MeasureText = Target.MeasureString(Text, useFont);
 
             PointF DrawPosition = GetDrawPosition(Bounds, MeasureText, TextAlignment);
             Brush BackBrush = this.BackBrush;
@@ -148,7 +162,7 @@ namespace BASeTris.GameStates.Menu
             //    ;
             //
             //}
-            TetrisGame.DrawText(Target, Font, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y,5f,5f,central);
+            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y,5f,5f,central);
             
         }
     }

@@ -40,24 +40,29 @@ namespace BASeTris.GameStates.Menu
             return MenuEventResultConstants.Handled;
         }
 
-        public override void Draw(Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
         {
             //draw < and > just outside the bounds using our font.
+            Font useFont = GetScaledFont(pOwner);
             String sLeftCover = "< ";
             String sRightCover = ">";
-            var MeasureLeft = Target.MeasureString(sLeftCover, this.Font);
-            var MeasureRight = Target.MeasureString(sRightCover, this.Font);
+            var PrevItem = OptionManager.GetText(OptionManager.PeekPrevious());
+            var NextItem = OptionManager.GetText(OptionManager.PeekNext());
+            sLeftCover = PrevItem + sLeftCover;
+            sRightCover = sRightCover + NextItem;
+            var MeasureLeft = Target.MeasureString(sLeftCover, useFont);
+            var MeasureRight = Target.MeasureString(sRightCover, useFont);
 
             PointF LeftPos = new PointF(Bounds.Left - MeasureLeft.Width, Bounds.Top + (Bounds.Height / 2) - MeasureLeft.Height / 2);
             PointF RightPos = new PointF(Bounds.Right,Bounds.Top + (Bounds.Height/2) - MeasureRight.Height/2);
-
+            
             if (_Activated)
             {
-                TetrisGame.DrawText(Target, this.Font, sLeftCover, this.ForeBrush, ShadowBrush, LeftPos.X, LeftPos.Y);
-                TetrisGame.DrawText(Target, this.Font, sRightCover, this.ForeBrush, ShadowBrush, RightPos.X, RightPos.Y);
+                TetrisGame.DrawText(Target, useFont, sLeftCover, this.ForeBrush, ShadowBrush, LeftPos.X, LeftPos.Y);
+                TetrisGame.DrawText(Target, useFont, sRightCover, this.ForeBrush, ShadowBrush, RightPos.X, RightPos.Y);
             }
 
-            base.Draw(Target, Bounds, DrawState);
+            base.Draw(pOwner,Target, Bounds, DrawState);
         }
 
         public override void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
