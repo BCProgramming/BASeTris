@@ -61,13 +61,28 @@ namespace BASeTris.GameStates.Menu
             //throw new NotImplementedException();
             _BG?.FrameProc();
         }
-        protected virtual float DrawHeader(Graphics Target,RectangleF Bounds)
+        Dictionary<double, Font> FontSizeData = new Dictionary<double, Font>();
+        private Font GetScaledHeaderFont(IStateOwner pOwner)
         {
-            var HeaderSize = Target.MeasureString(StateHeader, HeaderFont);
+            lock (FontSizeData)
+            {
+                if (!FontSizeData.ContainsKey(pOwner.ScaleFactor))
+                {
+                    Font buildfont = new Font(this.HeaderFont.FontFamily, (float)(this.HeaderFont.Size * pOwner.ScaleFactor), this.HeaderFont.Style);
+                    FontSizeData.Add(pOwner.ScaleFactor, buildfont);
+                }
+                return FontSizeData[pOwner.ScaleFactor];
+            }
+        }
+        protected virtual float DrawHeader(IStateOwner pOwner,Graphics Target,RectangleF Bounds)
+        {
+
+            Font useHeaderFont = GetScaledHeaderFont(pOwner);
+            var HeaderSize = Target.MeasureString(StateHeader, useHeaderFont);
             float UseX = Bounds.Width / 2 - HeaderSize.Width / 2;
             float UseY = HeaderSize.Height / 3;
 
-            TetrisGame.DrawText(Target,HeaderFont,StateHeader,Brushes.Black,Brushes.White,UseX,UseY);
+            TetrisGame.DrawText(Target,useHeaderFont,StateHeader,Brushes.Black,Brushes.White,UseX,UseY);
 
             return UseY + HeaderSize.Height;
         }
@@ -78,7 +93,7 @@ namespace BASeTris.GameStates.Menu
             //throw new NotImplementedException();
             if(_BG!=null) _BG.DrawProc(g,Bounds);
             int CurrentIndex = StartItemOffset;
-            float CurrentY = DrawHeader(g, Bounds);
+            float CurrentY = DrawHeader(pOwner,g, Bounds);
             float MaxHeight = 0, MaxWidth = 0;
             //we want to find the widest item.
             foreach(var searchitem in MenuElements)
