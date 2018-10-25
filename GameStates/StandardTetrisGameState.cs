@@ -322,7 +322,7 @@ namespace BASeTris.GameStates
             {
                 if ((DateTime.Now - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
                 {
-                    if (HandleGroupOperation(iterate))
+                    if (HandleGroupOperation(pOwner,iterate))
                     {
                         ProcessFieldChangeWithScore(pOwner, iterate);
                     }
@@ -757,9 +757,24 @@ namespace BASeTris.GameStates
             pOwner.Feedback(0.3f, 100);
             grp.Clamp(PlayField.RowCount, PlayField.ColCount);
         }
+        private bool HandleBlockGroupKey(IStateOwner pOwner,GameKeys key)
+        {
+            bool AnyTrue = false;
+            foreach(var activeitem in PlayField.BlockGroups)
+            {
+                AnyTrue |= activeitem.HandleGameKey(pOwner, key);
+            }
 
+            return AnyTrue;
+
+        }
+        
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+
+            if (HandleBlockGroupKey(pOwner, g)) return;
+
+
             if (g == GameKeys.GameKey_RotateCW || g == GameKeys.GameKey_RotateCCW)
             {
                 bool ccw = g == GameKeys.GameKey_RotateCCW;
@@ -803,7 +818,7 @@ namespace BASeTris.GameStates
             {
                 foreach (var activeitem in PlayField.BlockGroups)
                 {
-                    if (HandleGroupOperation(activeitem))
+                    if (HandleGroupOperation(pOwner,activeitem))
                     {
                         pOwner.Feedback(0.4f, 100);
                         ProcessFieldChangeWithScore(pOwner, activeitem);
@@ -901,10 +916,15 @@ namespace BASeTris.GameStates
             }
             else if (g == GameKeys.GameKey_Debug2)
             {
-                if (pOwner.CurrentState is StandardTetrisGameState)
+
+                OptionsMenuState OptionState = new OptionsMenuState(BackgroundDrawers.StandardImageBackgroundDraw.GetStandardBackgroundDrawer(),
+                    pOwner, pOwner.CurrentState);
+
+                pOwner.CurrentState = OptionState;
+                /*if (pOwner.CurrentState is StandardTetrisGameState)
                 {
                     ((StandardTetrisGameState) pOwner.CurrentState).GameStats.Score += 1000;
-                }
+                }*/
             }
             else if(g==GameKeys.GameKey_Debug3)
             {
@@ -951,8 +971,10 @@ namespace BASeTris.GameStates
 
         bool BlockHold = false;
 
-        private bool HandleGroupOperation(BlockGroup activeItem)
+        private bool HandleGroupOperation(IStateOwner pOwner,BlockGroup activeItem)
         {
+
+            if (activeItem.HandleBlockOperation(pOwner)) return true;
             if (PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1))
             {
                 activeItem.Y++;

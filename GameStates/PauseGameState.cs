@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using BASeTris.GameStates.Menu;
 
 namespace BASeTris.GameStates
@@ -46,13 +47,27 @@ namespace BASeTris.GameStates
             MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume" };
             MenuItemActivated += (o, e) =>
             {
-                ResumeGame(pOwner);
+                if(e.MenuElement==ResumeOption)
+                    ResumeGame(pOwner);
             };
-            ResumeOption.Font = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+            ResumeOption.Font = TetrisGame.GetRetroFont(14, 1.0f);
+
+            var scaleitem = new MenuStateScaleMenuItem(pOwner);
+            scaleitem.Font = ResumeOption.Font;
+
+            var ExitItem = new ConfirmedTextMenuItem() {Text="Quit"};
+            ExitItem.Font = scaleitem.Font;
+            ExitItem.OnOptionConfirmed += (a, b) =>
+            {
+                MessageBox.Show("Confirmed Exit!");
+            };
+
             MenuElements.Add(ResumeOption);
+            MenuElements.Add(scaleitem);
+            MenuElements.Add(ExitItem);
         }
 
-        protected override float DrawHeader(Graphics Target, RectangleF Bounds)
+        protected override float DrawHeader(IStateOwner pOwner,Graphics Target, RectangleF Bounds)
         {
             //for the pause screen, we don't draw the header. We return half the size of the screen though.
             //return base.DrawHeader(Target, Bounds);
@@ -100,14 +115,8 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-            if (g == GameKeys.GameKey_Pause)
-            {
-                ResumeGame(pOwner);
-            }
-            else
-            {
+           
                 base.HandleGameKey(pOwner,g);
-            }
         }
 
         private void ResumeGame(IStateOwner pOwner)

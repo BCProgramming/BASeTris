@@ -13,7 +13,7 @@ namespace BASeTris.GameStates.Menu
     public class MenuStateMultiOption<T> :MenuStateTextMenuItem
     {
         protected IMultiOptionManager<T> OptionManager = null;
-        public EventHandler<OptionActivated<T>> OnActivateOption;
+        public event EventHandler<OptionActivated<T>> OnActivateOption;
         public T CurrentOption = default(T);
         private bool _Activated = false;
         private bool _Selected = false;
@@ -36,10 +36,14 @@ namespace BASeTris.GameStates.Menu
 
         public override MenuEventResultConstants OnActivated()
         {
-            _Activated = !_Activated;
+            _Activated = true;
             return MenuEventResultConstants.Handled;
         }
-
+        public override MenuEventResultConstants OnDeactivated()
+        {
+            _Activated = false;
+            return MenuEventResultConstants.Handled;
+        }
         public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
         {
             //draw < and > just outside the bounds using our font.

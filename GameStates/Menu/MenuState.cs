@@ -31,7 +31,8 @@ namespace BASeTris.GameStates.Menu
         public Font HeaderFont { get; set; } = new Font("Arial",28,FontStyle.Regular,GraphicsUnit.Pixel);
         //Our menu elements.
         public List<MenuStateMenuItem> MenuElements = new List<MenuStateMenuItem>();
-
+        public int MainXOffset;
+        bool OffsetUsed = false;
         public int StartItemOffset = 0; //start drawing menu items at this index. This is
         //used to scroll the menu up and down.
         public int SelectedIndex = 0;
@@ -48,16 +49,23 @@ namespace BASeTris.GameStates.Menu
         }
         public MenuState():this(null)
         {
-
+            
         }
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //we are a full mode state, so this shouldn't be called.
             //throw new NotImplementedException();
         }
-
+        int OffsetAnimationSpeed = 3;
         public override void GameProc(IStateOwner pOwner)
         {
+            if(!OffsetUsed)
+            {
+                MainXOffset = -pOwner.GameArea.Width / 2;
+                OffsetUsed = true;
+            }
+            if (MainXOffset < 0) MainXOffset += OffsetAnimationSpeed;
+            OffsetAnimationSpeed += 3;
             //throw new NotImplementedException();
             _BG?.FrameProc();
         }
@@ -79,7 +87,7 @@ namespace BASeTris.GameStates.Menu
 
             Font useHeaderFont = GetScaledHeaderFont(pOwner);
             var HeaderSize = Target.MeasureString(StateHeader, useHeaderFont);
-            float UseX = Bounds.Width / 2 - HeaderSize.Width / 2;
+            float UseX = (Bounds.Width / 2)- (HeaderSize.Width / 2) + MainXOffset;
             float UseY = HeaderSize.Height / 3;
 
             TetrisGame.DrawText(Target,useHeaderFont,StateHeader,Brushes.Black,Brushes.White,UseX,UseY);
@@ -111,7 +119,7 @@ namespace BASeTris.GameStates.Menu
             for(int menuitemindex = 0;menuitemindex < MenuElements.Count;menuitemindex++)
             {
                 var drawitem = MenuElements[menuitemindex];
-                Rectangle TargetBounds = new Rectangle((int)(Bounds.Width / 2 - ItemSize.Width / 2), (int)CurrentY, (int)(ItemSize.Width), (int)(ItemSize.Height));
+                Rectangle TargetBounds = new Rectangle((int)(Bounds.Width / 2 - ItemSize.Width / 2)+MainXOffset, (int)CurrentY, (int)(ItemSize.Width), (int)(ItemSize.Height));
                 MenuStateMenuItem.StateMenuItemState useState = menuitemindex == SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
                     drawitem.Draw(pOwner,g, TargetBounds, useState);
                 CurrentY += ItemSize.Height + 5;
@@ -119,7 +127,23 @@ namespace BASeTris.GameStates.Menu
          
 
         }
+        protected int GetPreviousIndex(int StartPos)
+        {
+            StartPos--;
+            if (StartPos < 0)StartPos= MenuElements.Count - 1;
 
+            return StartPos;
+        }
+        protected int GetNextIndex(int StartPos)
+        {
+            StartPos++;
+            if (MenuElements.Count - 1 < StartPos)
+            {
+                StartPos = 0;
+            }
+            return StartPos;
+        }
+        public MenuStateMenuItem ActivatedItem = null;
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             //handle up and down to change the currently selected menu item.
@@ -128,31 +152,56 @@ namespace BASeTris.GameStates.Menu
             var OriginalIndex = SelectedIndex;
             if(g==GameKeys.GameKey_Down)
             {
-                //move selected index upwards.
-
-                SelectedIndex++;
-                if(MenuElements.Count-1 < SelectedIndex)
+                if (ActivatedItem != null)
                 {
-                    SelectedIndex = 0;
+                    ActivatedItem.ProcessGameKey(pOwner, g);
+                }
+                else
+                {
+                    //move selected index upwards.
+
+                    SelectedIndex = GetNextIndex(SelectedIndex);
+                    while (!MenuElements[SelectedIndex].GetSelectable())
+                        SelectedIndex = GetNextIndex(SelectedIndex);
                 }
                 triggered = true;
                 //should also skip if disabled...
             }
             else if(g==GameKeys.GameKey_Drop)
             {
-                //move selected index downwards.
-                SelectedIndex--;
-                if (SelectedIndex < 0) SelectedIndex = MenuElements.Count - 1;
+                if (ActivatedItem != null)
+                {
+                    ActivatedItem.ProcessGameKey(pOwner, g);
+                }
+                else
+                { //move selected index downwards.
+                    SelectedIndex = GetPreviousIndex(SelectedIndex);
+
+                    while (!MenuElements[SelectedIndex].GetSelectable())
+                        SelectedIndex = GetPreviousIndex(SelectedIndex);
+                }
                 triggered = true;
             }
 
             if(g==GameKeys.GameKey_RotateCW || g==GameKeys.GameKey_MenuActivate || g==GameKeys.GameKey_Pause)
             {
-                //Activate the currently selected item.
-                var currentitem = MenuElements[SelectedIndex];
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated);
-                MenuItemActivated?.Invoke(this,new MenuStateMenuItemActivatedEventArgs(currentitem));
-                currentitem.OnActivated();
+                if (ActivatedItem != null)
+                {
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated);
+                    ActivatedItem.OnDeactivated();
+                    ActivatedItem = null;
+                }
+                else
+                {
+
+                    //Activate the currently selected item.
+                    var currentitem = MenuElements[SelectedIndex];
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated);
+                    ActivatedItem = currentitem;
+                    MenuItemActivated?.Invoke(this, new MenuStateMenuItemActivatedEventArgs(currentitem));
+
+                    currentitem.OnActivated();
+                }
                 triggered = true;
             }
 

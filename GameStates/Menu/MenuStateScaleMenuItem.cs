@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,7 +28,8 @@ namespace BASeTris.GameStates.Menu
         {
             _Owner = pOwner;
             base.OptionManager = new MultiOptionManagerList<MenuItemScaleItemSelection>(ScaleOptions,1);
-            this.Text = "Small";
+            var closest = (from so in ScaleOptions orderby Math.Abs(so.Scale - pOwner.ScaleFactor) ascending select so).First();
+            this.Text = closest.Text;
             OnActivateOption += ScaleActivate;
 
         }

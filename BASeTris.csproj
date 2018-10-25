@@ -107,10 +107,12 @@
     <Compile Include="GameStates\FieldBlockClearAction.cs" />
     <Compile Include="GameStates\GameOverGameState.cs" />
     <Compile Include="GameStates\IDirectKeyboardInputState.cs" />
+    <Compile Include="GameStates\Menu\ConfirmedMenuItem.cs" />
     <Compile Include="GameStates\Menu\MenuState.cs" />
     <Compile Include="GameStates\Menu\MenuStateMenuItem.cs" />
     <Compile Include="GameStates\Menu\MenuStateMultiOption.cs" />
     <Compile Include="GameStates\Menu\MenuStateScaleMenuItem.cs" />
+    <Compile Include="GameStates\Menu\OptionsMenuState.cs" />
     <Compile Include="GameStates\PauseGameState.cs" />
     <Compile Include="GameStates\ShowHighScoresState.cs" />
     <Compile Include="GameStates\StandardGameOptions.cs" />
@@ -135,6 +137,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameObjects\ProxyObject.cs" />
+    <Compile Include="Rendering\IRenderingProvider.cs" />
+    <Compile Include="Replay\StatefulReplay.cs" />
     <Compile Include="StandardSettings.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="AssetManager\QColorMatrix.cs" />

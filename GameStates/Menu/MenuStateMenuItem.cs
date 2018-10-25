@@ -21,6 +21,7 @@ namespace BASeTris.GameStates.Menu
             Unhandled,
             Handled
         }
+        public abstract bool GetSelectable();
         public abstract void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState);
         /// <summary>
         /// Method called when this menu item is selected.
@@ -37,6 +38,8 @@ namespace BASeTris.GameStates.Menu
         /// </summary>
         /// <returns></returns>
         public virtual MenuEventResultConstants OnActivated() { return MenuEventResultConstants.Unhandled; }
+
+        public virtual MenuEventResultConstants OnDeactivated() { return MenuEventResultConstants.Unhandled; }
         public static Color MixColor(Color ColorA, Color ColorB, float percentage)
         {
             float[] ColorAValues = new float[] { (float)ColorA.A, (float)ColorA.R, (float)ColorA.G, (float)ColorA.B };
@@ -70,10 +73,12 @@ namespace BASeTris.GameStates.Menu
     //Standard Item in a menu for a Menu State.
     public class MenuStateTextMenuItem: MenuStateSizedMenuItem
     {
+        
         Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
         public HorizontalAlignment TextAlignment { get; set; } = HorizontalAlignment.Center;
-        public String Text { get; set; }
+        public virtual String Text { get; set; }
         private Font _Font;
+        
         public Font Font { get{ return _Font; } set{ _Font = value; lock(FontSizeData){FontSizeData = new Dictionary<double, Font>();} } }
         private Color _ForeColor;
         private Color _BackColor = Color.Transparent;
@@ -87,9 +92,14 @@ namespace BASeTris.GameStates.Menu
         protected  Brush BackBrush { get; set; }
 
         protected Brush ShadowBrush { get; set; }
+
         private Color _ShadowColor = Color.Gray;
         public Color ShadowColor { get { return _ShadowColor; } set { _ShadowColor = value;ShadowBrush = new SolidBrush(value); } }
-            
+
+        public override bool GetSelectable()
+        {
+            return true;
+        }
 
         public MenuStateTextMenuItem()
         {
@@ -167,6 +177,14 @@ namespace BASeTris.GameStates.Menu
         }
     }
 
+
+    public class MenuStateLabelMenuItem:MenuStateTextMenuItem
+    {
+        public override bool GetSelectable()
+        {
+            return false;
+        }
+    }
     //Additional Menu Options we'll want:
     //A "Toggle" State that shows several options and accepts Right and Left to switch between them.
     //Possibly just activating and then allowing different options to be chosen if there are too many to fit.

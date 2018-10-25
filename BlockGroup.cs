@@ -13,6 +13,7 @@ using BASeTris.TetrisBlocks;
 
 namespace BASeTris
 {
+    //TODO: change it so that BlockGroup's can accept the gamekey input. Will have to refactor what we have already...
     public class BlockGroup : IEnumerable<BlockGroupEntry>
     {
         public String SpecialName { get; set; }
@@ -51,7 +52,28 @@ namespace BASeTris
 
         private DateTime LastRotationCall = DateTime.MinValue;
 
+        /// <summary>
+        /// called repeatedly for active groups, normally at a rate determined by the current level.
+        /// return true to cancel standard handling. (eg. Block falling)
+        /// </summary>
+        /// <param name="pOwner"></param>
+        /// <returns></returns>
+        public virtual bool HandleBlockOperation(IStateOwner pOwner)
+        {
+            return false;
+        }
 
+        /// <summary>
+        /// Called before default handling of a key by the game. return true if the key was handled to stop the default handling of said key.
+        /// Note that this is called on all the blockGroups in play, so returning true won't stop other blockgroups from receiving the key themselves.
+        /// </summary>
+        /// <param name="pOwner"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public virtual bool HandleGameKey(IStateOwner pOwner,GameState.GameKeys key)
+        {
+            return false;
+        }
         public void RecalcExtents()
         {
             foreach (var iterateentry in this)
