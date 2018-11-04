@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
+using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
 
 namespace BASeTris
@@ -114,7 +116,8 @@ namespace BASeTris
                 foreach (BlockGroupEntry bge in this)
                 {
                     RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
-                    TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(DrawRep, DrawPos, this);
+                    TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this);
+                    //RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                     bge.Block.DrawBlock(tbd);
                 }
             }

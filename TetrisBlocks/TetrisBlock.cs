@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Rendering.RenderElements;
 
 namespace BASeTris.TetrisBlocks
 {
@@ -50,10 +51,15 @@ namespace BASeTris.TetrisBlocks
             set { _Rotation = value; }
         }
 
-
-        public virtual void DrawBlock(TetrisBlockDrawParameters parameters)
+        internal void InvokeBeforeDraw(TetrisBlockDrawParameters parameters)
         {
             BeforeDraw?.Invoke(parameters);
+        }
+        [Obsolete("Use Rendering Providers.")]
+        public virtual void DrawBlock(TetrisBlockDrawParameters parameters)
+        {
+            
+            InvokeBeforeDraw(parameters);            
         }
 
         public virtual void AnimateFrame()
@@ -61,21 +67,6 @@ namespace BASeTris.TetrisBlocks
             //nothing by default. Well, for now anyway....
         }
     }
-
-    public class TetrisBlockDrawParameters
-    {
-        public Graphics g;
-        public RectangleF region;
-        public BlockGroup GroupOwner = null;
-        public Brush OverrideBrush = null;
-        public ImageAttributes ApplyAttributes = null;
-        public float FillPercent = 1f;
-
-        public TetrisBlockDrawParameters(Graphics pG, RectangleF pRegion, BlockGroup pGroupOwner)
-        {
-            g = pG;
-            region = pRegion;
-            GroupOwner = pGroupOwner;
-        }
-    }
+   
+  
 }

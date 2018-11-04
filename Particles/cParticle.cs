@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
 
 namespace BASeTris
@@ -360,7 +361,7 @@ namespace BASeTris
             Bitmap BuildImage = new Bitmap((int) BlockPosition.Width, (int) BlockPosition.Height);
             using (Graphics g = Graphics.FromImage(BuildImage))
             {
-                TetrisBlockDrawParameters tbdp = new TetrisBlockDrawParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null);
+                TetrisBlockDrawGDIPlusParameters tbdp = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null);
                 sourceblock.DrawBlock(tbdp);
 
                 //now we need to chop it into 'cols' columns and 'rows' rows.
@@ -426,7 +427,7 @@ namespace BASeTris
             BlockImage = new Bitmap((int) BlockRect.Width, (int) BlockRect.Height);
             using (Graphics g = Graphics.FromImage(BlockImage))
             {
-                TetrisBlockDrawParameters tb = new TetrisBlockDrawParameters(g, BlockRect, null);
+                TetrisBlockDrawGDIPlusParameters tb = new TetrisBlockDrawGDIPlusParameters(g, BlockRect, null);
                 sourceblock.DrawBlock(tb);
             }
 

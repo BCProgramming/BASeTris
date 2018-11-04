@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
+using BASeTris.DrawHelper;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
@@ -21,7 +23,7 @@ namespace BASeTris.GameStates
 {
     public class StandardTetrisGameState : GameState
     {
-        Bitmap useBackground = null;
+        private StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<BlockGroup> NextBlocks = new Queue<BlockGroup>();
         public BlockGroup HoldBlock = null;
         private List<Particle> Particles = new List<Particle>();
@@ -249,6 +251,11 @@ namespace BASeTris.GameStates
             }
         }
 
+        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
+        {
+            _DrawHelper.DrawProc(this,pOwner,g,Bounds);
+        }
+
         public BlockGroup GetGhostDrop(BlockGroup Source, out int dropLength, int CancelProximity = 3)
         {
             //routine returns the Ghost Drop representor of this BlockGroup.
@@ -473,7 +480,7 @@ namespace BASeTris.GameStates
                         BlockGroup ArbitraryGroup = new BlockGroup();
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
                         this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
+                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
                         GenerateColorBlock.DrawBlock(tbd);
                     }
                 }
@@ -664,7 +671,7 @@ namespace BASeTris.GameStates
         double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
         Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
 
-        private TimeSpan GetElapsedTime(IStateOwner powner)
+        public TimeSpan GetElapsedTime(IStateOwner powner)
         {
             TimeSpan useCalc = (DateTime.Now - GameStartTime);
 
@@ -688,67 +695,16 @@ namespace BASeTris.GameStates
             return useCalc.ToString(@"hh\:mm\:ss");
         }
 
-        private RectangleF StoredBackground = RectangleF.Empty;
-
-        private void RefreshBackground(RectangleF buildSize)
-        {
-            StoredBackground = buildSize;
-            useBackground = new Bitmap((int) buildSize.Width, (int) buildSize.Height);
-            using (Graphics bgg = Graphics.FromImage(useBackground))
-            {
-                Image drawbg = TetrisGame.Imageman["background"];
-                bgg.CompositingQuality = CompositingQuality.AssumeLinear;
-                bgg.DrawImage(drawbg, 0, 0, buildSize.Width, buildSize.Height);
-            }
-        }
+     
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //throw new NotImplementedException();
         }
 
-        private Brush GhostBrush = new SolidBrush(Color.FromArgb(75, Color.DarkBlue));
-        RectangleF StoredBlockImageRect = RectangleF.Empty;
-        Image StoredBlockImage = null;
+        
 
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            if (useBackground == null || !StoredBackground.Equals(Bounds))
-            {
-                RefreshBackground(Bounds);
-            }
-
-            g.DrawImage(useBackground, Bounds);
-
-
-            if (PlayField != null)
-            {
-                PlayField.Draw(g, Bounds);
-            }
-
-
-            foreach (var activeblock in PlayField.BlockGroups)
-            {
-                int dl = 0;
-                var GrabGhost = GetGhostDrop(activeblock, out dl, 3);
-                if (GrabGhost != null)
-                {
-                    var BlockWidth = PlayField.GetBlockWidth(Bounds);
-                    var BlockHeight = PlayField.GetBlockHeight(Bounds);
-
-                    foreach (var iterateblock in activeblock)
-                    {
-                        RectangleF BlockBounds = new RectangleF(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), PlayField.GetBlockWidth(Bounds), PlayField.GetBlockHeight(Bounds));
-                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, GrabGhost);
-                        ImageAttributes Shade = new ImageAttributes();
-                        Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
-                        tbd.ApplyAttributes = Shade;
-                        //tbd.OverrideBrush = GhostBrush;
-                        iterateblock.Block.DrawBlock(tbd);
-                    }
-                }
-            }
-        }
+        
 
         private void PerformRotation(IStateOwner pOwner, BlockGroup grp, bool ccw)
         {

@@ -98,6 +98,7 @@
     <Compile Include="Choosers\WeightedChooser.cs" />
     <Compile Include="ControllerInputHelper.cs" />
     <Compile Include="DASRepeatHandler.cs" />
+    <Compile Include="DrawHelper\StandardTetrisGameStateDrawHelper.cs" />
     <Compile Include="FieldInitializers\FieldInitializer.cs" />
     <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
     <Compile Include="GameStates\EnterCheatState.cs" />
@@ -137,7 +138,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameObjects\ProxyObject.cs" />
+    <Compile Include="Rendering\GDIPlus\GDIPlusRenderingProvider.cs" />
+    <Compile Include="Rendering\IRenderingHandler.cs" />
     <Compile Include="Rendering\IRenderingProvider.cs" />
+    <Compile Include="Rendering\RenderElements\ElementRenderData.cs" />
+    <Compile Include="Rendering\StandardRenderingProvider.cs" />
     <Compile Include="Replay\StatefulReplay.cs" />
     <Compile Include="StandardSettings.cs" />
     <Compile Include="Statistics.cs" />
@@ -205,6 +210,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
     <PropertyGroup>

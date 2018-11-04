@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.Rendering.RenderElements;
 
 namespace BASeTris
 {
@@ -251,7 +252,7 @@ namespace BASeTris
                     if (TetBlock != null)
                     {
                         RectangleF BlockBounds = new RectangleF(XPos, YPos, BlockWidth, BlockHeight);
-                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, null);
+                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null);
                         TetBlock.DrawBlock(tbd);
                     }
                 }
@@ -331,7 +332,7 @@ namespace BASeTris
 
 
                             RectangleF BlockBounds = new RectangleF(DrawXPx, DrawYPx, BlockWidth, BlockHeight);
-                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawParameters(g, BlockBounds, bg);
+                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, bg);
                             bge.Block.DrawBlock(tbd);
                         }
                     }

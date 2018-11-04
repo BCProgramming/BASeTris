@@ -1,0 +1,77 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BASeTris.AssetManager;
+using BASeTris.GameStates;
+using BASeTris.Rendering;
+using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.RenderElements;
+using BASeTris.TetrisBlocks;
+
+namespace BASeTris.DrawHelper
+{
+    public class StandardTetrisGameStateDrawHelper
+    {
+        private RectangleF StoredBackground = RectangleF.Empty;
+        private Brush GhostBrush = new SolidBrush(Color.FromArgb(75, Color.DarkBlue));
+        RectangleF StoredBlockImageRect = RectangleF.Empty;
+        Image StoredBlockImage = null;
+        Bitmap useBackground = null;
+        private void RefreshBackground(RectangleF buildSize)
+        {
+            StoredBackground = buildSize;
+            useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height);
+            using (Graphics bgg = Graphics.FromImage(useBackground))
+            {
+                Image drawbg = TetrisGame.Imageman["background"];
+                bgg.CompositingQuality = CompositingQuality.AssumeLinear;
+                bgg.DrawImage(drawbg, 0, 0, buildSize.Width, buildSize.Height);
+            }
+        }
+        public void DrawProc(StandardTetrisGameState pState, IStateOwner pOwner, Graphics g, RectangleF Bounds)
+        {
+            if (useBackground == null || !StoredBackground.Equals(Bounds))
+            {
+                RefreshBackground(Bounds);
+            }
+
+            g.DrawImage(useBackground, Bounds);
+            var PlayField = pState.PlayField;
+
+            if (PlayField != null)
+            {
+                PlayField.Draw(g, Bounds);
+            }
+
+
+            foreach (var activeblock in PlayField.BlockGroups)
+            {
+                int dl = 0;
+                var GrabGhost = pState.GetGhostDrop(activeblock, out dl, 3);
+                if (GrabGhost != null)
+                {
+                    var BlockWidth = PlayField.GetBlockWidth(Bounds);
+                    var BlockHeight = PlayField.GetBlockHeight(Bounds);
+
+                    foreach (var iterateblock in activeblock)
+                    {
+                        RectangleF BlockBounds = new RectangleF(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), PlayField.GetBlockWidth(Bounds), PlayField.GetBlockHeight(Bounds));
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, GrabGhost);
+                        ImageAttributes Shade = new ImageAttributes();
+                        Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
+                        tbd.ApplyAttributes = Shade;
+                        //tbd.OverrideBrush = GhostBrush;
+                        var GetHandler = RenderingProvider.Static.GetHandler(typeof(Graphics), iterateblock.Block.GetType(), typeof(TetrisBlockDrawGDIPlusParameters));
+                        GetHandler.Render(pOwner,tbd.g,iterateblock.Block,tbd);
+                        //iterateblock.Block.DrawBlock(tbd);
+                    }
+                }
+            }
+        }
+    }
+}

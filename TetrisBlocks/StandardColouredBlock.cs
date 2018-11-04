@@ -9,64 +9,70 @@ using System.Threading.Tasks;
 using System.Xml.Schema;
 using BaseTris;
 using BASeTris.AssetManager;
+using BASeTris.Rendering.RenderElements;
 
 namespace BASeTris.TetrisBlocks
 {
     public class ImageBlock : TetrisBlock
     {
-        protected bool DoRotateTransform = false; //if true, we'll RotateTransform the image based on this blocks rotation.
-        protected Image[] _RotationImages; //array of images, indexed based on rotation.
-        protected ImageAttributes[] useAttributes; //array of Attributes to apply to the image when drawing. Same indexing as above.
+        internal bool DoRotateTransform = false; //if true, we'll RotateTransform the image based on this blocks rotation.
+        internal Image[] _RotationImages; //array of images, indexed based on rotation.
+        internal ImageAttributes[] useAttributes; //array of Attributes to apply to the image when drawing. Same indexing as above.
 
         protected virtual void NoImage()
         {
         }
 
-        public override void DrawBlock(TetrisBlockDrawParameters parameters)
+        public override void DrawBlock(TetrisBlockDrawParameters drawparameters)
         {
-            base.DrawBlock(parameters);
-            if (_RotationImages == null) NoImage();
-            /*if (parameters.OverrideBrush != null)
-            {
-                parameters.g.FillRectangle(parameters.OverrideBrush, parameters.region);
-                return;
-            }*/
-            int usemodulo = Rotation;
-            Image useImage = _RotationImages[usemodulo % _RotationImages.Length];
-            ImageAttributes useAttrib = parameters.ApplyAttributes ?? (useAttributes == null ? null : useAttributes[usemodulo % useAttributes.Length]);
 
-            float Degrees = usemodulo * 90;
-            PointF Center = new PointF(parameters.region.Left + (float) (parameters.region.Width / 2), parameters.region.Top + (float) (parameters.region.Height / 2));
+            if (drawparameters is TetrisBlockDrawGDIPlusParameters)
+            {
+                var parameters = (TetrisBlockDrawGDIPlusParameters)drawparameters;
+                base.DrawBlock(parameters);
+                if (_RotationImages == null) NoImage();
+                //if (parameters.OverrideBrush != null)
+                //{
+                //    parameters.g.FillRectangle(parameters.OverrideBrush, parameters.region);
+                //    return;
+                //}
+                int usemodulo = Rotation;
+                Image useImage = _RotationImages[usemodulo % _RotationImages.Length];
+                ImageAttributes useAttrib = parameters.ApplyAttributes ?? (useAttributes == null ? null : useAttributes[usemodulo % useAttributes.Length]);
+
+                float Degrees = usemodulo * 90;
+                PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));
 
 
-            if (DoRotateTransform)
-            {
-                var original = parameters.g.Transform;
-                parameters.g.TranslateTransform(Center.X, Center.Y);
-                parameters.g.RotateTransform(Degrees);
-                parameters.g.TranslateTransform(-Center.X, -Center.Y);
-                parameters.g.DrawImage(useImage, new Rectangle((int) parameters.region.Left, (int) parameters.region.Top, (int) parameters.region.Width, (int) parameters.region.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
-                parameters.g.Transform = original;
-            }
-            else
-            {
-                //inset the region by the specified amount of percentage.
-                RectangleF DrawPosition = parameters.region;
-                if (parameters.FillPercent != 1)
+                if (DoRotateTransform)
                 {
-                    float totalWidth = parameters.region.Width;
-                    float totalHeight = parameters.region.Height;
-                    float CenterX = DrawPosition.Width / 2 + DrawPosition.Left;
-                    float CenterY = DrawPosition.Height / 2 + DrawPosition.Top;
-
-                    float desiredWidth = totalWidth * parameters.FillPercent;
-                    float desiredHeight = totalHeight * parameters.FillPercent;
-
-                    DrawPosition = new RectangleF(CenterX - desiredWidth / 2, CenterY - desiredHeight / 2, desiredWidth, desiredHeight);
+                    var original = parameters.g.Transform;
+                    parameters.g.TranslateTransform(Center.X, Center.Y);
+                    parameters.g.RotateTransform(Degrees);
+                    parameters.g.TranslateTransform(-Center.X, -Center.Y);
+                    parameters.g.DrawImage(useImage, new Rectangle((int)parameters.region.Left, (int)parameters.region.Top, (int)parameters.region.Width, (int)parameters.region.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                    parameters.g.Transform = original;
                 }
+                else
+                {
+                    //inset the region by the specified amount of percentage.
+                    RectangleF DrawPosition = parameters.region;
+                    if (parameters.FillPercent != 1)
+                    {
+                        float totalWidth = parameters.region.Width;
+                        float totalHeight = parameters.region.Height;
+                        float CenterX = DrawPosition.Width / 2 + DrawPosition.Left;
+                        float CenterY = DrawPosition.Height / 2 + DrawPosition.Top;
+
+                        float desiredWidth = totalWidth * parameters.FillPercent;
+                        float desiredHeight = totalHeight * parameters.FillPercent;
+
+                        DrawPosition = new RectangleF(CenterX - desiredWidth / 2, CenterY - desiredHeight / 2, desiredWidth, desiredHeight);
+                    }
 
 
-                parameters.g.DrawImage(useImage, new Rectangle((int) DrawPosition.Left, (int) DrawPosition.Top, (int) DrawPosition.Width, (int) DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                    parameters.g.DrawImage(useImage, new Rectangle((int)DrawPosition.Left, (int)DrawPosition.Top, (int)DrawPosition.Width, (int)DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                }
             }
         }
     }
@@ -82,7 +88,7 @@ namespace BASeTris.TetrisBlocks
             Style_Shine
         }
 
-        private Image GummyBitmap = null;
+        public Image GummyBitmap = null;
         public Color _BlockColor = Color.Red;
         public Color _InnerColor = Color.White;
         public BlockStyle DisplayStyle = BlockStyle.Style_Gummy;
@@ -104,7 +110,7 @@ namespace BASeTris.TetrisBlocks
         private Pen BlockPen = null;
         private static Dictionary<ColouredBlockGummyIndexData, Image> GummyBitmaps = new Dictionary<ColouredBlockGummyIndexData, Image>();
 
-        private int CurrentImageHash = 0;
+        internal int CurrentImageHash = 0;
 
         protected override void NoImage()
         {
@@ -234,7 +240,7 @@ namespace BASeTris.TetrisBlocks
             return result;
         }
 
-        private class ColouredBlockGummyIndexData
+        internal class ColouredBlockGummyIndexData
         {
             public readonly Color MainColor;
             private readonly Color _InnerColor;
