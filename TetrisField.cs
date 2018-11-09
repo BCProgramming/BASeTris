@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -266,7 +267,7 @@ namespace BASeTris
             float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
             if (FieldBitmap == null || !LastFieldSave.Equals(Bounds) || HasChanged)
             {
-                Bitmap BuildField = new Bitmap((int) Bounds.Width, (int) Bounds.Height);
+                Bitmap BuildField = new Bitmap((int) Bounds.Width, (int) Bounds.Height, PixelFormat.Format32bppPArgb);
                 using (Graphics gfield = Graphics.FromImage(BuildField))
                 {
                     gfield.Clear(Color.Transparent);

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -110,7 +111,7 @@ namespace BASeTris
             Size BitmapSize = new Size((int) BlockSize.Width * (_GroupExtents.Width + 1), (int) BlockSize.Height * (_GroupExtents.Height + 1));
 
             //generate a new image.
-            Bitmap BuiltRepresentation = new Bitmap(BitmapSize.Width, BitmapSize.Height);
+            Bitmap BuiltRepresentation = new Bitmap(BitmapSize.Width, BitmapSize.Height, PixelFormat.Format32bppPArgb);
             using (Graphics DrawRep = Graphics.FromImage(BuiltRepresentation))
             {
                 foreach (BlockGroupEntry bge in this)

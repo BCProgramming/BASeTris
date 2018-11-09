@@ -72,9 +72,10 @@ namespace BASeTris
         public void SetScale(double factor)
         {
             current_factor = factor;
-            mnuScale_Tiny.Checked = mnuScale_Small.Checked = mnuScale_Large.Checked = mnuScale_Biggliest.Checked = false;
+            
             Invoke((MethodInvoker)(()=>
             {
+                mnuScale_Tiny.Checked = mnuScale_Small.Checked = mnuScale_Large.Checked = mnuScale_Biggliest.Checked = false;
                 Size = new Size((int) (DefaultWidth * factor), (int) (DefaultHeight * factor));
             }));
         }
@@ -270,6 +271,9 @@ namespace BASeTris
             if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
             {
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+
                 _Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
             }
         }
@@ -279,6 +283,8 @@ namespace BASeTris
             if (_Game == null) return;
             if (picTetrisField.Visible == false) return;
             e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+            e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
         }
 
@@ -405,6 +411,8 @@ namespace BASeTris
             {
                 if (picStatistics.Visible == false) return;
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
                 CurrentState.DrawStats(this, e.Graphics, picStatistics.ClientRectangle);
             }
         }

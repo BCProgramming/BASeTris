@@ -25,7 +25,7 @@ namespace BASeTris.DrawHelper
         private void RefreshBackground(RectangleF buildSize)
         {
             StoredBackground = buildSize;
-            useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height);
+            useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height, PixelFormat.Format32bppPArgb);
             using (Graphics bgg = Graphics.FromImage(useBackground))
             {
                 Image drawbg = TetrisGame.Imageman["background"];

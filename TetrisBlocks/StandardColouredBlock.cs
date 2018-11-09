@@ -219,7 +219,7 @@ namespace BASeTris.TetrisBlocks
             ColorMatrix cm = new ColorMatrix(mat);
             ImageAttributes ia = new ImageAttributes();
             ia.SetColorMatrix(cm);
-            Bitmap result = new Bitmap(Source.Width, Source.Height);
+            Bitmap result = new Bitmap(Source.Width, Source.Height, PixelFormat.Format32bppPArgb);
             using (Graphics gg = Graphics.FromImage(result))
             {
                 gg.Clear(Color.Transparent);
@@ -231,7 +231,7 @@ namespace BASeTris.TetrisBlocks
 
         private Image ResizeImage(Image Source, Size newSize)
         {
-            Bitmap result = new Bitmap(newSize.Width, newSize.Height);
+            Bitmap result = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
             using (Graphics bgr = Graphics.FromImage(result))
             {
                 bgr.DrawImage(Source, 0, 0, newSize.Width, newSize.Height);

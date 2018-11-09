@@ -358,7 +358,7 @@ namespace BASeTris
             Graphics usecanvas;
             List<RectangleF> OriginRect = new List<RectangleF>();
             RectangleF templocation = BlockPosition;
-            Bitmap BuildImage = new Bitmap((int) BlockPosition.Width, (int) BlockPosition.Height);
+            Bitmap BuildImage = new Bitmap((int) BlockPosition.Width, (int) BlockPosition.Height, PixelFormat.Format32bppPArgb);
             using (Graphics g = Graphics.FromImage(BuildImage))
             {
                 TetrisBlockDrawGDIPlusParameters tbdp = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null);
@@ -424,7 +424,7 @@ namespace BASeTris
             Bitmap BlockImage;
             Graphics usecanvas;
             RectangleF templocation = BlockRect;
-            BlockImage = new Bitmap((int) BlockRect.Width, (int) BlockRect.Height);
+            BlockImage = new Bitmap((int) BlockRect.Width, (int) BlockRect.Height, PixelFormat.Format32bppPArgb);
             using (Graphics g = Graphics.FromImage(BlockImage))
             {
                 TetrisBlockDrawGDIPlusParameters tb = new TetrisBlockDrawGDIPlusParameters(g, BlockRect, null);
@@ -699,7 +699,7 @@ namespace BASeTris
             }
             else
             {
-                Bitmap maketexturemap = new Bitmap(15, 15);
+                Bitmap maketexturemap = new Bitmap(15, 15, PixelFormat.Format32bppPArgb);
                 Graphics maketexturegraphics = Graphics.FromImage(maketexturemap);
                 maketexturegraphics.Clear(Color.Blue);
                 pieceimage = maketexturemap; //bugfix: pieceimage was null below for the PointF() constructor and caused of course a nullreferenceexception.
@@ -762,7 +762,7 @@ namespace BASeTris
 
 
             if (SpeedFunc == null) SpeedFunc = (() => (float) ((TetrisGame.rgen.NextDouble() * 2) + 1));
-            Bitmap createimage = new Bitmap((int) source.Size.Width, source.Size.Height);
+            Bitmap createimage = new Bitmap((int) source.Size.Width, source.Size.Height, PixelFormat.Format32bppPArgb);
             Graphics useg = Graphics.FromImage(createimage);
             //draw it...
             lock (source)
@@ -1650,7 +1650,7 @@ namespace BASeTris
         {
             //cheat... create a new LightOrb object...
             LightOrb lo = new LightOrb(new PointF(DrawSize.Width / 2, DrawSize.Height / 2), usecolor, Math.Min(DrawSize.Width, DrawSize.Height) / 2);
-            Bitmap usebitmap = new Bitmap(DrawSize.Width, DrawSize.Height);
+            Bitmap usebitmap = new Bitmap(DrawSize.Width, DrawSize.Height, PixelFormat.Format32bppPArgb);
             Graphics useg = Graphics.FromImage(usebitmap);
             lo.Draw(useg);
             return usebitmap;
