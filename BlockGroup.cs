@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -35,7 +36,10 @@ namespace BASeTris
 
         protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
         private Dictionary<TetrisBlock, BlockGroupEntry> _DataLookup = null;
-
+        public IList<BlockGroupEntry> GetBlockData()
+        {
+            return BlockData.AsReadOnly();
+        }
         public Dictionary<TetrisBlock, BlockGroupEntry> BlockDataLookup
         {
             get
@@ -114,12 +118,15 @@ namespace BASeTris
             Bitmap BuiltRepresentation = new Bitmap(BitmapSize.Width, BitmapSize.Height, PixelFormat.Format32bppPArgb);
             using (Graphics DrawRep = Graphics.FromImage(BuiltRepresentation))
             {
+                DrawRep.CompositingQuality = CompositingQuality.HighSpeed;
+                DrawRep.InterpolationMode = InterpolationMode.NearestNeighbor;
+                DrawRep.SmoothingMode = SmoothingMode.HighSpeed;
                 foreach (BlockGroupEntry bge in this)
                 {
                     RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
                     TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this);
-                    //RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
-                    bge.Block.DrawBlock(tbd);
+                    RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
+                    //bge.Block.DrawBlock(tbd);
                 }
             }
 
@@ -252,6 +259,7 @@ namespace BASeTris
                 else
                     iterateblock.RotationModulo++;
 
+                
                 if (iterateblock.RotationModulo == 0)
                 {
                     Debug.Print("Err");

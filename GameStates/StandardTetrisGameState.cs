@@ -14,6 +14,7 @@ using BASeTris.Choosers;
 using BASeTris.DrawHelper;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
@@ -205,8 +206,24 @@ namespace BASeTris.GameStates
         {
             this.Chooser = pChooser;
             PlayField = new TetrisField();
+            PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
             PlayField.BlockGroupSet += PlayField_BlockGroupSet;
+        }
+
+        private void PlayField_OnThemeChangeEvent(object sender, OnThemeChangeEventArgs e)
+        {
+            lock (LockTetImageRedraw)
+            {
+                TetrominoImages = null;
+                f_RedrawStatusBitmap = true;
+                StatisticsBackground = null;
+                f_RedrawTetrominoImages = true;
+                foreach (var refreshgroup in PlayField.BlockGroups)
+                {
+                    PlayField.Theme.ApplyTheme(refreshgroup, PlayField);
+                    }
+            }
         }
 
         ~StandardTetrisGameState()
@@ -480,8 +497,9 @@ namespace BASeTris.GameStates
                         BlockGroup ArbitraryGroup = new BlockGroup();
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
                         this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
-                        GenerateColorBlock.DrawBlock(tbd);
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
+                        RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
+                        
                     }
                 }
             }

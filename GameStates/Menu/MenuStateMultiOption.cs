@@ -106,13 +106,17 @@ namespace BASeTris.GameStates.Menu
         T PeekPrevious();
         T PeekNext();
 
+        void SetCurrentIndex(int Index);
         String GetText(T Item);
     }
     public class MultiOptionManagerList<T>:IMultiOptionManager<T>
     {
         private int SelectedIndex;
         private T[] Options;
-
+        public void SetCurrentIndex(int pIndex)
+        {
+            SelectedIndex = pIndex;
+        }
         public MultiOptionManagerList(T[] pOptions,int pStartingIndex)
         {
             Options = pOptions;

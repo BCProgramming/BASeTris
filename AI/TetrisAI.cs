@@ -292,10 +292,11 @@ namespace BASeTris.AI
             int Holes = GetHoles();
             int Bumpy = GetBumpiness();
             Debug.Print("Rows=" + Rows + " Aggregate=" + Aggregate + " Holes=" + Holes + " Bumps=" + Bumpy);
-            double a = -0.510066f;
+            double a = -0.610066f;
             double b = 0.760666;
-            double c = -0.35663;
-            double d = -.184483;
+            double c = -0.55663;
+            //double d = -.184483;
+            double d = -.384483;
             return (a * (double) Aggregate) +
                    (b * (double) Rows) +
                    (c * (double) Holes) +

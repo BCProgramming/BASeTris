@@ -30,6 +30,7 @@ namespace BASeTris.GameStates.Menu
             base.OptionManager = new MultiOptionManagerList<MenuItemScaleItemSelection>(ScaleOptions,1);
             var closest = (from so in ScaleOptions orderby Math.Abs(so.Scale - pOwner.ScaleFactor) ascending select so).First();
             this.Text = closest.Text;
+            OptionManager.SetCurrentIndex(Array.IndexOf(ScaleOptions, closest));
             OnActivateOption += ScaleActivate;
 
         }
@@ -38,8 +39,6 @@ namespace BASeTris.GameStates.Menu
             _Owner.SetScale(e.Option.Scale);
         }
     }
-
-
     public class MenuItemScaleItemSelection
     {
         public MenuItemScaleItemSelection(String pText,float pScale)

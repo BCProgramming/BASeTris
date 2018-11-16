@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
@@ -45,7 +46,7 @@ namespace BASeTris
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
         private static Image _TiledCache = null;
-
+        public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         public static Image StandardTiledTetrisBackground
         {
             get
@@ -57,6 +58,10 @@ namespace BASeTris
                     Bitmap ReduceSize = new Bitmap((int) (reduceit.Width * .1), (int) (reduceit.Height * .1));
                     using (Graphics greduce = Graphics.FromImage(ReduceSize))
                     {
+                        greduce.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        greduce.CompositingQuality = CompositingQuality.HighSpeed;
+                        greduce.SmoothingMode = SmoothingMode.HighSpeed;
+                        greduce.PixelOffsetMode = PixelOffsetMode.HighSpeed;
                         greduce.DrawImage(reduceit, new Rectangle(0, 0, ReduceSize.Width, ReduceSize.Height));
                     }
 
@@ -179,7 +184,17 @@ namespace BASeTris
         public GameState CurrentState
         {
             get { return CurrentGameState; }
-            set { CurrentGameState = value; }
+            set
+            {
+                var newvalue = value;
+                var oldvalue = CurrentGameState;
+                if (newvalue == oldvalue) return; //it's already the same so no need for any change here.
+                BeforeGameStateChangeEventArgs eventargs = new BeforeGameStateChangeEventArgs(oldvalue, newvalue);
+                BeforeGameStateChange?.Invoke(this,eventargs);
+                if (eventargs.Cancel) return;
+
+                CurrentGameState = value;
+            }
         }
 
         public void EnqueueAction(Action pAction)
@@ -431,6 +446,9 @@ namespace BASeTris
             Bitmap BuildImage = new Bitmap(Input.Width + 6, Input.Height + 6);
             using (Graphics useG = Graphics.FromImage(BuildImage))
             {
+                useG.CompositingQuality = CompositingQuality.HighQuality;
+                useG.InterpolationMode = InterpolationMode.Bicubic;
+                useG.SmoothingMode = SmoothingMode.AntiAlias;
                 var shadowtet = GetShadowAttributes(0f);
                 int offset = 2;
                 foreach (Point shadowblob in new Point[] {new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset)})
@@ -461,4 +479,5 @@ namespace BASeTris
             return resultAttr;
         }
     }
+   
 }

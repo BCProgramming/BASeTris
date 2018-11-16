@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 
 namespace BASeTris
@@ -24,13 +26,31 @@ namespace BASeTris
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         public bool AnimateRotations = true;
         private TetrisBlock[][] FieldContents;
-
+        public event EventHandler<OnThemeChangeEventArgs> OnThemeChangeEvent;
         public long LineCount
         {
             get { return GameStats.LineCount; }
         }
 
-        public TetrominoTheme Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
+        private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
+
+
+        public TetrominoTheme Theme
+        {
+            get
+            {
+                return _Theme;
+            }
+            set
+            {
+                _Theme = value;
+                SetFieldColors();
+                OnThemeChangeEvent?.Invoke(this,new OnThemeChangeEventArgs());
+            }
+        }
+
+        //public TetrominoTheme Theme = new NESTetrominoTheme();
+        //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
         private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
 
         public int Level
@@ -225,7 +245,7 @@ namespace BASeTris
         RectangleF LastFieldSave = RectangleF.Empty;
         Image FieldBitmap = null;
 
-        public void DrawFieldContents(Graphics g, RectangleF Bounds)
+        public void DrawFieldContents(IStateOwner pState,Graphics g, RectangleF Bounds)
         {
             float BlockWidth = Bounds.Width / COLCOUNT;
             float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
@@ -253,14 +273,14 @@ namespace BASeTris
                     if (TetBlock != null)
                     {
                         RectangleF BlockBounds = new RectangleF(XPos, YPos, BlockWidth, BlockHeight);
-                        TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null);
-                        TetBlock.DrawBlock(tbd);
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null);
+                        RenderingProvider.Static.DrawElement(pState,tbd.g,TetBlock,tbd);
                     }
                 }
             }
         }
 
-        public void Draw(Graphics g, RectangleF Bounds)
+        public void Draw(IStateOwner pState,Graphics g, RectangleF Bounds)
         {
             //first how big is each block?
             float BlockWidth = Bounds.Width / COLCOUNT;
@@ -270,8 +290,11 @@ namespace BASeTris
                 Bitmap BuildField = new Bitmap((int) Bounds.Width, (int) Bounds.Height, PixelFormat.Format32bppPArgb);
                 using (Graphics gfield = Graphics.FromImage(BuildField))
                 {
+                    gfield.CompositingQuality = CompositingQuality.HighSpeed;
+                    gfield.SmoothingMode = SmoothingMode.HighSpeed;
+                    gfield.InterpolationMode = InterpolationMode.NearestNeighbor;
                     gfield.Clear(Color.Transparent);
-                    DrawFieldContents(gfield, Bounds);
+                    DrawFieldContents(pState,gfield, Bounds);
                     if (FieldBitmap != null) FieldBitmap.Dispose();
                     FieldBitmap = BuildField;
                 }
@@ -334,7 +357,7 @@ namespace BASeTris
 
                             RectangleF BlockBounds = new RectangleF(DrawXPx, DrawYPx, BlockWidth, BlockHeight);
                             TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, bg);
-                            bge.Block.DrawBlock(tbd);
+                            RenderingProvider.Static.DrawElement(pState,g,bge.Block,tbd);
                         }
                     }
 
@@ -349,7 +372,7 @@ namespace BASeTris
             {
                 foreach (var iteratecell in iteraterow)
                 {
-                    if (iteratecell != null)
+                    if (iteratecell != null && iteratecell.Owner!=null)
                         Theme.ApplyTheme(iteratecell.Owner, this);
                 }
             }
@@ -376,5 +399,9 @@ namespace BASeTris
                 _group = bg;
             }
         }
+    }
+    public class OnThemeChangeEventArgs :EventArgs
+    {
+
     }
 }

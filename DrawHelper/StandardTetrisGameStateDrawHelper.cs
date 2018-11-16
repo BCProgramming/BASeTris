@@ -45,7 +45,7 @@ namespace BASeTris.DrawHelper
 
             if (PlayField != null)
             {
-                PlayField.Draw(g, Bounds);
+                PlayField.Draw(pOwner,g, Bounds);
             }
 
 

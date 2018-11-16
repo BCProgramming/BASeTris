@@ -55,12 +55,12 @@ namespace BASeTris.TetrisBlocks
         {
             BeforeDraw?.Invoke(parameters);
         }
-        [Obsolete("Use Rendering Providers.")]
-        public virtual void DrawBlock(TetrisBlockDrawParameters parameters)
+        //[Obsolete("Use Rendering Providers.")]
+        /*public virtual void DrawBlock(TetrisBlockDrawParameters parameters)
         {
             
             InvokeBeforeDraw(parameters);            
-        }
+        }*/
 
         public virtual void AnimateFrame()
         {

@@ -82,41 +82,48 @@ namespace BASeTris.Rendering.GDIPlus
                     return;
                 }*/
                 int usemodulo = Source.Rotation;
+                if (usemodulo < 0) usemodulo = Source._RotationImages.Length - usemodulo;
                 Image useImage = Source._RotationImages[usemodulo % Source._RotationImages.Length];
                 ImageAttributes useAttrib = parameters.ApplyAttributes ?? (Source.useAttributes == null ? null : Source.useAttributes[usemodulo % Source.useAttributes.Length]);
 
                 float Degrees = usemodulo * 90;
                 PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));
 
+                RectangleF DrawPosition = parameters.region;
+                if (parameters.FillPercent != 1)
+                {
+                    float totalWidth = parameters.region.Width;
+                    float totalHeight = parameters.region.Height;
+                    float CenterX = DrawPosition.Width / 2 + DrawPosition.Left;
+                    float CenterY = DrawPosition.Height / 2 + DrawPosition.Top;
 
+                    float desiredWidth = totalWidth * parameters.FillPercent;
+                    float desiredHeight = totalHeight * parameters.FillPercent;
+
+                    DrawPosition = new RectangleF(CenterX - desiredWidth / 2, CenterY - desiredHeight / 2, desiredWidth, desiredHeight);
+                }
+                PointF[] UsePoints = new PointF[] { new PointF(DrawPosition.Left, DrawPosition.Top), new PointF(DrawPosition.Right, DrawPosition.Top), new PointF(DrawPosition.Left, DrawPosition.Bottom) };
                 if (Source.DoRotateTransform)
                 {
                     var original = parameters.g.Transform;
                     parameters.g.TranslateTransform(Center.X, Center.Y);
                     parameters.g.RotateTransform(Degrees);
                     parameters.g.TranslateTransform(-Center.X, -Center.Y);
-                    parameters.g.DrawImage(useImage, new Rectangle((int)parameters.region.Left, (int)parameters.region.Top, (int)parameters.region.Width, (int)parameters.region.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                    
+                    parameters.g.DrawImage(useImage, UsePoints,
+                        new RectangleF(0f, 0f, (float)useImage.Width, (float)useImage.Height), GraphicsUnit.Pixel, useAttrib);
+                    //parameters.g.DrawImage(useImage,parameters.region,new RectangleF(0f,0f, (float)useImage.Width, (float)useImage.Height),GraphicsUnit.Pixel,useAttrib );
+                    //parameters.g.DrawImage(useImage, parameters.region, 0f, 0f, (float)useImage.Width, (float)useImage.Height, GraphicsUnit.Pixel, useAttrib);
                     parameters.g.Transform = original;
                 }
                 else
                 {
                     //inset the region by the specified amount of percentage.
-                    RectangleF DrawPosition = parameters.region;
-                    if (parameters.FillPercent != 1)
-                    {
-                        float totalWidth = parameters.region.Width;
-                        float totalHeight = parameters.region.Height;
-                        float CenterX = DrawPosition.Width / 2 + DrawPosition.Left;
-                        float CenterY = DrawPosition.Height / 2 + DrawPosition.Top;
+                   
 
-                        float desiredWidth = totalWidth * parameters.FillPercent;
-                        float desiredHeight = totalHeight * parameters.FillPercent;
-
-                        DrawPosition = new RectangleF(CenterX - desiredWidth / 2, CenterY - desiredHeight / 2, desiredWidth, desiredHeight);
-                    }
-
-
-                    parameters.g.DrawImage(useImage, new Rectangle((int)DrawPosition.Left, (int)DrawPosition.Top, (int)DrawPosition.Width, (int)DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                    parameters.g.DrawImage(useImage, UsePoints,
+                        new RectangleF(0f, 0f, (float)useImage.Width, (float)useImage.Height), GraphicsUnit.Pixel, useAttrib);
+                    //parameters.g.DrawImage(useImage, new Rectangle((int)DrawPosition.Left, (int)DrawPosition.Top, (int)DrawPosition.Width, (int)DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
                 }
             }
         }
@@ -124,7 +131,7 @@ namespace BASeTris.Rendering.GDIPlus
 
     public class TetrisStandardColouredBlockRenderingHandler : TetrisImageBlockRenderingHandler, IRenderingHandler<Graphics, StandardColouredBlock, TetrisBlockDrawParameters>
     {
-        public static Dictionary<StandardColouredBlock.BlockStyle, Dictionary<Color, Image>> StandardColourBlocks = null;
+        public static Dictionary<String, Dictionary<Color, Image>> StandardColourBlocks = null;
         private static Dictionary<StandardColouredBlock.ColouredBlockGummyIndexData, Image> GummyBitmaps = new Dictionary<StandardColouredBlock.ColouredBlockGummyIndexData, Image>();
         
         private void RebuildImage(StandardColouredBlock Source)
@@ -166,33 +173,33 @@ namespace BASeTris.Rendering.GDIPlus
                 baseimage = "block_std_red";
             else if (Source.DisplayStyle == StandardColouredBlock.BlockStyle.Style_Chisel)
                 baseimage = "block_chisel_red";
-
             Size TargetSize = new Size(100, 100);
+            String sBlockKey = baseimage;
             if (StandardColourBlocks == null)
             {
-                StandardColourBlocks = new Dictionary<StandardColouredBlock.BlockStyle, Dictionary<Color, Image>>();
+                StandardColourBlocks = new Dictionary<String, Dictionary<Color, Image>>();
             }
 
-            if (!StandardColourBlocks.ContainsKey(Source.DisplayStyle))
+            if (!StandardColourBlocks.ContainsKey(sBlockKey))
             {
-                StandardColourBlocks.Add(Source.DisplayStyle, new Dictionary<Color, Image>());
+                StandardColourBlocks.Add(sBlockKey, new Dictionary<Color, Image>());
             }
 
-            if (StandardColourBlocks[Source.DisplayStyle].Count == 0)
+            if (StandardColourBlocks[sBlockKey].Count == 0)
             {
                 foreach (Color c in new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Blue, Color.Red, Color.Orange })
                 {
-                    StandardColourBlocks[Source.DisplayStyle].Add(c, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], c), TargetSize));
+                    StandardColourBlocks[sBlockKey].Add(c, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], c), TargetSize));
                 }
             }
 
-            if (!StandardColourBlocks[Source.DisplayStyle].ContainsKey(Source.BlockColor))
+            if (!StandardColourBlocks[sBlockKey].ContainsKey(Source.BlockColor))
             {
-                StandardColourBlocks[Source.DisplayStyle].Add(Source.BlockColor, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], Source.BlockColor), TargetSize));
+                StandardColourBlocks[sBlockKey].Add(Source.BlockColor, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], Source.BlockColor), TargetSize));
             }
 
 
-            return StandardColourBlocks[Source.DisplayStyle][Source.BlockColor];
+            return StandardColourBlocks[sBlockKey][Source.BlockColor];
         }
 
         private Image RecolorImage(Image Source, Color Target)
@@ -245,12 +252,19 @@ namespace BASeTris.Rendering.GDIPlus
 
         public void Render(IStateOwner pOwner, Graphics pRenderTarget, StandardColouredBlock Source, TetrisBlockDrawParameters Element)
         {
-            StandardColouredBlock.ColouredBlockGummyIndexData gummydata = new StandardColouredBlock.ColouredBlockGummyIndexData(Source.BlockColor, Source.InnerColor, Source.InnerColor != Source.BlockColor);
-            if (Source.CurrentImageHash != gummydata.GetHashCode())
+            if (Source.DisplayStyle == StandardColouredBlock.BlockStyle.Style_Custom)
             {
-                RebuildImage(Source);
+                base.Render(pOwner, pRenderTarget, Source, Element);
             }
-            base.Render(pOwner,pRenderTarget,Source,Element);
+            else
+            {
+                StandardColouredBlock.ColouredBlockGummyIndexData gummydata = new StandardColouredBlock.ColouredBlockGummyIndexData(Source.BlockColor, Source.InnerColor, Source.InnerColor != Source.BlockColor);
+                if (Source.CurrentImageHash != gummydata.GetHashCode())
+                {
+                    RebuildImage(Source);
+                }
+                base.Render(pOwner, pRenderTarget, Source, Element);
+            }
         }
     }
 }

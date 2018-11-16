@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
 
@@ -362,7 +363,8 @@ namespace BASeTris
             using (Graphics g = Graphics.FromImage(BuildImage))
             {
                 TetrisBlockDrawGDIPlusParameters tbdp = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null);
-                sourceblock.DrawBlock(tbdp);
+                RenderingProvider.Static.DrawElement(null, tbdp.g, sourceblock, tbdp);
+                
 
                 //now we need to chop it into 'cols' columns and 'rows' rows.
                 //first, how big will each "piece" be?
@@ -401,9 +403,9 @@ namespace BASeTris
             }
         }
 
-        public static BrickDebris[] GenerateQuadBricks(TetrisBlock sourceblock, RectangleF BlockRect, PointF BallSpeed)
+        public static BrickDebris[] GenerateQuadBricks(IStateOwner pState,TetrisBlock sourceblock, RectangleF BlockRect, PointF BallSpeed)
         {
-            return GenerateQuadBricks(sourceblock, BlockRect, BallSpeed, 2);
+            return GenerateQuadBricks(pState,sourceblock, BlockRect, BallSpeed, 2);
         }
 
 
@@ -415,7 +417,7 @@ namespace BASeTris
         /// <param name="sourceblock">Block to create Bricks on</param>
         /// <param name="BallSpeed">Speed of ball that destroyed the block, or null.</param>
         /// <returns>the four BrickDebris objects created</returns>
-        public static BrickDebris[] GenerateQuadBricks(TetrisBlock sourceblock, RectangleF BlockRect, PointF? BallSpeed, float RandomFactor)
+        public static BrickDebris[] GenerateQuadBricks(IStateOwner pState,TetrisBlock sourceblock, RectangleF BlockRect, PointF? BallSpeed, float RandomFactor)
         {
             if (BallSpeed == null) BallSpeed = PointF.Empty;
 
@@ -428,7 +430,7 @@ namespace BASeTris
             using (Graphics g = Graphics.FromImage(BlockImage))
             {
                 TetrisBlockDrawGDIPlusParameters tb = new TetrisBlockDrawGDIPlusParameters(g, BlockRect, null);
-                sourceblock.DrawBlock(tb);
+                RenderingProvider.Static.DrawElement(pState,g,sourceblock,tb);
             }
 
 

@@ -31,6 +31,16 @@ namespace BASeTris
         
         private List<GameObject> GameObjects = new List<GameObject>();
         private TetrisGame _Game;
+        //delegate the BeforeGameStateChange event...
+        public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange
+        {
+            add => _Game.BeforeGameStateChange += value;
+            remove => _Game.BeforeGameStateChange -= value;
+        }
+
+
+
+
         ControllerInputState CIS = null;
         HashSet<Keys> PressedKeys = new HashSet<Keys>();
 

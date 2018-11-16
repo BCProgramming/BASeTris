@@ -1508,25 +1508,41 @@ namespace BASeTris.AssetManager
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
 
-        public Image this[String man_key]
+        public Image this[String man_key,float reductionFactor=1]
         {
             get
             {
+                Image resultImage = null;
                 man_key = man_key.ToUpper();
                 //return loadedimages[man_key];
                 if (loadedimages.ContainsKey(man_key))
-                    return getLoadedImage(man_key);
+                    resultImage = getLoadedImage(man_key);
                 else if (loadedicons.ContainsKey(man_key))
-                    return getLoadedIcon(man_key, new Size(16, 16)).ToBitmap();
+                    resultImage = getLoadedIcon(man_key, new Size(16, 16)).ToBitmap();
                 else
                     //log to imagelookup.log file.
                     mcallback.FlagError("Lookup of Image " + man_key + " Failed.", null);
 
-                return null;
+                if(resultImage!=null && reductionFactor!=1)
+                {
+                    Size TargetSize = new Size((int)((float)resultImage.Width * reductionFactor), (int)((float)resultImage.Height * reductionFactor));
+                    resultImage = ReduceImage(resultImage, TargetSize);
+                }
+
+                return resultImage;
             }
             set { loadedimages[man_key] = value; }
         }
+        public static Image ReduceImage(Image Source, Size TargetSize)
+        {
+            Bitmap Result = new Bitmap(TargetSize.Width, TargetSize.Height);
+            using (Graphics g = Graphics.FromImage(Result))
+            {
+                g.DrawImage(Source,new Rectangle(0,0,TargetSize.Width,TargetSize.Height));
+            }
+            return Result;
 
+        }
         //default "name to stream" implementation.
         public Stream DefaultNameToStream(String filename, FileMode OpenMode)
         {
@@ -1742,7 +1758,7 @@ namespace BASeTris.AssetManager
                 return TetrisGame.Imageman.getLoadedImage(Prefix);
         }
 
-        public Image getLoadedImage(String searchindex)
+        public Image getLoadedImage(String searchindex,float Reduction = 1)
         {
             String index = searchindex.ToUpper();
             if (loadedimages.ContainsKey(index)) return loadedimages[index.ToUpper()];
@@ -1803,6 +1819,24 @@ namespace BASeTris.AssetManager
                     case "FLIPXY":
                         changedimage.RotateFlip(RotateFlipType.RotateNoneFlipXY);
                         break;
+                    case "ROT90":
+                        changedimage.RotateFlip(RotateFlipType.Rotate90FlipX);
+                        break;
+                    case "ROT180":
+                        changedimage.RotateFlip(RotateFlipType.Rotate180FlipX);
+                        break;
+                    case "ROT270":
+                        changedimage.RotateFlip(RotateFlipType.Rotate270FlipX);
+                        break;
+                    case "FLIPXROT90":
+                        changedimage.RotateFlip(RotateFlipType.Rotate90FlipX);
+                        break;
+                    case "FLIPXROT180":
+                        changedimage.RotateFlip(RotateFlipType.Rotate180FlipX);
+                        break;
+                    case "FLIPXROT270":
+                        changedimage.RotateFlip(RotateFlipType.Rotate270FlipX);
+                        break;
                     case "COLORIZE":
                     case "COLOURIZE":
                         int reduse, greenuse, blueuse, alphause = 255;
@@ -1820,6 +1854,11 @@ namespace BASeTris.AssetManager
                         applyattributes.SetColorMatrix(usematrix);
                         changedimage = TetrisGame.ApplyImageAttributes(changedimage, applyattributes);
 
+                        if(Reduction!=1)
+                        {
+                            Size targetsize = new Size((int)((float)changedimage.Width * Reduction), (int)((float)changedimage.Height * Reduction));
+                            changedimage = ReduceImage(changedimage, targetsize);
+                        }
 
                         break;
                 }

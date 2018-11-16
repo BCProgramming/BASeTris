@@ -33,12 +33,12 @@ namespace BASeTris.Theme.Audio
             return new AudioTheme()
             {
                 BackgroundMusic = new AudioThemeElement(new[] { "tetris_theme_A", "tetris_a_theme_techno","tetris_theme_B","tetris_theme_C" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                BlockGroupMove = new AudioThemeElement(new String[] { "block_move_2", "block_move" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+                BlockGroupMove = new AudioThemeElement(new String[] { "block_move_2", "block_move","block_move_3" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
                 BlockGroupPlace = new AudioThemeElement(new String[] { "block_place_3", "block_place_2", "block_place" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-                BlockGroupRotate = new AudioThemeElement(new String[] { "block_rotate_3", "block_rotate_2", "block_rotate" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+                BlockGroupRotate = new AudioThemeElement(new String[] { "block_rotate_3", "block_rotate_2", "block_rotate","block_rotate_4" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
                 BlockStopped = new AudioThemeElement(new String[] { "block_stop" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                ClearLine = new AudioThemeElement(new String[] {"line_clear_3","line_clear", "line_clear_2"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                ClearTetris = new AudioThemeElement(new String[] {"line_tetris", "line_tetris_2"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+                ClearLine = new AudioThemeElement(new String[] {"line_clear_3","line_clear", "line_clear_2","line_clear_4"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+                ClearTetris = new AudioThemeElement(new String[] {"line_tetris", "line_tetris_2","line_tetris_3"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
                 GameOver = new AudioThemeElement("tetris_game_over"),
                 GameOverShade = new AudioThemeElement("shade_move"),
                 Pause = new AudioThemeElement("pause"),

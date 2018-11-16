@@ -55,6 +55,10 @@ namespace BASeTris.GameStates
             var scaleitem = new MenuStateScaleMenuItem(pOwner);
             scaleitem.Font = ResumeOption.Font;
 
+            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner);
+            ThemeItem.Font = ResumeOption.Font;
+            
+
             var ExitItem = new ConfirmedTextMenuItem() {Text="Quit"};
             ExitItem.Font = scaleitem.Font;
             ExitItem.OnOptionConfirmed += (a, b) =>
@@ -64,6 +68,7 @@ namespace BASeTris.GameStates
 
             MenuElements.Add(ResumeOption);
             MenuElements.Add(scaleitem);
+            MenuElements.Add(ThemeItem);
             MenuElements.Add(ExitItem);
         }
 

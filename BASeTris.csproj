@@ -110,6 +110,7 @@
     <Compile Include="GameStates\IDirectKeyboardInputState.cs" />
     <Compile Include="GameStates\Menu\ConfirmedMenuItem.cs" />
     <Compile Include="GameStates\Menu\MenuState.cs" />
+    <Compile Include="GameStates\Menu\MenuStateDisplayThemeMenuItem.cs" />
     <Compile Include="GameStates\Menu\MenuStateMenuItem.cs" />
     <Compile Include="GameStates\Menu\MenuStateMultiOption.cs" />
     <Compile Include="GameStates\Menu\MenuStateScaleMenuItem.cs" />
