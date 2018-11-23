@@ -63,7 +63,7 @@ namespace BASeTris.GameStates
             ExitItem.Font = scaleitem.Font;
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
-                MessageBox.Show("Confirmed Exit!");
+                Application.Exit();
             };
 
             MenuElements.Add(ResumeOption);

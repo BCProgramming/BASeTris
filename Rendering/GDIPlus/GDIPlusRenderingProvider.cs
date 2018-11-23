@@ -119,10 +119,12 @@ namespace BASeTris.Rendering.GDIPlus
                 else
                 {
                     //inset the region by the specified amount of percentage.
-                   
 
-                    parameters.g.DrawImage(useImage, UsePoints,
-                        new RectangleF(0f, 0f, (float)useImage.Width, (float)useImage.Height), GraphicsUnit.Pixel, useAttrib);
+                    lock (useImage)
+                    {
+                        parameters.g.DrawImage(useImage, UsePoints,
+                            new RectangleF(0f, 0f, (float)useImage.Width, (float)useImage.Height), GraphicsUnit.Pixel, useAttrib);
+                    }
                     //parameters.g.DrawImage(useImage, new Rectangle((int)DrawPosition.Left, (int)DrawPosition.Top, (int)DrawPosition.Width, (int)DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
                 }
             }
@@ -266,5 +268,19 @@ namespace BASeTris.Rendering.GDIPlus
                 base.Render(pOwner, pRenderTarget, Source, Element);
             }
         }
+    }
+
+    public static class GraphicsExtensions
+    {
+
+        public static void DrawImage(this Graphics g,Image DrawImage,RectangleF DestRect,ImageAttributes Attributes)
+        {
+
+            PointF[] UsePoints = new PointF[] { new PointF(DestRect.Left, DestRect.Top), new PointF(DestRect.Right, DestRect.Top), new PointF(DestRect.Left, DestRect.Bottom) };
+            g.DrawImage(DrawImage, UsePoints,
+                new RectangleF(0f, 0f, (float)DrawImage.Width, (float)DrawImage.Height), GraphicsUnit.Pixel, Attributes);
+        }
+
+
     }
 }

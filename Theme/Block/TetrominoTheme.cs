@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +19,8 @@ namespace BASeTris
     public abstract class TetrominoTheme
     {
         public abstract void ApplyTheme(BlockGroup Group, TetrisField Field);
-
+        public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field);
+        
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
 
         private Image AddCachedImage(String Key,Image pImage)
@@ -51,23 +55,60 @@ namespace BASeTris
         }
         public static Image[] GetImageRotations(Image Source)
         {
-            Image Rotate90 = new Bitmap(Source);
-            Image Rotate180 = new Bitmap(Source);
-            Image Rotate270 = new Bitmap(Source);
+            lock (Source)
+            {
+                Image Rotate90 = new Bitmap(Source);
+                Image Rotate180 = new Bitmap(Source);
+                Image Rotate270 = new Bitmap(Source);
 
 
 
-            Rotate90.RotateFlip(RotateFlipType.Rotate90FlipNone);
-            Rotate180.RotateFlip(RotateFlipType.Rotate180FlipNone);
-            Rotate270.RotateFlip(RotateFlipType.Rotate270FlipNone);
-            return new Image[] { Source, Rotate90, Rotate180, Rotate270 };
+                Rotate90.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                Rotate180.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                Rotate270.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                return new Image[] { Source, Rotate90, Rotate180, Rotate270 };
+            }
+        }
+        static Color DefaultTint = Color.Transparent;
+        protected PlayFieldBackgroundInfo GetColoredBackground(Color MainColor,Color? TintColor = null)
+        {
+                Image ResultImage = new Bitmap(250, 500);
+                using (Graphics drawdark = Graphics.FromImage(ResultImage))
+                {
+                    drawdark.Clear(MainColor);
+                }
+            Color UseTint = TintColor == null ? Color.Transparent : TintColor.Value;
+            return new PlayFieldBackgroundInfo(ResultImage, UseTint);
         }
     }
+    public class PlayFieldBackgroundInfo
+    {
+        public Image BackgroundImage;
+        public Color TintColor = Color.Transparent;
+        public PlayFieldBackgroundInfo(Image pBackgroundImage,Color pTintColor)
+        {
+            BackgroundImage = pBackgroundImage;
+            TintColor = pTintColor;
+        }
 
+    }
     public class NESTetrominoTheme : TetrominoTheme
     {
         public NESTetrominoTheme()
         {
+        }
+        Bitmap DarkImage;
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        {
+            if(DarkImage==null)
+            {
+                DarkImage = new Bitmap(250, 500);
+                using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                {
+                    drawdark.Clear(Color.FromArgb(10,10,10));
+                }
+            }
+            return new PlayFieldBackgroundInfo(DarkImage,Color.Transparent);
         }
 
         public override void ApplyTheme(BlockGroup Group, TetrisField Field)
@@ -93,9 +134,10 @@ namespace BASeTris
                     selected = Hollow;
                 else if (bg is Tetromino_J || bg is Tetromino_Z)
                     selected = Dark;
-                else
+                else if (bg is Tetromino)
                     selected = Light;
-
+                else
+                    selected = TetrisGame.Choose(new Color[][] { Hollow, Dark, Light });
                 if (iterate.Block is StandardColouredBlock)
                 {
                     var coloured = (StandardColouredBlock) iterate.Block;
@@ -143,6 +185,12 @@ namespace BASeTris
         {
             get { return _Style; }
             set { _Style = value; }
+        }
+
+        
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        {
+            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background",0.5f],Color.Transparent);
         }
 
         public StandardTetrominoTheme(StandardColouredBlock.BlockStyle pBlockStyle)
@@ -248,6 +296,251 @@ namespace BASeTris
     //Blue J
     //Orange L
 
+    /// <summary>
+    /// Theme which has tetrominoes be outlined rather than draw as distinct blocks.
+    /// </summary>
+    public class OutlinedTetrominoTheme : TetrominoTheme
+    {
+        [Flags]
+        public enum BlockOutlines
+        {
+            Outline_Top = 1,
+            Outline_Left = 2,
+            Outline_Bottom=4,
+            Outline_Right = 8,
+            Square_Top_Left = 16,
+            Square_Top_Right = 32,
+            Square_Bottom_Right = 64,
+            Square_Bottom_Left = 128
+        }
+
+
+        private Dictionary<String, Image> StoredImages = new Dictionary<String, Image>();
+        Size StandardDrawSize = new Size(125,125);
+        Color StandardDrawColor = Color.Red;
+        Pen OutlinePen = new Pen(Color.Black, 10);
+        float PenWidth = 10;
+        private String getCacheKey(BlockOutlines outline, Color BaseColor)
+        {
+            return "(" + BaseColor.R + "," + BaseColor.G + "," + BaseColor.B + ")-" + ((int)outline).ToString();
+        }
+        private Image GetOutlinedImage(BlockOutlines outline,Color BaseColor)
+        {
+            string sKey = getCacheKey(outline, BaseColor);
+            if(!StoredImages.ContainsKey(sKey))
+            {
+                Bitmap BuildImage = new Bitmap(StandardDrawSize.Width,StandardDrawSize.Height);
+                using (Graphics g = Graphics.FromImage(BuildImage))
+                {
+                    g.CompositingQuality = CompositingQuality.HighSpeed;
+                    g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                    g.SmoothingMode = SmoothingMode.HighSpeed;
+                    g.Clear(BaseColor);
+                }
+                var ResultImage = DrawOutline(BuildImage, outline, OutlinePen);
+                StoredImages.Add(sKey,ResultImage);
+            }
+            return StoredImages[sKey];
+        }
+        private Image DrawOutline(Image Target, BlockOutlines pOutlines, Pen pPen)
+        {
+            Bitmap BuildResult = new Bitmap(Target);
+            using (Graphics g = Graphics.FromImage(BuildResult))
+            {
+                g.CompositingQuality = CompositingQuality.HighSpeed;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.SmoothingMode = SmoothingMode.HighSpeed;
+                if (pOutlines.HasFlag(BlockOutlines.Outline_Top))
+                {
+                    g.DrawLine(pPen, 0, 0, BuildResult.Width, 0);
+                }
+
+                if (pOutlines.HasFlag(BlockOutlines.Outline_Bottom))
+                {
+                    g.DrawLine(pPen, 0,BuildResult.Height, BuildResult.Width, BuildResult.Height);
+                }
+                if (pOutlines.HasFlag(BlockOutlines.Outline_Left))
+                {
+                    g.DrawLine(pPen, 0, 0, 0, BuildResult.Height);
+                }
+                if (pOutlines.HasFlag(BlockOutlines.Outline_Right))
+                {
+                    g.DrawLine(pPen, BuildResult.Width, 0, BuildResult.Width, BuildResult.Height);
+                }
+                //TODO: handle drawing dotted corners...
+
+                if(pOutlines.HasFlag(BlockOutlines.Square_Top_Left))
+                {
+                    g.FillRectangle(pPen.Brush,new RectangleF(0,0,PenWidth,PenWidth));
+                }
+                else if(pOutlines.HasFlag(BlockOutlines.Square_Top_Right))
+                {
+                    g.FillRectangle(pPen.Brush,new RectangleF(Target.Width-PenWidth,0,PenWidth,PenWidth));
+                }
+                else if(pOutlines.HasFlag(BlockOutlines.Square_Bottom_Left))
+                {
+                    g.FillRectangle(pPen.Brush, new RectangleF(0, Target.Height-PenWidth, PenWidth, PenWidth));
+                }
+                else if(pOutlines.HasFlag(BlockOutlines.Square_Bottom_Right))
+                {
+                    g.FillRectangle(pPen.Brush, new RectangleF(Target.Width - PenWidth, Target.Height - PenWidth, PenWidth, PenWidth));
+                }
+            }
+            return BuildResult;
+        }
+
+        public OutlinedTetrominoTheme()
+        {
+
+        }
+        public override void ApplyTheme(BlockGroup Group, TetrisField Field)
+        {
+            int CurrLevel = Field == null ? 0 : (int)(Field.LineCount / 10);
+            if (Group is Tetromino_I)
+                ApplyTheme_I(Group, CurrLevel);
+            else if (Group is Tetromino_J)
+                ApplyTheme_J(Group, CurrLevel);
+            else if (Group is Tetromino_L)
+                ApplyTheme_L(Group, CurrLevel);
+            else if (Group is Tetromino_O)
+                ApplyTheme_O(Group, CurrLevel);
+            else if (Group is Tetromino_S)
+                ApplyTheme_S(Group, CurrLevel);
+            else if (Group is Tetromino_Z)
+                ApplyTheme_Z(Group, CurrLevel);
+            else if (Group is Tetromino_T)
+                ApplyTheme_T(Group, CurrLevel);
+            else
+                ApplyImages(Group,new Image[]{GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top | BlockOutlines.Outline_Right | BlockOutlines.Outline_Left,GetLevelColor(CurrLevel))});
+                
+        }
+        private Color[] ColorArray = null;
+        private Color GetLevelColor(int Level)
+        {
+            if (ColorArray == null)
+            {
+                var BaseColor = Color.Red;
+                int ColorCount = 10;
+                double Partitions = 240d / (double)ColorCount;
+                List<Color> BuildColors = new List<Color>();
+                for (int i = 0; i < ColorCount - 1; i++)
+                {
+                    BuildColors.Add(HSLColor.RotateHue(BaseColor, (int)(i * Partitions)));
+                }
+                ColorArray = BuildColors.ToArray();
+            }
+            return ColorArray[Level % (ColorArray.Length - 1)];
+
+
+        }
+
+        private void ApplyImages(BlockGroup Target,Image[] BlockImages)
+        {
+            var BlockData = Target.GetBlockData();
+            
+            for(int i=0;i<BlockData.Count;i++)
+            {
+                
+                if (BlockData[i].Block is StandardColouredBlock)
+                {
+                    ((StandardColouredBlock)BlockData[i].Block).DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                    ((StandardColouredBlock)BlockData[i].Block)._RotationImages = GetImageRotations(BlockImages[i]);
+                }
+            }
+        }
+
+        protected void ApplyTheme_I(BlockGroup Target,int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top | BlockOutlines.Outline_Left,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top|BlockOutlines.Outline_Right ,baseColor)
+            });
+            
+        }
+        protected void ApplyTheme_J(BlockGroup Target,int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Right | BlockOutlines.Outline_Top | BlockOutlines.Outline_Left,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Left | BlockOutlines.Outline_Bottom | BlockOutlines.Square_Top_Right ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Bottom ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Bottom|BlockOutlines.Outline_Right ,baseColor)
+            });
+        }
+
+        protected void ApplyTheme_L(BlockGroup Target, int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top | BlockOutlines.Outline_Left,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Right | BlockOutlines.Outline_Bottom |BlockOutlines.Square_Top_Left,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left|BlockOutlines.Outline_Right ,baseColor)
+            });
+        }
+        protected void ApplyTheme_O(BlockGroup Target, int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Left ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Right ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Right,baseColor)
+            });
+        }
+
+        protected void ApplyTheme_Z(BlockGroup Target, int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left | BlockOutlines.Outline_Bottom,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Right|BlockOutlines.Square_Bottom_Left ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Left | BlockOutlines.Outline_Bottom ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Right | BlockOutlines.Outline_Top,baseColor)
+            });
+        }
+        protected void ApplyTheme_S(BlockGroup Target, int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left | BlockOutlines.Outline_Bottom,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Right |BlockOutlines.Square_Top_Left,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Right | BlockOutlines.Outline_Top,baseColor)
+            });
+        }
+
+        protected void ApplyTheme_T(BlockGroup Target, int CurrentLevel)
+        {
+            Color baseColor = GetLevelColor(CurrentLevel);
+            ApplyImages(Target, new Image[]
+            {
+                GetOutlinedImage(BlockOutlines.Outline_Bottom|BlockOutlines.Square_Bottom_Right | BlockOutlines.Square_Bottom_Left ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left | BlockOutlines.Outline_Bottom ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Left | BlockOutlines.Outline_Top | BlockOutlines.Outline_Right ,baseColor),
+                GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Right | BlockOutlines.Outline_Top,baseColor)
+            });
+        }
+
+        PlayFieldBackgroundInfo ColoredBG = null;
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        {
+            if (ColoredBG == null) ColoredBG = GetColoredBackground(Color.AntiqueWhite, null);
+
+            return ColoredBG;
+        }
+    }
+
+
     public class GameBoyTetrominoTheme : TetrominoTheme
     {
         static readonly Size ImageSize;
@@ -257,12 +550,29 @@ namespace BASeTris
             I_Left_Cap = TetrisGame.Imageman.getLoadedImage("FLIPX:mottle_right_cap", 0.25f);
             I_Horizontal = TetrisGame.Imageman.getLoadedImage("mottle_horizontal", 0.25f);
             Solid_Square = TetrisGame.Imageman.getLoadedImage("standard_square", 0.25f);
-            Dotted_Dark = Dotted_Light = Fat_Dotted_Light = Inset_Bevel = Solid_Square;
+            Dotted_Dark = TetrisGame.Imageman.getLoadedImage("dark_dotted", 0.25f);
+            Dotted_Light = TetrisGame.Imageman.getLoadedImage("light_dotted", 0.25f);
+            Fat_Dotted_Light = TetrisGame.Imageman.getLoadedImage("lighter_big_dotted", 0.25f);
+            Inset_Bevel = TetrisGame.Imageman.getLoadedImage("solid_beveled", 0.25f);
             ImageSize = I_Right_Cap.Size;
 
 
 
         }
+        private Bitmap LightImage = null;
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        {
+            if (LightImage == null)
+            {
+                LightImage = new Bitmap(250, 500);
+                using (Graphics drawdark = Graphics.FromImage(LightImage))
+                {
+                    drawdark.Clear(Color.PeachPuff);
+                }
+            }
+            return new PlayFieldBackgroundInfo(LightImage, Color.Transparent);
+        }
+
         protected Image GetRightCap(int Level)
         {
             Color LevelColor = GetLevelColor(Level);
@@ -388,6 +698,7 @@ namespace BASeTris
                     {
                         StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                        TetrisGame.Choose(new Image[] { GetSolidSquare(CurrLevel), GetDottedLight(CurrLevel), GetDottedDark(CurrLevel), GetFatDotted(CurrLevel), GetInsetBevel(CurrLevel) });
                         scb._RotationImages = new Image[] { GetInsetBevel(CurrLevel) };
                         //scb.BaseImageKey = Solid_Square; 
                     }

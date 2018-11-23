@@ -16,7 +16,8 @@ namespace BASeTris.GameStates.Menu
 
             new MenuStateThemeSelection("Standard",typeof(StandardTetrominoTheme), ()=>new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine)),
             new MenuStateThemeSelection("Nintendo NES",typeof(NESTetrominoTheme),() => new NESTetrominoTheme()),
-            new MenuStateThemeSelection("Game Boy",typeof(GameBoyTetrominoTheme), ()=>new GameBoyTetrominoTheme())
+            new MenuStateThemeSelection("Game Boy",typeof(GameBoyTetrominoTheme), ()=>new GameBoyTetrominoTheme()),
+            new MenuStateThemeSelection("Outlined",typeof(OutlinedTetrominoTheme), ()=>new OutlinedTetrominoTheme()) 
         };
         public MenuStateDisplayThemeMenuItem(IStateOwner pOwner) : base(null)
         {
@@ -48,6 +49,7 @@ namespace BASeTris.GameStates.Menu
             {
                 //if it's a standard state, we set the Theme of the TetrisField, and un-assign this event.
                 newstate.PlayField.Theme = ActivatedOption.Option.GenerateThemeFunc();
+                newstate.DoRefreshBackground = true;
                 _Owner.BeforeGameStateChange -= _Owner_BeforeGameStateChange;
             }
         }

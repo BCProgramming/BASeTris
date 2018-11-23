@@ -22,22 +22,35 @@ namespace BASeTris.DrawHelper
         RectangleF StoredBlockImageRect = RectangleF.Empty;
         Image StoredBlockImage = null;
         Bitmap useBackground = null;
-        private void RefreshBackground(RectangleF buildSize)
+        private void RefreshBackground(StandardTetrisGameState pState,RectangleF buildSize)
         {
             StoredBackground = buildSize;
             useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height, PixelFormat.Format32bppPArgb);
             using (Graphics bgg = Graphics.FromImage(useBackground))
             {
-                Image drawbg = TetrisGame.Imageman["background"];
+                var bgdrawdata = pState.PlayField.Theme.GetThemePlayFieldBackground(pState.PlayField);
+                var drawbg = bgdrawdata.BackgroundImage;
                 bgg.CompositingQuality = CompositingQuality.AssumeLinear;
-                bgg.DrawImage(drawbg, 0, 0, buildSize.Width, buildSize.Height);
+                bgg.InterpolationMode = InterpolationMode.NearestNeighbor;
+                bgg.SmoothingMode = SmoothingMode.HighSpeed;
+                if (bgdrawdata.TintColor != Color.Transparent)
+                {
+                    ImageAttributes useAttributes = new ImageAttributes();
+                    var getmatrix = ColorMatrices.GetColourizer(bgdrawdata.TintColor);
+                    useAttributes.SetColorMatrix(getmatrix);
+                    bgg.DrawImage(drawbg, new RectangleF(0f, 0f, buildSize.Width, buildSize.Height),useAttributes);
+                }
+                else
+                {
+                    bgg.DrawImage(drawbg, new RectangleF(0f, 0f, buildSize.Width, buildSize.Height), new RectangleF(0f, 0f, drawbg.Width, drawbg.Height), GraphicsUnit.Pixel);
+                }
             }
         }
         public void DrawProc(StandardTetrisGameState pState, IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            if (useBackground == null || !StoredBackground.Equals(Bounds))
+            if (useBackground == null || !StoredBackground.Equals(Bounds) || pState.DoRefreshBackground)
             {
-                RefreshBackground(Bounds);
+                RefreshBackground(pState,Bounds);
             }
 
             g.DrawImage(useBackground, Bounds);

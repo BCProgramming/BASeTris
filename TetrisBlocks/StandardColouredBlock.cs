@@ -165,7 +165,8 @@ namespace BASeTris.TetrisBlocks
             using (Graphics gg = Graphics.FromImage(result))
             {
                 gg.Clear(Color.Transparent);
-                gg.DrawImage(Source, new Rectangle(0, 0, Source.Width, Source.Height), 0, 0, Source.Width, Source.Height, GraphicsUnit.Pixel, ia);
+                lock(Source)
+                    gg.DrawImage(Source, new Rectangle(0, 0, Source.Width, Source.Height), 0, 0, Source.Width, Source.Height, GraphicsUnit.Pixel, ia);
             }
 
             return result;

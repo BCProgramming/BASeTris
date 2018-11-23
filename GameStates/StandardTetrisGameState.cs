@@ -30,6 +30,7 @@ namespace BASeTris.GameStates
         private List<Particle> Particles = new List<Particle>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
+        public bool DoRefreshBackground = false;
         public Choosers.BlockGroupChooser Chooser = null;
 
         //given a value, translates from an unscaled horizontal coordinate in the default width to the appropriate size of the playing field based on the presented bounds.
