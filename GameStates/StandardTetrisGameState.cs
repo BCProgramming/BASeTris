@@ -267,6 +267,9 @@ namespace BASeTris.GameStates
             {
                 GameOvered = true;
             }
+            //reapply the theme when setting it down. Some themes may want
+            //to have different appearances for blocks that are "set" versus those that are still "active".
+            PlayField.Theme.ApplyTheme(e._group,PlayField);
         }
 
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)

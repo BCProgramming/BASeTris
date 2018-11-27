@@ -158,6 +158,9 @@
     <Compile Include="Tetrominoes\Tetromino.cs" />
     <Compile Include="Theme\Audio\AudioTheme.cs" />
     <Compile Include="Theme\Audio\AudioThemeManager.cs" />
+    <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />
+    <Compile Include="Theme\Block\NESTetrominoTheme.cs" />
+    <Compile Include="Theme\Block\OutlinedTetrominoTheme.cs" />
     <Compile Include="Theme\Block\TetrominoTheme.cs" />
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />

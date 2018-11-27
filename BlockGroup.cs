@@ -107,7 +107,10 @@ namespace BASeTris
             return "BlockGroup:" + BlockData.Count + " Blocks ";
         }
 
-
+        public bool IsActive(TetrisField pField)
+        {
+            return pField.BlockGroups.Any((b) => b == this);
+        }
         public Image GetImage(SizeF BlockSize)
         {
             RecalcExtents();
