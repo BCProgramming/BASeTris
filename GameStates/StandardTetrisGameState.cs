@@ -269,7 +269,10 @@ namespace BASeTris.GameStates
             }
             //reapply the theme when setting it down. Some themes may want
             //to have different appearances for blocks that are "set" versus those that are still "active".
-            PlayField.Theme.ApplyTheme(e._group,PlayField);
+            var firstBlock = e._group.FirstOrDefault();
+            BlockGroup useGroup = e._group;
+            if (firstBlock != null) useGroup = firstBlock.Block.Owner ?? e._group;
+            PlayField.Theme.ApplyTheme(useGroup,PlayField);
         }
 
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -298,6 +301,10 @@ namespace BASeTris.GameStates
             }
 
             if (dropLength < CancelProximity) return null;
+            foreach(var iterate in Duplicator)
+            {
+                iterate.Block.Owner = Source;
+            }
             return Duplicator;
         }
 
