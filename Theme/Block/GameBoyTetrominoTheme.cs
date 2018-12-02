@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 using BASeTris.AssetManager;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
@@ -124,6 +126,18 @@ namespace BASeTris
         private static Image I_Horizontal;
         private static Image I_Left_Cap;
 
+        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        {
+            int RandomLevel = TetrisGame.rgen.Next(25);
+            Action<BlockGroup,TetrisField,int> SelectL = Apply_L;
+            Action<BlockGroup, TetrisField, int>[] Types = new Action<BlockGroup, TetrisField, int>[]
+            {
+                Apply_L,Apply_J,Apply_I,Apply_O,Apply_S,Apply_Z,Apply_T
+            };
+            var selected = TetrisGame.Choose(Types);
+            selected(Group, Field, RandomLevel);
+        }
+
         public override void ApplyTheme(BlockGroup Group, TetrisField Field)
         {
             int CurrLevel = Field == null ? 0 : (int)(Field.LineCount / 10);
@@ -172,7 +186,7 @@ namespace BASeTris
             }
         }
 
-        public void Apply_L(Tetromino_L Group, TetrisField Field,int CurrLevel)
+        public void Apply_L(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //L block is a solid darker colour.
             
@@ -187,7 +201,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_J(Tetromino_J Group, TetrisField Field,int CurrLevel)
+        public void Apply_J(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //darker outline with a middle white square.
             foreach (var blockcheck in Group)
@@ -203,7 +217,7 @@ namespace BASeTris
 
         }
         static float ReductionFactor = 0.5f;
-        public void Apply_I(Tetromino_I Group, TetrisField Field,int CurrLevel)
+        public void Apply_I(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //mottled. need to set rotation images as well.
 
@@ -213,12 +227,22 @@ namespace BASeTris
             //index three is right middle
             //index four is right side.
             var BlockData = Group.GetBlockData();
+
+            if (BlockData.Count < 4)
+            {
+                BlockData = new List<BlockGroupEntry>(BlockData);
+                while (BlockData.Count < 4)
+                {
+                    BlockData.Add(null);
+                }
+                BlockData = TetrisGame.Shuffle(BlockData).ToList();
+            }
             var LeftSide = BlockData[0];
             var LeftMiddle = BlockData[1];
             var RightMiddle = BlockData[2];
             var RightSide = BlockData[3];
                     
-            if(LeftSide.Block is StandardColouredBlock)
+            if(LeftSide!=null && LeftSide.Block is StandardColouredBlock)
             {
                 var scb = (LeftSide.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
@@ -227,7 +251,7 @@ namespace BASeTris
                 //        TetrisGame.Imageman.getLoadedImage("FLIPXROT180:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("FLIPXROT270:mottle_right_cap",ReductionFactor) };
             }
             Image i;
-            if(LeftMiddle.Block is StandardColouredBlock)
+            if(LeftMiddle !=null && LeftMiddle.Block is StandardColouredBlock)
             {
                 var scb = (LeftMiddle.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
@@ -236,7 +260,7 @@ namespace BASeTris
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_horizontal",ReductionFactor) };
             }
 
-            if (RightMiddle.Block is StandardColouredBlock)
+            if (RightMiddle!=null && RightMiddle.Block is StandardColouredBlock)
             {
                 var scb = (RightMiddle.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
@@ -244,7 +268,7 @@ namespace BASeTris
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_horizontal",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_horizontal",ReductionFactor) };
             }
-            if (RightSide.Block is StandardColouredBlock)
+            if (RightSide!=null && RightSide.Block is StandardColouredBlock)
             {
                 var scb = (RightSide.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
@@ -256,7 +280,7 @@ namespace BASeTris
             
             
         }
-        public void Apply_Z(Tetromino_Z Group, TetrisField Field,int CurrLevel)
+        public void Apply_Z(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //dotted center, darker colour.
             foreach (var blockcheck in Group)
@@ -270,7 +294,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_O(Tetromino_O Group, TetrisField Field,int CurrLevel)
+        public void Apply_O(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //white, inset block
             foreach (var blockcheck in Group)
@@ -284,7 +308,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_S(Tetromino_S Group, TetrisField Field,int CurrLevel)
+        public void Apply_S(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //dotted center, light colour.
             foreach (var blockcheck in Group)
@@ -298,7 +322,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_T(Tetromino_T Group, TetrisField Field,int CurrLevel)
+        public void Apply_T(BlockGroup Group, TetrisField Field,int CurrLevel)
         {
             //inset bevel
             foreach (var blockcheck in Group)

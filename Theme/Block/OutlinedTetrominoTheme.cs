@@ -105,6 +105,15 @@ namespace BASeTris
         {
 
         }
+
+        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        {
+            int LevelUse = TetrisGame.rgen.Next(10);
+
+            ApplyImages(Group, new Image[] { GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top | BlockOutlines.Outline_Right | BlockOutlines.Outline_Left, GetLevelColor(LevelUse)) });
+
+        }
+
         public override void ApplyTheme(BlockGroup Group, TetrisField Field)
         {
             int CurrLevel = Field == null ? 0 : (int)(Field.LineCount / 10);

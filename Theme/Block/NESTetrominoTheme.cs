@@ -22,11 +22,17 @@ namespace BASeTris
             }
             return new PlayFieldBackgroundInfo(DarkImage,Color.Transparent);
         }
+        Color[][] LevelColorSets = new Color[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
+        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        {
+            var RandomColor = TetrisGame.Choose(LevelColorSets);
+            ApplyColorSet(Group,RandomColor);
+        }
 
         public override void ApplyTheme(BlockGroup Group, TetrisField Field)
         {
             Color[] useColorSet;
-            Color[][] ChooseColorSets = new Color[][] {Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors};
+            Color[][] ChooseColorSets = LevelColorSets;
             long CurrLevel = (Field == null) ? 0 : (Field.LineCount / 10);
             int ColorSet = (int) (CurrLevel) % ChooseColorSets.Length;
             useColorSet = ChooseColorSets[ColorSet];

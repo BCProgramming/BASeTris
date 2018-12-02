@@ -77,7 +77,24 @@ namespace BASeTris
             float realSize = (g.DpiY / 72) * emSize;
             return realSize;
         }
+        public static IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese)
+        {
+            if (rgen == null) rgen = new Random();
+            var sl = new SortedList<float, T>();
+            foreach (T iterate in Shufflethese)
+            {
+                sl.Add((float)rgen.NextDouble(), iterate);
 
+
+            }
+            Random rg = new Random();
+
+            return sl.Select(iterator => iterator.Value);
+
+
+
+
+        }
         public static Font GetRetroFont(float desiredSize, double ScaleFactor, FontStyle desiredStyle = FontStyle.Regular, GraphicsUnit GUnit = GraphicsUnit.Point)
         {
             return new Font(RetroFont, (float) (desiredSize * ScaleFactor), desiredStyle, GUnit);

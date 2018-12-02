@@ -492,7 +492,6 @@ namespace BASeTris.GameStates
         {
             Bitmap buildbg = new Bitmap(1120, 2576);
             Size BlockSize = new Size(128, 128);
-            Color[] usePossibleColours = NESTetrominoTheme.AllThemeColors;
             int ColumnCount = (buildbg.Width / BlockSize.Width) + 1;
             int RowCount = (buildbg.Height / BlockSize.Height) + 1;
             using (Graphics g = Graphics.FromImage(buildbg))
@@ -507,7 +506,8 @@ namespace BASeTris.GameStates
                         StandardColouredBlock GenerateColorBlock = new StandardColouredBlock();
                         BlockGroup ArbitraryGroup = new BlockGroup();
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
-                        this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
+                        this.PlayField.Theme.ApplyRandom(ArbitraryGroup,this.PlayField);
+                        //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
                         TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
                         RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
                         

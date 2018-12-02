@@ -17,6 +17,7 @@ namespace BASeTris
     public abstract class TetrominoTheme
     {
         public abstract void ApplyTheme(BlockGroup Group, TetrisField Field);
+        public abstract void ApplyRandom(BlockGroup Group, TetrisField Field);
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field);
         
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
@@ -123,6 +124,12 @@ namespace BASeTris
         public StandardTetrominoTheme(StandardColouredBlock.BlockStyle pBlockStyle)
         {
             _Style = pBlockStyle;
+        }
+
+        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        {
+            int useLevel = TetrisGame.rgen.Next(50);
+            ApplyColorSet(Group,useLevel);
         }
 
         public override void ApplyTheme(BlockGroup Group, TetrisField Field)
