@@ -387,7 +387,7 @@ namespace BASeTris.GameStates
             if (GameOvered)
             {
                 //For testing: write out the replay data as a sequence of little images.
-                ReplayData.WriteStateImages("T:\\ReplayData");
+                //ReplayData.WriteStateImages("T:\\ReplayData");
                 TetrisGame.Soundman.StopMusic();
                 FinalGameTime = DateTime.Now - GameStartTime;
                 PlayField.GameStats.TotalGameTime = FinalGameTime;
