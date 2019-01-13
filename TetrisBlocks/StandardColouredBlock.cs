@@ -35,6 +35,7 @@ namespace BASeTris.TetrisBlocks
             Style_HardBevel,
             Style_Chisel,
             Style_Shine,
+            Style_Mottled,
             Style_Custom
         }
 

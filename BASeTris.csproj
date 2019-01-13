@@ -121,6 +121,7 @@
     <Compile Include="GameStates\StandardTetrisGameState.cs" />
     <Compile Include="GameStates\UnpauseDelayGameState.cs" />
     <Compile Include="GameStates\ViewScoreDetailsState.cs" />
+    <Compile Include="HotLine.cs" />
     <Compile Include="Particles\cParticle.cs" />
     <Compile Include="DebugLog.cs" />
     <Compile Include="BASeTris.cs">
@@ -178,6 +179,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Pixel.ttf" />
+    <EmbeddedResource Include="LCD.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

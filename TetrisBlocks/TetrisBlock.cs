@@ -34,6 +34,9 @@ namespace BASeTris.TetrisBlocks
 
         private int _Rotation = 0;
 
+       
+
+
         //rotation can be set but if owned by a BlockGroup we use it's rotation.
         public virtual int Rotation
         {

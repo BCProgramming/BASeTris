@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
@@ -16,6 +18,7 @@ using BASeTris.FieldInitializers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
+using BASeTris.Replay;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
@@ -32,6 +35,8 @@ namespace BASeTris.GameStates
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
         public Choosers.BlockGroupChooser Chooser = null;
+
+      
 
         //given a value, translates from an unscaled horizontal coordinate in the default width to the appropriate size of the playing field based on the presented bounds.
         public double GetScaledHorizontal(RectangleF Bounds,double Value)
@@ -71,9 +76,12 @@ namespace BASeTris.GameStates
             return TetrisGame.ScoreMan["Standard"];
         }
 
-        public virtual int ProcessFieldChange(IStateOwner pOwner, BlockGroup Trigger)
+        public virtual int ProcessFieldChange(IStateOwner pOwner, BlockGroup Trigger,out IList<HotLine> HotLines)
         {
+
+            HotLines = new List<HotLine>();
             //process lines for standard game.
+            ReplayData.CreateReplayState(pOwner, this);
             GameProcSuspended = true;
             try
             {
@@ -86,6 +94,11 @@ namespace BASeTris.GameStates
                     if (PlayField.Contents[r].All((d) => d != null))
                     {
                         Debug.Print("Found completed row at row " + r);
+                        if(PlayField.Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && PlayField.HotLines.ContainsKey(r))
+                        {
+                            Debug.Print("Found hotline row at row " + r);
+                            HotLines.Add(PlayField.HotLines[r]);
+                        }
                         CompletedRows.Add(r);
                         rowsfound++;
                         //enqueue an action to perform the clear. We'll be replacing the current state with a clear action state, so this should execute AFTER that state returns control.
@@ -189,6 +202,7 @@ namespace BASeTris.GameStates
             finally
             {
                 GameProcSuspended = false;
+                ReplayData.CreateReplayState(pOwner, this);
             }
         }
 
@@ -210,6 +224,7 @@ namespace BASeTris.GameStates
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
             PlayField.BlockGroupSet += PlayField_BlockGroupSet;
+            PlayField.SetStandardHotLines();
         }
 
         private void PlayField_OnThemeChangeEvent(object sender, OnThemeChangeEventArgs e)
@@ -319,9 +334,10 @@ namespace BASeTris.GameStates
         }
 
         private bool FirstRun = false;
-
+        private StatefulReplay ReplayData = null;
         public override void GameProc(IStateOwner pOwner)
         {
+            if(ReplayData==null) ReplayData = new StatefulReplay();
             if (!FirstRun)
             {
                 if (GameOptions.MusicEnabled)
@@ -359,7 +375,9 @@ namespace BASeTris.GameStates
                 {
                     if (HandleGroupOperation(pOwner,iterate))
                     {
+                        
                         ProcessFieldChangeWithScore(pOwner, iterate);
+                        
                     }
 
                     iterate.LastFall = DateTime.Now;
@@ -368,6 +386,8 @@ namespace BASeTris.GameStates
 
             if (GameOvered)
             {
+                //For testing: write out the replay data as a sequence of little images.
+                ReplayData.WriteStateImages("T:\\ReplayData");
                 TetrisGame.Soundman.StopMusic();
                 FinalGameTime = DateTime.Now - GameStartTime;
                 PlayField.GameStats.TotalGameTime = FinalGameTime;
@@ -393,7 +413,8 @@ namespace BASeTris.GameStates
 
         public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner, BlockGroup Trigger)
         {
-            int result = ProcessFieldChange(pOwner, Trigger);
+            
+            int result = ProcessFieldChange(pOwner, Trigger,out IList<HotLine> HotLines);
             int AddScore = 0;
             if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 15;
             if (result >= 2)
@@ -403,6 +424,16 @@ namespace BASeTris.GameStates
             if (result >= 4)
                 AddScore += AddScore + ((GameStats.LineCount / 10) + 5) * 75;
 
+            if(HotLines!=null)
+            {
+                double SumMult = 00;
+                foreach(var iterate in HotLines)
+                {
+                    SumMult += iterate.Multiplier;
+                }
+                AddScore = (int)((double)AddScore * SumMult);
+            }
+            
             LastScoreCalc = AddScore;
 
             if (LastScoreLines == result) //getting the same lines in a row gives added score.
@@ -483,9 +514,13 @@ namespace BASeTris.GameStates
 
         public virtual BlockGroup GenerateTetromino()
         {
-            return Chooser.GetNext();
-        }
+            var nextitem = Chooser.GetNext();
+            //add additional processing here- for example Sticky tetris and cascade tetris should
+            //modify colouring of blocks.
 
+            return nextitem;
+        }
+        
         Image StatisticsBackground = null;
 
         public void GenerateStatisticsBackground()
@@ -814,18 +849,21 @@ namespace BASeTris.GameStates
             {
                 //drop all active groups.
                 BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
-                foreach (var activeitem in PlayField.BlockGroups)
+                if (FirstGroup != null)
                 {
-                    int dropqty = 0;
-                    var ghosted = GetGhostDrop(activeitem, out dropqty, 0);
-                    PlayField.SetGroupToField(ghosted);
-                    PlayField.RemoveBlockGroup(activeitem);
-                    GameStats.AddScore((dropqty * (5 + (GameStats.LineCount / 10))));
-                }
+                    foreach (var activeitem in PlayField.BlockGroups)
+                    {
+                        int dropqty = 0;
+                        var ghosted = GetGhostDrop(activeitem, out dropqty, 0);
+                        PlayField.SetGroupToField(ghosted);
+                        PlayField.RemoveBlockGroup(activeitem);
+                        GameStats.AddScore((dropqty * (5 + (GameStats.LineCount / 10))));
+                    }
 
-                pOwner.Feedback(0.6f, 200);
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
-                ProcessFieldChangeWithScore(pOwner, FirstGroup);
+                    pOwner.Feedback(0.6f, 200);
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace);
+                    ProcessFieldChangeWithScore(pOwner, FirstGroup);
+                }
             }
             else if (g == GameKeys.GameKey_Right || g == GameKeys.GameKey_Left)
             {
@@ -873,7 +911,8 @@ namespace BASeTris.GameStates
 
                         PlayField.AddBlockGroup(HoldBlock);
 
-
+                        //We probably should set the speed appropriately here for the level. As is it will retain the speed from whe nthe hold block was
+                        //held.
                         PlayField.Theme.ApplyTheme(HoldBlock, PlayField);
                         HoldBlock.X = (int) (((float) PlayField.ColCount / 2) - ((float) HoldBlock.GroupExtents.Width / 2));
                         HoldBlock.Y = 0;

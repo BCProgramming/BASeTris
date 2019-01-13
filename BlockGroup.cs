@@ -24,11 +24,17 @@ namespace BASeTris
 
         public int FallSpeed { get; set; } = 250; //Higher is slower, number of ms between movements.
         public int X { get; set; }
-        public int Y { get; set; }
+        private int _Y = 0;
+        public int Y { get { return _Y; } set{ _Y = value; LastFall = DateTime.Now; } }
         private int XMin, XMax, YMin, YMax;
         private Rectangle _GroupExtents = Rectangle.Empty;
         public DateTime LastFall = DateTime.MinValue;
 
+        public float GetHeightTranslation(float BlockHeight)
+        {
+            double Percent = ((DateTime.Now - LastFall).TotalMilliseconds) / (double)FallSpeed;
+            return (float)(((float)BlockHeight) * (Percent));
+        }
         public Rectangle GroupExtents
         {
             get { return _GroupExtents; }
@@ -58,7 +64,7 @@ namespace BASeTris
         }
 
         private DateTime LastRotationCall = DateTime.MinValue;
-
+        
         /// <summary>
         /// called repeatedly for active groups, normally at a rate determined by the current level.
         /// return true to cancel standard handling. (eg. Block falling)
@@ -243,7 +249,7 @@ namespace BASeTris
             return Math.Atan2(PointB.Y - PointA.Y, PointB.X - PointA.X);
         }
 
-
+        
         public DateTime GetLastRotation()
         {
             return LastRotationCall;
@@ -315,6 +321,7 @@ namespace BASeTris
             return result;
         }
 
+        
 
         public int RotationModulo = 0;
 

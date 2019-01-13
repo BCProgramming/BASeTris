@@ -62,6 +62,7 @@
             this.picTetrisField.TabStop = false;
             this.picTetrisField.Click += new System.EventHandler(this.picTetrisField_Click);
             this.picTetrisField.Paint += new System.Windows.Forms.PaintEventHandler(this.picTetrisField_Paint);
+            this.picTetrisField.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picTetrisField_MouseClick);
             this.picTetrisField.Resize += new System.EventHandler(this.picTetrisField_Resize);
             // 
             // picStatistics
@@ -163,7 +164,7 @@
             // 
             this.aIToolStripMenuItem.Name = "aIToolStripMenuItem";
             this.aIToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.aIToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.aIToolStripMenuItem.Size = new System.Drawing.Size(150, 26);
             this.aIToolStripMenuItem.Text = "AI";
             this.aIToolStripMenuItem.Click += new System.EventHandler(this.aIToolStripMenuItem_Click);
             // 

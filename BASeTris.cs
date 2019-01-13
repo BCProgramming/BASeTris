@@ -499,5 +499,19 @@ namespace BASeTris
         private void debugToolStripMenuItem_Click(object sender, EventArgs e)
         {
         }
+
+        private void picTetrisField_MouseClick(object sender, MouseEventArgs e)
+        {
+            if(e.Button==MouseButtons.Right)
+            {
+                ContextMenuStrip cms = new ContextMenuStrip();
+                for(int i=0;i<10;i++)
+                {
+                    ToolStripMenuItem tsm = new ToolStripMenuItem("Item " + i);
+                    cms.Items.Add(tsm);
+                }
+                cms.Show();
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 
@@ -22,11 +23,58 @@ namespace BASeTris
         //The "tetris field" here just represents the "permanent" blocks. eg, blocks that have been dropped, and "set" in place.
         //these get evaluated to check for lines when a new block is placed, for example.
 
+            [Flags]
+            public enum GameFlags
+            {
+                Flags_None=0, //Standard tetris.
+                Flags_Hotline = 1, //perform Hotline drawing/logic
+                Flags_Cascade = 2, //Perform "Cascade" logic. 
+                Flags_Sticky = 4, //usually goes with Cascade but isn't required. This needs special tetromino handling, as well.
+            }
+
         public Statistics GameStats = new Statistics();
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         public bool AnimateRotations = true;
         private TetrisBlock[][] FieldContents;
+
+
+        public GameFlags _GameFlags = GameFlags.Flags_None;
+        public GameFlags Flags { get { return _GameFlags; } set { _GameFlags = value; }}
+        public Dictionary<int, HotLine> HotLines = new Dictionary<int, HotLine>();
         public event EventHandler<OnThemeChangeEventArgs> OnThemeChangeEvent;
+
+        Dictionary<int, Dictionary<Color, TextureBrush>> HotLineTextures = new Dictionary<int, Dictionary<Color, TextureBrush>>();
+
+
+        public TextureBrush GetHotLineTexture(int pHeight, Color pColor)
+        {
+            if (!HotLineTextures.ContainsKey(pHeight))
+            {
+                HotLineTextures.Add(pHeight, new Dictionary<Color, TextureBrush>());
+            }
+            if (!HotLineTextures[pHeight].ContainsKey(pColor))
+            {
+                HotLineTextures[pHeight].Add(pColor, BuildHotLineTexture(pHeight, pColor));
+            }
+            return HotLineTextures[pHeight][pColor];
+        }
+        private TextureBrush BuildHotLineTexture(int pHeight, Color pColor)
+        {
+
+            Bitmap buildimage = new Bitmap(1, pHeight);
+            using (Graphics buildg = Graphics.FromImage(buildimage))
+            {
+                using (LinearGradientBrush lgb = new LinearGradientBrush(new Rectangle(0, 0, 1, pHeight), pColor, MenuStateMenuItem.MixColor(pColor, Color.FromArgb(150, Color.Black)), LinearGradientMode.Vertical))
+                {
+
+                    buildg.FillRectangle(lgb, new Rectangle(0, 0, 1, pHeight));
+                }
+            }
+            return new TextureBrush(buildimage, new Rectangle(0, 0, 1, pHeight));
+
+        }
+
+
         public long LineCount
         {
             get { return GameStats.LineCount; }
@@ -132,7 +180,16 @@ namespace BASeTris
                 FieldContents[row] = new TetrisBlock[COLCOUNT];
             }
         }
-
+        public void SetStandardHotLines()
+        {
+            HotLines.Clear();
+            HotLines.Add(17, new HotLine(Color.Goldenrod, 1.25, 17));
+            HotLines.Add(12, new HotLine(Color.Yellow, 1.5, 12));
+            HotLines.Add(8, new HotLine(Color.Orange, 2, 8));
+            HotLines.Add(5, new HotLine(Color.Red, 3, 5));
+            HotLines.Add(3, new HotLine(Color.Purple, 5, 3));
+            HotLines.Add(2, new HotLine(Color.Blue, 10, 2));
+        }
         public bool HasChanged = false;
 
         public void AnimateFrame()
@@ -265,6 +322,29 @@ namespace BASeTris
             {
                 float YPos = (drawRow - HIDDENROWS) * BlockHeight;
                 var currRow = FieldContents[drawRow];
+
+
+                //also, is there a hotline here?
+                if (Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && HotLines.ContainsKey(drawRow))
+                {
+                    RectangleF RowBounds = new RectangleF(0, YPos, BlockWidth * COLCOUNT, BlockHeight);
+                    Brush useFillBrush = null;
+                    var HotLine = HotLines[drawRow];
+                    if (HotLine.LineBrush != null) useFillBrush = HotLine.LineBrush;
+                    else
+                    {
+                        useFillBrush = GetHotLineTexture((int)RowBounds.Height + 1, HotLines[drawRow].Color);
+                    }
+                    if(useFillBrush is TextureBrush tb1)
+                    {
+                        tb1.TranslateTransform(0,YPos);
+                    }
+                    g.FillRectangle(useFillBrush, RowBounds);
+                    if (useFillBrush is TextureBrush tb2)
+                    {
+                        tb2.ResetTransform();
+                    }
+                }
                 //for each Tetris Row...
                 for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
                 {
@@ -277,6 +357,7 @@ namespace BASeTris
                         RenderingProvider.Static.DrawElement(pState,tbd.g,TetBlock,tbd);
                     }
                 }
+               
             }
         }
 
@@ -324,6 +405,9 @@ namespace BASeTris
                         }
                     }
 
+                    var translation = bg.GetHeightTranslation(BlockHeight);
+                    PointF doTranslate = new PointF(0,translation);
+
                     if (useAngle != 0 && AnimateRotations)
                     {
                         int MaxXBlock = (from p in bg select p.X).Max();
@@ -344,6 +428,9 @@ namespace BASeTris
                         g.RotateTransform((float) useAngle);
                         g.TranslateTransform(-useCenter.X, -useCenter.Y);
                     }
+
+                    g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y);
+
 
                     foreach (BlockGroupEntry bge in bg)
                     {

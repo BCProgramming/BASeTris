@@ -17,6 +17,7 @@ using BaseTris.AssetManager;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.GameStates;
+using BASeTris.Replay;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
 
@@ -45,6 +46,7 @@ namespace BASeTris
         public static bool DJMode { get; set; } = true;
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
+        public static FontFamily LCDFont;
         private static Image _TiledCache = null;
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         public static Image StandardTiledTetrisBackground
@@ -149,22 +151,37 @@ namespace BASeTris
             String[] AudioAssets = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Audio")).ToArray();
             Soundman = new cNewSoundManager(new BASSDriver(), AudioAssets);
 
-            Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BASeTris.Pixel.ttf");
-
-            byte[] fontdata = new byte[fontStream.Length];
-            fontStream.Read(fontdata, 0, (int) fontStream.Length);
-            fontStream.Close();
-            unsafe
-            {
-                fixed (byte* pFontData = fontdata)
-                {
-                    pfc.AddMemoryFont((System.IntPtr) pFontData, fontdata.Length);
-                }
-            }
-
-            RetroFont = pfc.Families[0];
+            RetroFont = GetResourceFont("BASeTris.Pixel.ttf");
+            LCDFont = GetResourceFont("BASeTris.LCD.ttf");
+            //RetroFont = pfc.Families[0];
         }
+        static Dictionary<String,FontFamily> LoadedFonts = new Dictionary<String, FontFamily>();
+        private static FontFamily GetResourceFont(String ResourceName)
+        {
 
+            if (LoadedFonts.ContainsKey(ResourceName))
+            {
+                return LoadedFonts[ResourceName];
+            }
+            else
+            {
+                Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName);
+
+                byte[] fontdata = new byte[fontStream.Length];
+                fontStream.Read(fontdata, 0, (int)fontStream.Length);
+                fontStream.Close();
+                unsafe
+                {
+                    fixed (byte* pFontData = fontdata)
+                    {
+                        pfc.AddMemoryFont((System.IntPtr)pFontData, fontdata.Length);
+                    }
+                }
+
+                LoadedFonts.Add(ResourceName, pfc.Families[0]);
+                return pfc.Families[0];
+            }
+        }
         public TetrisGame(IStateOwner pOwner, GameState InitialGameState)
         {
             if (Soundman == null) InitState();
