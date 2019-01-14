@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
+using BASeTris.GameStates;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
@@ -29,11 +30,18 @@ namespace BASeTris
         private int XMin, XMax, YMin, YMax;
         private Rectangle _GroupExtents = Rectangle.Empty;
         public DateTime LastFall = DateTime.MinValue;
-
-        public float GetHeightTranslation(float BlockHeight)
+        public float HighestHeightValue = 0;
+        public float GetHeightTranslation(IStateOwner pOwner,float BlockHeight)
         {
-            double Percent = ((DateTime.Now - LastFall).TotalMilliseconds) / (double)FallSpeed;
-            return (float)(((float)BlockHeight) * (Percent));
+            if (pOwner.CurrentState is PauseGameState)
+            {
+                return 0;
+            }
+            else
+            {
+                double Percent = ((DateTime.Now - LastFall).TotalMilliseconds) / (double)FallSpeed;
+                return (float)(((float)BlockHeight) * (Percent));
+            }
         }
         public Rectangle GroupExtents
         {

@@ -994,7 +994,7 @@ namespace BASeTris.GameStates
         }
 
         bool BlockHold = false;
-
+        public int GroupLockTime { get; set; } = 666;
         private bool HandleGroupOperation(IStateOwner pOwner,BlockGroup activeItem)
         {
 
@@ -1005,7 +1005,7 @@ namespace BASeTris.GameStates
             }
             else
             {
-                if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > 250)
+                if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > GroupLockTime)
                 {
                     PlayField.SetGroupToField(activeItem);
                     GameStats.AddScore(25 - activeItem.Y);

@@ -360,7 +360,7 @@ namespace BASeTris
                
             }
         }
-
+        double HighestHeightValue = 0;
         public void Draw(IStateOwner pState,Graphics g, RectangleF Bounds)
         {
             //first how big is each block?
@@ -405,9 +405,22 @@ namespace BASeTris
                         }
                     }
 
-                    var translation = bg.GetHeightTranslation(BlockHeight);
-                    PointF doTranslate = new PointF(0,translation);
+                    var translation = bg.GetHeightTranslation(pState, BlockHeight);
 
+                    float BlockPercent = translation / BlockHeight;
+                    float CalcValue = BlockPercent + (float)bg.Y;
+
+                    if (CalcValue > bg.HighestHeightValue)
+                    {
+                        bg.HighestHeightValue = CalcValue;
+                    }
+                    else
+                    {
+                        translation = (bg.HighestHeightValue-(float)bg.Y) * BlockHeight;
+                    }
+
+                    PointF doTranslate = new PointF(0,translation);
+                    
                     if (useAngle != 0 && AnimateRotations)
                     {
                         int MaxXBlock = (from p in bg select p.X).Max();

@@ -59,9 +59,14 @@ namespace BASeTris
                 if (iterate.Block is StandardColouredBlock)
                 {
                     var coloured = (StandardColouredBlock) iterate.Block;
-                    coloured.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Gummy;
+                    coloured.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Pixeled;
+                    
                     coloured.BlockColor = selected[0];
                     coloured.InnerColor = selected[1];
+                    if (coloured.InnerColor != coloured.BlockColor)
+                    {
+                        coloured.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Pixeled_Outline;
+                    }
                 }
             }
         }

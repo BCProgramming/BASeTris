@@ -36,6 +36,8 @@ namespace BASeTris.TetrisBlocks
             Style_Chisel,
             Style_Shine,
             Style_Mottled,
+            Style_Pixeled,
+            Style_Pixeled_Outline,
             Style_Custom
         }
 
@@ -114,7 +116,11 @@ namespace BASeTris.TetrisBlocks
                 baseimage = "block_std_red";
             else if (DisplayStyle == BlockStyle.Style_Chisel)
                 baseimage = "block_chisel_red";
-
+            else if(DisplayStyle==BlockStyle.Style_Pixeled)
+            {
+                baseimage = "block_pixeled_red";
+            }
+            
             Size TargetSize = new Size(100, 100);
             if (StandardColourBlocks == null)
             {

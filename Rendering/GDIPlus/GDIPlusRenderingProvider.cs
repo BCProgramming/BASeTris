@@ -175,6 +175,15 @@ namespace BASeTris.Rendering.GDIPlus
                 baseimage = "block_std_red";
             else if (Source.DisplayStyle == StandardColouredBlock.BlockStyle.Style_Chisel)
                 baseimage = "block_chisel_red";
+            else if (Source.DisplayStyle == StandardColouredBlock.BlockStyle.Style_Pixeled)
+            {
+                baseimage = "block_pixeled_red";
+            }
+            else if(Source.DisplayStyle==StandardColouredBlock.BlockStyle.Style_Pixeled_Outline)
+                {
+                baseimage = "block_pixeled_red_outline";        
+                }
+            
             else if(Source.DisplayStyle == StandardColouredBlock.BlockStyle.Style_Mottled)
             {
                 baseimage = "block_mottled";
