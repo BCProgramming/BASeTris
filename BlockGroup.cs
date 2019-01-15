@@ -141,7 +141,7 @@ namespace BASeTris
                 foreach (BlockGroupEntry bge in this)
                 {
                     RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
-                    TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this);
+                    TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this,new StandardSettings());
                     RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                     //bge.Block.DrawBlock(tbd);
                 }

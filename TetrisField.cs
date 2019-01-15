@@ -34,7 +34,7 @@ namespace BASeTris
 
         public Statistics GameStats = new Statistics();
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
-        public bool AnimateRotations = true;
+        public StandardSettings Settings;
         private TetrisBlock[][] FieldContents;
 
 
@@ -353,7 +353,7 @@ namespace BASeTris
                     if (TetBlock != null)
                     {
                         RectangleF BlockBounds = new RectangleF(XPos, YPos, BlockWidth, BlockHeight);
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null);
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null,Settings);
                         RenderingProvider.Static.DrawElement(pState,tbd.g,TetBlock,tbd);
                     }
                 }
@@ -406,22 +406,23 @@ namespace BASeTris
                     }
 
                     var translation = bg.GetHeightTranslation(pState, BlockHeight);
+                   
+                   
+                        float BlockPercent = translation / BlockHeight;
+                        float CalcValue = BlockPercent + (float)bg.Y;
 
-                    float BlockPercent = translation / BlockHeight;
-                    float CalcValue = BlockPercent + (float)bg.Y;
-
-                    if (CalcValue > bg.HighestHeightValue)
-                    {
-                        bg.HighestHeightValue = CalcValue;
-                    }
-                    else
-                    {
-                        translation = (bg.HighestHeightValue-(float)bg.Y) * BlockHeight;
-                    }
-
+                        if (CalcValue > bg.HighestHeightValue)
+                        {
+                            bg.HighestHeightValue = CalcValue;
+                        }
+                        else
+                        {
+                            translation = (bg.HighestHeightValue - (float)bg.Y) * BlockHeight;
+                        }
+                   
                     PointF doTranslate = new PointF(0,translation);
                     
-                    if (useAngle != 0 && AnimateRotations)
+                    if (useAngle != 0 && Settings.SmoothRotate)
                     {
                         int MaxXBlock = (from p in bg select p.X).Max();
                         int MaxYBlock = (from p in bg select p.Y).Max();
@@ -442,7 +443,7 @@ namespace BASeTris
                         g.TranslateTransform(-useCenter.X, -useCenter.Y);
                     }
 
-                    g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y);
+                    if (Settings.SmoothFall) g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y,MatrixOrder.Prepend);
 
 
                     foreach (BlockGroupEntry bge in bg)
@@ -456,7 +457,7 @@ namespace BASeTris
 
 
                             RectangleF BlockBounds = new RectangleF(DrawXPx, DrawYPx, BlockWidth, BlockHeight);
-                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, bg);
+                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, bg,Settings);
                             RenderingProvider.Static.DrawElement(pState,g,bge.Block,tbd);
                         }
                     }

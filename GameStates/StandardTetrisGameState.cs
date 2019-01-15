@@ -35,7 +35,7 @@ namespace BASeTris.GameStates
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
         public Choosers.BlockGroupChooser Chooser = null;
-
+        
       
 
         //given a value, translates from an unscaled horizontal coordinate in the default width to the appropriate size of the playing field based on the presented bounds.
@@ -217,10 +217,13 @@ namespace BASeTris.GameStates
             return NextBlocks.Peek();
         }
 
-        public StandardTetrisGameState(BlockGroupChooser pChooser, FieldInitializer pFieldInitializer)
+        public StandardTetrisGameState(BlockGroupChooser pChooser, FieldInitializer pFieldInitializer,StandardSettings Settings)
         {
+
+            
             this.Chooser = pChooser;
             PlayField = new TetrisField();
+            PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
             PlayField.BlockGroupSet += PlayField_BlockGroupSet;
@@ -543,7 +546,7 @@ namespace BASeTris.GameStates
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
                         this.PlayField.Theme.ApplyRandom(ArbitraryGroup,this.PlayField);
                         //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null);
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null,new StandardSettings());
                         RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
                         
                     }
@@ -697,15 +700,19 @@ namespace BASeTris.GameStates
 
 
                         //g.TranslateTransform(CenterPoint.X,CenterPoint.Y);
+                       
                         g.TranslateTransform(DrawTetLocation.X + DrawTetSize.Width / 2, DrawTetLocation.Y + DrawTetSize.Width / 2);
+
+
                         double DrawTetAngle = UseAngleCurrent;
                         DrawTetAngle += (Math.PI * AngleMovePercent);
-                        float useDegrees = 180 + (float) (DrawTetAngle * (180 / Math.PI));
+                        float useDegrees = 180 + (float)(DrawTetAngle * (180 / Math.PI));
 
-                        g.RotateTransform((float) useDegrees);
+                        g.RotateTransform((float)useDegrees);
+
                         g.TranslateTransform(-(DrawTetLocation.X + DrawTetSize.Width / 2), -(DrawTetLocation.Y + DrawTetSize.Height / 2));
                         //g.TranslateTransform(-CenterPoint.X,-CenterPoint.Y);
-
+                    
 
                         if (DrawTetSize.Width > 0 && DrawTetSize.Height > 0)
                         {

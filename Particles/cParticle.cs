@@ -362,7 +362,7 @@ namespace BASeTris
             Bitmap BuildImage = new Bitmap((int) BlockPosition.Width, (int) BlockPosition.Height, PixelFormat.Format32bppPArgb);
             using (Graphics g = Graphics.FromImage(BuildImage))
             {
-                TetrisBlockDrawGDIPlusParameters tbdp = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null);
+                TetrisBlockDrawGDIPlusParameters tbdp = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(0, 0, templocation.Width, templocation.Height), null,new StandardSettings());
                 RenderingProvider.Static.DrawElement(null, tbdp.g, sourceblock, tbdp);
                 
 
@@ -429,7 +429,7 @@ namespace BASeTris
             BlockImage = new Bitmap((int) BlockRect.Width, (int) BlockRect.Height, PixelFormat.Format32bppPArgb);
             using (Graphics g = Graphics.FromImage(BlockImage))
             {
-                TetrisBlockDrawGDIPlusParameters tb = new TetrisBlockDrawGDIPlusParameters(g, BlockRect, null);
+                TetrisBlockDrawGDIPlusParameters tb = new TetrisBlockDrawGDIPlusParameters(g, BlockRect, null,new StandardSettings());
                 RenderingProvider.Static.DrawElement(pState,g,sourceblock,tb);
             }
 

@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -145,7 +146,10 @@ namespace BASeTris
 
         private void StartGame()
         {
-            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
+            String sDataFolder = TetrisGame.AppDataFolder;
+            String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
+            StandardSettings ss = new StandardSettings(sSettingsFile);
+            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),ss);
             _Game = new TetrisGame(this, standardstate);
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
 
@@ -393,7 +397,7 @@ namespace BASeTris
             {
                 X.StopPolling();
             }
-
+            
             if (ai != null) ai.AbortAI();
             TetrisGame.Soundman.StopMusic();
             Application.Exit();
