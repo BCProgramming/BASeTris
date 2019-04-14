@@ -14,6 +14,9 @@ using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
+    //placed here for reference:
+    //possible theme idea: a theme which itself is a preference-based setup.
+    //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class TetrominoTheme
     {
         public abstract void ApplyTheme(BlockGroup Group, TetrisField Field);
@@ -138,7 +141,7 @@ namespace BASeTris
             ApplyColorSet(Group, CurrLevel);
         }
 
-        private StandardColouredBlock.BlockStyle[] usabletypes = new StandardColouredBlock.BlockStyle[] {StandardColouredBlock.BlockStyle.Style_Chisel, StandardColouredBlock.BlockStyle.Style_CloudBevel, StandardColouredBlock.BlockStyle.Style_HardBevel, StandardColouredBlock.BlockStyle.Style_Shine,StandardColouredBlock.BlockStyle.Style_Mottled, StandardColouredBlock.BlockStyle.Style_Pixeled };
+        private StandardColouredBlock.BlockStyle[] usabletypes = new StandardColouredBlock.BlockStyle[] {StandardColouredBlock.BlockStyle.Style_Chisel, StandardColouredBlock.BlockStyle.Style_CloudBevel, StandardColouredBlock.BlockStyle.Style_HardBevel, StandardColouredBlock.BlockStyle.Style_Shine,StandardColouredBlock.BlockStyle.Style_Mottled};
 
         private Dictionary<Type, StandardColouredBlock.BlockStyle> GetBlockStyleLookup(Type[] Types)
         {

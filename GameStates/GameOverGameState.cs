@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.BASeScores;
+using BASeTris.Properties;
 
 namespace BASeTris.GameStates
 {
@@ -30,7 +31,7 @@ namespace BASeTris.GameStates
         {
             GameOveredState = paused;
             InitTime = DateTime.Now;
-            TetrisGame.Soundman.PlaySound("mmdeath");
+            
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -44,13 +45,18 @@ namespace BASeTris.GameStates
         }
 
         DateTime LastAdvance = DateTime.MinValue;
-
+        bool PlayedDeathSound = false;
         public override void GameProc(IStateOwner pOwner)
         {
+            if(!PlayedDeathSound)
+            {
+                PlayedDeathSound = true;
+                TetrisGame.Soundman.PlaySound("mmdeath", pOwner.Settings.EffectVolume);
+            }
             if ((DateTime.Now - CompleteSummaryTime).TotalMilliseconds > 500)
             {
                 CompleteSummaryTime = DateTime.MaxValue;
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOver);
+                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOver,pOwner.Settings.EffectVolume);
                 StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
                 if (standardstate != null)
                 {
@@ -66,7 +72,7 @@ namespace BASeTris.GameStates
             if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)
             {
                 LastAdvance = DateTime.Now;
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOverShade);
+                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOverShade, pOwner.Settings.EffectVolume);
                 CoverBlocks++;
                 StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
                 if (standardstate != null)
@@ -88,7 +94,7 @@ namespace BASeTris.GameStates
                 {
                     if (ShowExtraLines != calcresult)
                     {
-                        TetrisGame.Soundman.PlaySound("block_place_2");
+                        TetrisGame.Soundman.PlaySound("block_place_2", pOwner.Settings.EffectVolume);
                     }
 
                     ShowExtraLines = calcresult;
@@ -105,7 +111,7 @@ namespace BASeTris.GameStates
         }
 
         Brush useCoverBrush = null;
-
+        public String GameOverText = "GAME\nOVER\n"; //+ ShowExtraLines.ToString();
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             if (GameOveredState is StandardTetrisGameState)
@@ -121,7 +127,7 @@ namespace BASeTris.GameStates
             {
                 Font EntryFont = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
                 Font GameOverFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);
-                String GameOverText = "GAME\nOVER\n"; //+ ShowExtraLines.ToString();
+                
                 var measured = g.MeasureString(GameOverText, GameOverFont);
                 var measuremini = g.MeasureString(GameOverText, EntryFont);
                 PointF GameOverPos = new PointF(Bounds.Width / 2 - measured.Width / 2, measured.Height/4);
@@ -190,7 +196,7 @@ namespace BASeTris.GameStates
                             ((StandardTetrisGameState) GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((StandardTetrisGameState) GameOveredState).GameStats))
                             , ((StandardTetrisGameState) GameOveredState).GameStats);
                         pOwner.CurrentState = ehs;
-                        TetrisGame.Soundman.PlayMusic("highscoreentry");
+                        TetrisGame.Soundman.PlayMusic("highscoreentry",pOwner.Settings.MusicVolume,true);
                     }
                 }
             }

@@ -51,7 +51,7 @@ namespace BASeTris.GameStates
         {
             var submitscore = ScoreToEntryFunc(sCurrentEntry.ToString().Replace("_", " ").Trim(), GameStatistics.Score);
             ScoreListing.Submit(submitscore);
-            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.ClearTetris);
+            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.ClearTetris, pOwner.Settings.EffectVolume);
             TetrisGame.Soundman.PlayMusic("high_score_list");
             pOwner.CurrentState = new ShowHighScoresState(ScoreListing, null, new int[] {AchievedPosition});
         }

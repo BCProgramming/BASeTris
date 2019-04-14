@@ -12,7 +12,7 @@ namespace BASeTris.GameStates.Menu
     public class OptionsMenuState:MenuState
     {
         private GameState _OriginalState;
-
+        
         public OptionsMenuState(IBackgroundDraw background,IStateOwner pOwner,GameState OriginalState):base(background)
         {
             _OriginalState = OriginalState;
@@ -64,7 +64,8 @@ namespace BASeTris.GameStates.Menu
 
         private void MusicOptionItem_OnActivateOption(object sender, OptionActivated<SoundOption> e)
         {
-            TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, 0.75f,true);
+            
+            TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, e.Owner.Settings.MusicVolume, true);
         }
 
         private class SoundOption

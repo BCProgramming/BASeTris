@@ -36,6 +36,7 @@ namespace BASeTris.GameStates.Menu
         public int StartItemOffset = 0; //start drawing menu items at this index. This is
         //used to scroll the menu up and down.
         public int SelectedIndex = 0;
+
         public override GameState.DisplayMode SupportedDisplayMode
         {
             get { return GameState.DisplayMode.Full; }
@@ -187,7 +188,7 @@ namespace BASeTris.GameStates.Menu
             {
                 if (ActivatedItem != null)
                 {
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated);
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated, pOwner.Settings.EffectVolume);
                     ActivatedItem.OnDeactivated();
                     ActivatedItem = null;
                 }
@@ -196,7 +197,7 @@ namespace BASeTris.GameStates.Menu
 
                     //Activate the currently selected item.
                     var currentitem = MenuElements[SelectedIndex];
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated);
+                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated, pOwner.Settings.EffectVolume);
                     ActivatedItem = currentitem;
                     MenuItemActivated?.Invoke(this, new MenuStateMenuItemActivatedEventArgs(currentitem));
 
@@ -207,7 +208,7 @@ namespace BASeTris.GameStates.Menu
 
             else if (OriginalIndex != SelectedIndex)
             {
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemSelected);
+                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemSelected, pOwner.Settings.EffectVolume);
                 var previousitem = MenuElements[OriginalIndex];
                 var currentitem = MenuElements[SelectedIndex];
                 MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previousitem));

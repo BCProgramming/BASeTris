@@ -26,20 +26,27 @@ namespace BASeTris
         public int FallSpeed { get; set; } = 250; //Higher is slower, number of ms between movements.
         public int X { get; set; }
         private int _Y = 0;
-        public int Y { get { return _Y; } set{ _Y = value; LastFall = DateTime.Now; } }
+        public int Y { get { return _Y; } private set{ _Y = value; } }
+        public void SetY(IStateOwner pOwner,int Value)
+        {
+            if(pOwner!=null) LastFall = pOwner.GetElapsedTime();
+            Y = Value;
+        }
         private int XMin, XMax, YMin, YMax;
         private Rectangle _GroupExtents = Rectangle.Empty;
-        public DateTime LastFall = DateTime.MinValue;
+        public TimeSpan LastFall = TimeSpan.Zero;
         public float HighestHeightValue = 0;
+        
         public float GetHeightTranslation(IStateOwner pOwner,float BlockHeight)
         {
-            if (pOwner.CurrentState is PauseGameState)
+            if (!pOwner.CurrentState.GamePlayActive)
             {
                 return 0;
             }
             else
             {
-                double Percent = ((DateTime.Now - LastFall).TotalMilliseconds) / (double)FallSpeed;
+                double Percent = ((pOwner.GetElapsedTime() - LastFall).TotalMilliseconds) / (double)FallSpeed;
+                if (Percent > 1) Percent = 1; if (Percent < 0) Percent = 0;
                 return (float)(((float)BlockHeight) * (Percent));
             }
         }

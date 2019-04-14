@@ -13,7 +13,7 @@ namespace BASeTris.GameStates
         DateTime InitialUnpauseTime = DateTime.MinValue;
         TimeSpan PauseDelay = new TimeSpan(0, 0, 0, 5);
         Action ReturnFunc = null;
-
+        public override bool GamePlayActive { get { return false; } }
         public UnpauseDelayGameState(GameState ReturnToState, Action pReturnFunc = null)
         {
             _ReturnState = ReturnToState;
@@ -61,7 +61,7 @@ namespace BASeTris.GameStates
             if (LastSecond != timeremaining.Seconds)
             {
                 //emit a sound.
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOverShade);
+                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOverShade, pOwner.Settings.EffectVolume);
                 LastSecond = timeremaining.Seconds;
                 lastMillis = 1000;
             }

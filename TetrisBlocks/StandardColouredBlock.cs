@@ -45,7 +45,7 @@ namespace BASeTris.TetrisBlocks
         
         public Color _BlockColor = Color.Red;
         public Color _InnerColor = Color.White;
-        public BlockStyle DisplayStyle = BlockStyle.Style_Gummy;
+        public BlockStyle DisplayStyle = BlockStyle.Style_CloudBevel;
 
         public Color BlockColor
         {

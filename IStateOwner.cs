@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BASeTris
 {
@@ -20,6 +21,13 @@ namespace BASeTris
         double ScaleFactor { get; }
         void SetScale(double pScale);
         event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
+        DateTime GameStartTime { get; set; }
+
+        TimeSpan FinalGameTime { get; set; }
+        DateTime LastPausedTime { get; set; }
+        TimeSpan GetElapsedTime();
+
+        StandardSettings Settings { get; }
     }
 
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

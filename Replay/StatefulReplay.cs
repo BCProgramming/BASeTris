@@ -153,7 +153,7 @@ namespace BASeTris.Replay
                 var Field = Source.PlayField;
                 Rows = Field.RowCount;
                 Columns = Field.ColCount;
-                ElapsedGameTime = Source.GetElapsedTime(pOwner);
+                ElapsedGameTime = pOwner.GetElapsedTime();
                 BoardState = new StatefulReplayStateBlockInformation[Field.RowCount][];
                 for (int y = 0; y < Field.RowCount; y++)
                 {

@@ -173,7 +173,7 @@ namespace BASeTris.GameStates
                 IncrementedDrawState++;
                 LastIncrementTime = DateTime.Now;
                 //Maybe twiddle the Timediff a bit? I dunno
-                TetrisGame.Soundman.PlaySound("switch_inactive");
+                TetrisGame.Soundman.PlaySound("switch_inactive", pOwner.Settings.EffectVolume);
                 if (IncrementedDrawState == _ScoreList.MaximumSize + 2)
                 {
                     ScrollCompleted = true;

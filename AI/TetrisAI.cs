@@ -326,7 +326,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
                 if (CanFit(Duplicator, FieldState, Duplicator.Y + 1, Duplicator.X + XOffset))
                 {
                     dropLength++;
-                    Duplicator.Y++;
+                    Duplicator.SetY(null,Duplicator.Y+1);
                 }
                 else
                 {

@@ -23,7 +23,10 @@ namespace BASeTris
     public abstract class GameState
     {
         public virtual bool GameProcSuspended { get; set; } = false;
-
+        /// <summary>
+        /// Indicates whether this GameState allows active play. This is used to determine certain actions such as movement interpolation.
+        /// </summary>
+        public virtual bool GamePlayActive { get{ return false; } }
         public enum DisplayMode
         {
             Partitioned,

@@ -34,7 +34,7 @@ namespace BASeTris
 
         public Statistics GameStats = new Statistics();
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
-        public StandardSettings Settings;
+        
         private TetrisBlock[][] FieldContents;
 
 
@@ -353,7 +353,7 @@ namespace BASeTris
                     if (TetBlock != null)
                     {
                         RectangleF BlockBounds = new RectangleF(XPos, YPos, BlockWidth, BlockHeight);
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null,Settings);
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, null,pState.Settings);
                         RenderingProvider.Static.DrawElement(pState,tbd.g,TetBlock,tbd);
                     }
                 }
@@ -421,8 +421,10 @@ namespace BASeTris
                         }
                    
                     PointF doTranslate = new PointF(0,translation);
-                    
-                    if (useAngle != 0 && Settings.SmoothRotate)
+                    if(!pState.Settings.SmoothFall) doTranslate = new PointF(0,0);
+                    //if (Settings.SmoothFall) g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y);
+                    if(pState.Settings.SmoothFall) g.TranslateTransform(doTranslate.X,-BlockHeight + doTranslate.Y);
+                    if (useAngle != 0 && pState.Settings.SmoothRotate)
                     {
                         int MaxXBlock = (from p in bg select p.X).Max();
                         int MaxYBlock = (from p in bg select p.Y).Max();
@@ -443,7 +445,7 @@ namespace BASeTris
                         g.TranslateTransform(-useCenter.X, -useCenter.Y);
                     }
 
-                    if (Settings.SmoothFall) g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y,MatrixOrder.Prepend);
+                    
 
 
                     foreach (BlockGroupEntry bge in bg)
@@ -457,7 +459,7 @@ namespace BASeTris
 
 
                             RectangleF BlockBounds = new RectangleF(DrawXPx, DrawYPx, BlockWidth, BlockHeight);
-                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, bg,Settings);
+                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, bg, pState.Settings);
                             RenderingProvider.Static.DrawElement(pState,g,bge.Block,tbd);
                         }
                     }

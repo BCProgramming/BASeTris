@@ -65,7 +65,7 @@ namespace BASeTris.DrawHelper
             foreach (var activeblock in PlayField.BlockGroups)
             {
                 int dl = 0;
-                var GrabGhost = pState.GetGhostDrop(activeblock, out dl, 3);
+                var GrabGhost = pState.GetGhostDrop(pOwner,activeblock, out dl, 3);
                 if (GrabGhost != null)
                 {
                     var BlockWidth = PlayField.GetBlockWidth(Bounds);
@@ -74,7 +74,7 @@ namespace BASeTris.DrawHelper
                     foreach (var iterateblock in activeblock)
                     {
                         RectangleF BlockBounds = new RectangleF(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), PlayField.GetBlockWidth(Bounds), PlayField.GetBlockHeight(Bounds));
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, GrabGhost,PlayField.Settings);
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, GrabGhost,pOwner.Settings);
                         ImageAttributes Shade = new ImageAttributes();
                         Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
                         tbd.ApplyAttributes = Shade;

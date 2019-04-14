@@ -48,6 +48,42 @@ namespace BASeTris
         public static FontFamily RetroFont;
         public static FontFamily LCDFont;
         private static Image _TiledCache = null;
+        private DateTime _GameStartTime = DateTime.MinValue;
+        private DateTime _LastPausedTime = DateTime.MinValue;
+        
+        public StandardSettings Settings
+        {
+            get
+            {
+                return GameOwner.Settings;
+            }
+        }
+        public DateTime GameStartTime {  get { return _GameStartTime; } set { _GameStartTime = value; } }
+        public DateTime LastPausedTime
+        {
+            get { return _LastPausedTime; }
+            set { _LastPausedTime = value; }
+        }
+        
+        private TimeSpan _FinalGameTime = TimeSpan.MinValue;
+        public TimeSpan FinalGameTime {  get { return _FinalGameTime; } set { _FinalGameTime = value; } }
+
+        public TimeSpan GetElapsedTime()
+        {
+            TimeSpan useCalc = (DateTime.Now - GameStartTime);
+
+            if (FinalGameTime != TimeSpan.MinValue)
+            {
+                useCalc = FinalGameTime;
+            }
+
+            if (CurrentState is PauseGameState || CurrentState is UnpauseDelayGameState)
+            {
+                useCalc = LastPausedTime - GameStartTime;
+            }
+
+            return useCalc;
+        }
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         public static Image StandardTiledTetrisBackground
         {

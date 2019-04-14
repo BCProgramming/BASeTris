@@ -127,7 +127,7 @@ namespace BASeTris.GameStates
         private void ResumeGame(IStateOwner pOwner)
         {
             var unpauser = new UnpauseDelayGameState
-                (PausedState, () => { UnPause(); });
+                (PausedState, () => { UnPause(pOwner); });
 
             var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing?.UnPause();
@@ -137,9 +137,9 @@ namespace BASeTris.GameStates
             pOwner.CurrentState = unpauser;
         }
 
-        private static void UnPause()
+        private static void UnPause(IStateOwner pOwner)
         {
-            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause);
+            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause, pOwner.Settings.EffectVolume);
             var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing2?.UnPause();
             playing2?.setVolume(1.0f);

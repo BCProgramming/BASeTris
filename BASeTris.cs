@@ -29,7 +29,7 @@ namespace BASeTris
 {
     public partial class BASeTris : Form, IStateOwner
     {
-        
+        private StandardSettings GameSettings = null;
         private List<GameObject> GameObjects = new List<GameObject>();
         private TetrisGame _Game;
         //delegate the BeforeGameStateChange event...
@@ -38,8 +38,35 @@ namespace BASeTris
             add => _Game.BeforeGameStateChange += value;
             remove => _Game.BeforeGameStateChange -= value;
         }
+        public StandardSettings Settings 
+        {
+            get
+            {
+                return GameSettings;
+            }
+        }
+        public DateTime GameStartTime
+        {
+            get => _Game.GameStartTime;
+            set => _Game.GameStartTime = value;
+        }
 
+        public TimeSpan FinalGameTime
+        {
+            get => _Game.FinalGameTime;
+            set => _Game.FinalGameTime = value;
+        }
 
+        public DateTime LastPausedTime
+        {
+            get => _Game.LastPausedTime;
+            set => _Game.LastPausedTime = value;
+        }
+
+        public TimeSpan GetElapsedTime()
+        {
+            return _Game.GetElapsedTime();
+        }
 
 
         ControllerInputState CIS = null;
@@ -148,8 +175,8 @@ namespace BASeTris
         {
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
-            StandardSettings ss = new StandardSettings(sSettingsFile);
-            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),ss);
+            GameSettings = new StandardSettings(sSettingsFile);
+            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
             _Game = new TetrisGame(this, standardstate);
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
 

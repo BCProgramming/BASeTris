@@ -121,13 +121,13 @@ namespace BASeTris.GameStates
             if (g == GameKeys.GameKey_Drop)
             {
                 ChangeChar(1);
-                TetrisGame.Soundman.PlaySound(Char_Change_Up_Sound);
+                TetrisGame.Soundman.PlaySound(Char_Change_Up_Sound, pOwner.Settings.EffectVolume);
                 //change current character "upwards"
             }
             else if (g == GameKeys.GameKey_Down)
             {
                 ChangeChar(-1);
-                TetrisGame.Soundman.PlaySound(Char_Change_Up_Sound);
+                TetrisGame.Soundman.PlaySound(Char_Change_Up_Sound, pOwner.Settings.EffectVolume);
                 //change current character "downwards"
             }
             else if (g == GameKeys.GameKey_Left)
@@ -136,7 +136,7 @@ namespace BASeTris.GameStates
                 currpos--;
                 if (currpos < 0) currpos = NameEntered.Length - 1;
                 CurrentPosition = currpos;
-                TetrisGame.Soundman.PlaySound(Char_Pos_Left);
+                TetrisGame.Soundman.PlaySound(Char_Pos_Left, pOwner.Settings.EffectVolume);
                 //change current position -1 (wrapping to the end if needed)
             }
             else if (g == GameKeys.GameKey_Right)
@@ -145,7 +145,7 @@ namespace BASeTris.GameStates
                 currpos++;
                 if (currpos > NameEntered.Length - 1) currpos = 0;
                 CurrentPosition = currpos;
-                TetrisGame.Soundman.PlaySound(Char_Pos_Right);
+                TetrisGame.Soundman.PlaySound(Char_Pos_Right, pOwner.Settings.EffectVolume);
                 //change current position 1 (wrapping tp the start if needed)
             }
             else if (g == GameKeys.GameKey_RotateCW)

@@ -76,12 +76,12 @@ namespace BASeTris.GameStates.Menu
                 if (pKey == GameState.GameKeys.GameKey_Left)
                 {
                     CurrentOption = OptionManager.MovePrevious();
-                    OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption));
+                    OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption,pStateOwner));
                 }
                 else if (pKey == GameState.GameKeys.GameKey_Right)
                 {
                     CurrentOption = OptionManager.MoveNext();
-                    OnActivateOption?.Invoke(this,new OptionActivated<T>(CurrentOption));
+                    OnActivateOption?.Invoke(this,new OptionActivated<T>(CurrentOption,pStateOwner));
                 }
 
                 if (OptionManager != null && CurrentOption!=null)
@@ -93,9 +93,11 @@ namespace BASeTris.GameStates.Menu
     public class OptionActivated<T> : EventArgs
     {
         public T Option;
-        public OptionActivated(T pOption)
+        public IStateOwner Owner = null;
+        public OptionActivated(T pOption,IStateOwner pOwner)
         {
             Option = pOption;
+            Owner = pOwner;
         }
     }
     public interface IMultiOptionManager<T>
