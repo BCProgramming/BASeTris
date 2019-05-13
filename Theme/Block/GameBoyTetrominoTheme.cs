@@ -126,11 +126,11 @@ namespace BASeTris
         private static Image I_Horizontal;
         private static Image I_Left_Cap;
 
-        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, TetrisField Field)
         {
             int RandomLevel = TetrisGame.rgen.Next(25);
-            Action<BlockGroup,TetrisField,int> SelectL = Apply_L;
-            Action<BlockGroup, TetrisField, int>[] Types = new Action<BlockGroup, TetrisField, int>[]
+            Action<Nomino,TetrisField,int> SelectL = Apply_L;
+            Action<Nomino, TetrisField, int>[] Types = new Action<Nomino, TetrisField, int>[]
             {
                 Apply_L,Apply_J,Apply_I,Apply_O,Apply_S,Apply_Z,Apply_T
             };
@@ -138,7 +138,7 @@ namespace BASeTris
             selected(Group, Field, RandomLevel);
         }
 
-        public override void ApplyTheme(BlockGroup Group, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, TetrisField Field)
         {
             int CurrLevel = Field == null ? 0 : (int)(Field.LineCount / 10);
 
@@ -186,7 +186,7 @@ namespace BASeTris
             }
         }
 
-        public void Apply_L(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_L(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //L block is a solid darker colour.
             
@@ -201,7 +201,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_J(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_J(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //darker outline with a middle white square.
             foreach (var blockcheck in Group)
@@ -217,7 +217,7 @@ namespace BASeTris
 
         }
         static float ReductionFactor = 0.5f;
-        public void Apply_I(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_I(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //mottled. need to set rotation images as well.
 
@@ -230,7 +230,7 @@ namespace BASeTris
 
             if (BlockData.Count < 4)
             {
-                BlockData = new List<BlockGroupEntry>(BlockData);
+                BlockData = new List<NominoElement>(BlockData);
                 while (BlockData.Count < 4)
                 {
                     BlockData.Add(null);
@@ -280,7 +280,7 @@ namespace BASeTris
             
             
         }
-        public void Apply_Z(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_Z(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //dotted center, darker colour.
             foreach (var blockcheck in Group)
@@ -294,7 +294,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_O(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_O(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //white, inset block
             foreach (var blockcheck in Group)
@@ -308,7 +308,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_S(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_S(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //dotted center, light colour.
             foreach (var blockcheck in Group)
@@ -322,7 +322,7 @@ namespace BASeTris
                 }
             }
         }
-        public void Apply_T(BlockGroup Group, TetrisField Field,int CurrLevel)
+        public void Apply_T(Nomino Group, TetrisField Field,int CurrLevel)
         {
             //inset bevel
             foreach (var blockcheck in Group)

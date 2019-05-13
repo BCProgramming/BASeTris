@@ -17,7 +17,7 @@ namespace BASeTris.TetrisBlocks
     public abstract class TetrisBlock
     {
         public Action<TetrisBlockDrawParameters> BeforeDraw = null;
-        public BlockGroup Owner { get; set; }
+        public Nomino Owner { get; set; }
 
         public virtual bool IsAnimated
         {
@@ -37,14 +37,14 @@ namespace BASeTris.TetrisBlocks
        
 
 
-        //rotation can be set but if owned by a BlockGroup we use it's rotation.
+        //rotation can be set but if owned by a Nomino we use it's rotation.
         public virtual int Rotation
         {
             get
             {
                 if (Owner != null)
                 {
-                    BlockGroupEntry getbge = Owner.FindEntry(this);
+                    NominoElement getbge = Owner.FindEntry(this);
                     if (getbge != null) return getbge.RotationModulo;
                 }
 

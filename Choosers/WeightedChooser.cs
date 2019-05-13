@@ -10,11 +10,11 @@ namespace BASeTris.Choosers
     {
         protected float[] pWeights;
 
-        public delegate float WeightLookupRoutine(Func<BlockGroup> ForFunc);
+        public delegate float WeightLookupRoutine(Func<Nomino> ForFunc);
 
         protected WeightLookupRoutine LookupRoutine = null;
 
-        protected float DefaultWeightLookup(Func<BlockGroup> ForFunc)
+        protected float DefaultWeightLookup(Func<Nomino> ForFunc)
         {
             int foundindex = -1;
             for (int i = 0; i < _Available.Length; i++)
@@ -30,19 +30,19 @@ namespace BASeTris.Choosers
             return pWeights[foundindex % pWeights.Length];
         }
 
-        public WeightedChooser(Func<BlockGroup>[] pAvailable, float[] pWeight) : base(pAvailable)
+        public WeightedChooser(Func<Nomino>[] pAvailable, float[] pWeight) : base(pAvailable)
         {
             pWeights = pWeight;
             LookupRoutine = DefaultWeightLookup;
         }
 
-        public WeightedChooser(Func<BlockGroup>[] pAvailable, WeightLookupRoutine lookuproutine) : base(pAvailable)
+        public WeightedChooser(Func<Nomino>[] pAvailable, WeightLookupRoutine lookuproutine) : base(pAvailable)
         {
             LookupRoutine = lookuproutine;
         }
 
 
-        public override BlockGroup GetNext()
+        public override Nomino GetNext()
         {
             float[] useWeight = (from p in _Available select LookupRoutine(p)).ToArray();
             return RandomHelper.Select(_Available, useWeight)();

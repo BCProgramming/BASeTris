@@ -8,7 +8,7 @@ namespace BASeTris.Choosers
 {
     public class BagChooser : BlockGroupChooser
     {
-        Queue<Func<BlockGroup>> WorkQueue = new Queue<Func<BlockGroup>>();
+        Queue<Func<Nomino>> WorkQueue = new Queue<Func<Nomino>>();
 
 
         public static IEnumerable<T> Shuffle<T>(Random rgen, IEnumerable<T> Shufflethese)
@@ -22,7 +22,7 @@ namespace BASeTris.Choosers
             return sl.Select(iterator => iterator.Value);
         }
 
-        public BagChooser(Func<BlockGroup>[] SelectionFunctions) : base(SelectionFunctions)
+        public BagChooser(Func<Nomino>[] SelectionFunctions) : base(SelectionFunctions)
         {
         }
 
@@ -35,7 +35,7 @@ namespace BASeTris.Choosers
             }
         }
 
-        public override BlockGroup GetNext()
+        public override Nomino GetNext()
         {
             if (WorkQueue.Count == 0) RefillQueue();
             return WorkQueue.Dequeue()();

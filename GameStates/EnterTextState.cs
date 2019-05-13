@@ -12,6 +12,12 @@ namespace BASeTris.GameStates
     public abstract class EnterTextState : GameState, IDirectKeyboardInputState
     {
         protected String[] EntryPrompt = null;
+        public enum EntryDrawStyle
+        {
+            EntryDrawStyle_Preblank,
+            EntryDrawStyle_Centered
+        }
+        private EntryDrawStyle EntryStyle = EntryDrawStyle.EntryDrawStyle_Preblank;
         IStateOwner Owner = null;
         StringBuilder NameEntered = new StringBuilder("__________");
         String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -50,11 +56,11 @@ namespace BASeTris.GameStates
         }
 
         Font useFont = null;
-
+        protected Font EntryFont = null;
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             if (useFont == null) useFont = TetrisGame.GetRetroFont(15, pOwner.ScaleFactor);
-
+            if (EntryFont == null) EntryFont = TetrisGame.GetRetroFont(15, pOwner.ScaleFactor);
 
             float Millipercent = (float) DateTime.Now.Ticks / 5000f; //(float)DateTime.Now.Millisecond / 1000;
 
@@ -81,18 +87,34 @@ namespace BASeTris.GameStates
 
 
             var AllCharacterBounds = (from c in NameEntered.ToString().ToCharArray() select g.MeasureString(c.ToString(), useFont)).ToArray();
-            float useCharWidth = g.MeasureString("_", useFont).Width;
-            float TotalWidth = (useCharWidth + 5) * NameEntered.Length;
-            float NameEntryX = (Bounds.Width / 2) - (TotalWidth / 2);
-
-            for (int charpos = 0; charpos < NameEntered.Length; charpos++)
+            float useCharWidth = g.MeasureString("_", EntryFont).Width;
+            float TotalWidth;
+            if (EntryStyle == EntryDrawStyle.EntryDrawStyle_Centered)
             {
-                char thischar = NameEntered[charpos];
-                float useX = NameEntryX + ((useCharWidth + 5) * (charpos));
-                Brush DisplayBrush = (CurrentPosition == charpos) ? new SolidBrush(UseHighLightingColor) : Brushes.NavajoWhite;
-                Brush ShadowBrush = (CurrentPosition == charpos) ? new SolidBrush(useLightRain) : Brushes.Black;
-                g.DrawString(thischar.ToString(), useFont, ShadowBrush, new PointF(useX + 2, nameEntryY + 2));
-                g.DrawString(thischar.ToString(), useFont, DisplayBrush, new PointF(useX, nameEntryY));
+                TotalWidth = (useCharWidth + 5) * NameEntered.ToString().Trim('_', ' ').Length;
+                
+            }
+            TotalWidth = (useCharWidth + 5) * NameEntered.Length;
+            float NameEntryX = (Bounds.Width / 2) - (TotalWidth / 2);
+            if (EntryStyle == EntryDrawStyle.EntryDrawStyle_Preblank)
+            {
+                for (int charpos = 0; charpos < NameEntered.Length; charpos++)
+                {
+                    char thischar = NameEntered[charpos];
+                    float useX = NameEntryX + ((useCharWidth + 5) * (charpos));
+                    Brush DisplayBrush = (CurrentPosition == charpos) ? new SolidBrush(UseHighLightingColor) : Brushes.NavajoWhite;
+                    Brush ShadowBrush = (CurrentPosition == charpos) ? new SolidBrush(useLightRain) : Brushes.Black;
+                    g.DrawString(thischar.ToString(), EntryFont, ShadowBrush, new PointF(useX + 2, nameEntryY + 2));
+                    g.DrawString(thischar.ToString(), EntryFont, DisplayBrush, new PointF(useX, nameEntryY));
+                }
+            }
+            else if (EntryStyle == EntryDrawStyle.EntryDrawStyle_Centered)
+            {
+                //"simpler"- we just draw the trimmed text.
+                String TrimEntered = NameEntered.ToString().Trim(' ', '_');
+                
+
+
             }
         }
 
@@ -150,7 +172,7 @@ namespace BASeTris.GameStates
             }
             else if (g == GameKeys.GameKey_RotateCW)
             {
-                String sEntry = NameEntered.ToString().Replace("_", " ").Trim();
+                String sEntry = NameEntered.ToString().Trim('_', ' ');
                 if (ValidateEntry(pOwner, sEntry))
                 {
                     CommitEntry(pOwner, sEntry);

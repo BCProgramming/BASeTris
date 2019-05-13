@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Pentominoes
 {
-    public class Pentomino : BlockGroup
+    public class Pentomino : Nomino
     {
     }
 

@@ -19,8 +19,8 @@ namespace BASeTris
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class TetrominoTheme
     {
-        public abstract void ApplyTheme(BlockGroup Group, TetrisField Field);
-        public abstract void ApplyRandom(BlockGroup Group, TetrisField Field);
+        public abstract void ApplyTheme(Nomino Group, TetrisField Field);
+        public abstract void ApplyRandom(Nomino Group, TetrisField Field);
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field);
         
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
@@ -129,13 +129,13 @@ namespace BASeTris
             _Style = pBlockStyle;
         }
 
-        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, TetrisField Field)
         {
             int useLevel = TetrisGame.rgen.Next(50);
             ApplyColorSet(Group,useLevel);
         }
 
-        public override void ApplyTheme(BlockGroup Group, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, TetrisField Field)
         {
             int CurrLevel = Field == null ? 0 : (int) (Field.LineCount / 10);
             ApplyColorSet(Group, CurrLevel);
@@ -155,7 +155,7 @@ namespace BASeTris
             return Result;
         }
 
-        public static Color GetStandardColor(BlockGroup source, int Level)
+        public static Color GetStandardColor(Nomino source, int Level)
         {
             Color[] Colors = new Color[] {Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
             int useIndex = -1;
@@ -196,7 +196,7 @@ namespace BASeTris
         private static Random rg = new Random();
         private static Dictionary<Type, StandardColouredBlock.BlockStyle> UseStyles = null;
 
-        private void ApplyColorSet(BlockGroup bg, int Level)
+        private void ApplyColorSet(Nomino bg, int Level)
         {
             if (bg == null) return;
 

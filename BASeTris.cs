@@ -169,7 +169,7 @@ namespace BASeTris
         }
 
         bool XPolling = false;
-        BlockGroup testBG = null;
+        Nomino testBG = null;
 
         private void StartGame()
         {
@@ -368,7 +368,7 @@ namespace BASeTris
             {
                 if (e.Shift && e.Control)
                 {
-                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Game, 16);
+                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Game, 64);
                     CurrentState = cheatstate;
                 }
             }

@@ -34,14 +34,14 @@ namespace BASeTris.AI
             return Copied;
         }
 
-        public static IEnumerable<StoredBoardState> GetPossibleResults(TetrisBlock[][] Source, BlockGroup bg)
+        public static IEnumerable<StoredBoardState> GetPossibleResults(TetrisBlock[][] Source, Nomino bg)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for (int useRotation = 0; useRotation < 4; useRotation++)
             {
                 for (int x = -5; x < Source[0].Length + 5; x++)
                 {
-                    BlockGroup cloneFor = new BlockGroup(bg);
+                    Nomino cloneFor = new Nomino(bg);
                     foreach (var resetblock in cloneFor)
                     {
                         resetblock.Block = new StandardColouredBlock();
@@ -68,7 +68,7 @@ namespace BASeTris.AI
                 {
                     //todo: we want to copy the playfield for our inspection here... we'll want to see what happens based on moving the blockgroup left or right up to each side and dropping it and evaluate the result to select the ideal
                     //then slap those keys into the queue.
-                    BlockGroup ActiveGroup = stdState.PlayField.BlockGroups[0];
+                    Nomino ActiveGroup = stdState.PlayField.BlockGroups[0];
                     var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup).ToList();
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
                     var Sorted = PossibleStates.OrderByDescending((w) => w.GetScore()).ToList();
@@ -127,7 +127,7 @@ namespace BASeTris.AI
 
     public class StoredBoardState
     {
-        private BlockGroup _SourceGroup;
+        private Nomino _SourceGroup;
         private TetrisBlock[][] _BoardState;
 
         public TetrisBlock[][] State
@@ -163,10 +163,10 @@ namespace BASeTris.AI
             return sb.ToString();
         }
 
-        public StoredBoardState(TetrisBlock[][] InitialState, BlockGroup pGroup, int pXOffset, int pRotationCount)
+        public StoredBoardState(TetrisBlock[][] InitialState, Nomino pGroup, int pXOffset, int pRotationCount)
         {
             _BoardState = TetrisAI.DuplicateField(InitialState);
-            _SourceGroup = new BlockGroup(pGroup);
+            _SourceGroup = new Nomino(pGroup);
             XOffset = pXOffset;
             RotationCount = pRotationCount;
             foreach (var resetblock in _SourceGroup)
@@ -176,7 +176,7 @@ namespace BASeTris.AI
 
 
             for (int i = 0; i < RotationCount; i++) _SourceGroup.Rotate(false);
-            //move the BlockGroup by the specified offset...
+            //move the Nomino by the specified offset...
 
             _SourceGroup.RecalcExtents();
             /*
@@ -310,7 +310,7 @@ d = -0.184483
 a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
 
-        private void DropBlock(BlockGroup Source, ref TetrisBlock[][] FieldState, int XOffset)
+        private void DropBlock(Nomino Source, ref TetrisBlock[][] FieldState, int XOffset)
         {
             bool result = true;
             int YOffset = 0;
@@ -318,7 +318,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             int ROWCOUNT = FieldState.Length - 1;
             int COLCOUNT = FieldState[0].Length - 1;
 
-            BlockGroup Duplicator = new BlockGroup(Source);
+            Nomino Duplicator = new Nomino(Source);
 
             int dropLength = 0;
             while (true)
@@ -343,7 +343,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             }
         }
 
-        private bool CanFit(BlockGroup Source, TetrisBlock[][] Field, int Y, int X)
+        private bool CanFit(Nomino Source, TetrisBlock[][] Field, int Y, int X)
         {
             bool result = false;
             int ROWCOUNT = Field.Length - 1;

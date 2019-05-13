@@ -16,7 +16,7 @@ namespace BASeTris.Choosers.AIChoosers
     {
         protected StandardTetrisGameState _State;
 
-        public BaseAIChooser(StandardTetrisGameState _StandardState, Func<BlockGroup>[] pAvailable) : base(pAvailable)
+        public BaseAIChooser(StandardTetrisGameState _StandardState, Func<Nomino>[] pAvailable) : base(pAvailable)
         {
             _State = _StandardState;
         }
@@ -66,10 +66,10 @@ namespace BASeTris.Choosers.AIChoosers
 
         Thread AIWorker = null;
         private int _MaxElements = 15;
-        protected ConcurrentQueue<BlockGroup> WorkQueue = new ConcurrentQueue<BlockGroup>();
-        public abstract BlockGroup PerformGetNext();
+        protected ConcurrentQueue<Nomino> WorkQueue = new ConcurrentQueue<Nomino>();
+        public abstract Nomino PerformGetNext();
 
-        public override BlockGroup GetNext()
+        public override Nomino GetNext()
         {
             if (AIWorker == null)
             {
@@ -83,7 +83,7 @@ namespace BASeTris.Choosers.AIChoosers
                 Thread.Sleep(5);
             }
 
-            BlockGroup getresult = null;
+            Nomino getresult = null;
             while (!WorkQueue.TryDequeue(out getresult))
             {
                 Thread.Sleep(15);

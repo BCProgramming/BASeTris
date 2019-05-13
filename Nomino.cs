@@ -18,8 +18,8 @@ using BASeTris.TetrisBlocks;
 
 namespace BASeTris
 {
-    //TODO: change it so that BlockGroup's can accept the gamekey input. Will have to refactor what we have already...
-    public class BlockGroup : IEnumerable<BlockGroupEntry>
+    //TODO: change it so that Nomino's can accept the gamekey input. Will have to refactor what we have already...
+    public class Nomino : IEnumerable<NominoElement>
     {
         public String SpecialName { get; set; }
 
@@ -55,19 +55,19 @@ namespace BASeTris
             get { return _GroupExtents; }
         }
 
-        protected List<BlockGroupEntry> BlockData = new List<BlockGroupEntry>();
-        private Dictionary<TetrisBlock, BlockGroupEntry> _DataLookup = null;
-        public IList<BlockGroupEntry> GetBlockData()
+        protected List<NominoElement> BlockData = new List<NominoElement>();
+        private Dictionary<TetrisBlock, NominoElement> _DataLookup = null;
+        public IList<NominoElement> GetBlockData()
         {
             return BlockData.AsReadOnly();
         }
-        public Dictionary<TetrisBlock, BlockGroupEntry> BlockDataLookup
+        public Dictionary<TetrisBlock, NominoElement> BlockDataLookup
         {
             get
             {
                 if (_DataLookup == null)
                 {
-                    _DataLookup = new Dictionary<TetrisBlock, BlockGroupEntry>();
+                    _DataLookup = new Dictionary<TetrisBlock, NominoElement>();
                     foreach (var addelement in this)
                     {
                         _DataLookup.Add(addelement.Block, addelement);
@@ -125,7 +125,7 @@ namespace BASeTris
 
         public override string ToString()
         {
-            return "BlockGroup:" + BlockData.Count + " Blocks ";
+            return "Nomino:" + BlockData.Count + " Blocks ";
         }
 
         public bool IsActive(TetrisField pField)
@@ -145,7 +145,7 @@ namespace BASeTris
                 DrawRep.CompositingQuality = CompositingQuality.HighSpeed;
                 DrawRep.InterpolationMode = InterpolationMode.NearestNeighbor;
                 DrawRep.SmoothingMode = SmoothingMode.HighSpeed;
-                foreach (BlockGroupEntry bge in this)
+                foreach (NominoElement bge in this)
                 {
                     RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
                     TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this,new StandardSettings());
@@ -157,24 +157,24 @@ namespace BASeTris
             return BuiltRepresentation;
         }
 
-        public BlockGroup(BlockGroup sourcebg)
+        public Nomino(Nomino sourcebg)
         {
             FallSpeed = sourcebg.FallSpeed;
             X = sourcebg.X;
             Y = sourcebg.Y;
             foreach (var cloneentry in sourcebg.BlockData)
             {
-                AddBlock(new BlockGroupEntry(cloneentry));
+                AddBlock(new NominoElement(cloneentry));
             }
         }
 
-        public BlockGroup()
+        public Nomino()
         {
             XMin = YMin = int.MaxValue;
             XMax = YMax = int.MinValue;
         }
 
-        private void AddBlock(BlockGroupEntry bge)
+        private void AddBlock(NominoElement bge)
         {
             if (bge.X < XMin) XMin = bge.X;
             if (bge.X > XMax) XMax = bge.X;
@@ -186,11 +186,11 @@ namespace BASeTris
 
         public void AddBlock(Point[] RotationPoints, TetrisBlock tb)
         {
-            BlockGroupEntry bge = new BlockGroupEntry(RotationPoints, tb);
+            NominoElement bge = new NominoElement(RotationPoints, tb);
             AddBlock(bge);
         }
 
-        public BlockGroupEntry FindEntry(TetrisBlock findBlock)
+        public NominoElement FindEntry(TetrisBlock findBlock)
         {
             return BlockDataLookup[findBlock];
         }
@@ -215,7 +215,7 @@ namespace BASeTris
             if (MaximumY > RowCount) Y = Y - (MaximumY - RowCount);
         }
 
-        public IEnumerator<BlockGroupEntry> GetEnumerator()
+        public IEnumerator<NominoElement> GetEnumerator()
         {
             return BlockData.GetEnumerator();
         }
@@ -225,9 +225,9 @@ namespace BASeTris
             return GetEnumerator();
         }
 
-        public static BlockGroup GetTetromino_Array(Point[][] Source, String pName)
+        public static Nomino GetTetromino_Array(Point[][] Source, String pName)
         {
-            BlockGroup bg = new BlockGroup();
+            Nomino bg = new Nomino();
             bg.SpecialName = pName;
             foreach (var bge in GetTetrominoEntries(Source))
             {
@@ -238,24 +238,24 @@ namespace BASeTris
             return bg;
         }
 
-        public static IEnumerable<BlockGroupEntry> GetTetrominoEntries(Point[] Source, Size AreaSize)
+        public static IEnumerable<NominoElement> GetTetrominoEntries(Point[] Source, Size AreaSize)
         {
-            //assumes a "single" set of blocks, we rotate it with the BlockGroupEntry Constructor for the needed rotation points.
+            //assumes a "single" set of blocks, we rotate it with the NominoElement Constructor for the needed rotation points.
             foreach (Point BlockPos in Source)
             {
                 StandardColouredBlock CreateBlock = new StandardColouredBlock();
-                yield return new BlockGroupEntry(BlockPos, AreaSize, CreateBlock);
+                yield return new NominoElement(BlockPos, AreaSize, CreateBlock);
             }
         }
 
-        public static IEnumerable<BlockGroupEntry> GetTetrominoEntries(Point[][] Source)
+        public static IEnumerable<NominoElement> GetTetrominoEntries(Point[][] Source)
         {
             foreach (Point[] loopposdata in Source)
             {
                 StandardColouredBlock CreateBlock = new StandardColouredBlock();
 
 
-                yield return new BlockGroupEntry(loopposdata, CreateBlock);
+                yield return new NominoElement(loopposdata, CreateBlock);
             }
         }
 
@@ -300,7 +300,7 @@ namespace BASeTris
         }
     }
 
-    public class BlockGroupEntry
+    public class NominoElement
     {
         //Represents a single block within a group. the RotationPoints represent the positions this specific block will rotate/change to when rotated.
         private int sMod(int A, int B)
@@ -342,13 +342,13 @@ namespace BASeTris
 
         public TetrisBlock Block;
 
-        public BlockGroupEntry(Point Point, Size AreaSize, TetrisBlock pBlock)
+        public NominoElement(Point Point, Size AreaSize, TetrisBlock pBlock)
         {
             Positions = GetRotations(Point, AreaSize);
             Block = pBlock;
         }
 
-        public BlockGroupEntry(Point[] RotationPoints, TetrisBlock pBlock)
+        public NominoElement(Point[] RotationPoints, TetrisBlock pBlock)
         {
             if (RotationPoints.Length == 0) throw new ArgumentException("RotationPoints");
 
@@ -356,7 +356,7 @@ namespace BASeTris
             Block = pBlock;
         }
 
-        public BlockGroupEntry(BlockGroupEntry clonesource)
+        public NominoElement(NominoElement clonesource)
         {
             RotationModulo = clonesource.RotationModulo;
             Positions = new Point[clonesource.Positions.Length];

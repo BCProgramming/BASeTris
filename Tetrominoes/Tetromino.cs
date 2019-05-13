@@ -7,10 +7,10 @@ using BASeTris.Choosers;
 
 namespace BASeTris.Tetrominoes
 {
-    public class Tetromino : BlockGroup
+    public class Tetromino : Nomino
     {
-        internal static Func<BlockGroup>[] StandardTetrominoFunctions =
-            new Func<BlockGroup>[]
+        internal static Func<Nomino>[] StandardTetrominoFunctions =
+            new Func<Nomino>[]
             {
                 () => new Tetromino_Z(),
                 () => new Tetromino_I(),

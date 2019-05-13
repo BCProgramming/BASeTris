@@ -45,7 +45,7 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-            //Should we allow Game keys here? probably. We'll block them for the moment though. There shouldn't be an active BlockGroup during this process
+            //Should we allow Game keys here? probably. We'll block them for the moment though. There shouldn't be an active Nomino during this process
             //so really there shouldn't be anything to control- Aside, of course, from pause for example.
             //throw new NotImplementedException();
         }

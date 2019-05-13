@@ -11,10 +11,10 @@ namespace BASeTris.Rendering.RenderElements
 
     public abstract class TetrisBlockDrawParameters
     {
-        public BlockGroup GroupOwner = null;
+        public Nomino GroupOwner = null;
         public float FillPercent = 1f;
         public StandardSettings Settings;
-        public TetrisBlockDrawParameters(BlockGroup pGroupOwner,StandardSettings pSettings)
+        public TetrisBlockDrawParameters(Nomino pGroupOwner,StandardSettings pSettings)
         {
             GroupOwner = pGroupOwner;
             Settings = pSettings;
@@ -30,7 +30,7 @@ namespace BASeTris.Rendering.RenderElements
         public ImageAttributes ApplyAttributes = null;
 
 
-        public TetrisBlockDrawGDIPlusParameters(Graphics pG, RectangleF pRegion, BlockGroup pGroupOwner, StandardSettings pSettings) : base(pGroupOwner,pSettings)
+        public TetrisBlockDrawGDIPlusParameters(Graphics pG, RectangleF pRegion, Nomino pGroupOwner, StandardSettings pSettings) : base(pGroupOwner,pSettings)
         {
             g = pG;
             region = pRegion;

@@ -99,7 +99,7 @@ namespace BASeTris
 
         //public TetrominoTheme Theme = new NESTetrominoTheme();
         //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
-        private List<BlockGroup> ActiveBlockGroups = new List<BlockGroup>();
+        private List<Nomino> ActiveBlockGroups = new List<Nomino>();
 
         public int Level
         {
@@ -129,9 +129,9 @@ namespace BASeTris
             get { return COLCOUNT; }
         }
 
-        public IList<BlockGroup> BlockGroups
+        public IList<Nomino> BlockGroups
         {
-            get { return new List<BlockGroup>(ActiveBlockGroups); }
+            get { return new List<Nomino>(ActiveBlockGroups); }
         }
 
 
@@ -155,7 +155,7 @@ namespace BASeTris
             }
         }
 
-        public void AddBlockGroup(BlockGroup newGroup)
+        public void AddBlockGroup(Nomino newGroup)
         {
             Debug.Print("Added:" + newGroup.ToString());
             lock (ActiveBlockGroups)
@@ -164,7 +164,7 @@ namespace BASeTris
             }
         }
 
-        public void RemoveBlockGroup(BlockGroup oldGroup)
+        public void RemoveBlockGroup(Nomino oldGroup)
         {
             lock (ActiveBlockGroups)
             {
@@ -226,14 +226,14 @@ namespace BASeTris
 
         DateTime LastSetGroup = DateTime.MinValue;
 
-        public void SetGroupToField(BlockGroup bg)
+        public void SetGroupToField(Nomino bg)
         {
             lock (ActiveBlockGroups)
             {
                 LastSetGroup = DateTime.Now;
 
 
-                Debug.Print("Setting BlockGroup to Field:" + bg.ToString());
+                Debug.Print("Setting Nomino to Field:" + bg.ToString());
                 foreach (var groupblock in bg)
                 {
                     int RowPos = groupblock.Y + bg.Y;
@@ -248,9 +248,9 @@ namespace BASeTris
             }
         }
 
-        public bool CanFit(BlockGroup bg, int X, int Y)
+        public bool CanFit(Nomino bg, int X, int Y)
         {
-            IList<BlockGroupEntry> Contacts = new List<BlockGroupEntry>();
+            IList<NominoElement> Contacts = new List<NominoElement>();
             bool result = true;
             foreach (var checkblock in bg)
             {
@@ -280,9 +280,9 @@ namespace BASeTris
             return result;
         }
 
-        public bool CanRotate(BlockGroup bg, bool ccw)
+        public bool CanRotate(Nomino bg, bool ccw)
         {
-            BlockGroup duped = new BlockGroup(bg);
+            Nomino duped = new Nomino(bg);
             duped.Rotate(ccw);
             duped.Clamp(ROWCOUNT, COLCOUNT);
             return CanFit(duped, bg.X, bg.Y);
@@ -388,7 +388,7 @@ namespace BASeTris
 
             lock (ActiveBlockGroups)
             {
-                foreach (BlockGroup bg in ActiveBlockGroups)
+                foreach (Nomino bg in ActiveBlockGroups)
                 {
                     int BaseXPos = bg.X;
                     int BaseYPos = bg.Y;
@@ -448,7 +448,7 @@ namespace BASeTris
                     
 
 
-                    foreach (BlockGroupEntry bge in bg)
+                    foreach (NominoElement bge in bg)
                     {
                         int DrawX = BaseXPos + bge.X;
                         int DrawY = BaseYPos + bge.Y - HIDDENROWS;
@@ -495,9 +495,9 @@ namespace BASeTris
 
         public class BlockGroupSetEventArgs : EventArgs
         {
-            public BlockGroup _group = null;
+            public Nomino _group = null;
 
-            public BlockGroupSetEventArgs(BlockGroup bg)
+            public BlockGroupSetEventArgs(Nomino bg)
             {
                 _group = bg;
             }

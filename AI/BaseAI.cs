@@ -54,7 +54,7 @@ namespace BASeTris.AI
         {
             //This is where the thinking happens.
             //The AI evaluates the state of the game, and adds any needed keys to press to the queue.
-            //generally if the AI finds no active BlockGroup, or more than one.... it should probably skip out.
+            //generally if the AI finds no active Nomino, or more than one.... it should probably skip out.
         }
 
         public void AbortAI()

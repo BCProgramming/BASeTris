@@ -38,11 +38,11 @@ namespace BASeTris.Choosers
 }*/
         int prev, roll;
 
-        public NESChooser(Func<BlockGroup>[] pAvailable) : base(pAvailable)
+        public NESChooser(Func<Nomino>[] pAvailable) : base(pAvailable)
         {
         }
 
-        public NESChooser(Func<BlockGroup>[] pAvailable, int Seed) : base(pAvailable, Seed)
+        public NESChooser(Func<Nomino>[] pAvailable, int Seed) : base(pAvailable, Seed)
         {
         }
 
@@ -54,7 +54,7 @@ namespace BASeTris.Choosers
             roll = _Available.Length + 1;
         }
 
-        public override BlockGroup GetNext()
+        public override Nomino GetNext()
         {
             int id = rgen.Next(roll);
             if (id == prev || id == _Available.Length)

@@ -64,6 +64,7 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -85,9 +86,10 @@
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BackgroundDrawers\IBackgroundDraw.cs" />
     <Compile Include="BASSDriver.cs" />
-    <Compile Include="BlockGroup.cs" />
+    <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />
     <Compile Include="Cheats\DebugCheat.cs" />
+    <Compile Include="Cheats\SetMusicCheat.cs" />
     <Compile Include="Choosers\AIChoosers\MeanChooser.cs" />
     <Compile Include="Choosers\BagChooser.cs" />
     <Compile Include="Choosers\AIChoosers\BaseAIChooser.cs" />
@@ -122,6 +124,7 @@
     <Compile Include="GameStates\UnpauseDelayGameState.cs" />
     <Compile Include="GameStates\ViewScoreDetailsState.cs" />
     <Compile Include="HotLine.cs" />
+    <Compile Include="NominoBuilder.cs" />
     <Compile Include="Particles\cParticle.cs" />
     <Compile Include="DebugLog.cs" />
     <Compile Include="BASeTris.cs">

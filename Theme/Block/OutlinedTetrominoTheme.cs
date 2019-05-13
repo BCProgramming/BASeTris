@@ -106,7 +106,7 @@ namespace BASeTris
 
         }
 
-        public override void ApplyRandom(BlockGroup Group, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, TetrisField Field)
         {
             int LevelUse = TetrisGame.rgen.Next(10);
 
@@ -114,7 +114,7 @@ namespace BASeTris
 
         }
 
-        public override void ApplyTheme(BlockGroup Group, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, TetrisField Field)
         {
             int CurrLevel = Field == null ? 0 : (int)(Field.LineCount / 10);
             if (Group is Tetromino_I)
@@ -155,7 +155,7 @@ namespace BASeTris
 
         }
 
-        private void ApplyImages(BlockGroup Target,Image[] BlockImages)
+        private void ApplyImages(Nomino Target,Image[] BlockImages)
         {
             var BlockData = Target.GetBlockData();
             
@@ -170,7 +170,7 @@ namespace BASeTris
             }
         }
 
-        protected void ApplyTheme_I(BlockGroup Target,int CurrentLevel)
+        protected void ApplyTheme_I(Nomino Target,int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]
@@ -182,7 +182,7 @@ namespace BASeTris
             });
             
         }
-        protected void ApplyTheme_J(BlockGroup Target,int CurrentLevel)
+        protected void ApplyTheme_J(Nomino Target,int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]
@@ -194,7 +194,7 @@ namespace BASeTris
             });
         }
 
-        protected void ApplyTheme_L(BlockGroup Target, int CurrentLevel)
+        protected void ApplyTheme_L(Nomino Target, int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]
@@ -205,7 +205,7 @@ namespace BASeTris
                 GetOutlinedImage(BlockOutlines.Outline_Top | BlockOutlines.Outline_Left|BlockOutlines.Outline_Right ,baseColor)
             });
         }
-        protected void ApplyTheme_O(BlockGroup Target, int CurrentLevel)
+        protected void ApplyTheme_O(Nomino Target, int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]
@@ -217,7 +217,7 @@ namespace BASeTris
             });
         }
 
-        protected void ApplyTheme_Z(BlockGroup Target, int CurrentLevel)
+        protected void ApplyTheme_Z(Nomino Target, int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]
@@ -228,7 +228,7 @@ namespace BASeTris
                 GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Right | BlockOutlines.Outline_Top,baseColor)
             });
         }
-        protected void ApplyTheme_S(BlockGroup Target, int CurrentLevel)
+        protected void ApplyTheme_S(Nomino Target, int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]
@@ -240,7 +240,7 @@ namespace BASeTris
             });
         }
 
-        protected void ApplyTheme_T(BlockGroup Target, int CurrentLevel)
+        protected void ApplyTheme_T(Nomino Target, int CurrentLevel)
         {
             Color baseColor = GetLevelColor(CurrentLevel);
             ApplyImages(Target, new Image[]

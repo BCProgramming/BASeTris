@@ -8,10 +8,10 @@ namespace BASeTris.Choosers
 {
     public abstract class BlockGroupChooser : IDisposable
     {
-        protected Func<BlockGroup>[] _Available;
+        protected Func<Nomino>[] _Available;
         protected Random rgen = null;
 
-        public BlockGroupChooser(Func<BlockGroup>[] pAvailable)
+        public BlockGroupChooser(Func<Nomino>[] pAvailable)
         {
             _Available = pAvailable;
             rgen = new Random();
@@ -21,13 +21,13 @@ namespace BASeTris.Choosers
         {
         }
 
-        public BlockGroupChooser(Func<BlockGroup>[] pAvailable, int Seed)
+        public BlockGroupChooser(Func<Nomino>[] pAvailable, int Seed)
         {
             _Available = pAvailable;
             rgen = new Random(Seed);
         }
 
-        public IEnumerable<BlockGroup> GetEnumerator()
+        public IEnumerable<Nomino> GetEnumerator()
         {
             while (true)
             {
@@ -35,6 +35,6 @@ namespace BASeTris.Choosers
             }
         }
 
-        public abstract BlockGroup GetNext();
+        public abstract Nomino GetNext();
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BaseDoku;
@@ -16,6 +18,12 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
+            foreach(var iterate in NominoBuilder.BuildNominoes(5))
+            {
+                var buildstring = NominoBuilder.NominoToString(iterate);
+
+
+            }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;

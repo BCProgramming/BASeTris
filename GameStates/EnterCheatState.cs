@@ -14,6 +14,7 @@ namespace BASeTris.GameStates
         public EnterCheatState(GameState pOriginalState, IStateOwner pOwner, int EntryLength, string PossibleChars = " _ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") : base(pOwner, EntryLength, PossibleChars)
         {
             _PreviousState = pOriginalState;
+            EntryFont = TetrisGame.GetRetroFont(8, pOwner.ScaleFactor);
             EntryPrompt = new string[] {"Enter Cheat Code"};
         }
 

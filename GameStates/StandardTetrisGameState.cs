@@ -28,8 +28,8 @@ namespace BASeTris.GameStates
     public class StandardTetrisGameState : GameState
     {
         private StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
-        public Queue<BlockGroup> NextBlocks = new Queue<BlockGroup>();
-        public BlockGroup HoldBlock = null;
+        public Queue<Nomino> NextBlocks = new Queue<Nomino>();
+        public Nomino HoldBlock = null;
         private List<Particle> Particles = new List<Particle>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
@@ -77,7 +77,7 @@ namespace BASeTris.GameStates
             return TetrisGame.ScoreMan["Standard"];
         }
 
-        public virtual int ProcessFieldChange(IStateOwner pOwner, BlockGroup Trigger,out IList<HotLine> HotLines)
+        public virtual int ProcessFieldChange(IStateOwner pOwner, Nomino Trigger,out IList<HotLine> HotLines)
         {
 
             HotLines = new List<HotLine>();
@@ -212,7 +212,7 @@ namespace BASeTris.GameStates
 
         public bool GameOvered = false;
 
-        public BlockGroup GetNext()
+        public Nomino GetNext()
         {
             if (NextBlocks.Count == 0) return null;
             return NextBlocks.Peek();
@@ -289,7 +289,7 @@ namespace BASeTris.GameStates
             //reapply the theme when setting it down. Some themes may want
             //to have different appearances for blocks that are "set" versus those that are still "active".
             var firstBlock = e._group.FirstOrDefault();
-            BlockGroup useGroup = e._group;
+            Nomino useGroup = e._group;
             if (firstBlock != null) useGroup = firstBlock.Block.Owner ?? e._group;
             PlayField.Theme.ApplyTheme(useGroup,PlayField);
         }
@@ -299,11 +299,11 @@ namespace BASeTris.GameStates
             _DrawHelper.DrawProc(this,pOwner,g,Bounds);
         }
 
-        public BlockGroup GetGhostDrop(IStateOwner pOwner,BlockGroup Source, out int dropLength, int CancelProximity = 3)
+        public Nomino GetGhostDrop(IStateOwner pOwner,Nomino Source, out int dropLength, int CancelProximity = 3)
         {
-            //routine returns the Ghost Drop representor of this BlockGroup.
+            //routine returns the Ghost Drop representor of this Nomino.
             //this function will also return null if the dropped block is CancelProximity or closer to the place it would be dropped.
-            BlockGroup Duplicator = new BlockGroup(Source);
+            Nomino Duplicator = new Nomino(Source);
 
             dropLength = 0;
             while (true)
@@ -420,7 +420,7 @@ namespace BASeTris.GameStates
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
 
-        public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner, BlockGroup Trigger)
+        public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner, Nomino Trigger)
         {
             
             int result = ProcessFieldChange(pOwner, Trigger,out IList<HotLine> HotLines);
@@ -514,13 +514,13 @@ namespace BASeTris.GameStates
             PlayField.AddBlockGroup(nextget);
         }
 
-        private void SetLevelSpeed(BlockGroup group)
+        private void SetLevelSpeed(Nomino group)
         {
             group.FallSpeed = Math.Max(1000 - (PlayField.Level * 100), 50);
         }
 
 
-        public virtual BlockGroup GenerateTetromino()
+        public virtual Nomino GenerateTetromino()
         {
             var nextitem = Chooser.GetNext();
             //add additional processing here- for example Sticky tetris and cascade tetris should
@@ -547,7 +547,7 @@ namespace BASeTris.GameStates
                         int DrawBlockX = col * BlockSize.Width;
                         int DrawBlockY = row * BlockSize.Height;
                         StandardColouredBlock GenerateColorBlock = new StandardColouredBlock();
-                        BlockGroup ArbitraryGroup = new BlockGroup();
+                        Nomino ArbitraryGroup = new Nomino();
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
                         this.PlayField.Theme.ApplyRandom(ArbitraryGroup,this.PlayField);
                         //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
@@ -767,7 +767,7 @@ namespace BASeTris.GameStates
 
         
 
-        private void PerformRotation(IStateOwner pOwner, BlockGroup grp, bool ccw)
+        private void PerformRotation(IStateOwner pOwner, Nomino grp, bool ccw)
         {
             grp.Rotate(ccw);
             TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate, pOwner.Settings.EffectVolume);
@@ -845,7 +845,7 @@ namespace BASeTris.GameStates
             else if (g == GameKeys.GameKey_Drop)
             {
                 //drop all active groups.
-                BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+                Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                 if (FirstGroup != null)
                 {
                     foreach (var activeitem in PlayField.BlockGroups)
@@ -901,7 +901,7 @@ namespace BASeTris.GameStates
                 {
                     //if there is a holdblock, take it and put it into the gamefield and make the first active blockgroup the new holdblock,
                     //then set BlockHold to block it from being used until the next Tetromino is spawned.
-                    BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+                    Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                     if (FirstGroup != null)
                     {
                         PlayField.RemoveBlockGroup(FirstGroup);
@@ -922,7 +922,7 @@ namespace BASeTris.GameStates
                 }
                 else if (!BlockHold)
                 {
-                    BlockGroup FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+                    Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                     if (FirstGroup != null)
                     {
                         PlayField.RemoveBlockGroup(FirstGroup);
@@ -993,7 +993,7 @@ namespace BASeTris.GameStates
 
         bool BlockHold = false;
         
-        private bool HandleGroupOperation(IStateOwner pOwner,BlockGroup activeItem)
+        private bool HandleGroupOperation(IStateOwner pOwner,Nomino activeItem)
         {
 
             if (activeItem.HandleBlockOperation(pOwner)) return true;
