@@ -18,12 +18,12 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-            foreach(var iterate in NominoBuilder.BuildNominoes(5))
+           /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
             {
                 var buildstring = NominoBuilder.NominoToString(iterate);
 
 
-            }
+            }*/
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;

@@ -115,7 +115,7 @@ namespace BASeTris.GameStates.Menu
             var MeasureText = Temp.MeasureString(Text, testfont);
             return MeasureText.ToSize();
         }
-        private float GetDrawX(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
+        private static float GetDrawX(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
         {
             switch(pAlign)
             {
@@ -128,7 +128,7 @@ namespace BASeTris.GameStates.Menu
             }
             return 0;
         }
-        private PointF GetDrawPosition(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
+        private static PointF GetDrawPosition(RectangleF pBounds,SizeF DrawSize,HorizontalAlignment pAlign)
         {
             float useX = GetDrawX(pBounds, DrawSize, pAlign);
             float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Height / 2));
@@ -147,9 +147,13 @@ namespace BASeTris.GameStates.Menu
                 return FontSizeData[pOwner.ScaleFactor];
             }
         }
-        public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        public static void DrawMenuText(IStateOwner pOwner, MenuTextDrawInfo DrawData, Graphics Target,Rectangle Bounds,StateMenuItemState DrawState)
         {
             //basically just draw the Text centered within the Bounds.
+          
+        }
+        public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        {
             var useFont = GetScaledFont(pOwner);
             var MeasureText = Target.MeasureString(Text, useFont);
 
@@ -157,8 +161,8 @@ namespace BASeTris.GameStates.Menu
             Brush BackBrush = this.BackBrush;
             if (DrawState == StateMenuItemState.State_Selected)
                 BackBrush = Brushes.DarkBlue;
-            
-            Target.FillRectangle(BackBrush,Bounds);
+
+            Target.FillRectangle(BackBrush, Bounds);
 
             StringFormat central = new StringFormat();
             central.Alignment = StringAlignment.Near;
@@ -167,16 +171,47 @@ namespace BASeTris.GameStates.Menu
             if (DrawState == StateMenuItemState.State_Selected)
                 ForeBrush = Brushes.Aqua;
             Brush ShadowBrush = this.ShadowBrush;
-            //if(Text.IndexOf("ITEM 3",0,StringComparison.OrdinalIgnoreCase)>-1)
-            //{
-            //    ;
-            //
-            //}
-            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y,5f,5f,central);
-            
+            var useStyle = new DrawTextInformation()
+            {
+                Text = Text,
+                BackgroundBrush = Brushes.Transparent,
+                DrawFont = useFont,
+                ForegroundBrush = ForeBrush,
+                ShadowBrush = ShadowBrush,
+                Position = DrawPosition,
+                ShadowOffset = new PointF(5f, 5f),
+                Format = central
+            };
+            if(DrawState==StateMenuItemState.State_Selected)
+            {
+                useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculator());
+            }
+            TetrisGame.DrawText(Target, useStyle);
+
+//            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y, 5f, 5f, central);
+
         }
     }
+    public class MenuTextDrawInfo
+    {
+        public String Text;
+        public HorizontalAlignment TextAlignment;
+        public Font Font;
+        public Brush ForegroundBrush;
+        public Brush BackgroundBrush;
+        public MenuTextDrawInfo()
+        {
 
+        }
+        public MenuTextDrawInfo(String pText,HorizontalAlignment pAlignment,Font pFont,Brush ForeBrush,Brush BackBrush)
+        {
+            Text = pText;
+            TextAlignment = pAlignment;
+            Font = pFont;
+            ForegroundBrush = ForeBrush;
+            BackgroundBrush = BackBrush;
+        }
+    }
 
     public class MenuStateLabelMenuItem:MenuStateTextMenuItem
     {

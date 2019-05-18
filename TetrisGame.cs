@@ -154,16 +154,52 @@ namespace BASeTris
             return HSLColor.RotateHue(Source, useRotation);
             
         }
-        public static void DrawText(Graphics g,Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition,float ShadowXOffset=5,float ShadowYOffset=5,StringFormat sf = null)
+        public static void DrawText(Graphics g, Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition, float ShadowXOffset = 5, float ShadowYOffset = 5, StringFormat sf = null)
         {
-            if (sf == null)
+            DrawText(g, new DrawTextInformation()
             {
-                sf = new StringFormat();
-            }
-            g.DrawString(sText, UseFont, ShadowBrush, XPosition+ShadowXOffset,YPosition+ShadowYOffset,sf);
-            g.DrawString(sText, UseFont, ForegroundBrush, XPosition,YPosition,sf);
+                Text = sText,
+                BackgroundBrush = Brushes.Transparent,
+                DrawFont = UseFont,
+                ForegroundBrush = ForegroundBrush,
+                ShadowBrush = ShadowBrush,
+                Position = new PointF(XPosition, YPosition),
+                ShadowOffset = new PointF(ShadowXOffset, ShadowYOffset),
+                Format = sf
+            });
         }
+        public static void DrawText(Graphics g,DrawTextInformation DrawData)
+        {
+            if (DrawData.Format == null)
+            {
+                DrawData.Format = new StringFormat();
+            }
 
+            //May 15th 2019- we now draw the string manually. None of this DrawString stuff.
+            var characterpositions = MeasureCharacterSizes(g, DrawData.DrawFont, DrawData.Text);
+
+            char[] drawcharacters = DrawData.Text.ToCharArray();
+            g.PageUnit = GraphicsUnit.Pixel;
+            for (int i=0;i<drawcharacters.Length;i++)
+            {
+                //get the dimensions of this character
+                
+                char drawcharacter = drawcharacters[i];
+                PointF DrawPosition = new PointF(characterpositions[i].Location.X+DrawData.Position.X, characterpositions[i].Location.Y + DrawData.Position.Y);
+                DrawData.CharacterHandler.DrawCharacter(g,drawcharacter,DrawData,DrawPosition, characterpositions[i].Size,i, drawcharacters.Length,1);
+                }
+
+            //Draw the foreground
+            for (int i = 0; i < drawcharacters.Length; i++)
+            {
+                //get the dimensions of this character
+                char drawcharacter = drawcharacters[i];
+                PointF DrawPosition = new PointF(characterpositions[i].Location.X + DrawData.Position.X, characterpositions[i].Location.Y + DrawData.Position.Y);
+                DrawData.CharacterHandler.DrawCharacter(g, drawcharacter, DrawData, DrawPosition,characterpositions[i].Size, i, drawcharacters.Length, 2);
+            }
+            //g.DrawString(DrawData.Text, DrawData.DrawFont, DrawData.ShadowBrush,DrawData.Position.X+DrawData.ShadowOffset.X, DrawData.Position.Y+DrawData.ShadowOffset.Y,DrawData.Format);
+        }
+        
         public static void InitState()
         {
             String ScoreFolder = Path.Combine
@@ -532,6 +568,89 @@ namespace BASeTris
             return BuildImage;
         }
 
+        // Measure the characters in a string with
+        // no more than 32 characters.
+        private static List<RectangleF> MeasureCharacterSizeInternal(
+            Graphics gr, Font font, string text)
+        {
+
+            List<RectangleF> result = new List<RectangleF>();
+
+            using (StringFormat string_format = new StringFormat())
+            {
+                RectangleF FullBound;
+                
+                string_format.Alignment = StringAlignment.Near;
+                string_format.LineAlignment = StringAlignment.Near;
+                string_format.Trimming = StringTrimming.None;
+                string_format.FormatFlags =
+                    StringFormatFlags.MeasureTrailingSpaces;
+                var measurefull = gr.MeasureString(text, font, PointF.Empty, StringFormat.GenericDefault);
+                FullBound = new RectangleF(0, 0, measurefull.Width, measurefull.Height);
+                CharacterRange[] ranges = new CharacterRange[text.Length];
+                for (int i = 0; i < text.Length; i++)
+                {
+                    ranges[i] = new CharacterRange(i, 1);
+                }
+                string_format.SetMeasurableCharacterRanges(ranges);
+
+                // Find the character ranges.
+                RectangleF rect = new RectangleF(0, 0, 10000, 100);
+                Region[] regions =
+                    gr.MeasureCharacterRanges(
+                        text, font, FullBound,
+                        string_format);
+
+                // Convert the regions into rectangles.
+                foreach (Region region in regions)
+                    result.Add(region.GetBounds(gr));
+            }
+
+            return result;
+        }
+
+        // Measure the characters in the string.
+        private static List<RectangleF> MeasureCharacterSizes(Graphics gr,
+            Font font, string text)
+        {
+            List<RectangleF> results = new List<RectangleF>();
+
+            // The X location for the next character.
+            float x = 0;
+
+            // Get the character sizes 31 characters at a time.
+            for (int start = 0; start < text.Length; start += 32)
+            {
+                // Get the substring.
+                int len = 32;
+                if (start + len >= text.Length) len = text.Length - start;
+                string substring = text.Substring(start, len);
+
+                // Measure the characters.
+                List<RectangleF> rects =
+                    MeasureCharacterSizeInternal(gr, font, substring);
+
+                // Remove lead-in for the first character.
+                if (start == 0) x += rects[0].Left;
+
+                // Save all but the last rectangle.
+                for (int i = 0; i < rects.Count + 1 - 1; i++)
+                {
+                    RectangleF new_rect = new RectangleF(
+                        x, rects[i].Top,
+                        rects[i].Width, rects[i].Height);
+                    results.Add(new_rect);
+
+                    // Move to the next character's X position.
+                    x += rects[i].Width;
+                }
+            }
+
+            // Return the results.
+            return results;
+        }
+
+
         public static ImageAttributes GetShadowAttributes(float ShadowBrightness = 0.1f)
         {
             float brt = ShadowBrightness;
@@ -549,5 +668,82 @@ namespace BASeTris
             return resultAttr;
         }
     }
-   
+    public class DrawTextInformation
+    {
+        
+        public Font DrawFont;
+        public String Text;
+        public PointF Position;
+        public Brush ForegroundBrush;
+        public Brush BackgroundBrush;
+        public Brush ShadowBrush;
+        public PointF ShadowOffset = new PointF(5, 5);
+        public StringFormat Format;
+        public DrawCharacterHandler CharacterHandler = new DrawCharacterHandler();
+        
+        //Graphics g,Font UseFont,
+        //String sText, Brush ForegroundBrush,
+        //Brush ShadowBrush, float XPosition, float YPosition,
+        //float ShadowXOffset=5,float ShadowYOffset=5,StringFormat sf = null
+    }
+    public class DrawCharacterHandler
+    {
+        private IList<DrawCharacterPositionCalculator> Extensions = new List<DrawCharacterPositionCalculator>() { new DrawCharacterPositionCalculator() };
+        public void SetPositionCalculator(DrawCharacterPositionCalculator calc)
+        {
+            Extensions = new List<DrawCharacterPositionCalculator>() { calc };
+        }
+        public void DrawCharacter(Graphics g,char character,DrawTextInformation DrawData,PointF Position, SizeF CharacterSize,int CharacterNumber, int TotalCharacters,int Pass)
+        {
+            //adjust positioning by calling each extension.
+            foreach(var iterate in Extensions)
+            {
+                iterate.AdjustPositioning(ref Position,CharacterSize,DrawData,CharacterNumber,TotalCharacters,Pass);
+            }
+            PointF AddedOffset = Pass == 1 ? PointF.Empty : DrawData.ShadowOffset;
+            Brush DrawBrush = Pass == 1 ? DrawData.ShadowBrush : DrawData.ForegroundBrush;
+            //call beforedraw...
+            foreach(var iterate in Extensions)
+            {
+                iterate.BeforeDraw(g,character,DrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
+            }
+            g.DrawString(character.ToString(), DrawData.DrawFont, DrawBrush, Position.X + AddedOffset.X, Position.Y + AddedOffset.Y, DrawData.Format);
+            foreach (var iterate in Extensions.Reverse())
+            {
+                iterate.AfterDraw(g, character, DrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
+            }
+        }
+    }
+    public class DrawCharacterPositionCalculator
+    {
+        public virtual void AdjustPositioning(ref PointF Position, SizeF size,DrawTextInformation DrawData,int pCharacterNumber,int TotalCharacters,int Pass)
+        {
+            //default makes no changes.
+        }
+        public virtual void BeforeDraw(Graphics g,char character,DrawTextInformation DrawData,PointF Position,SizeF CharacterSize,int CharacterNumber,int TotalCharacters,int Pass)
+        {
+
+        }
+        public virtual void AfterDraw(Graphics g, char character, DrawTextInformation DrawData, PointF Position, SizeF CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
+        {
+
+        }
+
+    }
+    public class RotatingPositionCharacterPositionCalculator:DrawCharacterPositionCalculator
+    {
+        private float Radius = 10;
+        public override void AdjustPositioning(ref PointF Position, SizeF size, DrawTextInformation DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
+        {
+            //rotate once every 3/4's of a second.
+            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750)/750;
+            var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
+            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * 0.5f*Math.PI);
+            PointF newOffset = new PointF((float)Math.Cos(Angle)*Radius,(float)Math.Sin(Angle)*Radius);
+            Position.X = Position.X + newOffset.X;
+            Position.Y = Position.Y + newOffset.Y;
+        }
+    }
+    
+
 }
