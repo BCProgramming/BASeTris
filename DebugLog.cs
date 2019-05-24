@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace BaseDoku
+namespace BASeCamp.Logging
 {
     /// <summary>
     ///     Debug logging output class. Can automatically transform Debug output (Debug.Print) and save it to a properly dated

@@ -10,8 +10,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
-
-public static class StringExtensions
+namespace System.Reflection.BASeCamp
+{
+    public static class StringExtensions
 {
     /// <summary>
     /// this string is the regular expression, sregex is the string to test.
@@ -61,8 +62,7 @@ internal class Nullcallback : iManagerCallback
 
 #endif
 
-namespace System.Reflection.BASeCamp
-{
+
     /// <summary>
     /// VersionInfo structure. Designed to help ease parsing and interpretation of version numbers.
     /// 

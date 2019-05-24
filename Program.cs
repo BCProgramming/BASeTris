@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using BaseDoku;
 using BASeCamp.BASeScores;
+using BASeCamp.Logging;
 
 namespace BASeTris
 {

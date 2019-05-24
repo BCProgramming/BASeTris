@@ -680,12 +680,15 @@ namespace BASeTris
         public PointF ShadowOffset = new PointF(5, 5);
         public StringFormat Format;
         public DrawCharacterHandler CharacterHandler = new DrawCharacterHandler();
-        
+        public float ScalePercentage = 1;
+        public DrawTextInformation PreDrawData = null; //delegate to this one first if present.
+        public DrawTextInformation PostDrawData = null; //delegate to this one after if present.
         //Graphics g,Font UseFont,
         //String sText, Brush ForegroundBrush,
         //Brush ShadowBrush, float XPosition, float YPosition,
         //float ShadowXOffset=5,float ShadowYOffset=5,StringFormat sf = null
     }
+    
     public class DrawCharacterHandler
     {
         private IList<DrawCharacterPositionCalculator> Extensions = new List<DrawCharacterPositionCalculator>() { new DrawCharacterPositionCalculator() };
@@ -695,6 +698,10 @@ namespace BASeTris
         }
         public void DrawCharacter(Graphics g,char character,DrawTextInformation DrawData,PointF Position, SizeF CharacterSize,int CharacterNumber, int TotalCharacters,int Pass)
         {
+            if(DrawData.PreDrawData !=null)
+            {
+                DrawCharacter(g,character,DrawData.PreDrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
+            }
             //adjust positioning by calling each extension.
             foreach(var iterate in Extensions)
             {
@@ -707,10 +714,26 @@ namespace BASeTris
             {
                 iterate.BeforeDraw(g,character,DrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
             }
-            g.DrawString(character.ToString(), DrawData.DrawFont, DrawBrush, Position.X + AddedOffset.X, Position.Y + AddedOffset.Y, DrawData.Format);
+            Font UseFont = DrawData.DrawFont;
+            PointF DrawPosition = new PointF(Position.X + AddedOffset.X, Position.Y + AddedOffset.Y);
+            if(DrawData.ScalePercentage!=1)
+            {
+                UseFont = new Font(DrawData.DrawFont.FontFamily,DrawData.DrawFont.Size*DrawData.ScalePercentage,DrawData.DrawFont.Style);
+                float NewWidth = CharacterSize.Width * DrawData.ScalePercentage;
+                float NewHeight = CharacterSize.Height * DrawData.ScalePercentage;
+                AddedOffset.X -= ((NewWidth - CharacterSize.Width)) / 2;
+                AddedOffset.Y -= ((NewHeight - CharacterSize.Height)) / 2;
+            }
+
+
+            g.DrawString(character.ToString(), UseFont, DrawBrush, DrawPosition.X, DrawPosition.Y, DrawData.Format);
             foreach (var iterate in Extensions.Reverse())
             {
                 iterate.AfterDraw(g, character, DrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
+            }
+            if(DrawData.PostDrawData!=null)
+            {
+                DrawCharacter(g,character,DrawData.PostDrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
             }
         }
     }
@@ -733,12 +756,13 @@ namespace BASeTris
     public class RotatingPositionCharacterPositionCalculator:DrawCharacterPositionCalculator
     {
         private float Radius = 10;
+        private float CharacterNumberModifier = 0.5f;
         public override void AdjustPositioning(ref PointF Position, SizeF size, DrawTextInformation DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
         {
             //rotate once every 3/4's of a second.
             var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750)/750;
             var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
-            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * 0.5f*Math.PI);
+            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
             PointF newOffset = new PointF((float)Math.Cos(Angle)*Radius,(float)Math.Sin(Angle)*Radius);
             Position.X = Position.X + newOffset.X;
             Position.Y = Position.Y + newOffset.Y;
