@@ -16,6 +16,7 @@ using BASeTris.Choosers;
 using BASeTris.DrawHelper;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Replay;

@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 

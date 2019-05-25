@@ -46,6 +46,7 @@ namespace BASeTris.DrawHelper
                 }
             }
         }
+        
         public void DrawProc(StandardTetrisGameState pState, IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             if (useBackground == null || !StoredBackground.Equals(Bounds) || pState.DoRefreshBackground)

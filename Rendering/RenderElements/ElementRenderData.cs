@@ -20,7 +20,7 @@ namespace BASeTris.Rendering.RenderElements
             Settings = pSettings;
         }
     }
-
+   
     public class TetrisBlockDrawGDIPlusParameters : TetrisBlockDrawParameters
     {
         public Graphics g;

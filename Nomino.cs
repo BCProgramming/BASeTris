@@ -12,9 +12,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using BASeTris.GameStates;
+using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
+using SkiaSharp;
 
 namespace BASeTris
 {
@@ -365,4 +367,5 @@ namespace BASeTris
             Block.Rotation = clonesource.RotationModulo;
         }
     }
+    
 }

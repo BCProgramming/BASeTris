@@ -11,43 +11,100 @@ using BASeTris.TetrisBlocks;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    public class RenderingProvider : IRenderingProvider 
+    public class GDIPlusHelpers
     {
-        public static RenderingProvider Static = new RenderingProvider();
-        private Dictionary<Type, Dictionary<Type, IRenderingHandler>> handlerLookup = new Dictionary<Type, Dictionary<Type, IRenderingHandler>>();
-        bool InitProviderDictionary = false; 
-        public IRenderingHandler GetHandler(Type ClassType, Type DrawType, Type DrawDataType)
+        static Dictionary<StandardColouredBlock.BlockStyle, Dictionary<Color, Image>> StandardColourBlocks = null;
+
+        public static Image GetGummyImage(Color pColor,Color pInnerColor,Size pSize)
         {
-            if(!InitProviderDictionary)
+            return GummyImage.GetGummyImage(pColor, pInnerColor, pSize);
+        }
+
+        public static Image GetBevelImage(StandardColouredBlock.BlockStyle DisplayStyle,Color DisplayColor)
+        {
+            String baseimage = "block_lightbevel_red";
+            if (DisplayStyle == StandardColouredBlock.BlockStyle.Style_CloudBevel)
+                baseimage = "block_lightbevel_red";
+            else if (DisplayStyle == StandardColouredBlock.BlockStyle.Style_Shine)
             {
-                InitProviderDictionary = true;
-                handlerLookup = new Dictionary<Type, Dictionary<Type, IRenderingHandler>>();
-
-
-                handlerLookup.Add(typeof(Graphics), new Dictionary<Type, IRenderingHandler>()
-                  { { typeof(TetrisBlock),new TetrisBlockRenderingHandler()},
-                    { typeof(ImageBlock),new TetrisImageBlockRenderingHandler()},
-                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockRenderingHandler() }
-                    });
-
-                
+                baseimage = "block_shine_red";
             }
-            if(handlerLookup.ContainsKey(ClassType))
+            else if (DisplayStyle == StandardColouredBlock.BlockStyle.Style_HardBevel)
+                baseimage = "block_std_red";
+            else if (DisplayStyle == StandardColouredBlock.BlockStyle.Style_Chisel)
+                baseimage = "block_chisel_red";
+            else if (DisplayStyle == StandardColouredBlock.BlockStyle.Style_Pixeled)
             {
-                if(handlerLookup[ClassType].ContainsKey(DrawType))
+                baseimage = "block_pixeled_red";
+            }
+
+            Size TargetSize = new Size(100, 100);
+            if (StandardColourBlocks == null)
+            {
+                StandardColourBlocks = new Dictionary<StandardColouredBlock.BlockStyle, Dictionary<Color, Image>>();
+            }
+
+            if (!StandardColourBlocks.ContainsKey(DisplayStyle))
+            {
+                StandardColourBlocks.Add(DisplayStyle, new Dictionary<Color, Image>());
+            }
+
+            if (StandardColourBlocks[DisplayStyle].Count == 0)
+            {
+                foreach (Color c in new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Blue, Color.Red, Color.Orange })
                 {
-                    return handlerLookup[ClassType][DrawType];
+                    StandardColourBlocks[DisplayStyle].Add(c, ResizeImage(GDIPlusHelpers.RecolorImage(TetrisGame.Imageman[baseimage], c), TargetSize));
                 }
             }
-            return null;
+
+            if (!StandardColourBlocks[DisplayStyle].ContainsKey(DisplayColor))
+            {
+                StandardColourBlocks[DisplayStyle].Add(DisplayColor, ResizeImage(GDIPlusHelpers.RecolorImage(TetrisGame.Imageman[baseimage], DisplayColor), TargetSize));
+            }
+
+
+            return StandardColourBlocks[DisplayStyle][DisplayColor];
         }
-        public void DrawElement(IStateOwner pOwner,Object Target,Object Element,Object ElementData)
+        public static Image ResizeImage(Image Source, Size newSize)
         {
-            var Handler = GetHandler(Target.GetType(), Element.GetType(), ElementData.GetType());
-            Handler.Render(pOwner,Target,Element,ElementData);
+            Bitmap result = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
+            using (Graphics bgr = Graphics.FromImage(result))
+            {
+                bgr.DrawImage(Source, 0, 0, newSize.Width, newSize.Height);
+            }
+
+            return result;
+        }
+        public static Image RecolorImage(Image Source, Color Target)
+        {
+            float NormalizedR = (float)Target.R / 255;
+            float NormalizedG = (float)Target.G / 255;
+            float NormalizedB = (float)Target.B / 255;
+            float NormalizedA = (float)Target.A / 255;
+
+            //input image is assumed to use RED as it's dominant colour!
+            float[][] mat = new float[][]
+            {
+                new float[] {NormalizedR, NormalizedG, NormalizedB, NormalizedA, 0},
+                new float[] {0, 1, 0, 0, 0},
+                new float[] {0, 0, 1, 0, 0},
+                new float[] {0, 0, 0, 1, 0},
+                new float[] {0, 0, 0, 0, 1},
+            };
+            ColorMatrix cm = new ColorMatrix(mat);
+            ImageAttributes ia = new ImageAttributes();
+            ia.SetColorMatrix(cm);
+            Bitmap result = new Bitmap(Source.Width, Source.Height, PixelFormat.Format32bppPArgb);
+            using (Graphics gg = Graphics.FromImage(result))
+            {
+                gg.Clear(Color.Transparent);
+                gg.DrawImage(Source, new Rectangle(0, 0, Source.Width, Source.Height), 0, 0, Source.Width, Source.Height, GraphicsUnit.Pixel, ia);
+            }
+
+            return result;
         }
     }
-    public class TetrisBlockRenderingHandler : StandardRenderingHandler<Graphics,TetrisBlock,TetrisBlockDrawParameters>
+    public class TetrisBlockGDIRenderingHandler : StandardRenderingHandler<Graphics,TetrisBlock,TetrisBlockDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, TetrisBlock Source, TetrisBlockDrawParameters Element)
         {
@@ -56,7 +113,7 @@ namespace BASeTris.Rendering.GDIPlus
       
     }
 
-    public class TetrisImageBlockRenderingHandler : TetrisBlockRenderingHandler, IRenderingHandler<Graphics,ImageBlock,TetrisBlockDrawParameters>
+    public class TetrisImageBlockGDIRenderingHandler : TetrisBlockGDIRenderingHandler, IRenderingHandler<Graphics,ImageBlock,TetrisBlockDrawParameters>
     {
         protected virtual void NoImage()
         {
@@ -131,7 +188,7 @@ namespace BASeTris.Rendering.GDIPlus
         }
     }
 
-    public class TetrisStandardColouredBlockRenderingHandler : TetrisImageBlockRenderingHandler, IRenderingHandler<Graphics, StandardColouredBlock, TetrisBlockDrawParameters>
+    public class TetrisStandardColouredBlockGDIRenderingHandler : TetrisImageBlockGDIRenderingHandler, IRenderingHandler<Graphics, StandardColouredBlock, TetrisBlockDrawParameters>
     {
         public static Dictionary<String, Dictionary<Color, Image>> StandardColourBlocks = null;
         private static Dictionary<StandardColouredBlock.ColouredBlockGummyIndexData, Image> GummyBitmaps = new Dictionary<StandardColouredBlock.ColouredBlockGummyIndexData, Image>();
@@ -204,47 +261,20 @@ namespace BASeTris.Rendering.GDIPlus
             {
                 foreach (Color c in new Color[] { Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Blue, Color.Red, Color.Orange })
                 {
-                    StandardColourBlocks[sBlockKey].Add(c, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], c), TargetSize));
+                    StandardColourBlocks[sBlockKey].Add(c, ResizeImage(GDIPlusHelpers.RecolorImage(TetrisGame.Imageman[baseimage], c), TargetSize));
                 }
             }
 
             if (!StandardColourBlocks[sBlockKey].ContainsKey(Source.BlockColor))
             {
-                StandardColourBlocks[sBlockKey].Add(Source.BlockColor, ResizeImage(RecolorImage(TetrisGame.Imageman[baseimage], Source.BlockColor), TargetSize));
+                StandardColourBlocks[sBlockKey].Add(Source.BlockColor, ResizeImage(GDIPlusHelpers.RecolorImage(TetrisGame.Imageman[baseimage], Source.BlockColor), TargetSize));
             }
 
 
             return StandardColourBlocks[sBlockKey][Source.BlockColor];
         }
 
-        private Image RecolorImage(Image Source, Color Target)
-        {
-            float NormalizedR = (float)Target.R / 255;
-            float NormalizedG = (float)Target.G / 255;
-            float NormalizedB = (float)Target.B / 255;
-            float NormalizedA = (float)Target.A / 255;
-
-            //input image is assumed to use RED as it's dominant colour!
-            float[][] mat = new float[][]
-            {
-                new float[] {NormalizedR, NormalizedG, NormalizedB, NormalizedA, 0},
-                new float[] {0, 1, 0, 0, 0},
-                new float[] {0, 0, 1, 0, 0},
-                new float[] {0, 0, 0, 1, 0},
-                new float[] {0, 0, 0, 0, 1},
-            };
-            ColorMatrix cm = new ColorMatrix(mat);
-            ImageAttributes ia = new ImageAttributes();
-            ia.SetColorMatrix(cm);
-            Bitmap result = new Bitmap(Source.Width, Source.Height,PixelFormat.Format32bppPArgb);
-            using (Graphics gg = Graphics.FromImage(result))
-            {
-                gg.Clear(Color.Transparent);
-                gg.DrawImage(Source, new Rectangle(0, 0, Source.Width, Source.Height), 0, 0, Source.Width, Source.Height, GraphicsUnit.Pixel, ia);
-            }
-
-            return result;
-        }
+        
 
         private Image ResizeImage(Image Source, Size newSize)
         {
@@ -293,7 +323,5 @@ namespace BASeTris.Rendering.GDIPlus
             g.DrawImage(DrawImage, UsePoints,
                 new RectangleF(0f, 0f, (float)DrawImage.Width, (float)DrawImage.Height), GraphicsUnit.Pixel, Attributes);
         }
-
-
     }
 }

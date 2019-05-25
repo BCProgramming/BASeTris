@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using BASeTris.AssetManager;
+using BASeTris.Rendering.GDIPlus;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 
@@ -86,7 +87,7 @@ namespace BASeTris
             var found = GetCachedImage(pKey, ImageSize, pColor);
             if(found==null)
             {
-                Image Recolored = StandardColouredBlock.RecolorImage(Original, pColor);
+                Image Recolored = GDIPlusHelpers.RecolorImage(Original, pColor);
                 return AddCachedImage(pKey, ImageSize, pColor, Recolored);
             }
             else

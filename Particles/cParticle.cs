@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;

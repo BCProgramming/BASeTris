@@ -21,8 +21,13 @@ using BASeTris.Choosers;
 using BASeTris.Choosers.AIChoosers;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
+using BASeTris.Rendering;
+using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.RenderElements;
+using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
+using SkiaSharp;
 using XInput.Wrapper;
 
 namespace BASeTris
@@ -136,6 +141,10 @@ namespace BASeTris
             //XMLHighScores<NoSpecialInfo> TestScores = new XMLHighScores<NoSpecialInfo>(35000,(r)=>new NoSpecialInfo());
             //int Position1 = TestScores.IsEligible(12000);
             //int Position2 = TestScores.IsEligible(3000);
+
+         
+
+
             CIS = new ControllerInputState(X.Gamepad_1);
             CIS.ButtonPressed += CIS_ButtonPressed;
             CIS.ButtonReleased += CIS_ButtonReleased;
@@ -145,8 +154,19 @@ namespace BASeTris
             menuStrip1.Renderer = buildrender;
             menuStrip1.BackColor = SystemColors.Control;
             TetrisGame.InitState();
-        }
+            /*
+            SkiaBitmap = new SKBitmap(new SKImageInfo(picTetrisField.Width, picTetrisField.Height, SKColorType.Rgba8888));
+            SKCanvas SkiaCanvas = new SKCanvas(SkiaBitmap);
 
+            StandardColouredBlock scb = new StandardColouredBlock() { DisplayStyle = StandardColouredBlock.BlockStyle.Style_Mottled };
+            TetrisBlockDrawSkiaParameters tt = new TetrisBlockDrawSkiaParameters(SkiaCanvas, new SKRect(0, 0, 64, 64), null, Settings);
+            RenderingProvider.Static.DrawElement(this, SkiaCanvas, scb, tt);*/
+
+
+           
+        }
+        SKBitmap SkiaBitmap = null;
+        
         private void CIS_ButtonPressed(Object sender, ControllerInputState.ControllerButtonEventArgs args)
         {
             Debug.Print("Button pressed:" + args.button);
@@ -308,6 +328,7 @@ namespace BASeTris
 
         private void picFullSize_Paint(object sender, PaintEventArgs e)
         {
+            
             if (_Game == null) return;
             if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
             {
@@ -318,9 +339,13 @@ namespace BASeTris
                 _Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
             }
         }
-
+        
+        
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
+            /*e.Graphics.DrawImage(SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaBitmap), Point.Empty);*/
+            
+           // return;
             if (_Game == null) return;
             if (picTetrisField.Visible == false) return;
             e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
