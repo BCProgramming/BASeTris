@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BaseTris;
+using BASeTris.GameStates;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.TetrisBlocks;
 
@@ -104,6 +105,7 @@ namespace BASeTris.Rendering.GDIPlus
             return result;
         }
     }
+    
     public class TetrisBlockGDIRenderingHandler : StandardRenderingHandler<Graphics,TetrisBlock,TetrisBlockDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, TetrisBlock Source, TetrisBlockDrawParameters Element)
@@ -169,8 +171,6 @@ namespace BASeTris.Rendering.GDIPlus
                     
                     parameters.g.DrawImage(useImage, UsePoints,
                         new RectangleF(0f, 0f, (float)useImage.Width, (float)useImage.Height), GraphicsUnit.Pixel, useAttrib);
-                    //parameters.g.DrawImage(useImage,parameters.region,new RectangleF(0f,0f, (float)useImage.Width, (float)useImage.Height),GraphicsUnit.Pixel,useAttrib );
-                    //parameters.g.DrawImage(useImage, parameters.region, 0f, 0f, (float)useImage.Width, (float)useImage.Height, GraphicsUnit.Pixel, useAttrib);
                     parameters.g.Transform = original;
                 }
                 else
@@ -187,7 +187,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
         }
     }
-
+    
     public class TetrisStandardColouredBlockGDIRenderingHandler : TetrisImageBlockGDIRenderingHandler, IRenderingHandler<Graphics, StandardColouredBlock, TetrisBlockDrawParameters>
     {
         public static Dictionary<String, Dictionary<Color, Image>> StandardColourBlocks = null;
@@ -312,7 +312,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
         }
     }
-
+    
     public static class GraphicsExtensions
     {
 

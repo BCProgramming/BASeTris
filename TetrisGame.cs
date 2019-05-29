@@ -20,6 +20,7 @@ using BASeTris.GameStates;
 using BASeTris.Replay;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
+using SkiaSharp;
 
 namespace BASeTris
 {
@@ -47,6 +48,8 @@ namespace BASeTris
         static PrivateFontCollection pfc = new PrivateFontCollection();
         public static FontFamily RetroFont;
         public static FontFamily LCDFont;
+        public static SKTypeface RetroFontSK;
+        public static SKTypeface LCDFontSK;
         private static Image _TiledCache = null;
         private DateTime _GameStartTime = DateTime.MinValue;
         private DateTime _LastPausedTime = DateTime.MinValue;
@@ -129,6 +132,27 @@ namespace BASeTris
 
             return sl.Select(iterator => iterator.Value);
 
+
+
+
+        }
+        public static void DrawTextSK(SKCanvas Target,String pText,SKPoint Position, SKTypeface typeface,SKColor Color, float DesiredSize,double ScaleFactor)
+        {
+            var rBytes = UTF8Encoding.Default.GetBytes("testing".ToCharArray());
+            using (SKPaint skp = new SKPaint())
+            {
+                skp.Color = Color;
+                skp.ColorFilter = SKColorFilter.CreateBlendMode(
+                    SkiaSharp.Views.Desktop.Extensions.ToSKColor(
+                    System.Drawing.Color.FromArgb(255, 255, 0, 0)),SKBlendMode.Screen);
+                skp.TextSize = (float)(DesiredSize * ScaleFactor);
+                skp.Typeface = typeface;
+                skp.FilterQuality = SKFilterQuality.High;
+                skp.SubpixelText = true;
+                Target.DrawText(rBytes, Position.X, Position.Y, skp);
+            }
+            
+            //SkiaCanvas.DrawText(UTF8Encoding.Default.GetBytes("testing".ToCharArray()), 67, 67, skp);
 
 
 
@@ -225,8 +249,38 @@ namespace BASeTris
 
             RetroFont = GetResourceFont("BASeTris.Pixel.ttf");
             LCDFont = GetResourceFont("BASeTris.LCD.ttf");
+            RetroFontSK = GetResourceFontSK("BASeTris.Pixel.ttf");
+            LCDFontSK= GetResourceFontSK("BASeTris.LCD.ttf");
             //RetroFont = pfc.Families[0];
         }
+        static Dictionary<String, SKTypeface> LoadedSKFonts = new Dictionary<String, SKTypeface>();
+        
+        private static SKTypeface GetResourceFontSK(String ResourceName)
+        {
+            if(LoadedSKFonts.ContainsKey(ResourceName))
+            {
+                return LoadedSKFonts[ResourceName];
+            }
+            else
+            {
+                SKTypeface result;
+                var assembly = Assembly.GetExecutingAssembly();
+                var stream = assembly.GetManifestResourceStream(ResourceName);
+                if (stream == null)
+                    return null;
+
+                result = SKTypeface.FromStream(stream);
+                if(result!=null)
+                    LoadedSKFonts.Add(ResourceName, result);
+
+                return result;
+                
+                
+                
+            }
+        }
+
+
         static Dictionary<String,FontFamily> LoadedFonts = new Dictionary<String, FontFamily>();
         private static FontFamily GetResourceFont(String ResourceName)
         {

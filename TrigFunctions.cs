@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace BASeTris
 {
     public static class TrigFunctions
@@ -45,8 +44,6 @@ namespace BASeTris
 
         public static void IncrementLocation(IStateOwner pOwner, ref PointF Location, PointF Velocity, ref PointF Offset)
         {
-            if (Offset == null) Offset = PointF.Empty;
-
             Location = new PointF(Location.X + Velocity.X, Location.Y + Velocity.Y);
         }
 

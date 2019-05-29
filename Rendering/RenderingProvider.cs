@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates;
+using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
@@ -26,7 +28,10 @@ namespace BASeTris.Rendering
                 handlerLookup.Add(typeof(Graphics), new Dictionary<Type, IRenderingHandler>()
                 { { typeof(TetrisBlock),new TetrisBlockGDIRenderingHandler()},
                     { typeof(ImageBlock),new TetrisImageBlockGDIRenderingHandler()},
-                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockGDIRenderingHandler() }
+                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockGDIRenderingHandler() },
+                    {typeof(StandardTetrisGameState),new StandardTetrisGameStateRenderingHandler()},
+                    {typeof(MenuState),new MenuStateRenderingHandler()},
+                    {typeof(PauseGameState),new PauseGameStateRenderingHandler()}
                 });
                 handlerLookup.Add(typeof(SkiaSharp.SKCanvas), new Dictionary<Type, IRenderingHandler>()
                 { { typeof(TetrisBlock),new TetrisBlockSkiaRenderingHandler()},

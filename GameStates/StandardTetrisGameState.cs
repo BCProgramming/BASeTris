@@ -28,7 +28,7 @@ namespace BASeTris.GameStates
 {
     public class StandardTetrisGameState : GameState
     {
-        private StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
+        internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
         public Nomino HoldBlock = null;
         private List<Particle> Particles = new List<Particle>();
@@ -297,7 +297,8 @@ namespace BASeTris.GameStates
 
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            _DrawHelper.DrawProc(this,pOwner,g,Bounds);
+            RenderingProvider.Static.DrawElement(pOwner, g, this, new GameStateDrawParameters(Bounds));
+            //_DrawHelper.DrawProc(this,pOwner,g,Bounds);
         }
 
         public Nomino GetGhostDrop(IStateOwner pOwner,Nomino Source, out int dropLength, int CancelProximity = 3)

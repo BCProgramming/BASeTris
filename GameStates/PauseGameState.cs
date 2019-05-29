@@ -13,7 +13,7 @@ namespace BASeTris.GameStates
     {
         private GameState PausedState = null;
         int NumFallingItems = 65;
-        private List<PauseFallImage> FallImages = null;
+        internal List<PauseFallImage> FallImages = null;
         Random rgen = new Random();
         public override DisplayMode SupportedDisplayMode { get{ return DisplayMode.Partitioned; } }
 
@@ -72,7 +72,7 @@ namespace BASeTris.GameStates
             MenuElements.Add(ExitItem);
         }
 
-        protected override float DrawHeader(IStateOwner pOwner,Graphics Target, RectangleF Bounds)
+        public override float DrawHeader(IStateOwner pOwner,Graphics Target, RectangleF Bounds)
         {
             //for the pause screen, we don't draw the header. We return half the size of the screen though.
             //return base.DrawHeader(Target, Bounds);
@@ -102,20 +102,7 @@ namespace BASeTris.GameStates
 
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            Font usePauseFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);
-            String sPauseText = "Pause";
-            SizeF Measured = g.MeasureString(sPauseText, usePauseFont);
-            g.FillRectangle(Brushes.Gray, Bounds);
-            foreach (var iterate in FallImages)
-            {
-                iterate.Draw(g);
-            }
-
-            g.ResetTransform();
-            PointF DrawPos = new PointF(Bounds.Width / 2 - Measured.Width / 2, Bounds.Height / 2 - Measured.Height / 2);
-            TetrisGame.DrawText(g,usePauseFont,sPauseText,Brushes.White,Brushes.Black,DrawPos.X,DrawPos.Y);
-
-            base.DrawProc(pOwner,g,Bounds); //draw the menu itself.
+           
         }
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
@@ -145,7 +132,7 @@ namespace BASeTris.GameStates
             playing2?.setVolume(1.0f);
         }
 
-        private class PauseFallImage
+        public class PauseFallImage
         {
             public float Angle = 0;
             public float AngleSpeed = 3;

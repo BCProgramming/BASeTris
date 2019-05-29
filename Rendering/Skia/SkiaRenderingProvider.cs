@@ -73,14 +73,7 @@ namespace BASeTris.Rendering.Skia
                 if (usemodulo < 0) usemodulo = Source._RotationImages.Length - usemodulo;
 
                 Image useImageA = Source._RotationImages[usemodulo % Source._RotationImages.Length];
-                
-
-
                 SKImage useImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useImageA));
-
-                SKMatrix useAttributes = SKMatrix.MakeIdentity(); //unimplemented...
-                //ImageAttributes useAttrib = parameters.ApplyAttributes ?? (Source.useAttributes == null ? null : Source.useAttributes[usemodulo % Source.useAttributes.Length]);
-                
                 float Degrees = usemodulo * 90;
                 PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));
 
@@ -102,15 +95,11 @@ namespace BASeTris.Rendering.Skia
                     new SKPoint(DrawPosition.Left, DrawPosition.Bottom) };
                 if (Source.DoRotateTransform)
                 {
-                    var original = parameters.g.TotalMatrix;
+                    var current = parameters.g.TotalMatrix;
                     parameters.g.ResetMatrix();
                     parameters.g.RotateDegrees(Degrees, Center.X, Center.Y);
-
                     parameters.g.DrawImage(useImage, DrawPosition);
-                    /*parameters.g.DrawImage(useImage, UsePoints,
-                        new RectangleF(0f, 0f, (float)useImage.Width, (float)useImage.Height), GraphicsUnit.Pixel, useAttrib);*/
-                    //parameters.g.DrawImage(useImage,parameters.region,new RectangleF(0f,0f, (float)useImage.Width, (float)useImage.Height),GraphicsUnit.Pixel,useAttrib );
-                    //parameters.g.DrawImage(useImage, parameters.region, 0f, 0f, (float)useImage.Width, (float)useImage.Height, GraphicsUnit.Pixel, useAttrib);
+                    parameters.g.SetMatrix(current);
                 }
                 else
                 {
@@ -121,7 +110,6 @@ namespace BASeTris.Rendering.Skia
                         parameters.g.DrawImage(useImage, DrawPosition);
                         
                     }
-                    //parameters.g.DrawImage(useImage, new Rectangle((int)DrawPosition.Left, (int)DrawPosition.Top, (int)DrawPosition.Width, (int)DrawPosition.Height), 0, 0, useImage.Width, useImage.Height, GraphicsUnit.Pixel, useAttrib);
                 }
                 
             }
@@ -220,37 +208,57 @@ namespace BASeTris.Rendering.Skia
 
             return StandardColourBlocks[sBlockKey][Source.BlockColor.ToSKColor()];
         }
-
-        private SKImage RecolorImage(SKImage Source, SKColor Target)
+        public static float[] GetColorizationMatrix(SKColor Target)
         {
-            return Source;
-            /*
-            float NormalizedR = (float)Target.R / 255;
-            float NormalizedG = (float)Target.G / 255;
-            float NormalizedB = (float)Target.B / 255;
-            float NormalizedA = (float)Target.A / 255;
+            float NormalizedR = (float)Target.Red / 255;
+            float NormalizedG = (float)Target.Green / 255;
+            float NormalizedB = (float)Target.Blue / 255;
+            float NormalizedA = (float)Target.Alpha / 255;
+            NormalizedR /= 1.33f;
+            NormalizedG /= 1.33f;
+            NormalizedB /= 1.33f;
+            NormalizedA /= 1.33f;
 
-            //input image is assumed to use RED as it's dominant colour!
-            float[][] mat = new float[][]
-            {
-                new float[] {NormalizedR, NormalizedG, NormalizedB, NormalizedA, 0},
-                new float[] {0, 1, 0, 0, 0},
-                new float[] {0, 0, 1, 0, 0},
-                new float[] {0, 0, 0, 1, 0},
-                new float[] {0, 0, 0, 0, 1},
-            };
-            ColorMatrix cm = new ColorMatrix(mat);
-            ImageAttributes ia = new ImageAttributes();
-            ia.SetColorMatrix(cm);
-            Bitmap result = new Bitmap(Source.Width, Source.Height, PixelFormat.Format32bppPArgb);
-            using (Graphics gg = Graphics.FromImage(result))
-            {
-                gg.Clear(Color.Transparent);
-                gg.DrawImage(Source, new Rectangle(0, 0, Source.Width, Source.Height), 0, 0, Source.Width, Source.Height, GraphicsUnit.Pixel, ia);
-            }
-
-            return result;*/
+            float[] mat = new float[] {
+                NormalizedR, 0.72f, 0.07f, 0, 0,
+                NormalizedG, 0.72f, 0.07f, 0f, 0f,
+                NormalizedB, 0.72f, 0.07f, 0f, 0f,
+                NormalizedA,    0f,    0f,    1f, 0f};
+            return mat;
         }
+        public static SKImage RecolorImage(SKImage Source, SKColor Target)
+        {
+            SKCanvas c;
+            SKPaint p;
+            var mat = GetColorizationMatrix(Target);
+
+            return ApplyMatrix(Source, mat);
+        }
+        public static SKImage FadeImage(SKImage Source,float Alpha)
+        {
+            var mat = GetFaderMatrix(Alpha);
+            return ApplyMatrix(Source, mat);
+        }
+        public static SKImage ApplyMatrix(SKImage Source,float[] mat)
+        {
+
+            SKRectI irect = new SKRectI((int)0, (int)0, Source.Width, Source.Height);
+            var result = Source.ApplyImageFilter(SKImageFilter.CreateColorFilter(SKColorFilter.CreateColorMatrix(mat)), irect, irect, out SKRectI active, out SKPoint activeclip);
+            return result;
+        }
+        public static float[] GetFaderMatrix(float Alpha)
+        {
+
+            
+            float[] mat = new float[] {
+                1, 0f, 0f, 0, 0,
+                0f, 1f, 0f, 0f, 0f,
+                0f, 0f, 1f, 0f, 0f,
+                0f,    0f,    0f,    Alpha, 1f};
+
+            return mat;
+        }
+
 
         private SKImage ResizeImage(SKImage Source, Size newSize)
         {

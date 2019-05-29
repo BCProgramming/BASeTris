@@ -154,14 +154,21 @@ namespace BASeTris
             menuStrip1.Renderer = buildrender;
             menuStrip1.BackColor = SystemColors.Control;
             TetrisGame.InitState();
-            /*
-            SkiaBitmap = new SKBitmap(new SKImageInfo(picTetrisField.Width, picTetrisField.Height, SKColorType.Rgba8888));
+            
+            /*SkiaBitmap = new SKBitmap(new SKImageInfo(picTetrisField.Width, picTetrisField.Height, SKColorType.Rgba8888));
             SKCanvas SkiaCanvas = new SKCanvas(SkiaBitmap);
 
-            StandardColouredBlock scb = new StandardColouredBlock() { DisplayStyle = StandardColouredBlock.BlockStyle.Style_Mottled };
+            StandardColouredBlock scb = new StandardColouredBlock() { DisplayStyle = StandardColouredBlock.BlockStyle.Style_Mottled,BlockColor = Color.Yellow };
             TetrisBlockDrawSkiaParameters tt = new TetrisBlockDrawSkiaParameters(SkiaCanvas, new SKRect(0, 0, 64, 64), null, Settings);
-            RenderingProvider.Static.DrawElement(this, SkiaCanvas, scb, tt);*/
-
+            scb.Rotation = 0;
+            scb.DoRotateTransform = true;
+            
+            RenderingProvider.Static.DrawElement(this, SkiaCanvas, scb, tt);
+            SKTypeface st = TetrisGame.RetroFontSK;
+            TetrisGame.DrawTextSK(SkiaCanvas, "Testing 1 2 3", new SKPoint(15, 15), st, SkiaSharp.Views.Desktop.Extensions.ToSKColor(Color.Blue), 18, 1d);
+            */
+            
+            
 
            
         }
@@ -343,14 +350,29 @@ namespace BASeTris
         
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
-            /*e.Graphics.DrawImage(SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaBitmap), Point.Empty);*/
+            /*e.Graphics.DrawImage(SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaBitmap), Point.Empty);
             
-           // return;
+            return;*/
             if (_Game == null) return;
             if (picTetrisField.Visible == false) return;
             e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
             e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+            if(_Game.CurrentState is FieldActionGameState)
+            {
+                ;
+            }
+            var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+            if(renderer!=null)
+            {
+                if(renderer is IStateRenderingHandler staterender)
+                {
+                    staterender.Render(this, e.Graphics, _Game.CurrentState,
+                        new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
+                    return;
+                }
+            }
+            //if the above doesn't go through....
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
         }
 

@@ -42,7 +42,7 @@ namespace BASeTris.GameStates.Menu
             get { return GameState.DisplayMode.Full; }
         }
 
-        private IBackgroundDraw _BG = null;
+        public IBackgroundDraw _BG = null;
 
         public MenuState(IBackgroundDraw pBG)
         {
@@ -83,7 +83,7 @@ namespace BASeTris.GameStates.Menu
                 return FontSizeData[pOwner.ScaleFactor];
             }
         }
-        protected virtual float DrawHeader(IStateOwner pOwner,Graphics Target,RectangleF Bounds)
+        public virtual float DrawHeader(IStateOwner pOwner,Graphics Target,RectangleF Bounds)
         {
 
             Font useHeaderFont = GetScaledHeaderFont(pOwner);
@@ -97,7 +97,7 @@ namespace BASeTris.GameStates.Menu
         }
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            //draw the header text,
+          /*  //draw the header text,
             //then draw each menu item.
             //throw new NotImplementedException();
             if(_BG!=null) _BG.DrawProc(g,Bounds);
@@ -125,7 +125,7 @@ namespace BASeTris.GameStates.Menu
                     drawitem.Draw(pOwner,g, TargetBounds, useState);
                 CurrentY += ItemSize.Height + 5;
             }
-         
+         */
 
         }
         protected int GetPreviousIndex(int StartPos)
