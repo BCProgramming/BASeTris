@@ -55,5 +55,60 @@ namespace BASeTris.Rendering
             var Handler = GetHandler(Target.GetType(), Element.GetType(), ElementData.GetType());
             Handler.Render(pOwner, Target, Element, ElementData);
         }
+        public void DrawStateStats(IStateOwner pOwner,Object Target, Object Element,Object ElementData)
+        {
+            var Handler = GetHandler(Target.GetType(), Element.GetType(), ElementData.GetType());
+            if(Handler is IStateRenderingHandler)
+            {
+                (Handler as IStateRenderingHandler).RenderStats(pOwner,Target,Element,ElementData);
+            }
+        }
+       public ExtendedData extendedInfo = new ExtendedData();
+    }
+    public class ExtendedData
+    {
+        //"per element data" is defined per element (the things being drawn, to be clear). Per state instance, per block instance, etc.
+        // basically these can be used to store additional render handler specific fields/properties, for example it can be used to cache images or bitmaps or whatever from
+        // one call to the next.
+
+        private static System.Runtime.CompilerServices.ConditionalWeakTable<Object, Object> _extendedData = new System.Runtime.CompilerServices.ConditionalWeakTable<Object, Object>();
+        /// <summary>
+        /// Retrieves the instance information for the provided instance, or null of there is no current instance information.
+        /// </summary>
+        /// <param name="Item"></param>
+        /// <returns></returns>
+        public Object GetPerElementData(Object Item)
+        {
+            if (_extendedData.TryGetValue(Item, out Object result))
+            {
+                //we got a result- return it.
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public Object GetPerElementData(Object Item, Func<Object, Object> NewFunc)
+        {
+            lock (_extendedData)
+            {
+                if (_extendedData.TryGetValue(Item, out Object result))
+                {
+                    //we got a result- return it.
+                    return result;
+                }
+                else
+                {
+                    Object generatedinstance = NewFunc(Item);
+                    _extendedData.Add(Item, generatedinstance);
+                    return generatedinstance;
+                }
+            }
+        }
+        public void SetPerElementData(Object Item, Object Value)
+        {
+            _extendedData.Add(Item, Value);
+        }
     }
 }

@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering;
 
 namespace BASeTris.GameStates
 {
     public class PauseGameState : MenuState
     {
-        private GameState PausedState = null;
+        public GameState PausedState = null;
         int NumFallingItems = 65;
         internal List<PauseFallImage> FallImages = null;
         Random rgen = new Random();
@@ -81,7 +82,19 @@ namespace BASeTris.GameStates
 
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            PausedState.DrawStats(pOwner, g, Bounds);
+            // RenderingProvider.Static.DrawElement();
+            /*var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+            if (renderer != null)
+            {
+                if (renderer is IStateRenderingHandler staterender)
+                {
+                    staterender.Render(this, e.Graphics, _Game.CurrentState,
+                        new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
+                    return;
+                }
+            }*/
+
+            //PausedState.DrawStats(pOwner, g, Bounds);
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)

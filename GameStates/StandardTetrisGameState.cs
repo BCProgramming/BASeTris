@@ -262,8 +262,8 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
 
-        private bool f_RedrawTetrominoImages = false;
-        private bool f_RedrawStatusBitmap = false;
+        public bool f_RedrawTetrominoImages = false;
+        public bool f_RedrawStatusBitmap = false;
         private Dictionary<System.Type, Image> TetrominoImages = null;
 
         public Image GetTetronimoImage(System.Type TetrominoType)
@@ -563,8 +563,8 @@ namespace BASeTris.GameStates
             StatisticsBackground = buildbg;
         }
 
-        RectangleF LastDrawStat = Rectangle.Empty;
-        private Object LockTetImageRedraw = new Object();
+        public RectangleF LastDrawStat = Rectangle.Empty;
+        public Object LockTetImageRedraw = new Object();
 
         public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
@@ -745,7 +745,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        private Queue<float> StoredLevels = new Queue<float>();
+        internal Queue<float> StoredLevels = new Queue<float>();
         double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
         Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
 

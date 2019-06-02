@@ -501,6 +501,18 @@ namespace BASeTris
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+
+                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        staterender.RenderStats(this, e.Graphics, _Game.CurrentState,
+                            new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
+                        return;
+                    }
+                }
+
                 CurrentState.DrawStats(this, e.Graphics, picStatistics.ClientRectangle);
             }
         }

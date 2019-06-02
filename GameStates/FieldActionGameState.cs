@@ -40,7 +40,6 @@ namespace BASeTris.GameStates
 
         public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            
             _BaseState.DrawProc(pOwner, g, Bounds);
         }
 

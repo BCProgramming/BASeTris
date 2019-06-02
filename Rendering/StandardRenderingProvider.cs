@@ -22,8 +22,6 @@ namespace BASeTris.Rendering
         {
             this.Render(pOwner, (TClassType)pRenderTarget, (TDrawType)Element,(TDataType)ElementData);
         }
-        //StandardRenderingHandler keeps a Weak
-        public static System.Runtime.CompilerServices.ConditionalWeakTable<TDrawType, Object> extendedData = new System.Runtime.CompilerServices.ConditionalWeakTable<TDrawType, Object>();
     }
     //derived implementation- RenderingHandler specifically for GameState classes.
     //Primarily, these add "RenderStats".
