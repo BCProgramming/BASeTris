@@ -7,7 +7,7 @@ using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.GameStates
 {
-    class EnterHighScoreState : EnterTextState
+    public class EnterHighScoreState : EnterTextState
     {
         Statistics GameStatistics = null;
         IHighScoreList ScoreListing = null;
@@ -33,11 +33,7 @@ namespace BASeTris.GameStates
             EntryPrompt = (" Congratulations, your score is\n at position " + AchievedPosition + " \n Enter your name.").Split('\n');
         }
 
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //never called...
-            //OwnerState.DrawStats(pOwner,g,Bounds);
-        }
+     
 
         Font useFont = null;
 

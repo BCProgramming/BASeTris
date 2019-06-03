@@ -12,6 +12,13 @@ using BASeTris.TetrisBlocks;
 
 namespace BASeTris.Rendering
 {
+    public class RenderAbstractionException : Exception
+    {
+        public RenderAbstractionException(String pMessage):base(pMessage)
+        {
+
+        }
+    }
     public class RenderingProvider : IRenderingProvider
     {
         public static RenderingProvider Static = new RenderingProvider();
@@ -31,7 +38,16 @@ namespace BASeTris.Rendering
                     { typeof(StandardColouredBlock),new TetrisStandardColouredBlockGDIRenderingHandler() },
                     {typeof(StandardTetrisGameState),new StandardTetrisGameStateRenderingHandler()},
                     {typeof(MenuState),new MenuStateRenderingHandler()},
-                    {typeof(PauseGameState),new PauseGameStateRenderingHandler()}
+                    {typeof(PauseGameState),new PauseGameStateRenderingHandler()},
+                    {typeof(EnterTextState),new EnterTextStateRenderingHandler()},
+                    {typeof(EnterCheatState),new EnterTextStateRenderingHandler() },
+                    {typeof(GameOverGameState),new GameOverStateRenderingHandler() },
+                    {typeof(FieldLineActionGameState),new  FieldActionStateRenderingHandler() },
+                    {typeof(UnpauseDelayGameState),new UnpauseDelayStateRenderingHandler() },
+                    {typeof(ShowHighScoresState),new ShowHighScoreStateRenderingHandler()},
+                    {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()}
+
+
                 });
                 handlerLookup.Add(typeof(SkiaSharp.SKCanvas), new Dictionary<Type, IRenderingHandler>()
                 { { typeof(TetrisBlock),new TetrisBlockSkiaRenderingHandler()},
@@ -53,6 +69,10 @@ namespace BASeTris.Rendering
         public void DrawElement(IStateOwner pOwner, Object Target, Object Element, Object ElementData)
         {
             var Handler = GetHandler(Target.GetType(), Element.GetType(), ElementData.GetType());
+            if(Handler==null)
+            {
+                throw new RenderAbstractionException("Type " + Element.GetType().Name + " Does not have a rendering provider for type " + Target.GetType().Name);
+            }
             Handler.Render(pOwner, Target, Element, ElementData);
         }
         public void DrawStateStats(IStateOwner pOwner,Object Target, Object Element,Object ElementData)

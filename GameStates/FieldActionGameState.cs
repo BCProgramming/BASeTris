@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Choosers;
+using BASeTris.Rendering;
+using BASeTris.Rendering.GDIPlus;
 using BASeTris.TetrisBlocks;
 
 namespace BASeTris.GameStates
@@ -15,17 +17,14 @@ namespace BASeTris.GameStates
     //also this could be used to ADD stuff to the field- so it's not strictly for CLEAR but "ActionGameState" seemed a bit silly as a name.
     public abstract class FieldActionGameState : GameState
     {
-        protected StandardTetrisGameState _BaseState;
+        public StandardTetrisGameState _BaseState;
 
         public FieldActionGameState(StandardTetrisGameState pBaseState)
         {
             _BaseState = pBaseState;
         }
 
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            _BaseState.DrawStats(pOwner, g, Bounds);
-        }
+
         //we don't call the main State's GameProc here. We operate on the data (the field contents) to "clear" the given information but we operate on it separate from
         //the standard game state. For example we replace blocks with "intermediate" forms, or remove them altogether, then when finished return control and allow the game to continue.
         //The general approach ought to be to set this state, then enqueue a frameaction to be run for the next frame that "performs" the actual action, such as clearing rows or whatever.
@@ -38,10 +37,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            _BaseState.DrawProc(pOwner, g, Bounds);
-        }
+
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {

@@ -52,11 +52,7 @@ namespace BASeTris.GameStates.Menu
         {
             
         }
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //we are a full mode state, so this shouldn't be called.
-            //throw new NotImplementedException();
-        }
+        
         int OffsetAnimationSpeed = 3;
         public override void GameProc(IStateOwner pOwner)
         {
@@ -95,39 +91,7 @@ namespace BASeTris.GameStates.Menu
 
             return UseY + HeaderSize.Height;
         }
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-          /*  //draw the header text,
-            //then draw each menu item.
-            //throw new NotImplementedException();
-            if(_BG!=null) _BG.DrawProc(g,Bounds);
-            int CurrentIndex = StartItemOffset;
-            float CurrentY = DrawHeader(pOwner,g, Bounds);
-            float MaxHeight = 0, MaxWidth = 0;
-            //we want to find the widest item.
-            foreach(var searchitem in MenuElements)
-            {
-                if(searchitem is MenuStateSizedMenuItem mss)
-                {
-                    var grabsize = mss.GetSize(pOwner);
-                    if (grabsize.Height > MaxHeight) MaxHeight = grabsize.Height;
-                    if (grabsize.Width > MaxWidth) MaxWidth = grabsize.Width;
-                }
-            }
-            //we draw each item at the maximum size.
-            SizeF ItemSize = new SizeF(MaxWidth, MaxHeight);
-            CurrentY += (float)(pOwner.ScaleFactor * 5);
-            for(int menuitemindex = 0;menuitemindex < MenuElements.Count;menuitemindex++)
-            {
-                var drawitem = MenuElements[menuitemindex];
-                Rectangle TargetBounds = new Rectangle((int)(Bounds.Width / 2 - ItemSize.Width / 2)+MainXOffset, (int)CurrentY, (int)(ItemSize.Width), (int)(ItemSize.Height));
-                MenuStateMenuItem.StateMenuItemState useState = menuitemindex == SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
-                    drawitem.Draw(pOwner,g, TargetBounds, useState);
-                CurrentY += ItemSize.Height + 5;
-            }
-         */
-
-        }
+       
         protected int GetPreviousIndex(int StartPos)
         {
             StartPos--;

@@ -4,12 +4,14 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Rendering;
+using BASeTris.Rendering.GDIPlus;
 
 namespace BASeTris.GameStates
 {
     public class UnpauseDelayGameState : GameState
     {
-        GameState _ReturnState = null;
+        public GameState _ReturnState = null;
         DateTime InitialUnpauseTime = DateTime.MinValue;
         TimeSpan PauseDelay = new TimeSpan(0, 0, 0, 5);
         Action ReturnFunc = null;
@@ -20,15 +22,9 @@ namespace BASeTris.GameStates
             ReturnFunc = pReturnFunc;
         }
 
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            _ReturnState.DrawStats(pOwner, g, Bounds);
-            //Draw Faded out overlay to darken things up.
-            DrawFadeOverlay(g, Bounds);
-        }
-
-        private int LastSecond;
-        TimeSpan timeremaining = TimeSpan.Zero;
+     
+        public int LastSecond;
+        public TimeSpan timeremaining = TimeSpan.Zero;
 
         public override void GameProc(IStateOwner pOwner)
         {
@@ -49,37 +45,9 @@ namespace BASeTris.GameStates
             }
         }
 
-        private double lastMillis = 1000;
+        public double lastMillis = 1000;
 
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            _ReturnState.DrawProc(pOwner, g, Bounds);
-            //Draw Faded out overlay to darken things up.
-            DrawFadeOverlay(g, Bounds);
-            //draw a centered Countdown
-
-            if (LastSecond != timeremaining.Seconds)
-            {
-                //emit a sound.
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOverShade, pOwner.Settings.EffectVolume);
-                LastSecond = timeremaining.Seconds;
-                lastMillis = 1000;
-            }
-
-            double SecondsLeft = Math.Round(timeremaining.TotalSeconds, 1);
-            String sSecondsLeft = timeremaining.ToString("%s");
-            double Millis = (double) timeremaining.Milliseconds / 1000d; //millis in percent. We will use this to animate the unpause time left.
-            Millis = Math.Min(Millis, lastMillis);
-            float useSize = (float) (64f * (1 - (Millis)));
-            var SecondsFont = TetrisGame.GetRetroFont(useSize, pOwner.ScaleFactor);
-            var MeasureText = g.MeasureString(sSecondsLeft, SecondsFont);
-
-            PointF DrawPosition = new PointF(Bounds.Width / 2 - MeasureText.Width / 2, Bounds.Height / 2 - MeasureText.Height / 2);
-
-            g.DrawString(sSecondsLeft, SecondsFont, Brushes.White, DrawPosition);
-            lastMillis = Millis;
-        }
-
+        
         Brush fadeBrush = new SolidBrush(Color.FromArgb(200, Color.Black));
 
         private void DrawFadeOverlay(Graphics g, RectangleF Bounds)

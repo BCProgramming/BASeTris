@@ -54,9 +54,11 @@ namespace BASeTris
         }
 
         public virtual DisplayMode SupportedDisplayMode { get; }
-        public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);
+        /*[Obsolete("Use Rendering Providers")]
+        public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void GameProc(IStateOwner pOwner);
-        public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);
+        //Obbsolete("Use Rendering Providers")]
+        /*public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void HandleGameKey(IStateOwner pOwner, GameKeys g);
 
         public abstract void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds);

@@ -80,22 +80,7 @@ namespace BASeTris.GameStates
             return (float)Bounds.Height *0.6f;
         }
 
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            // RenderingProvider.Static.DrawElement();
-            /*var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-            if (renderer != null)
-            {
-                if (renderer is IStateRenderingHandler staterender)
-                {
-                    staterender.Render(this, e.Graphics, _Game.CurrentState,
-                        new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
-                    return;
-                }
-            }*/
-
-            //PausedState.DrawStats(pOwner, g, Bounds);
-        }
+        
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
@@ -113,11 +98,7 @@ namespace BASeTris.GameStates
         }
 
 
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-           
-        }
-
+     
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
            

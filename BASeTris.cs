@@ -508,12 +508,12 @@ namespace BASeTris
                     if (renderer is IStateRenderingHandler staterender)
                     {
                         staterender.RenderStats(this, e.Graphics, _Game.CurrentState,
-                            new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
+                            new GameStateDrawParameters(picStatistics.ClientRectangle));
                         return;
                     }
                 }
 
-                CurrentState.DrawStats(this, e.Graphics, picStatistics.ClientRectangle);
+                ///CurrentState.DrawStats(this, e.Graphics, picStatistics.ClientRectangle);
             }
         }
 

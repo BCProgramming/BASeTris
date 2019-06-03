@@ -11,17 +11,17 @@ namespace BASeTris.GameStates
 {
     public abstract class EnterTextState : GameState, IDirectKeyboardInputState
     {
-        protected String[] EntryPrompt = null;
+        public String[] EntryPrompt = null;
         public enum EntryDrawStyle
         {
             EntryDrawStyle_Preblank,
             EntryDrawStyle_Centered
         }
-        private EntryDrawStyle EntryStyle = EntryDrawStyle.EntryDrawStyle_Preblank;
+        public EntryDrawStyle EntryStyle = EntryDrawStyle.EntryDrawStyle_Preblank;
         IStateOwner Owner = null;
-        StringBuilder NameEntered = new StringBuilder("__________");
-        String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        int CurrentPosition = 0; //position of character being "edited"
+        public StringBuilder NameEntered = new StringBuilder("__________");
+        public readonly String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        public int CurrentPosition = 0; //position of character being "edited"
         public IBackgroundDraw _BG = null;
 
         public override DisplayMode SupportedDisplayMode
@@ -43,11 +43,7 @@ namespace BASeTris.GameStates
 
         public abstract void CommitEntry(IStateOwner pOwner, String sCurrentEntry);
 
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //never called...
-            //Owner.DrawStats(pOwner,g,Bounds);
-        }
+      
 
         public override void GameProc(IStateOwner pOwner)
         {
@@ -55,69 +51,8 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
 
-        Font useFont = null;
-        protected Font EntryFont = null;
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            if (useFont == null) useFont = TetrisGame.GetRetroFont(15, pOwner.ScaleFactor);
-            if (EntryFont == null) EntryFont = TetrisGame.GetRetroFont(15, pOwner.ScaleFactor);
-
-            float Millipercent = (float) DateTime.Now.Ticks / 5000f; //(float)DateTime.Now.Millisecond / 1000;
-
-            int RotateAmount = (int) (Millipercent * 240);
-
-            Color UseBackgroundColor = HSLColor.RotateHue(Color.DarkBlue, RotateAmount);
-            Color UseHighLightingColor = HSLColor.RotateHue(Color.Red, RotateAmount);
-            Color useLightRain = HSLColor.RotateHue(Color.LightPink, RotateAmount);
-            //throw new NotImplementedException();
-            _BG.DrawProc(g, Bounds);
-            int StartYPosition = (int) (Bounds.Height * 0.15f);
-            var MeasureBounds = g.MeasureString(EntryPrompt[0], useFont);
-            for (int i = 0; i < EntryPrompt.Length; i++)
-            {
-                //draw this line centered at StartYPosition+Height*i...
-
-                int useYPosition = (int) (StartYPosition + (MeasureBounds.Height + 5) * i);
-                int useXPosition = (int) (Bounds.Width / 2 - MeasureBounds.Width / 2);
-                g.DrawString(EntryPrompt[i], useFont, Brushes.Black, new PointF(useXPosition + 5, useYPosition + 5));
-                g.DrawString(EntryPrompt[i], useFont, new SolidBrush(useLightRain), new PointF(useXPosition, useYPosition));
-            }
-
-            float nameEntryY = StartYPosition + (MeasureBounds.Height + 5) * (EntryPrompt.Length + 1);
-
-
-            var AllCharacterBounds = (from c in NameEntered.ToString().ToCharArray() select g.MeasureString(c.ToString(), useFont)).ToArray();
-            float useCharWidth = g.MeasureString("_", EntryFont).Width;
-            float TotalWidth;
-            if (EntryStyle == EntryDrawStyle.EntryDrawStyle_Centered)
-            {
-                TotalWidth = (useCharWidth + 5) * NameEntered.ToString().Trim('_', ' ').Length;
-                
-            }
-            TotalWidth = (useCharWidth + 5) * NameEntered.Length;
-            float NameEntryX = (Bounds.Width / 2) - (TotalWidth / 2);
-            if (EntryStyle == EntryDrawStyle.EntryDrawStyle_Preblank)
-            {
-                for (int charpos = 0; charpos < NameEntered.Length; charpos++)
-                {
-                    char thischar = NameEntered[charpos];
-                    float useX = NameEntryX + ((useCharWidth + 5) * (charpos));
-                    Brush DisplayBrush = (CurrentPosition == charpos) ? new SolidBrush(UseHighLightingColor) : Brushes.NavajoWhite;
-                    Brush ShadowBrush = (CurrentPosition == charpos) ? new SolidBrush(useLightRain) : Brushes.Black;
-                    g.DrawString(thischar.ToString(), EntryFont, ShadowBrush, new PointF(useX + 2, nameEntryY + 2));
-                    g.DrawString(thischar.ToString(), EntryFont, DisplayBrush, new PointF(useX, nameEntryY));
-                }
-            }
-            else if (EntryStyle == EntryDrawStyle.EntryDrawStyle_Centered)
-            {
-                //"simpler"- we just draw the trimmed text.
-                String TrimEntered = NameEntered.ToString().Trim(' ', '_');
-                
-
-
-            }
-        }
-
+        public Font useFont = null;
+        public Font EntryFont = null;
         String Char_Change_Up_Sound = "char_change";
         String Char_Change_Down_Sound = "char_change";
         String Char_Pos_Left = "switch_inactive";

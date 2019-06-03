@@ -17,6 +17,8 @@ using BaseTris.AssetManager;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.GameStates;
+using BASeTris.Rendering;
+using BASeTris.Rendering.GDIPlus;
 using BASeTris.Replay;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
@@ -426,7 +428,7 @@ namespace BASeTris
 
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
-            CurrentGameState.DrawProc(this, g, Bounds);
+            RenderingProvider.Static.DrawElement(this,g,CurrentGameState,new GameStateDrawParameters(Bounds));
             CurrentGameState.DrawForegroundEffect(this, g, Bounds);
         }
 

@@ -273,7 +273,7 @@ namespace BASeTris.GameStates
 
         public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
 
-        private void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,RectangleF Bounds)
+        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,RectangleF Bounds)
         {
             lock (LockTetImageRedraw)
             {
@@ -295,11 +295,7 @@ namespace BASeTris.GameStates
             PlayField.Theme.ApplyTheme(useGroup,PlayField);
         }
 
-        public override void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            RenderingProvider.Static.DrawElement(pOwner, g, this, new GameStateDrawParameters(Bounds));
-            //_DrawHelper.DrawProc(this,pOwner,g,Bounds);
-        }
+       
 
         public Nomino GetGhostDrop(IStateOwner pOwner,Nomino Source, out int dropLength, int CancelProximity = 3)
         {
@@ -566,187 +562,10 @@ namespace BASeTris.GameStates
         public RectangleF LastDrawStat = Rectangle.Empty;
         public Object LockTetImageRedraw = new Object();
 
-        public override void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            bool RedrawsNeeded = !LastDrawStat.Equals(Bounds);
-            LastDrawStat = Bounds;
-            if (StatisticsBackground == null || RedrawsNeeded)
-            {
-                GenerateStatisticsBackground();
-            }
-
-            g.DrawImage(StatisticsBackground, Bounds);
-            //g.Clear(Color.Black);
-            if (TetrominoImages == null || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(pOwner,Bounds);
-
-            lock (LockTetImageRedraw)
-            {
-                var useStats = GameStats;
-                double Factor = Bounds.Height / 644d;
-                int DesiredFontPixelHeight = (int) (Bounds.Height * (23d / 644d));
-                Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
-                var TopScore = this.GetLocalScores().GetScores().First().Score;
-                int MaxScoreLength = Math.Max(TopScore.ToString().Length, useStats.Score.ToString().Length);
-
-                String CurrentScoreStr = useStats.Score.ToString().PadLeft(MaxScoreLength + 2);
-                String TopScoreStr = TopScore.ToString().PadLeft(MaxScoreLength + 2);
-                //TODO: redo this segment separately, so we can have the labels left-aligned and the values right-aligned.
-               // String BuildStatString = "Time:  " + FormatGameTime(pOwner).ToString().PadLeft(MaxScoreLength + 2) + "\n" +
-               //                          "Score: " + CurrentScoreStr + "\n" +
-               //                          "Top:   " + TopScoreStr + " \n" +
-               //                          "Lines: " + GameStats.LineCount.ToString().PadLeft(MaxScoreLength+2);
-
-                g.FillRectangle(LightenBrush, 0, 5, Bounds.Width, (int)(450 * Factor));
-                String[] StatLabels = new string[]{"Time:","Score:","Top:","Lines:"};
-                String[] StatValues = new string[]{FormatGameTime(pOwner),useStats.Score.ToString(),TopScore.ToString(), GameStats.LineCount.ToString() };
-                Point StatPosition = new Point((int)(7 * Factor), (int)(7 * Factor));
-
-                int CurrentYPosition = StatPosition.Y;
-                for(int statindex=0;statindex<StatLabels.Length;statindex++)
-                {
-                    var MeasureLabel = g.MeasureString(StatLabels[statindex], standardFont);
-                    var MeasureValue = g.MeasureString(StatValues[statindex], standardFont);
-                    float LargerHeight = Math.Max(MeasureLabel.Height, MeasureValue.Height);
-
-                    //we want to draw the current stat label at position StatPosition.X,CurrentYPosition...
-
-                    TetrisGame.DrawText(g,standardFont,StatLabels[statindex],Brushes.Black,Brushes.White,StatPosition.X,CurrentYPosition);
-                    
-                    //we want to draw the current stat value at Bounds.Width-ValueWidth.
-                    TetrisGame.DrawText(g,standardFont,StatValues[statindex],Brushes.Black,Brushes.White,(float)(Bounds.Width-MeasureValue.Width-(5*Factor)),CurrentYPosition);
-
-                    //add the larger of the two heights to the current Y Position.
-                    CurrentYPosition += (int)LargerHeight;
-                    CurrentYPosition += 2;
-
-                }
-
-
-
-
-     
-
-                Type[] useTypes = new Type[] {typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z)};
-                int[] PieceCounts = new int[] {useStats.I_Piece_Count, useStats.O_Piece_Count, useStats.J_Piece_Count, useStats.T_Piece_Count, useStats.L_Piece_Count, useStats.S_Piece_Count, useStats.Z_Piece_Count};
-
-                int StartYPos = (int) (140 * Factor);
-                int useXPos = (int) (30 * Factor);
-                ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
-                for (int i = 0; i < useTypes.Length; i++)
-                {
-                    PointF BaseCoordinate = new PointF(useXPos, StartYPos + (int) ((float) i * (40d * Factor)));
-                    PointF TextPos = new PointF(useXPos + (int) (100d * Factor), BaseCoordinate.Y);
-                    String StatText = "" + PieceCounts[i];
-                    SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                    Image TetrominoImage = TetrominoImages[useTypes[i]];
-                    PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
-
-                    g.DrawImage(TetrominoImage, ImagePos);
-                    g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
-                    g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
-                }
-
-                Point NextDrawPosition = new Point((int) (40f * Factor), (int) (420 * Factor));
-                Size NextSize = new Size((int) (200f * Factor), (int) (200f * Factor));
-                Point CenterPoint = new Point(NextDrawPosition.X + NextSize.Width / 2, NextDrawPosition.Y + NextSize.Height / 2);
-                //now draw the "Next" Queue. For now we'll just show one "next" item.
-                if (NextBlocks.Count > 0)
-                {
-                    var QueueList = NextBlocks.ToArray();
-                    Image[] NextTetrominoes = (from t in QueueList select TetrominoImages[t.GetType()]).ToArray();
-                    Image DisplayBox = TetrisGame.Imageman["display_box"];
-                    //draw it at 40,420. (Scaled).
-                    float ScaleDiff = 0;
-                    iActiveSoundObject PlayingMusic;
-                    if ((PlayingMusic = TetrisGame.Soundman.GetPlayingMusic_Active()) != null)
-                        StoredLevels.Enqueue(PlayingMusic.Level);
-
-                    if (StoredLevels.Count >= 4)
-                    {
-                        ScaleDiff = Math.Min(30, 10 * StoredLevels.Dequeue());
-                    }
-
-                    if (!TetrisGame.DJMode)
-                    {
-                        ScaleDiff = 0;
-                    }
-
-                    g.DrawImage
-                    (DisplayBox,
-                        new Rectangle(new Point((int) (NextDrawPosition.X - ScaleDiff), (int) (NextDrawPosition.Y - ScaleDiff)), new Size((int) (NextSize.Width + (ScaleDiff * 2)), (int) (NextSize.Height + (ScaleDiff * 2)))), 0, 0, DisplayBox.Width, DisplayBox.Height, GraphicsUnit.Pixel);
-
-                    g.FillEllipse(Brushes.Black, CenterPoint.X - 5, CenterPoint.Y - 5, 10, 10);
-
-                    for (int i = NextTetrominoes.Length - 1; i > -1; i--)
-                    {
-                        double StartAngle = Math.PI;
-                        double AngleIncrementSize = (Math.PI * 1.8) / (double) NextTetrominoes.Length;
-                        //we draw starting at StartAngle, in increments of AngleIncrementSize.
-                        //i is the index- we want to increase the angle by that amount (well, obviously, I suppose...
-
-                        double UseAngleCurrent = StartAngle + AngleIncrementSize * (float) i + NextAngleOffset;
-
-                        double UseXPosition = CenterPoint.X + ((float) ((NextSize.Width) / 2.2) * Math.Cos(UseAngleCurrent));
-                        double UseYPosition = CenterPoint.Y + ((float) ((NextSize.Height) / 2.2) * Math.Sin(UseAngleCurrent));
-
-
-                        var NextTetromino = NextTetrominoes[i];
-
-                        float Deviation = (i - NextTetrominoes.Length / 2);
-                        Point Deviate = new Point((int) (Deviation * 20 * Factor), (int) (Deviation * 20 * Factor));
-
-                        Point DrawTetLocation = new Point((int) UseXPosition - (NextTetromino.Width / 2), (int) UseYPosition - NextTetromino.Height / 2);
-                        //Point DrawTetLocation = new Point(Deviate.X + (int)(NextDrawPosition.X + ((float)NextSize.Width / 2) - ((float)NextTetromino.Width / 2)),
-                        //    Deviate.Y + (int)(NextDrawPosition.Y + ((float)NextSize.Height / 2) - ((float)NextTetromino.Height / 2)));
-                        double AngleMovePercent = NextAngleOffset / AngleIncrementSize;
-                        double NumAffect = NextAngleOffset == 0 ? 0 : AngleIncrementSize / NextAngleOffset;
-                        Size DrawTetSize = new Size
-                        (
-                            (int) ((float) NextTetromino.Width * (0.3 + (1 - ((float) (i) * 0.15f) - .15f * AngleMovePercent))),
-                            (int) ((float) NextTetromino.Height * (0.3 + (1 - ((float) (i) * 0.15f) - .15f * AngleMovePercent))));
-
-
-                        //g.TranslateTransform(CenterPoint.X,CenterPoint.Y);
-                       
-                        g.TranslateTransform(DrawTetLocation.X + DrawTetSize.Width / 2, DrawTetLocation.Y + DrawTetSize.Width / 2);
-
-
-                        double DrawTetAngle = UseAngleCurrent;
-                        DrawTetAngle += (Math.PI * AngleMovePercent);
-                        float useDegrees = 180 + (float)(DrawTetAngle * (180 / Math.PI));
-
-                        g.RotateTransform((float)useDegrees);
-
-                        g.TranslateTransform(-(DrawTetLocation.X + DrawTetSize.Width / 2), -(DrawTetLocation.Y + DrawTetSize.Height / 2));
-                        //g.TranslateTransform(-CenterPoint.X,-CenterPoint.Y);
-                    
-
-                        if (DrawTetSize.Width > 0 && DrawTetSize.Height > 0)
-                        {
-                            //ImageAttributes Shade = GetShadowAttributes(1.0f - ((float)i * 0.3f));
-                            ImageAttributes Shade = new ImageAttributes();
-                            Shade.SetColorMatrix(ColorMatrices.GetFader(1.0f - ((float) i * 0.1f)));
-
-
-                            g.DrawImage
-                            (NextTetromino, new Rectangle((int) DrawTetLocation.X, (int) DrawTetLocation.Y, DrawTetSize.Width, DrawTetSize.Height), 0f, 0f,
-                                (float) NextTetromino.Width, (float) NextTetromino.Height, GraphicsUnit.Pixel, Shade);
-                        }
-
-                        g.ResetTransform();
-                    }
-                }
-
-                if (HoldBlock != null)
-                {
-                    Image HoldTetromino = TetrominoImages[HoldBlock.GetType()];
-                    g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
-                }
-            }
-        }
+       
 
         internal Queue<float> StoredLevels = new Queue<float>();
-        double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
+        public double NextAngleOffset = 0; //use this to animate the "Next" ring... Set it to a specific value and GameProc should reduce it to zero over time.
         Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
 
         
