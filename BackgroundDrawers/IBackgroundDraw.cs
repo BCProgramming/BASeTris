@@ -7,10 +7,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.AssetManager;
+using BASeTris.Rendering;
 
 
 namespace BASeTris.BackgroundDrawers
 {
+    
+
+    public abstract class BackgroundDraw : IBackgroundDraw 
+    {
+        public abstract void DrawProc(Graphics g, RectangleF Bounds);
+      
+        public abstract void FrameProc();
+    }
     public interface IBackgroundDraw
     {
         /// <summary>
@@ -25,8 +34,8 @@ namespace BASeTris.BackgroundDrawers
         /// </summary>
         void FrameProc();
     }
-
-    public class StandardImageBackgroundDraw : IBackgroundDraw
+    
+    public class StandardImageBackgroundDraw : BackgroundDraw
     {
         private Image _BackgroundImage = null;
 
@@ -63,12 +72,12 @@ namespace BASeTris.BackgroundDrawers
             BackgroundBrush.WrapMode = WrapMode.Tile;
         }
 
-        public void DrawProc(Graphics g, RectangleF Bounds)
+        public override void DrawProc(Graphics g, RectangleF Bounds)
         {
             g.FillRectangle(BackgroundBrush, Bounds);
         }
 
-        public void FrameProc()
+        public override void FrameProc()
         {
             if (!Movement.IsEmpty)
             {
