@@ -55,7 +55,14 @@ namespace BASeTris.Rendering.GDIPlus
             TimeSpan useCalc = stateowner.GetElapsedTime();
             return useCalc.ToString(@"hh\:mm\:ss");
         }
-        
+        public object LockTetImageRedraw = new Object();
+        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,StandardTetrisGameState State, RectangleF Bounds)
+        {
+            lock (LockTetImageRedraw)
+            {
+                TetrominoImages = TetrisGame.GetTetrominoBitmaps(Bounds, State.PlayField.Theme, State.PlayField, (float)Owner.ScaleFactor);
+            }
+        }
         public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, GameStateDrawParameters Element)
         {
             var Bounds = Element.Bounds;
@@ -70,7 +77,7 @@ namespace BASeTris.Rendering.GDIPlus
 
             g.DrawImage(StatisticsBackground, Bounds);
             //g.Clear(Color.Black);
-            if (TetrominoImages == null || RedrawsNeeded) Source.RedrawStatusbarTetrominoBitmaps(pOwner, Bounds);
+            if (TetrominoImages == null || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(pOwner,Source, Bounds);
             Process p;
             
             lock (Source.LockTetImageRedraw)

@@ -13,7 +13,8 @@ namespace BASeTris.Rendering.GDIPlus
         {
             var g = pRenderTarget;
             var Bounds = Element.Bounds;
-            Source._BG.DrawProc(g, Bounds);
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new BackgroundDrawData(Bounds));
+            
 
             Font HeaderFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);
             Font PlacementFont = TetrisGame.GetRetroFont(10, pOwner.ScaleFactor);

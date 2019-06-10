@@ -23,7 +23,8 @@ namespace BASeTris.Rendering.GDIPlus
             Color UseHighLightingColor = HSLColor.RotateHue(Color.Red, RotateAmount);
             Color useLightRain = HSLColor.RotateHue(Color.LightPink, RotateAmount);
             //throw new NotImplementedException();
-            Source._BG.DrawProc(g, Bounds);
+            if(Source.BG!=null)
+                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new BackgroundDrawData(Bounds));
             int StartYPosition = (int)(Bounds.Height * 0.15f);
             var MeasureBounds = g.MeasureString(Source.EntryPrompt[0], Source.useFont);
             for (int i = 0; i < Source.EntryPrompt.Length; i++)

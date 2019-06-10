@@ -12,7 +12,10 @@ namespace BASeTris.Rendering.GDIPlus
             //throw new NotImplementedException();
             Graphics g = pRenderTarget;
             var Bounds = Element.Bounds;
-            if (Source._BG != null) Source._BG.DrawProc(g, Bounds);
+            if (Source.BG != null)
+            {
+                RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,Source.BG,new BackgroundDrawData(Bounds));
+            }
             int CurrentIndex = Source.StartItemOffset;
             float CurrentY = Source.DrawHeader(pOwner, g, Bounds);
             float MaxHeight = 0, MaxWidth = 0;

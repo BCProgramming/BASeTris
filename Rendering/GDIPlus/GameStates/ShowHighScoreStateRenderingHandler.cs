@@ -17,8 +17,9 @@ namespace BASeTris.Rendering.GDIPlus
             //ColorMatrices.GetFader(1.0f - ((float)i * 0.1f))
             g.Clear(Color.White);
 
-
-            Self._BG.DrawProc(g, Bounds);
+            if(Self.BG!=null)
+                RenderingProvider.Static.DrawElement(pOwner, g, Self.BG, new BackgroundDrawData(Bounds));
+            
         }
 
         private Brush GetHighlightBrush()

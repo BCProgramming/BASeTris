@@ -22,7 +22,7 @@ namespace BASeTris.GameStates
         public StringBuilder NameEntered = new StringBuilder("__________");
         public readonly String AvailableChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         public int CurrentPosition = 0; //position of character being "edited"
-        public IBackgroundDraw _BG = null;
+        
 
         public override DisplayMode SupportedDisplayMode
         {
@@ -47,7 +47,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
-            _BG.FrameProc();
+            
             //throw new NotImplementedException();
         }
 

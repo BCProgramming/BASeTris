@@ -389,6 +389,10 @@ namespace BASeTris
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);
+            if(CurrentGameState.BG!=null)
+            {
+                CurrentGameState.BG.FrameProc();
+            }
         }
 
         Dictionary<Keys, GameState.GameKeys> KeyMapping = new Dictionary<Keys, GameState.GameKeys>()

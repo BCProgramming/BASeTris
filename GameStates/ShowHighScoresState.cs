@@ -41,7 +41,7 @@ namespace BASeTris.GameStates
             get { return GameState.DisplayMode.Full; }
         }
 
-        public IBackgroundDraw _BG = null;
+        
 
         public ShowHighScoresState(IHighScoreList ScoreList, GameState ReversionState = null, int[] HighlightPositions = null)
         {
@@ -50,10 +50,9 @@ namespace BASeTris.GameStates
             HighlightedScorePositions = HighlightPositions ?? new int[] { };
             SelectedScorePosition = HighlightPositions == null || HighlightPositions.Length == 0 ? 1 : HighlightPositions.First() - 1;
             RevertState = ReversionState;
-            var sib = StandardImageBackgroundDraw.GetStandardBackgroundDrawer();
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            sib.Movement = new PointF((float) xpoint, (float) ypoint);
+            var sib = StandardImageBackgroundDraw.GetStandardBackgroundDrawer(new PointF((float)xpoint, (float)ypoint));
             _BG = sib;
         }
 
@@ -70,7 +69,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
-            _BG.FrameProc();
+            
             if (DateTime.Now - LastIncrementTime > IncrementTimediff && !ScrollCompleted)
             {
                 IncrementedDrawState++;

@@ -273,13 +273,7 @@ namespace BASeTris.GameStates
 
         public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
 
-        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,RectangleF Bounds)
-        {
-            lock (LockTetImageRedraw)
-            {
-                TetrominoImages = TetrisGame.GetTetrominoBitmaps(Bounds, PlayField.Theme, PlayField,(float)Owner.ScaleFactor);
-            }
-        }
+       
 
         private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {

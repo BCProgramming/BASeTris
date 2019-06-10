@@ -42,7 +42,7 @@ namespace BASeTris.GameStates.Menu
             get { return GameState.DisplayMode.Full; }
         }
 
-        public IBackgroundDraw _BG = null;
+        
 
         public MenuState(IBackgroundDraw pBG)
         {
@@ -64,7 +64,7 @@ namespace BASeTris.GameStates.Menu
             if (MainXOffset < 0) MainXOffset += OffsetAnimationSpeed;
             OffsetAnimationSpeed += 3;
             //throw new NotImplementedException();
-            _BG?.FrameProc();
+            
         }
         Dictionary<double, Font> FontSizeData = new Dictionary<double, Font>();
         private Font GetScaledHeaderFont(IStateOwner pOwner)

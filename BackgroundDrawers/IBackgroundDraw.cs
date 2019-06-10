@@ -27,18 +27,18 @@ namespace BASeTris.BackgroundDrawers
         /// </summary>
         /// <param name="g"></param>
         /// <param name="Bounds"></param>
-        void DrawProc(Graphics g, RectangleF Bounds);
+        //void DrawProc(Graphics g, RectangleF Bounds);
+        //drawing is handled by rendering provider now...
 
         /// <summary>
         /// Called each Game "tick" to allow the background implementation to perform any necessary state changes.
         /// </summary>
         void FrameProc();
     }
-    
-    public class StandardImageBackgroundDraw : BackgroundDraw
+   
+    public class StandardImageBackgroundDrawGDICapsule
     {
-        private Image _BackgroundImage = null;
-
+        public Image _BackgroundImage = null;
         public Image BackgroundImage
         {
             get { return _BackgroundImage; }
@@ -53,8 +53,8 @@ namespace BASeTris.BackgroundDrawers
         public float CurrAngle { get; set; } = 0;
         public float AngleSpeed { get; set; } = 0;
         public PointF Movement { get; set; } = new PointF(0, 0);
-        private ImageAttributes theAttributes = null;
-        private TextureBrush BackgroundBrush = null;
+        public ImageAttributes theAttributes = null;
+        public TextureBrush BackgroundBrush = null;
 
         private void ResetState()
         {
@@ -71,38 +71,46 @@ namespace BASeTris.BackgroundDrawers
 
             BackgroundBrush.WrapMode = WrapMode.Tile;
         }
-
+    }
+    public class StandardImageBackgroundDraw : BackgroundDraw
+    {
+        private StandardImageBackgroundDrawGDICapsule _Capsule;
+        public StandardImageBackgroundDrawGDICapsule Capsule { get
+            {
+                return _Capsule;
+            }
+            set { _Capsule = value; }
+            }
         public override void DrawProc(Graphics g, RectangleF Bounds)
         {
-            g.FillRectangle(BackgroundBrush, Bounds);
+            
         }
 
         public override void FrameProc()
         {
-            if (!Movement.IsEmpty)
-            {
-                CurrOrigin = new PointF((CurrOrigin.X + Movement.X) % _BackgroundImage.Width, (CurrOrigin.Y + Movement.Y) % _BackgroundImage.Height);
-            }
-
-            if (AngleSpeed > 0) CurrAngle += AngleSpeed;
-            BackgroundBrush.ResetTransform();
-            BackgroundBrush.TranslateTransform(CurrOrigin.X, CurrOrigin.Y);
-            BackgroundBrush.RotateTransform(CurrAngle);
+            
         }
 
-        public StandardImageBackgroundDraw(Image pImage, ImageAttributes useAttributes)
+        public StandardImageBackgroundDraw(StandardImageBackgroundDrawGDICapsule sbdd)
         {
-            theAttributes = useAttributes;
-            BackgroundImage = pImage;
+            _Capsule = sbdd;
         }
         public static StandardImageBackgroundDraw GetStandardBackgroundDrawer(float fade=0.4f)
         {
             ImageAttributes useBGAttributes = new ImageAttributes();
             useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(fade));
-            var sib = new StandardImageBackgroundDraw(TetrisGame.StandardTiledTetrisBackground, useBGAttributes);
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            sib.Movement = new PointF((float)xpoint, (float)ypoint);
+            var sib = new StandardImageBackgroundDraw(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = new PointF((float)xpoint, (float)ypoint) });
+            
+            return sib;
+        }
+        public static StandardImageBackgroundDraw GetStandardBackgroundDrawer(PointF Movement,float fade = 0.4f)
+        {
+            ImageAttributes useBGAttributes = new ImageAttributes();
+            useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(fade));
+            var sib = new StandardImageBackgroundDraw(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = Movement });
+
             return sib;
         }
     }

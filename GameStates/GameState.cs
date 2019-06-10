@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
@@ -62,5 +63,8 @@ namespace BASeTris
         public abstract void HandleGameKey(IStateOwner pOwner, GameKeys g);
 
         public abstract void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds);
+
+        protected IBackgroundDraw _BG;
+        public IBackgroundDraw BG { get { return _BG; } set { _BG = value; } }
     }
 }

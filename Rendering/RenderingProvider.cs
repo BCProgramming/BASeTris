@@ -4,9 +4,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.GDIPlus.Backgrounds;
 using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
 
@@ -45,7 +47,8 @@ namespace BASeTris.Rendering
                     {typeof(FieldLineActionGameState),new  FieldActionStateRenderingHandler() },
                     {typeof(UnpauseDelayGameState),new UnpauseDelayStateRenderingHandler() },
                     {typeof(ShowHighScoresState),new ShowHighScoreStateRenderingHandler()},
-                    {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()}
+                    {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()},
+                    {typeof(StandardImageBackgroundDraw),new StandardImageBackgroundRenderingHandler() }
 
 
                 });

@@ -27,7 +27,7 @@ namespace BASeTris.GameStates
             Details_LevelTimes
         }
 
-        public IBackgroundDraw _BG;
+        
         public ViewScoreDetailsType CurrentView = ViewScoreDetailsType.Details_Tetrominoes;
         public int _Position;
 
@@ -43,7 +43,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
-            _BG.FrameProc();
+            
             //For flair we'll have some gubbins or whatever in the background.
             //throw new NotImplementedException();
         }
