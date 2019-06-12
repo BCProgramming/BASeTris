@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
@@ -13,7 +14,7 @@ namespace BASeTris.Rendering.GDIPlus
         {
             var g = pRenderTarget;
             var Bounds = Element.Bounds;
-            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new BackgroundDrawData(Bounds));
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new GDIBackgroundDrawData(Bounds));
             
 
             Font HeaderFont = TetrisGame.GetRetroFont(24, pOwner.ScaleFactor);

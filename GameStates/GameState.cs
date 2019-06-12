@@ -58,13 +58,15 @@ namespace BASeTris
         /*[Obsolete("Use Rendering Providers")]
         public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void GameProc(IStateOwner pOwner);
+        
         //Obbsolete("Use Rendering Providers")]
         /*public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void HandleGameKey(IStateOwner pOwner, GameKeys g);
 
         public abstract void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds);
 
-        protected IBackgroundDraw _BG;
-        public IBackgroundDraw BG { get { return _BG; } set { _BG = value; } }
+        protected IBackground _BG;
+        public IBackground BG { get => _BG;
+            set { _BG = value; } }
     }
 }

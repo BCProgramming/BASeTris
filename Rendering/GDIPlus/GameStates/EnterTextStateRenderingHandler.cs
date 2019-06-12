@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
@@ -24,7 +25,7 @@ namespace BASeTris.Rendering.GDIPlus
             Color useLightRain = HSLColor.RotateHue(Color.LightPink, RotateAmount);
             //throw new NotImplementedException();
             if(Source.BG!=null)
-                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new BackgroundDrawData(Bounds));
+                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new GDIBackgroundDrawData(Bounds));
             int StartYPosition = (int)(Bounds.Height * 0.15f);
             var MeasureBounds = g.MeasureString(Source.EntryPrompt[0], Source.useFont);
             for (int i = 0; i < Source.EntryPrompt.Length; i++)

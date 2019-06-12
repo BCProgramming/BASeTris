@@ -48,7 +48,7 @@ namespace BASeTris.Rendering
                     {typeof(UnpauseDelayGameState),new UnpauseDelayStateRenderingHandler() },
                     {typeof(ShowHighScoresState),new ShowHighScoreStateRenderingHandler()},
                     {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()},
-                    {typeof(StandardImageBackgroundDraw),new StandardImageBackgroundRenderingHandler() }
+                    {typeof(StandardImageBackground),new StandardImageBackgroundRenderingHandler() }
 
 
                 });

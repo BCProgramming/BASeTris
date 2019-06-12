@@ -31,7 +31,7 @@ namespace BASeTris.GameStates
         public ViewScoreDetailsType CurrentView = ViewScoreDetailsType.Details_Tetrominoes;
         public int _Position;
 
-        public ViewScoreDetailsState(ShowHighScoresState pOwner, IHighScoreEntry pShowEntry, IBackgroundDraw useBG, int DetailPosition)
+        public ViewScoreDetailsState(ShowHighScoresState pOwner, IHighScoreEntry pShowEntry, IBackground useBG, int DetailPosition)
         {
             _Position = DetailPosition;
             _BG = useBG; //so it is the same as the "main" show score state and looks "seamless".

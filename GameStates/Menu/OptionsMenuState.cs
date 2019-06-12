@@ -13,7 +13,7 @@ namespace BASeTris.GameStates.Menu
     {
         private GameState _OriginalState;
         
-        public OptionsMenuState(IBackgroundDraw background,IStateOwner pOwner,GameState OriginalState):base(background)
+        public OptionsMenuState(IBackground background,IStateOwner pOwner,GameState OriginalState):base(background)
         {
             _OriginalState = OriginalState;
             PopulateOptions(pOwner);

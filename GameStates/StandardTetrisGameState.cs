@@ -754,7 +754,7 @@ namespace BASeTris.GameStates
             else if (g == GameKeys.GameKey_Debug2)
             {
 
-                OptionsMenuState OptionState = new OptionsMenuState(BackgroundDrawers.StandardImageBackgroundDraw.GetStandardBackgroundDrawer(),
+                OptionsMenuState OptionState = new OptionsMenuState(BackgroundDrawers.StandardImageBackground.GetStandardBackgroundDrawer(),
                     pOwner, pOwner.CurrentState);
 
                 pOwner.CurrentState = OptionState;
@@ -770,7 +770,7 @@ namespace BASeTris.GameStates
                 Font ItemFont = new Font(TetrisGame.RetroFont, (int)((float)DesiredFontPixelHeight*(3f/4f)), FontStyle.Bold, GraphicsUnit.Pixel);
                 //set state to a testing menu state.
 
-                MenuState ms = new MenuState(BackgroundDrawers.StandardImageBackgroundDraw.GetStandardBackgroundDrawer());
+                MenuState ms = new MenuState(BackgroundDrawers.StandardImageBackground.GetStandardBackgroundDrawer());
                 ms.StateHeader = "This is a Menu";
                 ms.HeaderFont = standardFont;
                 MenuStateTextMenuItem returnitem = new MenuStateTextMenuItem();

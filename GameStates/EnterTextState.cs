@@ -34,7 +34,7 @@ namespace BASeTris.GameStates
             Owner = pOwner;
             AvailableChars = PossibleChars;
             NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));
-            var sib = StandardImageBackgroundDraw.GetStandardBackgroundDrawer();
+            var sib = StandardImageBackground.GetStandardBackgroundDrawer();
            
             _BG = sib;
         }
@@ -47,7 +47,6 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
-            
             //throw new NotImplementedException();
         }
 

@@ -8,17 +8,17 @@ using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.Rendering
 {
-    public class BackgroundDrawData : Rendering.GDIPlus.GameStateDrawParameters
+    public class BackgroundDrawParameters : Rendering.GDIPlus.GameStateDrawParameters
     {
-        public BackgroundDrawData(RectangleF pRect) :base(pRect)
+        public BackgroundDrawParameters(RectangleF pRect) :base(pRect)
         {
 
         }
     }
     //base Background rendering handler implementation.
-    public abstract class BackgroundDrawRenderHandler<TARGET, BG, BDD> : StandardRenderingHandler<TARGET, BG, BDD> where BDD : BackgroundDrawData where BG : BackgroundDraw
+    public abstract class BackgroundDrawRenderHandler<TARGET, BG, BDD> : StandardRenderingHandler<TARGET, BG, BDD> where BDD : BackgroundDrawData where BG : Background
     {
 
-        public abstract void FrameProc(BG BGInstance, BDD BackgroundData);
+        
     }
 }

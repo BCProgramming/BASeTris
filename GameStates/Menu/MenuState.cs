@@ -44,7 +44,7 @@ namespace BASeTris.GameStates.Menu
 
         
 
-        public MenuState(IBackgroundDraw pBG)
+        public MenuState(IBackground pBG)
         {
             _BG = pBG;
         }

@@ -391,7 +391,7 @@ namespace BASeTris
             CurrentGameState.GameProc(GameOwner);
             if(CurrentGameState.BG!=null)
             {
-                CurrentGameState.BG.FrameProc();
+                CurrentGameState.BG.FrameProc(GameOwner);
             }
         }
 

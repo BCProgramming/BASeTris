@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using BASeCamp.BASeScores;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
@@ -18,7 +19,7 @@ namespace BASeTris.Rendering.GDIPlus
             g.Clear(Color.White);
 
             if(Self.BG!=null)
-                RenderingProvider.Static.DrawElement(pOwner, g, Self.BG, new BackgroundDrawData(Bounds));
+                RenderingProvider.Static.DrawElement(pOwner, g, Self.BG, new GDIBackgroundDrawData(Bounds));
             
         }
 

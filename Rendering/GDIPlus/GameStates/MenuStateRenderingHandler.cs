@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Rendering.GDIPlus
@@ -14,7 +15,7 @@ namespace BASeTris.Rendering.GDIPlus
             var Bounds = Element.Bounds;
             if (Source.BG != null)
             {
-                RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,Source.BG,new BackgroundDrawData(Bounds));
+                RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,Source.BG,new GDIBackgroundDrawData(Bounds));
             }
             int CurrentIndex = Source.StartItemOffset;
             float CurrentY = Source.DrawHeader(pOwner, g, Bounds);

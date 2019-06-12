@@ -15,7 +15,7 @@ namespace BASeTris.GameStates
 
         private int AchievedPosition;
 
-        //private IBackgroundDraw _BG = null;
+        //private IBackground _BG = null;
         public override DisplayMode SupportedDisplayMode
         {
             get { return DisplayMode.Full; }
