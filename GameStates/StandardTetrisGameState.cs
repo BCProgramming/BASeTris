@@ -264,8 +264,8 @@ namespace BASeTris.GameStates
 
         public bool f_RedrawTetrominoImages = false;
         public bool f_RedrawStatusBitmap = false;
-        private Dictionary<System.Type, Image> TetrominoImages = null;
-
+        public Dictionary<System.Type, Image> TetrominoImages { protected set; get; } = null;
+        public bool HasTetrominoImages() => TetrominoImages != null;
         public Image GetTetronimoImage(System.Type TetrominoType)
         {
             return TetrominoImages[TetrominoType];
@@ -273,7 +273,10 @@ namespace BASeTris.GameStates
 
         public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
 
-       
+        public void SetTetrominoImages(Dictionary<Type,Image> images)
+        {
+            TetrominoImages = images;
+        }
 
         private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {
@@ -754,7 +757,7 @@ namespace BASeTris.GameStates
             else if (g == GameKeys.GameKey_Debug2)
             {
 
-                OptionsMenuState OptionState = new OptionsMenuState(BackgroundDrawers.StandardImageBackground.GetStandardBackgroundDrawer(),
+                OptionsMenuState OptionState = new OptionsMenuState(BackgroundDrawers.StandardImageBackgroundGDI.GetStandardBackgroundDrawer(),
                     pOwner, pOwner.CurrentState);
 
                 pOwner.CurrentState = OptionState;
@@ -770,7 +773,7 @@ namespace BASeTris.GameStates
                 Font ItemFont = new Font(TetrisGame.RetroFont, (int)((float)DesiredFontPixelHeight*(3f/4f)), FontStyle.Bold, GraphicsUnit.Pixel);
                 //set state to a testing menu state.
 
-                MenuState ms = new MenuState(BackgroundDrawers.StandardImageBackground.GetStandardBackgroundDrawer());
+                MenuState ms = new MenuState(BackgroundDrawers.StandardImageBackgroundGDI.GetStandardBackgroundDrawer());
                 ms.StateHeader = "This is a Menu";
                 ms.HeaderFont = standardFont;
                 MenuStateTextMenuItem returnitem = new MenuStateTextMenuItem();

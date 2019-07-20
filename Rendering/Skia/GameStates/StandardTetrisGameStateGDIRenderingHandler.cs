@@ -1,21 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
-using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
-using BASeTris.Tetrominoes;
+using BASeTris.Rendering.GDIPlus;
+using SkiaSharp;
 
-namespace BASeTris.Rendering.GDIPlus
+namespace BASeTris.Rendering.Skia.GameStates
 {
-    public class StandardTetrisGameStateRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, GameStateDrawParameters>
+    public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,StandardTetrisGameState,GameStateDrawParameters>
+    {
+        private StandardImageBackgroundSkia _Background = null;
+
+        private void BuildBackground(RectangleF Size)
+        {
+            _Background = new StandardImageBackgroundSkia();
+            Bitmap bmp = new Bitmap(ImageManager.ReduceImage(TetrisGame.Imageman["background"],
+                new Size((int)(Size.Width + 0.5f), (int)(Size.Height + 0.5f))));
+            
+            SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
+            _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(2, 2) };
+        }
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, StandardTetrisGameState Source, GameStateDrawParameters Element)
+        {
+            //testing code for background.
+            if (_Background==null)
+            {
+                BuildBackground(Element.Bounds);
+            }
+            _Background.FrameProc(pOwner);
+            RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,_Background,new SkiaBackgroundDrawData(SkiaSharp.Views.Desktop.Extensions.ToSKRect(Element.Bounds)));
+            
+            
+            TetrisGame.DrawTextSK(pRenderTarget,"Greetings!",new SKPoint(50,50),TetrisGame.RetroFontSK,new SKColor(0,0,255,128),28,pOwner.ScaleFactor);
+
+        }
+
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, StandardTetrisGameState Source, GameStateDrawParameters Element)
+        {
+            Render(pOwner,pRenderTarget,Source,Element);
+        }
+    }
+
+    /*public class StandardTetrisGameStateRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, GameStateDrawParameters>
     {
         public RectangleF LastDrawStat = Rectangle.Empty;
-        //private Dictionary<System.Type, Image> TetrominoImages = null;
+        private Dictionary<System.Type, Image> TetrominoImages = null;
         Brush LightenBrush = new SolidBrush(Color.FromArgb(128, Color.MintCream));
         
       
@@ -60,8 +94,7 @@ namespace BASeTris.Rendering.GDIPlus
         {
             lock (LockTetImageRedraw)
             {
-                
-                State.SetTetrominoImages(TetrisGame.GetTetrominoBitmaps(Bounds, State.PlayField.Theme, State.PlayField, (float)Owner.ScaleFactor));
+                TetrominoImages = TetrisGame.GetTetrominoBitmaps(Bounds, State.PlayField.Theme, State.PlayField, (float)Owner.ScaleFactor);
             }
         }
         public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, GameStateDrawParameters Element)
@@ -78,7 +111,7 @@ namespace BASeTris.Rendering.GDIPlus
 
             g.DrawImage(StatisticsBackground, Bounds);
             //g.Clear(Color.Black);
-            if (!Source.HasTetrominoImages() || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(pOwner,Source, Bounds);
+            if (TetrominoImages == null || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(pOwner,Source, Bounds);
             Process p;
             
             lock (Source.LockTetImageRedraw)
@@ -140,7 +173,7 @@ namespace BASeTris.Rendering.GDIPlus
                     PointF TextPos = new PointF(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
                     String StatText = "" + PieceCounts[i];
                     SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                    Image TetrominoImage = Source.TetrominoImages[useTypes[i]];
+                    Image TetrominoImage = TetrominoImages[useTypes[i]];
                     PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
 
                     g.DrawImage(TetrominoImage, ImagePos);
@@ -155,7 +188,7 @@ namespace BASeTris.Rendering.GDIPlus
                 if (Source.NextBlocks.Count > 0)
                 {
                     var QueueList = Source.NextBlocks.ToArray();
-                    Image[] NextTetrominoes = (from t in QueueList select Source.TetrominoImages[t.GetType()]).ToArray();
+                    Image[] NextTetrominoes = (from t in QueueList select TetrominoImages[t.GetType()]).ToArray();
                     Image DisplayBox = TetrisGame.Imageman["display_box"];
                     //draw it at 40,420. (Scaled).
                     float ScaleDiff = 0;
@@ -241,7 +274,7 @@ namespace BASeTris.Rendering.GDIPlus
 
                 if (Source.HoldBlock != null)
                 {
-                    Image HoldTetromino = Source.TetrominoImages[Source.HoldBlock.GetType()];
+                    Image HoldTetromino = TetrominoImages[Source.HoldBlock.GetType()];
                     g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                 }
             }
@@ -252,5 +285,5 @@ namespace BASeTris.Rendering.GDIPlus
             Source._DrawHelper.DrawProc(Source, pOwner, pRenderTarget, Element.Bounds);
             //throw new NotImplementedException();
         }
-    }
+    }*/
 }

@@ -144,7 +144,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameObjects\ProxyObject.cs" />
     <Compile Include="Rendering\BackgroundDrawRenderHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\Backgrounds\StandardImageBackgroundRenderingHandler.cs" />
+    <Compile Include="Rendering\GDIPlus\Backgrounds\StandardImageBackgroundGDIRenderingHandler.cs" />
     <Compile Include="Rendering\GDIPlus\GameStates\EnterTextStateRenderingHandler.cs" />
     <Compile Include="Rendering\GDIPlus\GameStates\FieldActionStateRenderingHandler.cs" />
     <Compile Include="Rendering\GDIPlus\GameStates\GameOverStateRenderingHandler.cs" />
@@ -162,9 +162,16 @@
     <Compile Include="Rendering\GDIPlus\GameStates\ViewScoreDetailsStateHandler.cs" />
     <Compile Include="Rendering\IRenderingHandler.cs" />
     <Compile Include="Rendering\IRenderingProvider.cs" />
+    <Compile Include="Rendering\Adapter\ProviderWrappers.cs" />
+    <Compile Include="Rendering\MenuItems\MenuStateMenuItemGDIRenderer.cs" />
     <Compile Include="Rendering\RenderElements\ElementRenderData.cs" />
     <Compile Include="Rendering\RenderingProvider.cs" />
+    <Compile Include="Rendering\Skia\Backgrounds\StandardImageBackgroundSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateGDIRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\SkiaRenderingProvider.cs" />
+    <Compile Include="Rendering\Skia\TetrisBlockSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\TetrisImageBlockSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\TetrisStandardColouredBlockSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\StandardRenderingProvider.cs" />
     <Compile Include="Replay\StatefulReplay.cs" />
     <Compile Include="StandardSettings.cs" />

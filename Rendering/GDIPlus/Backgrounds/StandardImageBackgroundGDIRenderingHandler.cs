@@ -10,17 +10,17 @@ using BASeTris.BackgroundDrawers;
 namespace BASeTris.Rendering.GDIPlus.Backgrounds
 {
 
-    public class StandardImageBackgroundRenderingHandler : BackgroundDrawRenderHandler<Graphics, StandardImageBackground, BackgroundDrawData>
+    public class StandardImageBackgroundGDIRenderingHandler : BackgroundDrawRenderHandler<Graphics, StandardImageBackgroundGDI, BackgroundDrawData>
     {
         //BackgroundDrawData should be a StandardBackgroundDrawData.
 
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, StandardImageBackground Source, BackgroundDrawData Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, StandardImageBackgroundGDI Source, BackgroundDrawData Element)
         {
             
             var sbb = Element as GDIBackgroundDrawData;
             if (sbb != null)
             {
-               var Capsule = Source.Capsule;
+               var Capsule = Source.Data;
                if(Capsule.BackgroundBrush==null)
                 {
                     Capsule.ResetState();

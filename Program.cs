@@ -20,8 +20,7 @@ namespace BASeTris
         static void Main()
         {
 
-            
-            
+
 
            /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
             {

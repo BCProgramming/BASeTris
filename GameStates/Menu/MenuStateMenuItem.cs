@@ -8,6 +8,17 @@ using System.Windows.Forms;
 
 namespace BASeTris.GameStates.Menu
 {
+    public class MenuStateMenuItemDrawData
+    {
+        public RectangleF Bounds = RectangleF.Empty;
+        public MenuStateMenuItem.StateMenuItemState DrawState = MenuStateMenuItem.StateMenuItemState.State_Normal;
+        public MenuStateMenuItemDrawData(RectangleF pBounds, MenuStateMenuItem.StateMenuItemState pDrawState)
+        {
+            Bounds = pBounds;
+            DrawState = pDrawState;
+        }
+    }
+    //TODO: implement RenderingProvider framework for MenuStateMenuItem and subclasses, replacing the Draw() abstract routine.
     public abstract class MenuStateMenuItem
     {
         public enum StateMenuItemState
@@ -22,7 +33,7 @@ namespace BASeTris.GameStates.Menu
             Handled
         }
         public abstract bool GetSelectable();
-        public abstract void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState);
+        public abstract void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState);
         /// <summary>
         /// Method called when this menu item is selected.
         /// </summary>
@@ -152,7 +163,7 @@ namespace BASeTris.GameStates.Menu
             //basically just draw the Text centered within the Bounds.
           
         }
-        public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        public override void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState)
         {
             var useFont = GetScaledFont(pOwner);
             var MeasureText = Target.MeasureString(Text, useFont);

@@ -52,7 +52,7 @@ namespace BASeTris.GameStates
             RevertState = ReversionState;
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            var sib = StandardImageBackground.GetStandardBackgroundDrawer(new PointF((float)xpoint, (float)ypoint));
+            var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer(new PointF((float)xpoint, (float)ypoint));
             _BG = sib;
         }
 

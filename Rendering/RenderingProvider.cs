@@ -9,7 +9,10 @@ using BASeTris.GameStates;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.GDIPlus.Backgrounds;
+using BASeTris.Rendering.MenuItems;
 using BASeTris.Rendering.Skia;
+using BASeTris.Rendering.Skia.Backgrounds;
+using BASeTris.Rendering.Skia.GameStates;
 using BASeTris.TetrisBlocks;
 
 namespace BASeTris.Rendering
@@ -48,14 +51,17 @@ namespace BASeTris.Rendering
                     {typeof(UnpauseDelayGameState),new UnpauseDelayStateRenderingHandler() },
                     {typeof(ShowHighScoresState),new ShowHighScoreStateRenderingHandler()},
                     {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()},
-                    {typeof(StandardImageBackground),new StandardImageBackgroundRenderingHandler() }
+                    {typeof(StandardImageBackgroundGDI),new StandardImageBackgroundGDIRenderingHandler() },
+                    {typeof(MenuStateMenuItem),new MenuStateMenuItemGDIRenderer() }
 
 
                 });
                 handlerLookup.Add(typeof(SkiaSharp.SKCanvas), new Dictionary<Type, IRenderingHandler>()
                 { { typeof(TetrisBlock),new TetrisBlockSkiaRenderingHandler()},
                     { typeof(ImageBlock),new TetrisImageBlockSkiaRenderingHandler()},
-                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockSkiaRenderingHandler() }
+                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockSkiaRenderingHandler() },
+                    {typeof(StandardTetrisGameState),new StandardTetrisGameStateSkiaRenderingHandler() },
+                    {typeof(StandardImageBackgroundSkia),new StandardImageBackgroundSkiaRenderingHandler() }
                 });
 
 
@@ -66,7 +72,18 @@ namespace BASeTris.Rendering
                 {
                     return handlerLookup[ClassType][DrawType];
                 }
+                //no? OK, let's try that again- we want to allow for base classes as well though.
+                foreach(var searchtype in handlerLookup[ClassType].Keys)
+                {
+                    if(searchtype.IsAssignableFrom(DrawType))
+                    {
+                        return handlerLookup[ClassType][searchtype];
+                    }
+                }
             }
+            
+            
+
             return null;
         }
         public void DrawElement(IStateOwner pOwner, Object Target, Object Element, Object ElementData)
@@ -86,7 +103,30 @@ namespace BASeTris.Rendering
                 (Handler as IStateRenderingHandler).RenderStats(pOwner,Target,Element,ElementData);
             }
         }
-       public ExtendedData extendedInfo = new ExtendedData();
+        /// <summary>
+        /// "Extended Info" is intended to allow instance objects- eg game items and objects that can be drawn- to store any data that needs to differ between providers. For example it can storee
+        /// stuff in one class for GDI+ and then another for SkiaSharp.
+        /// </summary>
+        public Dictionary<Object, ExtendedData> extendedInfo = new Dictionary<object, ExtendedData>();
+        public ExtendedData GetExtendedData(Type DrawType)
+        {
+            if(extendedInfo.ContainsKey(DrawType))
+            {
+                return extendedInfo[DrawType];
+            }
+            else
+            {
+                extendedInfo.Add(DrawType,new ExtendedData());
+                return extendedInfo[DrawType];
+            }
+        }
+        public Object GetExtendedData(Type DrawType,Object Instance,Func<Object,Object> BuildDataInstance=null)
+        {
+            ExtendedData data = GetExtendedData(DrawType);
+            var result = data.GetPerElementData(Instance, BuildDataInstance);
+            return result;
+        }
+       //public ExtendedData extendedInfo = new ExtendedData();
     }
     public class ExtendedData
     {

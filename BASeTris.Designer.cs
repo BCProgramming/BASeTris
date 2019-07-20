@@ -57,7 +57,7 @@
             this.picTetrisField.BackColor = System.Drawing.Color.White;
             this.picTetrisField.Location = new System.Drawing.Point(4, 39);
             this.picTetrisField.Name = "picTetrisField";
-            this.picTetrisField.Size = new System.Drawing.Size(332, 641);
+            this.picTetrisField.Size = new System.Drawing.Size(312, 641);
             this.picTetrisField.TabIndex = 0;
             this.picTetrisField.TabStop = false;
             this.picTetrisField.Click += new System.EventHandler(this.picTetrisField_Click);
@@ -70,7 +70,7 @@
             this.picStatistics.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.picStatistics.BackColor = System.Drawing.Color.Black;
-            this.picStatistics.Location = new System.Drawing.Point(342, 39);
+            this.picStatistics.Location = new System.Drawing.Point(322, 39);
             this.picStatistics.Name = "picStatistics";
             this.picStatistics.Size = new System.Drawing.Size(280, 644);
             this.picStatistics.TabIndex = 1;
@@ -86,7 +86,7 @@
             this.controlToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(625, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(605, 28);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -176,7 +176,7 @@
             this.picFullSize.BackColor = System.Drawing.Color.White;
             this.picFullSize.Location = new System.Drawing.Point(4, 39);
             this.picFullSize.Name = "picFullSize";
-            this.picFullSize.Size = new System.Drawing.Size(618, 644);
+            this.picFullSize.Size = new System.Drawing.Size(598, 644);
             this.picFullSize.TabIndex = 3;
             this.picFullSize.TabStop = false;
             this.picFullSize.Visible = false;
@@ -187,7 +187,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(625, 687);
+            this.ClientSize = new System.Drawing.Size(605, 687);
             this.Controls.Add(this.picStatistics);
             this.Controls.Add(this.picTetrisField);
             this.Controls.Add(this.menuStrip1);

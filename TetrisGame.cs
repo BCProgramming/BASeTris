@@ -140,13 +140,13 @@ namespace BASeTris
         }
         public static void DrawTextSK(SKCanvas Target,String pText,SKPoint Position, SKTypeface typeface,SKColor Color, float DesiredSize,double ScaleFactor)
         {
-            var rBytes = UTF8Encoding.Default.GetBytes("testing".ToCharArray());
+            var rBytes = UTF8Encoding.Default.GetBytes(pText.ToCharArray());
             using (SKPaint skp = new SKPaint())
             {
                 skp.Color = Color;
-                skp.ColorFilter = SKColorFilter.CreateBlendMode(
+                /*skp.ColorFilter = SKColorFilter.CreateBlendMode(
                     SkiaSharp.Views.Desktop.Extensions.ToSKColor(
-                    System.Drawing.Color.FromArgb(255, 255, 0, 0)),SKBlendMode.Screen);
+                    System.Drawing.Color.FromArgb(255, 255, 0, 0)),SKBlendMode.Screen);*/
                 skp.TextSize = (float)(DesiredSize * ScaleFactor);
                 skp.Typeface = typeface;
                 skp.FilterQuality = SKFilterQuality.High;
@@ -163,7 +163,7 @@ namespace BASeTris
         {
             return new Font(RetroFont, (float) (desiredSize * ScaleFactor), desiredStyle, GUnit);
         }
-
+        
         public static FontFamily GetMonospaceFont()
         {
             return RetroFont;

@@ -28,6 +28,7 @@ using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
+using SkiaSharp.Views.Desktop;
 using XInput.Wrapper;
 
 namespace BASeTris
@@ -104,10 +105,19 @@ namespace BASeTris
 
         public void SetDisplayMode(GameState.DisplayMode pMode)
         {
-            if (picFullSize.Visible == (pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
-            picFullSize.Visible = pMode == GameState.DisplayMode.Full;
-            picTetrisField.Visible = pMode == GameState.DisplayMode.Partitioned;
-            picStatistics.Visible = pMode == GameState.DisplayMode.Partitioned;
+            if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
+            {
+                skFullSize.Visible = false;
+                if (picFullSize.Visible == (pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
+                picFullSize.Visible = pMode == GameState.DisplayMode.Full;
+                picTetrisField.Visible = pMode == GameState.DisplayMode.Partitioned;
+                picStatistics.Visible = pMode == GameState.DisplayMode.Partitioned;
+            }
+            else
+            {
+                picFullSize.Visible = picTetrisField.Visible = picStatistics.Visible = false;
+                skFullSize.Visible = true;
+            }
         }
 
         private double current_factor = 1;
@@ -133,6 +143,8 @@ namespace BASeTris
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
+            PrepareSkia(); //add the Skia Controls.
             repeatHandler = new DASRepeatHandler
             ((k) =>
             {
@@ -313,17 +325,28 @@ namespace BASeTris
                 Invoke
                 ((MethodInvoker) (() =>
                 {
-                    if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                    if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
                     {
-                        picTetrisField.Invalidate();
-                        picTetrisField.Refresh();
-                        picStatistics.Invalidate();
-                        picStatistics.Refresh();
+                        if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                        {
+
+                            picTetrisField.Invalidate();
+                            picTetrisField.Refresh();
+                            picStatistics.Invalidate();
+                            picStatistics.Refresh();
+                        }
+                        else if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                        {
+                            picFullSize.Invalidate();
+                            picFullSize.Refresh();
+                        }
                     }
-                    else if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                    else if(ActiveRenderMode ==RendererMode.Renderer_SkiaSharp)
                     {
-                        picFullSize.Invalidate();
-                        picFullSize.Refresh();
+                        if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                        {
+                            skFullSize.Invalidate();
+                        }
                     }
                 }));
 
@@ -346,8 +369,77 @@ namespace BASeTris
                 _Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
             }
         }
-        
-        
+
+
+        private void SkFullSize_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
+        {
+            if (_Game == null) return;
+            if(CurrentState.SupportedDisplayMode==GameState.DisplayMode.Full)
+            {
+                e.Surface.Canvas.Clear();
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        staterender.Render(this, e.Surface.Canvas, _Game.CurrentState,
+                            new GameStateDrawParameters(new RectangleF(0,0,e.Info.Width,e.Info.Height)));
+                        return;
+                    }
+                }
+            }
+            else if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+            {
+                //SKControls mess up with multiple, so we need to basically draw the stats as well as the main display onto the same thing.
+                //we will paint both to a separate canvas, then merge them together.
+                GetHorizontalSizeData(skFullSize.Height,skFullSize.Width,out float FieldWidth,out float StatWidth);
+                if(skTetrisField==null) ResetSK();
+                skTetrisField.Clear();
+                skStats.Clear();
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        staterender.Render(this, skTetrisField, _Game.CurrentState,
+                            new GameStateDrawParameters(new RectangleF(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
+                        staterender.RenderStats(this,skStats,_Game.CurrentState, new GameStateDrawParameters(new RectangleF(0, 0, skStatsBmp.Width, e.Info.Height)));
+
+                    }
+                }
+
+                e.Surface.Canvas.DrawBitmap(skTetrisFieldBmp,0,0);
+                e.Surface.Canvas.DrawBitmap(skStatsBmp,skFullSize.Width-StatWidth,0);
+
+                //with this sizing information we can paint the two canvases.
+
+
+            }
+        }
+        private void SKFieldPaint(SKCanvas Target, SKRect Bounds)
+        {
+            if (_Game == null) return;
+            var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+            if(renderer!=null)
+            {
+                if(renderer is IStateRenderingHandler staterender)
+                {
+                    staterender.Render(this, Target, _Game.CurrentState, new GameStateDrawParameters(new RectangleF(Bounds.Left, Bounds.Top, Bounds.Width, Bounds.Height)));
+                }
+            }
+        }
+        private void SKStatsPaint(SKCanvas Target,SKRect Bounds)
+        {
+            if (_Game == null) return;
+            var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+            if (renderer != null)
+            {
+                if (renderer is IStateRenderingHandler staterender)
+                {
+                    staterender.RenderStats(this, Target, _Game.CurrentState, new GameStateDrawParameters(new RectangleF(Bounds.Left, Bounds.Top, Bounds.Width, Bounds.Height)));
+                }
+            }
+        }
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
             /*e.Graphics.DrawImage(SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaBitmap), Point.Empty);
@@ -374,6 +466,70 @@ namespace BASeTris
             }
             //if the above doesn't go through....
             _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
+            
+        }
+       
+        private void SkTetrisField_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
+        {
+            if (_Game == null) return;
+            if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+            {
+                e.Surface.Canvas.Clear();
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        staterender.Render(this, e.Surface.Canvas, _Game.CurrentState,
+                            new GameStateDrawParameters(new RectangleF(0, 0, e.Info.Width, e.Info.Height)));
+                        return;
+                    }
+                }
+            }
+        }
+
+
+        private void picStatistics_Paint(object sender, PaintEventArgs e)
+        {
+            if (CurrentState != null)
+            {
+                
+                if (picStatistics.Visible == false) return;
+                e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+
+                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        staterender.RenderStats(this, e.Graphics, _Game.CurrentState,
+                            new GameStateDrawParameters(picStatistics.ClientRectangle));
+                        return;
+                    }
+                }
+
+            }
+        }
+
+        private void SkStats_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
+        {
+            if (_Game == null) return;
+            if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+            {
+                e.Surface.Canvas.Clear();
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        staterender.RenderStats(this, e.Surface.Canvas, _Game.CurrentState,
+                            new GameStateDrawParameters(new RectangleF(0, 0, e.Info.Width, e.Info.Height)));
+                        return;
+                    }
+                }
+            }
         }
 
         private void picTetrisField_Resize(object sender, EventArgs e)
@@ -493,30 +649,67 @@ namespace BASeTris
             StartGame();
         }
 
-        private void picStatistics_Paint(object sender, PaintEventArgs e)
+     
+        public enum RendererMode
         {
-            if (CurrentState != null)
-            {
-                if (picStatistics.Visible == false) return;
-                e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
-                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+            Renderer_GDIPlus,
+            Renderer_SkiaSharp
+        }
+        public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
+        SKControl skFullSize;
+        SKBitmap skTetrisFieldBmp;
+        SKCanvas skTetrisField;
+        SKCanvas skStats;
+        SKBitmap skStatsBmp;
+        //SKControl skTetrisField;
+        //SKControl skStats;
+        private void PrepareSkia()
+        {
+            skFullSize = new SKControl();
+            skFullSize.Location = picFullSize.Location;
+            skFullSize.Size = picFullSize.Size;
+//            skTetrisField.Location = picTetrisField.Location;
+//            skTetrisField.Size = picTetrisField.Size;
+//            skStats.Location = picStatistics.Location;
+//            skStats.Size = picStatistics.Size;
+            skFullSize.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
+//            skTetrisField.Anchor = picTetrisField.Anchor;
+//            skStats.Anchor = picStatistics.Anchor;
+            Controls.Add(skFullSize);
+//            Controls.Add(skTetrisField);
+//            Controls.Add(skStats);
 
-                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                if (renderer != null)
-                {
-                    if (renderer is IStateRenderingHandler staterender)
-                    {
-                        staterender.RenderStats(this, e.Graphics, _Game.CurrentState,
-                            new GameStateDrawParameters(picStatistics.ClientRectangle));
-                        return;
-                    }
-                }
-
-                ///CurrentState.DrawStats(this, e.Graphics, picStatistics.ClientRectangle);
-            }
+            //paint routine handlers for Skia.
+            skFullSize.PaintSurface += SkFullSize_PaintSurface;
+            skFullSize.Resize += SkFullSize_Resize;
+            //skTetrisField.PaintSurface += SkTetrisField_PaintSurface;
+            //skStats.PaintSurface += SkStats_PaintSurface;
+            
         }
 
+        private void SkFullSize_Resize(object sender, EventArgs e)
+        {
+
+            ResetSK();
+                //SKCanvas skTetrisField;
+                //SKCanvas skStats;
+            
+
+        }
+        private void ResetSK()
+        {
+            GetHorizontalSizeData(skFullSize.Height, skFullSize.Width, out float FieldWidth, out float StatWidth);
+
+            SKBitmap Field = new SKBitmap((int)FieldWidth, skFullSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+            SKBitmap Stats = new SKBitmap((int)StatWidth, skFullSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+         
+            skTetrisField = new SKCanvas(Field);
+      
+            skStats = new SKCanvas(Stats);
+           
+            skTetrisFieldBmp = Field;
+            skStatsBmp = Stats;
+        }
         private void BASeTris_KeyUp(object sender, KeyEventArgs e)
         {
             Debug.Print("Button released:" + e.KeyCode);
@@ -554,7 +747,11 @@ namespace BASeTris
         private void BASeTris_ResizeEnd(object sender, EventArgs e)
         {
         }
-
+        private void GetHorizontalSizeData(float WindowHeight,float WindowWidth,out float FieldSize,out float StatSize)
+        {
+            FieldSize = WindowHeight * (332f / 641f);
+            StatSize = WindowWidth - FieldSize;
+        }
         private void BASeTris_SizeChanged(object sender, EventArgs e)
         {
             picTetrisField.Width = (int) (picTetrisField.Height * (332f / 641f));

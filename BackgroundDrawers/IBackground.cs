@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using BASeTris.AssetManager;
 using BASeTris.Rendering;
 using BASeTris.BackgroundDrawers;
+using SkiaSharp;
 
 namespace BASeTris.BackgroundDrawers
 {
@@ -19,6 +20,14 @@ namespace BASeTris.BackgroundDrawers
     public abstract class BackgroundDrawData
     {
 
+    }
+    public class SkiaBackgroundDrawData :BackgroundDrawData
+    {
+        public SKRect Bounds;
+        public SkiaBackgroundDrawData(SKRect pBounds)
+        {
+            Bounds = pBounds;
+        }
     }
     public class GDIBackgroundDrawData : BackgroundDrawData
     {
@@ -61,6 +70,57 @@ namespace BASeTris.BackgroundDrawers
     {
         void FrameProc(IStateOwner pState);
     }
+    public class StandardImageBackgroundDrawSkiaCapsule : BackgroundDrawData
+    {
+
+        public SKImage _BackgroundImage = null;
+        public SKImage BackgroundImage
+        {
+            get { return _BackgroundImage; }
+           
+        }
+
+        public SKPoint CurrOrigin { get; set; } = SKPoint.Empty;
+        public float CurrAngle { get; set; } = 0;
+        public float AngleSpeed { get; set; } = 0;
+        public SKPoint Movement { get; set; } = new SKPoint(0, 0);
+        public SKColorFilter theFilter = null;
+        public SKPaint BackgroundBrush = null;
+        public SKImageFilter PrimaryFilter = null;
+
+        public void ResetState(SKRect DrawBounds)
+        {
+            if (_BackgroundImage == null) return;
+            SKImageFilter PreTileFilter = null;
+            if (theFilter != null)
+            {
+                SKImageFilter si = SKImageFilter.CreateColorFilter(theFilter);
+                Rectangle AttribRect = new Rectangle(0, 0, _BackgroundImage.Width, _BackgroundImage.Height);
+                PreTileFilter = SKImageFilter.CreateBlendMode(SKBlendMode.DstIn, SKImageFilter.CreateImage(_BackgroundImage), si);
+                //BackgroundBrush = new SKPaint
+                //{
+                //    ImageFilter = SKImageFilter.CreateBlendMode(SKBlendMode.DstIn, SKImageFilter.CreateImage(_BackgroundImage), si)
+                //};
+
+            }
+            else
+            {
+                PreTileFilter = SKImageFilter.CreateImage(_BackgroundImage);
+                //BackgroundBrush = new SKPaint()
+                //{
+                //    ImageFilter = SKImageFilter.CreateImage(_BackgroundImage)
+                //};
+            }
+            SKRect Bound = new SKRect(0,0,_BackgroundImage.Width,_BackgroundImage.Height);
+            PrimaryFilter = SKImageFilter.CreateTile(Bound, new SKRect(-4096,-4096,4096,4096), PreTileFilter);
+            BackgroundBrush = new SKPaint()
+            {
+                ImageFilter = PrimaryFilter
+            };
+            //BackgroundBrush.WrapMode = WrapMode.Tile;
+        }
+    }
+
     public class StandardImageBackgroundDrawGDICapsule : BackgroundDrawData
     {
         
@@ -99,19 +159,39 @@ namespace BASeTris.BackgroundDrawers
             BackgroundBrush.WrapMode = WrapMode.Tile;
         }
     }
-    public class StandardImageBackground : Background<StandardImageBackgroundDrawGDICapsule> 
+    public class StandardImageBackgroundSkia : Background<StandardImageBackgroundDrawSkiaCapsule>
+    {
+        public override void FrameProc(IStateOwner pOwner)
+        {
+            StandardImageBackgroundDrawSkiaCapsule dd = Data;
+            if (dd == null) return;
+            if (dd.BackgroundBrush == null)
+            {
+                dd.ResetState(new SKRect(0, 0, pOwner.GameArea.Width, pOwner.GameArea.Height));
+            }
+            if (dd.BackgroundBrush == null) return;
+
+            if (!dd.Movement.IsEmpty)
+            {
+                
+                dd.CurrOrigin = new SKPoint((dd.CurrOrigin.X + dd.Movement.X) % dd._BackgroundImage.Width, (dd.CurrOrigin.Y + dd.Movement.Y) % dd._BackgroundImage.Height);
+            }
+
+            if (dd.AngleSpeed > 0) dd.CurrAngle += dd.AngleSpeed;
+            dd.BackgroundBrush.ImageFilter = SKImageFilter.CreateOffset(dd.CurrOrigin.X,dd.CurrOrigin.Y,dd.PrimaryFilter);
+            
+            //might need to do something weird for tiling.
+        }
+    }
+  
+    public class StandardImageBackgroundGDI : Background<StandardImageBackgroundDrawGDICapsule> 
     {
         
-        public StandardImageBackgroundDrawGDICapsule Capsule { get
-            {
-                return Data;
-            }
-            set { Data = value; }
-            }
+      
 
         public override void FrameProc(IStateOwner pOwner)
         {
-            StandardImageBackgroundDrawGDICapsule dd = Capsule;
+            StandardImageBackgroundDrawGDICapsule dd = Data;
             if (dd == null) return;
             if(dd.BackgroundBrush==null)
             {
@@ -130,25 +210,25 @@ namespace BASeTris.BackgroundDrawers
             dd.BackgroundBrush.RotateTransform(dd.CurrAngle);
         }
 
-        public StandardImageBackground(StandardImageBackgroundDrawGDICapsule sbdd)
+        public StandardImageBackgroundGDI(StandardImageBackgroundDrawGDICapsule sbdd)
         {
             Data = sbdd;
         }
-        public static StandardImageBackground GetStandardBackgroundDrawer(float fade=0.4f)
+        public static StandardImageBackgroundGDI GetStandardBackgroundDrawer(float fade=0.4f)
         {
             ImageAttributes useBGAttributes = new ImageAttributes();
             useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(fade));
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            var sib = new StandardImageBackground(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = new PointF((float)xpoint, (float)ypoint) });
+            var sib = new StandardImageBackgroundGDI(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = new PointF((float)xpoint, (float)ypoint) });
             
             return sib;
         }
-        public static StandardImageBackground GetStandardBackgroundDrawer(PointF Movement,float fade = 0.4f)
+        public static StandardImageBackgroundGDI GetStandardBackgroundDrawer(PointF Movement,float fade = 0.4f)
         {
             ImageAttributes useBGAttributes = new ImageAttributes();
             useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(fade));
-            var sib = new StandardImageBackground(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = Movement });
+            var sib = new StandardImageBackgroundGDI(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = Movement });
 
             return sib;
         }

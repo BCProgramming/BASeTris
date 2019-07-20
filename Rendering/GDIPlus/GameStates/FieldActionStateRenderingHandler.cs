@@ -8,7 +8,10 @@ namespace BASeTris.Rendering.GDIPlus
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, FieldActionGameState Source, GameStateDrawParameters Element)
         {
             if (Source._BaseState != null)
-                RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,Source._BaseState,Element);
+            {
+                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source._BaseState, Element);
+                Source.DrawForegroundEffect(pOwner,pRenderTarget,Element.Bounds);
+            }
         }
 
         public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, FieldActionGameState Source, GameStateDrawParameters Element)

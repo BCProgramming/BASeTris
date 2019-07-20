@@ -34,7 +34,7 @@ namespace BASeTris.GameStates
             Owner = pOwner;
             AvailableChars = PossibleChars;
             NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));
-            var sib = StandardImageBackground.GetStandardBackgroundDrawer();
+            var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
            
             _BG = sib;
         }

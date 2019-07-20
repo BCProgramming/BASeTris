@@ -44,7 +44,7 @@ namespace BASeTris.GameStates.Menu
             _Activated = false;
             return MenuEventResultConstants.Handled;
         }
-        public override void Draw(IStateOwner pOwner,Graphics Target, Rectangle Bounds, StateMenuItemState DrawState)
+        public override void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState)
         {
             //draw < and > just outside the bounds using our font.
             Font useFont = GetScaledFont(pOwner);

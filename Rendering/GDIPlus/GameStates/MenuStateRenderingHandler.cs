@@ -38,7 +38,8 @@ namespace BASeTris.Rendering.GDIPlus
                 var drawitem = Source.MenuElements[menuitemindex];
                 Rectangle TargetBounds = new Rectangle((int)(Bounds.Width / 2 - ItemSize.Width / 2) + Source.MainXOffset, (int)CurrentY, (int)(ItemSize.Width), (int)(ItemSize.Height));
                 MenuStateMenuItem.StateMenuItemState useState = menuitemindex == Source.SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
-                drawitem.Draw(pOwner, g, TargetBounds, useState);
+                RenderingProvider.Static.DrawElement(pOwner,g,drawitem,new MenuStateMenuItemDrawData(TargetBounds,useState) );
+                //drawitem.Draw(pOwner, g, TargetBounds, useState);
                 CurrentY += ItemSize.Height + 5;
             }
         }
