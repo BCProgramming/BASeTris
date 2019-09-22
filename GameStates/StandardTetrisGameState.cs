@@ -23,6 +23,7 @@ using BASeTris.Replay;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
+using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
@@ -188,7 +189,7 @@ namespace BASeTris.GameStates
                     }
                 }
 
-                PlayField.HasChanged = rowsfound > 0;
+                PlayField.HasChanged |= rowsfound > 0;
 
                 if (rowsfound > 0)
                 {
@@ -265,6 +266,27 @@ namespace BASeTris.GameStates
         public bool f_RedrawTetrominoImages = false;
         public bool f_RedrawStatusBitmap = false;
         public Dictionary<System.Type, Image> TetrominoImages { protected set; get; } = null;
+
+        private Dictionary<System.Type, SKBitmap> TetrominoSKBitmaps = null;
+        public SKBitmap GetTetrominoSKBitmap(System.Type Source)
+        {
+            if (TetrominoSKBitmaps == null) TetrominoSKBitmaps = new Dictionary<Type, SKBitmap>();
+            if(!TetrominoSKBitmaps.ContainsKey(Source))
+            {
+                if(TetrominoImages.ContainsKey(Source))
+                    TetrominoSKBitmaps.Add(Source,SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(TetrominoImages[Source])));
+
+            }
+
+            return TetrominoSKBitmaps[Source];
+
+        }
+
+        public bool HasTetrominoSKBitmaps() => TetrominoSKBitmaps != null;
+        public void SetTetrominoSKBitmaps(Dictionary<Type,SKBitmap> bitmaps)
+        {
+            TetrominoSKBitmaps = bitmaps;
+        }
         public bool HasTetrominoImages() => TetrominoImages != null;
         public Image GetTetronimoImage(System.Type TetrominoType)
         {

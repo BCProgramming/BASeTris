@@ -10,11 +10,13 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using BASeTris.GameStates;
 using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
+using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
 using SkiaSharp;
 
@@ -153,9 +155,31 @@ namespace BASeTris
                     TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this,new StandardSettings());
                     RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                     //bge.Block.DrawBlock(tbd);
+                    
                 }
             }
 
+            return BuiltRepresentation;
+        }
+        //SkiaSharp implementation of GetImage.
+        public SKBitmap GetImageSK(SKSize BlockSize)
+        {
+            RecalcExtents();
+            Size BitmapSize = new Size((int)BlockSize.Width * (_GroupExtents.Width + 1), (int)BlockSize.Height * (_GroupExtents.Height + 1));
+            SKImageInfo info = new SKImageInfo(BitmapSize.Width,BitmapSize.Height,SKColorType.Rgba8888,SKAlphaType.Premul);
+            SKBitmap BuiltRepresentation = new SKBitmap(info,SKBitmapAllocFlags.ZeroPixels);
+            using (SKCanvas DrawRep = new SKCanvas(BuiltRepresentation))
+            {
+                foreach(NominoElement bge in this)
+                {
+                    //RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
+                    var Left = BlockSize.Width * (bge.X - _GroupExtents.X);
+                    var Top = BlockSize.Height * (bge.Y - _GroupExtents.Y);
+                    SKRect DrawPos = new SKRect(Left, Top, Left + BlockSize.Width, Top + BlockSize.Height);
+                    TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(DrawRep,DrawPos,this,new StandardSettings());
+                    RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
+                }
+            }
             return BuiltRepresentation;
         }
 

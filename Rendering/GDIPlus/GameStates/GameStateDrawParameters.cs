@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Text;
 using System.Threading.Tasks;
+using SkiaSharp;
 
 namespace BASeTris.Rendering.GDIPlus
 {
@@ -15,4 +16,12 @@ namespace BASeTris.Rendering.GDIPlus
             Bounds = pBounds;
         }
     }
+    public class GameStateSkiaDrawParameters
+    {
+        public SKRect Bounds;
+        public GameStateSkiaDrawParameters(SKRect pBounds)
+        {
+            Bounds = pBounds;
+        }
+}
 }

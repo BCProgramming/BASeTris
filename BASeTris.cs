@@ -383,7 +383,7 @@ namespace BASeTris
                     if (renderer is IStateRenderingHandler staterender)
                     {
                         staterender.Render(this, e.Surface.Canvas, _Game.CurrentState,
-                            new GameStateDrawParameters(new RectangleF(0,0,e.Info.Width,e.Info.Height)));
+                            new GameStateSkiaDrawParameters(new SKRect(0,0,e.Info.Width,e.Info.Height)));
                         return;
                     }
                 }
@@ -396,20 +396,26 @@ namespace BASeTris
                 if(skTetrisField==null) ResetSK();
                 skTetrisField.Clear();
                 skStats.Clear();
+                //note: this approach is too slow. What it needs to do is call both renderers but have it paint directly to the target surface, with the bounds
+                //assigned appropriately for each call. Painting the two SKCanvas objects to the main one is too slow, it seems.
                 var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
                 if (renderer != null)
                 {
                     if (renderer is IStateRenderingHandler staterender)
                     {
-                        staterender.Render(this, skTetrisField, _Game.CurrentState,
-                            new GameStateDrawParameters(new RectangleF(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
-                        staterender.RenderStats(this,skStats,_Game.CurrentState, new GameStateDrawParameters(new RectangleF(0, 0, skStatsBmp.Width, e.Info.Height)));
+                        staterender.Render(this,e.Surface.Canvas,_Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, e.Info.Height)));
+                        //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
+                        
+                        staterender.RenderStats(this, e.Surface.Canvas, _Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth+StatWidth, e.Info.Height)));
+                        //staterender.Render(this, skTetrisField, _Game.CurrentState,
+                        //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
+                        //staterender.RenderStats(this,skStats,_Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
 
                     }
                 }
 
-                e.Surface.Canvas.DrawBitmap(skTetrisFieldBmp,0,0);
-                e.Surface.Canvas.DrawBitmap(skStatsBmp,skFullSize.Width-StatWidth,0);
+                //e.Surface.Canvas.DrawBitmap(skTetrisFieldBmp,0,0);
+                //e.Surface.Canvas.DrawBitmap(skStatsBmp,skFullSize.Width-StatWidth,0);
 
                 //with this sizing information we can paint the two canvases.
 
@@ -655,6 +661,7 @@ namespace BASeTris
             Renderer_GDIPlus,
             Renderer_SkiaSharp
         }
+        //public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
         public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
         SKControl skFullSize;
         SKBitmap skTetrisFieldBmp;
@@ -676,9 +683,9 @@ namespace BASeTris
 //            skTetrisField.Anchor = picTetrisField.Anchor;
 //            skStats.Anchor = picStatistics.Anchor;
             Controls.Add(skFullSize);
-//            Controls.Add(skTetrisField);
-//            Controls.Add(skStats);
-
+            //            Controls.Add(skTetrisField);
+            //            Controls.Add(skStats);
+            
             //paint routine handlers for Skia.
             skFullSize.PaintSurface += SkFullSize_PaintSurface;
             skFullSize.Resize += SkFullSize_Resize;

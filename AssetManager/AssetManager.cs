@@ -34,6 +34,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using Ionic.Zip;
 using Ionic.Zlib;
+using SkiaSharp;
 
 
 namespace BASeTris.AssetManager
@@ -1375,7 +1376,11 @@ namespace BASeTris.AssetManager
                     //ProcessSoundFile(ref usefilename);
                     iSoundSourceObject ss = mDriver.LoadSound(usefilename);
                     //use loopfile.Fullname for the key.
-                    mSoundSources.Add(Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper(), ss);
+                    String usekey = Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper();
+                    if (!mSoundSources.ContainsKey(usekey))
+                    {
+                        mSoundSources.Add(usekey, ss);
+                    }
                 }
             }
         }
@@ -1508,7 +1513,19 @@ namespace BASeTris.AssetManager
         private Dictionary<String, Image> loadedimages = new Dictionary<String, Image>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<String, SKBitmap> SkiaImages = new Dictionary<String, SKBitmap>(StringComparer.OrdinalIgnoreCase);
+        public SKBitmap GetSKBitmap(String man_key)
+        {
+            if(!SkiaImages.ContainsKey(man_key))
+            {
+                Image findkey = this[man_key];
+                SkiaImages.Add(man_key,SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
+            }
+            return SkiaImages[man_key];
+                
 
+            
+        }
         public Image this[String man_key,float reductionFactor=1]
         {
             get
@@ -2174,7 +2191,52 @@ namespace BASeTris.AssetManager
             return value;
         }
     }
+    public static class SKColorMatrices
+    {
+        public static SKColorFilter GetGrayScaleFilter()
+        {
+            return SKColorFilter.CreateColorMatrix(new float[]
+            {
+                0.21f, 0.72f, 0.07f, 0, 0,
+                0.21f, 0.72f, 0.07f, 0, 0,
+                0.21f, 0.72f, 0.07f, 0, 0,
+                0,     0,     0,     1, 0
+            });
+        }
+        public static SKColorFilter GetFader(float Alpha)
+        {
+            return SKColorFilter.CreateColorMatrix(new float[]
+            {
+                1f, 0f, 0f, 0, 0,
+                0f, 01f, 0f, 0, 0,
+                0f, 0f, 1f, 0, 0,
+                0,     0,     0,     Alpha, 0
+            });
+        }
+        public static SKColorFilter GetColourizer(float red, float green, float blue, float alpha)
+            {
 
+                float[] buildmat = new float[]
+                {
+                    red, 0f, 0f, 0, 0,
+                    0f, green, 0, 0, 0,
+                    0f, 0f, blue, 0, 0,
+                    0,     0,     0,     alpha, 0
+                };
+            return SKColorFilter.CreateColorMatrix(buildmat);
+        }
+        public static SKColorFilter GetBlackener()
+        {
+            float[] buildmat = new float[]
+            {
+                0, 0f, 0f, 0, 0,
+                0f, 0, 0, 0, 0,
+                0f, 0f, 0, 0, 0,
+                0,     0,     0,     1, 0
+            };
+            return SKColorFilter.CreateColorMatrix(buildmat);
+        }
+    }
 
     public static class ColorMatrices
     {
@@ -2229,6 +2291,7 @@ namespace BASeTris.AssetManager
                     new float[] {0, 0, 0, 1, 0},
                     new float[] {0, 0, 0, 0, 1}
                 });
+            
         }
 
         public static float[][] GetIdentity()

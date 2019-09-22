@@ -57,11 +57,16 @@ namespace BASeTris.Rendering
 
                 });
                 handlerLookup.Add(typeof(SkiaSharp.SKCanvas), new Dictionary<Type, IRenderingHandler>()
-                { { typeof(TetrisBlock),new TetrisBlockSkiaRenderingHandler()},
+                {
+                    { typeof(TetrisBlock),new TetrisBlockSkiaRenderingHandler()},
                     { typeof(ImageBlock),new TetrisImageBlockSkiaRenderingHandler()},
                     { typeof(StandardColouredBlock),new TetrisStandardColouredBlockSkiaRenderingHandler() },
+                    {typeof(FieldActionGameState),new FieldActionStateSkiaRenderingHandler() },
+                    {typeof(FieldLineActionGameState),new FieldActionStateSkiaRenderingHandler() },
                     {typeof(StandardTetrisGameState),new StandardTetrisGameStateSkiaRenderingHandler() },
-                    {typeof(StandardImageBackgroundSkia),new StandardImageBackgroundSkiaRenderingHandler() }
+                    {typeof(StandardImageBackgroundSkia),new StandardImageBackgroundSkiaRenderingHandler() },
+                    {typeof(TetrisField),new TetrisFieldRenderingHandlerSkia() }
+                    
                 });
 
 

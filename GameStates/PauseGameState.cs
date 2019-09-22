@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
+using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
@@ -14,7 +15,7 @@ namespace BASeTris.GameStates
     {
         public GameState PausedState = null;
         int NumFallingItems = 65;
-        internal List<PauseFallImage> FallImages = null;
+        internal List<PauseFallImageGDIPlus> FallImages = null;
         Random rgen = new Random();
         public override DisplayMode SupportedDisplayMode { get{ return DisplayMode.Partitioned; } }
 
@@ -28,10 +29,10 @@ namespace BASeTris.GameStates
 
                 Image[] availableImages = std.GetTetronimoImages();
                 var Areause = pOwner.GameArea;
-                FallImages = new List<PauseFallImage>();
+                FallImages = new List<PauseFallImageGDIPlus>();
                 for (int i = 0; i < NumFallingItems; i++)
                 {
-                    PauseFallImage pfi = new PauseFallImage();
+                    PauseFallImageGDIPlus pfi = new PauseFallImageGDIPlus();
                     pfi.OurImage = TetrisGame.Choose(availableImages);
                     pfi.XSpeed = (float) (rgen.NextDouble() * 10) - 5;
                     pfi.YSpeed = (float) (rgen.NextDouble() * 10) - 5;
@@ -126,7 +127,7 @@ namespace BASeTris.GameStates
             playing2?.setVolume(1.0f);
         }
 
-        public class PauseFallImage
+        public abstract class PauseFallImageBase
         {
             public float Angle = 0;
             public float AngleSpeed = 3;
@@ -134,9 +135,31 @@ namespace BASeTris.GameStates
             public float YPosition;
             public float XSpeed;
             public float YSpeed;
-            public Image OurImage;
+            public object BaseImage;
+            public abstract void Proc(Object bound);
+            public abstract void Draw(Object g);
+        }
+        public abstract class PauseFallImageBase<BoundType,CanvasType,ImageType> : PauseFallImageBase
+        {
+            
+            public abstract void Proc(BoundType GArea);
+            public abstract void Draw(CanvasType g);
+            public override void Proc(Object bound)
+            {
+                this.Proc((BoundType)bound);
+            }
+            public override void Draw(Object g)
+            {
+                this.Proc((CanvasType)g);
+            }
+            public ImageType OurImage {  get { return (ImageType)BaseImage; } set { BaseImage = value; } }
+        }
 
-            public void Proc(Rectangle GArea)
+        public class PauseFallImageGDIPlus : PauseFallImageBase<Rectangle,Graphics,Image>
+        {
+
+
+            public override void Proc(Rectangle GArea)
             {
                 XPosition += XSpeed;
                 YPosition += YSpeed;
@@ -147,7 +170,7 @@ namespace BASeTris.GameStates
                 if (YPosition > GArea.Bottom + OurImage.Height) YPosition = GArea.Top - OurImage.Height;
             }
 
-            public void Draw(Graphics g)
+            public override void Draw(Graphics g)
             {
                 g.ResetTransform();
                 g.TranslateTransform((XPosition + ((float) OurImage.Width / 2)), (YPosition + ((float) OurImage.Height / 2)));
@@ -157,5 +180,10 @@ namespace BASeTris.GameStates
                 g.DrawImage(OurImage, new Rectangle((int) XPosition, (int) YPosition, OurImage.Width, OurImage.Height), 0f, 0f, OurImage.Width, OurImage.Height, GraphicsUnit.Pixel);
             }
         }
+
+       /* public class PauseFaillImageSkiaSharp : PauseFallImageBase<SKRect,Graphics,Image>
+        {
+
+        }*/
     }
 }

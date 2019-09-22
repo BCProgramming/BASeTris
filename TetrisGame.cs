@@ -502,55 +502,62 @@ namespace BASeTris
         {
             GameOwner?.SetDisplayMode(pMode);
         }
-
+        private static String _AppDataFolder = null;
         public static String AppDataFolder
         {
             get
             {
+                if (_AppDataFolder != null) return _AppDataFolder;
                 String DataFolder = "";
-
-                //check for commandline...
-                var allargs = System.Environment.GetCommandLineArgs().ToList();
-                int usefoundlocation = -1;
-                String joined = String.Join(" ", System.Environment.GetCommandLineArgs());
-
-                int hyphenfind = joined.IndexOf("-datafolder:", StringComparison.OrdinalIgnoreCase);
-                int slashfind = joined.IndexOf("/datafolder:", StringComparison.OrdinalIgnoreCase);
-                if (hyphenfind > -1) usefoundlocation = hyphenfind;
-                else if (slashfind > -1) usefoundlocation = slashfind;
-
-
-                if (usefoundlocation > -1)
+                try
                 {
-                    int firstchar = usefoundlocation + 12;
-                    int endchar = -1;
-                    //if the first character is a quote, find the next quote; increment firstchar to avoid capturing that quote later, as well.
+                    //check for commandline...
+                    var allargs = System.Environment.GetCommandLineArgs().ToList();
+                    int usefoundlocation = -1;
+                    String joined = String.Join(" ", System.Environment.GetCommandLineArgs());
 
-                    if (joined[firstchar] == '\'')
+                    int hyphenfind = joined.IndexOf("-datafolder:", StringComparison.OrdinalIgnoreCase);
+                    int slashfind = joined.IndexOf("/datafolder:", StringComparison.OrdinalIgnoreCase);
+                    if (hyphenfind > -1) usefoundlocation = hyphenfind;
+                    else if (slashfind > -1) usefoundlocation = slashfind;
+
+
+                    if (usefoundlocation > -1)
                     {
-                        endchar = joined.IndexOf('\'', firstchar + 1);
-                        firstchar++;
+                        int firstchar = usefoundlocation + 12;
+                        int endchar = -1;
+                        //if the first character is a quote, find the next quote; increment firstchar to avoid capturing that quote later, as well.
+
+                        if (joined[firstchar] == '\'')
+                        {
+                            endchar = joined.IndexOf('\'', firstchar + 1);
+                            firstchar++;
+                        }
+                        else
+                        {
+                            endchar = joined.IndexOf(' ', firstchar + 1);
+                            if (endchar == -1) endchar = joined.Length;
+                        }
+
+                        DataFolder = joined.Substring(firstchar, endchar - firstchar);
+                        return DataFolder;
                     }
                     else
                     {
-                        endchar = joined.IndexOf(' ', firstchar + 1);
-                        if (endchar == -1) endchar = joined.Length;
-                    }
+                        if (!PortableMode)
+                        {
+                            DataFolder = Path.Combine
+                            (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                "BASeTris");
+                        }
 
-                    DataFolder = joined.Substring(firstchar, endchar - firstchar);
-                    return DataFolder;
+
+                        return DataFolder;
+                    }
                 }
-                else
+                finally
                 {
-                    if (!PortableMode)
-                    {
-                        DataFolder = Path.Combine
-                        (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                            "BASeTris");
-                    }
-
-
-                    return DataFolder;
+                    _AppDataFolder = DataFolder;
                 }
             }
         }
@@ -566,7 +573,45 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
+        public static Dictionary<Type,SKBitmap> GetTetrominoBitmapsSK(SKRect Bounds,TetrominoTheme UseTheme,TetrisField PlayField=null,float ScaleFactor=1)
+        {
+            Dictionary<Type, SKBitmap> TetrominoImages = new Dictionary<Type, SKBitmap>();
+            float useSize = 18 * ScaleFactor;
+            SKSize useTetSize = new SKSize(useSize, useSize);
+            Tetromino_I TetI = new Tetromino_I();
+            Tetromino_J TetJ = new Tetromino_J();
+            Tetromino_L TetL = new Tetromino_L();
+            Tetromino_O TetO = new Tetromino_O();
+            Tetromino_S TetS = new Tetromino_S();
+            Tetromino_T TetT = new Tetromino_T();
+            Tetromino_Z TetZ = new Tetromino_Z();
 
+
+            UseTheme.ApplyTheme(TetI, PlayField);
+            UseTheme.ApplyTheme(TetJ, PlayField);
+            UseTheme.ApplyTheme(TetL, PlayField);
+            UseTheme.ApplyTheme(TetO, PlayField);
+            UseTheme.ApplyTheme(TetS, PlayField);
+            UseTheme.ApplyTheme(TetT, PlayField);
+            UseTheme.ApplyTheme(TetZ, PlayField);
+            SKBitmap Image_I = OutlineImageSK(TetI.GetImageSK(useTetSize));
+            SKBitmap Image_J = OutlineImageSK(TetJ.GetImageSK(useTetSize));
+            SKBitmap Image_L = OutlineImageSK(TetL.GetImageSK(useTetSize));
+            SKBitmap Image_O = OutlineImageSK(TetO.GetImageSK(useTetSize));
+            SKBitmap Image_S = OutlineImageSK(TetS.GetImageSK(useTetSize));
+            SKBitmap Image_T = OutlineImageSK(TetT.GetImageSK(useTetSize));
+            SKBitmap Image_Z = OutlineImageSK(TetZ.GetImageSK(useTetSize));
+
+
+            TetrominoImages.Add(typeof(Tetromino_I), Image_I);
+            TetrominoImages.Add(typeof(Tetromino_J), Image_J);
+            TetrominoImages.Add(typeof(Tetromino_L), Image_L);
+            TetrominoImages.Add(typeof(Tetromino_O), Image_O);
+            TetrominoImages.Add(typeof(Tetromino_S), Image_S);
+            TetrominoImages.Add(typeof(Tetromino_T), Image_T);
+            TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
+            return TetrominoImages;
+        }
         public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null,float ScaleFactor=1)
         {
             Dictionary<Type, Image> TetrominoImages = new Dictionary<Type, Image>();
@@ -627,7 +672,30 @@ namespace BASeTris
 
             return BuildImage;
         }
+        //SkiaSharp implementation of OutlineImage.
+        private static SKBitmap OutlineImageSK(SKBitmap Input)
+        {
+            int OutlineWidth = 3;
+            SKImageInfo skinfo = new SKImageInfo(Input.Width+(OutlineWidth*2),Input.Height+(OutlineWidth*2));
+            SKBitmap BuildImage = new SKBitmap(skinfo, SKBitmapAllocFlags.ZeroPixels);
+            using (SKCanvas useG = new SKCanvas(BuildImage))
+            {
+                //may need to use a Color Matrix like the GDI+ version.
 
+                SKPaint Blacken = new SKPaint();
+                Blacken.ColorFilter = SKColorMatrices.GetBlackener();
+                int offset = OutlineWidth/2;
+                foreach(SKPoint shadowblob in new SKPoint[] {new SKPoint(0,0),new SKPoint(0,offset*2),new SKPoint(offset*2,0),new SKPoint(offset*2,offset*2)})
+                {
+                    SKRect TargetPos = new SKRect(shadowblob.X,shadowblob.Y,Input.Width,Input.Height);
+
+                    useG.DrawBitmap(Input,new SKRect(TargetPos.Left,TargetPos.Top,TargetPos.Left+Input.Width,TargetPos.Top+Input.Height), Blacken);
+
+                }
+                useG.DrawBitmap(Input,new SKPoint(offset,offset));
+            }
+            return BuildImage;
+        }
         // Measure the characters in a string with
         // no more than 32 characters.
         private static List<RectangleF> MeasureCharacterSizeInternal(

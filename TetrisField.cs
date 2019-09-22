@@ -38,7 +38,7 @@ namespace BASeTris
         
         private TetrisBlock[][] FieldContents;
 
-
+     
         public GameFlags _GameFlags = GameFlags.Flags_None;
         public GameFlags Flags { get { return _GameFlags; } set { _GameFlags = value; }}
         public Dictionary<int, HotLine> HotLines = new Dictionary<int, HotLine>();
@@ -102,16 +102,17 @@ namespace BASeTris
         //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
         private List<Nomino> ActiveBlockGroups = new List<Nomino>();
 
+        public IList<Nomino> GetActiveBlockGroups() => ActiveBlockGroups;
         public int Level
         {
             get { return (int) LineCount / 10; }
         }
 
-        const int ROWCOUNT = 22;
-        const int COLCOUNT = 10;
-        const int VISIBLEROWS = 20;
+        public const int ROWCOUNT = 22;
+        public const int COLCOUNT = 10;
+        public const int VISIBLEROWS = 20;
 
-        public int HIDDENROWS
+        public static int HIDDENROWS
         {
             get { return ROWCOUNT - VISIBLEROWS; }
         }
@@ -191,28 +192,42 @@ namespace BASeTris
             HotLines.Add(3, new HotLine(Color.Purple, 5, 3));
             HotLines.Add(2, new HotLine(Color.Blue, 10, 2));
         }
-        public bool HasChanged = false;
+        private bool _HasChanged = false;
+
+        public bool HasChanged
+        {
+            get { return _HasChanged; }
+            set {
+                if(value==false)
+                {
+                    ;
+                }
+
+                _HasChanged = value; }
+        }
 
         public void AnimateFrame()
         {
-            for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
+            lock (this)
             {
-                var currRow = FieldContents[drawRow];
-                //for each Tetris Row...
-                for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
+                for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
                 {
-                    var TetBlock = currRow[drawCol];
-                    if (TetBlock != null)
+                    var currRow = FieldContents[drawRow];
+                    //for each Tetris Row...
+                    for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
                     {
-                        if (TetBlock.IsAnimated)
+                        var TetBlock = currRow[drawCol];
+                        if (TetBlock != null)
                         {
-                            TetBlock.AnimateFrame();
-                            HasChanged = true;
+                            if (TetBlock.IsAnimated)
+                            {
+                                TetBlock.AnimateFrame();
+                                HasChanged = true;
+                            }
                         }
                     }
                 }
             }
-
             foreach (var bg in ActiveBlockGroups)
             {
                 foreach (var iterateblock in bg)
@@ -229,23 +244,26 @@ namespace BASeTris
 
         public void SetGroupToField(Nomino bg)
         {
-            lock (ActiveBlockGroups)
+            lock (this)
             {
-                LastSetGroup = DateTime.Now;
-
-
-                Debug.Print("Setting Nomino to Field:" + bg.ToString());
-                foreach (var groupblock in bg)
+                lock (ActiveBlockGroups)
                 {
-                    int RowPos = groupblock.Y + bg.Y;
-                    int ColPos = groupblock.X + bg.X;
-                    if (FieldContents[RowPos][ColPos] == null)
-                        FieldContents[RowPos][ColPos] = groupblock.Block;
-                }
+                    LastSetGroup = DateTime.Now;
 
-                BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
-                if (ActiveBlockGroups.Contains(bg)) ActiveBlockGroups.Remove(bg);
-                HasChanged = true;
+
+                    Debug.Print("Setting Nomino to Field:" + bg.ToString());
+                    foreach (var groupblock in bg)
+                    {
+                        int RowPos = groupblock.Y + bg.Y;
+                        int ColPos = groupblock.X + bg.X;
+                        if (FieldContents[RowPos][ColPos] == null)
+                            FieldContents[RowPos][ColPos] = groupblock.Block;
+                    }
+
+                    BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
+                    if (ActiveBlockGroups.Contains(bg)) ActiveBlockGroups.Remove(bg);
+                    HasChanged = true;
+                }
             }
         }
 
@@ -367,23 +385,25 @@ namespace BASeTris
             //first how big is each block?
             float BlockWidth = Bounds.Width / COLCOUNT;
             float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
-            if (FieldBitmap == null || !LastFieldSave.Equals(Bounds) || HasChanged)
+            lock (this)
             {
-                Bitmap BuildField = new Bitmap((int) Bounds.Width, (int) Bounds.Height, PixelFormat.Format32bppPArgb);
-                using (Graphics gfield = Graphics.FromImage(BuildField))
+                if (FieldBitmap == null || !LastFieldSave.Equals(Bounds) || HasChanged)
                 {
-                    gfield.CompositingQuality = CompositingQuality.HighSpeed;
-                    gfield.SmoothingMode = SmoothingMode.HighSpeed;
-                    gfield.InterpolationMode = InterpolationMode.NearestNeighbor;
-                    gfield.Clear(Color.Transparent);
-                    DrawFieldContents(pState,gfield, Bounds);
-                    if (FieldBitmap != null) FieldBitmap.Dispose();
-                    FieldBitmap = BuildField;
+                    Bitmap BuildField = new Bitmap((int)Bounds.Width, (int)Bounds.Height, PixelFormat.Format32bppPArgb);
+                    using (Graphics gfield = Graphics.FromImage(BuildField))
+                    {
+                        gfield.CompositingQuality = CompositingQuality.HighSpeed;
+                        gfield.SmoothingMode = SmoothingMode.HighSpeed;
+                        gfield.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        gfield.Clear(Color.Transparent);
+                        DrawFieldContents(pState, gfield, Bounds);
+                        if (FieldBitmap != null) FieldBitmap.Dispose();
+                        FieldBitmap = BuildField;
+                    }
+
+                    HasChanged = false;
                 }
-
-                HasChanged = false;
             }
-
             g.DrawImageUnscaled(FieldBitmap, 0, 0);
 
 
@@ -472,16 +492,19 @@ namespace BASeTris
 
         public void SetFieldColors()
         {
-            foreach (var iteraterow in FieldContents)
+            lock (this)
             {
-                foreach (var iteratecell in iteraterow)
+                foreach (var iteraterow in FieldContents)
                 {
-                    if (iteratecell != null && iteratecell.Owner!=null)
-                        Theme.ApplyTheme(iteratecell.Owner, this);
+                    foreach (var iteratecell in iteraterow)
+                    {
+                        if (iteratecell != null && iteratecell.Owner != null)
+                            Theme.ApplyTheme(iteratecell.Owner, this);
+                    }
                 }
-            }
 
-            HasChanged = true;
+                HasChanged = true;
+            }
         }
 
 
