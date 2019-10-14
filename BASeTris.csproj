@@ -86,7 +86,6 @@
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BackgroundDrawers\IBackground.cs" />
     <Compile Include="BASSDriver.cs" />
-    <Compile Include="GameComposite.cs" />
     <Compile Include="GamePresenter.cs" />
     <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />
