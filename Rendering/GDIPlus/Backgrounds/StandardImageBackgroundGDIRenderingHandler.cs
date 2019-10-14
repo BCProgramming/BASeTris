@@ -9,7 +9,7 @@ using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.Rendering.GDIPlus.Backgrounds
 {
-
+    [RenderingHandler(typeof(StandardImageBackgroundGDI), typeof(Graphics), typeof(BackgroundDrawData))]
     public class StandardImageBackgroundGDIRenderingHandler : BackgroundDrawRenderHandler<Graphics, StandardImageBackgroundGDI, BackgroundDrawData>
     {
         //BackgroundDrawData should be a StandardBackgroundDrawData.

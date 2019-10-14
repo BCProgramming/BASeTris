@@ -8,6 +8,7 @@ using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Rendering.MenuItems
 {
+    [RenderingHandler(typeof(MenuStateMenuItem), typeof(Graphics), typeof(MenuStateMenuItemDrawData))]
     public class MenuStateMenuItemGDIRenderer : IRenderingHandler<Graphics,MenuStateMenuItem,MenuStateMenuItemDrawData>
     {
         public void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemDrawData Element)

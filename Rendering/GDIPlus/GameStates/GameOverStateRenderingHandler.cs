@@ -5,6 +5,7 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+    [RenderingHandler(typeof(GameOverGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
     public class GameOverStateRenderingHandler : StandardStateRenderingHandler<Graphics,GameOverGameState,GameStateDrawParameters>
     {
         Brush useCoverBrush = null;

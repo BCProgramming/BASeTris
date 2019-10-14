@@ -24,6 +24,7 @@ namespace BASeTris.Rendering.Skia
             get { return ROWCOUNT - VISIBLEROWS; }
         }
     }
+    [RenderingHandler(typeof(TetrisField), typeof(SKCanvas),typeof(TetrisFieldDrawSkiaParameters))]
     public class TetrisFieldRenderingHandlerSkia : StandardRenderingHandler<SkiaSharp.SKCanvas,TetrisField,TetrisFieldDrawSkiaParameters>
     {
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TetrisField Source, TetrisFieldDrawSkiaParameters Element)

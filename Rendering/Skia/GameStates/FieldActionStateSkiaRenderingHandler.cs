@@ -10,6 +10,7 @@ using SkiaSharp;
 
 namespace BASeTris.Rendering.Skia
 {
+    [RenderingHandler(typeof(FieldActionGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class FieldActionStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, FieldActionGameState, GameStateSkiaDrawParameters>
     {
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, FieldActionGameState Source, GameStateSkiaDrawParameters Element)

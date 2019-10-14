@@ -9,6 +9,7 @@ using SkiaSharp;
 
 namespace BASeTris.Rendering.Skia.Backgrounds
 {
+    [RenderingHandler(typeof(StandardImageBackgroundSkia), typeof(SKCanvas), typeof(BackgroundDrawData))]
     public class StandardImageBackgroundSkiaRenderingHandler : BackgroundDrawRenderHandler<SKCanvas, StandardImageBackgroundSkia, BackgroundDrawData>
     {
         //BackgroundDrawData should be a StandardBackgroundDrawData.

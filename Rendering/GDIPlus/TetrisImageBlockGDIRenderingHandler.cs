@@ -5,6 +5,7 @@ using BASeTris.TetrisBlocks;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+    [RenderingHandler(typeof(ImageBlock), typeof(Graphics), typeof(TetrisBlockDrawParameters))]
     public class TetrisImageBlockGDIRenderingHandler : TetrisBlockGDIRenderingHandler, IRenderingHandler<Graphics,ImageBlock,TetrisBlockDrawParameters>
     {
         protected virtual void NoImage()

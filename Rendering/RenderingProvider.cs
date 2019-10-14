@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.BASeCamp;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
@@ -29,14 +32,42 @@ namespace BASeTris.Rendering
         public static RenderingProvider Static = new RenderingProvider();
         private Dictionary<Type, Dictionary<Type, IRenderingHandler>> handlerLookup = new Dictionary<Type, Dictionary<Type, IRenderingHandler>>();
         bool InitProviderDictionary = false;
+
+        private void AddTaggedHandlers(Assembly Source)
+        {
+            foreach(var iterate in Source.GetTypes())
+            {
+                if(iterate.IsClass)
+                {
+                    if(!iterate.IsAbstract)
+                    {
+                        foreach(var findattr in iterate.GetCustomAttributes<RenderingHandlerAttribute>())
+                        {
+                            if(!handlerLookup.ContainsKey(findattr.CanvasType))
+                            {
+                                handlerLookup.Add(findattr.CanvasType, new Dictionary<Type, IRenderingHandler>());
+                            }
+                            //we need to construct a class instance to add, then add it to the dictionary.
+                            if (!handlerLookup[findattr.CanvasType].ContainsKey(findattr.DrawType))
+                            {
+                                var handler = (IRenderingHandler)Activator.CreateInstance(iterate);
+                                handlerLookup[findattr.CanvasType].Add(findattr.DrawType, handler);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         public IRenderingHandler GetHandler(Type ClassType, Type DrawType, Type DrawDataType)
         {
             if (!InitProviderDictionary)
             {
+
+                
                 InitProviderDictionary = true;
                 handlerLookup = new Dictionary<Type, Dictionary<Type, IRenderingHandler>>();
-
-
+                AddTaggedHandlers(Assembly.GetExecutingAssembly());
+                /*
                 handlerLookup.Add(typeof(Graphics), new Dictionary<Type, IRenderingHandler>()
                 { { typeof(TetrisBlock),new TetrisBlockGDIRenderingHandler()},
                     { typeof(ImageBlock),new TetrisImageBlockGDIRenderingHandler()},
@@ -48,6 +79,7 @@ namespace BASeTris.Rendering
                     {typeof(EnterCheatState),new EnterTextStateRenderingHandler() },
                     {typeof(GameOverGameState),new GameOverStateRenderingHandler() },
                     {typeof(FieldLineActionGameState),new  FieldActionStateRenderingHandler() },
+                    {typeof(InsertBlockRowsActionGameState),new FieldActionStateRenderingHandler() },
                     {typeof(UnpauseDelayGameState),new UnpauseDelayStateRenderingHandler() },
                     {typeof(ShowHighScoresState),new ShowHighScoreStateRenderingHandler()},
                     {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()},
@@ -68,7 +100,7 @@ namespace BASeTris.Rendering
                     {typeof(TetrisField),new TetrisFieldRenderingHandlerSkia() }
                     
                 });
-
+                */
 
             }
             if (handlerLookup.ContainsKey(ClassType))
@@ -177,6 +209,18 @@ namespace BASeTris.Rendering
         public void SetPerElementData(Object Item, Object Value)
         {
             _extendedData.Add(Item, Value);
+        }
+    }
+    public class RenderingHandlerAttribute : Attribute
+    {
+        public Type DrawType { get; set; }
+        public Type CanvasType { get; set; }
+        public Type DrawParameterType { get; set; }
+        public RenderingHandlerAttribute(Type pDrawType,Type pCanvasType,Type pDrawParameterType)
+        {
+            DrawType = pDrawType;
+            CanvasType = pCanvasType;
+            DrawParameterType = pDrawParameterType;
         }
     }
 }

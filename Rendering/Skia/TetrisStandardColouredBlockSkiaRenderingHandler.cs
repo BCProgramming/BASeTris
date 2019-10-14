@@ -8,6 +8,7 @@ using SkiaSharp.Views.Desktop;
 
 namespace BASeTris.Rendering.Skia
 {
+    [RenderingHandler(typeof(StandardColouredBlock),typeof(SKCanvas),typeof(TetrisBlockDrawParameters))]
     public class TetrisStandardColouredBlockSkiaRenderingHandler : TetrisImageBlockSkiaRenderingHandler, IRenderingHandler<SKCanvas, StandardColouredBlock, TetrisBlockDrawParameters>
     {
         public static Dictionary<String, Dictionary<SKColor, SKImage>> StandardColourBlocks = null;

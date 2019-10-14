@@ -8,6 +8,7 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+    [RenderingHandler(typeof(ShowHighScoresState), typeof(Graphics), typeof(GameStateDrawParameters))]
     public class ShowHighScoreStateRenderingHandler : StandardStateRenderingHandler<Graphics,ShowHighScoresState,GameStateDrawParameters>
     {
         Pen LinePen = new Pen(new LinearGradientBrush(new Rectangle(0, 0, 5, 25), Color.Black, Color.DarkGray, LinearGradientMode.Vertical), 25);

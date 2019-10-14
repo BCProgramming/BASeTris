@@ -18,6 +18,7 @@ using SkiaSharp.Views.Desktop;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
+    [RenderingHandler(typeof(StandardTetrisGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,StandardTetrisGameState,GameStateSkiaDrawParameters>
     {
         private StandardImageBackgroundSkia _Background = null;

@@ -5,6 +5,7 @@ using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+    [RenderingHandler(typeof(PauseGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
     public class PauseGameStateRenderingHandler: StandardStateRenderingHandler<Graphics, PauseGameState, GameStateDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)

@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Rendering;
 using BASeTris.Rendering.RenderElements;
 
 namespace BASeTris.TetrisBlocks
@@ -13,7 +14,7 @@ namespace BASeTris.TetrisBlocks
     //which function as an "adapter" that will draw to certain outputs.
     //For example, as it stands now, we'd create a class to draw things via System.Drawing/GDI+. Once we have the interface-based approach to select the
     //"Drawing" implementation we can create additional implementations for drawing to other output types (openTK for example)).
-
+    
     public abstract class TetrisBlock
     {
         public Action<TetrisBlockDrawParameters> BeforeDraw = null;

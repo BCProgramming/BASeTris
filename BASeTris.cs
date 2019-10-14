@@ -27,51 +27,54 @@ using BASeTris.Rendering.RenderElements;
 using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
 using BASeTris.Tetrominoes;
+using OpenGL;
+using OpenTK.Platform;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using XInput.Wrapper;
 
 namespace BASeTris
 {
+    
+    //IStateOwner in the form itself.
+    //This is necessary so we can also have an implementation via the OpenTK GameWindow. 
     public partial class BASeTris : Form, IStateOwner
     {
-        private StandardSettings GameSettings = null;
-        private List<GameObject> GameObjects = new List<GameObject>();
-        private TetrisGame _Game;
+        private GamePresenter _Present;
         //delegate the BeforeGameStateChange event...
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange
         {
-            add => _Game.BeforeGameStateChange += value;
-            remove => _Game.BeforeGameStateChange -= value;
+            add => _Present.Game.BeforeGameStateChange += value;
+            remove => _Present.Game.BeforeGameStateChange -= value;
         }
         public StandardSettings Settings 
         {
             get
             {
-                return GameSettings;
+                return _Present.GameSettings;
             }
         }
         public DateTime GameStartTime
         {
-            get => _Game.GameStartTime;
-            set => _Game.GameStartTime = value;
+            get => _Present.Game.GameStartTime;
+            set => _Present.Game.GameStartTime = value;
         }
 
         public TimeSpan FinalGameTime
         {
-            get => _Game.FinalGameTime;
-            set => _Game.FinalGameTime = value;
+            get => _Present.Game.FinalGameTime;
+            set => _Present.Game.FinalGameTime = value;
         }
 
         public DateTime LastPausedTime
         {
-            get => _Game.LastPausedTime;
-            set => _Game.LastPausedTime = value;
+            get => _Present.Game.LastPausedTime;
+            set => _Present.Game.LastPausedTime = value;
         }
 
         public TimeSpan GetElapsedTime()
         {
-            return _Game.GetElapsedTime();
+            return _Present.Game.GetElapsedTime();
         }
 
 
@@ -85,7 +88,7 @@ namespace BASeTris
 
         public void AddGameObject(GameObject go)
         {
-            GameObjects.Add(go);
+            _Present.GameObjects.Add(go);
         }
 
       
@@ -107,7 +110,6 @@ namespace BASeTris
         {
             if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
             {
-                skFullSize.Visible = false;
                 if (picFullSize.Visible == (pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
                 picFullSize.Visible = pMode == GameState.DisplayMode.Full;
                 picTetrisField.Visible = pMode == GameState.DisplayMode.Partitioned;
@@ -116,7 +118,7 @@ namespace BASeTris
             else
             {
                 picFullSize.Visible = picTetrisField.Visible = picStatistics.Visible = false;
-                skFullSize.Visible = true;
+                
             }
         }
 
@@ -141,14 +143,15 @@ namespace BASeTris
 
         DASRepeatHandler repeatHandler = null;
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void BASeTris_Load(object sender, EventArgs e)
         {
 
             PrepareSkia(); //add the Skia Controls.
+            _Present = new GamePresenter();
             repeatHandler = new DASRepeatHandler
             ((k) =>
             {
-                if (_Game != null) _Game.HandleGameKey(this, k, TetrisGame.KeyInputSource.Input_HID);
+                if (_Present.Game != null) _Present.Game.HandleGameKey(this, k, TetrisGame.KeyInputSource.Input_HID);
             });
             //XMLHighScores<NoSpecialInfo> TestScores = new XMLHighScores<NoSpecialInfo>(35000,(r)=>new NoSpecialInfo());
             //int Position1 = TestScores.IsEligible(12000);
@@ -192,7 +195,7 @@ namespace BASeTris
             var translated = TranslateKey(args.button);
             if (translated != null)
             {
-                _Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
+                _Present.Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
                 GameKeyDown(translated.Value);
             }
         }
@@ -214,9 +217,9 @@ namespace BASeTris
         {
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
-            GameSettings = new StandardSettings(sSettingsFile);
+            _Present.GameSettings = new StandardSettings(sSettingsFile);
             var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
-            _Game = new TetrisGame(this, standardstate);
+            _Present.Game = new TetrisGame(this, standardstate);
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
 
 
@@ -279,7 +282,7 @@ namespace BASeTris
             ActiveKeys.Add(key);
             GameKeyDown(key);
             IgnoreController = false;
-            _Game.HandleGameKey(this, key, pSource);
+            _Present.Game.HandleGameKey(this, key, pSource);
         }
 
         private void GamepadInputThread()
@@ -312,14 +315,14 @@ namespace BASeTris
                     pResult();
                 }
 
-                if (LastFrameState != _Game.CurrentState)
+                if (LastFrameState != _Present.Game.CurrentState)
                 {
-                    Invoke((MethodInvoker) (() => { SetDisplayMode(_Game.CurrentState.SupportedDisplayMode); }));
+                    Invoke((MethodInvoker) (() => { SetDisplayMode(_Present.Game.CurrentState.SupportedDisplayMode); }));
                 }
 
-                if (_Game.CurrentState != null && !_Game.CurrentState.GameProcSuspended)
+                if (_Present.Game.CurrentState != null && !_Present.Game.CurrentState.GameProcSuspended)
                 {
-                    _Game.GameProc();
+                    _Present.Game.GameProc();
                 }
 
                 Invoke
@@ -327,7 +330,7 @@ namespace BASeTris
                 {
                     if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
                     {
-                        if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                        if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                         {
 
                             picTetrisField.Invalidate();
@@ -335,7 +338,7 @@ namespace BASeTris
                             picStatistics.Invalidate();
                             picStatistics.Refresh();
                         }
-                        else if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                        else if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
                         {
                             picFullSize.Invalidate();
                             picFullSize.Refresh();
@@ -343,7 +346,7 @@ namespace BASeTris
                     }
                     else if(ActiveRenderMode ==RendererMode.Renderer_SkiaSharp)
                     {
-                        if (_Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                        if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                         {
                             skFullSize.Invalidate();
                         }
@@ -359,30 +362,30 @@ namespace BASeTris
         private void picFullSize_Paint(object sender, PaintEventArgs e)
         {
             
-            if (_Game == null) return;
+            if (_Present.Game == null) return;
             if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
             {
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
 
-                _Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
+                _Present.Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
             }
         }
 
 
         private void SkFullSize_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            if (_Game == null) return;
+            if (_Present.Game == null) return;
             if(CurrentState.SupportedDisplayMode==GameState.DisplayMode.Full)
             {
                 e.Surface.Canvas.Clear();
-                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
                 if (renderer != null)
                 {
                     if (renderer is IStateRenderingHandler staterender)
                     {
-                        staterender.Render(this, e.Surface.Canvas, _Game.CurrentState,
+                        staterender.Render(this, e.Surface.Canvas, _Present.Game.CurrentState,
                             new GameStateSkiaDrawParameters(new SKRect(0,0,e.Info.Width,e.Info.Height)));
                         return;
                     }
@@ -398,18 +401,18 @@ namespace BASeTris
                 skStats.Clear();
                 //note: this approach is too slow. What it needs to do is call both renderers but have it paint directly to the target surface, with the bounds
                 //assigned appropriately for each call. Painting the two SKCanvas objects to the main one is too slow, it seems.
-                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
                 if (renderer != null)
                 {
                     if (renderer is IStateRenderingHandler staterender)
                     {
-                        staterender.Render(this,e.Surface.Canvas,_Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, e.Info.Height)));
+                        staterender.Render(this,e.Surface.Canvas,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, e.Info.Height)));
                         //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
                         
-                        staterender.RenderStats(this, e.Surface.Canvas, _Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth+StatWidth, e.Info.Height)));
-                        //staterender.Render(this, skTetrisField, _Game.CurrentState,
+                        staterender.RenderStats(this, e.Surface.Canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth+StatWidth, e.Info.Height)));
+                        //staterender.Render(this, skTetrisField, _Present.Game.CurrentState,
                         //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
-                        //staterender.RenderStats(this,skStats,_Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
+                        //staterender.RenderStats(this,skStats,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
 
                     }
                 }
@@ -422,77 +425,37 @@ namespace BASeTris
 
             }
         }
-        private void SKFieldPaint(SKCanvas Target, SKRect Bounds)
-        {
-            if (_Game == null) return;
-            var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-            if(renderer!=null)
-            {
-                if(renderer is IStateRenderingHandler staterender)
-                {
-                    staterender.Render(this, Target, _Game.CurrentState, new GameStateDrawParameters(new RectangleF(Bounds.Left, Bounds.Top, Bounds.Width, Bounds.Height)));
-                }
-            }
-        }
-        private void SKStatsPaint(SKCanvas Target,SKRect Bounds)
-        {
-            if (_Game == null) return;
-            var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-            if (renderer != null)
-            {
-                if (renderer is IStateRenderingHandler staterender)
-                {
-                    staterender.RenderStats(this, Target, _Game.CurrentState, new GameStateDrawParameters(new RectangleF(Bounds.Left, Bounds.Top, Bounds.Width, Bounds.Height)));
-                }
-            }
-        }
+       
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
             /*e.Graphics.DrawImage(SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaBitmap), Point.Empty);
             
             return;*/
-            if (_Game == null) return;
+            if (_Present.Game == null) return;
             if (picTetrisField.Visible == false) return;
             e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
             e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
-            if(_Game.CurrentState is FieldActionGameState)
+            if(_Present.Game.CurrentState is FieldActionGameState)
             {
                 ;
             }
-            var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+            var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
             if(renderer!=null)
             {
                 if(renderer is IStateRenderingHandler staterender)
                 {
-                    staterender.Render(this, e.Graphics, _Game.CurrentState,
+                    staterender.Render(this, e.Graphics, _Present.Game.CurrentState,
                         new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
                     return;
                 }
             }
             //if the above doesn't go through....
-            _Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
+            _Present.Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
             
         }
        
-        private void SkTetrisField_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
-        {
-            if (_Game == null) return;
-            if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-            {
-                e.Surface.Canvas.Clear();
-                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                if (renderer != null)
-                {
-                    if (renderer is IStateRenderingHandler staterender)
-                    {
-                        staterender.Render(this, e.Surface.Canvas, _Game.CurrentState,
-                            new GameStateDrawParameters(new RectangleF(0, 0, e.Info.Width, e.Info.Height)));
-                        return;
-                    }
-                }
-            }
-        }
+     
 
 
         private void picStatistics_Paint(object sender, PaintEventArgs e)
@@ -505,12 +468,12 @@ namespace BASeTris
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
 
-                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
                 if (renderer != null)
                 {
                     if (renderer is IStateRenderingHandler staterender)
                     {
-                        staterender.RenderStats(this, e.Graphics, _Game.CurrentState,
+                        staterender.RenderStats(this, e.Graphics, _Present.Game.CurrentState,
                             new GameStateDrawParameters(picStatistics.ClientRectangle));
                         return;
                     }
@@ -519,24 +482,7 @@ namespace BASeTris
             }
         }
 
-        private void SkStats_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
-        {
-            if (_Game == null) return;
-            if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-            {
-                e.Surface.Canvas.Clear();
-                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                if (renderer != null)
-                {
-                    if (renderer is IStateRenderingHandler staterender)
-                    {
-                        staterender.RenderStats(this, e.Surface.Canvas, _Game.CurrentState,
-                            new GameStateDrawParameters(new RectangleF(0, 0, e.Info.Width, e.Info.Height)));
-                        return;
-                    }
-                }
-            }
-        }
+      
 
         private void picTetrisField_Resize(object sender, EventArgs e)
         {
@@ -551,14 +497,14 @@ namespace BASeTris
             picTetrisField.Refresh();
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        private void BASeTris_KeyDown(object sender, KeyEventArgs e)
         {
             IgnoreController = true;
             if (e.KeyCode == Keys.G)
             {
-                if (_Game.CurrentState is StandardTetrisGameState)
+                if (_Present.Game.CurrentState is StandardTetrisGameState)
                 {
-                    StandardTetrisGameState gs = _Game.CurrentState as StandardTetrisGameState;
+                    StandardTetrisGameState gs = _Present.Game.CurrentState as StandardTetrisGameState;
                     TetrisBlock[][] inserts = new TetrisBlock[4][];
                     for (int i = 0; i < inserts.Length; i++)
                     {
@@ -577,7 +523,7 @@ namespace BASeTris
             {
                 if (e.Shift && e.Control)
                 {
-                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Game, 64);
+                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Present.Game, 64);
                     CurrentState = cheatstate;
                 }
             }
@@ -586,16 +532,16 @@ namespace BASeTris
             var translated = TranslateKey(e.KeyCode);
             if (translated != null)
             {
-                _Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
+                _Present.Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
                 GameKeyDown(translated.Value);
             }
         }
 
         private GameState.GameKeys? TranslateKey(Keys source)
         {
-            if (_Game != null)
+            if (_Present.Game != null)
             {
-                return _Game.TranslateKey(source);
+                return _Present.Game.TranslateKey(source);
             }
 
             return null;
@@ -620,7 +566,7 @@ namespace BASeTris
             return null;
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void BASeTris_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (GameThread != null)
                 GameThread.Abort();
@@ -641,8 +587,8 @@ namespace BASeTris
 
         public GameState CurrentState
         {
-            get { return _Game?.CurrentState; }
-            set { _Game.CurrentState = value; }
+            get { return _Present.Game?.CurrentState; }
+            set { _Present.Game.CurrentState = value; }
         }
 
         public void EnqueueAction(Action pAction)
@@ -664,21 +610,25 @@ namespace BASeTris
         //public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
         public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
         SKControl skFullSize;
+
+        
         SKBitmap skTetrisFieldBmp;
         SKCanvas skTetrisField;
         SKCanvas skStats;
         SKBitmap skStatsBmp;
-        //SKControl skTetrisField;
-        //SKControl skStats;
+    
+
         private void PrepareSkia()
-        {
+        {/*
             skFullSize = new SKControl();
             skFullSize.Location = picFullSize.Location;
             skFullSize.Size = picFullSize.Size;
-//            skTetrisField.Location = picTetrisField.Location;
-//            skTetrisField.Size = picTetrisField.Size;
-//            skStats.Location = picStatistics.Location;
-//            skStats.Size = picStatistics.Size;
+            //            skTetrisField.Location = picTetrisField.Location;
+            //            skTetrisField.Size = picTetrisField.Size;
+            //            skStats.Location = picStatistics.Location;
+            //            skStats.Size = picStatistics.Size;
+            skFullSize.KeyDown += SkFullSize_KeyDown;
+            skFullSize.KeyUp += SkFullSize_KeyUp;
             skFullSize.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
 //            skTetrisField.Anchor = picTetrisField.Anchor;
 //            skStats.Anchor = picStatistics.Anchor;
@@ -691,8 +641,15 @@ namespace BASeTris
             skFullSize.Resize += SkFullSize_Resize;
             //skTetrisField.PaintSurface += SkTetrisField_PaintSurface;
             //skStats.PaintSurface += SkStats_PaintSurface;
-            
+           */ 
         }
+
+        private void SkFullSize_KeyUp(object sender, KeyEventArgs e)
+        {
+            BASeTris_KeyUp(sender,e);
+        }
+
+       
 
         private void SkFullSize_Resize(object sender, EventArgs e)
         {
@@ -783,9 +740,9 @@ namespace BASeTris
 
         private void BASeTris_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (_Game != null && _Game.CurrentState is IDirectKeyboardInputState)
+            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
             {
-                var Casted = (IDirectKeyboardInputState) _Game.CurrentState;
+                var Casted = (IDirectKeyboardInputState) _Present.Game.CurrentState;
                 Casted.KeyPressed(this, (Keys) e.KeyChar);
             }
         }

@@ -8,6 +8,7 @@ using BASeTris.TetrisBlocks;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+    [RenderingHandler(typeof(StandardColouredBlock), typeof(Graphics), typeof(TetrisBlockDrawParameters))]
     public class TetrisStandardColouredBlockGDIRenderingHandler : TetrisImageBlockGDIRenderingHandler, IRenderingHandler<Graphics, StandardColouredBlock, TetrisBlockDrawParameters>
     {
         public static Dictionary<String, Dictionary<Color, Image>> StandardColourBlocks = null;

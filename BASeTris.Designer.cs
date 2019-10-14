@@ -200,11 +200,11 @@
             this.MinimizeBox = false;
             this.Name = "BASeTris";
             this.Text = "BASeTris";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BASeTris_FormClosing);
+            this.Load += new System.EventHandler(this.BASeTris_Load);
             this.ResizeEnd += new System.EventHandler(this.BASeTris_ResizeEnd);
             this.SizeChanged += new System.EventHandler(this.BASeTris_SizeChanged);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.BASeTris_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.BASeTris_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BASeTris_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).EndInit();

@@ -5,8 +5,8 @@ using SkiaSharp;
 
 namespace BASeTris.Rendering.Skia
 {
-   
 
+    [RenderingHandler(typeof(ImageBlock), typeof(SKCanvas),typeof(TetrisBlockDrawParameters))]
 
     public class TetrisImageBlockSkiaRenderingHandler : TetrisBlockSkiaRenderingHandler, IRenderingHandler<SkiaSharp.SKCanvas, ImageBlock, TetrisBlockDrawParameters>
     {

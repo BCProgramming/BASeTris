@@ -3,6 +3,7 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+    [RenderingHandler(typeof(FieldActionGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
     public class FieldActionStateRenderingHandler :StandardStateRenderingHandler<Graphics,FieldActionGameState,GameStateDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, FieldActionGameState Source, GameStateDrawParameters Element)
