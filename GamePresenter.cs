@@ -1,8 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using BASeTris.FieldInitializers;
+using BASeTris.GameStates;
+using BASeTris.Tetrominoes;
+using XInput.Wrapper;
 
 namespace BASeTris
 {
@@ -13,12 +21,150 @@ namespace BASeTris
     /// </summary>
     public class GamePresenter
     {
-        
+        Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys> ControllerKeyLookup = new Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys>()
+        {
+            {X.Gamepad.GamepadButtons.A, GameState.GameKeys.GameKey_RotateCW},
+            {X.Gamepad.GamepadButtons.X, GameState.GameKeys.GameKey_RotateCCW},
+            {X.Gamepad.GamepadButtons.RBumper, GameState.GameKeys.GameKey_Hold},
+            {X.Gamepad.GamepadButtons.Dpad_Left, GameState.GameKeys.GameKey_Left},
+            {X.Gamepad.GamepadButtons.Dpad_Right, GameState.GameKeys.GameKey_Right},
+            {X.Gamepad.GamepadButtons.Dpad_Down, GameState.GameKeys.GameKey_Down},
+            {X.Gamepad.GamepadButtons.Dpad_Up, GameState.GameKeys.GameKey_Drop},
+            {X.Gamepad.GamepadButtons.Start, GameState.GameKeys.GameKey_Pause}
+        };
+        public ControllerInputState CIS { get; set; } = null;
+        private IStateOwner _Owner = null;
         private StandardSettings _GameSettings = null;
         private List<GameObject> _GameObjects = new List<GameObject>();
+        public bool IgnoreController = false;
+        HashSet<GameState.GameKeys> ActiveKeys = new HashSet<GameState.GameKeys>();
         private TetrisGame _Game;
         public StandardSettings GameSettings {  get { return _GameSettings; } set { _GameSettings = value; } }
         public List<GameObject> GameObjects {  get { return _GameObjects; } set { _GameObjects = value; } }
         public TetrisGame Game {  get { return _Game; } set { _Game = value; } }
+        public DASRepeatHandler RepeatHandler { get; set; } = null;
+        public Thread GameThread = null;
+        public Thread InputThread = null;
+        public void Feedback(float Strength, int Length)
+        {
+            if (IgnoreController) return;
+            X.Gamepad_1.FFB_Vibrate(Strength, Strength, Length);
+        }
+
+        public void StartGame(ThreadStart GameProc)
+        {
+            String sDataFolder = TetrisGame.AppDataFolder;
+            String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
+            GameSettings = new StandardSettings(sSettingsFile);
+            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
+            Game = new TetrisGame(_Owner, standardstate);
+            //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
+
+
+            TetrisGame.AudioThemeMan.ResetTheme();
+            if (GameThread != null) GameThread.Abort();
+            GameThread = new Thread(GameProc);
+            GameThread.Start();
+            if (InputThread != null) InputThread.Abort();
+            InputThread = new Thread(GamepadInputThread);
+            InputThread.Start();
+        }
+        private void CheckInputs()
+        {
+            if (X.Gamepad_1.Update())
+            {
+                HandleKey(GameState.GameKeys.GameKey_RotateCW, X.Gamepad_1.A_down, X.Gamepad_1.A_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_RotateCCW, X.Gamepad_1.X_down, X.Gamepad_1.X_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Left, X.Gamepad_1.Dpad_Left_down, X.Gamepad_1.Dpad_Left_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Right, X.Gamepad_1.Dpad_Right_down, X.Gamepad_1.Dpad_Right_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Down, X.Gamepad_1.Dpad_Down_down, X.Gamepad_1.Dpad_Down_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up, TetrisGame.KeyInputSource.Input_HID);
+            }
+        }
+        private void GamepadInputThread()
+        {
+            while (true)
+            {
+                Thread.Sleep(3);
+                CIS.CheckState();
+            }
+        }
+        public GameState.GameKeys? TranslateKey(Keys source)
+        {
+            if (Game != null)
+            {
+                return Game.TranslateKey(source);
+            }
+
+            return null;
+        }
+        public GameState.GameKeys? TranslateKey(X.Gamepad.GamepadButtons Button)
+        {
+            if (ControllerKeyLookup.ContainsKey(Button))
+                return ControllerKeyLookup[Button];
+            return null;
+        }
+        public GamePresenter(IStateOwner pOwner)
+        {
+            _Owner = pOwner;
+            RepeatHandler = new DASRepeatHandler((k) =>
+            {
+                if (Game != null) Game.HandleGameKey(pOwner, k, TetrisGame.KeyInputSource.Input_HID);
+            });
+            CIS = new ControllerInputState(X.Gamepad_1);
+            CIS.ButtonPressed += CIS_ButtonPressed;
+            CIS.ButtonReleased += CIS_ButtonReleased;
+        }
+        public void HandleKey(GameState.GameKeys key, bool DownState, bool UpState, TetrisGame.KeyInputSource pSource)
+        {
+            if (ActiveKeys.Contains(key) && !DownState)
+            {
+                ActiveKeys.Remove(key);
+                GameKeyUp(key);
+                return;
+            }
+
+            if (ActiveKeys.Contains(key)) return;
+            if (!DownState) return;
+            ActiveKeys.Add(key);
+            GameKeyDown(key);
+            IgnoreController = false;
+            Game.HandleGameKey(_Owner, key, pSource);
+        }
+        private void CIS_ButtonPressed(Object sender, ControllerInputState.ControllerButtonEventArgs args)
+        {
+            Debug.Print("Button pressed:" + args.button);
+            var translated = TranslateKey(args.button);
+            if (translated != null)
+            {
+                Game.HandleGameKey(_Owner, translated.Value, TetrisGame.KeyInputSource.Input_HID);
+                GameKeyDown(translated.Value);
+            }
+        }
+
+        private void CIS_ButtonReleased(Object sender, ControllerInputState.ControllerButtonEventArgs args)
+        {
+            Debug.Print("Button released:" + args.button);
+            var translated = TranslateKey(args.button);
+            if (translated != null)
+            {
+                GameKeyUp(translated.Value);
+            }
+        }
+        //GameKeyUp and GameKeyDown are used for Key repeat.
+        //We implement key repeat manually. Typematic rate doesn't work for that anyway.
+
+        public void GameKeyUp(GameState.GameKeys key)
+        {
+            RepeatHandler.GameKeyUp(key);
+        }
+
+        public void GameKeyDown(GameState.GameKeys key)
+        {
+            RepeatHandler.GameKeyDown(key);
+        }
+
     }
 }
