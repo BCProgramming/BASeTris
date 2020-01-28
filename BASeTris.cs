@@ -38,7 +38,7 @@ namespace BASeTris
     
     //IStateOwner in the form itself.
     //This is necessary so we can also have an implementation via the OpenTK GameWindow. 
-    public partial class BASeTris : Form, IStateOwner
+    public partial class BASeTris : Form, IStateOwner,IGamePresenter
     {
         private GamePresenter _Present;
         //delegate the BeforeGameStateChange event...
@@ -107,6 +107,7 @@ namespace BASeTris
 
         public void SetDisplayMode(GameState.DisplayMode pMode)
         {
+            if (InvokeRequired) Invoke((MethodInvoker)(() => SetDisplayMode(pMode)));
             if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
             {
                 if (picFullSize.Visible == (pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
@@ -180,85 +181,44 @@ namespace BASeTris
         private void StartGame()
         {
 
-            _Present.StartGame(GameProc);
+            _Present.StartGame();
             
         }
 
-        private TetrisAI ai;
-        
-        private ConcurrentQueue<Action> ProcThreadActions = new ConcurrentQueue<Action>();
-        
-
-        
-
-
-       
-
-        
-
-        
-
-        private GameState LastFrameState = null;
-
-        private void GameProc()
+        public void Present()
         {
-            while (true)
+            Invoke
+            ((MethodInvoker)(() =>
             {
-                if (!IsHandleCreated || IsDisposed)
+                if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
                 {
-                    if (!this.Focused)
+                    if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                     {
-                        Thread.Sleep(250);
-                        continue;
+
+                        picTetrisField.Invalidate();
+                        picTetrisField.Refresh();
+                        picStatistics.Invalidate();
+                        picStatistics.Refresh();
+                    }
+                    else if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                    {
+                        picFullSize.Invalidate();
+                        picFullSize.Refresh();
                     }
                 }
-
-                if (ProcThreadActions.TryDequeue(out Action pResult))
+                else if (ActiveRenderMode == RendererMode.Renderer_SkiaSharp)
                 {
-                    pResult();
-                }
-
-                if (LastFrameState != _Present.Game.CurrentState)
-                {
-                    Invoke((MethodInvoker) (() => { SetDisplayMode(_Present.Game.CurrentState.SupportedDisplayMode); }));
-                }
-
-                if (_Present.Game.CurrentState != null && !_Present.Game.CurrentState.GameProcSuspended)
-                {
-                    _Present.Game.GameProc();
-                }
-
-                Invoke
-                ((MethodInvoker) (() =>
-                {
-                    if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
+                    if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                     {
-                        if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                        {
-
-                            picTetrisField.Invalidate();
-                            picTetrisField.Refresh();
-                            picStatistics.Invalidate();
-                            picStatistics.Refresh();
-                        }
-                        else if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
-                        {
-                            picFullSize.Invalidate();
-                            picFullSize.Refresh();
-                        }
+                        skFullSize.Invalidate();
                     }
-                    else if(ActiveRenderMode ==RendererMode.Renderer_SkiaSharp)
-                    {
-                        if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                        {
-                            skFullSize.Invalidate();
-                        }
-                    }
-                }));
-
-                Thread.Sleep(5);
-            }
+                }
+            }));
         }
+
+
+        
+        
 
         static Random rgen = new Random();
 
@@ -276,7 +236,7 @@ namespace BASeTris
             }
         }
 
-
+        //this needs to be moved to a new OpenTK GameWindow Presenter implementation
         private void SkFullSize_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             if (_Present.Game == null) return;
@@ -460,7 +420,7 @@ namespace BASeTris
                 X.StopPolling();
             }
             
-            if (ai != null) ai.AbortAI();
+            if (_Present.ai != null) _Present.ai.AbortAI();
             TetrisGame.Soundman.StopMusic();
             Application.Exit();
         }
@@ -473,7 +433,7 @@ namespace BASeTris
 
         public void EnqueueAction(Action pAction)
         {
-            ProcThreadActions.Enqueue(pAction);
+            _Present.EnqueueAction(pAction);
         }
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -607,14 +567,14 @@ namespace BASeTris
         private void aIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             aIToolStripMenuItem.Checked = !aIToolStripMenuItem.Checked;
-            if (ai == null)
+            if (_Present.ai == null)
             {
-                ai = new TetrisAI(this);
+                _Present.ai = new TetrisAI(this);
             }
             else
             {
-                ai.AbortAI();
-                ai = null;
+                _Present.ai.AbortAI();
+                _Present.ai = null;
             }
         }
         public void Feedback(float Strength, int Length)
@@ -646,6 +606,16 @@ namespace BASeTris
                 }
                 cms.Show();
             }
+        }
+
+        private void BASeTris_Enter(object sender, EventArgs e)
+        {
+            _Present.GameThreadPaused = false;
+        }
+
+        private void BASeTris_Leave(object sender, EventArgs e)
+        {
+            _Present.GameThreadPaused = true;
         }
     }
 }

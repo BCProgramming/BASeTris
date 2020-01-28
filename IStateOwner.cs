@@ -29,7 +29,11 @@ namespace BASeTris
 
         StandardSettings Settings { get; }
     }
-
+    public interface IGamePresenter
+    {
+        void Present();
+    }
+    
     public class BeforeGameStateChangeEventArgs : CancelEventArgs
     {
         public GameState PreviousState;

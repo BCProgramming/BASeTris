@@ -423,17 +423,7 @@ internal class Nullcallback : iManagerCallback
 
             foreach (Assembly loopassembly in checkassemblies)
             {
-                if (loopassembly.FullName.Contains("Dragon"))
-                {
-                    Debug.Print("dragon");
-                }
-
-                if (loopassembly == Assembly.GetExecutingAssembly())
-                {
-                    Debug.Print("test");
-                }
-
-                //
+               
                 if (TestAssembly(loopassembly))
                 {
                     pcallback.ShowMessage("Inspecting Assembly:" + loopassembly.GetName().Name);

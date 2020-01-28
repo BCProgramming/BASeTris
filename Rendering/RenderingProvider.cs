@@ -67,40 +67,7 @@ namespace BASeTris.Rendering
                 InitProviderDictionary = true;
                 handlerLookup = new Dictionary<Type, Dictionary<Type, IRenderingHandler>>();
                 AddTaggedHandlers(Assembly.GetExecutingAssembly());
-                /*
-                handlerLookup.Add(typeof(Graphics), new Dictionary<Type, IRenderingHandler>()
-                { { typeof(TetrisBlock),new TetrisBlockGDIRenderingHandler()},
-                    { typeof(ImageBlock),new TetrisImageBlockGDIRenderingHandler()},
-                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockGDIRenderingHandler() },
-                    {typeof(StandardTetrisGameState),new StandardTetrisGameStateRenderingHandler()},
-                    {typeof(MenuState),new MenuStateRenderingHandler()},
-                    {typeof(PauseGameState),new PauseGameStateRenderingHandler()},
-                    {typeof(EnterTextState),new EnterTextStateRenderingHandler()},
-                    {typeof(EnterCheatState),new EnterTextStateRenderingHandler() },
-                    {typeof(GameOverGameState),new GameOverStateRenderingHandler() },
-                    {typeof(FieldLineActionGameState),new  FieldActionStateRenderingHandler() },
-                    {typeof(InsertBlockRowsActionGameState),new FieldActionStateRenderingHandler() },
-                    {typeof(UnpauseDelayGameState),new UnpauseDelayStateRenderingHandler() },
-                    {typeof(ShowHighScoresState),new ShowHighScoreStateRenderingHandler()},
-                    {typeof(ViewScoreDetailsState),new ViewScoreDetailsStateHandler()},
-                    {typeof(StandardImageBackgroundGDI),new StandardImageBackgroundGDIRenderingHandler() },
-                    {typeof(MenuStateMenuItem),new MenuStateMenuItemGDIRenderer() }
-
-
-                });
-                handlerLookup.Add(typeof(SkiaSharp.SKCanvas), new Dictionary<Type, IRenderingHandler>()
-                {
-                    { typeof(TetrisBlock),new TetrisBlockSkiaRenderingHandler()},
-                    { typeof(ImageBlock),new TetrisImageBlockSkiaRenderingHandler()},
-                    { typeof(StandardColouredBlock),new TetrisStandardColouredBlockSkiaRenderingHandler() },
-                    {typeof(FieldActionGameState),new FieldActionStateSkiaRenderingHandler() },
-                    {typeof(FieldLineActionGameState),new FieldActionStateSkiaRenderingHandler() },
-                    {typeof(StandardTetrisGameState),new StandardTetrisGameStateSkiaRenderingHandler() },
-                    {typeof(StandardImageBackgroundSkia),new StandardImageBackgroundSkiaRenderingHandler() },
-                    {typeof(TetrisField),new TetrisFieldRenderingHandlerSkia() }
-                    
-                });
-                */
+               
 
             }
             if (handlerLookup.ContainsKey(ClassType))

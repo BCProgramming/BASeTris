@@ -204,9 +204,11 @@
             this.Load += new System.EventHandler(this.BASeTris_Load);
             this.ResizeEnd += new System.EventHandler(this.BASeTris_ResizeEnd);
             this.SizeChanged += new System.EventHandler(this.BASeTris_SizeChanged);
+            this.Enter += new System.EventHandler(this.BASeTris_Enter);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.BASeTris_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.BASeTris_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BASeTris_KeyUp);
+            this.Leave += new System.EventHandler(this.BASeTris_Leave);
             ((System.ComponentModel.ISupportInitialize)(this.picTetrisField)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picStatistics)).EndInit();
             this.menuStrip1.ResumeLayout(false);

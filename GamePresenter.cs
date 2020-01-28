@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.AI;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.Tetrominoes;
@@ -32,8 +34,10 @@ namespace BASeTris
             {X.Gamepad.GamepadButtons.Dpad_Up, GameState.GameKeys.GameKey_Drop},
             {X.Gamepad.GamepadButtons.Start, GameState.GameKeys.GameKey_Pause}
         };
+        public bool GameThreadPaused = false;
         public ControllerInputState CIS { get; set; } = null;
         private IStateOwner _Owner = null;
+        private IGamePresenter _Presenter = null;
         private StandardSettings _GameSettings = null;
         private List<GameObject> _GameObjects = new List<GameObject>();
         public bool IgnoreController = false;
@@ -45,13 +49,20 @@ namespace BASeTris
         public DASRepeatHandler RepeatHandler { get; set; } = null;
         public Thread GameThread = null;
         public Thread InputThread = null;
+        public TetrisAI ai { get; set; }
+
+        public ConcurrentQueue<Action> ProcThreadActions { get; set; } = new ConcurrentQueue<Action>();
+        public void EnqueueAction(Action pAction)
+        {
+            ProcThreadActions.Enqueue(pAction);
+        }
         public void Feedback(float Strength, int Length)
         {
             if (IgnoreController) return;
             X.Gamepad_1.FFB_Vibrate(Strength, Strength, Length);
         }
 
-        public void StartGame(ThreadStart GameProc)
+        public void StartGame()
         {
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
@@ -68,6 +79,37 @@ namespace BASeTris
             if (InputThread != null) InputThread.Abort();
             InputThread = new Thread(GamepadInputThread);
             InputThread.Start();
+        }
+        private GameState LastFrameState = null;
+        private void GameProc()
+        {
+            while (true)
+            {
+                if (GameThreadPaused)
+                {
+                    Thread.Sleep(250);
+                }
+
+
+                if (ProcThreadActions.TryDequeue(out Action pResult))
+                {
+                    pResult();
+                }
+
+                if (LastFrameState != Game.CurrentState)
+                {
+                    _Owner.SetDisplayMode(Game.CurrentState.SupportedDisplayMode);
+                }
+
+                if (Game.CurrentState != null && !Game.CurrentState.GameProcSuspended)
+                {
+                    Game.GameProc();
+                }
+
+                _Presenter.Present();
+
+                Thread.Sleep(5);
+            }
         }
         private void CheckInputs()
         {
@@ -106,9 +148,14 @@ namespace BASeTris
                 return ControllerKeyLookup[Button];
             return null;
         }
-        public GamePresenter(IStateOwner pOwner)
+        public GamePresenter(IStateOwner pOwner):this(pOwner,pOwner as IGamePresenter)
+        {
+
+        }
+        public GamePresenter(IStateOwner pOwner, IGamePresenter pPresenter)
         {
             _Owner = pOwner;
+            _Presenter = pPresenter;
             RepeatHandler = new DASRepeatHandler((k) =>
             {
                 if (Game != null) Game.HandleGameKey(pOwner, k, TetrisGame.KeyInputSource.Input_HID);

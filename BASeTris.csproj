@@ -231,6 +231,10 @@
       <Project>{7d03d6d6-4b21-4d87-ba1f-48ace062510d}</Project>
       <Name>BASeScores</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BCRenderingAdapter\BCRenderingAdapter\BCRenderingAdapter.csproj">
+      <Project>{e7c2ca46-4aab-4966-b251-02b68e3aa0f2}</Project>
+      <Name>BCRenderingAdapter</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XMLSerialization\Elementizer.csproj">
       <Project>{850a1563-ac23-4b60-bbcf-503b2bb69547}</Project>
       <Name>Elementizer</Name>
