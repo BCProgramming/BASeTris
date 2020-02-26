@@ -89,7 +89,6 @@ namespace BASeTris
             public DateTime LastRepeatTime = DateTime.MaxValue;
             public long InitialRepeatDelayTicks = TimeSpan.TicksPerSecond / 3;
             public long RepeatTicks = TimeSpan.TicksPerSecond / 10;
-
             public bool IsPressed()
             {
                 return LastKeyDown > LastKeyUp;
