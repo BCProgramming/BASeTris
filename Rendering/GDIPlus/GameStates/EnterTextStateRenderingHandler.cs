@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
+using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;

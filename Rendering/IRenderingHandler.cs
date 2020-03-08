@@ -8,7 +8,7 @@ namespace BASeTris.Rendering
     //builds upon the BASeCamp Rendering interfaces.
     public interface IRenderingHandler:BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner>
     {
-        void Render(IStateOwner pOwner, Object pRenderTarget, Object RenderSource,Object Element);
+        
     }
     public interface IStateRenderingHandler : IRenderingHandler
     {

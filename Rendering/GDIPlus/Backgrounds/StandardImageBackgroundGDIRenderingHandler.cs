@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
+using BASeCamp.Rendering;
 using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.Rendering.GDIPlus.Backgrounds

@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;

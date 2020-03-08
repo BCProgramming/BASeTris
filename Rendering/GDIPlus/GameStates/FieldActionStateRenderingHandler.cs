@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using BASeCamp.Rendering;
 using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus

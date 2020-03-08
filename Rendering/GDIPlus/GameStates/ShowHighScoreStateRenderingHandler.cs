@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using BASeCamp.BASeScores;
+using BASeCamp.Rendering;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 

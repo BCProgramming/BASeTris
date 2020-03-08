@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.GameStates;
 using BASeTris.Rendering.RenderElements;
