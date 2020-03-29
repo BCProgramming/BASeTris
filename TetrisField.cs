@@ -173,7 +173,18 @@ namespace BASeTris
                 ActiveBlockGroups.Remove(oldGroup);
             }
         }
+        public IEnumerable<int> FindCompleteRows()
+        {
+            for(int r = 0;r<Contents.Length-1;r++)
+            {
+                var FieldRow = Contents[r];
+                if(FieldRow.All((n)=>n!=null))
+                {
+                    yield return r;
+                }
+            }
 
+        }
         public TetrisField()
         {
             FieldContents = new TetrisBlock[ROWCOUNT][];

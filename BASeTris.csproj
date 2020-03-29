@@ -79,6 +79,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\AIEvolver.cs" />
     <Compile Include="AI\BaseAI.cs" />
     <Compile Include="AI\TetrisAI.cs" />
     <Compile Include="AssetManager\AssetManager.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BackgroundDrawers\IBackground.cs" />
     <Compile Include="BASSDriver.cs" />
+    <Compile Include="Cheats\SetPieceCheat.cs" />
     <Compile Include="GamePresenter.cs" />
     <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />

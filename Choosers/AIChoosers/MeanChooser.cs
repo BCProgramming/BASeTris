@@ -16,6 +16,7 @@ namespace BASeTris.Choosers.AIChoosers
     //This utilizes the routines found in the TetrisAI routines. How convenient- I already wrote those!
     public class MeanChooser : BaseAIChooser
     {
+        StoredBoardState.AIScoringRuleData AIRules = new StoredBoardState.AIScoringRuleData();
         public MeanChooser(StandardTetrisGameState _StandardState, Func<Nomino>[] pAvailable) : base(_StandardState, pAvailable)
         {
         }
@@ -54,7 +55,7 @@ namespace BASeTris.Choosers.AIChoosers
                 StoredBoardState CurrentMinimum = null;
                 foreach (var iterate in kvp.Value)
                 {
-                    double GrabScore = iterate.GetScore();
+                    double GrabScore = iterate.GetScore(AIRules);
                     if (GrabScore > Maximum)
                     {
                         Maximum = GrabScore;

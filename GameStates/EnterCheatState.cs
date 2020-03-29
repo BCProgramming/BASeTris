@@ -10,7 +10,7 @@ namespace BASeTris.GameStates
     public class EnterCheatState : EnterTextState
     {
         GameState _PreviousState = null;
-
+        public GameState PreviousState { get { return _PreviousState; } set { _PreviousState = value; } }
         public EnterCheatState(GameState pOriginalState, IStateOwner pOwner, int EntryLength, string PossibleChars = " _ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") : base(pOwner, EntryLength, PossibleChars)
         {
             _PreviousState = pOriginalState;

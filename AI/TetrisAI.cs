@@ -54,7 +54,7 @@ namespace BASeTris.AI
                 }
             }
         }
-
+        public StoredBoardState.AIScoringRuleData ScoringRules { get; set; } = new StoredBoardState.AIScoringRuleData();
         public override void AIActionFrame()
         {
             //do our hard thinking here.
@@ -71,17 +71,17 @@ namespace BASeTris.AI
                     Nomino ActiveGroup = stdState.PlayField.BlockGroups[0];
                     var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup).ToList();
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
-                    var Sorted = PossibleStates.OrderByDescending((w) => w.GetScore()).ToList();
-                    var Scores = (from p in PossibleStates orderby p.GetScore() descending select new Tuple<StoredBoardState, double>(p, p.GetScore())).ToArray();
+                    var Sorted = PossibleStates.OrderByDescending((w) => w.GetScore(ScoringRules)).ToList();
+                    var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
                     foreach (var writedebug in Scores)
                     {
-                        Debug.Print("Possible State: Move " + writedebug.Item1.XOffset + ", Rotate " + writedebug.Item1.RotationCount + " To get score " + writedebug.Item1.GetScore());
+                        Debug.Print("Possible State: Move " + writedebug.Item1.XOffset + ", Rotate " + writedebug.Item1.RotationCount + " To get score " + writedebug.Item1.GetScore(ScoringRules));
                         Debug.Print("What it will look like\n" + writedebug.Item1.GetBoardString());
                         Debug.Print("------");
                     }
 
                     var maximumValue = Sorted.FirstOrDefault();
-                    Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore());
+                    Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(ScoringRules));
                     Debug.Print("What it will look like\n" + maximumValue.GetBoardString());
                     Debug.Print("------");
 
@@ -278,7 +278,7 @@ namespace BASeTris.AI
             return HeightRunner;
         }
 
-        public double GetScore()
+        public double GetScore(AIScoringRuleData Rules)
         {
             //calculate the "value" of this state.
             //we need:
@@ -292,15 +292,15 @@ namespace BASeTris.AI
             int Holes = GetHoles();
             int Bumpy = GetBumpiness();
             Debug.Print("Rows=" + Rows + " Aggregate=" + Aggregate + " Holes=" + Holes + " Bumps=" + Bumpy);
-            double a = -0.610066f;
-            double b = 0.760666;
-            double c = -0.55663;
-            //double d = -.184483;
-            double d = -.384483;
-            return (a * (double) Aggregate) +
-                   (b * (double) Rows) +
-                   (c * (double) Holes) +
-                   (d * (double) Bumpy);
+            //double a = -0.610066f;
+            //double b = 0.760666;
+            //double c = -0.55663;
+            ////double d = -.184483;
+            //double d = -.384483;
+            return (Rules.AggregateHeightScore * (double) Aggregate) +
+                   (Rules.RowScore * (double) Rows) +
+                   (Rules.HoleScore * (double) Holes) +
+                   (Rules.BumpinessScore * (double) Bumpy);
 
             /*a = -0.510066
 b = 0.760666
@@ -371,6 +371,13 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             }
 
             return true;
+        }
+        public class AIScoringRuleData
+        {
+            public double AggregateHeightScore { get; set; } = -0.610066d;
+            public double RowScore { get; set; } = 0.760666d;
+            public double HoleScore { get; set; } = -0.55663d;
+            public double BumpinessScore { get; set; } = -0.384483d;
         }
     }
 }
