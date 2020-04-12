@@ -35,7 +35,7 @@ namespace BASeTris.Rendering.GDIPlus
                 //draw this line centered at StartYPosition+Height*i...
 
                 int useYPosition = (int)(StartYPosition + (MeasureBounds.Height + 5) * i);
-                int useXPosition = (int)(Bounds.Width / 2 - MeasureBounds.Width / 2);
+                int useXPosition = Math.Max((int)(Bounds.Width / 2 - MeasureBounds.Width / 2),(int)(Bounds.Left+15));
                 g.DrawString(Source.EntryPrompt[i], Source.useFont, Brushes.Black, new PointF(useXPosition + 5, useYPosition + 5));
                 g.DrawString(Source.EntryPrompt[i], Source.useFont, new SolidBrush(useLightRain), new PointF(useXPosition, useYPosition));
             }
@@ -44,7 +44,9 @@ namespace BASeTris.Rendering.GDIPlus
 
 
             var AllCharacterBounds = (from c in Source.NameEntered.ToString().ToCharArray() select g.MeasureString(c.ToString(), Source.useFont)).ToArray();
-            float useCharWidth = g.MeasureString("_", Source.EntryFont).Width;
+            var charMeasure = g.MeasureString("#", Source.EntryFont);
+            float useCharWidth = charMeasure.Width;
+            float useCharHeight = charMeasure.Height;
             float TotalWidth;
             if (Source.EntryStyle == EnterTextState.EntryDrawStyle.EntryDrawStyle_Centered)
             {
@@ -53,12 +55,19 @@ namespace BASeTris.Rendering.GDIPlus
             }
             TotalWidth = (useCharWidth + 5) * Source.NameEntered.Length;
             float NameEntryX = (Bounds.Width / 2) - (TotalWidth / 2);
+            NameEntryX = Math.Max(NameEntryX, Bounds.Left + 10);
+            float LineStart = NameEntryX;
             if (Source.EntryStyle == EnterTextState.EntryDrawStyle.EntryDrawStyle_Preblank)
             {
                 for (int charpos = 0; charpos < Source.NameEntered.Length; charpos++)
                 {
                     char thischar = Source.NameEntered[charpos];
-                    float useX = NameEntryX + ((useCharWidth + 5) * (charpos));
+                    float useX = NameEntryX + ((useCharWidth + 3) * (charpos));
+                    if(useX+useCharWidth > Bounds.Width)
+                    {
+                        useX = LineStart;
+                        nameEntryY += useCharHeight + 3;
+                    }
                     Brush DisplayBrush = (Source.CurrentPosition == charpos) ? new SolidBrush(UseHighLightingColor) : Brushes.NavajoWhite;
                     Brush ShadowBrush = (Source.CurrentPosition == charpos) ? new SolidBrush(useLightRain) : Brushes.Black;
                     g.DrawString(thischar.ToString(), Source.EntryFont, ShadowBrush, new PointF(useX + 2, nameEntryY + 2));

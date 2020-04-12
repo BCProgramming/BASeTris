@@ -31,6 +31,7 @@ namespace BASeTris.GameStates
 
         public EnterTextState(IStateOwner pOwner, int EntryLength, String PossibleChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
         {
+            EntryLength = Math.Min(48, EntryLength);
             Owner = pOwner;
             AvailableChars = PossibleChars;
             NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));

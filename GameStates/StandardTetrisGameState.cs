@@ -480,7 +480,7 @@ namespace BASeTris.GameStates
         
         private StandardGameOptions GameOptions = new StandardGameOptions();
 
-        private void RefillBlockQueue()
+        public void RefillBlockQueue()
         {
             while (GameOptions.NextQueueSize > NextBlocks.Count)
             {

@@ -277,6 +277,27 @@ namespace BASeTris.AI
 
             return HeightRunner;
         }
+        private int GetCrevasses()
+        {
+            const int MinimumCrevasseHeight = 2;
+            //a 'crevasse' is any place where the highest block is at least 3 blocks below the highest block in adjacent columns. The score is calculated as 1 plus the adjacent height above 3
+            //convert each column into a number representing the highest block.
+            int[] Heights = (from p in Enumerable.Range(0, _BoardState[0].Length - 1) select GetHeight(p)).ToArray();
+            int accumScore = 0;
+            for(int i=1;i<Heights.Length-2;i++)
+            {
+                int PrevHeight = Heights[i-1];
+                int CurrHeight = Heights[i];
+                int NextHeight = Heights[i + 1];
+                int CreviceScore = (Math.Max(0,(Math.Abs(CurrHeight - PrevHeight) - MinimumCrevasseHeight))) + Math.Max(0,(Math.Abs(CurrHeight - NextHeight) - MinimumCrevasseHeight));
+                accumScore += CreviceScore;
+
+
+            }
+
+            return accumScore;
+
+        }
 
         public double GetScore(AIScoringRuleData Rules)
         {
@@ -291,16 +312,20 @@ namespace BASeTris.AI
             int Aggregate = GetAggregateHeight();
             int Holes = GetHoles();
             int Bumpy = GetBumpiness();
-            Debug.Print("Rows=" + Rows + " Aggregate=" + Aggregate + " Holes=" + Holes + " Bumps=" + Bumpy);
+            int Crevice = GetCrevasses();
+            //Debug.Print("Rows=" + Rows + " Aggregate=" + Aggregate + " Holes=" + Holes + " Bumps=" + Bumpy);
             //double a = -0.610066f;
             //double b = 0.760666;
             //double c = -0.55663;
             ////double d = -.184483;
             //double d = -.384483;
-            return (Rules.AggregateHeightScore * (double) Aggregate) +
-                   (Rules.RowScore * (double) Rows) +
-                   (Rules.HoleScore * (double) Holes) +
-                   (Rules.BumpinessScore * (double) Bumpy);
+            double CreviceScore = (Rules.CrevasseScore * (double)Crevice);
+            return (Rules.AggregateHeightScore * (double)Aggregate) +
+                   (Rules.RowScore * (double)Rows) +
+                   (Rules.HoleScore * (double)Holes) +
+                   (Rules.BumpinessScore * (double)Bumpy) +
+                    CreviceScore;
+                
 
             /*a = -0.510066
 b = 0.760666
@@ -374,10 +399,18 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
         public class AIScoringRuleData
         {
-            public double AggregateHeightScore { get; set; } = -0.610066d;
-            public double RowScore { get; set; } = 0.760666d;
-            public double HoleScore { get; set; } = -0.55663d;
-            public double BumpinessScore { get; set; } = -0.384483d;
+            //Height:-3.56765739215024,Row:0.627171085947044,Hole:-0.717625853214083,Bumpiness:-0.49091002708371,Crevasse:-0.40348813763272
+            //Bump:-0.46105559660822,Height:-2.87825892656684,Hole:-0.631400211245207,Row:0.680445781380349   
+            public double AggregateHeightScore { get; set; } = -3.56765739215024; //- 0.610066d;
+            public double RowScore { get; set; } = 0.680445781380349; // 0.760666d;
+            public double HoleScore { get; set; } = -0.717625853214083; //- 0.55663d;
+            public double BumpinessScore { get; set; } = -0.49091002708371;
+
+            public double CrevasseScore { get; set; } = -0.40348813763272;
+            public override string ToString()
+            {
+                return $"Height:{AggregateHeightScore},Row:{RowScore},Hole:{HoleScore},Bumpiness:{BumpinessScore},Crevasse:{CrevasseScore}";
+            }
         }
     }
 }

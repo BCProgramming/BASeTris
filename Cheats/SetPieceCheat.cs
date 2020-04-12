@@ -41,7 +41,21 @@ namespace BASeTris.Cheats
                     case "O":
                         buildNominoFunc = () => new Tetromino_O();
                         break;
+                    case "BAG":
+                        if (pStateOwner.CurrentState is StandardTetrisGameState stdstate)
+                        {
+                            stdstate.Chooser = new BagChooser(Tetromino.StandardTetrominoFunctions);
+
+                            stdstate.NextBlocks.Clear();
+                            stdstate.RefillBlockQueue();
+
+                            return true;
+
+                        }
+                        break;
                     default:
+                    
+
                         return false;
                 }
 
@@ -53,7 +67,7 @@ namespace BASeTris.Cheats
                     mainstate.Chooser = new NESChooser(new Func<Nomino>[] { buildNominoFunc });
 
                     mainstate.NextBlocks.Clear();
-
+                    mainstate.RefillBlockQueue();
                     return true;
 
                 }
