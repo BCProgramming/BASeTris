@@ -86,6 +86,7 @@
     <Compile Include="AssetManager\DeletionHelper.cs" />
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="BackgroundDrawers\IBackground.cs" />
+    <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="Cheats\SetPieceCheat.cs" />
     <Compile Include="GamePresenter.cs" />

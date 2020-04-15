@@ -9,11 +9,18 @@ using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeCamp.Logging;
 using BASeTris.AI;
+using OpenTK;
 
 namespace BASeTris
 {
     static class Program
     {
+        public enum StartMode
+        {
+            Mode_WinForms,
+            Mode_OpenTK
+        }
+        static StartMode RunMode = StartMode.Mode_WinForms;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -21,8 +28,7 @@ namespace BASeTris
         static void Main()
         {
 
-
-
+           
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);
@@ -33,10 +39,18 @@ namespace BASeTris
             //var testresult = SimpleAIEvolver.RunSimulation(new StoredBoardState.AIScoringRuleData());
             //SimpleAIEvolver.RunSimulations();
             //return;
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;
-            Application.Run(new BASeTris());
+            if (RunMode == StartMode.Mode_WinForms)
+            {
+                Application.Run(new BASeTris());
+            }
+            else
+            {
+                new BASeTrisTK().Run();
+            }
         }
     }
 }

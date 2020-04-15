@@ -61,8 +61,12 @@ namespace BASeTris
             if (IgnoreController) return;
             X.Gamepad_1.FFB_Vibrate(Strength, Strength, Length);
         }
-
-        public void StartGame()
+        public enum GameHandlingConstants
+        {
+            Handle_GameThread,
+            Handle_Manual
+        }
+        public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
@@ -73,9 +77,16 @@ namespace BASeTris
 
 
             TetrisGame.AudioThemeMan.ResetTheme();
-            if (GameThread != null) GameThread.Abort();
-            GameThread = new Thread(GameProc);
-            GameThread.Start();
+            if (GameThread != null)
+            {
+                GameThread.Abort();
+                GameThread = null;
+            }
+            if (option == GameHandlingConstants.Handle_GameThread)
+            {
+                GameThread = new Thread(GameProc);
+                GameThread.Start();
+            }
             if (InputThread != null) InputThread.Abort();
             InputThread = new Thread(GamepadInputThread);
             InputThread.Start();

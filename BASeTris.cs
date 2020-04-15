@@ -231,7 +231,7 @@ namespace BASeTris
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
-
+                
                 _Present.Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
             }
         }
