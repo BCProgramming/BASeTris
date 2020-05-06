@@ -13,7 +13,7 @@ namespace BASeCamp.Logging
     /// <summary>
     ///     Debug logging output class. Can automatically transform Debug output (Debug.Print) and save it to a properly dated
     ///     and organized
-    ///     file in %APPDATA%\Mainframe\DebugLogs\AppName. Just make sure it get's initialized by calling it in some fashion-
+    ///     file in %APPDATA%\-CompanyName-\DebugLogs\AppName. Just make sure it get's initialized by calling it in some fashion-
     ///     setting EnableDebugging to True is usually good enough.
     ///     Note that Debug output will not appear for Release builds, if we ever use them.
     /// </summary>
