@@ -58,8 +58,14 @@ namespace BASeTris.Rendering.Skia
                 {
                     var current = parameters.g.TotalMatrix;
                     parameters.g.ResetMatrix();
+                    parameters.g.Concat(ref parameters.ApplyAttributes);
                     parameters.g.RotateDegrees(Degrees, Center.X, Center.Y);
-                    parameters.g.DrawImage(useImage, DrawPosition);
+                    if(parameters.ColorFilter==null)
+                        parameters.g.DrawImage(useImage, DrawPosition );
+                   else
+                    {
+                        parameters.g.DrawImage(useImage, DrawPosition,new SKPaint() { ColorFilter = parameters.ColorFilter});
+                    }
                     parameters.g.SetMatrix(current);
                 }
                 else
@@ -67,7 +73,14 @@ namespace BASeTris.Rendering.Skia
 
                     lock (useImage)
                     {
-                        parameters.g.DrawImage(useImage, DrawPosition);
+                        var current = parameters.g.TotalMatrix;
+                        parameters.g.Concat(ref parameters.ApplyAttributes);
+                        if(parameters.ColorFilter!=null)
+                            parameters.g.DrawImage(useImage, DrawPosition, new SKPaint() { ColorFilter = parameters.ColorFilter });
+                        else
+                            parameters.g.DrawImage(useImage, DrawPosition);
+
+                        parameters.g.SetMatrix(current);
                         
                     }
                 }

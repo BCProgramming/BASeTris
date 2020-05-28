@@ -10,7 +10,11 @@ namespace BASeTris.Rendering.Skia
 {
     public static class SkiaExtensions
     {
+        public static RectangleF ToRectangleF(this SKRect Source)
+        {
+            return new RectangleF(Source.Left, Source.Top, Source.Width, Source.Height);
+        }
 
-        
-    }
+}
+    
 }

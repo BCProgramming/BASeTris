@@ -100,6 +100,37 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
             }
+            
+           /* foreach(var activeblock in PlayField.BlockGroups)
+            {
+                int dl = 0;
+                var GrabGhost = Source.GetGhostDrop(pOwner, activeblock, out dl, 3);
+                if(GrabGhost!=null)
+                {
+                    var BlockWidth = PlayField.GetBlockWidth(Element.Bounds.ToDrawingRect());
+                    var BlockHeight = PlayField.GetBlockHeight(Element.Bounds.ToDrawingRect());
+
+                    foreach(var iterateblock in activeblock)
+                    {
+                        SKRect BlockBounds = new SKRect(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), 
+                            PlayField.GetBlockWidth( Element.Bounds.ToDrawingRect()), PlayField.GetBlockHeight(Element.Bounds.ToDrawingRect()));
+                        TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(pRenderTarget, BlockBounds, GrabGhost, pOwner.Settings);
+                        //ImageAttributes Shade = new ImageAttributes();
+                        //SKColorMatrices.GetFader
+                        //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
+                        //tbd.ApplyAttributes = Shade;
+                        //tbd.OverrideBrush = GhostBrush;
+                        tbd.ColorFilter =  SKColorMatrices.GetFader(0.5f);
+                        var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
+                        GetHandler.Render(pOwner, tbd.g, iterateblock.Block, tbd);
+                        //iterateblock.Block.DrawBlock(tbd);
+                    }
+
+
+                }
+            }*/
+            
+
             //draw the active block groups...
             /*
             foreach (var activeblock in PlayField.BlockGroups)

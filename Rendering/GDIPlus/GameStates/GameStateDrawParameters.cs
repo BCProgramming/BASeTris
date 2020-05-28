@@ -16,12 +16,5 @@ namespace BASeTris.Rendering.GDIPlus
             Bounds = pBounds;
         }
     }
-    public class GameStateSkiaDrawParameters
-    {
-        public SKRect Bounds;
-        public GameStateSkiaDrawParameters(SKRect pBounds)
-        {
-            Bounds = pBounds;
-        }
 }
-}
+

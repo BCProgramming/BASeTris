@@ -23,6 +23,7 @@ namespace BASeTris.Rendering.Skia
         public SkiaSharp.SKRect region;
         public SkiaSharp.SKPaint OverrideBrush = null;
         public SkiaSharp.SKMatrix ApplyAttributes = SkiaSharp.SKMatrix.MakeIdentity();
+        public SkiaSharp.SKColorFilter ColorFilter = null;
         public TetrisBlockDrawSkiaParameters(SkiaSharp.SKCanvas pG, SkiaSharp.SKRect pRegion, Nomino pGroupOwner, StandardSettings pSettings) : base(pGroupOwner, pSettings)
         {
             g = pG;

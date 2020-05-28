@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.Skia;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -26,17 +27,18 @@ namespace BASeTris
         SKCanvas _Canvas = null;
 
         //helper routine
-        public static GRBackendRenderTarget CreateRenderTarget()
+        public static GRBackendRenderTarget CreateRenderTarget(GameWindow Window)
         {
             GL.GetInteger(GetPName.FramebufferBinding, out int framebuffer);
             GL.GetInteger(GetPName.StencilBits, out int stencil);
             GL.GetInteger(GetPName.Samples, out int samples);
+            stencil = stencil == 0 ?1:stencil;
             int bufferWidth = 0;
             int bufferHeight = 0;
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferWidth, out bufferWidth);
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferHeight, out bufferHeight);
-
-            return new GRBackendRenderTarget(bufferWidth,bufferHeight,samples,stencil,new GRGlFramebufferInfo((uint)framebuffer,DefaultColorType.ToGlSizedFormat()));
+            
+            return new GRBackendRenderTarget(Window.ClientSize.Width,Window.ClientSize.Height,3,stencil,new GRGlFramebufferInfo((uint)framebuffer,DefaultColorType.ToGlSizedFormat()));
            
         }
 
@@ -52,7 +54,7 @@ namespace BASeTris
             Debug.Assert(glInterface.Validate());
             this.context = GRContext.Create(GRBackend.OpenGL, glInterface);
             Debug.Assert(this.context.Handle != IntPtr.Zero);
-            this.renderTarget = CreateRenderTarget();
+            this.renderTarget = CreateRenderTarget(this);
             CursorVisible = true;
 
             _Present = new GamePresenter(this);
@@ -72,6 +74,7 @@ namespace BASeTris
         }
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            _Present.RunNextThreadAction();
             if (_Present.Game.CurrentState != null && !_Present.Game.CurrentState.GameProcSuspended)
             {
                 _Present.Game.GameProc();
@@ -87,86 +90,88 @@ namespace BASeTris
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
-
-            Title = $"(Vsync: {VSync}) FPS: {1f / e.Time:0}";
-
-            Color4 backColor;
-            backColor.A = 1.0f;
-            backColor.R = 0.1f;
-            backColor.G = 0.1f;
-            backColor.B = 0.3f;
-            GL.ClearColor(backColor);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            
-            //this.renderTarget.Width = this.Width;
-            //this.renderTarget.Height = this.Height;
-
-            using (var surface = SKSurface.Create(this.context, this.renderTarget,GRSurfaceOrigin.TopLeft,DefaultColorType))
+            try
             {
-                Debug.Assert(surface != null);
-                Debug.Assert(surface.Handle != IntPtr.Zero);
+                Title = $"(Vsync: {VSync}) FPS: {1f / e.Time:0}";
 
-                var canvas = surface.Canvas;
-
-                canvas.Flush();
-
-                var info = this.renderTarget;
-
-                //canvas.Clear(SKColors.Beige);
-
-                /*using (SKPaint paint = new SKPaint
+                Color4 backColor;
+                backColor.A = 1.0f;
+                backColor.R = 0.1f;
+                backColor.G = 0.1f;
+                backColor.B = 0.3f;
+                GL.ClearColor(backColor);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, DefaultColorType))
                 {
-                    Style = SKPaintStyle.Stroke,
-                    Color = SKColors.Red,
-                    StrokeWidth = 25
-                })
-                {
-                    canvas.DrawCircle(info.Width / 2, info.Height / 2, 100, paint);
-                    paint.Style = SKPaintStyle.Fill;
-                    paint.Color = SKColors.Blue;
-                    canvas.DrawCircle(info.Width / 2, info.Height / 2, 100, paint);
-                }
-                */
-                //RenderingProvider.Static.DrawElement(this, g, CurrentGameState, new GameStateDrawParameters(Bounds));
-                if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
-                {
-                    var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                    if (renderer != null)
+                    Debug.Assert(surface != null);
+                    Debug.Assert(surface.Handle != IntPtr.Zero);
+
+                    var canvas = surface.Canvas;
+
+                    canvas.Flush();
+                    //canvas.Clear(SKColors.Brown);
+                    var info = this.renderTarget;
+                    
+                    //canvas.Clear(SKColors.Beige);
+                   /* 
+                    using (SKPaint paint = new SKPaint
                     {
-                        if (renderer is IStateRenderingHandler staterender)
+                        Style = SKPaintStyle.StrokeAndFill,
+                        Color = SKColors.White,
+                        StrokeWidth = 1
+                    })
+                    {
+                        //canvas.DrawCircle(info.Width / 2, info.Height / 2, 100, paint);
+                        //canvas.DrawCircle(200, 200, 150, paint);
+                        canvas.DrawText("Greetings", new SKPoint(50, 50),paint);
+                    }
+                    */
+                    
+                    
+                    if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                    {
+                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                        if (renderer != null)
                         {
-                            staterender.Render(this, canvas, _Present.Game.CurrentState,
-                                new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
-                            return;
+                            if (renderer is IStateRenderingHandler staterender)
+                            {
+                                staterender.Render(this, canvas, _Present.Game.CurrentState,
+                                    new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
+                                return;
+                            }
                         }
                     }
-                }
-                else if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                {
-                    GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
-                    var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                    if (renderer != null)
+                    else if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                     {
-                        if (renderer is IStateRenderingHandler staterender)
+                        GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
+                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                        if (renderer != null)
                         {
-                            canvas.Clear(SKColors.Blue);
-                            staterender.Render(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, ClientSize.Height)));
-                            //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
+                            if (renderer is IStateRenderingHandler staterender)
+                            {
+                                canvas.Clear(SKColors.Blue);
+                                staterender.Render(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, ClientSize.Height)));
+                                //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
 
-                            //staterender.RenderStats(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height)));
-                            //staterender.Render(this, skTetrisField, _Present.Game.CurrentState,
-                            //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
-                            //staterender.RenderStats(this,skStats,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
+                                //staterender.RenderStats(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height)));
+                                //staterender.Render(this, skTetrisField, _Present.Game.CurrentState,
+                                //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
+                                //staterender.RenderStats(this,skStats,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
 
+                            }
                         }
                     }
+                    
+                    //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
+                    //canvas.Flush();
                 }
-                //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
-                canvas.Flush();
+                this.context.Flush();
+                SwapBuffers();
             }
-            this.context.Flush();
-            SwapBuffers();
+            catch(Exception exr)
+            {
+                ;
+            }
         }
 
         public void SetDisplayMode(GameState.DisplayMode pMode)

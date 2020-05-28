@@ -12,7 +12,8 @@ namespace BASeTris.Rendering.Skia
     [RenderingHandler(typeof(StandardColouredBlock),typeof(SKCanvas),typeof(TetrisBlockDrawParameters))]
     public class TetrisStandardColouredBlockSkiaRenderingHandler : TetrisImageBlockSkiaRenderingHandler, IRenderingHandler<SKCanvas, StandardColouredBlock, TetrisBlockDrawParameters>
     {
-        public static Dictionary<String, Dictionary<SKColor, SKImage>> StandardColourBlocks = null;
+        public static Dictionary<String, Dictionary<SKColor, Dictionary<int, SKImage>>> StandardColourBlocks = null;
+        
         private static Dictionary<StandardColouredBlock.ColouredBlockGummyIndexData, SKImage> GummyBitmaps = new Dictionary<StandardColouredBlock.ColouredBlockGummyIndexData, SKImage>();
 
         private void RebuildImage(StandardColouredBlock Source)
@@ -41,7 +42,7 @@ namespace BASeTris.Rendering.Skia
                 Source.CurrentImageHash = IndexData.GetHashCode();
             }
         }
-        private SKImage GetBevelImage(StandardColouredBlock Source)
+        private SKImage GetBevelImage(StandardColouredBlock Source,int Alpha=255)
         {
             String baseimage = "block_lightbevel_red";
             if (Source.DisplayStyle == StandardColouredBlock.BlockStyle.Style_CloudBevel)
@@ -71,12 +72,12 @@ namespace BASeTris.Rendering.Skia
             String sBlockKey = baseimage;
             if (StandardColourBlocks == null)
             {
-                StandardColourBlocks = new Dictionary<String, Dictionary<SKColor, SKImage>>();
+                StandardColourBlocks = new Dictionary<string, Dictionary<SKColor, Dictionary<int, SKImage>>>();
             }
 
             if (!StandardColourBlocks.ContainsKey(sBlockKey))
             {
-                StandardColourBlocks.Add(sBlockKey, new Dictionary<SKColor, SKImage>());
+                StandardColourBlocks.Add(sBlockKey,new Dictionary<SKColor, Dictionary<int, SKImage>>());
             }
 
             if (StandardColourBlocks[sBlockKey].Count == 0)
@@ -87,7 +88,12 @@ namespace BASeTris.Rendering.Skia
                     Image GDIPImage = TetrisGame.Imageman[baseimage];
                     Bitmap GDIBit = new Bitmap(GDIPImage);
                     SKImage ski = SkiaSharp.Views.Desktop.Extensions.ToSKImage(GDIBit);
-                    StandardColourBlocks[sBlockKey].Add(c.ToSKColor(), ResizeImage(RecolorImage(ski, c.ToSKColor()), TargetSize));
+                    var BuildImage = ResizeImage(RecolorImage(ski, c.ToSKColor()), TargetSize);
+                    if (Alpha < 255) BuildImage = FadeImage(BuildImage, Alpha);
+                    if (!StandardColourBlocks.ContainsKey(sBlockKey)) StandardColourBlocks.Add(sBlockKey, new Dictionary<SKColor, Dictionary<int, SKImage>>());
+                    if (!StandardColourBlocks[sBlockKey].ContainsKey(c.ToSKColor()))
+                        StandardColourBlocks[sBlockKey].Add(c.ToSKColor(), new Dictionary<int, SKImage>());
+                    StandardColourBlocks[sBlockKey][c.ToSKColor()].Add(Alpha,BuildImage );
                 }
             }
 
@@ -96,12 +102,18 @@ namespace BASeTris.Rendering.Skia
                 Image GDIPImage = TetrisGame.Imageman[baseimage];
                 Bitmap GDIBit = new Bitmap(GDIPImage);
                 SKImage ski = SkiaSharp.Views.Desktop.Extensions.ToSKImage(GDIBit);
-                
-                StandardColourBlocks[sBlockKey].Add(Source.BlockColor.ToSKColor(), ResizeImage(RecolorImage(ski, Source.BlockColor.ToSKColor()), TargetSize));
+                var BuildImage = ResizeImage(RecolorImage(ski, Source.BlockColor.ToSKColor()), TargetSize);
+                if (Alpha < 255) BuildImage = FadeImage(BuildImage, Alpha);
+
+                if (!StandardColourBlocks[sBlockKey].ContainsKey(Source.BlockColor.ToSKColor()))
+                    StandardColourBlocks[sBlockKey].Add(Source.BlockColor.ToSKColor(), new Dictionary<int, SKImage>());
+                StandardColourBlocks[sBlockKey][Source.BlockColor.ToSKColor()].Add(Alpha, BuildImage);
+
+
             }
             
 
-            return StandardColourBlocks[sBlockKey][Source.BlockColor.ToSKColor()];
+            return StandardColourBlocks[sBlockKey][Source.BlockColor.ToSKColor()][Alpha];
         }
         public static float[] GetColorizationMatrix(SKColor Target)
         {

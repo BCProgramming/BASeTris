@@ -318,30 +318,8 @@ namespace BASeTris.GameStates
 
         public Nomino GetGhostDrop(IStateOwner pOwner,Nomino Source, out int dropLength, int CancelProximity = 3)
         {
-            //routine returns the Ghost Drop representor of this Nomino.
-            //this function will also return null if the dropped block is CancelProximity or closer to the place it would be dropped.
-            Nomino Duplicator = new Nomino(Source);
-
-            dropLength = 0;
-            while (true)
-            {
-                if (PlayField.CanFit(Duplicator, Duplicator.X, Duplicator.Y + 1))
-                {
-                    dropLength++;
-                    Duplicator.SetY(pOwner,Duplicator.Y+1);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (dropLength < CancelProximity) return null;
-            foreach(var iterate in Duplicator)
-            {
-                iterate.Block.Owner = Source;
-            }
-            return Duplicator;
+            
+            return PlayField.GetGhostDrop(pOwner, Source, out dropLength, CancelProximity);
         }
 
         public void FrameUpdate()

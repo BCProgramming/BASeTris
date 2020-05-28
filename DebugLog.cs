@@ -36,7 +36,6 @@ namespace BASeCamp.Logging
             InitLog(sLogFolder);
             if (EnableLogging)
                 Debug.Listeners.Add(this);
-            //Trace.Listeners.Add(this);
         }
 
         public DebugLogger(String sName)

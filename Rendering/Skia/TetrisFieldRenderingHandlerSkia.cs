@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.Rendering;
+using BASeTris.AssetManager;
 using BASeTris.Rendering.RenderElements;
 using SkiaSharp;
 
@@ -189,6 +190,35 @@ namespace BASeTris.Rendering.Skia
                         }
                     }
                     g.ResetMatrix();
+
+
+                    var GrabGhost = Source.GetGhostDrop(pState, bg, out int dl);
+                    if (GrabGhost != null)
+                    {
+                        foreach (var iterateblock in bg)
+                        {
+
+                            float drawGhostX = BlockWidth * (GrabGhost.X+iterateblock.X);
+                            float drawGhostY = BlockHeight * (GrabGhost.Y + iterateblock.Y - 2);
+
+                            SKRect BlockBounds = new SKRect(drawGhostX, drawGhostY, drawGhostX + BlockWidth, drawGhostY + BlockHeight);
+
+                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, GrabGhost, pState.Settings);
+                            //ImageAttributes Shade = new ImageAttributes();
+                            //SKColorMatrices.GetFader
+                            //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
+                            //tbd.ApplyAttributes = Shade;
+                            //tbd.OverrideBrush = GhostBrush;
+                            tbd.ColorFilter = SKColorMatrices.GetFader(0.5f);
+                            var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
+                            GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
+                            //iterateblock.Block.DrawBlock(tbd);
+                        }
+
+
+                    }
+
+
                 }
             }
         }

@@ -91,6 +91,13 @@ namespace BASeTris
             InputThread = new Thread(GamepadInputThread);
             InputThread.Start();
         }
+        public void RunNextThreadAction()
+        {
+            if (ProcThreadActions.TryDequeue(out Action pResult))
+            {
+                pResult();
+            }
+        }
         private GameState LastFrameState = null;
         private void GameProc()
         {
@@ -102,10 +109,7 @@ namespace BASeTris
                 }
 
 
-                if (ProcThreadActions.TryDequeue(out Action pResult))
-                {
-                    pResult();
-                }
+                RunNextThreadAction();
 
                 if (LastFrameState != Game.CurrentState)
                 {
