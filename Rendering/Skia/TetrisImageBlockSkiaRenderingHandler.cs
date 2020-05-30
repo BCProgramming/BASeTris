@@ -49,7 +49,7 @@ namespace BASeTris.Rendering.Skia
                     float desiredWidth = totalWidth * parameters.FillPercent;
                     float desiredHeight = totalHeight * parameters.FillPercent;
 
-                    DrawPosition = new SKRect(CenterX - desiredWidth / 2, CenterY - desiredHeight / 2, desiredWidth, desiredHeight);
+                    DrawPosition = new SKRect(CenterX - desiredWidth / 2, CenterY - desiredHeight / 2, (CenterX - desiredWidth / 2) + desiredWidth, CenterY - desiredHeight / 2 + desiredHeight);
                 }
                 SKPoint[] UsePoints = new SKPoint[] { new SKPoint(DrawPosition.Left, DrawPosition.Top),
                     new SKPoint(DrawPosition.Right, DrawPosition.Top),

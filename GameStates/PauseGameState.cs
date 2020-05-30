@@ -26,7 +26,7 @@ namespace BASeTris.GameStates
             if (PausedState is StandardTetrisGameState)
             {
                 StandardTetrisGameState std = PausedState as StandardTetrisGameState;
-
+                //TODO: well this clearly shouldn't be here...
                 Image[] availableImages = std.GetTetronimoImages();
                 var Areause = pOwner.GameArea;
                 FallImages = new List<PauseFallImageGDIPlus>();

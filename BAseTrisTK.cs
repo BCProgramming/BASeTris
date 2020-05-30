@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -41,8 +42,12 @@ namespace BASeTris
             return new GRBackendRenderTarget(Window.ClientSize.Width,Window.ClientSize.Height,3,stencil,new GRGlFramebufferInfo((uint)framebuffer,DefaultColorType.ToGlSizedFormat()));
            
         }
+        public const int DEFAULT_GAME_WIDTH = 400;
+        public const int DEFAULT_STAT_WIDTH = 312;
+        public const int DEFAULT_AREA_HEIGHT = 775;
+        
 
-        public BASeTrisTK():base(800,600,GraphicsMode.Default,"BASeTris",GameWindowFlags.Default)
+        public BASeTrisTK():base(DEFAULT_GAME_WIDTH+DEFAULT_STAT_WIDTH,DEFAULT_AREA_HEIGHT,GraphicsMode.Default,"BASeTris",GameWindowFlags.Default)
         {
             
         }
@@ -67,7 +72,28 @@ namespace BASeTris
             this.context?.Dispose();
             this.context = null;
         }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+        }
+        protected override void OnClosed(EventArgs e)
+        {
+            if (_Present.GameThread != null)
+                _Present.GameThread.Abort();
+            if (_Present.InputThread != null)
+            {
+                _Present.InputThread.Abort();
+            }
 
+            if (XInput.Wrapper.X.IsAvailable)
+            {
+                XInput.Wrapper.X.StopPolling();
+            }
+
+            if (_Present.ai != null) _Present.ai.AbortAI();
+            TetrisGame.Soundman.StopMusic();
+            Exit();
+        }
         protected override void OnResize(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);

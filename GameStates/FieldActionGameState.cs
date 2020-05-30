@@ -90,6 +90,11 @@ namespace BASeTris.GameStates
         public override void GameProc(IStateOwner pOwner)
         {
             base.GameProc(pOwner);
+            if (pOwner.CurrentState is StandardTetrisGameState stgs1)
+            {
+                pOwner.EnqueueAction(() => { stgs1.PlayField.HasChanged = true; });
+
+            }
             if (StartOperation == DateTime.MaxValue)
             {
                 StartOperation = LastOperation = DateTime.Now;
@@ -129,9 +134,15 @@ namespace BASeTris.GameStates
                 {
                     //reset the original State.
                     pOwner.CurrentState = _BaseState;
+                   
                     foreach (var iterate in AfterClear)
                     {
                         pOwner.EnqueueAction(iterate);
+                    }
+                    if (pOwner.CurrentState is StandardTetrisGameState stgs2)
+                    {
+                        pOwner.EnqueueAction(() => { stgs2.PlayField.HasChanged = true; });
+                        
                     }
                 }
             }
