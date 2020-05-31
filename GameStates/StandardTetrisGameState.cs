@@ -292,7 +292,7 @@ namespace BASeTris.GameStates
         {
             return TetrominoImages[TetrominoType];
         }
-
+        public SKBitmap[] GetTetrominoSKBitmaps() => TetrominoSKBitmaps.Values.ToArray();
         public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
 
         public void SetTetrominoImages(Dictionary<Type,Image> images)

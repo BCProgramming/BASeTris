@@ -8,9 +8,43 @@ using BASeTris.GameStates.Menu;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(PauseGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class PauseGameStateGDIPlusRenderingHandler: StandardStateRenderingHandler<Graphics, PauseGameState, GameStateDrawParameters>
+    public class PauseGameStateGDIPlusRenderingHandler:  MenuStateGDIPlusRenderingHandler, IStateRenderingHandler<Graphics,PauseGameState,GameStateDrawParameters>
     {
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)
+
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
+        {
+            if (Source is PauseGameState pgs)
+            {
+                RenderStats(pOwner, pRenderTarget, pgs, Element);
+            }
+            else
+            {
+                base.Render(pOwner, pRenderTarget, Source, Element);
+            }
+        }
+        public void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)
+        {
+            //delegate...
+            var PausedState = Source.PausedState;
+            if (PausedState != null)
+            {
+                RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, PausedState, Element);
+            }
+        }
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
+        {
+            if (Source is PauseGameState pgs)
+            {
+                Render(pOwner, pRenderTarget, pgs, Element);
+            }
+            else
+            {
+                base.Render(pOwner, pRenderTarget, Source, Element);
+            }
+        }
+      
+        
+        public void Render(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)
         {
             if(!Source.DrawDataInitialized)
             {
@@ -34,9 +68,16 @@ namespace BASeTris.Rendering.GDIPlus
             PointF DrawPos = new PointF(Bounds.Width / 2 - Measured.Width / 2, Bounds.Height / 2 - Measured.Height / 2);
             TetrisGame.DrawText(g, usePauseFont, sPauseText, Brushes.White, Brushes.Black, DrawPos.X, DrawPos.Y);
             //retrieve the renderer for the MenuState object.
-            var basecall = RenderingProvider.Static.GetHandler(typeof(Graphics), typeof(MenuState), typeof(GameStateDrawParameters));
-            basecall?.Render(pOwner,pRenderTarget,Source,Element); //draw the menu itself.
+            base.Render(pOwner, pRenderTarget, Source, Element);
+            //var basecall = RenderingProvider.Static.GetHandler(typeof(Graphics), typeof(MenuState), typeof(GameStateDrawParameters));
+            //basecall?.Render(pOwner,pRenderTarget,Source,Element); //draw the menu itself.
 
+        }
+        public override float DrawHeader(IStateOwner pOwner, MenuState Source, Graphics Target, RectangleF Bounds)
+        {
+            //for the pause screen, we don't draw the header. We return half the size of the screen though.
+            //return base.DrawHeader(Target, Bounds);
+            return (float)Bounds.Height * 0.6f;
         }
         private void InitDrawData(IStateOwner pOwner,PauseGameState Source, GameStateDrawParameters Element)
         {
@@ -60,16 +101,7 @@ namespace BASeTris.Rendering.GDIPlus
                 }
             }
         }
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)
-        {
-            //delegate...
-            var PausedState = Source.PausedState;
-            if(PausedState!=null)
-            {
-                RenderingProvider.Static.DrawStateStats(pOwner,pRenderTarget,PausedState,Element);
-            }
-            
-        }
+     
 
        
     }

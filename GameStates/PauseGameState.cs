@@ -24,6 +24,7 @@ namespace BASeTris.GameStates
         }
         public PauseGameState(IStateOwner pOwner, StandardTetrisGameState pPausedState)
         {
+            StateHeader = "";
             PausedState = pPausedState;
             //initialize the given number of arbitrary tetronimo pause drawing images.
           
@@ -59,12 +60,7 @@ namespace BASeTris.GameStates
             MenuElements.Add(ExitItem);
         }
 
-        public override float DrawHeader(IStateOwner pOwner,Graphics Target, RectangleF Bounds)
-        {
-            //for the pause screen, we don't draw the header. We return half the size of the screen though.
-            //return base.DrawHeader(Target, Bounds);
-            return (float)Bounds.Height *0.6f;
-        }
+       
 
         
 
@@ -164,6 +160,29 @@ namespace BASeTris.GameStates
                 g.TranslateTransform(-(XPosition + ((float) OurImage.Width / 2)), -(YPosition + ((float) OurImage.Height / 2)));
 
                 g.DrawImage(OurImage, new Rectangle((int) XPosition, (int) YPosition, OurImage.Width, OurImage.Height), 0f, 0f, OurImage.Width, OurImage.Height, GraphicsUnit.Pixel);
+            }
+        }
+
+        public class PauseFallImageSkiaSharp : PauseFallImageBase<SKRect,SKCanvas,SKBitmap>
+        {
+            public override void Proc(SKRect GArea)
+            {
+                XPosition += XSpeed;
+                YPosition += YSpeed;
+                Angle += AngleSpeed;
+                if (XPosition < GArea.Left - OurImage.Width) XPosition = GArea.Right + OurImage.Width;
+                if (XPosition > GArea.Right + OurImage.Width) XPosition = GArea.Left - OurImage.Width;
+                if (YPosition < GArea.Top - OurImage.Height) YPosition = GArea.Bottom + OurImage.Height;
+                if (YPosition > GArea.Bottom + OurImage.Height) YPosition = GArea.Top - OurImage.Height;
+
+            }
+            public override void Draw(SKCanvas g)
+            {
+                g.ResetMatrix();
+                g.Translate((XPosition + ((float)OurImage.Width / 2)), (YPosition + ((float)OurImage.Height / 2)));
+                g.RotateDegrees(Angle);
+                g.Translate(-(XPosition + ((float)OurImage.Width / 2)), -(YPosition + ((float)OurImage.Height / 2)));
+                g.DrawBitmap(OurImage, new SKRect(XPosition, YPosition, XPosition + OurImage.Width, YPosition + OurImage.Height));
             }
         }
 

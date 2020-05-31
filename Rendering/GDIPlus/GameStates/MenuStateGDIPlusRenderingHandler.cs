@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using BASeCamp.Rendering;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.Menu;
@@ -20,7 +21,7 @@ namespace BASeTris.Rendering.GDIPlus
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,Source.BG,new GDIBackgroundDrawData(Bounds));
             }
             int CurrentIndex = Source.StartItemOffset;
-            float CurrentY = Source.DrawHeader(pOwner, g, Bounds);
+            float CurrentY = DrawHeader(pOwner,Source, g, Bounds);
             float MaxHeight = 0, MaxWidth = 0;
             //we want to find the widest item.
             foreach (var searchitem in Source.MenuElements)
@@ -45,7 +46,31 @@ namespace BASeTris.Rendering.GDIPlus
                 CurrentY += ItemSize.Height + 5;
             }
         }
+        protected Dictionary<double, Font> FontSizeData = new Dictionary<double, Font>();
+        protected Font GetScaledHeaderFont(IStateOwner pOwner,MenuState Source)
+        {
+            lock (FontSizeData)
+            {
+                if (!FontSizeData.ContainsKey(pOwner.ScaleFactor))
+                {
+                    Font buildfont = new Font(Source.HeaderFont.FontFamily, (float)(Source.HeaderFont.Size * pOwner.ScaleFactor), Source.HeaderFont.Style);
+                    FontSizeData.Add(pOwner.ScaleFactor, buildfont);
+                }
+                return FontSizeData[pOwner.ScaleFactor];
+            }
+        }
+        public virtual float DrawHeader(IStateOwner pOwner, MenuState Source,Graphics Target, RectangleF Bounds)
+        {
 
+            Font useHeaderFont = GetScaledHeaderFont(pOwner,Source);
+            var HeaderSize = Target.MeasureString(Source.StateHeader, useHeaderFont);
+            float UseX = (Bounds.Width / 2) - (HeaderSize.Width / 2) + Source.MainXOffset;
+            float UseY = HeaderSize.Height / 3;
+
+            TetrisGame.DrawText(Target, useHeaderFont, Source.StateHeader, Brushes.Black, Brushes.White, UseX, UseY);
+
+            return UseY + HeaderSize.Height;
+        }
         public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
         {
             //throw new NotImplementedException();

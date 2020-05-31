@@ -37,6 +37,8 @@ namespace BASeTris.GameStates.Menu
         //used to scroll the menu up and down.
         public int SelectedIndex = 0;
 
+        
+
         public override GameState.DisplayMode SupportedDisplayMode
         {
             get { return GameState.DisplayMode.Full; }
@@ -66,31 +68,7 @@ namespace BASeTris.GameStates.Menu
             //throw new NotImplementedException();
             
         }
-        Dictionary<double, Font> FontSizeData = new Dictionary<double, Font>();
-        private Font GetScaledHeaderFont(IStateOwner pOwner)
-        {
-            lock (FontSizeData)
-            {
-                if (!FontSizeData.ContainsKey(pOwner.ScaleFactor))
-                {
-                    Font buildfont = new Font(this.HeaderFont.FontFamily, (float)(this.HeaderFont.Size * pOwner.ScaleFactor), this.HeaderFont.Style);
-                    FontSizeData.Add(pOwner.ScaleFactor, buildfont);
-                }
-                return FontSizeData[pOwner.ScaleFactor];
-            }
-        }
-        public virtual float DrawHeader(IStateOwner pOwner,Graphics Target,RectangleF Bounds)
-        {
-
-            Font useHeaderFont = GetScaledHeaderFont(pOwner);
-            var HeaderSize = Target.MeasureString(StateHeader, useHeaderFont);
-            float UseX = (Bounds.Width / 2)- (HeaderSize.Width / 2) + MainXOffset;
-            float UseY = HeaderSize.Height / 3;
-
-            TetrisGame.DrawText(Target,useHeaderFont,StateHeader,Brushes.Black,Brushes.White,UseX,UseY);
-
-            return UseY + HeaderSize.Height;
-        }
+        
        
         protected int GetPreviousIndex(int StartPos)
         {

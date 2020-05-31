@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.GameStates.Menu;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,4 +43,25 @@ namespace BASeTris.Rendering
     {
 
     }
+    /*
+    public interface IMenuStateRenderingHandler : IStateRenderingHandler
+    {
+        /// <summary>
+        /// Renders the Menu State Header, if needed
+        /// </summary>
+        /// <param name="pOwner">Owner state</param>
+        /// <param name="pRenderTarget">Target Canvas to render to</param>
+        /// <param name="RenderSource">MenuState or derived implementation being rendered</param>
+        /// <param name="Element">Additional Draw Parameter Information.</param>
+        /// <returns></returns>
+        float RenderHeader(IStateOwner pOwner, object pRenderTarget, Object RenderSource, Object Element);
+    }
+
+    public interface IMenuStateRenderingHandler<in TRenderTarget, in TRenderSource,in TDataElement> : IStateRenderingHandler<TRenderTarget,TRenderSource,TDataElement>,IMenuStateRenderingHandler where TRenderSource : MenuState
+    {
+        float RenderHeader(IStateOwner pOwner, TRenderTarget pRenderTarget, TRenderSource Source, TDataElement Element);
+       
+    }
+    */
+
 }
