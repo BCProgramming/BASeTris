@@ -6,7 +6,7 @@ using BASeTris.GameStates.Menu;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(MenuState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class MenuStateRenderingHandler :StandardStateRenderingHandler<Graphics,MenuState, GameStateDrawParameters>
+    public class MenuStateGDIPlusRenderingHandler :StandardStateRenderingHandler<Graphics,MenuState, GameStateDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
         {

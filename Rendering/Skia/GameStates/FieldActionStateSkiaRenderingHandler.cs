@@ -26,7 +26,10 @@ namespace BASeTris.Rendering.Skia
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, FieldActionGameState Source, GameStateSkiaDrawParameters Element)
         {
             if (Source._BaseState != null)
+            {
+                
                 RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source._BaseState, Element);
+            }
         }
     }
 }

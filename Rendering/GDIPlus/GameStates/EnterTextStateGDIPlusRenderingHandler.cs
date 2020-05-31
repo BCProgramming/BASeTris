@@ -9,7 +9,7 @@ using BASeTris.GameStates;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(EnterTextState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class EnterTextStateRenderingHandler : StandardStateRenderingHandler<Graphics, EnterTextState,GameStateDrawParameters>
+    public class EnterTextStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, EnterTextState,GameStateDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, EnterTextState Source, GameStateDrawParameters Element)
         {

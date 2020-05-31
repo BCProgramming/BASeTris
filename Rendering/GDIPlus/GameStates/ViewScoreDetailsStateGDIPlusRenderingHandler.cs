@@ -9,7 +9,7 @@ using BASeTris.GameStates;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(ViewScoreDetailsState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class ViewScoreDetailsStateHandler : StandardStateRenderingHandler<Graphics,ViewScoreDetailsState,GameStateDrawParameters>
+    public class ViewScoreDetailsStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,ViewScoreDetailsState,GameStateDrawParameters>
     {
         private Pen Separator = new Pen(Color.Black, 3);
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, ViewScoreDetailsState Source, GameStateDrawParameters Element)

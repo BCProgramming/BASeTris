@@ -14,7 +14,7 @@ using BASeTris.Tetrominoes;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(StandardTetrisGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class StandardTetrisGameStateRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, GameStateDrawParameters>
+    public class StandardTetrisGameStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, GameStateDrawParameters>
     {
         public RectangleF LastDrawStat = Rectangle.Empty;
         //private Dictionary<System.Type, Image> TetrominoImages = null;

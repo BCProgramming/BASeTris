@@ -16,7 +16,7 @@ namespace BASeTris.GameStates
     //This is itself a base class for "Clear" actions. This would include actions like clearing a line in Tetris, clearing a set of blocks in Dr Mario or Tetris 2, etc.
     //also this could be used to ADD stuff to the field- so it's not strictly for CLEAR but "ActionGameState" seemed a bit silly as a name.
     
-    public abstract class FieldActionGameState : GameState
+    public abstract class FieldActionGameState : GameState,ICompositeState<StandardTetrisGameState>
     {
         public StandardTetrisGameState _BaseState;
 
@@ -38,7 +38,10 @@ namespace BASeTris.GameStates
             }
         }
 
-
+        public StandardTetrisGameState GetComposite()
+        {
+            return _BaseState;
+        }
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {

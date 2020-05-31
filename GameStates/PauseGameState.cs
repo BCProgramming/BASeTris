@@ -11,37 +11,22 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
-    public class PauseGameState : MenuState
+    public class PauseGameState : MenuState,ICompositeState<StandardTetrisGameState>
     {
-        public GameState PausedState = null;
-        int NumFallingItems = 65;
-        internal List<PauseFallImageGDIPlus> FallImages = null;
-        Random rgen = new Random();
+        public bool DrawDataInitialized = false;
+        public StandardTetrisGameState PausedState = null;
+        public const int NumFallingItems = 65;
+        public List<PauseFallImageBase> FallImages = null;
         public override DisplayMode SupportedDisplayMode { get{ return DisplayMode.Partitioned; } }
-
-        public PauseGameState(IStateOwner pOwner, GameState pPausedState)
+        public StandardTetrisGameState GetComposite()
+        {
+            return PausedState;
+        }
+        public PauseGameState(IStateOwner pOwner, StandardTetrisGameState pPausedState)
         {
             PausedState = pPausedState;
             //initialize the given number of arbitrary tetronimo pause drawing images.
-            if (PausedState is StandardTetrisGameState)
-            {
-                StandardTetrisGameState std = PausedState as StandardTetrisGameState;
-                //TODO: well this clearly shouldn't be here...
-                Image[] availableImages = std.GetTetronimoImages();
-                var Areause = pOwner.GameArea;
-                FallImages = new List<PauseFallImageGDIPlus>();
-                for (int i = 0; i < NumFallingItems; i++)
-                {
-                    PauseFallImageGDIPlus pfi = new PauseFallImageGDIPlus();
-                    pfi.OurImage = TetrisGame.Choose(availableImages);
-                    pfi.XSpeed = (float) (rgen.NextDouble() * 10) - 5;
-                    pfi.YSpeed = (float) (rgen.NextDouble() * 10) - 5;
-                    pfi.AngleSpeed = (float) (rgen.NextDouble() * 20) - 10;
-                    pfi.XPosition = (float) rgen.NextDouble() * (float) Areause.Width;
-                    pfi.YPosition = (float) rgen.NextDouble() * (float) Areause.Height;
-                    FallImages.Add(pfi);
-                }
-            }
+          
             PopulatePauseMenu(pOwner);
         }
         private void PopulatePauseMenu(IStateOwner pOwner)
@@ -90,6 +75,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
+            if (!DrawDataInitialized) return;
             foreach (var iterate in FallImages)
             {
                 iterate.Proc(pOwner.GameArea);
@@ -150,7 +136,7 @@ namespace BASeTris.GameStates
             }
             public override void Draw(Object g)
             {
-                this.Proc((CanvasType)g);
+                this.Draw((CanvasType)g);
             }
             public ImageType OurImage {  get { return (ImageType)BaseImage; } set { BaseImage = value; } }
         }

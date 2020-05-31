@@ -7,7 +7,7 @@ using BASeTris.GameStates;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(GameOverGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class GameOverStateRenderingHandler : StandardStateRenderingHandler<Graphics,GameOverGameState,GameStateDrawParameters>
+    public class GameOverStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,GameOverGameState,GameStateDrawParameters>
     {
         Brush useCoverBrush = null;
         private void DrawTetrominoStat(GameOverGameState Self,  Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)

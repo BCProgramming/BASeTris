@@ -148,7 +148,7 @@ namespace BASeTris
             //int Position1 = TestScores.IsEligible(12000);
             //int Position2 = TestScores.IsEligible(3000);
             
-            menuStrip1.Font = new Font(menuStrip1.Font.FontFamily, 28, FontStyle.Regular);
+            menuStrip1.Font = new Font(menuStrip1.Font.FontFamily, 14, FontStyle.Regular);
             Win10MenuRenderer buildrender = new Win10MenuRenderer(null, true);
 
             menuStrip1.Renderer = buildrender;

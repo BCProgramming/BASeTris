@@ -118,6 +118,7 @@ namespace BASeTris
             base.OnRenderFrame(e);
             try
             {
+                var CurrentGameState = _Present.Game.CurrentState;
                 Title = $"(Vsync: {VSync}) FPS: {1f / e.Time:0}";
 
                 Color4 backColor;
@@ -154,31 +155,40 @@ namespace BASeTris
                     */
                     
                     
-                    if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                    if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Full)
                     {
-                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), CurrentGameState.GetType(), typeof(GameStateSkiaDrawParameters));
                         if (renderer != null)
                         {
                             if (renderer is IStateRenderingHandler staterender)
                             {
-                                staterender.Render(this, canvas, _Present.Game.CurrentState,
+                                staterender.Render(this, canvas, CurrentGameState,
                                     new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
                                 return;
                             }
                         }
                     }
-                    else if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                    else if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                     {
                         GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
-                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), CurrentGameState.GetType(), typeof(GameStateSkiaDrawParameters));
                         if (renderer != null)
                         {
                             if (renderer is IStateRenderingHandler staterender)
                             {
-                                canvas.Clear(SKColors.Blue);
-                                staterender.Render(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, ClientSize.Height)));
+                                SKRect FieldRect = new SKRect(0, 0, FieldWidth, ClientSize.Height);
+                                SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height);
+                                //canvas.Clear(SKColors.Blue);
+                                canvas.Save(); //save state before setting clip to field.
+                                canvas.ClipRect(FieldRect);
+                                staterender.Render(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(FieldRect));
+                                canvas.Restore();
+                                //now, call rendder to render the stats.
+                                canvas.ClipRect(StatsRect);
+                                
+                                staterender.RenderStats(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(StatsRect));
                                 //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
-
+                                
                                 //staterender.RenderStats(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height)));
                                 //staterender.Render(this, skTetrisField, _Present.Game.CurrentState,
                                 //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));

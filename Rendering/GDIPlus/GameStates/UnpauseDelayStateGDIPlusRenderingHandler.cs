@@ -6,7 +6,7 @@ using BASeTris.GameStates;
 namespace BASeTris.Rendering.GDIPlus
 {
     [RenderingHandler(typeof(UnpauseDelayGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class UnpauseDelayStateRenderingHandler : StandardStateRenderingHandler<Graphics,UnpauseDelayGameState,GameStateDrawParameters>
+    public class UnpauseDelayStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,UnpauseDelayGameState,GameStateDrawParameters>
     {
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, UnpauseDelayGameState Source, GameStateDrawParameters Element)
         {

@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using BaseTris.AssetManager;
+using BASeTris.AssetManager;
 using BASeCamp.BASeScores;
 using BASeTris.AssetManager;
 using BASeTris.GameStates;

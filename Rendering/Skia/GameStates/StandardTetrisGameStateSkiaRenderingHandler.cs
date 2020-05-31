@@ -212,7 +212,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 {
                     var useStats = Source.GameStats;
                     double Factor = Bounds.Height / 644d;
-                    var DesiredFontPixelHeight = PixelsToPoints((int)(Bounds.Height * (23d / 644d)));
+                    var DesiredFontPixelHeight = PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
                     float DesiredFontSize = (float)DesiredFontPixelHeight;
                     SKPaint skp;
                     SKTypeface standardFont = TetrisGame.RetroFontSK;
@@ -287,8 +287,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                         //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
                         SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
                         PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
+                        SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width*1.5f, ImagePos.Y + TetrominoImage.Height*1.5f);
 
-                        g.DrawBitmap(TetrominoImage, ImagePos.X, ImagePos.Y, null);
+                        g.DrawBitmap(TetrominoImage, DrawRect, null);
 
                         TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
                         TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, Color.Black.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
@@ -359,8 +360,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                             double NumAffect = Source.NextAngleOffset == 0 ? 0 : AngleIncrementSize / Source.NextAngleOffset;
                             Size DrawTetSize = new Size
                             (
-                                (int)((float)NextTetromino.Width * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))),
-                                (int)((float)NextTetromino.Height * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))));
+                                (int)((float)(NextTetromino.Width*1.5f) * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))),
+                                (int)((float)(NextTetromino.Height*1.5f) * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))));
 
 
                             //g.TranslateTransform(CenterPoint.X,CenterPoint.Y);
