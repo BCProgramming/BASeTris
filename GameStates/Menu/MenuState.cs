@@ -28,7 +28,12 @@ namespace BASeTris.GameStates.Menu
 
         public String StateHeader { get; set; }
 
-        public Font HeaderFont { get; set; } = new Font("Arial",28,FontStyle.Regular,GraphicsUnit.Pixel);
+        
+
+        public String HeaderTypeface { get; set; } = "Arial";
+        public float HeaderTypeSize { get; set; } = 28;
+        
+
         //Our menu elements.
         public List<MenuStateMenuItem> MenuElements = new List<MenuStateMenuItem>();
         public int MainXOffset;

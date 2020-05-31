@@ -26,7 +26,9 @@ namespace BASeTris.GameStates.Menu
             Font ItemFont = new Font(TetrisGame.RetroFont, (int)((float)DesiredFontPixelHeight * (3f / 4f)), FontStyle.Bold, GraphicsUnit.Pixel);
             MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
             StateHeader = "Options";
-            HeaderFont = standardFont;
+            HeaderTypeface = TetrisGame.RetroFont.Name;
+            HeaderTypeSize = DesiredFontPixelHeight;
+            
 
             MenuItemActivated += (obj, e) =>
             {

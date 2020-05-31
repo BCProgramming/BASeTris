@@ -69,9 +69,7 @@ namespace BASeTris.Rendering.GDIPlus
             TetrisGame.DrawText(g, usePauseFont, sPauseText, Brushes.White, Brushes.Black, DrawPos.X, DrawPos.Y);
             //retrieve the renderer for the MenuState object.
             base.Render(pOwner, pRenderTarget, Source, Element);
-            //var basecall = RenderingProvider.Static.GetHandler(typeof(Graphics), typeof(MenuState), typeof(GameStateDrawParameters));
-            //basecall?.Render(pOwner,pRenderTarget,Source,Element); //draw the menu itself.
-
+         
         }
         public override float DrawHeader(IStateOwner pOwner, MenuState Source, Graphics Target, RectangleF Bounds)
         {

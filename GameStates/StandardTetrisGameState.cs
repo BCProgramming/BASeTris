@@ -775,7 +775,9 @@ namespace BASeTris.GameStates
 
                 MenuState ms = new MenuState(BackgroundDrawers.StandardImageBackgroundGDI.GetStandardBackgroundDrawer());
                 ms.StateHeader = "This is a Menu";
-                ms.HeaderFont = standardFont;
+                ms.HeaderTypeface = standardFont.Name;
+                ms.HeaderTypeSize = standardFont.Size;
+                
                 MenuStateTextMenuItem returnitem = new MenuStateTextMenuItem();
                 returnitem.Font = ItemFont;
                 returnitem.Text = "Return";

@@ -53,7 +53,7 @@ namespace BASeTris.Rendering.GDIPlus
             {
                 if (!FontSizeData.ContainsKey(pOwner.ScaleFactor))
                 {
-                    Font buildfont = new Font(Source.HeaderFont.FontFamily, (float)(Source.HeaderFont.Size * pOwner.ScaleFactor), Source.HeaderFont.Style);
+                    Font buildfont = new Font(Source.HeaderTypeface, (float)(Source.HeaderTypeSize * pOwner.ScaleFactor), FontStyle.Regular);
                     FontSizeData.Add(pOwner.ScaleFactor, buildfont);
                 }
                 return FontSizeData[pOwner.ScaleFactor];
