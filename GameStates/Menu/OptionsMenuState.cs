@@ -48,7 +48,9 @@ namespace BASeTris.GameStates.Menu
                 new SoundOption("tetris_theme_A","NES A Theme"),
                 new SoundOption("tetris_theme_B","NES B Theme"),
                 new SoundOption("tetris_theme_C","NES C Theme"),
-                new SoundOption("tetris_2","Tetris 2")
+                new SoundOption("tetris_2","Tetris 2"),
+                new SoundOption("smb3_tetris","Tetris DS-SMB3"),
+                new SoundOption("tetrisds","Tetris DS")
 
             }, 0);
 
@@ -57,7 +59,8 @@ namespace BASeTris.GameStates.Menu
 
 
             MusicOptionItem.OnActivateOption += MusicOptionItem_OnActivateOption;
-            ReturnItem.Font = SoundLabel.Font = MusicOptionItem.Font = ItemFont;
+            ReturnItem.FontFace = SoundLabel.FontFace = MusicOptionItem.FontFace = ItemFont.FontFamily.Name;
+            ReturnItem.FontSize = SoundLabel.FontSize = MusicOptionItem.FontSize = ItemFont.Size;
             MenuElements.Add(ReturnItem);
             MenuElements.Add(SoundLabel);
             MenuElements.Add(MusicOptionItem);

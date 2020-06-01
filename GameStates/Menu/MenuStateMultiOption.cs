@@ -7,19 +7,31 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.Menu
 {
+    public class MenuStateMultiOption :  MenuStateTextMenuItem
+    {
+        public IMultiOptionManager OptionManagerBase = null;
+        public virtual Object CurrentOptionBase { get; set; } = null;
+        protected bool _Activated = false;
+        public bool Activated {  get { return _Activated; } set { _Activated = value; } }
+        protected bool _Selected = false;
+        public bool Selected {  get { return _Selected; } set { _Selected = value; } }
+        public MenuStateMultiOption(IMultiOptionManager pOptionManager)
+        {
+
+        }
+
+    }
     /// <summary>
     /// A text Menu item that can be activated to select/change between a set of options.
     /// </summary>
-    public class MenuStateMultiOption<T> :MenuStateTextMenuItem
+    public class MenuStateMultiOption<T> : MenuStateMultiOption
     {
-        protected IMultiOptionManager<T> OptionManager = null;
+        public IMultiOptionManager<T> OptionManager { get { return OptionManagerBase as IMultiOptionManager<T>; } set { OptionManagerBase = value; } }
         public event EventHandler<OptionActivated<T>> OnActivateOption;
-        public T CurrentOption = default(T);
-        private bool _Activated = false;
-        private bool _Selected = false;
-        public MenuStateMultiOption(IMultiOptionManager<T> pOptionManager)
+
+        public T CurrentOption { get { return (T)CurrentOptionBase; } set { CurrentOptionBase = value; } }
+        public MenuStateMultiOption(IMultiOptionManager<T> pOptionManager):base(pOptionManager)
         {
-            OptionManager = pOptionManager;
         }
 
         public override MenuEventResultConstants OnSelected()
@@ -44,30 +56,7 @@ namespace BASeTris.GameStates.Menu
             _Activated = false;
             return MenuEventResultConstants.Handled;
         }
-        public override void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState)
-        {
-            //draw < and > just outside the bounds using our font.
-            Font useFont = GetScaledFont(pOwner);
-            String sLeftCover = "< ";
-            String sRightCover = ">";
-            var PrevItem = OptionManager.GetText(OptionManager.PeekPrevious());
-            var NextItem = OptionManager.GetText(OptionManager.PeekNext());
-            sLeftCover = PrevItem + sLeftCover;
-            sRightCover = sRightCover + NextItem;
-            var MeasureLeft = Target.MeasureString(sLeftCover, useFont);
-            var MeasureRight = Target.MeasureString(sRightCover, useFont);
-
-            PointF LeftPos = new PointF(Bounds.Left - MeasureLeft.Width, Bounds.Top + (Bounds.Height / 2) - MeasureLeft.Height / 2);
-            PointF RightPos = new PointF(Bounds.Right,Bounds.Top + (Bounds.Height/2) - MeasureRight.Height/2);
-            
-            if (_Activated)
-            {
-                TetrisGame.DrawText(Target, useFont, sLeftCover, this.ForeBrush, ShadowBrush, LeftPos.X, LeftPos.Y);
-                TetrisGame.DrawText(Target, useFont, sRightCover, this.ForeBrush, ShadowBrush, RightPos.X, RightPos.Y);
-            }
-
-            base.Draw(pOwner,Target, Bounds, DrawState);
-        }
+       
 
         public override void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
         {
@@ -100,7 +89,15 @@ namespace BASeTris.GameStates.Menu
             Owner = pOwner;
         }
     }
-    public interface IMultiOptionManager<T>
+    public interface IMultiOptionManager
+    {
+        Object MovePreviousBase();
+        Object MoveNextBase();
+        Object PeekPreviousBase();
+        Object PeekNextBase();
+        String GetTextBase(Object Item);
+    }
+    public interface IMultiOptionManager<T>: IMultiOptionManager
     {
         T MovePrevious();
         T MoveNext();
@@ -111,11 +108,53 @@ namespace BASeTris.GameStates.Menu
         void SetCurrentIndex(int Index);
         String GetText(T Item);
     }
-    public class MultiOptionManagerList<T>:IMultiOptionManager<T>
+    public abstract class AbstractMultiOptionManager<T> : IMultiOptionManager<T>
+    {
+        public abstract string GetText(T Item);
+
+        public string GetTextBase(object Item)
+        {
+            return GetText((T)Item);
+        }
+
+        public abstract T MoveNext();
+        public object MoveNextBase()
+        {
+            return MoveNext();
+        }
+
+        public abstract T MovePrevious();
+        
+
+        public object MovePreviousBase()
+        {
+            return MovePrevious();
+        }
+
+        public abstract T PeekNext();
+        
+
+        public object PeekNextBase()
+        {
+            return PeekNext();
+        }
+
+        public abstract T PeekPrevious();
+        
+
+        public object PeekPreviousBase()
+        {
+            return PeekPrevious();
+        }
+
+        public abstract void SetCurrentIndex(int Index);
+        
+    }
+    public class MultiOptionManagerList<T>: AbstractMultiOptionManager<T>
     {
         private int SelectedIndex;
         private T[] Options;
-        public void SetCurrentIndex(int pIndex)
+        public override void SetCurrentIndex(int pIndex)
         {
             SelectedIndex = pIndex;
         }
@@ -124,32 +163,32 @@ namespace BASeTris.GameStates.Menu
             Options = pOptions;
             SelectedIndex = pStartingIndex;
         }
-        public string GetText(T Value)
+        public override string GetText(T Value)
         {
             return Value.ToString();
         }
 
-        public T PeekPrevious()
+        public override T PeekPrevious()
         {
             var TestIndex = SelectedIndex - 1;
             if (TestIndex < 0) TestIndex = Options.Length - 1;
             return Options[TestIndex];
         }
 
-        public T PeekNext()
+        public override T PeekNext()
         {
             var TestIndex = SelectedIndex + 1;
             if (TestIndex > Options.Length-1) TestIndex = 0;
             return Options[TestIndex];
         }
 
-        public T MovePrevious()
+        public override T MovePrevious()
         {
             SelectedIndex--;
             if (SelectedIndex < 0) SelectedIndex = Options.Length - 1;
             return Options[SelectedIndex];
         }
-        public T MoveNext()
+        public override T MoveNext()
         {
             SelectedIndex++;
             if (SelectedIndex > Options.Length-1) SelectedIndex = 0;

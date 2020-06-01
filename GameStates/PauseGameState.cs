@@ -38,17 +38,24 @@ namespace BASeTris.GameStates
                 if(e.MenuElement==ResumeOption)
                     ResumeGame(pOwner);
             };
-            ResumeOption.Font = TetrisGame.GetRetroFont(14, 1.0f);
+            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
+            ResumeOption.FontFace = FontSrc.FontFamily.Name;
+            ResumeOption.FontSize = FontSrc.Size;
+            //ResumeOption.Font = TetrisGame.GetRetroFont(14, 1.0f);
 
             var scaleitem = new MenuStateScaleMenuItem(pOwner);
-            scaleitem.Font = ResumeOption.Font;
-
-            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner);
-            ThemeItem.Font = ResumeOption.Font;
+            scaleitem.FontFace = FontSrc.FontFamily.Name;
+            scaleitem.FontSize = FontSrc.Size;
             
 
+            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner);
+            ThemeItem.FontFace = FontSrc.FontFamily.Name;
+            ThemeItem.FontSize = FontSrc.Size;
+
+
             var ExitItem = new ConfirmedTextMenuItem() {Text="Quit"};
-            ExitItem.Font = scaleitem.Font;
+            ExitItem.FontFace = FontSrc.FontFamily.Name;
+            ExitItem.FontSize = FontSrc.Size;
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
                 Application.Exit();

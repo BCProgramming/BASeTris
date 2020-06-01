@@ -3,6 +3,7 @@ using System.Drawing;
 using BASeCamp.Rendering;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering.MenuItems;
 
 namespace BASeTris.Rendering.GDIPlus
 {
@@ -23,14 +24,23 @@ namespace BASeTris.Rendering.GDIPlus
             int CurrentIndex = Source.StartItemOffset;
             float CurrentY = DrawHeader(pOwner,Source, g, Bounds);
             float MaxHeight = 0, MaxWidth = 0;
+            
             //we want to find the widest item.
             foreach (var searchitem in Source.MenuElements)
             {
+                
                 if (searchitem is MenuStateSizedMenuItem mss)
                 {
-                    var grabsize = mss.GetSize(pOwner);
-                    if (grabsize.Height > MaxHeight) MaxHeight = grabsize.Height;
-                    if (grabsize.Width > MaxWidth) MaxWidth = grabsize.Width;
+                    var sizehandler = RenderingProvider.Static.GetHandler(typeof(Graphics), searchitem.GetType(),typeof(MenuStateMenuItemDrawData));
+                    if(sizehandler is ISizableMenuItemGDIPlusRenderingHandler isizer)
+
+                    {
+                        var grabsize = isizer.GetSize(pOwner,mss);
+                        if (grabsize.Height > MaxHeight) MaxHeight = grabsize.Height;
+                        if (grabsize.Width > MaxWidth) MaxWidth = grabsize.Width;
+                        
+                    }
+                    
                 }
             }
             //we draw each item at the maximum size.

@@ -779,7 +779,8 @@ namespace BASeTris.GameStates
                 ms.HeaderTypeSize = standardFont.Size;
                 
                 MenuStateTextMenuItem returnitem = new MenuStateTextMenuItem();
-                returnitem.Font = ItemFont;
+                returnitem.FontFace = ItemFont.Name;
+                returnitem.FontSize = ItemFont.Size;
                 returnitem.Text = "Return";
                 returnitem.BackColor = Color.Transparent;
                 returnitem.ForeColor = Color.DarkBlue;
@@ -787,7 +788,8 @@ namespace BASeTris.GameStates
                 ms.MenuElements.Add(returnitem);
 
                 var scaleitem = new MenuStateScaleMenuItem(pOwner);
-                scaleitem.Font = ItemFont;
+                scaleitem.FontFace = ItemFont.Name;
+                scaleitem.FontSize = ItemFont.Size;
                 ms.MenuElements.Add(scaleitem);
 
                 ms.MenuItemActivated += (obj, e) =>
@@ -800,7 +802,8 @@ namespace BASeTris.GameStates
                 for (int i=0;i<8;i++)
                 {
                     MenuStateTextMenuItem mts = new MenuStateTextMenuItem();
-                    mts.Font = ItemFont;
+                    mts.FontFace = ItemFont.Name;
+                    mts.FontSize = ItemFont.Size;
                     mts.BackColor = Color.Transparent;
                     mts.ForeColor = Color.Black;
                     mts.Text = "Item " + i.ToString();
