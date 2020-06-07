@@ -8,16 +8,28 @@ using System.Windows.Forms;
 
 namespace BASeTris.GameStates.Menu
 {
-    public class MenuStateMenuItemDrawData
+    public class MenuStateMenuItemGDIPlusDrawData
     {
         public RectangleF Bounds = RectangleF.Empty;
         public MenuStateMenuItem.StateMenuItemState DrawState = MenuStateMenuItem.StateMenuItemState.State_Normal;
-        public MenuStateMenuItemDrawData(RectangleF pBounds, MenuStateMenuItem.StateMenuItemState pDrawState)
+        public MenuStateMenuItemGDIPlusDrawData(RectangleF pBounds, MenuStateMenuItem.StateMenuItemState pDrawState)
         {
             Bounds = pBounds;
             DrawState = pDrawState;
         }
     }
+
+    public class MenuStateMenuItemSkiaDrawData
+    {
+        public SkiaSharp.SKRect Bounds = SkiaSharp.SKRect.Empty;
+        public MenuStateMenuItem.StateMenuItemState DrawState = MenuStateMenuItem.StateMenuItemState.State_Normal;
+        public MenuStateMenuItemSkiaDrawData(SkiaSharp.SKRect pBounds, MenuStateMenuItem.StateMenuItemState pDrawState)
+        {
+            Bounds = pBounds;
+            DrawState = pDrawState;
+        }
+    }
+
     //TODO: implement RenderingProvider framework for MenuStateMenuItem and subclasses, replacing the Draw() abstract routine.
     public abstract class MenuStateMenuItem
     {
@@ -76,6 +88,23 @@ namespace BASeTris.GameStates.Menu
         }
 
     }
+    public static class HorizontalAlignmentExtensions
+    {
+        public static HorizontalAlignment GetGDIPlusAlignment(this MenuStateTextMenuItem.MenuHorizontalAlignment Source)
+        {
+            switch(Source)
+            {
+                case MenuStateTextMenuItem.MenuHorizontalAlignment.Left:
+                    return HorizontalAlignment.Left;
+                case MenuStateTextMenuItem.MenuHorizontalAlignment.Center:
+                    return HorizontalAlignment.Center;
+                case MenuStateTextMenuItem.MenuHorizontalAlignment.Right:
+                    return HorizontalAlignment.Right;
+                default:
+                    return HorizontalAlignment.Left;
+            }
+        }
+    }
     public abstract class MenuStateSizedMenuItem : MenuStateMenuItem
     {
         
@@ -84,9 +113,14 @@ namespace BASeTris.GameStates.Menu
     //Standard Item in a menu for a Menu State.
     public class MenuStateTextMenuItem: MenuStateSizedMenuItem
     {
-        
 
-        public HorizontalAlignment TextAlignment { get; set; } = HorizontalAlignment.Center;
+        public enum MenuHorizontalAlignment
+        {
+            Left,
+            Center,
+            Right
+        }
+        public MenuHorizontalAlignment TextAlignment { get; set; } = MenuHorizontalAlignment.Center;
         public virtual String Text { get; set; }
         public String FontFace { get; set; }
         public float FontSize { get; set; }

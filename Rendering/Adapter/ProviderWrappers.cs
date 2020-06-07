@@ -15,6 +15,89 @@ namespace BASeTris.Rendering.Adapters
     //Color, SKColor
     //Some form of ColorMatrix
 
+
+    public class BCFont
+
+    {
+        [Flags]
+        public enum BCFontStyle
+        {
+            Regular=0,
+            Bold=1,
+            Italic=2,
+            Underline=4,
+            Strikeout=8
+        }
+        public String FontFace { get; set; }
+        public float FontSize { get; set; }
+        
+        public BCFontStyle FontStyle { get; set; }
+        public BCFont(String pFontFace,float pFontSize,BCFontStyle pStyle)
+        {
+            FontFace = pFontFace;
+            FontSize = pFontSize;
+            FontStyle = pStyle;
+        }
+        public static implicit operator Font(BCFont pSource)
+        {
+
+            Font buildResult = new Font(pSource.FontFace,pSource.FontSize,GetGDIPlusFontStyle(pSource.FontStyle));
+            return buildResult;
+
+        }
+        public static implicit operator BCFont(Font pSource)
+        {
+            BCFont buildResult = new BCFont(pSource.FontFamily.Name, pSource.Size, GetBCStyleFromGDIPlusStyle(pSource.Style));
+            return buildResult;
+        }
+        public static FontStyle GetGDIPlusFontStyle(BCFontStyle pSrc)
+        {
+            FontStyle result = System.Drawing.FontStyle.Regular;
+            if (pSrc.HasFlag(BCFontStyle.Bold))
+                result |= System.Drawing.FontStyle.Bold;
+            if (pSrc.HasFlag(BCFontStyle.Italic))
+                result |= System.Drawing.FontStyle.Italic;
+            if (pSrc.HasFlag(BCFontStyle.Underline))
+                result |= System.Drawing.FontStyle.Underline;
+            if (pSrc.HasFlag(BCFontStyle.Strikeout))
+                result |= System.Drawing.FontStyle.Strikeout;
+
+            return result;
+        }
+        public static BCFontStyle GetBCStyleFromGDIPlusStyle(FontStyle pSrc)
+        {
+            BCFontStyle result = BCFontStyle.Regular;
+            if (pSrc.HasFlag(System.Drawing.FontStyle.Bold))
+                result |= BCFontStyle.Bold;
+            if (pSrc.HasFlag(System.Drawing.FontStyle.Italic))
+                result |= BCFontStyle.Italic;
+            if (pSrc.HasFlag(System.Drawing.FontStyle.Underline))
+                result |= BCFontStyle.Underline;
+            if (pSrc.HasFlag(System.Drawing.FontStyle.Strikeout))
+                result |= BCFontStyle.Strikeout;
+            
+            return result;
+        }
+      
+
+    }
+
+    public class SKFontInfo
+    {
+        public SKTypeface TypeFace { get; set; }
+        public float FontSize { get; set; }
+        public SKFontInfo(SKTypeface face,float pFontSize)
+        {
+            TypeFace = face;
+            FontSize = FontSize;
+        }
+        public void ApplyPaint(SKPaint Target)
+        {
+            Target.Typeface = this.TypeFace;
+            Target.TextSize = this.FontSize;
+        }
+    }
+
     public class BCColor
     {
         public byte R;

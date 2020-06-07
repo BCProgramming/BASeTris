@@ -55,7 +55,7 @@ namespace BASeTris
         private static Image _TiledCache = null;
         private DateTime _GameStartTime = DateTime.MinValue;
         private DateTime _LastPausedTime = DateTime.MinValue;
-        
+
         public StandardSettings Settings
         {
             get
@@ -63,15 +63,15 @@ namespace BASeTris
                 return GameOwner.Settings;
             }
         }
-        public DateTime GameStartTime {  get { return _GameStartTime; } set { _GameStartTime = value; } }
+        public DateTime GameStartTime { get { return _GameStartTime; } set { _GameStartTime = value; } }
         public DateTime LastPausedTime
         {
             get { return _LastPausedTime; }
             set { _LastPausedTime = value; }
         }
-        
+
         private TimeSpan _FinalGameTime = TimeSpan.MinValue;
-        public TimeSpan FinalGameTime {  get { return _FinalGameTime; } set { _FinalGameTime = value; } }
+        public TimeSpan FinalGameTime { get { return _FinalGameTime; } set { _FinalGameTime = value; } }
 
         public TimeSpan GetElapsedTime()
         {
@@ -98,7 +98,7 @@ namespace BASeTris
                 {
                     Image reduceit = Imageman["block_arrangement"];
                     //reduce total size to 20%.
-                    Bitmap ReduceSize = new Bitmap((int) (reduceit.Width * .1), (int) (reduceit.Height * .1));
+                    Bitmap ReduceSize = new Bitmap((int)(reduceit.Width * .1), (int)(reduceit.Height * .1));
                     using (Graphics greduce = Graphics.FromImage(ReduceSize))
                     {
                         greduce.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -138,7 +138,7 @@ namespace BASeTris
 
 
         }
-        public static void DrawTextSK(SKCanvas Target,String pText,SKPoint Position, SKTypeface typeface,SKColor Color, float DesiredSize,double ScaleFactor)
+        public static void DrawTextSK(SKCanvas Target, String pText, SKPoint Position, SKTypeface typeface, SKColor Color, float DesiredSize, double ScaleFactor)
         {
             var rBytes = UTF8Encoding.Default.GetBytes(pText.ToCharArray());
             using (SKPaint skp = new SKPaint())
@@ -153,37 +153,37 @@ namespace BASeTris
                 skp.SubpixelText = true;
                 Target.DrawText(rBytes, Position.X, Position.Y, skp);
             }
-            
+
             //SkiaCanvas.DrawText(UTF8Encoding.Default.GetBytes("testing".ToCharArray()), 67, 67, skp);
 
 
 
         }
-        
+
         public static Font GetRetroFont(float desiredSize, double ScaleFactor, FontStyle desiredStyle = FontStyle.Regular, GraphicsUnit GUnit = GraphicsUnit.Point)
         {
-            return new Font(RetroFont, (float) (desiredSize * ScaleFactor), desiredStyle, GUnit);
+            return new Font(RetroFont, (float)(desiredSize * ScaleFactor), desiredStyle, GUnit);
         }
-        
+
         public static FontFamily GetMonospaceFont()
         {
             return RetroFont;
         }
-        public static Color GetRainbowColor(Color Source,double Multiplier)
+        public static Color GetRainbowColor(Color Source, double Multiplier)
         {
             long usetick = DateTime.Now.Ticks;
-            double usepercent = 240/((double)(usetick%240)*Multiplier);
+            double usepercent = 240 / ((double)(usetick % 240) * Multiplier);
             return GetRainbowColor(Source, (float)usepercent);
         }
-        public static Color GetRainbowColor(Color Source,float PercentOffset)
+        public static Color GetRainbowColor(Color Source, float PercentOffset)
         {
             int useRotation = (int)(PercentOffset * 240) % 240;
             return HSLColor.RotateHue(Source, useRotation);
-            
+
         }
         public static void DrawText(Graphics g, Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition, float ShadowXOffset = 5, float ShadowYOffset = 5, StringFormat sf = null)
         {
-            DrawText(g, new DrawTextInformation()
+            DrawText(g, new DrawTextInformationGDI()
             {
                 Text = sText,
                 BackgroundBrush = Brushes.Transparent,
@@ -195,7 +195,11 @@ namespace BASeTris
                 Format = sf
             });
         }
-        public static void DrawText(Graphics g,DrawTextInformation DrawData)
+        public static void DrawTextSK(SKCanvas g, DrawTextInformationSkia DrawData)
+        {
+
+        }
+        public static void DrawText(Graphics g, DrawTextInformationGDI DrawData)
         {
             if (DrawData.Format == null)
             {
@@ -207,14 +211,14 @@ namespace BASeTris
 
             char[] drawcharacters = DrawData.Text.ToCharArray();
             g.PageUnit = GraphicsUnit.Pixel;
-            for (int i=0;i<drawcharacters.Length;i++)
+            for (int i = 0; i < drawcharacters.Length; i++)
             {
                 //get the dimensions of this character
-                
+
                 char drawcharacter = drawcharacters[i];
-                PointF DrawPosition = new PointF(characterpositions[i].Location.X+DrawData.Position.X, characterpositions[i].Location.Y + DrawData.Position.Y);
-                DrawData.CharacterHandler.DrawCharacter(g,drawcharacter,DrawData,DrawPosition, characterpositions[i].Size,i, drawcharacters.Length,1);
-                }
+                PointF DrawPosition = new PointF(characterpositions[i].Location.X + DrawData.Position.X, characterpositions[i].Location.Y + DrawData.Position.Y);
+                DrawData.CharacterHandler.DrawCharacter(g, drawcharacter, DrawData, DrawPosition, characterpositions[i].Size, i, drawcharacters.Length, 1);
+            }
 
             //Draw the foreground
             for (int i = 0; i < drawcharacters.Length; i++)
@@ -222,11 +226,11 @@ namespace BASeTris
                 //get the dimensions of this character
                 char drawcharacter = drawcharacters[i];
                 PointF DrawPosition = new PointF(characterpositions[i].Location.X + DrawData.Position.X, characterpositions[i].Location.Y + DrawData.Position.Y);
-                DrawData.CharacterHandler.DrawCharacter(g, drawcharacter, DrawData, DrawPosition,characterpositions[i].Size, i, drawcharacters.Length, 2);
+                DrawData.CharacterHandler.DrawCharacter(g, drawcharacter, DrawData, DrawPosition, characterpositions[i].Size, i, drawcharacters.Length, 2);
             }
             //g.DrawString(DrawData.Text, DrawData.DrawFont, DrawData.ShadowBrush,DrawData.Position.X+DrawData.ShadowOffset.X, DrawData.Position.Y+DrawData.ShadowOffset.Y,DrawData.Format);
         }
-        
+
         public static void InitState()
         {
             String ScoreFolder = Path.Combine
@@ -253,14 +257,25 @@ namespace BASeTris
             RetroFont = GetResourceFont("BASeTris.Pixel.ttf");
             LCDFont = GetResourceFont("BASeTris.LCD.ttf");
             RetroFontSK = GetResourceFontSK("BASeTris.Pixel.ttf");
-            LCDFontSK= GetResourceFontSK("BASeTris.LCD.ttf");
+            LCDFontSK = GetResourceFontSK("BASeTris.LCD.ttf");
             //RetroFont = pfc.Families[0];
         }
+
+        private static SKPaint MeasureText = new SKPaint() { };
+        public static SKRect MeasureSKText(SKTypeface pTypeFace, float pFontSize, String pText)
+        {
+            MeasureText.Typeface = pTypeFace;
+            MeasureText.TextSize = pFontSize;
+            SKRect Bounds = SKRect.Empty;
+            MeasureText.MeasureText(pText, ref Bounds);
+            return Bounds;
+        }
+
         static Dictionary<String, SKTypeface> LoadedSKFonts = new Dictionary<String, SKTypeface>();
-        
+
         private static SKTypeface GetResourceFontSK(String ResourceName)
         {
-            if(LoadedSKFonts.ContainsKey(ResourceName))
+            if (LoadedSKFonts.ContainsKey(ResourceName))
             {
                 return LoadedSKFonts[ResourceName];
             }
@@ -273,18 +288,18 @@ namespace BASeTris
                     return null;
 
                 result = SKTypeface.FromStream(stream);
-                if(result!=null)
+                if (result != null)
                     LoadedSKFonts.Add(ResourceName, result);
 
                 return result;
-                
-                
-                
+
+
+
             }
         }
 
 
-        static Dictionary<String,FontFamily> LoadedFonts = new Dictionary<String, FontFamily>();
+        static Dictionary<String, FontFamily> LoadedFonts = new Dictionary<String, FontFamily>();
         private static FontFamily GetResourceFont(String ResourceName)
         {
 
@@ -327,9 +342,9 @@ namespace BASeTris
         public static T ClampValue<T>(T Value, T min, T max) where T : IComparable
         {
             //cast to IComparable
-            IComparable cvalue = (IComparable) Value;
-            IComparable cmin = (IComparable) min;
-            IComparable cmax = (IComparable) max;
+            IComparable cvalue = (IComparable)Value;
+            IComparable cmin = (IComparable)min;
+            IComparable cmax = (IComparable)max;
 
             //return (T)(cvalue.CompareTo(cmin)< 0 ?cmin:cvalue.CompareTo(cmax)>0?max:Value);
             if (cvalue.CompareTo(cmin) < 0)
@@ -353,7 +368,7 @@ namespace BASeTris
                 var oldvalue = CurrentGameState;
                 if (newvalue == oldvalue) return; //it's already the same so no need for any change here.
                 BeforeGameStateChangeEventArgs eventargs = new BeforeGameStateChangeEventArgs(oldvalue, newvalue);
-                BeforeGameStateChange?.Invoke(this,eventargs);
+                BeforeGameStateChange?.Invoke(this, eventargs);
                 if (eventargs.Cancel) return;
 
                 CurrentGameState = value;
@@ -377,7 +392,7 @@ namespace BASeTris
             GameOwner.AddGameObject(Source);
         }
 
-       
+
 
         public double ScaleFactor
         {
@@ -390,7 +405,7 @@ namespace BASeTris
         public void GameProc()
         {
             CurrentGameState.GameProc(GameOwner);
-            if(CurrentGameState.BG!=null)
+            if (CurrentGameState.BG != null)
             {
                 CurrentGameState.BG.FrameProc(GameOwner);
             }
@@ -433,7 +448,7 @@ namespace BASeTris
 
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
-            RenderingProvider.Static.DrawElement(this,g,CurrentGameState,new GameStateDrawParameters(Bounds));
+            RenderingProvider.Static.DrawElement(this, g, CurrentGameState, new GameStateDrawParameters(Bounds));
             CurrentGameState.DrawForegroundEffect(this, g, Bounds);
         }
 
@@ -479,7 +494,7 @@ namespace BASeTris
 
         public static String[] GetSearchFolders()
         {
-            return new String[] {GetLocalAssets(), AppDataFolder};
+            return new String[] { GetLocalAssets(), AppDataFolder };
         }
 
         private static String GetLocalAssets()
@@ -574,7 +589,7 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
-        public static Dictionary<Type,SKBitmap> GetTetrominoBitmapsSK(SKRect Bounds,TetrominoTheme UseTheme,TetrisField PlayField=null,float ScaleFactor=1)
+        public static Dictionary<Type, SKBitmap> GetTetrominoBitmapsSK(SKRect Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<Type, SKBitmap> TetrominoImages = new Dictionary<Type, SKBitmap>();
             float useSize = 18 * ScaleFactor;
@@ -613,7 +628,7 @@ namespace BASeTris
             TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
             return TetrominoImages;
         }
-        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null,float ScaleFactor=1)
+        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<Type, Image> TetrominoImages = new Dictionary<Type, Image>();
             float useSize = 18 * ScaleFactor;
@@ -663,7 +678,7 @@ namespace BASeTris
                 useG.SmoothingMode = SmoothingMode.AntiAlias;
                 var shadowtet = GetShadowAttributes(0f);
                 int offset = 2;
-                foreach (Point shadowblob in new Point[] {new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset)})
+                foreach (Point shadowblob in new Point[] { new Point(offset, offset), new Point(-offset, offset), new Point(offset, -offset), new Point(-offset, -offset) })
                 {
                     useG.DrawImage(Input, new Rectangle(3 + shadowblob.X, 3 + shadowblob.Y, Input.Width, Input.Height), 0, 0, Input.Width, Input.Height, GraphicsUnit.Pixel, shadowtet);
                 }
@@ -677,7 +692,7 @@ namespace BASeTris
         private static SKBitmap OutlineImageSK(SKBitmap Input)
         {
             int OutlineWidth = 3;
-            SKImageInfo skinfo = new SKImageInfo(Input.Width+(OutlineWidth*2),Input.Height+(OutlineWidth*2));
+            SKImageInfo skinfo = new SKImageInfo(Input.Width + (OutlineWidth * 2), Input.Height + (OutlineWidth * 2));
             SKBitmap BuildImage = new SKBitmap(skinfo, SKBitmapAllocFlags.ZeroPixels);
             using (SKCanvas useG = new SKCanvas(BuildImage))
             {
@@ -685,15 +700,15 @@ namespace BASeTris
 
                 SKPaint Blacken = new SKPaint();
                 Blacken.ColorFilter = SKColorMatrices.GetBlackener();
-                int offset = OutlineWidth/2;
-                foreach(SKPoint shadowblob in new SKPoint[] {new SKPoint(0,0),new SKPoint(0,offset*2),new SKPoint(offset*2,0),new SKPoint(offset*2,offset*2)})
+                int offset = OutlineWidth / 2;
+                foreach (SKPoint shadowblob in new SKPoint[] { new SKPoint(0, 0), new SKPoint(0, offset * 2), new SKPoint(offset * 2, 0), new SKPoint(offset * 2, offset * 2) })
                 {
-                    SKRect TargetPos = new SKRect(shadowblob.X,shadowblob.Y,Input.Width,Input.Height);
+                    SKRect TargetPos = new SKRect(shadowblob.X, shadowblob.Y, Input.Width, Input.Height);
 
-                    useG.DrawBitmap(Input,new SKRect(TargetPos.Left,TargetPos.Top,TargetPos.Left+Input.Width,TargetPos.Top+Input.Height), Blacken);
+                    useG.DrawBitmap(Input, new SKRect(TargetPos.Left, TargetPos.Top, TargetPos.Left + Input.Width, TargetPos.Top + Input.Height), Blacken);
 
                 }
-                useG.DrawBitmap(Input,new SKPoint(offset,offset));
+                useG.DrawBitmap(Input, new SKPoint(offset, offset));
             }
             return BuildImage;
         }
@@ -708,7 +723,7 @@ namespace BASeTris
             using (StringFormat string_format = new StringFormat())
             {
                 RectangleF FullBound;
-                
+
                 string_format.Alignment = StringAlignment.Near;
                 string_format.LineAlignment = StringAlignment.Near;
                 string_format.Trimming = StringTrimming.None;
@@ -797,106 +812,7 @@ namespace BASeTris
             return resultAttr;
         }
     }
-    public class DrawTextInformation
-    {
-        
-        public Font DrawFont;
-        public String Text;
-        public PointF Position;
-        public Brush ForegroundBrush;
-        public Brush BackgroundBrush;
-        public Brush ShadowBrush;
-        public PointF ShadowOffset = new PointF(5, 5);
-        public StringFormat Format;
-        public DrawCharacterHandler CharacterHandler = new DrawCharacterHandler();
-        public float ScalePercentage = 1;
-        public DrawTextInformation PreDrawData = null; //delegate to this one first if present.
-        public DrawTextInformation PostDrawData = null; //delegate to this one after if present.
-        //Graphics g,Font UseFont,
-        //String sText, Brush ForegroundBrush,
-        //Brush ShadowBrush, float XPosition, float YPosition,
-        //float ShadowXOffset=5,float ShadowYOffset=5,StringFormat sf = null
-    }
     
-    public class DrawCharacterHandler
-    {
-        private IList<DrawCharacterPositionCalculator> Extensions = new List<DrawCharacterPositionCalculator>() { new DrawCharacterPositionCalculator() };
-        public void SetPositionCalculator(DrawCharacterPositionCalculator calc)
-        {
-            Extensions = new List<DrawCharacterPositionCalculator>() { calc };
-        }
-        public void DrawCharacter(Graphics g,char character,DrawTextInformation DrawData,PointF Position, SizeF CharacterSize,int CharacterNumber, int TotalCharacters,int Pass)
-        {
-            if(DrawData.PreDrawData !=null)
-            {
-                DrawCharacter(g,character,DrawData.PreDrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
-            }
-            //adjust positioning by calling each extension.
-            foreach(var iterate in Extensions)
-            {
-                iterate.AdjustPositioning(ref Position,CharacterSize,DrawData,CharacterNumber,TotalCharacters,Pass);
-            }
-            PointF AddedOffset = Pass == 1 ? PointF.Empty : DrawData.ShadowOffset;
-            Brush DrawBrush = Pass == 1 ? DrawData.ShadowBrush : DrawData.ForegroundBrush;
-            //call beforedraw...
-            foreach(var iterate in Extensions)
-            {
-                iterate.BeforeDraw(g,character,DrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
-            }
-            Font UseFont = DrawData.DrawFont;
-            PointF DrawPosition = new PointF(Position.X + AddedOffset.X, Position.Y + AddedOffset.Y);
-            if(DrawData.ScalePercentage!=1)
-            {
-                UseFont = new Font(DrawData.DrawFont.FontFamily,DrawData.DrawFont.Size*DrawData.ScalePercentage,DrawData.DrawFont.Style);
-                float NewWidth = CharacterSize.Width * DrawData.ScalePercentage;
-                float NewHeight = CharacterSize.Height * DrawData.ScalePercentage;
-                AddedOffset.X -= ((NewWidth - CharacterSize.Width)) / 2;
-                AddedOffset.Y -= ((NewHeight - CharacterSize.Height)) / 2;
-            }
-
-
-            g.DrawString(character.ToString(), UseFont, DrawBrush, DrawPosition.X, DrawPosition.Y, DrawData.Format);
-            foreach (var iterate in Extensions.Reverse())
-            {
-                iterate.AfterDraw(g, character, DrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
-            }
-            if(DrawData.PostDrawData!=null)
-            {
-                DrawCharacter(g,character,DrawData.PostDrawData,Position,CharacterSize,CharacterNumber,TotalCharacters,Pass);
-            }
-        }
-    }
-    public class DrawCharacterPositionCalculator
-    {
-        public virtual void AdjustPositioning(ref PointF Position, SizeF size,DrawTextInformation DrawData,int pCharacterNumber,int TotalCharacters,int Pass)
-        {
-            //default makes no changes.
-        }
-        public virtual void BeforeDraw(Graphics g,char character,DrawTextInformation DrawData,PointF Position,SizeF CharacterSize,int CharacterNumber,int TotalCharacters,int Pass)
-        {
-
-        }
-        public virtual void AfterDraw(Graphics g, char character, DrawTextInformation DrawData, PointF Position, SizeF CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
-        {
-
-        }
-
-    }
-    public class RotatingPositionCharacterPositionCalculator:DrawCharacterPositionCalculator
-    {
-        private float Radius = 10;
-        private float CharacterNumberModifier = 0.5f;
-        public override void AdjustPositioning(ref PointF Position, SizeF size, DrawTextInformation DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
-        {
-            //rotate once every 3/4's of a second.
-            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750)/750;
-            var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
-            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
-            PointF newOffset = new PointF((float)Math.Cos(Angle)*Radius,(float)Math.Sin(Angle)*Radius);
-            Position.X = Position.X + newOffset.X;
-            Position.Y = Position.Y + newOffset.Y;
-        }
-    }
     
 
 }

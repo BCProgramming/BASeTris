@@ -1,132 +1,152 @@
-﻿using System;
+﻿using BASeCamp.Rendering;
+using BASeTris.GameStates.Menu;
+using BASeTris.Rendering.Adapters;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using BASeCamp.Rendering;
-using BASeTris.GameStates.Menu;
+using static BASeTris.GameStates.Menu.MenuStateTextMenuItem;
 
-namespace BASeTris.Rendering.MenuItems
+namespace BASeTris.Rendering.Skia.MenuItems
 {
-
-    public interface ISizableMenuItemGDIPlusRenderingHandler
+    public interface ISizableMenuItemSkiaRenderingHandler
     {
-        SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem item);
+        SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem item);
     }
-
-    [RenderingHandler(typeof(MenuStateMenuItem), typeof(Graphics), typeof(MenuStateMenuItemGDIPlusDrawData))]
-    public class MenuStateMenuItemGDIRenderer : IRenderingHandler<Graphics,MenuStateMenuItem,MenuStateMenuItemGDIPlusDrawData>
+#if false
+    [RenderingHandler(typeof(MenuStateMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData))]
+    public class MenuStateMenuItemSkiaRenderer : IRenderingHandler<SKCanvas, MenuStateMenuItem, MenuStateMenuItemSkiaDrawData>
     {
 
-        public void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemGDIPlusDrawData Element)
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
         {
-//
+            //
         }
 
         public void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
-            Render(pOwner,(Graphics)pRenderTarget,(MenuStateMenuItem)RenderSource,(MenuStateMenuItemGDIPlusDrawData)Element);
+            Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateMenuItem)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
         }
-        public SizeF GetSize(IStateOwner pOwner, MenuStateMenuItem Source)
+        public SKPoint GetSize(IStateOwner pOwner, MenuStateMenuItem Source)
         {
             if (Source is MenuStateSizedMenuItem sizer)
             {
-                var RealRenderer = RenderingProvider.Static.GetHandler(Source.GetType(), typeof(Graphics), typeof(MenuStateMenuItemGDIPlusDrawData));
+                var RealRenderer = RenderingProvider.Static.GetHandler(Source.GetType(), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData));
                 if (RealRenderer != null)
                 {
-                    if (RealRenderer is ISizableMenuItemGDIPlusRenderingHandler sizerender)
+                    if (RealRenderer is ISizableMenuItemSkiaRenderingHandler sizerender)
                     {
                         return sizerender.GetSize(pOwner, sizer);
                     }
                 }
             }
-            return SizeF.Empty;
+            return SKPoint.Empty;
 
         }
     }
 
 
-    [RenderingHandler(typeof(MenuStateTextMenuItem), typeof(Graphics), typeof(MenuStateMenuItemGDIPlusDrawData))]
-    public class MenuStateTextMenuItemGDIRenderer : IRenderingHandler<Graphics,MenuStateTextMenuItem,MenuStateMenuItemGDIPlusDrawData>, ISizableMenuItemGDIPlusRenderingHandler
+    [RenderingHandler(typeof(MenuStateTextMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemGDIPlusDrawData))]
+    public class MenuStateTextMenuItemGDIRenderer : IRenderingHandler<SKCanvas, MenuStateTextMenuItem, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
     {
-        protected Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
-        static Dictionary<double, Dictionary<String,Font>> FontSizeData = new Dictionary<double, Dictionary<String,Font>>();
-        public static Font GetScaledFont(IStateOwner pOwner, String FontFace,float FontSize)
+        //protected Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
+        /*static Dictionary<double, Dictionary<String, SKFontInfo>> FontSizeData = new Dictionary<double, Dictionary<String, SKFontInfo>>();
+         
+        public static SKFontInfo GetScaledFont(IStateOwner pOwner, String FontFace, float FontSize)
         {
             float findSize = (float)(FontSize * pOwner.ScaleFactor);
 
             return GetFont(FontFace, findSize);
         }
-        public static Font GetFont(String FontFace, float FontSize)
+        public static SKFontInfo GetFont(String FontFace, float FontSize)
         {
-            lock(FontSizeData)
+            lock (FontSizeData)
             {
-                if(!FontSizeData.ContainsKey(FontSize))
+                if (!FontSizeData.ContainsKey(FontSize))
                 {
-                    var newdict = new Dictionary<String, Font>(StringComparer.OrdinalIgnoreCase);
+                    var newdict = new Dictionary<String, SKFontInfo>(StringComparer.OrdinalIgnoreCase);
                     FontSizeData.Add(FontSize, newdict);
                 }
                 var SizeDict = FontSizeData[FontSize];
-                if(!SizeDict.ContainsKey(FontFace))
+                if (!SizeDict.ContainsKey(FontFace))
                 {
-                    Font buildfont = new Font(FontFace, FontSize, FontStyle.Regular);
+                    Font buildfont = new SKFontInfo(FontFace, FontSize);
                     SizeDict.Add(FontFace, buildfont);
                 }
                 return SizeDict[FontFace];
             }
+        }*/
+        
+        public static SKFontInfo GetFont(float FontSize)
+        {
+            return new SKFontInfo(TetrisGame.RetroFontSK, FontSize);
         }
-        public SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
+        public static SKFontInfo GetScaledFont(IStateOwner powner,float FontSize)
+        {
+            return GetFont((float)(FontSize * powner.ScaleFactor));
+        }
+        public SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
         {
             return GetSize(pOwner, (MenuStateTextMenuItem)Source);
         }
-        public SizeF GetSize(IStateOwner pOwner,MenuStateTextMenuItem Source)
+        public SKPoint GetSize(IStateOwner pOwner, MenuStateTextMenuItem Source)
         {
-            var testfont = GetScaledFont(pOwner,Source.FontFace,Source.FontSize);
-            var MeasureText = Temp.MeasureString(Source.Text, testfont);
-            return MeasureText.ToSize();
+            //var testfont = GetScaledFont(pOwner, Source.FontFace, Source.FontSize);
+            //var MeasureText = Temp.MeasureString(Source.Text, testfont);
+            return SKPoint.Empty;
+            //return MeasureText.ToSize();
         }
-        private static float GetDrawX(RectangleF pBounds, SizeF DrawSize, HorizontalAlignment pAlign)
+
+        private static float GetDrawX(SKRect pBounds, SKRect DrawSize, MenuHorizontalAlignment pAlign)
         {
             switch (pAlign)
             {
-                case HorizontalAlignment.Center:
+                case MenuHorizontalAlignment.Center:
                     return (pBounds.Left + pBounds.Width / 2) - DrawSize.Width / 2;
-                case HorizontalAlignment.Left:
+                case MenuHorizontalAlignment.Left:
                     return pBounds.Left;
-                case HorizontalAlignment.Right:
-                    return pBounds.Right - DrawSize.Width;
+                case MenuHorizontalAlignment.Right:
+                    return pBounds.Right - DrawSize.Height;
             }
             return 0;
         }
-        private static PointF GetDrawPosition(RectangleF pBounds, SizeF DrawSize, HorizontalAlignment pAlign)
+        private static SKPoint GetDrawPosition(SKRect pBounds, SKRect DrawSize, MenuHorizontalAlignment pAlign)
         {
             float useX = GetDrawX(pBounds, DrawSize, pAlign);
-            float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Height / 2));
-            return new PointF(useX, useY);
+            float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Width / 2));
+            return new SKPoint(useX, useY);
         }
-        public void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuStateTextMenuItem Source, MenuStateMenuItemGDIPlusDrawData Element)
+        private static SKPaint TransparentPaint = new SKPaint() { Color = SKColors.Transparent };
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateTextMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
         {
-            var useFont = GetScaledFont(pOwner, Source.FontFace,Source.FontSize);
-            var MeasureText = pRenderTarget.MeasureString(Source.Text, useFont);
-
-            PointF DrawPosition = GetDrawPosition(Element.Bounds, MeasureText, Source.TextAlignment.GetGDIPlusAlignment());
-            Brush BackBrush = Source.BackBrush;
+            var useFont = GetScaledFont(pOwner,Source.FontSize);
+            var MeasureText = TetrisGame.MeasureSKText(useFont.TypeFace, useFont.FontSize, Source.Text);
             
-            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-                BackBrush = Brushes.DarkBlue;
 
-            pRenderTarget.FillRectangle(BackBrush, Element.Bounds);
+            SKPoint DrawPosition = GetDrawPosition(Element.Bounds,  MeasureText, Source.TextAlignment);
+            SKPaint BackPaint = null;
+            
 
-            StringFormat central = new StringFormat();
-            central.Alignment = StringAlignment.Near;
-            central.LineAlignment = StringAlignment.Near;
-            Brush ForeBrush = Source.ForeBrush;
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-                ForeBrush = Brushes.Aqua;
-            Brush ShadowBrush = Source.ShadowBrush;
-            var useStyle = new DrawTextInformationGDI()
+                BackPaint = new SKPaint() { Color = SKColors.DarkBlue };
+            else
+                BackPaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.BackColor) };
+            pRenderTarget.DrawRect(Element.Bounds, BackPaint);
+
+
+            SKPaint ForePaint = null;
+            SKPaint ShadowPaint = null;
+            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+                ForePaint = new SKPaint() { Color = SKColors.Aqua };
+            else
+                ForePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ForeColor)};
+
+            ShadowPaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor) };
+
+            
+           /* var useStyle = new DrawTextInformation()
             {
                 Text = Source.Text,
                 BackgroundBrush = Brushes.Transparent,
@@ -136,11 +156,13 @@ namespace BASeTris.Rendering.MenuItems
                 Position = DrawPosition,
                 ShadowOffset = new PointF(5f, 5f),
                 Format = central
-            };
+            };*/
+
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
             {
                 useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculator());
             }
+            
             TetrisGame.DrawText(pRenderTarget, useStyle);
 
 
@@ -156,8 +178,8 @@ namespace BASeTris.Rendering.MenuItems
         }
     }
     [RenderingHandler(typeof(MenuStateMultiOption), typeof(Graphics), typeof(MenuStateMenuItemGDIPlusDrawData))]
-    
-    
+
+
     public class MenuStateMultiOptionItemGDIRenderer : MenuStateTextMenuItemGDIRenderer, IRenderingHandler<Graphics, MenuStateMultiOption, MenuStateMenuItemGDIPlusDrawData>, ISizableMenuItemGDIPlusRenderingHandler
     {
 
@@ -175,7 +197,7 @@ namespace BASeTris.Rendering.MenuItems
         }
         public void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuStateMultiOption Source, MenuStateMenuItemGDIPlusDrawData Element)
         {
-            Font useFont = MenuStateTextMenuItemGDIRenderer.GetScaledFont(pOwner,Source.FontFace,Source.FontSize);
+            Font useFont = MenuStateTextMenuItemGDIRenderer.GetScaledFont(pOwner, Source.FontFace, Source.FontSize);
             var OptionManager = Source.OptionManagerBase;
             var Bounds = Element.Bounds;
             String sLeftCover = "< ";
@@ -199,5 +221,6 @@ namespace BASeTris.Rendering.MenuItems
             base.Render(pOwner, pRenderTarget, Source, Element);
         }
     }
-    //public class MenuStateTextMenuItemGDIRenderer : IRenderingHandler<Graphics,MenuStateTextMenuItem,MenuStateMenuItemDrawData>, ISizableMenuItemGDIPlusRenderingHandler
+#endif
+
 }

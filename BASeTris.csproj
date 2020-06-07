@@ -149,6 +149,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameObjects\ProxyObject.cs" />
     <Compile Include="Rendering\BackgroundDrawRenderHandler.cs" />
+    <Compile Include="Rendering\DrawTextInfo.cs" />
     <Compile Include="Rendering\GDIPlus\Backgrounds\StandardImageBackgroundGDIRenderingHandler.cs" />
     <Compile Include="Rendering\GDIPlus\GameStates\EnterTextStateGDIPlusRenderingHandler.cs" />
     <Compile Include="Rendering\GDIPlus\GameStates\FieldActionStateGDIPlusRenderingHandler.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="Rendering\Skia\GameStates\MenuStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
     <Compile Include="Rendering\Skia\SkiaExtensions.cs" />
     <Compile Include="Rendering\Skia\SkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\TetrisBlockSkiaRenderingHandler.cs" />

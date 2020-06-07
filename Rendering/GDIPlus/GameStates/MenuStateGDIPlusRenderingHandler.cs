@@ -31,7 +31,7 @@ namespace BASeTris.Rendering.GDIPlus
                 
                 if (searchitem is MenuStateSizedMenuItem mss)
                 {
-                    var sizehandler = RenderingProvider.Static.GetHandler(typeof(Graphics), searchitem.GetType(),typeof(MenuStateMenuItemDrawData));
+                    var sizehandler = RenderingProvider.Static.GetHandler(typeof(Graphics), searchitem.GetType(),typeof(MenuStateMenuItemGDIPlusDrawData));
                     if(sizehandler is ISizableMenuItemGDIPlusRenderingHandler isizer)
 
                     {
@@ -51,23 +51,14 @@ namespace BASeTris.Rendering.GDIPlus
                 var drawitem = Source.MenuElements[menuitemindex];
                 Rectangle TargetBounds = new Rectangle((int)(Bounds.Width / 2 - ItemSize.Width / 2) + Source.MainXOffset, (int)CurrentY, (int)(ItemSize.Width), (int)(ItemSize.Height));
                 MenuStateMenuItem.StateMenuItemState useState = menuitemindex == Source.SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
-                RenderingProvider.Static.DrawElement(pOwner,g,drawitem,new MenuStateMenuItemDrawData(TargetBounds,useState) );
+                RenderingProvider.Static.DrawElement(pOwner,g,drawitem,new MenuStateMenuItemGDIPlusDrawData(TargetBounds,useState) );
                 //drawitem.Draw(pOwner, g, TargetBounds, useState);
                 CurrentY += ItemSize.Height + 5;
             }
         }
-        protected Dictionary<double, Font> FontSizeData = new Dictionary<double, Font>();
-        protected Font GetScaledHeaderFont(IStateOwner pOwner,MenuState Source)
+        protected Font GetScaledHeaderFont(IStateOwner pOwner, MenuState Source)
         {
-            lock (FontSizeData)
-            {
-                if (!FontSizeData.ContainsKey(pOwner.ScaleFactor))
-                {
-                    Font buildfont = new Font(Source.HeaderTypeface, (float)(Source.HeaderTypeSize * pOwner.ScaleFactor), FontStyle.Regular);
-                    FontSizeData.Add(pOwner.ScaleFactor, buildfont);
-                }
-                return FontSizeData[pOwner.ScaleFactor];
-            }
+            return MenuStateTextMenuItemGDIRenderer.GetScaledFont(pOwner, Source.HeaderTypeface, Source.HeaderTypeSize);
         }
         public virtual float DrawHeader(IStateOwner pOwner, MenuState Source,Graphics Target, RectangleF Bounds)
         {
