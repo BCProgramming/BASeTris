@@ -20,7 +20,7 @@ namespace BASeTris
             Mode_WinForms,
             Mode_OpenTK
         }
-        static StartMode RunMode = StartMode.Mode_WinForms;
+        public static StartMode RunMode = StartMode.Mode_OpenTK;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

@@ -139,7 +139,7 @@ namespace BASeTris.Rendering.MenuItems
             };
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
             {
-                useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculator());
+                useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorGDI());
             }
             TetrisGame.DrawText(pRenderTarget, useStyle);
 

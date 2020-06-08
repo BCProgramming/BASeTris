@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BASeTris.Rendering.Adapters;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -41,6 +43,14 @@ namespace BASeTris.Rendering
         public DrawTextInformationSkia PreDrawData { get { return PreDrawDataBase as DrawTextInformationSkia; } set { PreDrawDataBase = value; } }
 
         public DrawTextInformationSkia PostDrawData { get { return PostDrawDataBase as DrawTextInformationSkia; } set { PostDrawDataBase = value; } }
+        public SKPaint ForegroundPaint;
+        public SKPaint BackgroundPaint;
+        public SKPaint ShadowPaint;
+        public SKPoint Position;
+        public SKPoint ShadowOffset = new SKPoint(5, 5);
+        public SKFontInfo DrawFont;
+        public DrawCharacterHandlerSkia CharacterHandler = new DrawCharacterHandlerSkia();
+
     }
 
     public abstract class DrawCharacterHandler<PositionCalcType, CanvasType, InfoType, PosType, SizeType> where PositionCalcType : DrawCharacterPositionCalculator<CanvasType, PosType, SizeType, InfoType>, new()
@@ -96,6 +106,52 @@ namespace BASeTris.Rendering
             }
         }
     }
+    public class DrawCharacterHandlerSkia : DrawCharacterHandler<DrawCharacterPositionCalculatorSkia, SKCanvas, DrawTextInformationSkia, SKPoint, SKPoint>
+    {
+
+        public override void DrawCharacter(SKCanvas g, char character, DrawTextInformationSkia DrawData, SKPoint Position, SKPoint CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
+        {
+            if (DrawData.PreDrawData != null)
+            {
+                DrawCharacter(g, character, DrawData.PreDrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
+            }
+            //adjust positioning by calling each extension.
+            foreach (var iterate in _Extensions)
+            {
+                iterate.AdjustPositioning(ref Position, CharacterSize, DrawData, CharacterNumber, TotalCharacters, Pass);
+            }
+            SKPoint AddedOffset = Pass == 1 ? SKPoint.Empty : DrawData.ShadowOffset;
+            SKPaint DrawBrush = Pass == 1 ? DrawData.ShadowPaint: DrawData.ForegroundPaint;
+            //call beforedraw...
+            foreach (var iterate in _Extensions)
+            {
+                iterate.BeforeDraw(g, character, DrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
+            }
+            SKFontInfo UseFont = new SKFontInfo(DrawData.DrawFont);
+            
+            SKPoint DrawPosition = new SKPoint(Position.X + AddedOffset.X, Position.Y + AddedOffset.Y);
+            if (DrawData.ScalePercentage != 1)
+            {
+                UseFont.FontSize = UseFont.FontSize * DrawData.ScalePercentage;
+                float NewWidth = CharacterSize.X * DrawData.ScalePercentage;
+                float NewHeight = CharacterSize.Y * DrawData.ScalePercentage;
+                AddedOffset.X -= ((NewWidth - CharacterSize.X)) / 2;
+                AddedOffset.Y -= ((NewHeight - CharacterSize.Y)) / 2;
+            }
+            g.DrawText(character.ToString(), DrawPosition, DrawBrush);
+
+            foreach (var iterate in _Extensions.Reverse())
+            {
+                iterate.AfterDraw(g, character, DrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
+            }
+            if (DrawData.PostDrawData != null)
+            {
+                DrawCharacter(g, character, DrawData.PostDrawData, Position, CharacterSize, CharacterNumber, TotalCharacters, Pass);
+            }
+        }
+    }
+
+
     public abstract class DrawCharacterPositionCalculator<CanvasType, PosType, SizeType, InfoType>
     {
         public abstract void AdjustPositioning(ref PosType Position, SizeType size, InfoType DrawData, int pCharacterNumber, int TotalCharacters, int Pass);
@@ -118,23 +174,38 @@ namespace BASeTris.Rendering
         }
 
     }
-    public class DrawCharacterPositionCalculatorSkia
+    public class DrawCharacterPositionCalculatorSkia: DrawCharacterPositionCalculator<SKCanvas, SKPoint, SKPoint, DrawTextInformationSkia>
     {
-        public virtual void AdjustPositioning(ref PointF Position, SizeF size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
+        public override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
         {
             //default makes no changes.
         }
-        public virtual void BeforeDraw(Graphics g, char character, DrawTextInformationSkia DrawData, PointF Position, SizeF CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
+        /*public void AdjustPositioning(ref SKPoint Position,SKPoint size,DrawTextInformationSkia DrawData,int pCharacterNumber,int TotalCharacters,int Pass)
+        {
+            PointF usePosition = SkiaSharp.Views.Desktop.Extensions.ToDrawingPoint(Position);
+            PointF tempSize = SkiaSharp.Views.Desktop.Extensions.ToDrawingPoint(size);
+            SizeF sendsize = new SizeF(tempSize.Width, tempSize.Height);
+            AdjustPositioning(ref usePosition, sendsize, DrawData, pCharacterNumber, TotalCharacters, Pass);
+        }*/
+        public override void BeforeDraw(SKCanvas g, char character, DrawTextInformationSkia DrawData, SKPoint Position, SKPoint CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
         {
 
         }
-        public virtual void AfterDraw(Graphics g, char character, DrawTextInformationSkia DrawData, PointF Position, SizeF CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
+        public override void AfterDraw(SKCanvas g, char character, DrawTextInformationSkia DrawData, SKPoint Position, SKPoint CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
         {
 
         }
 
     }
-    public class RotatingPositionCharacterPositionCalculator : DrawCharacterPositionCalculatorGDI
+    public class NullCharacterPositionCalculatorGDI: DrawCharacterPositionCalculatorGDI
+    {
+
+    }
+    public class NullCharacterPositionCalculatorSkia: DrawCharacterPositionCalculatorSkia
+    {
+
+    }
+    public class RotatingPositionCharacterPositionCalculatorGDI : DrawCharacterPositionCalculatorGDI
     {
         private float Radius = 10;
         private float CharacterNumberModifier = 0.5f;

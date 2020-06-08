@@ -86,6 +86,11 @@ namespace BASeTris.Rendering.Adapters
     {
         public SKTypeface TypeFace { get; set; }
         public float FontSize { get; set; }
+        public SKFontInfo(SKFontInfo Source)
+        {
+            TypeFace = Source.TypeFace;
+            FontSize = Source.FontSize;
+        }
         public SKFontInfo(SKTypeface face,float pFontSize)
         {
             TypeFace = face;

@@ -81,7 +81,13 @@ namespace BASeTris.GameStates
             if (!DrawDataInitialized) return;
             foreach (var iterate in FallImages)
             {
-                iterate.Proc(pOwner.GameArea);
+                if(Program.RunMode==Program.StartMode.Mode_WinForms)
+                    iterate.Proc(pOwner.GameArea);
+                else if(Program.RunMode == Program.StartMode.Mode_OpenTK)
+                {
+                    var ga = pOwner.GameArea;
+                    iterate.Proc(new SKRect(ga.Left, ga.Top, ga.Left + ga.Width, ga.Top + ga.Height));
+                }
             }
             base.GameProc(pOwner);
             //no op!
@@ -135,6 +141,7 @@ namespace BASeTris.GameStates
             public abstract void Draw(CanvasType g);
             public override void Proc(Object bound)
             {
+
                 this.Proc((BoundType)bound);
             }
             public override void Draw(Object g)

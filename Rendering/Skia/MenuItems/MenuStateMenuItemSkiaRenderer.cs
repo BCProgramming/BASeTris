@@ -15,7 +15,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
     {
         SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem item);
     }
-#if false
+
     [RenderingHandler(typeof(MenuStateMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData))]
     public class MenuStateMenuItemSkiaRenderer : IRenderingHandler<SKCanvas, MenuStateMenuItem, MenuStateMenuItemSkiaDrawData>
     {
@@ -49,7 +49,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
 
     [RenderingHandler(typeof(MenuStateTextMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemGDIPlusDrawData))]
-    public class MenuStateTextMenuItemGDIRenderer : IRenderingHandler<SKCanvas, MenuStateTextMenuItem, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
+    public class MenuStateTextMenuItemSkiaRenderer : IRenderingHandler<SKCanvas, MenuStateTextMenuItem, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
     {
         //protected Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
         /*static Dictionary<double, Dictionary<String, SKFontInfo>> FontSizeData = new Dictionary<double, Dictionary<String, SKFontInfo>>();
@@ -137,33 +137,32 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
 
             SKPaint ForePaint = null;
-            SKPaint ShadowPaint = null;
+            SKPaint ShadePaint = null;
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
                 ForePaint = new SKPaint() { Color = SKColors.Aqua };
             else
-                ForePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ForeColor)};
+                ForePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ForeColor),TextAlign=SKTextAlign.Center};
 
-            ShadowPaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor) };
+            ShadePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor), TextAlign = SKTextAlign.Center };
 
-            
-           /* var useStyle = new DrawTextInformation()
+
+            var useStyle = new DrawTextInformationSkia()
             {
                 Text = Source.Text,
-                BackgroundBrush = Brushes.Transparent,
+                BackgroundPaint = new SKPaint() { Color = SKColors.Transparent },
                 DrawFont = useFont,
-                ForegroundBrush = ForeBrush,
-                ShadowBrush = ShadowBrush,
+                ForegroundPaint = ForePaint,
+                ShadowPaint = ShadePaint,
                 Position = DrawPosition,
-                ShadowOffset = new PointF(5f, 5f),
-                Format = central
-            };*/
+                ShadowOffset = new SKPoint(5f, 5f),
+            };
 
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
             {
-                useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculator());
+                useStyle.CharacterHandler.SetPositionCalculator(new NullCharacterPositionCalculatorSkia());
             }
-            
-            TetrisGame.DrawText(pRenderTarget, useStyle);
+
+            TetrisGame.DrawTextSK(pRenderTarget, useStyle);
 
 
             //            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y, 5f, 5f, central);
@@ -174,53 +173,66 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
         public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
-            Render(pOwner, (Graphics)pRenderTarget, (MenuStateTextMenuItem)RenderSource, (MenuStateMenuItemGDIPlusDrawData)Element);
+            Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateTextMenuItem)RenderSource, (MenuStateMenuItemGDIPlusDrawData)Element);
         }
     }
-    [RenderingHandler(typeof(MenuStateMultiOption), typeof(Graphics), typeof(MenuStateMenuItemGDIPlusDrawData))]
+    [RenderingHandler(typeof(MenuStateMultiOption), typeof(SKCanvas), typeof(MenuStateMenuItemGDIPlusDrawData))]
 
 
-    public class MenuStateMultiOptionItemGDIRenderer : MenuStateTextMenuItemGDIRenderer, IRenderingHandler<Graphics, MenuStateMultiOption, MenuStateMenuItemGDIPlusDrawData>, ISizableMenuItemGDIPlusRenderingHandler
+    public class MenuStateMultiOptionItemSkiaRenderer : MenuStateTextMenuItemSkiaRenderer, IRenderingHandler<SKCanvas, MenuStateMultiOption, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
     {
 
-        public SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
+        public SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
         {
             return GetSize(pOwner, (MenuStateMultiOption)Source);
         }
-        public SizeF GetSize(IStateOwner pOwner, MenuStateMultiOption Source)
+        public SKPoint GetSize(IStateOwner pOwner, MenuStateMultiOption Source)
         {
             return base.GetSize(pOwner, Source);
         }
         public override void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
-            Render(pOwner, (Graphics)pRenderTarget, (MenuStateMultiOption)RenderSource, (MenuStateMenuItemGDIPlusDrawData)Element);
+            Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateMultiOption)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
         }
-        public void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuStateMultiOption Source, MenuStateMenuItemGDIPlusDrawData Element)
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateMultiOption Source, MenuStateMenuItemSkiaDrawData Element)
         {
-            Font useFont = MenuStateTextMenuItemGDIRenderer.GetScaledFont(pOwner, Source.FontFace, Source.FontSize);
+            SKFontInfo useFont = MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.FontSize);
             var OptionManager = Source.OptionManagerBase;
             var Bounds = Element.Bounds;
             String sLeftCover = "< ";
             String sRightCover = ">";
-
+            
             var PrevItem = OptionManager.GetTextBase(OptionManager.PeekPreviousBase());
             var NextItem = OptionManager.GetTextBase(OptionManager.PeekNextBase());
             sLeftCover = PrevItem + sLeftCover;
             sRightCover = sRightCover + NextItem;
-            var MeasureLeft = pRenderTarget.MeasureString(sLeftCover, useFont);
-            var MeasureRight = pRenderTarget.MeasureString(sRightCover, useFont);
+            
+            SKPaint Foreground = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ForeColor) };
+            SKPaint Background = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.BackColor) };
+            SKPaint Shadow = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor) };
+            DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = Foreground, BackgroundPaint = Background, ShadowPaint = Shadow };
+            //TODO: need to get this implemented via a SKPaint, but the TextMenu item should probably have draw data in an "abstracted" form...
+            SKRect MeasureLeft = new SKRect();
+            SKRect MeasureRight = new SKRect();
+            Foreground.MeasureText(sLeftCover,ref MeasureLeft);
+            
+            Foreground.MeasureText(sRightCover,ref MeasureRight);
+            //var MeasureLeft = pRenderTarget.MeasureString(sLeftCover, useFont);
+            //var MeasureRight = pRenderTarget.MeasureString(sRightCover, useFont);
+            SKPoint LeftPos = new SKPoint(Bounds.Left - MeasureLeft.Width, Bounds.Top + (Bounds.Height / 2) - MeasureLeft.Height / 2);
+            SKPoint RightPos = new SKPoint(Bounds.Right, Bounds.Top + (Bounds.Height / 2) - MeasureRight.Height / 2);
 
-            PointF LeftPos = new PointF(Bounds.Left - MeasureLeft.Width, Bounds.Top + (Bounds.Height / 2) - MeasureLeft.Height / 2);
-            PointF RightPos = new PointF(Bounds.Right, Bounds.Top + (Bounds.Height / 2) - MeasureRight.Height / 2);
-
+            
             if (Source.Activated)
             {
-                TetrisGame.DrawText(pRenderTarget, useFont, sLeftCover, Source.ForeBrush, Source.ShadowBrush, LeftPos.X, LeftPos.Y);
-                TetrisGame.DrawText(pRenderTarget, useFont, sRightCover, Source.ForeBrush, Source.ShadowBrush, RightPos.X, RightPos.Y);
+                dtis.Text = sLeftCover;
+                TetrisGame.DrawTextSK(pRenderTarget, dtis);
+                dtis.Text = sRightCover;
+                TetrisGame.DrawTextSK(pRenderTarget, dtis);
             }
             base.Render(pOwner, pRenderTarget, Source, Element);
         }
     }
-#endif
+
 
 }
