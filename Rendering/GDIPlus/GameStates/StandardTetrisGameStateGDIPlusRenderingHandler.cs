@@ -22,7 +22,7 @@ namespace BASeTris.Rendering.GDIPlus
         
       
         Image StatisticsBackground = null;
-        
+        TetrominoTheme GeneratedImageTheme = null; 
         public void GenerateStatisticsBackground(StandardTetrisGameState Self)
         {
             Bitmap buildbg = new Bitmap(1120, 2576);
@@ -51,6 +51,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
 
             StatisticsBackground = buildbg;
+            GeneratedImageTheme = Self.PlayField.Theme;
         }
         private String FormatGameTime(IStateOwner stateowner)
         {
@@ -73,7 +74,7 @@ namespace BASeTris.Rendering.GDIPlus
 
             bool RedrawsNeeded = !LastDrawStat.Equals(Bounds);
             LastDrawStat = Bounds;
-            if (StatisticsBackground == null || RedrawsNeeded)
+            if (StatisticsBackground == null || RedrawsNeeded || GeneratedImageTheme!=Source.PlayField.Theme)
             {
                 GenerateStatisticsBackground(Source);
             }

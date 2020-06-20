@@ -476,7 +476,7 @@ namespace BASeTris.GameStates
             }
 
             var nextget = NextBlocks.Dequeue();
-            PlayField.Theme.ApplyTheme(nextget, PlayField);
+            
             if (NextBlocks.Count < GameOptions.NextQueueSize)
             {
                 RefillBlockQueue();
@@ -507,6 +507,7 @@ namespace BASeTris.GameStates
             NextAngleOffset += Math.PI * 2 / 5;
 
             PlayField.AddBlockGroup(nextget);
+            PlayField.Theme.ApplyTheme(nextget, PlayField);
         }
 
         private void SetLevelSpeed(Nomino group)
@@ -670,7 +671,10 @@ namespace BASeTris.GameStates
                     {
                         int dropqty = 0;
                         var ghosted = GetGhostDrop(pOwner,activeitem, out dropqty, 0);
-                        PlayField.SetGroupToField(ghosted);
+                        
+                        activeitem.X = ghosted.X;
+                        activeitem.SetY(pOwner, ghosted.Y);
+                        PlayField.SetGroupToField(activeitem);
                         PlayField.RemoveBlockGroup(activeitem);
                         GameStats.AddScore((dropqty * (5 + (GameStats.LineCount / 10))));
                     }

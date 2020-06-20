@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.Rendering.Adapters;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -126,21 +127,16 @@ namespace BASeTris.GameStates.Menu
         public float FontSize { get; set; }
         
         
-        private Color _ForeColor;
-        private Color _BackColor = Color.Transparent;
-        public Color ForeColor { get{ return _ForeColor; } set{ _ForeColor = value;ForeBrush = new SolidBrush(value); } }
+        private BCColor _ForeColor;
+        private BCColor _BackColor = Color.Transparent;
+        public BCColor ForeColor { get{ return _ForeColor; } set{ _ForeColor = value; } }
 
-        public Color BackColor { get { return _BackColor; } set { _BackColor = value; BackBrush = new SolidBrush(value); } }
+        public BCColor BackColor { get { return _BackColor; } set { _BackColor = value;  } }
 
 
-        public Brush ForeBrush { get; set; }
 
-        public  Brush BackBrush { get; set; }
-
-        public Brush ShadowBrush { get; set; }
-
-        private Color _ShadowColor = Color.Gray;
-        public Color ShadowColor { get { return _ShadowColor; } set { _ShadowColor = value;ShadowBrush = new SolidBrush(value); } }
+        private BCColor _ShadowColor = Color.Gray;
+        public BCColor ShadowColor { get { return _ShadowColor; } set { _ShadowColor = value; } }
 
         public override bool GetSelectable()
         {
@@ -158,37 +154,14 @@ namespace BASeTris.GameStates.Menu
      
        
         
-        public static void DrawMenuText(IStateOwner pOwner, MenuTextDrawInfo DrawData, Graphics Target,Rectangle Bounds,StateMenuItemState DrawState)
-        {
-            //basically just draw the Text centered within the Bounds.
-          
-        }
+        
         public override void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState)
         {
 
 
         }
     }
-    public class MenuTextDrawInfo
-    {
-        public String Text;
-        public HorizontalAlignment TextAlignment;
-        public Font Font;
-        public Brush ForegroundBrush;
-        public Brush BackgroundBrush;
-        public MenuTextDrawInfo()
-        {
-
-        }
-        public MenuTextDrawInfo(String pText,HorizontalAlignment pAlignment,Font pFont,Brush ForeBrush,Brush BackBrush)
-        {
-            Text = pText;
-            TextAlignment = pAlignment;
-            Font = pFont;
-            ForegroundBrush = ForeBrush;
-            BackgroundBrush = BackBrush;
-        }
-    }
+    
 
     public class MenuStateLabelMenuItem:MenuStateTextMenuItem
     {

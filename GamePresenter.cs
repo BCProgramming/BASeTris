@@ -12,6 +12,7 @@ using BASeTris.AI;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.Tetrominoes;
+using BASeTris.Theme.Block;
 using XInput.Wrapper;
 
 namespace BASeTris
@@ -73,6 +74,7 @@ namespace BASeTris
             GameSettings = new StandardSettings(sSettingsFile);
             var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
             Game = new TetrisGame(_Owner, standardstate);
+            
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
 
 

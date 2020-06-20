@@ -39,7 +39,8 @@ namespace BASeTris.TetrisBlocks
             Style_Mottled,
             Style_Pixeled,
             Style_Pixeled_Outline,
-            Style_Custom
+            Style_Custom,
+                Style_Custom_NoColorize
         }
 
         public Image GummyBitmap = null;

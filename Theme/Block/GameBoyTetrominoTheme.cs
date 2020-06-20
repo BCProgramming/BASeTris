@@ -88,6 +88,7 @@ namespace BASeTris
             if(found==null)
             {
                 Image Recolored = GDIPlusHelpers.RecolorImage(Original, pColor);
+                Recolored = GDIPlusHelpers.ResizeImage(Recolored, new Size(ImageSize.Width / 4, ImageSize.Height / 4));
                 return AddCachedImage(pKey, ImageSize, pColor, Recolored);
             }
             else

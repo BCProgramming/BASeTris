@@ -107,7 +107,9 @@ namespace BASeTris
             get { return GameStats.LineCount; }
         }
 
-        private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
+        //
+        //private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
+        private TetrominoTheme _Theme = new SNESTetrominoTheme();
 
 
         public TetrominoTheme Theme
@@ -297,8 +299,8 @@ namespace BASeTris
                             FieldContents[RowPos][ColPos] = groupblock.Block;
                     }
 
-                    BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
                     if (ActiveBlockGroups.Contains(bg)) ActiveBlockGroups.Remove(bg);
+                    BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
                     HasChanged = true;
                 }
             }

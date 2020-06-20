@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.TetrisBlocks;
-
+using BASeTris.Theme.Block;
 namespace BASeTris.GameStates.Menu
 {
     public class MenuStateDisplayThemeMenuItem : MenuStateMultiOption<MenuStateThemeSelection>
@@ -17,7 +17,10 @@ namespace BASeTris.GameStates.Menu
             new MenuStateThemeSelection("Standard",typeof(StandardTetrominoTheme), ()=>new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine)),
             new MenuStateThemeSelection("Nintendo NES",typeof(NESTetrominoTheme),() => new NESTetrominoTheme()),
             new MenuStateThemeSelection("Game Boy",typeof(GameBoyTetrominoTheme), ()=>new GameBoyTetrominoTheme()),
-            new MenuStateThemeSelection("Outlined",typeof(OutlinedTetrominoTheme), ()=>new OutlinedTetrominoTheme()) 
+            new MenuStateThemeSelection("SNES TD&DRM",typeof(SNESTetrominoTheme), ()=>new SNESTetrominoTheme()),
+            new MenuStateThemeSelection("Outlined",typeof(OutlinedTetrominoTheme), ()=>new OutlinedTetrominoTheme()),
+            new MenuStateThemeSelection("Simple",typeof(SimpleBlockTheme), ()=>new SimpleBlockTheme()),
+
         };
         public MenuStateDisplayThemeMenuItem(IStateOwner pOwner) : base(null)
         {

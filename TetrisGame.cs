@@ -688,6 +688,17 @@ namespace BASeTris
 
             return BuildImage;
         }
+        static Dictionary<Color, Brush> ColorBrushes = new Dictionary<Color, Brush>();
+        public static Brush GetColorBrush(Color src)
+        {
+            if(!ColorBrushes.ContainsKey(src))
+            {
+                ColorBrushes.Add(src, new SolidBrush(src));
+            }
+            return ColorBrushes[src];
+        }
+
+
         //SkiaSharp implementation of OutlineImage.
         private static SKBitmap OutlineImageSK(SKBitmap Input)
         {

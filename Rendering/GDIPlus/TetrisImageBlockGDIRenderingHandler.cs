@@ -19,6 +19,8 @@ namespace BASeTris.Rendering.GDIPlus
                 this.Render(pOwner,pRenderTarget,(ImageBlock)Source,Element);
         }
 
+
+
         public virtual void Render(IStateOwner pOwner, Graphics pRenderTarget, ImageBlock Source, TetrisBlockDrawParameters Element)
         {
             var drawparameters = Element;
@@ -33,8 +35,9 @@ namespace BASeTris.Rendering.GDIPlus
                     return;
                 }*/
                 int usemodulo = Source.Rotation;
-                if (usemodulo < 0) usemodulo = Source._RotationImages.Length - usemodulo;
-                Image useImage = Source._RotationImages[usemodulo % Source._RotationImages.Length];
+                //if (usemodulo < 0) usemodulo = Source._RotationImages.Length - usemodulo;
+                var useindex = MathHelper.mod(usemodulo, Source._RotationImages.Length);
+                Image useImage = Source._RotationImages[useindex];
                 ImageAttributes useAttrib = parameters.ApplyAttributes ?? (Source.useAttributes == null ? null : Source.useAttributes[usemodulo % Source.useAttributes.Length]);
 
                 float Degrees = usemodulo * 90;

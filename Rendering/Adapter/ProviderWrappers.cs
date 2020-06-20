@@ -10,6 +10,83 @@ using SkiaSharp;
 
 namespace BASeTris.Rendering.Adapters
 {
+
+    
+    public struct BCPoint
+    {
+        private SKPoint Main;
+        public float X {  get { return Main.X; } set { Main.X = value; } }
+        public float Y {  get { return Main.Y; }  set { Main.Y = value; } }
+        public BCPoint(SKPoint Source)
+        {
+            Main = Source;
+        }
+        public BCPoint(float X, float Y):this(new SKPoint(X,Y))
+        {
+
+        }
+        public BCPoint(PointF Source):this(Source.X,Source.Y)
+        {
+
+        }
+        public static implicit operator SKPoint(BCPoint src)
+        {
+            return src.Main;
+        }
+        public static implicit operator BCPoint(SKPoint src)
+        {
+            return new BCPoint(src);
+        }
+        public static implicit operator BCPoint(PointF src)
+        {
+            return new BCPoint(src);
+        }
+        public static implicit operator PointF(BCPoint src)
+        {
+            return new PointF(src.X, src.Y);
+        }
+        
+    }
+    public struct BCRect
+    {
+        private SKRect Main;
+        public BCRect(SKRect Source)
+        {
+            Main = Source;
+        }
+        public BCRect(RectangleF Source):this(new SKRect(Source.Left,Source.Top,Source.Right,Source.Bottom))
+        {
+
+        }
+        public BCRect(float pLeft,float pTop, float pWidth,float pHeight):this(new SKRect(pLeft,pTop,pLeft+pWidth,pTop+pHeight))
+        {
+
+        }
+        public float Left {  get { return Main.Left; } set { Main.Left = value; } }
+        public float Top { get { return Main.Top; } set { Main.Top = value; } }
+        public float Width {  get { return Main.Width; } set { Main.Right = Main.Left+value; } }
+        public float Right { get { return Main.Right; } set { Main.Right = value; } }
+        public float Bottom { get { return Main.Bottom; } set { Main.Bottom = value; } }
+        public float Height { get { return Main.Height; } set { Main.Bottom = Main.Top + value; } }
+        public static implicit operator SKRect(BCRect src)
+        {
+            return src.Main;
+        }
+        public static implicit operator RectangleF(BCRect src)
+        {
+            return new RectangleF(src.Left, src.Top, src.Width, src.Height);
+        }
+        public static implicit operator BCRect(SKRect src)
+        {
+            return new BCRect(src);
+        }
+        public static implicit operator BCRect(RectangleF src)
+        {
+            return new BCRect(src);
+        }
+    }
+
+
     //adapter classes needed for:
     //PointF, SKPoint
     //Color, SKColor
@@ -103,60 +180,64 @@ namespace BASeTris.Rendering.Adapters
         }
     }
 
-    public class BCColor
+    public struct BCColor
     {
-        public byte R;
-        public byte G;
-        public byte B;
-        public byte A;
-        public BCColor(BCColor Source)
+        private SKColor Main;
+        public byte R { get { return Main.Red; } }
+        public byte G { get { return Main.Green; } }
+        public byte B { get { return Main.Blue; } }
+        public byte A { get { return Main.Alpha; } }
+        public BCColor(SKColor src)
         {
-            R = Source.R;
-            G = Source.G;
-            B = Source.B;
-            A = Source.A;
+            Main = src;
         }
-        public BCColor(byte pR,byte pG,byte pB,byte pA)
+        public BCColor(byte pR, byte pG, byte pB, byte pA) : this(new SKColor(pR, pG, pB, pA))
         {
-            R = pR;
-            G = pG;
-            B = pB;
-            A = pA;
-        }
-        //BCColor->SKColor
-        public static implicit operator SKColor(BCColor pSource)
-        {
-            return new SKColor(pSource.R,pSource.G,pSource.B,pSource.A);
-        }
-        //SKColor -> BCColor
-        public static implicit operator BCColor(SKColor pSource)
-        {
-            return new BCColor(pSource.Red,pSource.Green,pSource.Blue,pSource.Alpha);
-        }
-        //BCColor->Color
-        public static implicit operator Color(BCColor pSource)
-        {
-            return Color.FromArgb(pSource.A,pSource.R,pSource.G,pSource.B);
-        }
-        //Color->BCColor
-        public static implicit operator BCColor(Color pSource)
-        {
-            return new BCColor(pSource.R, pSource.G, pSource.B, pSource.A);
-        }
-        public static BCColor FromArgb(byte pA, byte pR,byte pG,byte pB)
-        {
-            return new BCColor(pR,pG,pB,pA);
-        }
-        public static BCColor Red = Color.Red;
-        public static BCColor Orange = Color.Orange;
-        public static BCColor Yellow = Color.Yellow;
-        public static BCColor Green = Color.Green;
-        public static BCColor Blue = Color.Blue;
-        public static BCColor Indigo = Color.Indigo;
-        public static BCColor Violet = Color.Violet;
 
+        }
+        public BCColor(byte pR, byte pG, byte pB) : this(pR, pG, pB, 255)
+        {
+
+        }
+        public static implicit operator Color(BCColor src)
+        {
+            return Color.FromArgb(src.A, src.R, src.G, src.B);
+        }
+        public static implicit operator BCColor(Color src)
+        {
+            return new BCColor(src.R, src.G, src.B, src.A);
+        }
+        public static implicit operator SKColor(BCColor src)
+        {
+            return src.Main;
+        }
+        public static implicit operator BCColor(SKColor src)
+        {
+            return new BCColor(src);
+        }
+        public static BCColor Red = new BCColor(SKColors.Red);
+        public static BCColor Orange = new BCColor(SKColors.Orange);
+        public static BCColor Yellow = new BCColor(SKColors.Yellow);
+        public static BCColor Green = new BCColor(SKColors.Green);
+        public static BCColor Blue = new BCColor(SKColors.Blue);
+        public static BCColor Indigo= new BCColor(SKColors.Indigo);
+        public static BCColor Violet= new BCColor(SKColors.Violet);
+        public static BCColor White = new BCColor(SKColors.White);
+        public static BCColor Gray = new BCColor(SKColors.Gray);
+        public static BCColor Black = new BCColor(SKColors.Black);
+        public static BCColor DarkSlateGray = new BCColor(SKColors.DarkSlateGray);
+        public static BCColor Transparent = new BCColor(SKColors.Transparent);
+        public override string ToString()
+        {
+            return Main.ToString();
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
-    
+
+
 
     //provider wrappers are classes that wrap elementary types and provide implicit conversions to other element types.
     public class BCPointF

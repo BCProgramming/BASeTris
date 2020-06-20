@@ -112,7 +112,7 @@ namespace BASeTris.Rendering.MenuItems
             var MeasureText = pRenderTarget.MeasureString(Source.Text, useFont);
 
             PointF DrawPosition = GetDrawPosition(Element.Bounds, MeasureText, Source.TextAlignment.GetGDIPlusAlignment());
-            Brush BackBrush = Source.BackBrush;
+            Brush BackBrush = new SolidBrush(Source.BackColor);
             
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
                 BackBrush = Brushes.DarkBlue;
@@ -122,10 +122,10 @@ namespace BASeTris.Rendering.MenuItems
             StringFormat central = new StringFormat();
             central.Alignment = StringAlignment.Near;
             central.LineAlignment = StringAlignment.Near;
-            Brush ForeBrush = Source.ForeBrush;
+            Brush ForeBrush = new SolidBrush(Source.ForeColor);
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
                 ForeBrush = Brushes.Aqua;
-            Brush ShadowBrush = Source.ShadowBrush;
+            Brush ShadowBrush = new SolidBrush(Source.ShadowColor);
             var useStyle = new DrawTextInformationGDI()
             {
                 Text = Source.Text,
@@ -193,8 +193,9 @@ namespace BASeTris.Rendering.MenuItems
 
             if (Source.Activated)
             {
-                TetrisGame.DrawText(pRenderTarget, useFont, sLeftCover, Source.ForeBrush, Source.ShadowBrush, LeftPos.X, LeftPos.Y);
-                TetrisGame.DrawText(pRenderTarget, useFont, sRightCover, Source.ForeBrush, Source.ShadowBrush, RightPos.X, RightPos.Y);
+                
+                TetrisGame.DrawText(pRenderTarget, useFont, sLeftCover, new SolidBrush(Source.ForeColor),new SolidBrush(Source.ShadowColor), LeftPos.X, LeftPos.Y);
+                TetrisGame.DrawText(pRenderTarget, useFont, sRightCover, new SolidBrush(Source.ForeColor), new SolidBrush(Source.ShadowColor), RightPos.X, RightPos.Y);
             }
             base.Render(pOwner, pRenderTarget, Source, Element);
         }
