@@ -35,7 +35,7 @@ namespace BASeTris.GameStates
 
      
 
-        Font useFont = null;
+        
 
 
         public override bool ValidateEntry(IStateOwner pOwner, string sCurrentEntry)

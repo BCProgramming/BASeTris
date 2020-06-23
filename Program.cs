@@ -10,6 +10,7 @@ using BASeCamp.BASeScores;
 using BASeCamp.Logging;
 using BASeTris.AI;
 using OpenTK;
+using OpenTK.Input;
 
 namespace BASeTris
 {
@@ -45,8 +46,7 @@ namespace BASeTris
             DebugLogger.EnableLogging = true;
             if (RunMode == StartMode.Mode_WinForms)
             {
-                var testresult = SNESTetrominoTheme.GetUnsetImage(0, 'O');
-                SkiaSharp.Views.Desktop.Extensions.ToBitmap(testresult).Save("T:\\O_SNES_UNSET.PNG");
+             
                 Application.Run(new BASeTris());
             }
             else

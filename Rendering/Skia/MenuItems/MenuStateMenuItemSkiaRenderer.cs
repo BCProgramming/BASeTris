@@ -87,11 +87,11 @@ namespace BASeTris.Rendering.Skia.MenuItems
         {
             return GetFont((float)(FontSize * powner.ScaleFactor));
         }
-        public SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
+        public virtual SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
         {
             return GetSize(pOwner, (MenuStateTextMenuItem)Source);
         }
-        public SKPoint GetSize(IStateOwner pOwner, MenuStateTextMenuItem Source)
+        public virtual SKPoint GetSize(IStateOwner pOwner, MenuStateTextMenuItem Source)
         {
             //var testfont = GetScaledFont(pOwner, Source.FontFace, Source.FontSize);
             //var MeasureText = Temp.MeasureString(Source.Text, testfont);
@@ -182,7 +182,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
     public class MenuStateMultiOptionItemSkiaRenderer : MenuStateTextMenuItemSkiaRenderer, IRenderingHandler<SKCanvas, MenuStateMultiOption, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
     {
 
-        public SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
+        public override SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
         {
             return GetSize(pOwner, (MenuStateMultiOption)Source);
         }

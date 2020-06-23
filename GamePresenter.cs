@@ -13,6 +13,7 @@ using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Block;
+using OpenTK.Input;
 using XInput.Wrapper;
 
 namespace BASeTris
@@ -149,6 +150,10 @@ namespace BASeTris
                 Thread.Sleep(3);
                 CIS.CheckState();
             }
+        }
+        public GameState.GameKeys? TranslateKey(Key source)
+        {
+            return null;
         }
         public GameState.GameKeys? TranslateKey(Keys source)
         {

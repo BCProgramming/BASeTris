@@ -23,6 +23,7 @@ using BASeTris.Replay;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
 using SkiaSharp;
+using OpenTK.Input;
 
 namespace BASeTris
 {
@@ -428,6 +429,23 @@ namespace BASeTris
             {Keys.F11,GameState.GameKeys.GameKey_Debug3}
         };
 
+        Dictionary<Key, GameState.GameKeys> KeyMappingTK = new Dictionary<Key, GameState.GameKeys>()
+        {
+            {Key.Left, GameState.GameKeys.GameKey_Left},
+            {Key.Right, GameState.GameKeys.GameKey_Right},
+            {Key.Down, GameState.GameKeys.GameKey_Down},
+            {Key.Up, GameState.GameKeys.GameKey_Drop},
+            {Key.X, GameState.GameKeys.GameKey_RotateCW},
+            {Key.Z, GameState.GameKeys.GameKey_RotateCCW},
+            {Key.Pause, GameState.GameKeys.GameKey_Pause},
+            {Key.P, GameState.GameKeys.GameKey_Pause},
+            {Key.Space, GameState.GameKeys.GameKey_Hold},
+            {Key.Enter,GameState.GameKeys.GameKey_MenuActivate },
+            {Key.F2, GameState.GameKeys.GameKey_Debug1},
+            {Key.F7, GameState.GameKeys.GameKey_Debug2},
+            {Key.F11,GameState.GameKeys.GameKey_Debug3}
+        };
+
 
         public GameState.GameKeys? TranslateKey(Keys source)
         {
@@ -436,6 +454,14 @@ namespace BASeTris
                 return KeyMapping[source];
             }
 
+            return null;
+        }
+        public GameState.GameKeys? TranslateKey(Key source)
+        {
+            if(KeyMappingTK.ContainsKey(source))
+            {
+                return KeyMappingTK[source];
+            }
             return null;
         }
 

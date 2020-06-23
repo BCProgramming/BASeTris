@@ -24,7 +24,7 @@ namespace BASeTris.Rendering
     public interface IRenderingHandler<in TRenderTarget,in TRenderSource,in TDataElement> :BASeCamp.Rendering.Interfaces.IRenderingHandler<TRenderTarget,TRenderSource,TDataElement,IStateOwner>, IRenderingHandler where TRenderSource:class
     {
         //rendering handler has pretty much one method- to draw to the appropriate type.
-        void Render(IStateOwner pOwner, TRenderTarget pRenderTarget, TRenderSource Source,TDataElement Element);
+        //void Render(IStateOwner pOwner, TRenderTarget pRenderTarget, TRenderSource Source,TDataElement Element);
     }
     /// <summary>
     /// abstract Rendering interface.

@@ -141,7 +141,7 @@ namespace BASeTris
         private void BASeTris_Load(object sender, EventArgs e)
         {
 
-            PrepareSkia(); //add the Skia Controls.
+           
             _Present = new GamePresenter(this);
             
             //XMLHighScores<NoSpecialInfo> TestScores = new XMLHighScores<NoSpecialInfo>(35000,(r)=>new NoSpecialInfo());
@@ -206,13 +206,7 @@ namespace BASeTris
                         picFullSize.Refresh();
                     }
                 }
-                else if (ActiveRenderMode == RendererMode.Renderer_SkiaSharp)
-                {
-                    if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                    {
-                        skFullSize.Invalidate();
-                    }
-                }
+               
             }));
         }
 
@@ -236,58 +230,7 @@ namespace BASeTris
             }
         }
 
-        //this needs to be moved to a new OpenTK GameWindow Presenter implementation
-        private void SkFullSize_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
-        {
-            if (_Present.Game == null) return;
-            if(CurrentState.SupportedDisplayMode==GameState.DisplayMode.Full)
-            {
-                e.Surface.Canvas.Clear();
-                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                if (renderer != null)
-                {
-                    if (renderer is IStateRenderingHandler staterender)
-                    {
-                        staterender.Render(this, e.Surface.Canvas, _Present.Game.CurrentState,
-                            new GameStateSkiaDrawParameters(new SKRect(0,0,e.Info.Width,e.Info.Height)));
-                        return;
-                    }
-                }
-            }
-            else if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-            {
-                //SKControls mess up with multiple, so we need to basically draw the stats as well as the main display onto the same thing.
-                //we will paint both to a separate canvas, then merge them together.
-                GetHorizontalSizeData(skFullSize.Height,skFullSize.Width,out float FieldWidth,out float StatWidth);
-                if(skTetrisField==null) ResetSK();
-                skTetrisField.Clear();
-                skStats.Clear();
-                //note: this approach is too slow. What it needs to do is call both renderers but have it paint directly to the target surface, with the bounds
-                //assigned appropriately for each call. Painting the two SKCanvas objects to the main one is too slow, it seems.
-                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
-                if (renderer != null)
-                {
-                    if (renderer is IStateRenderingHandler staterender)
-                    {
-                        staterender.Render(this,e.Surface.Canvas,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, FieldWidth, e.Info.Height)));
-                        //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
-                        
-                        staterender.RenderStats(this, e.Surface.Canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth+StatWidth, e.Info.Height)));
-                        //staterender.Render(this, skTetrisField, _Present.Game.CurrentState,
-                        //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
-                        //staterender.RenderStats(this,skStats,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
-
-                    }
-                }
-
-                //e.Surface.Canvas.DrawBitmap(skTetrisFieldBmp,0,0);
-                //e.Surface.Canvas.DrawBitmap(skStatsBmp,skFullSize.Width-StatWidth,0);
-
-                //with this sizing information we can paint the two canvases.
-
-
-            }
-        }
+       
        
         private void picTetrisField_Paint(object sender, PaintEventArgs e)
         {
@@ -445,75 +388,22 @@ namespace BASeTris
         public enum RendererMode
         {
             Renderer_GDIPlus,
-            Renderer_SkiaSharp
+
         }
         //public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
         public RendererMode ActiveRenderMode = RendererMode.Renderer_GDIPlus;
-        SKControl skFullSize;
+        
 
         
-        SKBitmap skTetrisFieldBmp;
-        SKCanvas skTetrisField;
-        SKCanvas skStats;
-        SKBitmap skStatsBmp;
+
     
 
-        private void PrepareSkia()
-        {/*
-            skFullSize = new SKControl();
-            skFullSize.Location = picFullSize.Location;
-            skFullSize.Size = picFullSize.Size;
-            //            skTetrisField.Location = picTetrisField.Location;
-            //            skTetrisField.Size = picTetrisField.Size;
-            //            skStats.Location = picStatistics.Location;
-            //            skStats.Size = picStatistics.Size;
-            skFullSize.KeyDown += SkFullSize_KeyDown;
-            skFullSize.KeyUp += SkFullSize_KeyUp;
-            skFullSize.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
-//            skTetrisField.Anchor = picTetrisField.Anchor;
-//            skStats.Anchor = picStatistics.Anchor;
-            Controls.Add(skFullSize);
-            //            Controls.Add(skTetrisField);
-            //            Controls.Add(skStats);
-            
-            //paint routine handlers for Skia.
-            skFullSize.PaintSurface += SkFullSize_PaintSurface;
-            skFullSize.Resize += SkFullSize_Resize;
-            //skTetrisField.PaintSurface += SkTetrisField_PaintSurface;
-            //skStats.PaintSurface += SkStats_PaintSurface;
-           */ 
-        }
+     
 
-        private void SkFullSize_KeyUp(object sender, KeyEventArgs e)
-        {
-            BASeTris_KeyUp(sender,e);
-        }
-
-       
-
-        private void SkFullSize_Resize(object sender, EventArgs e)
-        {
-
-            ResetSK();
-                //SKCanvas skTetrisField;
-                //SKCanvas skStats;
-            
-
-        }
-        private void ResetSK()
-        {
-            GetHorizontalSizeData(skFullSize.Height, skFullSize.Width, out float FieldWidth, out float StatWidth);
-
-            SKBitmap Field = new SKBitmap((int)FieldWidth, skFullSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            SKBitmap Stats = new SKBitmap((int)StatWidth, skFullSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-         
-            skTetrisField = new SKCanvas(Field);
       
-            skStats = new SKCanvas(Stats);
-           
-            skTetrisFieldBmp = Field;
-            skStatsBmp = Stats;
-        }
+
+      
+        
         private void BASeTris_KeyUp(object sender, KeyEventArgs e)
         {
             Debug.Print("Button released:" + e.KeyCode);

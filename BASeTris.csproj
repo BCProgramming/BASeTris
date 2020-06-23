@@ -175,12 +175,15 @@
     <Compile Include="Rendering\RenderingProvider.cs" />
     <Compile Include="Rendering\Skia\Backgrounds\StandardImageBackgroundSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStateSkiaDrawParameters.cs" />
+    <Compile Include="Rendering\Skia\GameStates\EnterTextStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\FieldActionStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\GameOverStateSkaiRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\MenuStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\ShowHighScoresStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
+    <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
     <Compile Include="Rendering\Skia\SkiaExtensions.cs" />
     <Compile Include="Rendering\Skia\SkiaRenderingProvider.cs" />

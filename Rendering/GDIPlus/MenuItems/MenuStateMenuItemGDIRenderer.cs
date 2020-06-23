@@ -77,11 +77,11 @@ namespace BASeTris.Rendering.MenuItems
                 return SizeDict[FontFace];
             }
         }
-        public SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
+        public virtual SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
         {
             return GetSize(pOwner, (MenuStateTextMenuItem)Source);
         }
-        public SizeF GetSize(IStateOwner pOwner,MenuStateTextMenuItem Source)
+        public virtual SizeF GetSize(IStateOwner pOwner,MenuStateTextMenuItem Source)
         {
             var testfont = GetScaledFont(pOwner,Source.FontFace,Source.FontSize);
             var MeasureText = Temp.MeasureString(Source.Text, testfont);
@@ -161,7 +161,7 @@ namespace BASeTris.Rendering.MenuItems
     public class MenuStateMultiOptionItemGDIRenderer : MenuStateTextMenuItemGDIRenderer, IRenderingHandler<Graphics, MenuStateMultiOption, MenuStateMenuItemGDIPlusDrawData>, ISizableMenuItemGDIPlusRenderingHandler
     {
 
-        public SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
+        public override SizeF GetSize(IStateOwner pOwner, MenuStateSizedMenuItem Source)
         {
             return GetSize(pOwner, (MenuStateMultiOption)Source);
         }

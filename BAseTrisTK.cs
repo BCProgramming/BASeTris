@@ -7,12 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.GameStates;
 using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
+using BASeTris.TetrisBlocks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 using SkiaSharp;
 
 namespace BASeTris
@@ -97,6 +100,64 @@ namespace BASeTris
         protected override void OnResize(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
+        }
+        protected override void OnKeyDown(KeyboardKeyEventArgs e)
+        {
+            _Present.IgnoreController = true;
+            if (e.Key == Key.G)
+            {
+                if (_Present.Game.CurrentState is StandardTetrisGameState)
+                {
+                    StandardTetrisGameState gs = _Present.Game.CurrentState as StandardTetrisGameState;
+                    TetrisBlock[][] inserts = new TetrisBlock[4][];
+                    for (int i = 0; i < inserts.Length; i++)
+                    {
+                        inserts[i] = new TetrisBlock[gs.PlayField.ColCount];
+                        for (int c = 1; c < inserts[i].Length; c++)
+                        {
+                            inserts[i][c] = new StandardColouredBlock() { BlockColor = Color.Red, DisplayStyle = StandardColouredBlock.BlockStyle.Style_CloudBevel };
+                        }
+                    }
+
+                    InsertBlockRowsActionGameState irs = new InsertBlockRowsActionGameState(gs, 0, inserts, Enumerable.Empty<Action>());
+                    CurrentState = irs;
+                }
+            }
+            else if (e.Key == Key.C)
+            {
+                if (e.Shift && e.Control)
+                {
+                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Present.Game, 64);
+                    CurrentState = cheatstate;
+                }
+            }
+
+            Debug.Print("Button pressed:" + e.Key);
+            var translated = _Present.TranslateKey(e.Key);
+            if (translated != null)
+            {
+                _Present.Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
+                _Present.GameKeyDown(translated.Value);
+
+            }
+        }
+        protected override void OnKeyUp(KeyboardKeyEventArgs e)
+        {
+            Debug.Print("Button released:" + e.Key);
+            var translated = _Present.TranslateKey(e.Key);
+            if (translated != null)
+            {
+                _Present.GameKeyUp(translated.Value);
+            }
+        }
+        protected override void OnKeyPress(OpenTK.KeyPressEventArgs e)
+        {
+            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
+            {
+                var Casted = (IDirectKeyboardInputState)_Present.Game.CurrentState;
+                Casted.KeyPressed(this, (Keys)e.KeyChar);
+            }
+            
         }
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
