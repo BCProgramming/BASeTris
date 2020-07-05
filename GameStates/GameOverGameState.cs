@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.BASeScores;
+using BASeTris.BackgroundDrawers;
+using BASeTris.GameStates.Menu;
 using BASeTris.Properties;
 
 namespace BASeTris.GameStates
@@ -126,6 +128,20 @@ namespace BASeTris.GameStates
                         TetrisGame.Soundman.PlayMusic("highscoreentry",pOwner.Settings.MusicVolume,true);
                     }
                 }
+            }
+            else if (CompleteSummary)
+            {
+                IBackground bg = null;
+                if (pOwner is BASeTris bt)
+                {
+                    bg = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
+                }
+                else if (pOwner is BASeTrisTK)
+                {
+                    bg = StandardImageBackgroundSkia.GetStandardBackgroundDrawer();
+                }
+                GenericMenuState TitleMenu = new GenericMenuState(bg, pOwner, new TitleMenuPopulator());
+                pOwner.CurrentState = TitleMenu;
             }
         }
     }

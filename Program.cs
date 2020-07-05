@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeCamp.BASeScores;
@@ -16,12 +17,27 @@ namespace BASeTris
 {
     static class Program
     {
+
+        private const int SPI_GETWORKAREA = 48;
+        [DllImport("user32.dll", EntryPoint = "SystemParametersInfoA")]
+        private static extern int SystemParametersInfo(int uAction, IntPtr uParam, ref RECT lpvParam, int fuWinIni);
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            internal int Left;
+            internal int Top;
+            internal int Right;
+            internal int Bottom;
+        }
+
+
+
         public enum StartMode
         {
             Mode_WinForms,
             Mode_OpenTK
         }
-        public static StartMode RunMode = StartMode.Mode_WinForms;
+        public static StartMode RunMode = StartMode.Mode_OpenTK;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -59,8 +75,16 @@ namespace BASeTris
                 SkiaSharp.Views.Desktop.Extensions.ToBitmap(unsetTestS).Save("T:\\S_SNES_UNSET.PNG");
                 var testresult2 = SNESTetrominoTheme.GetUnsetImage(6, 'I');
                 SkiaSharp.Views.Desktop.Extensions.ToBitmap(testresult2).Save("T:\\I_UNSET_SNES.PNG");*/
-                return;
-                new BASeTrisTK().Run();
+                //return;
+                RECT returnedvalue = new RECT();
+                SystemParametersInfo(SPI_GETWORKAREA, IntPtr.Zero, ref returnedvalue, 0);
+
+                var DesiredHeight = (returnedvalue.Bottom - returnedvalue.Top)- 64;
+                var DesiredWidth = (int)((float)DesiredHeight * .95f);
+
+
+
+                new BASeTrisTK(DesiredWidth,DesiredHeight).Run();
             }
         }
     }

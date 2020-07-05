@@ -11,7 +11,7 @@ using BASeTris.GameStates.Menu;
 namespace BASeTris.Rendering.Skia.GameStates
 {
     [RenderingHandler(typeof(PauseGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class PauseGameStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, PauseGameState, GameStateSkiaDrawParameters>
+    public class PauseGameStateSkiaRenderingHandler : MenuStateSkiaRenderingHandler // StandardStateRenderingHandler<SKCanvas, PauseGameState, GameStateSkiaDrawParameters>
     {
         private void InitDrawData(IStateOwner pOwner, PauseGameState Source, GameStateSkiaDrawParameters Element)
         {
@@ -37,7 +37,19 @@ namespace BASeTris.Rendering.Skia.GameStates
         }
         static SKPaint GrayBG = new SKPaint() { Color = SKColors.Gray };
         private static SKPaint GameOverTextPaint = null;
-        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, PauseGameState Source, GameStateSkiaDrawParameters Element)
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuState Source, GameStateSkiaDrawParameters Element)
+        {
+            if (Source is PauseGameState pgs)
+            {
+                Render(pOwner, pRenderTarget, pgs, Element);
+            }
+            else
+            {
+                base.Render(pOwner, pRenderTarget, Source, Element);
+            }
+        }
+
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, PauseGameState Source, GameStateSkiaDrawParameters Element)
         {
 
             if(!Source.DrawDataInitialized)
@@ -72,28 +84,42 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
 
-            SKPoint DrawPos = new SKPoint(Bounds.Width - 2 - MeasureBounds.Width / 2, Bounds.Height / 2 - MeasureBounds.Height / 2);
+            SKPoint DrawPos = new SKPoint(Bounds.Width / 2 - MeasureBounds.Width / 2, Bounds.Height / 2 - MeasureBounds.Height / 2);
             
             g.DrawText(sPauseText, DrawPos, GameOverTextPaint);
 
             //retrieve the renderer for the MenuState object.
-            var basecall = RenderingProvider.Static.GetHandler(typeof(SKCanvas), typeof(MenuState), typeof(GameStateSkiaDrawParameters));
-            basecall?.Render(pOwner, pRenderTarget, Source, Element);
 
-          
+            //var basecall = RenderingProvider.Static.GetHandler(typeof(SKCanvas), typeof(MenuState), typeof(GameStateSkiaDrawParameters));
+            base.Render(pOwner, pRenderTarget, Source, Element);
+            //basecall?.Render(pOwner, pRenderTarget, Source, Element);
+
+
+        }
+        public override float DrawHeader(IStateOwner pOwner, MenuState Source, SKCanvas Target, SKRect Bounds)
+        {
+            return (float)Bounds.Height * 0.6f;
         }
 
-        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, PauseGameState Source, GameStateSkiaDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, MenuState Source, GameStateSkiaDrawParameters Element)
         {
-            /*
+            if (Source is PauseGameState pgs)
+            {
+                RenderStats(pOwner, pRenderTarget, pgs, Element);
+            }
+            else
+            {
+                base.Render(pOwner, pRenderTarget, Source, Element);
+            }
+        }
+        public void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, PauseGameState Source, GameStateSkiaDrawParameters Element)
+        {
             //delegate...
             var PausedState = Source.PausedState;
             if (PausedState != null)
             {
                 RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, PausedState, Element);
             }
-            */
-
         }
 
 

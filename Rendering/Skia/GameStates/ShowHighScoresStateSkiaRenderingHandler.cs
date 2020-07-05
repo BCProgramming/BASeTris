@@ -45,8 +45,31 @@ namespace BASeTris.Rendering.Skia.GameStates
             float MiddleX = Bounds.Width / 2;
             DrawBackground(Source, pOwner, g, Bounds);
             float TextSize = Bounds.Height / 30f;
-            var ScoreFont = TetrisGame.RetroFontSK;
+            var ScoreFont = TetrisGame.RetroFontSK; //point size 24.
+            SKPaint MainScoreFont = new SKPaint() {Typeface = ScoreFont,TextSize = (float)(24*pOwner.ScaleFactor),Color=SKColors.Black };
+            SKPaint ShadowScoreFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(24 * pOwner.ScaleFactor),Color=SKColors.White };
+            SKRect resultitem = new SKRect();
+            float LineHeight = MainScoreFont.MeasureText("#", ref resultitem);
+            if(Source.IncrementedDrawState >= 0)
+            {
+                //draw "HIGH SCORES" header text.
+                SKRect MeasuredRect = new SKRect();
+                MainScoreFont.MeasureText(Source.HeaderText, ref MeasuredRect);
+                SKPoint DrawPosition = new SKPoint(MiddleX - (MeasuredRect.Width / 2), StartY);
+                g.DrawText(Source.HeaderText, new SKPoint(DrawPosition.X + 2, DrawPosition.Y + 2), MainScoreFont);
+                g.DrawText(Source.HeaderText, DrawPosition, MainScoreFont);
+            }
             
+            if(Source.IncrementedDrawState >=0)
+            {
+                //draw a line beneath the high score text.
+            }
+
+            if(Source.IncrementedDrawState >= 2)
+            {
+                //draw the high score listing entries.
+                //iterate from 2 to drawstate and draw the high score at position drawstate-2.
+            }
             /*
             float LineHeight = g.MeasureString("#", ScoreFont).Height + 5;
             //This needs to change based on the actual gameplay area size.)
@@ -117,7 +140,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     }
                 }
             }*/
-           
+
         }
 
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, ShowHighScoresState Source, GameStateSkiaDrawParameters Element)

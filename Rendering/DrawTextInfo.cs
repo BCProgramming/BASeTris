@@ -138,6 +138,7 @@ namespace BASeTris.Rendering
                 AddedOffset.X -= ((NewWidth - CharacterSize.X)) / 2;
                 AddedOffset.Y -= ((NewHeight - CharacterSize.Y)) / 2;
             }
+
             g.DrawText(character.ToString(), DrawPosition, DrawBrush);
 
             foreach (var iterate in _Extensions.Reverse())
@@ -214,6 +215,18 @@ namespace BASeTris.Rendering
             //rotate once every 3/4's of a second.
             float XPos = Position.X, YPos = Position.Y;
             StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.Width, size.Height, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius);
+            Position.X = XPos;
+            Position.Y = YPos;
+        }
+    }
+    public class RotatingPositionCharacterPositionCalculatorSkia :DrawCharacterPositionCalculatorSkia
+    {
+        private float Radius = 10;
+        private float CharacterNumberModifier = 0.5f;
+        public sealed override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
+        {
+            float XPos = Position.X, YPos = Position.Y;
+            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.X, size.Y, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius);
             Position.X = XPos;
             Position.Y = YPos;
         }

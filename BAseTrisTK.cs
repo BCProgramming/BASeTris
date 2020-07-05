@@ -45,16 +45,20 @@ namespace BASeTris
             return new GRBackendRenderTarget(Window.ClientSize.Width,Window.ClientSize.Height,3,stencil,new GRGlFramebufferInfo((uint)framebuffer,DefaultColorType.ToGlSizedFormat()));
            
         }
-        public const int DEFAULT_GAME_WIDTH = 400;
-        public const int DEFAULT_STAT_WIDTH = 312;
-        public const int DEFAULT_AREA_HEIGHT = 775;
+        public const int DEFAULT_GAME_WIDTH = 520;
+        public const int DEFAULT_STAT_WIDTH = (int)405.6;
+        public const int DEFAULT_AREA_HEIGHT = (int)1007.5;
         
 
-        public BASeTrisTK():base(DEFAULT_GAME_WIDTH+DEFAULT_STAT_WIDTH,DEFAULT_AREA_HEIGHT,GraphicsMode.Default,"BASeTris",GameWindowFlags.Default)
+        public BASeTrisTK(int Width,int Height):base(Width,Height,GraphicsMode.Default,"BASeTris",GameWindowFlags.Default)
         {
             
         }
-
+        private void UpdateSize()
+        {
+            this.ClientSize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
+            //this.renderTarget = CreateRenderTarget(this);
+        }
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -66,8 +70,12 @@ namespace BASeTris
             CursorVisible = true;
 
             _Present = new GamePresenter(this);
-            _Present.StartGame(GamePresenter.GameHandlingConstants.Handle_Manual);
+            StartGame();
             
+        }
+        public void StartGame()
+        {
+            _Present.StartGame(GamePresenter.GameHandlingConstants.Handle_Manual);
         }
         protected override void OnUnload(EventArgs e)
         {
@@ -174,13 +182,15 @@ namespace BASeTris
             FieldSize = WindowHeight * (332f / 641f);
             StatSize = WindowWidth - FieldSize;
         }
+       
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            Debug.Print("RenderFrame");
             base.OnRenderFrame(e);
             try
             {
                 var CurrentGameState = _Present.Game.CurrentState;
-                Title = $"(Vsync: {VSync}) FPS: {1f / e.Time:0}";
+                Title = $"State:{CurrentGameState.GetType().Name}  (Vsync: {VSync}) FPS: {1f / e.Time:0}";
 
                 Color4 backColor;
                 backColor.A = 1.0f;
@@ -256,6 +266,14 @@ namespace BASeTris
                                 //staterender.RenderStats(this,skStats,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
 
                             }
+                            else
+                            {
+                                ;
+                            }
+                        }
+                        else
+                        {
+                            ;
                         }
                     }
                     
@@ -293,15 +311,13 @@ namespace BASeTris
             _Present.Feedback(Strength, Length);
         }
 
-        public void AddGameObject(GameObject Source)
-        {
-            _Present.GameObjects.Add(Source);
-        }
+   
         private double _ScaleFactor = 1;
-        public double ScaleFactor { get { return _ScaleFactor; } }
+        public double ScaleFactor { get { return (float)this.ClientSize.Height / 950f; } }
         public void SetScale(double pScale)
         {
             _ScaleFactor = pScale;
+            UpdateSize();
         }
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange
         {

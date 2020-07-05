@@ -8,11 +8,11 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(ViewScoreDetailsState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class ViewScoreDetailsStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,ViewScoreDetailsState,GameStateDrawParameters>
+    [RenderingHandler(typeof(ViewScoreDetailsState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class ViewScoreDetailsStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,ViewScoreDetailsState,BaseDrawParameters>
     {
         private Pen Separator = new Pen(Color.Black, 3);
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, ViewScoreDetailsState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, ViewScoreDetailsState Source, BaseDrawParameters Element)
         {
             var g = pRenderTarget;
             var Bounds = Element.Bounds;
@@ -75,7 +75,7 @@ namespace BASeTris.Rendering.GDIPlus
             //draw the times each level was achieved.
             //(Possible feature: support paging if  we can't fit them on one screen?)
         }
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, ViewScoreDetailsState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, ViewScoreDetailsState Source, BaseDrawParameters Element)
         {
             throw new NotImplementedException();
         }

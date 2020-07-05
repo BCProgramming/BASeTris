@@ -32,6 +32,8 @@ using OpenTK.Platform;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using XInput.Wrapper;
+using BASeTris.GameStates.Menu;
+using BASeTris.BackgroundDrawers;
 
 namespace BASeTris
 {
@@ -85,10 +87,7 @@ namespace BASeTris
             InitializeComponent();
         }
 
-        public void AddGameObject(GameObject go)
-        {
-            _Present.GameObjects.Add(go);
-        }
+  
 
       
 
@@ -122,7 +121,7 @@ namespace BASeTris
             }
         }
 
-        private double current_factor = 1;
+        private double current_factor = 1.3;
 
         public void SetScale(double factor)
         {
@@ -154,7 +153,7 @@ namespace BASeTris
             menuStrip1.Renderer = buildrender;
             menuStrip1.BackColor = SystemColors.Control;
             TetrisGame.InitState();
-            
+
             /*SkiaBitmap = new SKBitmap(new SKImageInfo(picTetrisField.Width, picTetrisField.Height, SKColorType.Rgba8888));
             SKCanvas SkiaCanvas = new SKCanvas(SkiaBitmap);
 
@@ -167,10 +166,13 @@ namespace BASeTris
             SKTypeface st = TetrisGame.RetroFontSK;
             TetrisGame.DrawTextSK(SkiaCanvas, "Testing 1 2 3", new SKPoint(15, 15), st, SkiaSharp.Views.Desktop.Extensions.ToSKColor(Color.Blue), 18, 1d);
             */
-            
-            
+            StartGame();
 
-           
+            GenericMenuState TitleMenu = new GenericMenuState(StandardImageBackgroundGDI.GetStandardBackgroundDrawer(), this, new TitleMenuPopulator());
+
+            CurrentState = TitleMenu;
+            SetScale(1.33333d);
+
         }
         SKBitmap SkiaBitmap = null;
         
@@ -178,7 +180,7 @@ namespace BASeTris
         bool XPolling = false;
         Nomino testBG = null;
 
-        private void StartGame()
+        public void StartGame()
         {
 
             _Present.StartGame();
@@ -246,13 +248,13 @@ namespace BASeTris
             {
                 ;
             }
-            var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+            var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(BaseDrawParameters));
             if(renderer!=null)
             {
                 if(renderer is IStateRenderingHandler staterender)
                 {
                     staterender.Render(this, e.Graphics, _Present.Game.CurrentState,
-                        new GameStateDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
+                        new BaseDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
                     return;
                 }
             }
@@ -274,13 +276,13 @@ namespace BASeTris
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
 
-                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(GameStateDrawParameters));
+                var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(BaseDrawParameters));
                 if (renderer != null)
                 {
                     if (renderer is IStateRenderingHandler staterender)
                     {
                         staterender.RenderStats(this, e.Graphics, _Present.Game.CurrentState,
-                            new GameStateDrawParameters(picStatistics.ClientRectangle));
+                            new BaseDrawParameters(picStatistics.ClientRectangle));
                         return;
                     }
                 }

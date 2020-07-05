@@ -17,7 +17,7 @@ namespace BASeTris
         Rectangle GameArea { get; }
         void Feedback(float Strength, int Length);
 
-        void AddGameObject(GameObject Source);
+        
         double ScaleFactor { get; }
         void SetScale(double pScale);
         event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
@@ -32,6 +32,7 @@ namespace BASeTris
     public interface IGamePresenter
     {
         void Present();
+        void StartGame();
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

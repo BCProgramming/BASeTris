@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
+using BASeTris.GameObjects;
 using BASeTris.GameStates;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
@@ -80,6 +81,13 @@ namespace BASeTris.Rendering.Skia.GameStates
             _Background.FrameProc(pOwner);
             
             RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,_Background, new SkiaBackgroundDrawData(Element.Bounds));
+            //draw particles.
+            var particledrawer = RenderingProvider.Static.GetHandler(typeof(List<Particle>), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters));
+            if (Source.Particles.Count > 0)
+            {
+                ;
+            }
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.Particles, Element);
             var PlayField = Source.PlayField;
             if (PlayField != null)
             {
@@ -212,8 +220,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                 {
                     var useStats = Source.GameStats;
                     double Factor = Bounds.Height / 644d;
-                    var DesiredFontPixelHeight = PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
-                    float DesiredFontSize = (float)DesiredFontPixelHeight;
+                    var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
+                    float DesiredFontSize = (float)(DesiredFontPixelHeight * pOwner.ScaleFactor);
                     SKPaint skp;
                     SKTypeface standardFont = TetrisGame.RetroFontSK;
                     //Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
@@ -234,13 +242,13 @@ namespace BASeTris.Rendering.Skia.GameStates
                     String[] StatLabels = new string[] { "Time:", "Score:", "Top:", "Lines:" };
                     String[] StatValues = new string[] { FormatGameTime(pOwner), useStats.Score.ToString(), TopScore.ToString(), Source.GameStats.LineCount.ToString() };
                     
-                    BlackBrush.TextSize = (float)DesiredFontPixelHeight;
-                    BlackBrush.Typeface = TetrisGame.RetroFontSK;
+                    WhiteBrush.TextSize = BlackBrush.TextSize = DesiredFontSize;
+                    WhiteBrush.Typeface = BlackBrush.Typeface = TetrisGame.RetroFontSK;
                     SKRect MeasureLabel = new SKRect(), MeasureValue = new SKRect();
                     BlackBrush.MeasureText("#", ref MeasureLabel);
                     BlackBrush.MeasureText("#", ref MeasureValue);
                     SKPoint StatPosition = new SKPoint(Bounds.Left + (int)(7 * Factor), Bounds.Top + MeasureLabel.Height + (int)(14 * Factor));
-                    float CurrentYPosition = StatPosition.Y;
+                    float CurrentYPosition = StatPosition.Y+MeasureLabel.Height;
                     for (int statindex = 0; statindex < StatLabels.Length; statindex++)
                     {
                        float LabelWidth = BlackBrush.MeasureText(StatLabels[statindex] + "##", ref MeasureLabel);
@@ -252,11 +260,26 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                         //we want to draw the current stat label at position StatPosition.X,CurrentYPosition...
 
-                        TetrisGame.DrawTextSK(g, StatLabels[statindex], new SKPoint(StatPosition.X, CurrentYPosition),
-                            TetrisGame.RetroFontSK, SKColors.Black, DesiredFontSize, (float)pOwner.ScaleFactor);
+                        // TetrisGame.DrawTextSK(g, StatLabels[statindex], new SKPoint(StatPosition.X, CurrentYPosition),
+                        //     TetrisGame.RetroFontSK, SKColors.Black, DesiredFontSize, (float)pOwner.ScaleFactor);
+
+
+                        //draw labels...
+                        g.DrawText(StatLabels[statindex], new SKPoint(StatPosition.X + 5, CurrentYPosition + 5), WhiteBrush);
+                        g.DrawText(StatLabels[statindex], new SKPoint(StatPosition.X, CurrentYPosition), BlackBrush);
+
+
+                        SKPoint ValuePosition = new SKPoint((float)(Bounds.Right - ((MeasureValue.Width) + (5 * Factor))), CurrentYPosition);
+
+                        g.DrawText(StatValues[statindex], new SKPoint(ValuePosition.X + 5, ValuePosition.Y + 5), WhiteBrush);
+                        g.DrawText(StatValues[statindex], new SKPoint(ValuePosition.X , ValuePosition.Y ), BlackBrush);
+                        //TetrisGame.DrawTextSK(g, PaintInfo);
+
+
+                        //TetrisGame.DrawTextSK(g, PaintInfo);
 
                         //we want to draw the current stat value at Bounds.Width-ValueWidth.
-                        TetrisGame.DrawTextSK(g, StatValues[statindex], new SKPoint(Bounds.Left + (float)(Bounds.Width - (MeasureValue.Width + (5 * Factor))), CurrentYPosition), TetrisGame.RetroFontSK, SKColors.Black, DesiredFontSize, (float)pOwner.ScaleFactor);
+                        //TetrisGame.DrawTextSK(g, StatValues[statindex], new SKPoint((float)(Bounds.Right - ((MeasureValue.Width) + (5 * Factor))), CurrentYPosition), TetrisGame.RetroFontSK, SKColors.Black, DesiredFontSize, (float)pOwner.ScaleFactor);
 
                         //add the larger of the two heights to the current Y Position.
                         CurrentYPosition += (int)LargerHeight;

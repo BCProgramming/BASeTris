@@ -161,6 +161,17 @@ namespace BASeTris.BackgroundDrawers
     }
     public class StandardImageBackgroundSkia : Background<StandardImageBackgroundDrawSkiaCapsule>
     {
+        public static StandardImageBackgroundSkia  GetStandardBackgroundDrawer()
+        {
+            var _Background = new StandardImageBackgroundSkia();
+            var useImage = TetrisGame.Imageman["background"];
+            Bitmap bmp = new Bitmap(ImageManager.ReduceImage(useImage, new Size(useImage.Width / 2, useImage.Height / 2)));
+                
+
+            SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
+            _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
+            return _Background;
+        }
         public override void FrameProc(IStateOwner pOwner)
         {
             StandardImageBackgroundDrawSkiaCapsule dd = Data;

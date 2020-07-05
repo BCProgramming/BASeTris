@@ -15,6 +15,7 @@ using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
+using SkiaSharp;
 
 namespace BASeTris
 {
@@ -355,7 +356,14 @@ namespace BASeTris
         {
             return ForBounds.Height / (VISIBLEROWS);
         }
-
+        public float GetBlockWidth(SKRect ForBounds)
+        {
+            return ForBounds.Width / COLCOUNT;
+        }
+        public float GetBlockHeight(SKRect ForBounds)
+        {
+            return ForBounds.Height / (VISIBLEROWS);
+        }
         Pen LinePen = new Pen(Color.Black, 1) {DashPattern = new float[] {4, 1, 3, 1, 2, 1, 3, 1}};
         RectangleF LastFieldSave = RectangleF.Empty;
         Image FieldBitmap = null;

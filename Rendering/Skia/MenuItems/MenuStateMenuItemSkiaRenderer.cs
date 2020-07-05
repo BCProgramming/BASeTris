@@ -48,7 +48,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
     }
 
 
-    [RenderingHandler(typeof(MenuStateTextMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemGDIPlusDrawData))]
+    [RenderingHandler(typeof(MenuStateTextMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData))]
     public class MenuStateTextMenuItemSkiaRenderer : IRenderingHandler<SKCanvas, MenuStateTextMenuItem, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
     {
         //protected Graphics Temp = Graphics.FromImage(new Bitmap(1, 1));
@@ -93,9 +93,17 @@ namespace BASeTris.Rendering.Skia.MenuItems
         }
         public virtual SKPoint GetSize(IStateOwner pOwner, MenuStateTextMenuItem Source)
         {
+            //TODO- implement
+            SKPaint MeasurePaint = new SKPaint();
+            var RetroFont = TetrisGame.RetroFontSK;
+            MeasurePaint.Typeface = RetroFont;
+            MeasurePaint.TextSize = Source.FontSize;
+            SKRect result = new SKRect();
+            
+            MeasurePaint.MeasureText(new String(Enumerable.Repeat('█',Source.Text.Length).ToArray()), ref result);
+            return new SKPoint(result.Width, result.Height);
             //var testfont = GetScaledFont(pOwner, Source.FontFace, Source.FontSize);
             //var MeasureText = Temp.MeasureString(Source.Text, testfont);
-            return SKPoint.Empty;
             //return MeasureText.ToSize();
         }
 
@@ -115,8 +123,8 @@ namespace BASeTris.Rendering.Skia.MenuItems
         private static SKPoint GetDrawPosition(SKRect pBounds, SKRect DrawSize, MenuHorizontalAlignment pAlign)
         {
             float useX = GetDrawX(pBounds, DrawSize, pAlign);
-            float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Width / 2));
-            return new SKPoint(useX, useY);
+            float useY = (pBounds.Top + pBounds.Height / 2 - (DrawSize.Height / 2));
+            return new SKPoint(useX, useY+DrawSize.Height);
         }
         private static SKPaint TransparentPaint = new SKPaint() { Color = SKColors.Transparent };
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateTextMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
@@ -146,6 +154,11 @@ namespace BASeTris.Rendering.Skia.MenuItems
             ShadePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor), TextAlign = SKTextAlign.Center };
 
 
+            ForePaint.Typeface = useFont.TypeFace;
+            ForePaint.TextSize = (int)(15 * pOwner.ScaleFactor);
+            ShadePaint.Typeface = useFont.TypeFace;
+            ShadePaint.TextSize = (int)(15 * pOwner.ScaleFactor); 
+
             var useStyle = new DrawTextInformationSkia()
             {
                 Text = Source.Text,
@@ -159,7 +172,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
             {
-                useStyle.CharacterHandler.SetPositionCalculator(new NullCharacterPositionCalculatorSkia());
+                useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia());
             }
 
             TetrisGame.DrawTextSK(pRenderTarget, useStyle);
@@ -173,10 +186,10 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
         public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
-            Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateTextMenuItem)RenderSource, (MenuStateMenuItemGDIPlusDrawData)Element);
+            Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateTextMenuItem)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
         }
     }
-    [RenderingHandler(typeof(MenuStateMultiOption), typeof(SKCanvas), typeof(MenuStateMenuItemGDIPlusDrawData))]
+    [RenderingHandler(typeof(MenuStateMultiOption), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData))]
 
 
     public class MenuStateMultiOptionItemSkiaRenderer : MenuStateTextMenuItemSkiaRenderer, IRenderingHandler<SKCanvas, MenuStateMultiOption, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
@@ -211,6 +224,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
             SKPaint Background = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.BackColor) };
             SKPaint Shadow = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor) };
             DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = Foreground, BackgroundPaint = Background, ShadowPaint = Shadow };
+            dtis.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, Source.FontSize);
             //TODO: need to get this implemented via a SKPaint, but the TextMenu item should probably have draw data in an "abstracted" form...
             SKRect MeasureLeft = new SKRect();
             SKRect MeasureRight = new SKRect();

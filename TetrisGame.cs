@@ -139,6 +139,7 @@ namespace BASeTris
 
 
         }
+       
         public static void DrawTextSK(SKCanvas Target, String pText, SKPoint Position, SKTypeface typeface, SKColor Color, float DesiredSize, double ScaleFactor)
         {
             var rBytes = UTF8Encoding.Default.GetBytes(pText.ToCharArray());
@@ -198,6 +199,19 @@ namespace BASeTris
         }
         public static void DrawTextSK(SKCanvas g, DrawTextInformationSkia DrawData)
         {
+
+            var characterpositions = MeasureCharacterSizes(DrawData.ForegroundPaint, DrawData.Text);
+            char[] drawcharacters = DrawData.Text.ToCharArray();
+            foreach(int pass in new[] { 1,2})
+            {
+                for (int i = 0; i < drawcharacters.Length; i++)
+                {
+                    char drawcharacter = drawcharacters[i];
+                    SKPoint DrawPosition = new SKPoint(characterpositions[i].Left + DrawData.Position.X, characterpositions[i].Top + DrawData.Position.Y);
+                    DrawData.CharacterHandler.DrawCharacter(g, drawcharacter, DrawData, DrawPosition, new SKPoint(characterpositions[i].Size.Width, characterpositions[i].Size.Height), i, drawcharacters.Length, pass);
+                }
+            }
+
 
         }
         public static void DrawText(Graphics g, DrawTextInformationGDI DrawData)
@@ -388,10 +402,7 @@ namespace BASeTris
             GameOwner?.Feedback(Strength, Length);
         }
 
-        public void AddGameObject(GameObject Source)
-        {
-            GameOwner.AddGameObject(Source);
-        }
+       
 
 
 
@@ -474,7 +485,7 @@ namespace BASeTris
 
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
-            RenderingProvider.Static.DrawElement(this, g, CurrentGameState, new GameStateDrawParameters(Bounds));
+            RenderingProvider.Static.DrawElement(this, g, CurrentGameState, new BaseDrawParameters(Bounds));
             CurrentGameState.DrawForegroundEffect(this, g, Bounds);
         }
 
@@ -789,7 +800,21 @@ namespace BASeTris
 
             return result;
         }
+        private static List<SKRect> MeasureCharacterSizes(SKPaint skp,String text)
+        {
+            List<SKRect> results = new List<SKRect>();
+            float xpos = 0;
+            for(int index = 0;index < text.Length; index ++)
+            {
+                SKRect measuredchar = new SKRect();
+                skp.MeasureText("█",ref measuredchar);
+                measuredchar = new SKRect(xpos, measuredchar.Top, xpos + measuredchar.Width, measuredchar.Bottom);
+                xpos += measuredchar.Width;
+                results.Add(measuredchar);
 
+            }
+            return results;
+        }
         // Measure the characters in the string.
         private static List<RectangleF> MeasureCharacterSizes(Graphics gr,
             Font font, string text)

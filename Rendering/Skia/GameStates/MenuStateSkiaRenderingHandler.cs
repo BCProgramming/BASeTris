@@ -39,11 +39,12 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                 if (searchitem is MenuStateSizedMenuItem mss)
                 {
-                    var sizehandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), searchitem.GetType(), typeof(MenuStateMenuItemGDIPlusDrawData));
+                    var sizehandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), searchitem.GetType(), typeof(MenuStateMenuItemSkiaDrawData));
                     if (sizehandler is ISizableMenuItemSkiaRenderingHandler isizer)
 
                     {
                         var grabsize = isizer.GetSize(pOwner, mss);
+                        grabsize = new SKPoint((float)(grabsize.X * pOwner.ScaleFactor), (float)(grabsize.Y * pOwner.ScaleFactor));
                         if (grabsize.Y > MaxHeight) MaxHeight = grabsize.Y;
                         if (grabsize.X > MaxWidth) MaxWidth = grabsize.X;
 
@@ -74,7 +75,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         static SKPaint BackPainter = null;
         public virtual float DrawHeader(IStateOwner pOwner, MenuState Source, SKCanvas Target, SKRect Bounds)
         {
-            
+            if (String.IsNullOrEmpty(Source.StateHeader)) return 0;
             SKFontInfo useHeaderFont = GetScaledHeaderFont(pOwner, Source);
             Painter = new SKPaint() { Color = SKColors.Black };
             BackPainter = new SKPaint() { Color = SKColors.White };
@@ -83,7 +84,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
             SKRect HeaderSize = new SKRect();
-            Painter.MeasureText(Source.StateHeader, ref HeaderSize);
+            Painter.MeasureText(Source.StateHeader??"", ref HeaderSize);
             
             float UseX = (Bounds.Width / 2) - (HeaderSize.Width / 2) + Source.MainXOffset;
             float UseY = HeaderSize.Height / 3;

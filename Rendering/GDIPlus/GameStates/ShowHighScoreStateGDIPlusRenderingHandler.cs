@@ -9,8 +9,8 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(ShowHighScoresState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class ShowHighScoreStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,ShowHighScoresState,GameStateDrawParameters>
+    [RenderingHandler(typeof(ShowHighScoresState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class ShowHighScoreStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,ShowHighScoresState,BaseDrawParameters>
     {
         Pen LinePen = new Pen(new LinearGradientBrush(new Rectangle(0, 0, 5, 25), Color.Black, Color.DarkGray, LinearGradientMode.Vertical), 25);
         private String PointerText = "►";
@@ -29,7 +29,7 @@ namespace BASeTris.Rendering.GDIPlus
         {
             return DateTime.Now.Millisecond < 500 ? Brushes.Lime : Brushes.Blue;
         }
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, ShowHighScoresState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, ShowHighScoresState Source, BaseDrawParameters Element)
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
@@ -111,7 +111,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
         }
 
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, ShowHighScoresState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, ShowHighScoresState Source, BaseDrawParameters Element)
         {
             //throw new NotImplementedException();
         }

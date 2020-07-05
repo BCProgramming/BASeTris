@@ -32,9 +32,19 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
+
+            StandardTetrisGameState desiredState = null;
             if (_BaseState is StandardTetrisGameState)
+                desiredState = _BaseState;
+            else if(_BaseState is ICompositeState<StandardTetrisGameState> comp)
             {
-                _BaseState.FrameUpdate();
+                desiredState = comp.GetComposite();
+            }
+
+            if (desiredState!=null)
+            {
+                desiredState.FrameUpdate();
+                
             }
         }
 
@@ -77,7 +87,7 @@ namespace BASeTris.GameStates
         protected int[] RowNumbers = null;
 
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
-        protected bool FlashState = false;
+        public bool FlashState = false;
 
         public FieldLineActionGameState(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState)
         {
@@ -149,6 +159,7 @@ namespace BASeTris.GameStates
                     }
                 }
             }
+
         }
 
         //The actual "Frame" operation. This implementation clears one block and returns true when it clears all the blocks on each line.
@@ -273,14 +284,11 @@ namespace BASeTris.GameStates
         List<FieldBlockClearTask> ClearActivities = new List<FieldBlockClearTask>();
         
             
-        SolidBrush FlashBrush = new SolidBrush(Color.FromArgb(128, Color.White));
+        
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
-            if (FlashState)
-            {
-                g.FillRectangle(FlashBrush, Bounds);
-            }
+            
         }
     }
 

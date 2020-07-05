@@ -41,12 +41,12 @@ namespace BASeTris
         private IStateOwner _Owner = null;
         private IGamePresenter _Presenter = null;
         private StandardSettings _GameSettings = null;
-        private List<GameObject> _GameObjects = new List<GameObject>();
+        
         public bool IgnoreController = false;
         HashSet<GameState.GameKeys> ActiveKeys = new HashSet<GameState.GameKeys>();
         private TetrisGame _Game;
         public StandardSettings GameSettings {  get { return _GameSettings; } set { _GameSettings = value; } }
-        public List<GameObject> GameObjects {  get { return _GameObjects; } set { _GameObjects = value; } }
+        
         public TetrisGame Game {  get { return _Game; } set { _Game = value; } }
         public DASRepeatHandler RepeatHandler { get; set; } = null;
         public Thread GameThread = null;
@@ -73,6 +73,8 @@ namespace BASeTris
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
             GameSettings = new StandardSettings(sSettingsFile);
+
+
             var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
             Game = new TetrisGame(_Owner, standardstate);
             
@@ -153,6 +155,10 @@ namespace BASeTris
         }
         public GameState.GameKeys? TranslateKey(Key source)
         {
+            if(Game!=null)
+            {
+                return Game.TranslateKey(source);
+            }
             return null;
         }
         public GameState.GameKeys? TranslateKey(Keys source)

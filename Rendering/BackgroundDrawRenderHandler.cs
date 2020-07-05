@@ -8,7 +8,7 @@ using BASeTris.BackgroundDrawers;
 
 namespace BASeTris.Rendering
 {
-    public class BackgroundDrawParameters : Rendering.GDIPlus.GameStateDrawParameters
+    public class BackgroundDrawParameters : Rendering.GDIPlus.BaseDrawParameters
     {
         public BackgroundDrawParameters(RectangleF pRect) :base(pRect)
         {

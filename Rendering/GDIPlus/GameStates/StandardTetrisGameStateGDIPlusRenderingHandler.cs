@@ -13,8 +13,8 @@ using BASeTris.Tetrominoes;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(StandardTetrisGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class StandardTetrisGameStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, GameStateDrawParameters>
+    [RenderingHandler(typeof(StandardTetrisGameState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class StandardTetrisGameStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, BaseDrawParameters>
     {
         public RectangleF LastDrawStat = Rectangle.Empty;
         //private Dictionary<System.Type, Image> TetrominoImages = null;
@@ -67,7 +67,7 @@ namespace BASeTris.Rendering.GDIPlus
                 State.SetTetrominoImages(TetrisGame.GetTetrominoBitmaps(Bounds, State.PlayField.Theme, State.PlayField, (float)Owner.ScaleFactor));
             }
         }
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, BaseDrawParameters Element)
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
@@ -250,7 +250,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
         }
 
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, BaseDrawParameters Element)
         {
             Source._DrawHelper.DrawProc(Source, pOwner, pRenderTarget, Element.Bounds);
             //throw new NotImplementedException();

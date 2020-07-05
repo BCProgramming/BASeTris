@@ -7,10 +7,10 @@ using BASeTris.Rendering.MenuItems;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(MenuState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class MenuStateGDIPlusRenderingHandler :StandardStateRenderingHandler<Graphics,MenuState, GameStateDrawParameters>
+    [RenderingHandler(typeof(MenuState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class MenuStateGDIPlusRenderingHandler :StandardStateRenderingHandler<Graphics,MenuState, BaseDrawParameters>
     {
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, BaseDrawParameters Element)
         {
             //draw the header text,
             //then draw each menu item.
@@ -72,7 +72,7 @@ namespace BASeTris.Rendering.GDIPlus
 
             return UseY + HeaderSize.Height;
         }
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, BaseDrawParameters Element)
         {
             //throw new NotImplementedException();
         }

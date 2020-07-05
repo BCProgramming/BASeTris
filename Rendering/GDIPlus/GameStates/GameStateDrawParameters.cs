@@ -8,10 +8,10 @@ namespace BASeTris.Rendering.GDIPlus
     /// <summary>
     /// Base DrawElement type
     /// </summary>
-    public class GameStateDrawParameters
+    public class BaseDrawParameters
     {
         public RectangleF Bounds;
-        public GameStateDrawParameters(RectangleF pBounds)
+        public BaseDrawParameters(RectangleF pBounds)
         {
             Bounds = pBounds;
         }

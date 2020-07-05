@@ -6,8 +6,8 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(GameOverGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class GameOverStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,GameOverGameState,GameStateDrawParameters>
+    [RenderingHandler(typeof(GameOverGameState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class GameOverStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,GameOverGameState,BaseDrawParameters>
     {
         Brush useCoverBrush = null;
         private void DrawTetrominoStat(GameOverGameState Self,  Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)
@@ -19,7 +19,7 @@ namespace BASeTris.Rendering.GDIPlus
             Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.White, 5 + TextPos.X, 5 + TextPos.Y);
             Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.Black, TextPos.X, TextPos.Y);
         }
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, GameOverGameState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, GameOverGameState Source, BaseDrawParameters Element)
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
@@ -81,7 +81,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
         }
 
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, GameOverGameState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, GameOverGameState Source, BaseDrawParameters Element)
         {
             RenderingProvider.Static.DrawStateStats(pOwner,pRenderTarget,Source.GameOveredState,Element);
         }

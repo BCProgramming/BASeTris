@@ -46,7 +46,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             SKRect MeasureText = new SKRect();
             SecondsPaint.MeasureText(sSecondsLeft, ref MeasureText);
 
-            SKPoint DrawPosition = new SKPoint(Bounds.Width / 2 - MeasureText.Width / 2, Bounds.Height / 2 - MeasureText.Height / 2);
+            SKPoint DrawPosition = new SKPoint(Bounds.Width / 2 - MeasureText.Width / 2, Bounds.Height / 2 + MeasureText.Height / 2);
 
             g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
             Source.lastMillis = Millis;

@@ -15,8 +15,10 @@ using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.DrawHelper;
 using BASeTris.FieldInitializers;
+using BASeTris.GameObjects;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
+using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Replay;
@@ -32,7 +34,7 @@ namespace BASeTris.GameStates
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
         public Nomino HoldBlock = null;
-        private List<Particle> Particles = new List<Particle>();
+        public List<Particle> Particles = new List<Particle>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
@@ -258,6 +260,7 @@ namespace BASeTris.GameStates
             lock (LockTetImageRedraw)
             {
                 TetrominoImages = null;
+                TetrominoSKBitmaps = null;
             }
 
             //throw new NotImplementedException();
@@ -330,10 +333,12 @@ namespace BASeTris.GameStates
                 NextAngleOffset = Math.Sign(NextAngleOffset) * (Math.Abs(NextAngleOffset) - AngleChange);
                 if (NextAngleOffset < AngleChange) NextAngleOffset = 0;
             }
+
         }
 
         private bool FirstRun = false;
         private StatefulReplay ReplayData = null;
+       
         public override void GameProc(IStateOwner pOwner)
         {
             if(ReplayData==null) ReplayData = new StatefulReplay();
@@ -347,6 +352,8 @@ namespace BASeTris.GameStates
                 }
             }
 
+            //update particles.
+            
             FrameUpdate();
             if (pOwner.GameStartTime == DateTime.MinValue) pOwner.GameStartTime = DateTime.Now;
             if (pOwner.LastPausedTime != DateTime.MinValue)
@@ -359,18 +366,7 @@ namespace BASeTris.GameStates
                     iterate.HighestHeightValue = 0;
                 }
             }
-            List<Particle> RemoveParticles = new List<Particle>();
-            foreach(var iterate in Particles)
-            {
-                if(iterate.PerformFrame(pOwner))
-                {
-                    RemoveParticles.Add(iterate);
-                }
-            }
-            foreach(var removeit in RemoveParticles)
-            {
-                Particles.Remove(removeit);
-            }
+          
             //TODO: Animate line clears. Tetris should get some weird flashing thing or something too.
             PlayField.AnimateFrame();
             foreach (var iterate in PlayField.BlockGroups)
@@ -405,8 +401,8 @@ namespace BASeTris.GameStates
                 pOwner.EnqueueAction
                 (() =>
                 {
-                    Thread.Sleep(200);
-                    SpawnNewTetromino();
+                    
+                    SpawnNewTetromino(pOwner);
                     SpawnWait = false;
                 });
             }
@@ -467,7 +463,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        protected virtual void SpawnNewTetromino()
+        protected virtual void SpawnNewTetromino(IStateOwner pOwner)
         {
             BlockHold = false;
             if (NextBlocks.Count == 0)
@@ -505,7 +501,7 @@ namespace BASeTris.GameStates
 
             SetLevelSpeed(nextget);
             NextAngleOffset += Math.PI * 2 / 5;
-
+            nextget.LastFall = pOwner.GetElapsedTime().Add(new TimeSpan(0,0,0,0,100));
             PlayField.AddBlockGroup(nextget);
             PlayField.Theme.ApplyTheme(nextget, PlayField);
         }
@@ -665,18 +661,35 @@ namespace BASeTris.GameStates
             {
                 //drop all active groups.
                 Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+                
+
+
                 if (FirstGroup != null)
                 {
+                    //store the block positions for each block in the nomino.
+                    
+
                     foreach (var activeitem in PlayField.BlockGroups)
                     {
+                        List<BCPoint> StartBlockPositions = new List<BCPoint>();
+                        List<BCPoint> EndBlockPositions = new List<BCPoint>();
+                        foreach (var element in activeitem)
+                        {
+                            StartBlockPositions.Add(new BCPoint(activeitem.X + element.X, activeitem.Y + element.Y));
+                        }
                         int dropqty = 0;
                         var ghosted = GetGhostDrop(pOwner,activeitem, out dropqty, 0);
-                        
+                        foreach (var element in ghosted)
+                        {
+                            EndBlockPositions.Add(new BCPoint(ghosted.X + element.X, ghosted.Y + element.Y));
+                        }
+                        GenerateDropParticles(StartBlockPositions, EndBlockPositions);
                         activeitem.X = ghosted.X;
                         activeitem.SetY(pOwner, ghosted.Y);
                         PlayField.SetGroupToField(activeitem);
                         PlayField.RemoveBlockGroup(activeitem);
                         GameStats.AddScore((dropqty * (5 + (GameStats.LineCount / 10))));
+                        
                     }
 
                     pOwner.Feedback(0.6f, 200);
@@ -817,7 +830,40 @@ namespace BASeTris.GameStates
                 
             }
         }
+        const int ParticlesPerBlock = 15;
+        private void GenerateDropParticles(List<BCPoint> StartCoordinates,List<BCPoint> EndCoordinates)
+        {
+            for(int index=0;index<StartCoordinates.Count;index++)
+            {
 
+                BCPoint Original = StartCoordinates[index];
+                BCPoint Drop = EndCoordinates[index];
+                for(float y = Original.Y; y<Drop.Y-1;y++)
+                {
+                    GenerateDropParticles(new BCPoint(Original.X, y), 1, () => new BCPoint((float)((rgen.NextDouble() > 0.5 ? -1 : 1) * rgen.NextDouble()*0.1), (float)(rgen.NextDouble()*0.2f) + 0.2f));
+                }
+
+
+            }
+
+
+
+
+
+        }
+
+        private void GenerateDropParticles(BCPoint Location,int NumGenerate,Func<BCPoint> VelocityGenerator)
+        {
+            lock (Particles)
+            {
+                for (int i = 0; i < NumGenerate; i++)
+                {
+                    BCPoint Genpos = new BCPoint(Location.X + (float)rgen.NextDouble(), Location.Y + (float)rgen.NextDouble());
+                    Particle MakeParticle = new Particle(Genpos, VelocityGenerator(), Color.White);
+                    Particles.Add(MakeParticle);
+                }
+            }
+        }
         bool BlockHold = false;
         
         private bool HandleGroupOperation(IStateOwner pOwner,Nomino activeItem)

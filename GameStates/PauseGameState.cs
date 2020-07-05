@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
+using OpenTK;
 using SkiaSharp;
 
 namespace BASeTris.GameStates
@@ -24,7 +25,7 @@ namespace BASeTris.GameStates
         }
         public PauseGameState(IStateOwner pOwner, StandardTetrisGameState pPausedState)
         {
-            StateHeader = "";
+            StateHeader = "PAUSED";
             PausedState = pPausedState;
             //initialize the given number of arbitrary tetronimo pause drawing images.
           
@@ -33,10 +34,18 @@ namespace BASeTris.GameStates
         private void PopulatePauseMenu(IStateOwner pOwner)
         {
             MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume" };
+            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" };
             MenuItemActivated += (o, e) =>
             {
                 if(e.MenuElement==ResumeOption)
                     ResumeGame(pOwner);
+                else if(e.MenuElement==HighScoresItem)
+                {
+                    ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], this, null);
+                    pOwner.CurrentState = scorestate;
+                    ActivatedItem = null; //we need to reset this or the item will remain active.
+                }
+                
             };
             var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
             ResumeOption.FontFace = FontSrc.FontFamily.Name;
@@ -53,17 +62,29 @@ namespace BASeTris.GameStates
             ThemeItem.FontSize = FontSrc.Size;
 
 
+            HighScoresItem.FontFace = FontSrc.FontFamily.Name;
+            HighScoresItem.FontSize = FontSrc.Size;
+
+
             var ExitItem = new ConfirmedTextMenuItem() {Text="Quit"};
             ExitItem.FontFace = FontSrc.FontFamily.Name;
             ExitItem.FontSize = FontSrc.Size;
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
-                Application.Exit();
+                if(pOwner is Form f)
+                {
+                    f.Close();
+                }
+                else if(pOwner is GameWindow gw)
+                {
+                    gw.Exit();
+                }
             };
 
             MenuElements.Add(ResumeOption);
             MenuElements.Add(scaleitem);
             MenuElements.Add(ThemeItem);
+            MenuElements.Add(HighScoresItem);
             MenuElements.Add(ExitItem);
         }
 

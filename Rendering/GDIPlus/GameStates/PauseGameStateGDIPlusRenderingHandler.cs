@@ -7,11 +7,11 @@ using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(PauseGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class PauseGameStateGDIPlusRenderingHandler:  MenuStateGDIPlusRenderingHandler, IStateRenderingHandler<Graphics,PauseGameState,GameStateDrawParameters>
+    [RenderingHandler(typeof(PauseGameState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class PauseGameStateGDIPlusRenderingHandler:  MenuStateGDIPlusRenderingHandler, IStateRenderingHandler<Graphics,PauseGameState,BaseDrawParameters>
     {
 
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, BaseDrawParameters Element)
         {
             if (Source is PauseGameState pgs)
             {
@@ -22,7 +22,7 @@ namespace BASeTris.Rendering.GDIPlus
                 base.Render(pOwner, pRenderTarget, Source, Element);
             }
         }
-        public void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)
+        public void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, BaseDrawParameters Element)
         {
             //delegate...
             var PausedState = Source.PausedState;
@@ -31,7 +31,7 @@ namespace BASeTris.Rendering.GDIPlus
                 RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, PausedState, Element);
             }
         }
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, BaseDrawParameters Element)
         {
             if (Source is PauseGameState pgs)
             {
@@ -44,7 +44,7 @@ namespace BASeTris.Rendering.GDIPlus
         }
       
         
-        public void Render(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, GameStateDrawParameters Element)
+        public void Render(IStateOwner pOwner, Graphics pRenderTarget, PauseGameState Source, BaseDrawParameters Element)
         {
             if(!Source.DrawDataInitialized)
             {
@@ -77,7 +77,7 @@ namespace BASeTris.Rendering.GDIPlus
             //return base.DrawHeader(Target, Bounds);
             return (float)Bounds.Height * 0.6f;
         }
-        private void InitDrawData(IStateOwner pOwner,PauseGameState Source, GameStateDrawParameters Element)
+        private void InitDrawData(IStateOwner pOwner,PauseGameState Source, BaseDrawParameters Element)
         {
             if (Source.PausedState is StandardTetrisGameState std)
             {

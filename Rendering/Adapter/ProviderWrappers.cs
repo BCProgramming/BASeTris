@@ -45,7 +45,23 @@ namespace BASeTris.Rendering.Adapters
         {
             return new PointF(src.X, src.Y);
         }
-        
+        public static implicit operator Point(BCPoint src)
+        {
+            return new Point((int)src.X, (int)src.Y);
+        }
+        public static BCPoint operator +(BCPoint first,BCPoint other)
+        {
+            return new BCPoint(first.X + other.X, first.Y + other.Y);
+        }
+        public static BCPoint operator *(BCPoint first,float other)
+        {
+            return new BCPoint(first.X * other, first.Y * other);
+        }
+        public static BCPoint operator *(BCPoint first, BCPoint other)
+        {
+            return new BCPoint(first.X * other.X, first.Y * other.Y);
+        }
+
     }
     public struct BCRect
     {
@@ -171,7 +187,7 @@ namespace BASeTris.Rendering.Adapters
         public SKFontInfo(SKTypeface face,float pFontSize)
         {
             TypeFace = face;
-            FontSize = FontSize;
+            FontSize = pFontSize;
         }
         public void ApplyPaint(SKPaint Target)
         {

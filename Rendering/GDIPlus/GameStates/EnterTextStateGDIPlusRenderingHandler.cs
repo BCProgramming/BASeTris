@@ -8,10 +8,10 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(EnterTextState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class EnterTextStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, EnterTextState,GameStateDrawParameters>
+    [RenderingHandler(typeof(EnterTextState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class EnterTextStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, EnterTextState,BaseDrawParameters>
     {
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, EnterTextState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, EnterTextState Source, BaseDrawParameters Element)
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
@@ -84,7 +84,7 @@ namespace BASeTris.Rendering.GDIPlus
             }
         }
 
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, EnterTextState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, EnterTextState Source, BaseDrawParameters Element)
         {
             //throw new NotImplementedException();
         }

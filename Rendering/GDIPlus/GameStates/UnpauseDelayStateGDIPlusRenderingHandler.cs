@@ -5,10 +5,10 @@ using BASeTris.GameStates;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(UnpauseDelayGameState), typeof(Graphics), typeof(GameStateDrawParameters))]
-    public class UnpauseDelayStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,UnpauseDelayGameState,GameStateDrawParameters>
+    [RenderingHandler(typeof(UnpauseDelayGameState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class UnpauseDelayStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics,UnpauseDelayGameState,BaseDrawParameters>
     {
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, UnpauseDelayGameState Source, GameStateDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, UnpauseDelayGameState Source, BaseDrawParameters Element)
         {
             Graphics g = pRenderTarget;
             var Bounds = Element.Bounds;
@@ -39,7 +39,7 @@ namespace BASeTris.Rendering.GDIPlus
             Source.lastMillis = Millis;
         }
 
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, UnpauseDelayGameState Source, GameStateDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, UnpauseDelayGameState Source, BaseDrawParameters Element)
         {
             RenderingProvider.Static.DrawStateStats(pOwner,pRenderTarget,Source._ReturnState,Element);
             //Draw Faded out overlay to darken things up.
