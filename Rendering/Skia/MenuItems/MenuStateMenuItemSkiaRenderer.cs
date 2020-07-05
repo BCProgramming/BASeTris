@@ -166,7 +166,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
                 DrawFont = useFont,
                 ForegroundPaint = ForePaint,
                 ShadowPaint = ShadePaint,
-                Position = DrawPosition,
+                Position = new SKPoint(DrawPosition.X,DrawPosition.Y+MeasureText.Height/2),
                 ShadowOffset = new SKPoint(5f, 5f),
             };
 

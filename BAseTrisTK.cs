@@ -7,8 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
+using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
+using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
@@ -48,8 +51,9 @@ namespace BASeTris
         public const int DEFAULT_GAME_WIDTH = 520;
         public const int DEFAULT_STAT_WIDTH = (int)405.6;
         public const int DEFAULT_AREA_HEIGHT = (int)1007.5;
-        
 
+        private BCRect _LastDrawBounds;
+        public BCRect LastDrawBounds {  get { return _LastDrawBounds; } }
         public BASeTrisTK(int Width,int Height):base(Width,Height,GraphicsMode.Default,"BASeTris",GameWindowFlags.Default)
         {
             
@@ -71,11 +75,12 @@ namespace BASeTris
 
             _Present = new GamePresenter(this);
             StartGame();
-            
+            CurrentState = new GenericMenuState(StandardImageBackgroundSkia.GetStandardBackgroundDrawer(), this, new TitleMenuPopulator()) { StateHeader = "BASeTris" };
         }
         public void StartGame()
         {
             _Present.StartGame(GamePresenter.GameHandlingConstants.Handle_Manual);
+           
         }
         protected override void OnUnload(EventArgs e)
         {
@@ -174,6 +179,7 @@ namespace BASeTris
             {
                 _Present.Game.GameProc();
             }
+            _Present.CIS.CheckState();
             base.OnUpdateFrame(e);
             //run update...
         }
@@ -228,14 +234,20 @@ namespace BASeTris
                     
                     if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Full)
                     {
+                        canvas.Clear(SKColors.Pink);
                         var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), CurrentGameState.GetType(), typeof(GameStateSkiaDrawParameters));
                         if (renderer != null)
                         {
                             if (renderer is IStateRenderingHandler staterender)
                             {
+                                canvas.Save();
+                                var FullRect = new SKRect(0, 0, ClientSize.Width, ClientSize.Height);
+                                canvas.ClipRect(FullRect);
                                 staterender.Render(this, canvas, CurrentGameState,
-                                    new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
-                                return;
+                                    new GameStateSkiaDrawParameters(FullRect));
+                                canvas.Restore();
+                                _LastDrawBounds = FullRect;
+                               
                             }
                         }
                     }
@@ -251,6 +263,7 @@ namespace BASeTris
                                 SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height);
                                 //canvas.Clear(SKColors.Blue);
                                 canvas.Save(); //save state before setting clip to field.
+                                _LastDrawBounds = FieldRect;
                                 canvas.ClipRect(FieldRect);
                                 staterender.Render(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(FieldRect));
                                 canvas.Restore();
@@ -287,6 +300,10 @@ namespace BASeTris
             {
                 ;
             }
+            finally
+            {
+                
+            }
         }
 
         public void SetDisplayMode(GameState.DisplayMode pMode)
@@ -305,7 +322,12 @@ namespace BASeTris
             _Present.EnqueueAction(pAction);
         }
 
-        public Rectangle GameArea { get { return this.ClientRectangle; } }
+        public Rectangle GameArea { get {
+
+                GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
+
+                return new Rectangle(0,0,(int)FieldWidth,ClientSize.Height);
+            } }
         public void Feedback(float Strength, int Length)
         {
             _Present.Feedback(Strength, Length);

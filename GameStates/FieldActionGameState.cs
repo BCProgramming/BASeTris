@@ -6,9 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Choosers;
+using BASeTris.GameObjects;
 using BASeTris.Rendering;
+using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.TetrisBlocks;
+using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
@@ -128,7 +131,7 @@ namespace BASeTris.GameStates
             if ((DateTime.Now - LastOperation).TotalMilliseconds > MSBlockClearTime)
             {
                 //clear another block on each row.
-                var ClearResult = ClearFrame();
+                var ClearResult = ClearFrame(pOwner);
                 if (RowNumbers.Length >= 4)
                 {
                     FlashState = !FlashState;
@@ -164,7 +167,7 @@ namespace BASeTris.GameStates
 
         //The actual "Frame" operation. This implementation clears one block and returns true when it clears all the blocks on each line.
         //derived classes can override pretty much just this one to clear the lines in different ways.        
-        protected virtual bool ClearFrame()
+        protected virtual bool ClearFrame(IStateOwner pOwner)
         {
 
             var useStyle = _ClearStyle;
@@ -174,9 +177,9 @@ namespace BASeTris.GameStates
                 case LineClearStyle.LineClear_Left_To_Right:
                     foreach (int rowClear in RowNumbers)
                     {
-                        if(_Stagger && rowClear%2==0) ClearFrame_Right_To_Left(rowClear);
+                        if(_Stagger && rowClear%2==0) ClearFrame_Right_To_Left(pOwner,rowClear);
                         else
-                            ClearFrame_Left_To_Right(rowClear);
+                            ClearFrame_Left_To_Right(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -185,9 +188,9 @@ namespace BASeTris.GameStates
                 case LineClearStyle.LineClear_Right_To_Left:
                     foreach (int rowClear in RowNumbers)
                     {
-                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Left_To_Right(rowClear);
+                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Left_To_Right(pOwner,rowClear);
                         else
-                            ClearFrame_Right_To_Left(rowClear);
+                            ClearFrame_Right_To_Left(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -197,9 +200,9 @@ namespace BASeTris.GameStates
                     //middle out
                     foreach (int rowClear in RowNumbers)
                     {
-                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(rowClear);
+                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(pOwner,rowClear);
                         else
-                            ClearFrame_Middle_Out(rowClear);
+                            ClearFrame_Middle_Out(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -210,9 +213,9 @@ namespace BASeTris.GameStates
                     //middle out
                     foreach (int rowClear in RowNumbers)
                     {
-                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(rowClear);
+                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(pOwner,rowClear);
                                 else
-                            ClearFrame_Outside_In(rowClear);
+                            ClearFrame_Outside_In(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
@@ -223,48 +226,122 @@ namespace BASeTris.GameStates
 
             return true;
         }
+        private BCColor[] ClearLineParticleColours = new BCColor[]
+        {
+            Color.Red,Color.White,Color.Yellow,Color.Orange,Color.Pink };
+        const int ParticleCountPerBlock = 50;
+        private readonly TimeSpan ClearParticleTTL = new TimeSpan(0, 0, 0, 2);
+        private void AddParticles(IStateOwner pOwner,int BlockX,int BlockY,int DirectionMultiplier)
+        {
+            //the actual block we are clearing...
+            var ClearingBlock = _BaseState.PlayField.Contents[BlockY][BlockX];
+            SKColor baseColor = TetrisGame.Choose(ClearLineParticleColours);
+            Bitmap sourcebitmap = null;
+            if (ClearingBlock!=null && ClearingBlock is ImageBlock ib)
+            {
+                sourcebitmap = new Bitmap(ib._RotationImages[MathHelper.mod(ib.Rotation,ib._RotationImages.Length)]);
+                
+            }
+            var blockWidth = _BaseState.PlayField.GetBlockWidth((SKRect)pOwner.LastDrawBounds);
+            var blockHeight = _BaseState.PlayField.GetBlockHeight((SKRect)pOwner.LastDrawBounds);
+            var CoordPos = new BCPoint( BlockX,
+                BlockY-2);
+            lock (_BaseState.Particles)
+            {
+                for (int i = 0; i < ParticleCountPerBlock; i++)
+                {
+                    BCPoint ParticlePos = new BCPoint((float)TetrisGame.rgen.NextDouble(), (float)TetrisGame.rgen.NextDouble());
+                    //choose a new random position within the block.
+                    BCPoint NewParticlePoint = new BCPoint(CoordPos.X + ParticlePos.X, CoordPos.Y + ParticlePos.Y );
+                    BCPoint Velocity = new BCPoint(
 
-        private void ClearFrame_Outside_In(int rowClear)
+                        (float)(DirectionMultiplier * (TetrisGame.rgen.NextDouble() * 1 + (Math.Abs(BlockX - (_BaseState.PlayField.ColCount / 2))/5))), 0
+                    
+                        );
+                    BCColor ChosenColor = baseColor;
+
+                    if (sourcebitmap!=null)
+                    {
+                        Point TargetPixel = new Point((int)(ParticlePos.X*sourcebitmap.Width),(int)(ParticlePos.Y*sourcebitmap.Height));
+                        ChosenColor = sourcebitmap.GetPixel(TargetPixel.X, TargetPixel.Y);    
+                    }
+                    
+
+                    BaseParticle p = new BaseParticle(NewParticlePoint, Velocity, ChosenColor);
+                    p.TTL = ClearParticleTTL;
+                    _BaseState.Particles.Add(p);
+
+                }
+            }
+
+            
+        }
+        private void ClearFrame_Outside_In(IStateOwner pOwner,int rowClear)
         {
             var GrabRow = _BaseState.PlayField.Contents[rowClear];
             int processindex = GrabRow.Length - CurrentClearIndex;
             int i = GrabRow.Length >> 1;
             int useindex = i + ((processindex % 2 == 0) ? processindex / 2 : -(processindex / 2 + 1));
+            
             if (useindex < GrabRow.Length && useindex >= 0)
             {
+                int ParticleSign = -1;
+                if (useindex < GrabRow.Length / 2)
+                {
+                    ParticleSign = 1;
+                }
+                AddParticles(pOwner, useindex, rowClear, ParticleSign);
                 PerformClearAct(GrabRow, useindex);
             }
         }
 
-        private void ClearFrame_Middle_Out(int rowClear)
+        private void ClearFrame_Middle_Out(IStateOwner pOwner, int rowClear)
         {
             var GrabRow = _BaseState.PlayField.Contents[rowClear];
 
             int i = GrabRow.Length >> 1;
             int useindex = i + ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
+            //middle out will have particles flying outwards from the center in the direction they are being cleared, added each block clear.
+            //decide which direction we want the particles to move.
+
             if (useindex < GrabRow.Length && useindex >= 0)
+            {
+                int ParticleSign = 1;
+                if (useindex < GrabRow.Length / 2)
+                {
+                    ParticleSign = -1;
+                }
+                AddParticles(pOwner, useindex, rowClear, ParticleSign);
                 PerformClearAct(GrabRow, useindex);
+            }
         }
 
-        private void ClearFrame_Right_To_Left(int rowClear)
+        private void ClearFrame_Right_To_Left(IStateOwner pOwner, int rowClear)
         {
             var GrabRow = _BaseState.PlayField.Contents[rowClear];
             int useIndex = GrabRow.Length - CurrentClearIndex - 1;
             //find the block, and clear it out if needed.
             var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[useIndex];
+
             if (FindClear != null)
             {
+                int ParticleSign = -1;
+                
+                AddParticles(pOwner, useIndex, rowClear, ParticleSign);
                 PerformClearAct(GrabRow, useIndex);
             }
         }
 
-        private void ClearFrame_Left_To_Right(int rowClear)
+        private void ClearFrame_Left_To_Right(IStateOwner pOwner, int rowClear)
         {
             var GrabRow = _BaseState.PlayField.Contents[rowClear];
             //find the block, and clear it out if needed.
             var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[CurrentClearIndex];
             if (FindClear != null)
             {
+                int ParticleSign = 1;
+                
+                AddParticles(pOwner, CurrentClearIndex, rowClear, ParticleSign);
                 PerformClearAct(GrabRow, CurrentClearIndex);
             }
         }
@@ -335,7 +412,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        protected override bool ClearFrame()
+        protected override bool ClearFrame(IStateOwner pOwner)
         {
             for (int clearblock = 0; clearblock < RowClearCount; clearblock++)
             {

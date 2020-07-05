@@ -44,7 +44,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     {
                         var grabsize = isizer.GetSize(pOwner, mss);
-                        grabsize = new SKPoint((float)(grabsize.X * pOwner.ScaleFactor), (float)(grabsize.Y * pOwner.ScaleFactor));
+                        grabsize = new SKPoint((float)(grabsize.X * pOwner.ScaleFactor*2), (float)(grabsize.Y * pOwner.ScaleFactor*2));
                         if (grabsize.Y > MaxHeight) MaxHeight = grabsize.Y;
                         if (grabsize.X > MaxWidth) MaxWidth = grabsize.X;
 

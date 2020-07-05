@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.Rendering.Adapters;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -27,6 +28,7 @@ namespace BASeTris
         DateTime LastPausedTime { get; set; }
         TimeSpan GetElapsedTime();
 
+        BCRect LastDrawBounds { get; }
         StandardSettings Settings { get; }
     }
     public interface IGamePresenter

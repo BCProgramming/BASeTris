@@ -105,7 +105,7 @@ namespace BASeTris.GameStates.Menu
 
             var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
-            Target.HeaderTypeSize = FontSrc.Size * 2;
+            Target.HeaderTypeSize = (float)(28f*pOwner.ScaleFactor);
             foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,HighScoresItem,ExitItem})
             {
                 iterate.FontFace = FontSrc.FontFamily.Name;

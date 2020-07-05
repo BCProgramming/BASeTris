@@ -53,6 +53,10 @@ namespace BASeTris.Rendering.Adapters
         {
             return new BCPoint(first.X + other.X, first.Y + other.Y);
         }
+        public static BCPoint operator -(BCPoint first,BCPoint other)
+        {
+            return new BCPoint(first.X - other.X, first.Y - other.Y);
+        }
         public static BCPoint operator *(BCPoint first,float other)
         {
             return new BCPoint(first.X * other, first.Y * other);

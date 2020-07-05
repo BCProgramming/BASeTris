@@ -11,11 +11,11 @@ namespace BASeTris.Rendering.GDIPlus
 {
     //[RenderingHandler(typeof(TetrisBlock), typeof(Graphics), typeof(TetrisBlockDrawParameters))]
     //public class TetrisBlockGDIRenderingHandler : StandardRenderingHandler<Graphics, TetrisBlock, TetrisBlockDrawParameters>
-    [RenderingHandler(typeof(List<Particle>), typeof(Graphics), typeof(BaseDrawParameters))]
-    public class ParticleRenderingGDIPlusHandler : StandardRenderingHandler<Graphics, List<Particle>, BaseDrawParameters>
+    [RenderingHandler(typeof(List<BaseParticle>), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class ParticleRenderingGDIPlusHandler : StandardRenderingHandler<Graphics, List<BaseParticle>, BaseDrawParameters>
     {
         
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, List<Particle> Source, BaseDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, List<BaseParticle> Source, BaseDrawParameters Element)
         {
             foreach(var iterate in Source)
             {

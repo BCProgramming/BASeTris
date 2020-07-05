@@ -34,7 +34,7 @@ namespace BASeTris.GameStates
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
         public Nomino HoldBlock = null;
-        public List<Particle> Particles = new List<Particle>();
+        public List<BaseParticle> Particles = new List<BaseParticle>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
@@ -840,7 +840,7 @@ namespace BASeTris.GameStates
                 BCPoint Drop = EndCoordinates[index];
                 for(float y = Original.Y; y<Drop.Y-1;y++)
                 {
-                    GenerateDropParticles(new BCPoint(Original.X, y), 1, () => new BCPoint((float)((rgen.NextDouble() > 0.5 ? -1 : 1) * rgen.NextDouble()*0.1), (float)(rgen.NextDouble()*0.2f) + 0.2f));
+                    GenerateDropParticles(new BCPoint(Original.X, y), 1, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.2f)));
                 }
 
 
@@ -859,7 +859,7 @@ namespace BASeTris.GameStates
                 for (int i = 0; i < NumGenerate; i++)
                 {
                     BCPoint Genpos = new BCPoint(Location.X + (float)rgen.NextDouble(), Location.Y + (float)rgen.NextDouble());
-                    Particle MakeParticle = new Particle(Genpos, VelocityGenerator(), Color.White);
+                    BaseParticle MakeParticle = new BaseParticle(Genpos, VelocityGenerator(), Color.White);
                     Particles.Add(MakeParticle);
                 }
             }

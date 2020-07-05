@@ -34,6 +34,7 @@ using SkiaSharp.Views.Desktop;
 using XInput.Wrapper;
 using BASeTris.GameStates.Menu;
 using BASeTris.BackgroundDrawers;
+using BASeTris.Rendering.Adapters;
 
 namespace BASeTris
 {
@@ -248,19 +249,25 @@ namespace BASeTris
             {
                 ;
             }
+            RectangleF useBounds;
             var renderer = RenderingProvider.Static.GetHandler(typeof(Graphics), _Present.Game.CurrentState.GetType(), typeof(BaseDrawParameters));
             if(renderer!=null)
             {
                 if(renderer is IStateRenderingHandler staterender)
                 {
+                    useBounds = new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height);
                     staterender.Render(this, e.Graphics, _Present.Game.CurrentState,
-                        new BaseDrawParameters(new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height)));
+                        
+                        new BaseDrawParameters(useBounds));
+
+
                     return;
                 }
             }
             //if the above doesn't go through....
-            _Present.Game.DrawProc(e.Graphics, new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height));
-            
+            useBounds = new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height);
+            _Present.Game.DrawProc(e.Graphics, useBounds);
+            _LastDrawBounds = useBounds;
         }
        
      
@@ -375,6 +382,8 @@ namespace BASeTris
             get { return _Present.Game?.CurrentState; }
             set { _Present.Game.CurrentState = value; }
         }
+        private BCRect _LastDrawBounds;
+        public BCRect LastDrawBounds => _LastDrawBounds;
 
         public void EnqueueAction(Action pAction)
         {

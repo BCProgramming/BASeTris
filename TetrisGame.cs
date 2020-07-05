@@ -24,6 +24,7 @@ using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
 using SkiaSharp;
 using OpenTK.Input;
+using BASeTris.Rendering.Adapters;
 
 namespace BASeTris
 {
@@ -63,6 +64,10 @@ namespace BASeTris
             {
                 return GameOwner.Settings;
             }
+        }
+        public BCRect LastDrawBounds
+        {
+            get { return GameOwner.LastDrawBounds; }
         }
         public DateTime GameStartTime { get { return _GameStartTime; } set { _GameStartTime = value; } }
         public DateTime LastPausedTime

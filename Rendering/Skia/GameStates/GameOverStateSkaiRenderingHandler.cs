@@ -16,19 +16,13 @@ namespace BASeTris.Rendering.Skia.GameStates
     {
         SKPaint useCoverBrush = null;
 
-        private static SKPaint WhiteText;
-        private static SKPaint BlackText;
+        
         static GameOverStateRenderingHandler()
             {
-            WhiteText = new SKPaint();
-            WhiteText.Typeface = TetrisGame.RetroFontSK;
-            WhiteText.TextSize = 14;
-            BlackText = new SKPaint();
-            BlackText.Typeface = TetrisGame.RetroFontSK;
-            BlackText.TextSize = 14;
+        
            
             }
-    private void DrawTetrominoStat(GameOverGameState Self, Type TetronimoType, SKPoint BasePosition, SKCanvas Target, SKRect Bounds)
+    private void DrawTetrominoStat(GameOverGameState Self, Type TetronimoType, SKPoint BasePosition, SKCanvas Target, SKRect Bounds,SKPaint paint)
         {
             
             
@@ -40,9 +34,10 @@ namespace BASeTris.Rendering.Skia.GameStates
             
             SKPoint TextPos = new SKPoint(BasePosition.X + Bounds.Width / 2, BasePosition.Y - 10);
             String LineCount = standardgame.GameStats.GetLineCount(TetronimoType).ToString();
-
-            Target.DrawText(LineCount, TextPos.X+5, TextPos.Y+5, WhiteText);
-            Target.DrawText(LineCount, TextPos.X, TextPos.Y, BlackText);
+            paint.Color = SKColors.White;
+            Target.DrawText(LineCount, TextPos.X+5, TextPos.Y+5, paint);
+            paint.Color = SKColors.Black;
+            Target.DrawText(LineCount, TextPos.X, TextPos.Y, paint);
         }
         
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, GameOverGameState Source, GameStateSkiaDrawParameters Element)
@@ -73,6 +68,68 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 //draw each line of summary statistical info. Only draw the number of lines specified by Source.ShowExtraLines.
 
+                SKPaint GameOverTitlePaint = new SKPaint() { TextSize = (float)(24 * pOwner.ScaleFactor),Color=SKColors.White, Typeface = TetrisGame.RetroFontSK };
+                SKPaint GameOverEntryPaint = new SKPaint() { TextSize = (float)(14 * pOwner.ScaleFactor),Color=SKColors.White,Typeface = TetrisGame.RetroFontSK };
+                SKRect measured = new SKRect(), measuremini = new SKRect();
+                //we primarily want text heights for the later calcs.
+                GameOverTitlePaint.MeasureText(Source.GameOverText,ref measured);
+                GameOverEntryPaint.MeasureText(Source.GameOverText, ref measuremini);
+                SKPoint GameOverPos = new SKPoint(Bounds.Width / 2 - measured.Width / 2, measured.Height + measured.Height/2);
+                //draw title.
+                g.DrawText(Source.GameOverText, new SKPoint(GameOverPos.X+5,GameOverPos.Y+5), GameOverTitlePaint);
+                GameOverTitlePaint.Color = SKColors.Black;
+                g.DrawText(Source.GameOverText, new SKPoint(GameOverPos.X, GameOverPos.Y), GameOverTitlePaint);
+                for (int i = 0;i<Source.ShowExtraLines; i++)
+                {
+                    Type[] TetTypes = new Type[] {typeof(Tetrominoes.Tetromino_I),
+                            typeof(Tetrominoes.Tetromino_I) ,
+                            typeof(Tetrominoes.Tetromino_O) ,
+                            typeof(Tetrominoes.Tetromino_T) ,
+                            typeof(Tetrominoes.Tetromino_J) ,
+                            typeof(Tetrominoes.Tetromino_L) ,
+                            typeof(Tetrominoes.Tetromino_S),
+                        typeof(Tetrominoes.Tetromino_Z)};
+                    float XPosition = Bounds.Width * 0.25f;
+                    float YPosition = GameOverPos.Y + ((1 + i) * measuremini.Height) + measuremini.Height * 2;
+                    if(i==0)
+                    {
+                        SKRect measuredmini = new SKRect();
+                        GameOverEntryPaint.MeasureText("---Line Clears---", ref measuredmini);
+                        SKPoint ChosenPosition = new SKPoint(Bounds.Width / 2 - measuredmini.Width / 2, GameOverPos.Y + measured.Height * 2);
+                        //draw shadow...
+                        GameOverEntryPaint.Color = SKColors.White;
+                        g.DrawText("---Line Clears---", new SKPoint(ChosenPosition.X + 5, ChosenPosition.Y + 5), GameOverEntryPaint);
+                        GameOverEntryPaint.Color = SKColors.Black;
+                        g.DrawText("---Line Clears---", ChosenPosition, GameOverEntryPaint);
+                    }
+                    if (i >= 1)
+                    {
+                        DrawTetrominoStat(Source, TetTypes[i - 1], new SKPoint(XPosition, YPosition), g, Bounds, GameOverEntryPaint);
+                    }
+
+                    if (Source.NewScorePosition > -1)
+                    {
+                        SKPaint HighScoreEligible = new SKPaint()
+                        {
+                            Color = SKColors.Black,
+                            Typeface = TetrisGame.RetroFontSK,
+                            TextSize = (float)(8 * pOwner.ScaleFactor)
+                        };
+
+
+                        //draw the awarded score position as well.
+                        float XPos = Bounds.Width * .25f;
+                        float YPos = Bounds.Height - measured.Height - 10;
+                        String ScoreText = "New High Score!";
+                        SKRect MeasuredScoreText = new SKRect();
+                        HighScoreEligible.MeasureText(ScoreText, ref MeasuredScoreText);
+
+                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                        HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
+                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+
+                    }
+                }
             }
 
             /*
