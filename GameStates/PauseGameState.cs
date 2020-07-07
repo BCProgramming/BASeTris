@@ -77,6 +77,7 @@ namespace BASeTris.GameStates
             
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new TetrisAI(this);
+            PausePlayerAI.IsMoronic = true;
             //PauseGamePresenter.ai = PausePlayerAI;
             //PauseGamePresenter.IgnoreController = true;
 
@@ -175,7 +176,7 @@ namespace BASeTris.GameStates
                 if (stgs.PlayField.Contents[6].Any((w) => w != null))
                 {
                     //remove the bottom 4 rows.
-                    for (int r1 = stgs.PlayField.Contents.Length - 4; r1 < stgs.PlayField.Contents.Length - 1; r1++)
+                    for (int r1 = stgs.PlayField.Contents.Length - 4; r1 < stgs.PlayField.Contents.Length; r1++)
                     {
                         for (int g = r1; g > 0; g--)
                         {

@@ -54,6 +54,7 @@ namespace BASeTris.AI
                 }
             }
         }
+        public bool IsMoronic { get; set; } = false;
         public StoredBoardState.AIScoringRuleData ScoringRules { get; set; } = new StoredBoardState.AIScoringRuleData();
         public override void AIActionFrame()
         {
@@ -70,15 +71,17 @@ namespace BASeTris.AI
                     //then slap those keys into the queue.
                     Nomino ActiveGroup = stdState.PlayField.BlockGroups[0];
                     var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup).ToList();
+                    
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
-                    var Sorted = PossibleStates.OrderByDescending((w) => w.GetScore(ScoringRules)).ToList();
-                    var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
-                    foreach (var writedebug in Scores)
+                    var Sorted = (IsMoronic?PossibleStates.OrderByDescending((w)=>TetrisGame.rgen.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(ScoringRules))).ToList();
+
+                    //var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
+                    /*foreach (var writedebug in Scores)
                     {
                         Debug.Print("Possible State: Move " + writedebug.Item1.XOffset + ", Rotate " + writedebug.Item1.RotationCount + " To get score " + writedebug.Item1.GetScore(ScoringRules));
                         Debug.Print("What it will look like\n" + writedebug.Item1.GetBoardString());
                         Debug.Print("------");
-                    }
+                    }*/
 
                     var maximumValue = Sorted.FirstOrDefault();
                     Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(ScoringRules));
