@@ -35,7 +35,7 @@ using System.Windows.Forms.Design;
 using Ionic.Zip;
 using Ionic.Zlib;
 using SkiaSharp;
-
+using static BASeTris.AssetManager.cNewSoundManager;
 
 namespace BASeTris.AssetManager
 {
@@ -63,6 +63,7 @@ namespace BASeTris.AssetManager
 
         float Level { get; }
         iSoundSourceObject Source { get; }
+
     }
 
     public interface iSoundSourceObject
@@ -89,7 +90,114 @@ namespace BASeTris.AssetManager
     }
 
 
-    public class cNewSoundManager : IDisposable
+    public interface IAudioHandler
+    {
+        iSoundSourceObject GetPlayingMusic();
+        iActiveSoundObject GetPlayingMusic_Active();
+        iActiveSoundObject PlaySoundRnd(String key, float Volume);
+
+        iActiveSoundObject PlaySound(String key, bool playlooped);
+        iActiveSoundObject PlaySound(String key);
+
+        iActiveSoundObject PlaySound(String key, float volume);
+        iActiveSoundObject PlaySound(String key, bool playlooped, float volume);
+        iActiveSoundObject PlayMusic();
+        iActiveSoundObject PlayMusic(String key, float volume, bool loop);
+
+        iActiveSoundObject PlayMusic(String[] key, MultiMusicPlayMode mplaymode);
+        iActiveSoundObject PlayMusic(String[] key, MultiMusicPlayMode mplaymode, out iSoundSourceObject[] ssources);
+
+        void PauseMusic();
+
+
+        void PauseMusic(bool pausestate);
+
+
+
+        void StopMusic();
+        
+
+    }
+    
+    public class SilentSoundManager : IAudioHandler
+    {
+        private IAudioHandler _Composite = null;
+        public SilentSoundManager(IAudioHandler pComposite)
+        {
+            _Composite = pComposite;
+        }
+        public iSoundSourceObject GetPlayingMusic()
+        {
+            return _Composite.GetPlayingMusic();
+        }
+
+        public iActiveSoundObject GetPlayingMusic_Active()
+        {
+            return _Composite.GetPlayingMusic_Active();
+        }
+
+        public void PauseMusic()
+        {
+            _Composite.PauseMusic(); 
+        }
+
+        public void PauseMusic(bool pausestate)
+        {
+            _Composite.PauseMusic();
+        }
+
+        public iActiveSoundObject PlayMusic()
+        {
+            //we never play music
+            return null;
+        }
+
+        public iActiveSoundObject PlayMusic(string key, float volume, bool loop)
+        {
+            return null;
+        }
+
+        public iActiveSoundObject PlayMusic(string[] key, MultiMusicPlayMode mplaymode)
+        {
+            return null;
+        }
+
+        public iActiveSoundObject PlayMusic(string[] key, MultiMusicPlayMode mplaymode, out iSoundSourceObject[] ssources)
+        {
+            ssources = null;
+            return null;
+        }
+
+        public iActiveSoundObject PlaySound(string key, bool playlooped)
+        {
+            return null;
+        }
+
+        public iActiveSoundObject PlaySound(string key)
+        {
+            return null;
+        }
+
+        public iActiveSoundObject PlaySound(string key, float volume)
+        {
+            return null;
+        }
+
+        public iActiveSoundObject PlaySoundRnd(string key, float Volume)
+        {
+            return null;
+        }
+        public iActiveSoundObject PlaySound(String key, bool playlooped, float volume)
+        {
+            return null;
+        }
+        public void StopMusic()
+        {
+            ;
+        }
+    }
+
+    public class cNewSoundManager : IDisposable,IAudioHandler
     {
         // public event Action<iSoundSourceObject, String> SoundStopped;
         private iSoundEngineDriver mDriver;
@@ -912,7 +1020,13 @@ namespace BASeTris.AssetManager
             iSoundSourceObject grabbed = GetSound(key);
             return grabbed.Play(playlooped);
         }
-
+        public iActiveSoundObject PlaySound(String key,bool playlooped,float volume)
+        {
+            
+                iSoundSourceObject grabbed = GetSound(key);
+                return grabbed.Play(playlooped,volume);
+            
+        }
         //TODO: add PlaySound() that supports array if String[] for key.
         //will use QueuedSounds list.
         public iActiveSoundObject PlaySound(String key)
@@ -924,7 +1038,7 @@ namespace BASeTris.AssetManager
         public iActiveSoundObject PlaySound(String key, float volume)
         {
             iSoundSourceObject grabbed = GetSound(key);
-            return grabbed.Play(false);
+            return grabbed.Play(false,volume);
         }
 
         private MultiMusicPlayMode MultipleMusicPlayMode;

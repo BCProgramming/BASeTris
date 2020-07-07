@@ -459,7 +459,9 @@ namespace BASeTris
             {Key.Enter,GameState.GameKeys.GameKey_MenuActivate },
             {Key.F2, GameState.GameKeys.GameKey_Debug1},
             {Key.F7, GameState.GameKeys.GameKey_Debug2},
-            {Key.F11,GameState.GameKeys.GameKey_Debug3}
+            {Key.F11,GameState.GameKeys.GameKey_Debug3},
+            {Key.F12,GameState.GameKeys.GameKey_Debug4 },
+            {Key.Number5,GameState.GameKeys.GameKey_Debug5 }
         };
 
 

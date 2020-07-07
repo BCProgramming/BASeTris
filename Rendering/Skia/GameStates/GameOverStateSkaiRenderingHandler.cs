@@ -63,7 +63,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                 g.DrawRect(new SKRect(0,0,(float)Bounds.Width, (float)BlockSize.Y * Source.CoverBlocks), useCoverBrush);
 
             }
-
+            float YPosition = 0;
+            float XPosition = 0;
             if(Source.CompleteScroll)
             {
                 //draw each line of summary statistical info. Only draw the number of lines specified by Source.ShowExtraLines.
@@ -89,8 +90,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                             typeof(Tetrominoes.Tetromino_L) ,
                             typeof(Tetrominoes.Tetromino_S),
                         typeof(Tetrominoes.Tetromino_Z)};
-                    float XPosition = Bounds.Width * 0.25f;
-                    float YPosition = GameOverPos.Y + ((1 + i) * measuremini.Height) + measuremini.Height * 2;
+                    XPosition = Bounds.Width * 0.25f;
+                    YPosition = GameOverPos.Y + ((2 + i) * measured.Height) + measuremini.Height * 2;
                     if(i==0)
                     {
                         SKRect measuredmini = new SKRect();
@@ -102,33 +103,34 @@ namespace BASeTris.Rendering.Skia.GameStates
                         GameOverEntryPaint.Color = SKColors.Black;
                         g.DrawText("---Line Clears---", ChosenPosition, GameOverEntryPaint);
                     }
-                    if (i >= 1)
+                    if (i >= 2)
                     {
                         DrawTetrominoStat(Source, TetTypes[i - 1], new SKPoint(XPosition, YPosition), g, Bounds, GameOverEntryPaint);
                     }
 
-                    if (Source.NewScorePosition > -1)
+                    
+                }
+                if (Source.NewScorePosition > -1)
+                {
+                    SKPaint HighScoreEligible = new SKPaint()
                     {
-                        SKPaint HighScoreEligible = new SKPaint()
-                        {
-                            Color = SKColors.Black,
-                            Typeface = TetrisGame.RetroFontSK,
-                            TextSize = (float)(8 * pOwner.ScaleFactor)
-                        };
+                        Color = SKColors.Black,
+                        Typeface = TetrisGame.RetroFontSK,
+                        TextSize = (float)(8 * pOwner.ScaleFactor)
+                    };
 
 
-                        //draw the awarded score position as well.
-                        float XPos = Bounds.Width * .25f;
-                        float YPos = Bounds.Height - measured.Height - 10;
-                        String ScoreText = "New High Score!";
-                        SKRect MeasuredScoreText = new SKRect();
-                        HighScoreEligible.MeasureText(ScoreText, ref MeasuredScoreText);
+                    //draw the awarded score position as well.
+                    float XPos = Bounds.Width * .25f;
+                    float YPos = Bounds.Height - measured.Height - 10;
+                    String ScoreText = "New High Score!";
+                    SKRect MeasuredScoreText = new SKRect();
+                    HighScoreEligible.MeasureText(ScoreText, ref MeasuredScoreText);
 
-                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
-                        HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
-                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                    g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                    HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
+                    g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
 
-                    }
                 }
             }
 

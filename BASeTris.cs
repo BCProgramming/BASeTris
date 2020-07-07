@@ -45,6 +45,7 @@ namespace BASeTris
     {
         private GamePresenter _Present;
         //delegate the BeforeGameStateChange event...
+        public GamePresenter GetPresenter() => _Present;
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange
         {
             add => _Present.Game.BeforeGameStateChange += value;

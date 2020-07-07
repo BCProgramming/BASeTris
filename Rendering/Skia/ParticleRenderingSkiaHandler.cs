@@ -13,6 +13,23 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia
 {
+
+    [RenderingHandler(typeof(CharParticle),typeof(SKCanvas),typeof(GameStateSkiaDrawParameters))]
+    public class CharParticleRenderingSkiaHandler :BaseParticleRenderingSkiaHandler
+    {
+        SKPaint skp = new SKPaint() { Color = SKColors.White, TextSize = 18 };
+        public void Render(IStateOwner pOwner,SKCanvas pRenderTarget,CharParticle Source,GameStateSkiaDrawParameters Element)
+        {
+            var CharPoint = TranslatePosition(pOwner, pRenderTarget, Source.Position, Element);
+            //CharPoint -= new BCPoint(skp)
+            //    skp.MeasureText(Source.Character);
+        }
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, BaseParticle Source, GameStateSkiaDrawParameters Element)
+        {
+            Render(pOwner, pRenderTarget, (CharParticle)Source, Element);
+        }
+    }
+
     [RenderingHandler(typeof(LineParticle), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class LineParticleRenderingSkiaHandler : BaseParticleRenderingSkiaHandler //StandardRenderingHandler<SKCanvas, LineParticle, GameStateSkiaDrawParameters>
     {

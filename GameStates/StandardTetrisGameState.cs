@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeCamp.BASeScores;
+using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.DrawHelper;
@@ -80,7 +81,10 @@ namespace BASeTris.GameStates
         {
             return TetrisGame.ScoreMan["Standard"];
         }
+        public void ClearLine(int RowIndex)
+        {
 
+        }
         public virtual int ProcessFieldChange(IStateOwner pOwner, Nomino Trigger,out IList<HotLine> HotLines)
         {
 
@@ -135,17 +139,17 @@ namespace BASeTris.GameStates
                     PlayField_LevelChanged(this, new TetrisField.LevelChangeEventArgs((int) PlayField.LineCount / 10));
                     PlayField.GameStats.SetLevelTime(pOwner.GetElapsedTime());
 
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.LevelUp, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(TetrisGame.AudioThemeMan.LevelUp, pOwner.Settings.EffectVolume);
                     PlayField.SetFieldColors();
                 }
 
                 if (rowsfound > 0 && rowsfound < 4)
                 {
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.ClearLine, pOwner.Settings.EffectVolume*2);
+                    Sounds.PlaySound(TetrisGame.AudioThemeMan.ClearLine, pOwner.Settings.EffectVolume*2);
                 }
                 else if (rowsfound == 4)
                 {
-                    TetrisGame.Soundman.PlaySoundRnd(TetrisGame.AudioThemeMan.ClearTetris, pOwner.Settings.EffectVolume * 2);
+                    Sounds.PlaySoundRnd(TetrisGame.AudioThemeMan.ClearTetris, pOwner.Settings.EffectVolume * 2);
                 }
 
 
@@ -168,13 +172,13 @@ namespace BASeTris.GameStates
                         currenttempo = 68;
                         if (GameOptions.MusicRestartsOnTempoChange)
                         {
-                            if (GameOptions.MusicEnabled) TetrisGame.Soundman.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
+                            if (GameOptions.MusicEnabled) Sounds.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
                         }
 
-                        var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
+                        var grabbed = Sounds.GetPlayingMusic_Active();
                         if (grabbed != null)
                         {
-                            TetrisGame.Soundman.GetPlayingMusic_Active().Tempo = 75f;
+                            Sounds.GetPlayingMusic_Active().Tempo = 75f;
                         }
                     }
                 }
@@ -185,8 +189,8 @@ namespace BASeTris.GameStates
                         currenttempo = 1;
                         if (GameOptions.MusicRestartsOnTempoChange)
                             if (GameOptions.MusicEnabled)
-                                TetrisGame.Soundman.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
-                        var grabbed = TetrisGame.Soundman.GetPlayingMusic_Active();
+                                Sounds.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
+                        var grabbed = Sounds.GetPlayingMusic_Active();
                         if (grabbed != null) grabbed.Tempo = 1f;
                     }
                 }
@@ -222,10 +226,11 @@ namespace BASeTris.GameStates
             return NextBlocks.Peek();
         }
 
-        public StandardTetrisGameState(BlockGroupChooser pChooser, FieldInitializer pFieldInitializer)
+        IAudioHandler Sounds = null;
+        public StandardTetrisGameState(BlockGroupChooser pChooser, FieldInitializer pFieldInitializer,IAudioHandler pAudio)
         {
 
-            
+            Sounds = pAudio;
             this.Chooser = pChooser;
             PlayField = new TetrisField();
             //PlayField.Settings = Settings;
@@ -240,6 +245,7 @@ namespace BASeTris.GameStates
             lock (LockTetImageRedraw)
             {
                 TetrominoImages = null;
+                TetrominoSKBitmaps = null;
                 f_RedrawStatusBitmap = true;
                 StatisticsBackground = null;
                 f_RedrawTetrominoImages = true;
@@ -346,8 +352,11 @@ namespace BASeTris.GameStates
             {
                 if (GameOptions.MusicEnabled)
                 {
-                    var musicplay = TetrisGame.Soundman.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
-                    musicplay.Tempo = 1f;
+                    var musicplay = Sounds.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
+                    if (musicplay != null)
+                    {
+                        musicplay.Tempo = 1f;
+                    }
                     FirstRun = true;
                 }
             }
@@ -388,7 +397,7 @@ namespace BASeTris.GameStates
             {
                 //For testing: write out the replay data as a sequence of little images.
                 //ReplayData.WriteStateImages("T:\\ReplayData");
-                TetrisGame.Soundman.StopMusic();
+                Sounds.StopMusic();
                 pOwner.FinalGameTime = DateTime.Now - pOwner.GameStartTime;
                 PlayField.GameStats.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
@@ -585,7 +594,7 @@ namespace BASeTris.GameStates
         private void PerformRotation(IStateOwner pOwner, Nomino grp, bool ccw)
         {
             grp.Rotate(ccw);
-            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate, pOwner.Settings.EffectVolume);
+            Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate, pOwner.Settings.EffectVolume);
             pOwner.Feedback(0.3f, 100);
             grp.Clamp(PlayField.RowCount, PlayField.ColCount);
         }
@@ -693,7 +702,7 @@ namespace BASeTris.GameStates
                     }
 
                     pOwner.Feedback(0.6f, 200);
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace, pOwner.Settings.EffectVolume);
                     ProcessFieldChangeWithScore(pOwner, FirstGroup);
                 }
             }
@@ -706,12 +715,12 @@ namespace BASeTris.GameStates
                     {
                         lastHorizontalMove = DateTime.Now;
                         ActiveItem.X += XMove;
-                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupMove, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupMove, pOwner.Settings.EffectVolume);
                         pOwner.Feedback(0.1f, 50);
                     }
                     else
                     {
-                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockStopped, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockStopped, pOwner.Settings.EffectVolume);
                         pOwner.Feedback(0.4f,75);
                     }
                 }
@@ -723,9 +732,9 @@ namespace BASeTris.GameStates
                     pOwner.LastPausedTime = DateTime.Now;
                     pOwner.CurrentState = new PauseGameState(pOwner, this);
 
-                    var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
+                    var playing = Sounds.GetPlayingMusic_Active();
                     playing?.Pause();
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(TetrisGame.AudioThemeMan.Pause, pOwner.Settings.EffectVolume);
                 }
 
                 //pOwner.CurrentState = new PauseGameState(this);
@@ -750,7 +759,7 @@ namespace BASeTris.GameStates
                         HoldBlock.SetY(pOwner,0);
                         HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
                         HoldBlock = FirstGroup;
-                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Hold, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(TetrisGame.AudioThemeMan.Hold, pOwner.Settings.EffectVolume);
                         pOwner.Feedback(0.9f, 40);
                         BlockHold = true;
                     }
@@ -763,7 +772,7 @@ namespace BASeTris.GameStates
                         PlayField.RemoveBlockGroup(FirstGroup);
                         HoldBlock = FirstGroup;
                         BlockHold = true;
-                        TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Hold, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(TetrisGame.AudioThemeMan.Hold, pOwner.Settings.EffectVolume);
                     }
                 }
             }
@@ -829,6 +838,22 @@ namespace BASeTris.GameStates
                 pOwner.CurrentState = ms;
                 
             }
+            else if(g==GameKeys.GameKey_Debug4)
+            {
+                if (pOwner is IGamePresenter gp)
+                {
+                    var _Present = gp.GetPresenter();
+                    if (_Present.ai == null)
+                {
+                        _Present.ai = new TetrisAI(pOwner);
+                    }
+                else
+                {
+                        _Present.ai.AbortAI();
+                        _Present.ai = null;
+                    }
+                }
+            }
         }
         const int ParticlesPerBlock = 15;
         private void GenerateDropParticles(List<BCPoint> StartCoordinates,List<BCPoint> EndCoordinates)
@@ -840,7 +865,7 @@ namespace BASeTris.GameStates
                 BCPoint Drop = EndCoordinates[index];
                 for(float y = Original.Y; y<Drop.Y-1;y++)
                 {
-                    GenerateDropParticles(new BCPoint(Original.X, y), 1, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.2f)));
+                    GenerateDropParticles(new BCPoint(Original.X, y), 1, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)));
                 }
 
 
@@ -881,7 +906,7 @@ namespace BASeTris.GameStates
                     PlayField.SetGroupToField(activeItem);
                     GameStats.AddScore(25 - activeItem.Y);
 
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace, pOwner.Settings.EffectVolume);
                     return true;
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using BASeTris.BackgroundDrawers;
+using BASeTris.Tetrominoes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,6 +80,7 @@ namespace BASeTris.GameStates.Menu
                     //start a new game.
                     if(pOwner is IGamePresenter igp)
                     {
+                        pOwner.CurrentState = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), null,TetrisGame.Soundman);
                         igp.StartGame();
                     }
                 }

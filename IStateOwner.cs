@@ -35,6 +35,8 @@ namespace BASeTris
     {
         void Present();
         void StartGame();
+
+        GamePresenter GetPresenter();
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

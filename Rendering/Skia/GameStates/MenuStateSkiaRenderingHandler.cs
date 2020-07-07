@@ -87,9 +87,11 @@ namespace BASeTris.Rendering.Skia.GameStates
             Painter.MeasureText(Source.StateHeader??"", ref HeaderSize);
             
             float UseX = (Bounds.Width / 2) - (HeaderSize.Width / 2) + Source.MainXOffset;
-            float UseY = HeaderSize.Height / 3;
+            float UseY = HeaderSize.Height + HeaderSize.Height / 3;
+            //paint foreground.
+            Target.DrawText(Source.StateHeader ?? "", new SKPoint(UseX + 5, UseY + 5), BackPainter);
+            Target.DrawText(Source.StateHeader ?? "", new SKPoint(UseX, UseY), Painter);
 
-            
 
             //TetrisGame.DrawTextSK(Target, Source.StateHeader,new SKPoint(UseX, UseY), useHeaderFont, SKColors.Black, SKColors.White);
 

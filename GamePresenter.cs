@@ -75,7 +75,7 @@ namespace BASeTris
             GameSettings = new StandardSettings(sSettingsFile);
 
 
-            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1));
+            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),TetrisGame.Soundman);
             Game = new TetrisGame(_Owner, standardstate);
             
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
@@ -149,9 +149,10 @@ namespace BASeTris
         {
             while (true)
             {
-                Thread.Sleep(3);
+                Thread.Sleep(1);
                 CIS.CheckState();
             }
+            ;
         }
         public GameState.GameKeys? TranslateKey(Key source)
         {
@@ -180,7 +181,7 @@ namespace BASeTris
         {
 
         }
-        public GamePresenter(IStateOwner pOwner, IGamePresenter pPresenter)
+        public GamePresenter(IStateOwner pOwner, IGamePresenter pPresenter,bool NoController = false)
         {
             _Owner = pOwner;
             _Presenter = pPresenter;
@@ -189,8 +190,11 @@ namespace BASeTris
                 if (Game != null) Game.HandleGameKey(pOwner, k, TetrisGame.KeyInputSource.Input_HID);
             });
             CIS = new ControllerInputState(X.Gamepad_1);
-            CIS.ButtonPressed += CIS_ButtonPressed;
-            CIS.ButtonReleased += CIS_ButtonReleased;
+            if (!NoController)
+            {
+                CIS.ButtonPressed += CIS_ButtonPressed;
+                CIS.ButtonReleased += CIS_ButtonReleased;
+            }
         }
         public void HandleKey(GameState.GameKeys key, bool DownState, bool UpState, TetrisGame.KeyInputSource pSource)
         {

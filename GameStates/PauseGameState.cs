@@ -5,31 +5,81 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BASeTris.AI;
+using BASeTris.AssetManager;
+using BASeTris.Choosers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
+using BASeTris.Rendering.Adapters;
+using BASeTris.Tetrominoes;
 using OpenTK;
 using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
-    public class PauseGameState : MenuState,ICompositeState<StandardTetrisGameState>
+    public class PauseGameState : MenuState,ICompositeState<StandardTetrisGameState>,IStateOwner
     {
+
+
+        #region IStateOwner implementations. 
+
+        //Remember these are for the "Fake" Game Owner so the inner Standard State thinks it is playing a game but we are just letting it run and painting it's playfield!
+        public GameState CurrentState
+        {
+            get => PauseGamePlayerState; set
+            {
+                PauseGamePlayerState = value;
+            }
+        }
+        //GameArea is the full pause screen area, so it's the same as our owner.
+        public Rectangle GameArea => PauseOwner.GameArea;
+
+        public double ScaleFactor => PauseOwner.ScaleFactor;
+
+        //these hopefully aren't needed. We do not want to assign, that is for sure.
+        public DateTime GameStartTime { get => PauseOwner.GameStartTime; set {; } }
+        public TimeSpan FinalGameTime { get => PauseOwner.FinalGameTime; set  {; } }
+        public DateTime LastPausedTime { get => PauseOwner.LastPausedTime; set  { } }
+
+        public BCRect LastDrawBounds => PauseOwner.LastDrawBounds;
+
+        public StandardSettings Settings => PauseOwner.Settings;
+
+        //we implement IStateOwner as a delegate, so we can provide ourselves to the PausePlayerState as an owner and it won't actually interfere with the main state.
         public bool DrawDataInitialized = false;
         public StandardTetrisGameState PausedState = null;
         public const int NumFallingItems = 65;
         public List<PauseFallImageBase> FallImages = null;
         public override DisplayMode SupportedDisplayMode { get{ return DisplayMode.Partitioned; } }
+        
+        public GameState PauseGamePlayerState { get; set; }
+        //public GamePresenter PauseGamePresenter { get; set; }
+      
+        public TetrisAI PausePlayerAI = null;
+
+        public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
+
         public StandardTetrisGameState GetComposite()
         {
             return PausedState;
         }
+        private IStateOwner PauseOwner = null;
         public PauseGameState(IStateOwner pOwner, StandardTetrisGameState pPausedState)
         {
             StateHeader = "PAUSED";
             PausedState = pPausedState;
+            PauseOwner = pOwner;
             //initialize the given number of arbitrary tetronimo pause drawing images.
           
             PopulatePauseMenu(pOwner);
+            //initialize the background player. This is some wild stuff, not going to lie. Crazy stuff. Probably won't work...
+            PauseGamePlayerState = new StandardTetrisGameState(new BagChooser(Tetromino.StandardTetrominoFunctions), null,new SilentSoundManager(TetrisGame.Soundman));
+            
+            //PauseGamePresenter = new GamePresenter(this);
+            PausePlayerAI = new TetrisAI(this);
+            //PauseGamePresenter.ai = PausePlayerAI;
+            //PauseGamePresenter.IgnoreController = true;
+
         }
         private void PopulatePauseMenu(IStateOwner pOwner)
         {
@@ -79,6 +129,7 @@ namespace BASeTris.GameStates
                 {
                     gw.Exit();
                 }
+                PausePlayerAI.AbortAI();
             };
 
             MenuElements.Add(ResumeOption);
@@ -110,6 +161,34 @@ namespace BASeTris.GameStates
                     iterate.Proc(new SKRect(ga.Left, ga.Top, ga.Left + ga.Width, ga.Top + ga.Height));
                 }
             }
+            lock (QueuedOwnerActions)
+            {
+                while (QueuedOwnerActions.Any())
+                {
+                    QueuedOwnerActions.Dequeue()();
+                }
+            }
+            PauseGamePlayerState.GameProc(this);
+            //addendum: when blocks are higher than say 16, let's remove the 4 bottom lines or something.
+            if(PauseGamePlayerState is StandardTetrisGameState stgs)
+            {
+                if (stgs.PlayField.Contents[6].Any((w) => w != null))
+                {
+                    //remove the bottom 4 rows.
+                    for (int r1 = stgs.PlayField.Contents.Length - 4; r1 < stgs.PlayField.Contents.Length - 1; r1++)
+                    {
+                        for (int g = r1; g > 0; g--)
+                        {
+                            //Debug.Print("Moving row " + (g - 1).ToString() + " to row " + g);
+
+                            for (int i = 0; i < stgs.PlayField.ColCount; i++)
+                            {
+                                stgs.PlayField.Contents[g][i] = stgs.PlayField.Contents[g - 1][i];
+                            }
+                        }
+                    }
+                }
+            }
             base.GameProc(pOwner);
             //no op!
         }
@@ -118,8 +197,9 @@ namespace BASeTris.GameStates
      
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-           
-                base.HandleGameKey(pOwner,g);
+
+            base.HandleGameKey(pOwner, g);
+            //PauseGamePlayerState.HandleGameKey(this, g);
         }
 
         private void ResumeGame(IStateOwner pOwner)
@@ -130,6 +210,7 @@ namespace BASeTris.GameStates
             var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing?.UnPause();
             playing?.setVolume(0.5f);
+            PausePlayerAI.AbortAI();
 
 
             pOwner.CurrentState = unpauser;
@@ -142,9 +223,42 @@ namespace BASeTris.GameStates
             playing2?.UnPause();
             playing2?.setVolume(1.0f);
         }
+        Queue<Action> QueuedOwnerActions = new Queue<Action>();
+        public void SetDisplayMode(DisplayMode pMode)
+        {
+            //throw new NotImplementedException();
+            
+        }
 
+        public void EnqueueAction(Action pAction)
+        {
+            lock (QueuedOwnerActions)
+            {
+                QueuedOwnerActions.Enqueue(pAction);
+            }
+        }
+
+        public void Feedback(float Strength, int Length)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void SetScale(double pScale)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public TimeSpan GetElapsedTime()
+        {
+            return TimeSpan.Zero;
+        }
+        #endregion
         public abstract class PauseFallImageBase
         {
+            public DateTime LastRotation = DateTime.MinValue;
+            public readonly TimeSpan MinimumRotationTime = new TimeSpan(0, 0, 3);
+            public readonly TimeSpan MaximumRotationTime = new TimeSpan(0, 0, 20);
+            public DateTime? NextSpinTime = null;
             public float Angle = 0;
             public float AngleSpeed = 3;
             public float XPosition;
@@ -152,17 +266,38 @@ namespace BASeTris.GameStates
             public float XSpeed;
             public float YSpeed;
             public object BaseImage;
-            public abstract void Proc(Object bound);
+            public int Rotation = 0;
+            
+            public virtual void Proc(Object bound)
+            {
+                //if no spin time is set, set a new one. We nullify the spin time when we spin, so this will reset.
+                if(NextSpinTime == null)
+                {
+                    var maxTime = MaximumRotationTime.Ticks;
+                    var minTime = MinimumRotationTime.Ticks;
+                    var Range = maxTime - minTime;
+                    //if the next spin time is not set, then set it to the current time plus a random rotation time.
+                    var randomticks = (long)((TetrisGame.rgen.NextDouble() * (double)Range) + minTime);
+                    NextSpinTime = DateTime.Now + TimeSpan.FromTicks(randomticks);
+                }
+                else if(DateTime.Now > NextSpinTime)
+                {
+                    NextSpinTime = null;//nullify it
+                    //increment the rotation and set the last RotationTime
+                    Rotation = MathHelper.mod(Rotation + (TetrisGame.rgen.NextDouble() >0.5?1:-1), 4);
+                    LastRotation = DateTime.Now;
+                }
+            }
             public abstract void Draw(Object g);
         }
         public abstract class PauseFallImageBase<BoundType,CanvasType,ImageType> : PauseFallImageBase
         {
             
-            public abstract void Proc(BoundType GArea);
+            protected abstract void Proc(BoundType GArea);
             public abstract void Draw(CanvasType g);
             public override void Proc(Object bound)
             {
-
+                base.Proc(bound);
                 this.Proc((BoundType)bound);
             }
             public override void Draw(Object g)
@@ -176,8 +311,9 @@ namespace BASeTris.GameStates
         {
 
 
-            public override void Proc(Rectangle GArea)
+            protected override void Proc(Rectangle GArea)
             {
+                
                 XPosition += XSpeed;
                 YPosition += YSpeed;
                 Angle += AngleSpeed;
@@ -200,7 +336,7 @@ namespace BASeTris.GameStates
 
         public class PauseFallImageSkiaSharp : PauseFallImageBase<SKRect,SKCanvas,SKBitmap>
         {
-            public override void Proc(SKRect GArea)
+            protected override void Proc(SKRect GArea)
             {
                 XPosition += XSpeed;
                 YPosition += YSpeed;
@@ -211,11 +347,16 @@ namespace BASeTris.GameStates
                 if (YPosition > GArea.Bottom + OurImage.Height) YPosition = GArea.Top - OurImage.Height;
 
             }
+            const double SpinTimeSeconds = 0.250;
             public override void Draw(SKCanvas g)
             {
+                
+                double Angleuse = Angle;
+                double PercentRotationComplete = Math.Min(SpinTimeSeconds, (DateTime.Now - LastRotation).TotalSeconds) / SpinTimeSeconds;
+                double useRotation = (Rotation * 90d) - ((1-PercentRotationComplete) * 90);
                 g.ResetMatrix();
                 g.Translate((XPosition + ((float)OurImage.Width / 2)), (YPosition + ((float)OurImage.Height / 2)));
-                g.RotateDegrees(Angle);
+                g.RotateDegrees((float)useRotation);
                 g.Translate(-(XPosition + ((float)OurImage.Width / 2)), -(YPosition + ((float)OurImage.Height / 2)));
                 g.DrawBitmap(OurImage, new SKRect(XPosition, YPosition, XPosition + OurImage.Width, YPosition + OurImage.Height));
             }

@@ -10,7 +10,7 @@ namespace BASeTris.Rendering.GDIPlus
     [RenderingHandler(typeof(PauseGameState), typeof(Graphics), typeof(BaseDrawParameters))]
     public class PauseGameStateGDIPlusRenderingHandler:  MenuStateGDIPlusRenderingHandler, IStateRenderingHandler<Graphics,PauseGameState,BaseDrawParameters>
     {
-
+        
         public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, BaseDrawParameters Element)
         {
             if (Source is PauseGameState pgs)

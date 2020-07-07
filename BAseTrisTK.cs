@@ -179,7 +179,7 @@ namespace BASeTris
             {
                 _Present.Game.GameProc();
             }
-            _Present.CIS.CheckState();
+            //_Present.CIS.CheckState();
             base.OnUpdateFrame(e);
             //run update...
         }
@@ -383,6 +383,11 @@ namespace BASeTris
         {
             //for OpenTK I don't believe we can really do much here, since we paint every frame.
             //throw new NotImplementedException();
+        }
+
+        public GamePresenter GetPresenter()
+        {
+            return _Present;
         }
     }
 }

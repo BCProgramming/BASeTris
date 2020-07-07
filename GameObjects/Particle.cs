@@ -46,4 +46,32 @@ namespace BASeTris.GameObjects
         }
 
     }
+    public class CharParticle : BaseParticle
+    {
+        public String Text = " ";
+        public BCFont FontInfo = new BCFont("Pixel Emulator", 16, BCFont.BCFontStyle.Regular);
+        public CharParticle(BCPoint pPosition,BCPoint pVelocity,BCColor pColor,String pText) :base(pPosition,pVelocity,pColor)
+        {
+            Text = pText;
+        }
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override bool GameProc(IStateOwner pOwner)
+        {
+            return base.GameProc(pOwner);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+    }
 }

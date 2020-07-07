@@ -26,16 +26,16 @@ namespace BASeTris.Rendering.Skia.GameStates
                     
                     PauseGameState.PauseFallImageSkiaSharp pfi = new PauseGameState.PauseFallImageSkiaSharp();
                     pfi.OurImage = TetrisGame.Choose(availableImages);
-                    pfi.XSpeed = (float)(rgen.NextDouble() * 10) - 5;
-                    pfi.YSpeed = (float)(rgen.NextDouble() * 10) - 5;
-                    pfi.AngleSpeed = (float)(rgen.NextDouble() * 20) - 10;
+                    pfi.XSpeed = 0;
+                    pfi.YSpeed = (float)(rgen.NextDouble() * 5);
+                    pfi.AngleSpeed = 0; //(float)(rgen.NextDouble() * 20) - 10;
                     pfi.XPosition = (float)rgen.NextDouble() * (float)Areause.Width;
                     pfi.YPosition = (float)rgen.NextDouble() * (float)Areause.Height;
                     Source.FallImages.Add(pfi);
                 }
             }
         }
-        static SKPaint GrayBG = new SKPaint() { Color = SKColors.Gray };
+        static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightBlue,BlendMode = SKBlendMode.HardLight };
         private static SKPaint GameOverTextPaint = null;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuState Source, GameStateSkiaDrawParameters Element)
         {
@@ -57,7 +57,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 InitDrawData(pOwner, Source, Element);
                 Source.DrawDataInitialized = true;
             }
-
+           
             if(GameOverTextPaint ==null)
             {
                 GameOverTextPaint = new SKPaint();
@@ -74,9 +74,13 @@ namespace BASeTris.Rendering.Skia.GameStates
             var measureresult = GameOverTextPaint.MeasureText(sPauseText, ref MeasureBounds);
             //render the paused state.
             //TetrisGame.RetroFontSK
+            
+            if (Source.PauseGamePlayerState != null)
+            {
+                RenderingProvider.Static.DrawElement(Source, pRenderTarget, Source.PauseGamePlayerState, Element);
+            }
             g.DrawRect(Bounds, GrayBG);
-
-            foreach(var iterate in FallImages)
+            foreach (var iterate in FallImages)
             {
                 iterate.Draw(g);
             }
