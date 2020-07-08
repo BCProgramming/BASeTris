@@ -110,7 +110,7 @@ namespace BASeTris.GameStates
         }
 
         Brush useCoverBrush = null;
-        public String GameOverText = "GAME\nOVER\n"; //+ ShowExtraLines.ToString();
+        public String GameOverText = "GAME     OVER"; //+ ShowExtraLines.ToString();
         
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
@@ -128,21 +128,22 @@ namespace BASeTris.GameStates
                         TetrisGame.Soundman.PlayMusic("highscoreentry",pOwner.Settings.MusicVolume,true);
                     }
                 }
-            }
-            else if (CompleteSummary)
-            {
-                IBackground bg = null;
-                if (pOwner is BASeTris bt)
+                else if (CompleteSummary)
                 {
-                    bg = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
+                    IBackground bg = null;
+                    if (pOwner is BASeTris bt)
+                    {
+                        bg = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
+                    }
+                    else if (pOwner is BASeTrisTK)
+                    {
+                        bg = StandardImageBackgroundSkia.GetStandardBackgroundDrawer();
+                    }
+                    GenericMenuState TitleMenu = new GenericMenuState(bg, pOwner, new TitleMenuPopulator());
+                    pOwner.CurrentState = TitleMenu;
                 }
-                else if (pOwner is BASeTrisTK)
-                {
-                    bg = StandardImageBackgroundSkia.GetStandardBackgroundDrawer();
-                }
-                GenericMenuState TitleMenu = new GenericMenuState(bg, pOwner, new TitleMenuPopulator());
-                pOwner.CurrentState = TitleMenu;
             }
+           
         }
     }
 }

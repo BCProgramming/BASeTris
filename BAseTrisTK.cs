@@ -32,7 +32,11 @@ namespace BASeTris
         private GRBackendRenderTarget renderTarget;
         SKSurface SkiaSurface = null;
         SKCanvas _Canvas = null;
-
+        public event EventHandler<GameClosingEventArgs> GameClosing;
+        private void FireGameClosing()
+        {
+            GameClosing?.Invoke(this, new GameClosingEventArgs(this));
+        }
         //helper routine
         public static GRBackendRenderTarget CreateRenderTarget(GameWindow Window)
         {
@@ -94,6 +98,7 @@ namespace BASeTris
         }
         protected override void OnClosed(EventArgs e)
         {
+            FireGameClosing();
             if (_Present.GameThread != null)
                 _Present.GameThread.Abort();
             if (_Present.InputThread != null)

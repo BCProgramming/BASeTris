@@ -128,12 +128,14 @@ namespace BASeTris.AssetManager
         }
         public iSoundSourceObject GetPlayingMusic()
         {
-            return _Composite.GetPlayingMusic();
+            return null;
+            //return _Composite.GetPlayingMusic();
         }
 
         public iActiveSoundObject GetPlayingMusic_Active()
         {
-            return _Composite.GetPlayingMusic_Active();
+            return null;
+            //return _Composite.GetPlayingMusic_Active();
         }
 
         public void PauseMusic()

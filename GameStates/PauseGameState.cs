@@ -31,6 +31,8 @@ namespace BASeTris.GameStates
                 PauseGamePlayerState = value;
             }
         }
+        public event EventHandler<GameClosingEventArgs> GameClosing;
+        
         //GameArea is the full pause screen area, so it's the same as our owner.
         public Rectangle GameArea => PauseOwner.GameArea;
 
@@ -72,16 +74,25 @@ namespace BASeTris.GameStates
             //initialize the given number of arbitrary tetronimo pause drawing images.
           
             PopulatePauseMenu(pOwner);
+            pOwner.GameClosing += POwner_GameClosing;
             //initialize the background player. This is some wild stuff, not going to lie. Crazy stuff. Probably won't work...
             PauseGamePlayerState = new StandardTetrisGameState(new BagChooser(Tetromino.StandardTetrominoFunctions), null,new SilentSoundManager(TetrisGame.Soundman));
             
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new TetrisAI(this);
-            PausePlayerAI.IsMoronic = true;
+            PausePlayerAI.ScoringRules.StupidFactor = 0.75f;
+            //PausePlayerAI.ScoringRules.Moronic = true;
+            
             //PauseGamePresenter.ai = PausePlayerAI;
             //PauseGamePresenter.IgnoreController = true;
 
         }
+
+        private void POwner_GameClosing(object sender, GameClosingEventArgs e)
+        {
+            if(PausePlayerAI!=null) PausePlayerAI.AbortAI();
+        }
+
         private void PopulatePauseMenu(IStateOwner pOwner)
         {
             MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume" };

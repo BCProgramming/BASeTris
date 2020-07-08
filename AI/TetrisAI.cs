@@ -34,13 +34,17 @@ namespace BASeTris.AI
             return Copied;
         }
 
-        public static IEnumerable<StoredBoardState> GetPossibleResults(TetrisBlock[][] Source, Nomino bg)
+        public static IEnumerable<StoredBoardState> GetPossibleResults(TetrisBlock[][] Source, Nomino bg, StoredBoardState.AIScoringRuleData rules)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for (int useRotation = 0; useRotation < 4; useRotation++)
             {
                 for (int x = -5; x < Source[0].Length + 5; x++)
                 {
+                    if(rules.StupidFactor<1)
+                    {
+                        if (TetrisGame.rgen.NextDouble() < rules.StupidFactor) continue;
+                    }
                     Nomino cloneFor = new Nomino(bg);
                     foreach (var resetblock in cloneFor)
                     {
@@ -54,7 +58,7 @@ namespace BASeTris.AI
                 }
             }
         }
-        public bool IsMoronic { get; set; } = false;
+
         public StoredBoardState.AIScoringRuleData ScoringRules { get; set; } = new StoredBoardState.AIScoringRuleData();
         public override void AIActionFrame()
         {
@@ -70,10 +74,10 @@ namespace BASeTris.AI
                     //todo: we want to copy the playfield for our inspection here... we'll want to see what happens based on moving the blockgroup left or right up to each side and dropping it and evaluate the result to select the ideal
                     //then slap those keys into the queue.
                     Nomino ActiveGroup = stdState.PlayField.BlockGroups[0];
-                    var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup).ToList();
+                    var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup,ScoringRules).ToList();
                     
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
-                    var Sorted = (IsMoronic?PossibleStates.OrderByDescending((w)=>TetrisGame.rgen.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(ScoringRules))).ToList();
+                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.rgen.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(ScoringRules))).ToList();
 
                     //var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
                     /*foreach (var writedebug in Scores)
@@ -414,6 +418,8 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             {
                 return $"Height:{AggregateHeightScore},Row:{RowScore},Hole:{HoleScore},Bumpiness:{BumpinessScore},Crevasse:{CrevasseScore}";
             }
+            public float StupidFactor { get; set; } = 1.0f;
+            public bool Moronic { get; set; } = false;
         }
     }
 }

@@ -137,28 +137,24 @@ namespace BASeTris
             get { return (int) LineCount / 10; }
         }
 
-        public const int ROWCOUNT = 22;
-        public const int COLCOUNT = 10;
-        public const int VISIBLEROWS = 20;
+        public const int DEFAULT_ROWCOUNT = 22; //22;
+        public const int DEFAULT_COLCOUNT = 10;//10;
+        public const int DEFAULT_VISIBLEROWS = 20; //20;
 
-        public static int HIDDENROWS
+        public int RowCount { get; set; } = DEFAULT_ROWCOUNT;
+        public int ColCount { get; set; } = DEFAULT_COLCOUNT;
+
+        public int VisibleRows { get; set; } = DEFAULT_VISIBLEROWS;
+        public int HIDDENROWS
         {
-            get { return ROWCOUNT - VISIBLEROWS; }
+            get { return RowCount - VisibleRows; }
         }
 
         //const int ROWCOUNT = 44;
         //const int COLCOUNT = 20;
         Random rg = new Random();
 
-        public int RowCount
-        {
-            get { return ROWCOUNT; }
-        }
-
-        public int ColCount
-        {
-            get { return COLCOUNT; }
-        }
+     
 
         public IList<Nomino> BlockGroups
         {
@@ -178,7 +174,7 @@ namespace BASeTris
                 ActiveBlockGroups.Clear();
                 foreach (var row in FieldContents)
                 {
-                    for (int i = 0; i < COLCOUNT; i++)
+                    for (int i = 0; i < ColCount; i++)
                     {
                         row[i] = null;
                     }
@@ -214,12 +210,15 @@ namespace BASeTris
             }
 
         }
-        public TetrisField()
+        public TetrisField(int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
         {
-            FieldContents = new TetrisBlock[ROWCOUNT][];
-            for (int row = 0; row < ROWCOUNT; row++)
+            this.RowCount = pRowCount;
+            this.ColCount = pColCount;
+            this.VisibleRows = RowCount - 2;
+            FieldContents = new TetrisBlock[RowCount][];
+            for (int row = 0; row < RowCount; row++)
             {
-                FieldContents[row] = new TetrisBlock[COLCOUNT];
+                FieldContents[row] = new TetrisBlock[ColCount];
             }
         }
         public void SetStandardHotLines()
@@ -250,11 +249,11 @@ namespace BASeTris
         {
             lock (this)
             {
-                for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
+                for (int drawRow = HIDDENROWS; drawRow < RowCount; drawRow++)
                 {
                     var currRow = FieldContents[drawRow];
                     //for each Tetris Row...
-                    for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
+                    for (int drawCol = 0; drawCol < ColCount; drawCol++)
                     {
                         var TetBlock = currRow[drawCol];
                         if (TetBlock != null)
@@ -320,7 +319,7 @@ namespace BASeTris
                     result = false;
                     Contacts.Add(checkblock);
                 }
-                else if (CheckRow >= ROWCOUNT || CheckCol >= COLCOUNT)
+                else if (CheckRow >= RowCount || CheckCol >= ColCount)
                 {
                     result = false;
                     Contacts.Add(checkblock);
@@ -343,26 +342,26 @@ namespace BASeTris
         {
             Nomino duped = new Nomino(bg);
             duped.Rotate(ccw);
-            duped.Clamp(ROWCOUNT, COLCOUNT);
+            duped.Clamp(RowCount, ColCount);
             return CanFit(duped, bg.X, bg.Y);
         }
 
         public float GetBlockWidth(RectangleF ForBounds)
         {
-            return ForBounds.Width / COLCOUNT;
+            return ForBounds.Width / ColCount;
         }
 
         public float GetBlockHeight(RectangleF ForBounds)
         {
-            return ForBounds.Height / (VISIBLEROWS);
+            return ForBounds.Height / (VisibleRows);
         }
         public float GetBlockWidth(SKRect ForBounds)
         {
-            return ForBounds.Width / COLCOUNT;
+            return ForBounds.Width / ColCount;
         }
         public float GetBlockHeight(SKRect ForBounds)
         {
-            return ForBounds.Height / (VISIBLEROWS);
+            return ForBounds.Height / (VisibleRows);
         }
         Pen LinePen = new Pen(Color.Black, 1) {DashPattern = new float[] {4, 1, 3, 1, 2, 1, 3, 1}};
         RectangleF LastFieldSave = RectangleF.Empty;
@@ -370,8 +369,8 @@ namespace BASeTris
 
         public void DrawFieldContents(IStateOwner pState,Graphics g, RectangleF Bounds)
         {
-            float BlockWidth = Bounds.Width / COLCOUNT;
-            float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
+            float BlockWidth = Bounds.Width / ColCount;
+            float BlockHeight = Bounds.Height / (VisibleRows); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
 #if false
             for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
             {
@@ -384,7 +383,7 @@ namespace BASeTris
                 g.DrawLine(LinePen, 0, YPos, Bounds.Width, YPos);
             }
 #endif
-            for (int drawRow = HIDDENROWS; drawRow < ROWCOUNT; drawRow++)
+            for (int drawRow = HIDDENROWS; drawRow < RowCount; drawRow++)
             {
                 float YPos = (drawRow - HIDDENROWS) * BlockHeight;
                 var currRow = FieldContents[drawRow];
@@ -393,7 +392,7 @@ namespace BASeTris
                 //also, is there a hotline here?
                 if (Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && HotLines.ContainsKey(drawRow))
                 {
-                    RectangleF RowBounds = new RectangleF(0, YPos, BlockWidth * COLCOUNT, BlockHeight);
+                    RectangleF RowBounds = new RectangleF(0, YPos, BlockWidth * ColCount, BlockHeight);
                     Brush useFillBrush = null;
                     var HotLine = HotLines[drawRow];
                     if (HotLine.LineBrush != null) useFillBrush = HotLine.LineBrush;
@@ -412,7 +411,7 @@ namespace BASeTris
                     }
                 }
                 //for each Tetris Row...
-                for (int drawCol = 0; drawCol < COLCOUNT; drawCol++)
+                for (int drawCol = 0; drawCol < ColCount; drawCol++)
                 {
                     float XPos = drawCol * BlockWidth;
                     var TetBlock = currRow[drawCol];
@@ -430,8 +429,8 @@ namespace BASeTris
         public void Draw(IStateOwner pState,Graphics g, RectangleF Bounds)
         {
             //first how big is each block?
-            float BlockWidth = Bounds.Width / COLCOUNT;
-            float BlockHeight = Bounds.Height / (VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
+            float BlockWidth = Bounds.Width / ColCount;
+            float BlockHeight = Bounds.Height / (VisibleRows); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
             lock (this)
             {
                 if (FieldBitmap == null || !LastFieldSave.Equals(Bounds) || HasChanged)
@@ -520,7 +519,7 @@ namespace BASeTris
                     {
                         int DrawX = BaseXPos + bge.X;
                         int DrawY = BaseYPos + bge.Y - HIDDENROWS;
-                        if (DrawX >= 0 && DrawY >= 0 && DrawX < COLCOUNT && DrawY < ROWCOUNT)
+                        if (DrawX >= 0 && DrawY >= 0 && DrawX < ColCount && DrawY < RowCount)
                         {
                             float DrawXPx = DrawX * BlockWidth;
                             float DrawYPx = DrawY * BlockHeight;

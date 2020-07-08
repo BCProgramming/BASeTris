@@ -57,7 +57,18 @@ namespace BASeTris
         private static Image _TiledCache = null;
         private DateTime _GameStartTime = DateTime.MinValue;
         private DateTime _LastPausedTime = DateTime.MinValue;
-
+        public event EventHandler<GameClosingEventArgs> GameClosing
+        {
+            add
+            {
+                GameOwner.GameClosing += value;
+            }
+            remove
+            {
+                GameOwner.GameClosing -= value;
+            }
+        }
+        
         public StandardSettings Settings
         {
             get

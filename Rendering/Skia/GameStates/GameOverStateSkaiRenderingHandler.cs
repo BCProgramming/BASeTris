@@ -69,8 +69,8 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 //draw each line of summary statistical info. Only draw the number of lines specified by Source.ShowExtraLines.
 
-                SKPaint GameOverTitlePaint = new SKPaint() { TextSize = (float)(24 * pOwner.ScaleFactor),Color=SKColors.White, Typeface = TetrisGame.RetroFontSK };
-                SKPaint GameOverEntryPaint = new SKPaint() { TextSize = (float)(14 * pOwner.ScaleFactor),Color=SKColors.White,Typeface = TetrisGame.RetroFontSK };
+                SKPaint GameOverTitlePaint = new SKPaint() { TextSize = (float)(48 * pOwner.ScaleFactor),Color=SKColors.White, Typeface = TetrisGame.RetroFontSK };
+                SKPaint GameOverEntryPaint = new SKPaint() { TextSize = (float)(28 * pOwner.ScaleFactor),Color=SKColors.White,Typeface = TetrisGame.RetroFontSK };
                 SKRect measured = new SKRect(), measuremini = new SKRect();
                 //we primarily want text heights for the later calcs.
                 GameOverTitlePaint.MeasureText(Source.GameOverText,ref measured);
@@ -91,7 +91,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             typeof(Tetrominoes.Tetromino_S),
                         typeof(Tetrominoes.Tetromino_Z)};
                     XPosition = Bounds.Width * 0.25f;
-                    YPosition = GameOverPos.Y + ((2 + i) * measured.Height) + measuremini.Height * 2;
+                    YPosition = GameOverPos.Y + ((2 + i) * (measured.Height*2.25f)) + measuremini.Height * 2;
                     if(i==0)
                     {
                         SKRect measuredmini = new SKRect();

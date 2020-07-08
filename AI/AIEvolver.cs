@@ -181,10 +181,10 @@ namespace BASeTris.AI
             List<Nomino> ChosenNominos = new List<Nomino>();
            
 
-            TetrisBlock[][] Contents = new TetrisBlock[TetrisField.ROWCOUNT][];
-            for (int row = 0; row < TetrisField.ROWCOUNT; row++)
+            TetrisBlock[][] Contents = new TetrisBlock[TetrisField.DEFAULT_ROWCOUNT][];
+            for (int row = 0; row < TetrisField.DEFAULT_ROWCOUNT; row++)
             {
-                Contents[row] = new TetrisBlock[TetrisField.COLCOUNT];
+                Contents[row] = new TetrisBlock[TetrisField.DEFAULT_COLCOUNT];
             }
             int Placedpieces = 0;
             int rowsFinished = 9;
@@ -199,7 +199,7 @@ namespace BASeTris.AI
                 var nextNomino = bgc.GetNext();
                 ChosenNominos.Add(nextNomino);
                 //Debug.Print("Processing new Nomino:" + nextNomino.SpecialName);
-                var PossibleBoardResults = TetrisAI.GetPossibleResults(Contents, nextNomino);
+                var PossibleBoardResults = TetrisAI.GetPossibleResults(Contents, nextNomino,scoredata);
                 //score each one based on the scoring rules.
                 var BestScore = (from p in PossibleBoardResults orderby p.GetScore(scoredata) descending select p).FirstOrDefault();
                 if(BestScore!=null)

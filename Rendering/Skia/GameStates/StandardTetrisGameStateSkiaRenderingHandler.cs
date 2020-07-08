@@ -92,11 +92,11 @@ namespace BASeTris.Rendering.Skia.GameStates
                         new TetrisFieldDrawSkiaParameters()
                         {
                             Bounds = Element.Bounds,
-                            COLCOUNT = TetrisField.COLCOUNT,
-                            ROWCOUNT = TetrisField.ROWCOUNT,
+                            COLCOUNT = PlayField.ColCount,
+                            ROWCOUNT = PlayField.RowCount,
                             FieldBitmap = null,
                             LastFieldSave = SKRect.Empty,
-                            VISIBLEROWS = TetrisField.VISIBLEROWS
+                            VISIBLEROWS = PlayField.VisibleRows
                         });
                 
                 TetrisFieldDrawSkiaParameters parameters = (TetrisFieldDrawSkiaParameters)grabdata;

@@ -35,7 +35,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 }
             }
         }
-        static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightBlue,BlendMode = SKBlendMode.HardLight };
+        static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightBlue,BlendMode = SKBlendMode.HardLight};
         private static SKPaint GameOverTextPaint = null;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuState Source, GameStateSkiaDrawParameters Element)
         {
@@ -79,6 +79,38 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 RenderingProvider.Static.DrawElement(Source, pRenderTarget, Source.PauseGamePlayerState, Element);
             }
+            var ColorShader = SKShader.CreateColor(new SKColor(128,128,0,128));
+
+            var PerlinShader = SKShader.CreatePerlinNoiseFractalNoise(0.5f, 0.5f, 4, 0,new SKPointI((int)Element.Bounds.Width,(int)Element.Bounds.Height)); //SKShader.CreatePerlinNoiseFractalNoise(0.5f, 0.5f, 5, (float)TetrisGame.rgen.NextDouble() * 3000000);
+            var DualPerlinShader = SKShader.CreateCompose(SKShader.CreatePerlinNoiseTurbulence(0.5f, 0.5f, 4, (float)TetrisGame.rgen.NextDouble() * 3000000), PerlinShader);
+
+
+            var Gradcolors = new SKColor[] {
+        new SKColor(0, 255, 255),
+        new SKColor(255, 0, 255),
+        new SKColor(255, 255, 0),
+        new SKColor(0, 255, 255)
+    };
+            //var sweep = SKShader.CreateSweepGradient(new SKPoint(128, 128), Gradcolors, null);
+            //var sweep = SKShader.CreateTwoPointConicalGradient(new SKPoint(Element.Bounds.Width / 2, Element.Bounds.Height - 64), Element.Bounds.Width,
+            //    new SKPoint(Element.Bounds.Width / 2, 64), Element.Bounds.Width / 4, Gradcolors, null, SKShaderTileMode.Clamp);
+            var sweep = SKShader.CreateLinearGradient(new SKPoint(0, 0), new SKPoint(Element.Bounds.Width, Element.Bounds.Height), Gradcolors, null, SKShaderTileMode.Repeat);
+            // create the second shader
+            var turbulence = SKShader.CreatePerlinNoiseTurbulence(0.05f, 0.05f, 4, 0);
+
+            // create the compose shader
+            var shader = SKShader.CreateCompose(sweep, turbulence, SKBlendMode.SrcOver);
+
+
+
+            GrayBG.BlendMode = SKBlendMode.Luminosity;
+            //GrayBG.BlendMode = SKBlendMode.Nor;
+            //GrayBG.Color = new SKColor(0,0,0,128);
+            //GrayBG.ColorFilter = SKColorFilter.CreateHighContrast(SKHighContrastConfig.Default);
+            //GrayBG.Shader = SKShader.CreateLinearGradient(new SKPoint(Bounds.Left, Bounds.Top), new SKPoint(Bounds.Right, Bounds.Bottom), new SKColor[] { SKColors.Red, SKColors.Yellow, SKColors.Blue, SKColors.Green }, null, SKShaderTileMode.Repeat);
+
+            //ColorShader; // SKShader.CreateCompose(ColorShader,DualPerlinShader);
+            GrayBG.Shader = shader;
             g.DrawRect(Bounds, GrayBG);
             foreach (var iterate in FallImages)
             {
@@ -89,7 +121,9 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
             SKPoint DrawPos = new SKPoint(Bounds.Width / 2 - MeasureBounds.Width / 2, Bounds.Height / 2 - MeasureBounds.Height / 2);
-            
+            GameOverTextPaint.Color = SKColors.White;
+            g.DrawText(sPauseText, new SKPoint(DrawPos.X+2,DrawPos.Y+2), GameOverTextPaint);
+            GameOverTextPaint.Color = SKColors.Navy;
             g.DrawText(sPauseText, DrawPos, GameOverTextPaint);
 
             //retrieve the renderer for the MenuState object.

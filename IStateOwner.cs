@@ -18,7 +18,7 @@ namespace BASeTris
         Rectangle GameArea { get; }
         void Feedback(float Strength, int Length);
 
-        
+
         double ScaleFactor { get; }
         void SetScale(double pScale);
         event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
@@ -30,6 +30,22 @@ namespace BASeTris
 
         BCRect LastDrawBounds { get; }
         StandardSettings Settings { get; }
+        event EventHandler<GameClosingEventArgs> GameClosing;
+    }
+    public class StateOwnerEventArgs :EventArgs
+    {
+        public IStateOwner _Owner;
+        public StateOwnerEventArgs(IStateOwner pOwner)
+        {
+            _Owner = pOwner;
+        }
+    }
+    public class GameClosingEventArgs : StateOwnerEventArgs
+    {
+        public GameClosingEventArgs(IStateOwner pOwner) :base(pOwner)
+        {
+
+        }
     }
     public interface IGamePresenter
     {
