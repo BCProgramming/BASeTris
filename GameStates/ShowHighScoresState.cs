@@ -52,8 +52,8 @@ namespace BASeTris.GameStates
             RevertState = ReversionState;
             double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
             double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer(new PointF((float)xpoint, (float)ypoint));
-            _BG = sib;
+            //var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer(new PointF((float)xpoint, (float)ypoint));
+            
         }
 
         //This state Draws the High scores.

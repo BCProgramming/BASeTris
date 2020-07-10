@@ -24,16 +24,23 @@ namespace BASeTris.Rendering.Skia.GameStates
     public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,StandardTetrisGameState,GameStateSkiaDrawParameters>
     {
         private StandardImageBackgroundSkia _Background = null;
+        private TetrominoTheme CurrentTheme = null;
         public SKRect LastDrawStat = SKRect.Empty;
         
-        private void BuildBackground(SKRect Size)
+        private void BuildBackground(StandardTetrisGameState Self,SKRect Size)
         {
+            var bgInfo = Self.PlayField.Theme.GetThemePlayFieldBackground(Self.PlayField);
+            
             _Background = new StandardImageBackgroundSkia();
-            Bitmap bmp = new Bitmap(ImageManager.ReduceImage(TetrisGame.Imageman["background"],
+            Bitmap bmp = new Bitmap(ImageManager.ReduceImage(bgInfo.BackgroundImage,
                 new Size((int)(Size.Width + 0.5f), (int)(Size.Height + 0.5f))));
             
             SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
             _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
+            if(bgInfo.TintColor!=Color.Transparent)
+            {
+                _Background.Data.theFilter = SKColorMatrices.GetColourizer(bgInfo.TintColor.R, bgInfo.TintColor.G, bgInfo.TintColor.B, bgInfo.TintColor.A);
+            }
         }
         SKImage StatisticsBackground = null;
         //redraws the StatisticsBackground SKImage.
@@ -74,9 +81,10 @@ namespace BASeTris.Rendering.Skia.GameStates
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, StandardTetrisGameState Source, GameStateSkiaDrawParameters Element)
         {
             //testing code for background.
-            if (_Background==null)
+            if (_Background==null || CurrentTheme!=Source.PlayField.Theme)
             {
-                BuildBackground(Element.Bounds);
+                BuildBackground(Source,Element.Bounds);
+                CurrentTheme = Source.PlayField.Theme;
             }
             _Background.FrameProc(pOwner);
             
@@ -323,7 +331,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     SKPoint NextDrawPosition = new SKPoint(Bounds.Left + (int)(40f * Factor), Bounds.Top + (int)(420 * Factor));
                     Size NextSize = new Size((int)(200f * Factor), (int)(200f * Factor));
                     SKPoint CenterPoint = new SKPoint(NextDrawPosition.X + NextSize.Width / 2, NextDrawPosition.Y + NextSize.Height / 2);
-                    //now draw the "Next" Queue. For now we'll just show one "next" item.
+                    
                     if (Source.NextBlocks.Count > 0)
                     {
                         var QueueList = Source.NextBlocks.ToArray();
@@ -358,8 +366,16 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                         g.DrawCircle(CenterPoint.X - 5, CenterPoint.Y - 5, 5, BlackBrush);
 
+                        //new "wiggling" mode. add Sin(timer*(5*index))*30 to the angle.
+
                         for (int i = NextTetrominoes.Length - 1; i > -1; i--)
                         {
+                            
+                            
+                            var AngleAdd = Math.Sin(((double)(DateTime.Now.Ticks+(250000*i)) / 5000000)) * 10;
+                            //var AngleAdd = Math.Sin(((double)DateTime.Now.Millisecond / 166)) * 15;
+                            
+
                             double StartAngle = Math.PI;
                             double AngleIncrementSize = (Math.PI * 1.8) / (double)NextTetrominoes.Length;
                             //we draw starting at StartAngle, in increments of AngleIncrementSize.
@@ -376,6 +392,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                             float Deviation = (i - NextTetrominoes.Length / 2);
                             Point Deviate = new Point((int)(Deviation * 20 * Factor), (int)(Deviation * 20 * Factor));
 
+                            var AngleRotateLocation = DateTime.Now.Ticks / 5000000;
+
                             Point DrawTetLocation = new Point((int)UseXPosition - (NextTetromino.Width / 2), (int)UseYPosition - NextTetromino.Height / 2);
                             //Point DrawTetLocation = new Point(Deviate.X + (int)(NextDrawPosition.X + ((float)NextSize.Width / 2) - ((float)NextTetromino.Width / 2)),
                             //    Deviate.Y + (int)(NextDrawPosition.Y + ((float)NextSize.Height / 2) - ((float)NextTetromino.Height / 2)));
@@ -391,8 +409,11 @@ namespace BASeTris.Rendering.Skia.GameStates
                             double DrawTetAngle = UseAngleCurrent;
                             DrawTetAngle += (Math.PI * AngleMovePercent);
                             float useDegrees = 180 + (float)(DrawTetAngle * (180 / Math.PI));
-
+                            useDegrees = (float)(useDegrees + AngleAdd);
                             g.RotateDegrees(useDegrees, DrawTetLocation.X + DrawTetSize.Width / 2, DrawTetLocation.Y + DrawTetSize.Width / 2);
+
+                            var DrawAdjustmentAngle = MathHelper.mod((int)(((double)DateTime.Now.Ticks / 400) * (5f*i)), 360);
+
 
 
                             if (DrawTetSize.Width > 0 && DrawTetSize.Height > 0)

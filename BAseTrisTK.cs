@@ -58,7 +58,7 @@ namespace BASeTris
 
         private BCRect _LastDrawBounds;
         public BCRect LastDrawBounds {  get { return _LastDrawBounds; } }
-        public BASeTrisTK(int Width,int Height):base(Width,Height,GraphicsMode.Default,"BASeTris",GameWindowFlags.Default)
+        public BASeTrisTK(int Width,int Height):base(Width,Height,GraphicsMode.Default,"BASeTris",GameWindowFlags.FixedWindow)
         {
             
         }
@@ -67,6 +67,7 @@ namespace BASeTris
             this.ClientSize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
             //this.renderTarget = CreateRenderTarget(this);
         }
+     
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -77,9 +78,11 @@ namespace BASeTris
             this.renderTarget = CreateRenderTarget(this);
             CursorVisible = true;
 
+           
+            Location = new Point(Location.X, 0);
             _Present = new GamePresenter(this);
             StartGame();
-            CurrentState = new GenericMenuState(StandardImageBackgroundSkia.GetStandardBackgroundDrawer(), this, new TitleMenuPopulator()) { StateHeader = "BASeTris" };
+            CurrentState = new GenericMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this, new TitleMenuPopulator()) { StateHeader = "BASeTris" };
         }
         public void StartGame()
         {

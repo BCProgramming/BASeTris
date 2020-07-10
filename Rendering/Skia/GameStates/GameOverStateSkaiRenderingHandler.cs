@@ -116,7 +116,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     {
                         Color = SKColors.Black,
                         Typeface = TetrisGame.RetroFontSK,
-                        TextSize = (float)(8 * pOwner.ScaleFactor)
+                        TextSize = (float)(24 * pOwner.ScaleFactor)
                     };
 
 

@@ -68,8 +68,12 @@ namespace BASeTris
             Handle_GameThread,
             Handle_Manual
         }
+        bool GameLoopsRunning = false;
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
+            if (GameLoopsRunning) return;
+            GameLoopsRunning = true;
+
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
             GameSettings = new StandardSettings(sSettingsFile);

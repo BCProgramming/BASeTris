@@ -680,17 +680,17 @@ namespace BASeTris.GameStates
 
                     foreach (var activeitem in PlayField.BlockGroups)
                     {
-                        List<BCPoint> StartBlockPositions = new List<BCPoint>();
-                        List<BCPoint> EndBlockPositions = new List<BCPoint>();
+                        List<Tuple<BCPoint,NominoElement>> StartBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
+                        List<Tuple<BCPoint, NominoElement>> EndBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
                         foreach (var element in activeitem)
                         {
-                            StartBlockPositions.Add(new BCPoint(activeitem.X + element.X, activeitem.Y + element.Y));
+                            StartBlockPositions.Add(new Tuple<BCPoint, NominoElement>(new BCPoint(activeitem.X + element.X, activeitem.Y + element.Y),element));
                         }
                         int dropqty = 0;
                         var ghosted = GetGhostDrop(pOwner,activeitem, out dropqty, 0);
                         foreach (var element in ghosted)
                         {
-                            EndBlockPositions.Add(new BCPoint(ghosted.X + element.X, ghosted.Y + element.Y));
+                            EndBlockPositions.Add(new Tuple<BCPoint, NominoElement>(new BCPoint(ghosted.X + element.X, ghosted.Y + element.Y), element));
                         }
                         GenerateDropParticles(StartBlockPositions, EndBlockPositions);
                         activeitem.X = ghosted.X;
@@ -856,16 +856,30 @@ namespace BASeTris.GameStates
             }
         }
         const int ParticlesPerBlock = 15;
-        private void GenerateDropParticles(List<BCPoint> StartCoordinates,List<BCPoint> EndCoordinates)
+        private void GenerateDropParticles(List<Tuple<BCPoint, NominoElement>> StartCoordinates,List<Tuple<BCPoint, NominoElement>> EndCoordinates)
         {
             for(int index=0;index<StartCoordinates.Count;index++)
             {
-
-                BCPoint Original = StartCoordinates[index];
-                BCPoint Drop = EndCoordinates[index];
-                for(float y = Original.Y; y<Drop.Y-1;y++)
+                
+                var Original = StartCoordinates[index];
+                var Drop = EndCoordinates[index];
+                Bitmap ColorSource = null;
+                if(Original.Item2.Block is ImageBlock)
                 {
-                    GenerateDropParticles(new BCPoint(Original.X, y), 1, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)));
+                    var casted = (Original.Item2.Block as ImageBlock);
+                    var ImageBase = casted._RotationImages[MathHelper.mod(casted.Rotation, casted._RotationImages.Length)];
+                    ColorSource = new Bitmap(ImageBase);
+                }
+                for (float y = Original.Item1.Y; y<Drop.Item1.Y-1;y++)
+                {
+                    GenerateDropParticles(new BCPoint(Original.Item1.X, y), 30, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)),
+                        (xget,yget)=> {
+                            var xposget = xget * ColorSource.Width;
+                            var yposget = yget * ColorSource.Height;
+                            var grabcolor = ColorSource.GetPixel((int)xposget, (int)yposget);
+                            return grabcolor;
+
+                        }  );
                 }
 
 
@@ -877,14 +891,18 @@ namespace BASeTris.GameStates
 
         }
 
-        private void GenerateDropParticles(BCPoint Location,int NumGenerate,Func<BCPoint> VelocityGenerator)
+        private void GenerateDropParticles(BCPoint Location,int NumGenerate,Func<BCPoint> VelocityGenerator,Func<float,float,BCColor> ColorFunc)
         {
+            
             lock (Particles)
             {
                 for (int i = 0; i < NumGenerate; i++)
                 {
-                    BCPoint Genpos = new BCPoint(Location.X + (float)rgen.NextDouble(), Location.Y + (float)rgen.NextDouble());
-                    BaseParticle MakeParticle = new BaseParticle(Genpos, VelocityGenerator(), Color.White);
+                    var genX = (float)rgen.NextDouble();
+                    var genY = (float)rgen.NextDouble();
+                    BCPoint Genpos = new BCPoint(Location.X + genX, Location.Y + genY);
+                    BCColor ChosenColor = ColorFunc(genX, genY);
+                    BaseParticle MakeParticle = new BaseParticle(Genpos, VelocityGenerator(), ChosenColor);
                     Particles.Add(MakeParticle);
                 }
             }

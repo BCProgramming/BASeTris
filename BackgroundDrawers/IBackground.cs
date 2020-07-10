@@ -172,6 +172,18 @@ namespace BASeTris.BackgroundDrawers
             _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
             return _Background;
         }
+        public static StandardImageBackgroundSkia GetMenuBackgroundDrawer()
+        {
+            var _Background = new StandardImageBackgroundSkia();
+            var useImage = TetrisGame.Imageman["block_arrangement"];
+            Bitmap bmp = new Bitmap(ImageManager.ReduceImage(useImage, new Size(useImage.Width/8, useImage.Height/8)));
+
+
+            SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
+            _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(5, 5) };
+            _Background.Data.theFilter = SKColorMatrices.GetFader(0.5f);
+            return _Background;
+        }
         public override void FrameProc(IStateOwner pOwner)
         {
             StandardImageBackgroundDrawSkiaCapsule dd = Data;

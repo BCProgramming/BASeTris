@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeTris.AI;
 using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 using BASeTris.Choosers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
@@ -133,13 +134,14 @@ namespace BASeTris.GameStates
             ExitItem.FontSize = FontSrc.Size;
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
-                if(pOwner is Form f)
+                
+                if (pOwner is Form f)
                 {
-                    f.Close();
+                    pOwner.CurrentState = new GenericMenuState(StandardImageBackgroundGDI.GetStandardBackgroundDrawer(),pOwner , new TitleMenuPopulator()) { StateHeader = "BASeTris" };
                 }
                 else if(pOwner is GameWindow gw)
                 {
-                    gw.Exit();
+                    pOwner.CurrentState = new GenericMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), pOwner, new TitleMenuPopulator()) { StateHeader = "BASeTris" };
                 }
                 PausePlayerAI.AbortAI();
             };
