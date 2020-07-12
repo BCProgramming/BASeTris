@@ -17,6 +17,7 @@ using BASeTris.Choosers;
 using BASeTris.DrawHelper;
 using BASeTris.FieldInitializers;
 using BASeTris.GameObjects;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
@@ -39,7 +40,7 @@ namespace BASeTris.GameStates
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
-        public Choosers.BlockGroupChooser Chooser = null;
+        public Choosers.BlockGroupChooser Chooser {  get { return GameHandler.Chooser; } }
 
 
         public override bool GamePlayActive { get{ return true; } }
@@ -79,143 +80,12 @@ namespace BASeTris.GameStates
 
         public virtual IHighScoreList<TetrisHighScoreData> GetLocalScores()
         {
-            return TetrisGame.ScoreMan["Standard"];
+            return GameHandler.GetHighScores();
         }
-        public void ClearLine(int RowIndex)
-        {
-
-        }
-        public virtual int ProcessFieldChange(IStateOwner pOwner, Nomino Trigger,out IList<HotLine> HotLines)
-        {
-
-            HotLines = new List<HotLine>();
-            //process lines for standard game.
-            ReplayData.CreateReplayState(pOwner, this);
-            GameProcSuspended = true;
-            try
-            {
-                int rowsfound = 0;
-                List<int> CompletedRows = new List<int>();
-                List<Action> AfterClearActions = new List<Action>();
-                //checks the field contents for lines. If there are lines found, they are removed, and all rows above it are shifted down.
-                for (int r = 0; r < PlayField.RowCount; r++)
-                {
-                    if (PlayField.Contents[r].All((d) => d != null))
-                    {
-                        Debug.Print("Found completed row at row " + r);
-                        if(PlayField.Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && PlayField.HotLines.ContainsKey(r))
-                        {
-                            Debug.Print("Found hotline row at row " + r);
-                            HotLines.Add(PlayField.HotLines[r]);
-                        }
-                        CompletedRows.Add(r);
-                        rowsfound++;
-                        //enqueue an action to perform the clear. We'll be replacing the current state with a clear action state, so this should execute AFTER that state returns control.
-                        var r1 = r;
-                        AfterClearActions.Add
-                        (() =>
-                        {
-                            for (int g = r1; g > 0; g--)
-                            {
-                                Debug.Print("Moving row " + (g - 1).ToString() + " to row " + g);
-
-                                for (int i = 0; i < PlayField.ColCount; i++)
-                                {
-                                    PlayField.Contents[g][i] = PlayField.Contents[g - 1][i];
-                                }
-                            }
-                        });
-                    }
-                }
-
-                long PreviousLineCount = PlayField.LineCount;
-                if (Trigger != null)
-                {
-                    PlayField.GameStats.AddLineCount(Trigger.GetType(), rowsfound);
-                }
-
-                if ((PreviousLineCount % 10) > (PlayField.LineCount % 10))
-                {
-                    PlayField_LevelChanged(this, new TetrisField.LevelChangeEventArgs((int) PlayField.LineCount / 10));
-                    PlayField.GameStats.SetLevelTime(pOwner.GetElapsedTime());
-
-                    Sounds.PlaySound(TetrisGame.AudioThemeMan.LevelUp, pOwner.Settings.EffectVolume);
-                    PlayField.SetFieldColors();
-                }
-
-                if (rowsfound > 0 && rowsfound < 4)
-                {
-                    Sounds.PlaySound(TetrisGame.AudioThemeMan.ClearLine, pOwner.Settings.EffectVolume*2);
-                }
-                else if (rowsfound == 4)
-                {
-                    Sounds.PlaySoundRnd(TetrisGame.AudioThemeMan.ClearTetris, pOwner.Settings.EffectVolume * 2);
-                }
+     
 
 
-                int topmost = PlayField.RowCount;
-                //find the topmost row with any blocks.
-                for (int i = 0; i < PlayField.RowCount; i++)
-                {
-                    if (PlayField.Contents[i].Any((w) => w != null))
-                    {
-                        topmost = i;
-                        break;
-                    }
-                }
-
-                topmost = topmost + rowsfound; //subtract the rows that were cleared to get an accurate measurement.
-                if (topmost < 9)
-                {
-                    if (currenttempo == 1)
-                    {
-                        currenttempo = 68;
-                        if (GameOptions.MusicRestartsOnTempoChange)
-                        {
-                            if (GameOptions.MusicEnabled) Sounds.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
-                        }
-
-                        var grabbed = Sounds.GetPlayingMusic_Active();
-                        if (grabbed != null)
-                        {
-                            Sounds.GetPlayingMusic_Active().Tempo = 75f;
-                        }
-                    }
-                }
-                else
-                {
-                    if (currenttempo != 1)
-                    {
-                        currenttempo = 1;
-                        if (GameOptions.MusicRestartsOnTempoChange)
-                            if (GameOptions.MusicEnabled)
-                                Sounds.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
-                        var grabbed = Sounds.GetPlayingMusic_Active();
-                        if (grabbed != null) grabbed.Tempo = 1f;
-                    }
-                }
-
-                PlayField.HasChanged |= rowsfound > 0;
-
-                if (rowsfound > 0)
-                {
-                    var ClearState = new FieldLineActionGameState(this, CompletedRows.ToArray(), AfterClearActions);
-                    ClearState.ClearStyle = TetrisGame.Choose((FieldLineActionGameState.LineClearStyle[]) (Enum.GetValues(typeof(FieldLineActionGameState.LineClearStyle))));
-
-                    pOwner.CurrentState = ClearState;
-                }
-
-                //if(rowsfound > 0) pOwner.CurrentState = new FieldLineActionDissolve(this,CompletedRows.ToArray(),AfterClearActions);
-                return rowsfound;
-            }
-            finally
-            {
-                GameProcSuspended = false;
-                ReplayData.CreateReplayState(pOwner, this);
-            }
-        }
-
-        private int currenttempo = 1;
+        public int currenttempo = 1;
 
 
         public bool GameOvered = false;
@@ -226,12 +96,14 @@ namespace BASeTris.GameStates
             return NextBlocks.Peek();
         }
 
-        IAudioHandler Sounds = null;
-        public StandardTetrisGameState(BlockGroupChooser pChooser, FieldInitializer pFieldInitializer,IAudioHandler pAudio)
+        public IAudioHandler Sounds = null;
+        public StandardTetrisGameState(IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer,IAudioHandler pAudio)
         {
 
             Sounds = pAudio;
-            this.Chooser = pChooser;
+            GameHandler = Handler;
+            
+            
             PlayField = new TetrisField();
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
@@ -260,7 +132,10 @@ namespace BASeTris.GameStates
         {
             if (Chooser != null) Chooser.Dispose();
         }
-
+        public void InvokePlayFieldLevelChanged(object sender,TetrisField.LevelChangeEventArgs e)
+        {
+            PlayField_LevelChanged(sender, e);
+        }
         private void PlayField_LevelChanged(object sender, TetrisField.LevelChangeEventArgs e)
         {
             lock (LockTetImageRedraw)
@@ -308,7 +183,10 @@ namespace BASeTris.GameStates
         {
             TetrominoImages = images;
         }
-
+        public void InvokeBlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
+        {
+            PlayField_BlockGroupSet(sender, e);
+        }
         private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {
             if (e._group.Y < 1)
@@ -352,7 +230,17 @@ namespace BASeTris.GameStates
             {
                 if (GameOptions.MusicEnabled)
                 {
-                    var musicplay = Sounds.PlayMusic(TetrisGame.AudioThemeMan.BackgroundMusic, pOwner.Settings.MusicVolume, true);
+                    iActiveSoundObject musicplay = null;
+                    if(pOwner.Settings.MusicOption=="<RANDOM>")
+                    {
+                        musicplay = Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.MusicVolume, true);
+                    }
+                    else
+                    {
+                        musicplay = Sounds.PlayMusic(pOwner.Settings.MusicOption, pOwner.Settings.MusicVolume, true);
+                    }
+
+                    
                     if (musicplay != null)
                     {
                         musicplay.Tempo = 1f;
@@ -384,8 +272,8 @@ namespace BASeTris.GameStates
                 {
                     if (HandleGroupOperation(pOwner,iterate))
                     {
-                        
-                        ProcessFieldChangeWithScore(pOwner, iterate);
+                        GameHandler.ProcessFieldChange(this, pOwner, iterate);
+                        //ProcessFieldChangeWithScore(pOwner, iterate);
                         
                     }
 
@@ -419,8 +307,8 @@ namespace BASeTris.GameStates
 
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
-
-        public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner, Nomino Trigger)
+        public IGameCustomizationHandler GameHandler { get; set; } = new StandardTetrisHandler();
+        /*public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner, Nomino Trigger)
         {
             
             int result = ProcessFieldChange(pOwner, Trigger,out IList<HotLine> HotLines);
@@ -455,19 +343,19 @@ namespace BASeTris.GameStates
             GameStats.AddScore(AddScore);
 
             pOwner.Feedback(0.9f * (float) result, result * 250);
-        }
+        }*/
 
         static bool SpawnWait = false;
         static Random rgen = new Random();
         
         
-        private StandardGameOptions GameOptions = new StandardGameOptions();
+        public StandardGameOptions GameOptions { get; set; } = new StandardGameOptions();
 
         public void RefillBlockQueue()
         {
             while (GameOptions.NextQueueSize > NextBlocks.Count)
             {
-                var Generated = GenerateTetromino();
+                var Generated = NominoTetromino();
                 NextBlocks.Enqueue(Generated);
             }
         }
@@ -521,12 +409,9 @@ namespace BASeTris.GameStates
         }
 
 
-        public virtual Nomino GenerateTetromino()
+        public virtual Nomino NominoTetromino()
         {
-            var nextitem = Chooser.GetNext();
-            //add additional processing here- for example Sticky tetris and cascade tetris should
-            //modify colouring of blocks.
-
+            var nextitem = Chooser.RetrieveNext();
             return nextitem;
         }
         
@@ -594,7 +479,7 @@ namespace BASeTris.GameStates
         private void PerformRotation(IStateOwner pOwner, Nomino grp, bool ccw)
         {
             grp.Rotate(ccw);
-            Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupRotate, pOwner.Settings.EffectVolume);
+            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key, pOwner.Settings.EffectVolume);
             pOwner.Feedback(0.3f, 100);
             grp.Clamp(PlayField.RowCount, PlayField.ColCount);
         }
@@ -662,7 +547,8 @@ namespace BASeTris.GameStates
                     if (HandleGroupOperation(pOwner,activeitem))
                     {
                         pOwner.Feedback(0.4f, 100);
-                        ProcessFieldChangeWithScore(pOwner, activeitem);
+                        //ProcessFieldChangeWithScore(pOwner, activeitem);
+                        GameHandler.ProcessFieldChange(this, pOwner, activeitem);
                     }
                 }
             }
@@ -702,8 +588,9 @@ namespace BASeTris.GameStates
                     }
 
                     pOwner.Feedback(0.6f, 200);
-                    Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace, pOwner.Settings.EffectVolume);
-                    ProcessFieldChangeWithScore(pOwner, FirstGroup);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
+                    GameHandler.ProcessFieldChange(this, pOwner, FirstGroup);
+                    //ProcessFieldChangeWithScore(pOwner, FirstGroup);
                 }
             }
             else if (g == GameKeys.GameKey_Right || g == GameKeys.GameKey_Left)
@@ -715,12 +602,12 @@ namespace BASeTris.GameStates
                     {
                         lastHorizontalMove = DateTime.Now;
                         ActiveItem.X += XMove;
-                        Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupMove, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.EffectVolume);
                         pOwner.Feedback(0.1f, 50);
                     }
                     else
                     {
-                        Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockStopped, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockStopped.Key, pOwner.Settings.EffectVolume);
                         pOwner.Feedback(0.4f,75);
                     }
                 }
@@ -734,7 +621,7 @@ namespace BASeTris.GameStates
 
                     var playing = Sounds.GetPlayingMusic_Active();
                     playing?.Pause();
-                    Sounds.PlaySound(TetrisGame.AudioThemeMan.Pause, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.EffectVolume);
                 }
 
                 //pOwner.CurrentState = new PauseGameState(this);
@@ -759,7 +646,7 @@ namespace BASeTris.GameStates
                         HoldBlock.SetY(pOwner,0);
                         HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
                         HoldBlock = FirstGroup;
-                        Sounds.PlaySound(TetrisGame.AudioThemeMan.Hold, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
                         pOwner.Feedback(0.9f, 40);
                         BlockHold = true;
                     }
@@ -772,7 +659,7 @@ namespace BASeTris.GameStates
                         PlayField.RemoveBlockGroup(FirstGroup);
                         HoldBlock = FirstGroup;
                         BlockHold = true;
-                        Sounds.PlaySound(TetrisGame.AudioThemeMan.Hold, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
                     }
                 }
             }
@@ -924,7 +811,7 @@ namespace BASeTris.GameStates
                     PlayField.SetGroupToField(activeItem);
                     GameStats.AddScore(25 - activeItem.Y);
 
-                    Sounds.PlaySound(TetrisGame.AudioThemeMan.BlockGroupPlace, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
                     return true;
                 }
             }

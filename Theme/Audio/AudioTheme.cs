@@ -32,23 +32,33 @@ namespace BASeTris.Theme.Audio
         {
             return new AudioTheme()
             {
-                BackgroundMusic = new AudioThemeElement(new[] { "tetris_theme_A", "tetris_a_theme_techno","tetris_theme_B","tetris_theme_C", "TetrisDS","smb3_tetris","kirbysand","silius1","journey3","tetris_gb_theme","tetris_nes_theme" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                BlockGroupMove = new AudioThemeElement(new String[] { "block_move_2", "block_move","block_move_3" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-                BlockGroupPlace = new AudioThemeElement(new String[] { "block_place_3", "block_place_2", "block_place" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-                BlockGroupRotate = new AudioThemeElement(new String[] { "block_rotate_3", "block_rotate_2", "block_rotate","block_rotate_4" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-                BlockStopped = new AudioThemeElement(new String[] { "block_stop" }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                ClearLine = new AudioThemeElement(new String[] {"line_clear_3","line_clear", "line_clear_2"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                ClearTetris = new AudioThemeElement(new String[] {"line_tetris", "line_tetris_2"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-                GameOver = new AudioThemeElement("tetris_game_over"),
-                GameOverShade = new AudioThemeElement("shade_move"),
-                Pause = new AudioThemeElement("pause"),
-                LevelUp = new AudioThemeElement("level_up"),
-                Hold = new AudioThemeElement("drop"),
-                MenuItemSelected = new AudioThemeElement(new String[]{"block_rotate","block_rotate_2","block_rotate_3"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-                MenuItemActivated = new AudioThemeElement(new String[] { "block_place","block_place_2","block_place_3"}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static)
+                BackgroundMusic = new AudioThemeElement(new[] 
+                    { ATS("tetris_theme_A","Theme A" ), ATS("tetris_a_theme_techno"),ATS("tetris_theme_B"),ATS("tetris_theme_C"),
+                    ATS("TetrisDS"),ATS("smb3_tetris"),ATS("kirbysand"),ATS("silius1"),ATS("journey3"),ATS("tetris_gb_theme"),ATS("tetris_nes_theme") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+                BlockGroupMove = new AudioThemeElement(new [] { ATS("block_move_2"), ATS("block_move"),ATS("block_move_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+                BlockGroupPlace = new AudioThemeElement(new [] { ATS("block_place_3"), ATS("block_place_2"), ATS("block_place") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+                BlockGroupRotate = new AudioThemeElement(new [] { ATS("block_rotate_3"), ATS("block_rotate_2"), ATS("block_rotate"),ATS("block_rotate_4") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+                BlockStopped = new AudioThemeElement(new [] { ATS("block_stop") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+                ClearLine = new AudioThemeElement(new [] {ATS("line_clear_3"),ATS("line_clear"), ATS("line_clear_2")}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+                ClearTetris = new AudioThemeElement(new [] {ATS("line_tetris"), ATS("line_tetris_2")}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+                GameOver = new AudioThemeElement("tetris_game_over","Game Over"),
+                GameOverShade = new AudioThemeElement("shade_move","Game Over Blinds"),
+                Pause = new AudioThemeElement("pause","Pause"),
+                LevelUp = new AudioThemeElement("level_up","Advance Level"),
+                Hold = new AudioThemeElement("drop","Block Dropped"),
+                MenuItemSelected = new AudioThemeElement(new []{ATS("block_rotate"),ATS("block_rotate_2"),ATS("block_rotate_3")}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+                MenuItemActivated = new AudioThemeElement(new [] { ATS("block_place"), ATS("block_place_2"), ATS("block_place_3")}, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static)
 
 
             };
+        }
+        private static AudioThemeSelection ATS(String pKey,String pFriendly)
+        {
+            return new AudioThemeSelection(pKey, pFriendly);
+        }
+        private static AudioThemeSelection ATS(String pKey)
+        {
+            return ATS(pKey, pKey);
         }
     }
 
@@ -59,21 +69,32 @@ namespace BASeTris.Theme.Audio
             Flag_Randomized,
             Flag_Static
         }
-        public String[] AudioKeys;
+        public AudioThemeSelection[] AudioKeys;
+        
         public AudioThemeElementChooseFlags ChooseFlag; //if multiple keys are entered this means that one will be initially chosen and returned fro that point on until the Theme is reset.
 
-        public AudioThemeElement(String[] pAudioKeys, AudioThemeElementChooseFlags pFlags)
+        public AudioThemeElement(AudioThemeSelection[] pAudioKeys, AudioThemeElementChooseFlags pFlags)
         {
             AudioKeys = pAudioKeys;
             ChooseFlag = pFlags;
         }
 
-        public AudioThemeElement(String pAudioKey) : this(pAudioKey, AudioThemeElementChooseFlags.Flag_Randomized)
+        public AudioThemeElement(String pAudioKey,String pFriendlyName) : this(pAudioKey,pFriendlyName, AudioThemeElementChooseFlags.Flag_Randomized)
         {
         }
 
-        public AudioThemeElement(String pAudioKey, AudioThemeElementChooseFlags pFlags) : this(new string[] {pAudioKey}, pFlags)
+        public AudioThemeElement(String pAudioKey,String pFriendlyName, AudioThemeElementChooseFlags pFlags) : this(new [] {new AudioThemeSelection(pAudioKey,pFriendlyName)}, pFlags)
         {
+        }
+    }
+    public class AudioThemeSelection
+    {
+        public String Key { get; }
+        public String FriendlyName { get; }
+        public AudioThemeSelection(String pKey,String pFriendlyName)
+        {
+            Key = pKey;
+            FriendlyName = pFriendlyName;
         }
     }
 }

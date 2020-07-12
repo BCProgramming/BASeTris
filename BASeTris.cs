@@ -35,6 +35,7 @@ using XInput.Wrapper;
 using BASeTris.GameStates.Menu;
 using BASeTris.BackgroundDrawers;
 using BASeTris.Rendering.Adapters;
+using BASeTris.Theme.Audio;
 
 namespace BASeTris
 {
@@ -59,6 +60,7 @@ namespace BASeTris
                 return _Present.GameSettings;
             }
         }
+        public AudioThemeManager AudioThemeMan { get { return _Present.AudioThemeMan; } set { _Present.AudioThemeMan = value; } }
         public DateTime GameStartTime
         {
             get => _Present.Game.GameStartTime;

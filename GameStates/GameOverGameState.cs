@@ -55,7 +55,7 @@ namespace BASeTris.GameStates
             if ((DateTime.Now - CompleteSummaryTime).TotalMilliseconds > 500)
             {
                 CompleteSummaryTime = DateTime.MaxValue;
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOver,pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOver.Key, pOwner.Settings.EffectVolume);
                 StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
                 if (standardstate != null)
                 {
@@ -71,7 +71,7 @@ namespace BASeTris.GameStates
             if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)
             {
                 LastAdvance = DateTime.Now;
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.GameOverShade, pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, pOwner.Settings.EffectVolume);
                 CoverBlocks++;
                 StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
                 if (standardstate != null)

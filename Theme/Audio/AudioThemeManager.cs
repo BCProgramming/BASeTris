@@ -11,12 +11,12 @@ namespace BASeTris.Theme.Audio
 {
     public class AudioThemeManager
     {
-        private AudioTheme CurrentTheme;
-        private Dictionary<AudioThemeElement, String> CachedStatics = new Dictionary<AudioThemeElement, string>();
+        public AudioTheme CurrentTheme { get; set; }
+        private Dictionary<AudioThemeElement, AudioThemeSelection> CachedStatics = new Dictionary<AudioThemeElement, AudioThemeSelection>();
 
         public void ResetTheme()
         {
-            CachedStatics = new Dictionary<AudioThemeElement, string>();
+            CachedStatics = new Dictionary<AudioThemeElement, AudioThemeSelection>();
         }
 
         public AudioThemeManager(AudioTheme UseTheme)
@@ -24,7 +24,7 @@ namespace BASeTris.Theme.Audio
             CurrentTheme = UseTheme;
         }
 
-        private String GetThemeProperty(String pProp)
+        private AudioThemeSelection GetThemeProperty(String pProp)
         {
             PropertyInfo grabprop = CurrentTheme.GetType().GetProperty(pProp, typeof(AudioThemeElement));
             Object result = grabprop.GetGetMethod().Invoke(CurrentTheme, new object[] { });
@@ -45,29 +45,29 @@ namespace BASeTris.Theme.Audio
             }
         }
 
-        public String BlockGroupMove => GetThemeProperty(nameof(this.BlockGroupMove));
-        public String BlockGroupPlace => GetThemeProperty(nameof(this.BlockGroupPlace));
+        public AudioThemeSelection BlockGroupMove => GetThemeProperty(nameof(this.BlockGroupMove));
+        public AudioThemeSelection BlockGroupPlace => GetThemeProperty(nameof(this.BlockGroupPlace));
 
-        public String BlockGroupRotate => GetThemeProperty(nameof(this.BlockGroupRotate));
+        public AudioThemeSelection BlockGroupRotate => GetThemeProperty(nameof(this.BlockGroupRotate));
 
-        public String BlockStopped => GetThemeProperty(nameof(this.BlockStopped));
+        public AudioThemeSelection BlockStopped => GetThemeProperty(nameof(this.BlockStopped));
 
-        public String MenuItemSelected => GetThemeProperty(nameof(this.MenuItemSelected));
+        public AudioThemeSelection MenuItemSelected => GetThemeProperty(nameof(this.MenuItemSelected));
 
-        public String MenuItemActivated =>GetThemeProperty(nameof(this.MenuItemActivated));
-        public String ClearLine => GetThemeProperty(nameof(this.ClearLine));
-        public String ClearTetris => GetThemeProperty(nameof(this.ClearTetris));
+        public AudioThemeSelection MenuItemActivated =>GetThemeProperty(nameof(this.MenuItemActivated));
+        public AudioThemeSelection ClearLine => GetThemeProperty(nameof(this.ClearLine));
+        public AudioThemeSelection ClearTetris => GetThemeProperty(nameof(this.ClearTetris));
 
-        public String BackgroundMusic => GetThemeProperty(nameof(this.BackgroundMusic));
-        public String GameOverShade => GetThemeProperty(nameof(this.GameOverShade));
+        public AudioThemeSelection BackgroundMusic => GetThemeProperty(nameof(this.BackgroundMusic));
+        public AudioThemeSelection GameOverShade => GetThemeProperty(nameof(this.GameOverShade));
 
-        public String Pause => GetThemeProperty(nameof(this.Pause));
+        public AudioThemeSelection Pause => GetThemeProperty(nameof(this.Pause));
 
-        public String GameOver => GetThemeProperty(nameof(this.GameOver));
+        public AudioThemeSelection GameOver => GetThemeProperty(nameof(this.GameOver));
 
-        public String LevelUp => GetThemeProperty(nameof(this.LevelUp));
+        public AudioThemeSelection LevelUp => GetThemeProperty(nameof(this.LevelUp));
 
-        public String Hold => GetThemeProperty(nameof(this.Hold));
+        public AudioThemeSelection Hold => GetThemeProperty(nameof(this.Hold));
 
         /*  public String[] BlockGroupMove;
         public String[] BlockGroupPlace;

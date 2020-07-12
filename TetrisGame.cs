@@ -42,7 +42,7 @@ namespace BASeTris
 
         //public static HighScoreManager ScoreMan;
         public static XMLScoreManager<TetrisHighScoreData> ScoreMan;
-        public static AudioThemeManager AudioThemeMan;
+        //public static AudioThemeManager AudioThemeMan;
         public static Random rgen = new Random();
         public static bool PortableMode = false;
         private GameState CurrentGameState = null;
@@ -56,6 +56,12 @@ namespace BASeTris
         public static SKTypeface LCDFontSK;
         public static SKTypeface ArialFontSK;
         private static Image _TiledCache = null;
+        public AudioThemeManager AudioThemeMan { get { return GameOwner.AudioThemeMan; } set
+            {
+                //???
+                GameOwner.AudioThemeMan = value;
+            }
+        }
         private DateTime _GameStartTime = DateTime.MinValue;
         private DateTime _LastPausedTime = DateTime.MinValue;
         public event EventHandler<GameClosingEventArgs> GameClosing
@@ -273,7 +279,7 @@ namespace BASeTris
                 Directory.CreateDirectory(ScoreFolder);
             }
 
-            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
+            
 
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.xml");
             ScoreMan = XMLScoreManager<TetrisHighScoreData>.FromFile(ScoreFile);

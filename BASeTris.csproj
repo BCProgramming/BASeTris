@@ -91,8 +91,12 @@
     <Compile Include="Cheats\SetPieceCheat.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
+    <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />
+    <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />
+    <Compile Include="GameStates\IMouseInputState.cs" />
     <Compile Include="GameStates\Menu\GenericMenuState.cs" />
     <Compile Include="GameStates\ICompositeState.cs" />
+    <Compile Include="GameStates\Menu\MenuStateMusicMenuItem.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />

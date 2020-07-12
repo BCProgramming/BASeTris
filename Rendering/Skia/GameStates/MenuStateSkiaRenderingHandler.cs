@@ -65,7 +65,21 @@ namespace BASeTris.Rendering.Skia.GameStates
                 //drawitem.Draw(pOwner, g, TargetBounds, useState);
                 CurrentY += ItemSize.Y + 5;
             }
+            if (CursorBitmap == null)
+            {
+                CursorBitmap = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new System.Drawing.Bitmap(TetrisGame.Imageman["cursor"]));
+                using (SKCanvas canvo = new SKCanvas(new SKBitmap(CursorBitmap.Width, CursorBitmap.Height)))
+                {
+                    canvo.Clear(SKColors.Transparent);
+                    canvo.DrawImage(CursorBitmap, new SKPoint(0, 0));
+                }
+            }
+
+
+            g.DrawImage(CursorBitmap, Source.LastMouseMovement, null);
+
         }
+        SKImage CursorBitmap = null;
         protected SKFontInfo GetScaledHeaderFont(IStateOwner pOwner, MenuState Source)
         {
             return MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.HeaderTypeSize);

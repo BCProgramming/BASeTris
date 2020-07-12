@@ -1,4 +1,5 @@
 ﻿using BASeTris.BackgroundDrawers;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Tetrominoes;
 using System;
 using System.Collections.Generic;
@@ -80,14 +81,16 @@ namespace BASeTris.GameStates.Menu
                     //start a new game.
                     if(pOwner is IGamePresenter igp)
                     {
-                        pOwner.CurrentState = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), null,TetrisGame.Soundman);
+                        pOwner.CurrentState = new StandardTetrisGameState(new StandardTetrisHandler(), null,TetrisGame.Soundman);
                         igp.StartGame();
                     }
                 }
                 if(e.MenuElement == OptionsItem)
                 {
                     //Show the options menu
-                    GenericMenuState OptionsMenu = new GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
+                    var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
+                    pOwner.CurrentState = OptionsMenu;
+                    Target.ActivatedItem = null;
                 }
                 if(e.MenuElement == HighScoresItem)
                 {

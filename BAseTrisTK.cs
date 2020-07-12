@@ -15,6 +15,7 @@ using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
 using BASeTris.TetrisBlocks;
+using BASeTris.Theme.Audio;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -37,6 +38,7 @@ namespace BASeTris
         {
             GameClosing?.Invoke(this, new GameClosingEventArgs(this));
         }
+        public AudioThemeManager AudioThemeMan { get { return _Present.AudioThemeMan; } set { _Present.AudioThemeMan = value; } }
         //helper routine
         public static GRBackendRenderTarget CreateRenderTarget(GameWindow Window)
         {
@@ -160,6 +162,27 @@ namespace BASeTris
                 _Present.Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
                 _Present.GameKeyDown(translated.Value);
 
+            }
+        }
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            if(_Present.Game.CurrentState is IMouseInputState imis)
+            {
+                imis.MouseDown(MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X,e.Position.Y));
+            }
+        }
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            if (_Present.Game.CurrentState is IMouseInputState imis)
+            {
+                imis.MouseUp(MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X, e.Position.Y));
+            }
+        }
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            if (_Present.Game.CurrentState is IMouseInputState imis)
+            {
+                imis.MouseMove(new BCPoint(e.Position.X, e.Position.Y));
             }
         }
         protected override void OnKeyUp(KeyboardKeyEventArgs e)

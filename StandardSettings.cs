@@ -24,6 +24,7 @@ namespace BASeTris
         public bool SmoothFall = false;
         public bool SmoothRotate = true;
         private String sLoadedSource = null;
+        public String MusicOption { get; set; } = "<RANDOM>";
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
             return new XElement
@@ -35,7 +36,8 @@ namespace BASeTris
                 new XAttribute("DASRate", DASRate),
                 new XAttribute("LockTime", LockTime),
                 new XAttribute("SmoothFall", SmoothFall),
-                new XAttribute("SmoothRotate", SmoothRotate));
+                new XAttribute("SmoothRotate", SmoothRotate),
+                new XAttribute("MusicOption",MusicOption));
 
         }
         public StandardSettings()
@@ -84,6 +86,7 @@ namespace BASeTris
             DASRate = Node.GetAttributeInt("DASRate", 100);
             SmoothFall = Node.GetAttributeBool("SmoothFall", false);
             SmoothRotate = Node.GetAttributeBool("SmoothRotate", true);
+            MusicOption = Node.GetAttributeString("MusicOption", "<RANDOM>");
         }
     }
 }

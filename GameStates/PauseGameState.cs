@@ -13,6 +13,7 @@ using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Tetrominoes;
+using BASeTris.Theme.Audio;
 using OpenTK;
 using SkiaSharp;
 
@@ -44,6 +45,7 @@ namespace BASeTris.GameStates
         public TimeSpan FinalGameTime { get => PauseOwner.FinalGameTime; set  {; } }
         public DateTime LastPausedTime { get => PauseOwner.LastPausedTime; set  { } }
 
+        public AudioThemeManager AudioThemeMan { get { return PauseOwner.AudioThemeMan; } set { PauseOwner.AudioThemeMan = value; } }
         public BCRect LastDrawBounds => PauseOwner.LastDrawBounds;
 
         public StandardSettings Settings => PauseOwner.Settings;
@@ -76,8 +78,8 @@ namespace BASeTris.GameStates
           
             PopulatePauseMenu(pOwner);
             pOwner.GameClosing += POwner_GameClosing;
-            //initialize the background player. This is some wild stuff, not going to lie. Crazy stuff. Probably won't work...
-            PauseGamePlayerState = new StandardTetrisGameState(new BagChooser(Tetromino.StandardTetrominoFunctions), null,new SilentSoundManager(TetrisGame.Soundman));
+            
+            PauseGamePlayerState = new StandardTetrisGameState(pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman));
             
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new TetrisAI(this);
@@ -232,7 +234,7 @@ namespace BASeTris.GameStates
 
         private static void UnPause(IStateOwner pOwner)
         {
-            TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.Pause, pOwner.Settings.EffectVolume);
+            TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.EffectVolume);
             var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing2?.UnPause();
             playing2?.setVolume(1.0f);

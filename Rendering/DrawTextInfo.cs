@@ -244,5 +244,25 @@ namespace BASeTris.Rendering
             YPos = YPos + NewYPos;
 
         }
+        public static void VerticalWavePositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)
+        {
+            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
+            var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
+            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
+            
+            float NewYPos = (float)Math.Sin(Angle) * Height;
+            
+            YPos = YPos + NewYPos;
+        }
+        public static void HorizontalWavePositionCalculator(ref float XPos, ref float YPos, float Width, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)
+        {
+            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
+            var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
+            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
+
+            float NewXPos = (float)Math.Cos(Angle) * Width;
+
+            XPos = XPos + NewXPos;
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace BASeTris.GameStates.Menu
         public bool Selected {  get { return _Selected; } set { _Selected = value; } }
         public MenuStateMultiOption(IMultiOptionManager pOptionManager)
         {
-
+            OptionManagerBase = pOptionManager;
         }
 
     }

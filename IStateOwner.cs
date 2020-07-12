@@ -1,4 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
+using BASeTris.Theme.Audio;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +19,7 @@ namespace BASeTris
         Rectangle GameArea { get; }
         void Feedback(float Strength, int Length);
 
-
+        AudioThemeManager AudioThemeMan { get; set; }
         double ScaleFactor { get; }
         void SetScale(double pScale);
         event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;

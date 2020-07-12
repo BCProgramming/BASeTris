@@ -100,7 +100,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
             MeasurePaint.TextSize = Source.FontSize;
             SKRect result = new SKRect();
             
-            MeasurePaint.MeasureText(new String(Enumerable.Repeat('█',Source.Text.Length).ToArray()), ref result);
+            MeasurePaint.MeasureText(new String(Enumerable.Repeat('█',(Source.Text??"").Length).ToArray()), ref result);
             return new SKPoint(result.Width, result.Height);
             //var testfont = GetScaledFont(pOwner, Source.FontFace, Source.FontSize);
             //var MeasureText = Temp.MeasureString(Source.Text, testfont);

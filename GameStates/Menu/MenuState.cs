@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeTris;
 using BASeTris.BackgroundDrawers;
+using BASeTris.Rendering.Adapters;
 
 namespace BASeTris.GameStates.Menu
 {
-    public class MenuState : GameState
+    public class MenuState : GameState,IMouseInputState
     {
         //The "Menu" state presents a Menu. Well, I mean, obviously.
 
@@ -28,7 +29,7 @@ namespace BASeTris.GameStates.Menu
 
         public String StateHeader { get; set; }
 
-        
+        public BCPoint LastMouseMovement { get; set; }
 
         public String HeaderTypeface { get; set; } = "Arial";
         public float HeaderTypeSize { get; set; } = 28;
@@ -135,7 +136,7 @@ namespace BASeTris.GameStates.Menu
             {
                 if (ActivatedItem != null)
                 {
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated, pOwner.Settings.EffectVolume);
+                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.EffectVolume);
                     ActivatedItem.OnDeactivated();
                     ActivatedItem = null;
                 }
@@ -144,7 +145,7 @@ namespace BASeTris.GameStates.Menu
 
                     //Activate the currently selected item.
                     var currentitem = MenuElements[SelectedIndex];
-                    TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemActivated, pOwner.Settings.EffectVolume);
+                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.EffectVolume);
                     ActivatedItem = currentitem;
                     MenuItemActivated?.Invoke(this, new MenuStateMenuItemActivatedEventArgs(currentitem));
 
@@ -155,7 +156,7 @@ namespace BASeTris.GameStates.Menu
 
             else if (OriginalIndex != SelectedIndex)
             {
-                TetrisGame.Soundman.PlaySound(TetrisGame.AudioThemeMan.MenuItemSelected, pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.EffectVolume);
                 var previousitem = MenuElements[OriginalIndex];
                 var currentitem = MenuElements[SelectedIndex];
                 MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previousitem));
@@ -180,6 +181,21 @@ namespace BASeTris.GameStates.Menu
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //throw new NotImplementedException();
+        }
+
+        public void MouseDown(StateMouseButtons ButtonDown, BCPoint Position)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void MouseUp(StateMouseButtons ButtonUp, BCPoint Position)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void MouseMove(BCPoint Position)
+        {
+            LastMouseMovement = Position;
         }
     }
     public class MenuStateEventArgs : EventArgs

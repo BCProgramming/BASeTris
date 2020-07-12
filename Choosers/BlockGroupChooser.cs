@@ -10,7 +10,7 @@ namespace BASeTris.Choosers
     {
         protected Func<Nomino>[] _Available;
         protected Random rgen = null;
-
+        public Action<Nomino> ResultAffector { get; set; } = null;
         public BlockGroupChooser(Func<Nomino>[] pAvailable)
         {
             _Available = pAvailable;
@@ -34,7 +34,13 @@ namespace BASeTris.Choosers
                 yield return GetNext();
             }
         }
-
-        public abstract Nomino GetNext();
+        public virtual Nomino RetrieveNext()
+        {
+            var result = GetNext();
+            if (ResultAffector != null) ResultAffector(result);
+            return result;
+        }
+        
+        protected abstract Nomino GetNext();
     }
 }

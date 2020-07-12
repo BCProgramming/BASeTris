@@ -50,13 +50,19 @@ namespace BASeTris.GameStates.Menu
                 new SoundOption("tetris_theme_C","NES C Theme"),
                 new SoundOption("tetris_2","Tetris 2"),
                 new SoundOption("smb3_tetris","Tetris DS-SMB3"),
-                new SoundOption("tetrisds","Tetris DS")
+                new SoundOption("tetrisds","Tetris DS"),
+                new SoundOption("kirbysand","Kirby Sand"),
+                new SoundOption("silius1","Silius"),
+                new SoundOption("journey3","Journey 3"),
+                new SoundOption("tetris_nes_theme","NES"),
+                new SoundOption("tetris_gb_theme","GB"),
+                new SoundOption("<RANDOM>","Random")
 
             }, 0);
 
 
             MenuStateMultiOption<SoundOption> MusicOptionItem = new MenuStateMultiOption<SoundOption>(SoundOptions);
-
+            MusicOptionItem.Text = "Music";
 
             MusicOptionItem.OnActivateOption += MusicOptionItem_OnActivateOption;
             ReturnItem.FontFace = SoundLabel.FontFace = MusicOptionItem.FontFace = ItemFont.FontFamily.Name;
@@ -69,8 +75,15 @@ namespace BASeTris.GameStates.Menu
 
         private void MusicOptionItem_OnActivateOption(object sender, OptionActivated<SoundOption> e)
         {
-            
-            TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, e.Owner.Settings.MusicVolume, true);
+            if (e.Option.SoundKey == "<RANDOM>")
+            {
+                TetrisGame.Soundman.PlayMusic(e.Owner.AudioThemeMan.BackgroundMusic.Key, true);
+            }
+            else
+            {
+                TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, e.Owner.Settings.MusicVolume, true);
+            }
+            e.Owner.Settings.MusicOption = e.Option.SoundKey;
         }
 
         private class SoundOption

@@ -11,7 +11,9 @@ using System.Windows.Forms;
 using BASeTris.AI;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Tetrominoes;
+using BASeTris.Theme.Audio;
 using BASeTris.Theme.Block;
 using OpenTK.Input;
 using XInput.Wrapper;
@@ -41,7 +43,7 @@ namespace BASeTris
         private IStateOwner _Owner = null;
         private IGamePresenter _Presenter = null;
         private StandardSettings _GameSettings = null;
-        
+        public AudioThemeManager AudioThemeMan { get; set; } = null;
         public bool IgnoreController = false;
         HashSet<GameState.GameKeys> ActiveKeys = new HashSet<GameState.GameKeys>();
         private TetrisGame _Game;
@@ -73,19 +75,19 @@ namespace BASeTris
         {
             if (GameLoopsRunning) return;
             GameLoopsRunning = true;
-
+            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
             GameSettings = new StandardSettings(sSettingsFile);
 
 
-            var standardstate = new StandardTetrisGameState(Tetromino.BagTetrominoChooser(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),TetrisGame.Soundman);
+            var standardstate = new StandardTetrisGameState(new StandardTetrisHandler(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),TetrisGame.Soundman);
             Game = new TetrisGame(_Owner, standardstate);
             
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
 
 
-            TetrisGame.AudioThemeMan.ResetTheme();
+            AudioThemeMan.ResetTheme();
             if (GameThread != null)
             {
                 GameThread.Abort();
