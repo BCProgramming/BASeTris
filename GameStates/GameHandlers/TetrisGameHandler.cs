@@ -42,7 +42,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return new StandardTetrisHandler();
         }
-        private int GetScore(int LinesCleared, IList<HotLine> ClearedHotLines, StandardTetrisGameState state, IStateOwner pOwner, Nomino Trigger)
+        private int GetScore(int LinesCleared, IList<HotLine> ClearedHotLines, GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
             var GameStats = state.GameStats;
             int result = LinesCleared;
@@ -78,7 +78,7 @@ namespace BASeTris.GameStates.GameHandlers
             
 
         }
-        public FieldChangeResult ProcessFieldChange(StandardTetrisGameState state, IStateOwner pOwner, Nomino Trigger)
+        public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
             var HotLines = new List<HotLine>();
             FieldChangeResult FCR = new FieldChangeResult();
@@ -210,5 +210,6 @@ namespace BASeTris.GameStates.GameHandlers
             return FCR;
 
         }
+        public TetrominoTheme DefaultTheme { get { return new SNESTetrominoTheme(); } }
     }
 }

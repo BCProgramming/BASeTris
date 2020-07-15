@@ -81,7 +81,7 @@ namespace BASeTris
             GameSettings = new StandardSettings(sSettingsFile);
 
 
-            var standardstate = new StandardTetrisGameState(new StandardTetrisHandler(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),TetrisGame.Soundman);
+            var standardstate = new GameplayGameState(new StandardTetrisHandler(), new GarbageFieldInitializer(new Random(), new NESTetrominoTheme(), 1),TetrisGame.Soundman);
             Game = new TetrisGame(_Owner, standardstate);
             
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);

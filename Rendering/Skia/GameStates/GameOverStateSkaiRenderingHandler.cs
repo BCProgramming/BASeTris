@@ -28,7 +28,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             
 
 
-            StandardTetrisGameState standardgame = Self.GameOveredState as StandardTetrisGameState;
+            GameplayGameState standardgame = Self.GameOveredState as GameplayGameState;
             SKBitmap I_Tet = standardgame.GetTetrominoSKBitmap(TetronimoType);
             Target.DrawBitmap(I_Tet, new SKPoint(BasePosition.X - (float)(I_Tet.Width) / 2, BasePosition.Y));
             
@@ -44,9 +44,9 @@ namespace BASeTris.Rendering.Skia.GameStates
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
-            if (Source.GameOveredState is StandardTetrisGameState)
+            if (Source.GameOveredState is GameplayGameState)
             {
-                StandardTetrisGameState standardgame = Source.GameOveredState as StandardTetrisGameState;
+                GameplayGameState standardgame = Source.GameOveredState as GameplayGameState;
                 SKPoint BlockSize = new SKPoint(Bounds.Width / (float)standardgame.PlayField.ColCount, Bounds.Height / (float)standardgame.PlayField.RowCount);
                 
                 if (useCoverBrush == null)

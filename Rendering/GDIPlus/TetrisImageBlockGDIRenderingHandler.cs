@@ -2,7 +2,7 @@
 using System.Drawing.Imaging;
 using BASeCamp.Rendering;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.Rendering.GDIPlus
 {
@@ -13,7 +13,7 @@ namespace BASeTris.Rendering.GDIPlus
         {
         }
 
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, TetrisBlock Source, TetrisBlockDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, NominoBlock Source, TetrisBlockDrawParameters Element)
         {
             if(Source is ImageBlock)
                 this.Render(pOwner,pRenderTarget,(ImageBlock)Source,Element);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Theme.Block;
 namespace BASeTris.GameStates.Menu
 {
@@ -48,7 +48,7 @@ namespace BASeTris.GameStates.Menu
 
         private void _Owner_BeforeGameStateChange(object sender, BeforeGameStateChangeEventArgs e)
         {
-            if (e.NewState is StandardTetrisGameState newstate)
+            if (e.NewState is GameplayGameState newstate)
             {
                 //if it's a standard state, we set the Theme of the TetrisField, and un-assign this event.
                 newstate.PlayField.Theme = ActivatedOption.Option.GenerateThemeFunc();

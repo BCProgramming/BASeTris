@@ -14,9 +14,9 @@ namespace BASeTris.Choosers.AIChoosers
 {
     public abstract class BaseAIChooser : BlockGroupChooser
     {
-        protected StandardTetrisGameState _State;
+        protected GameplayGameState _State;
 
-        public BaseAIChooser(StandardTetrisGameState _StandardState, Func<Nomino>[] pAvailable) : base(pAvailable)
+        public BaseAIChooser(GameplayGameState _StandardState, Func<Nomino>[] pAvailable) : base(pAvailable)
         {
             _State = _StandardState;
         }
@@ -69,7 +69,7 @@ namespace BASeTris.Choosers.AIChoosers
         protected ConcurrentQueue<Nomino> WorkQueue = new ConcurrentQueue<Nomino>();
         public abstract Nomino PerformGetNext();
 
-        public override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             if (AIWorker == null)
             {

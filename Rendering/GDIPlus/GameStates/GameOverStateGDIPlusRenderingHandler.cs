@@ -12,7 +12,7 @@ namespace BASeTris.Rendering.GDIPlus
         Brush useCoverBrush = null;
         private void DrawTetrominoStat(GameOverGameState Self,  Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)
         {
-            StandardTetrisGameState standardgame = Self.GameOveredState as StandardTetrisGameState;
+            GameplayGameState standardgame = Self.GameOveredState as GameplayGameState;
             Image I_Tet = standardgame.GetTetronimoImage(TetronimoType);
             Target.DrawImage(I_Tet, new PointF(BasePosition.X - (float)(I_Tet.Width) / 2, BasePosition.Y));
             PointF TextPos = new PointF(BasePosition.X + Bounds.Width / 2, BasePosition.Y - 10);
@@ -23,9 +23,9 @@ namespace BASeTris.Rendering.GDIPlus
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
-            if (Source.GameOveredState is StandardTetrisGameState)
+            if (Source.GameOveredState is GameplayGameState)
             {
-                StandardTetrisGameState standardgame = Source.GameOveredState as StandardTetrisGameState;
+                GameplayGameState standardgame = Source.GameOveredState as GameplayGameState;
                 SizeF BlockSize = new SizeF(Bounds.Width / (float)standardgame.PlayField.ColCount, Bounds.Height / (float)standardgame.PlayField.RowCount);
                 useCoverBrush = new LinearGradientBrush(new Rectangle(0, 0, (int)Bounds.Width, (int)BlockSize.Height), Color.DarkSlateGray, Color.MintCream, LinearGradientMode.Vertical);
                 RenderingProvider.Static.DrawElement(pOwner,g, Source.GameOveredState,Element);

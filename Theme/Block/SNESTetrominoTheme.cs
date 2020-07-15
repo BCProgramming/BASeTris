@@ -1,5 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;
@@ -8,9 +8,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris
 {
+    [HandlerTheme(typeof(StandardTetrisHandler))]
     public class SNESTetrominoTheme : TetrominoTheme
     {
         //This theme is based on the colour and appearance of the Tetris game in SNES Tetris and Dr.Mario.
@@ -251,6 +253,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
 
         static String TetOrder = "TJZOSLI";
         static char[] TetChars = TetOrder.ToCharArray();
+       
         public static BlockColors GetBlockColors(int LevelNumber,char TetrominoType)
         {
             //first get the level data...

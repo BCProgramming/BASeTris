@@ -11,7 +11,7 @@ using BASeTris.GameStates;
 using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.DrawHelper
 {
@@ -22,7 +22,7 @@ namespace BASeTris.DrawHelper
         RectangleF StoredBlockImageRect = RectangleF.Empty;
         Image StoredBlockImage = null;
         Bitmap useBackground = null;
-        private void RefreshBackground(StandardTetrisGameState pState,RectangleF buildSize)
+        private void RefreshBackground(GameplayGameState pState,RectangleF buildSize)
         {
             StoredBackground = buildSize;
             useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height, PixelFormat.Format32bppPArgb);
@@ -47,7 +47,7 @@ namespace BASeTris.DrawHelper
             }
         }
         
-        public void DrawProc(StandardTetrisGameState pState, IStateOwner pOwner, Graphics g, RectangleF Bounds)
+        public void DrawProc(GameplayGameState pState, IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             if (useBackground == null || !StoredBackground.Equals(Bounds) || pState.DoRefreshBackground)
             {

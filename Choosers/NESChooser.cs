@@ -54,7 +54,7 @@ namespace BASeTris.Choosers
             roll = _Available.Length + 1;
         }
 
-        public override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             int id = rgen.Next(roll);
             if (id == prev || id == _Available.Length)

@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using BASeTris.Rendering.Adapters;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.Theme.Block
 {
-
+    [HandlerTheme(typeof(StandardTetrisHandler))]
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
     {
 
@@ -62,7 +63,10 @@ namespace BASeTris.Theme.Block
         {
             return new SKPointI(9, 9);
         }
-
+        protected override bool IsRotatable(NominoElement testvalue)
+        {
+            return false;
+        }
         public override SKColor GetColor(TetrisField field, Nomino Element, NESBlockTypes BlockType, BCT PixelType)
         {
             int LevelNum = field.Level;

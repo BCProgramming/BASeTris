@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using BASeCamp.Rendering;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 

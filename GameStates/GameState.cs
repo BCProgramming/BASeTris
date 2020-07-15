@@ -16,7 +16,7 @@ using BASeTris.BackgroundDrawers;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris

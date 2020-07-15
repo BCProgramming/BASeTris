@@ -10,7 +10,7 @@ using BASeTris.GameObjects;
 using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using SkiaSharp;
 
 namespace BASeTris.GameStates
@@ -19,11 +19,11 @@ namespace BASeTris.GameStates
     //This is itself a base class for "Clear" actions. This would include actions like clearing a line in Tetris, clearing a set of blocks in Dr Mario or Tetris 2, etc.
     //also this could be used to ADD stuff to the field- so it's not strictly for CLEAR but "ActionGameState" seemed a bit silly as a name.
     
-    public abstract class FieldActionGameState : GameState,ICompositeState<StandardTetrisGameState>
+    public abstract class FieldActionGameState : GameState,ICompositeState<GameplayGameState>
     {
-        public StandardTetrisGameState _BaseState;
+        public GameplayGameState _BaseState;
 
-        public FieldActionGameState(StandardTetrisGameState pBaseState)
+        public FieldActionGameState(GameplayGameState pBaseState)
         {
             _BaseState = pBaseState;
         }
@@ -36,10 +36,10 @@ namespace BASeTris.GameStates
         public override void GameProc(IStateOwner pOwner)
         {
 
-            StandardTetrisGameState desiredState = null;
-            if (_BaseState is StandardTetrisGameState)
+            GameplayGameState desiredState = null;
+            if (_BaseState is GameplayGameState)
                 desiredState = _BaseState;
-            else if(_BaseState is ICompositeState<StandardTetrisGameState> comp)
+            else if(_BaseState is ICompositeState<GameplayGameState> comp)
             {
                 desiredState = comp.GetComposite();
             }
@@ -51,7 +51,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        public StandardTetrisGameState GetComposite()
+        public GameplayGameState GetComposite()
         {
             return _BaseState;
         }
@@ -92,7 +92,7 @@ namespace BASeTris.GameStates
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
         public bool FlashState = false;
 
-        public FieldLineActionGameState(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState)
+        public FieldLineActionGameState(GameplayGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState)
         {
             AfterClear = pAfterClearActions;
             RowNumbers = ClearRows;
@@ -106,7 +106,7 @@ namespace BASeTris.GameStates
         public override void GameProc(IStateOwner pOwner)
         {
             base.GameProc(pOwner);
-            if (pOwner.CurrentState is StandardTetrisGameState stgs1)
+            if (pOwner.CurrentState is GameplayGameState stgs1)
             {
                 pOwner.EnqueueAction(() => { stgs1.PlayField.HasChanged = true; });
 
@@ -155,7 +155,7 @@ namespace BASeTris.GameStates
                     {
                         pOwner.EnqueueAction(iterate);
                     }
-                    if (pOwner.CurrentState is StandardTetrisGameState stgs2)
+                    if (pOwner.CurrentState is GameplayGameState stgs2)
                     {
                         pOwner.EnqueueAction(() => { stgs2.PlayField.HasChanged = true; });
                         
@@ -346,7 +346,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        protected void PerformClearAct(TetrisBlock[] FullRow, int index)
+        protected void PerformClearAct(NominoBlock[] FullRow, int index)
         {
             if(ClearAction==null)
                 FullRow[index] = null;
@@ -354,7 +354,7 @@ namespace BASeTris.GameStates
             {
                 //if we have a clear action, then we want to create a new instance and set it up here, then add it to the ClearActivities Dictionary.
                 //Remember- this is separate from our line clear style, and is used to animate each block "clearing" (shrinking away, fading, etc)
-                FieldBlockClearTask fbct = new FieldBlockClearTask(ClearAction, new TetrisBlock[] { FullRow[index] });
+                FieldBlockClearTask fbct = new FieldBlockClearTask(ClearAction, new NominoBlock[] { FullRow[index] });
                 ClearActivities.Add(fbct);
             }
         }
@@ -375,8 +375,8 @@ namespace BASeTris.GameStates
         //since the FieldBlockClearAction is stateless (or at least tries to be) it has no block references, so we keep track of those here
         public DateTime StartClearTime;
         public FieldBlockClearAction ClearAction;
-        public IEnumerable<TetrisBlock> Blocks;
-        public FieldBlockClearTask(FieldBlockClearAction pClearAction,IEnumerable<TetrisBlock> pBlocks)
+        public IEnumerable<NominoBlock> Blocks;
+        public FieldBlockClearTask(FieldBlockClearAction pClearAction,IEnumerable<NominoBlock> pBlocks)
         {
             ClearAction = pClearAction;
             Blocks = pBlocks;
@@ -389,7 +389,7 @@ namespace BASeTris.GameStates
         Queue<Point> ClearBlockList = null;
         int RowClearCount = 0;
 
-        public FieldLineActionDissolve(StandardTetrisGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState, ClearRows, pAfterClearActions)
+        public FieldLineActionDissolve(GameplayGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState, ClearRows, pAfterClearActions)
         {
             List<Point> AllBlockPositions = new List<Point>();
             RowClearCount = ClearRows.Length;
@@ -430,16 +430,16 @@ namespace BASeTris.GameStates
     {
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
 
-        private Queue<TetrisBlock[]> RowInsertions = null;
+        private Queue<NominoBlock[]> RowInsertions = null;
 
         //private TetrisBlock[][] InsertionData = null;
         private int InsertionRow;
 
 
-        public InsertBlockRowsActionGameState(StandardTetrisGameState pBaseState, int InsertRow, TetrisBlock[][] RowData, IEnumerable<Action> pAfterClearActions) : base(pBaseState)
+        public InsertBlockRowsActionGameState(GameplayGameState pBaseState, int InsertRow, NominoBlock[][] RowData, IEnumerable<Action> pAfterClearActions) : base(pBaseState)
         {
-            RowInsertions = new Queue<TetrisBlock[]>();
-            foreach (TetrisBlock[] AddRow in RowData)
+            RowInsertions = new Queue<NominoBlock[]>();
+            foreach (NominoBlock[] AddRow in RowData)
             {
                 RowInsertions.Enqueue(AddRow);
             }
@@ -481,14 +481,14 @@ namespace BASeTris.GameStates
                 else
                 {
                     //dequeue the next line of blocks to insert.
-                    TetrisBlock[] NextRow = RowInsertions.Dequeue();
+                    NominoBlock[] NextRow = RowInsertions.Dequeue();
 
                     //insert into the playfield at InsertionIndex.
                     //This means moving All rows from InsertionIndex up one.
                     for (int moverow = 0; moverow < InsertionIndex; moverow++)
                     {
-                        TetrisBlock[] ThisRow = _BaseState.PlayField.Contents[moverow + 1];
-                        TetrisBlock[] TargetRow = _BaseState.PlayField.Contents[moverow];
+                        NominoBlock[] ThisRow = _BaseState.PlayField.Contents[moverow + 1];
+                        NominoBlock[] TargetRow = _BaseState.PlayField.Contents[moverow];
 
                         for (int copyCol = 0; copyCol < ThisRow.Length; copyCol++)
                         {
@@ -496,7 +496,7 @@ namespace BASeTris.GameStates
                         }
                     }
 
-                    TetrisBlock[] InsertedRow = _BaseState.PlayField.Contents[InsertionIndex];
+                    NominoBlock[] InsertedRow = _BaseState.PlayField.Contents[InsertionIndex];
                     for (int i = 0; i < InsertedRow.Length; i++)
                     {
                         InsertedRow[i] = NextRow[i % NextRow.Length];

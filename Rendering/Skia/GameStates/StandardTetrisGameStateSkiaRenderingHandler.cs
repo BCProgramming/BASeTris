@@ -13,21 +13,21 @@ using BASeTris.GameObjects;
 using BASeTris.GameStates;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
-    [RenderingHandler(typeof(StandardTetrisGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,StandardTetrisGameState,GameStateSkiaDrawParameters>
+    [RenderingHandler(typeof(GameplayGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,GameplayGameState,GameStateSkiaDrawParameters>
     {
         private StandardImageBackgroundSkia _Background = null;
         private TetrominoTheme CurrentTheme = null;
         public SKRect LastDrawStat = SKRect.Empty;
         
-        private void BuildBackground(StandardTetrisGameState Self,SKRect Size)
+        private void BuildBackground(GameplayGameState Self,SKRect Size)
         {
             var bgInfo = Self.PlayField.Theme.GetThemePlayFieldBackground(Self.PlayField);
             
@@ -44,7 +44,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         }
         SKImage StatisticsBackground = null;
         //redraws the StatisticsBackground SKImage.
-        public void GenerateStatisticsBackground(StandardTetrisGameState Self)
+        public void GenerateStatisticsBackground(GameplayGameState Self)
         {
             using (SKBitmap sourcebit = new SKBitmap(new SKImageInfo(1120, 2576, SKColorType.Rgba8888)))
             {
@@ -78,7 +78,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         }
 
 
-        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, StandardTetrisGameState Source, GameStateSkiaDrawParameters Element)
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, GameplayGameState Source, GameStateSkiaDrawParameters Element)
         {
             //testing code for background.
             if (_Background==null || CurrentTheme!=Source.PlayField.Theme)
@@ -184,7 +184,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         }
         public object LockTetImageRedraw = new Object();
         bool CalledRedraw = false;
-        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner, StandardTetrisGameState State, SKRect Bounds)
+        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner, GameplayGameState State, SKRect Bounds)
         {
             if(CalledRedraw)
             {
@@ -207,7 +207,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         {
             return pPixels * 72 / gscale.DpiX;
         }
-        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, StandardTetrisGameState Source, GameStateSkiaDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, GameplayGameState Source, GameStateSkiaDrawParameters Element)
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
@@ -234,7 +234,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     SKTypeface standardFont = TetrisGame.RetroFontSK;
                     //Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
 
-                    var TopScore = Source.GetLocalScores().GetScores().First().Score;
+                    var TopScore = Source.GetLocalScores()==null?0:Source.GetLocalScores().GetScores().First().Score;
                     int MaxScoreLength = Math.Max(TopScore.ToString().Length, useStats.Score.ToString().Length);
 
                     String CurrentScoreStr = useStats.Score.ToString().PadLeft(MaxScoreLength + 2);
@@ -319,11 +319,13 @@ namespace BASeTris.Rendering.Skia.GameStates
                         SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
                         PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
                         SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width*1.5f, ImagePos.Y + TetrominoImage.Height*1.5f);
+                        if (Source.GameHandler is TetrisGameHandler)
+                        {
+                            g.DrawBitmap(TetrominoImage, DrawRect, null);
 
-                        g.DrawBitmap(TetrominoImage, DrawRect, null);
-
-                        TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
-                        TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, Color.Black.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
+                            TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
+                            TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, Color.Black.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
+                        }
                         //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
                         //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
                     }
@@ -388,7 +390,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
                             var NextTetromino = NextTetrominoes[i];
-
+                            if (NextTetromino == null) continue;
                             float Deviation = (i - NextTetrominoes.Length / 2);
                             Point Deviate = new Point((int)(Deviation * 20 * Factor), (int)(Deviation * 20 * Factor));
 

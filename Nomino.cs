@@ -17,7 +17,7 @@ using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Rendering.Skia;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using SkiaSharp;
 
 namespace BASeTris
@@ -60,18 +60,22 @@ namespace BASeTris
         }
 
         protected List<NominoElement> BlockData = new List<NominoElement>();
-        private Dictionary<TetrisBlock, NominoElement> _DataLookup = null;
+        private Dictionary<NominoBlock, NominoElement> _DataLookup = null;
         public IList<NominoElement> GetBlockData()
         {
             return BlockData.AsReadOnly();
         }
-        public Dictionary<TetrisBlock, NominoElement> BlockDataLookup
+        public int IndexOf(NominoElement findItem)
+        {
+            return BlockData.IndexOf(findItem);
+        }
+        public Dictionary<NominoBlock, NominoElement> BlockDataLookup
         {
             get
             {
                 if (_DataLookup == null)
                 {
-                    _DataLookup = new Dictionary<TetrisBlock, NominoElement>();
+                    _DataLookup = new Dictionary<NominoBlock, NominoElement>();
                     foreach (var addelement in this)
                     {
                         _DataLookup.Add(addelement.Block, addelement);
@@ -210,13 +214,13 @@ namespace BASeTris
             BlockData.Add(bge);
         }
 
-        public void AddBlock(Point[] RotationPoints, TetrisBlock tb)
+        public void AddBlock(Point[] RotationPoints, NominoBlock tb)
         {
             NominoElement bge = new NominoElement(RotationPoints, tb);
             AddBlock(bge);
         }
 
-        public NominoElement FindEntry(TetrisBlock findBlock)
+        public NominoElement FindEntry(NominoBlock findBlock)
         {
             return BlockDataLookup[findBlock];
         }
@@ -255,7 +259,7 @@ namespace BASeTris
         {
             Nomino bg = new Nomino();
             bg.SpecialName = pName;
-            foreach (var bge in GetTetrominoEntries(Source))
+            foreach (var bge in GetNominoEntries(Source))
             {
                 bge.Block.Owner = bg;
                 bg.AddBlock(bge);
@@ -263,24 +267,24 @@ namespace BASeTris
 
             return bg;
         }
-
-        public static IEnumerable<NominoElement> GetTetrominoEntries(Point[] Source, Size AreaSize)
+        
+        public static IEnumerable<NominoElement> GetNominoEntries(Point[] Source, Size AreaSize,Func<NominoBlock> BuildBlock = null)
         {
+            if (BuildBlock == null) BuildBlock = () => new StandardColouredBlock();
             //assumes a "single" set of blocks, we rotate it with the NominoElement Constructor for the needed rotation points.
             foreach (Point BlockPos in Source)
             {
-                StandardColouredBlock CreateBlock = new StandardColouredBlock();
+                NominoBlock CreateBlock = BuildBlock();
                 yield return new NominoElement(BlockPos, AreaSize, CreateBlock);
             }
         }
 
-        public static IEnumerable<NominoElement> GetTetrominoEntries(Point[][] Source)
+        public static IEnumerable<NominoElement> GetNominoEntries(Point[][] Source, Func<NominoBlock> BuildBlock = null)
         {
+            if (BuildBlock == null) BuildBlock = () => new StandardColouredBlock();
             foreach (Point[] loopposdata in Source)
             {
-                StandardColouredBlock CreateBlock = new StandardColouredBlock();
-
-
+                NominoBlock CreateBlock = BuildBlock();
                 yield return new NominoElement(loopposdata, CreateBlock);
             }
         }
@@ -366,15 +370,15 @@ namespace BASeTris
 
         public int RotationModulo = 0;
 
-        public TetrisBlock Block;
+        public NominoBlock Block;
 
-        public NominoElement(Point Point, Size AreaSize, TetrisBlock pBlock)
+        public NominoElement(Point Point, Size AreaSize, NominoBlock pBlock)
         {
             Positions = GetRotations(Point, AreaSize);
             Block = pBlock;
         }
 
-        public NominoElement(Point[] RotationPoints, TetrisBlock pBlock)
+        public NominoElement(Point[] RotationPoints, NominoBlock pBlock)
         {
             if (RotationPoints.Length == 0) throw new ArgumentException("RotationPoints");
 

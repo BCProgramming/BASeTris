@@ -9,6 +9,18 @@ using BASeCamp.Elementizer;
 
 namespace BASeTris
 {
+    public class DrMarioHighScoreData : IHighScoreEntryCustomData
+    {
+        public DrMarioHighScoreData(XElement Source, object PersistenceData)
+        {
+            //
+        }
+        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            return null;
+            //throw new NotImplementedException();
+        }
+    }
     /// <summary>
     /// holds extra score information for the High score info.
     /// </summary>

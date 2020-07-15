@@ -1,4 +1,4 @@
-﻿using BASeTris.TetrisBlocks;
+﻿using BASeTris.Blocks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,7 +37,7 @@ namespace BASeTris
         public Statistics GameStats = new Statistics();
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         
-        private TetrisBlock[][] FieldContents;
+        private NominoBlock[][] FieldContents;
 
      
         public GameFlags _GameFlags = GameFlags.Flags_None;
@@ -110,7 +110,7 @@ namespace BASeTris
 
         //
         //private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
-        private TetrominoTheme _Theme = new SNESTetrominoTheme();
+        private TetrominoTheme _Theme = null;
 
 
         public TetrominoTheme Theme
@@ -162,7 +162,7 @@ namespace BASeTris
         }
 
 
-        public TetrisBlock[][] Contents
+        public NominoBlock[][] Contents
         {
             get { return FieldContents; }
         }
@@ -210,15 +210,16 @@ namespace BASeTris
             }
 
         }
-        public TetrisField(int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
+        public TetrisField(TetrominoTheme theme, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
         {
+            _Theme = theme;
             this.RowCount = pRowCount;
             this.ColCount = pColCount;
             this.VisibleRows = RowCount - 2;
-            FieldContents = new TetrisBlock[RowCount][];
+            FieldContents = new NominoBlock[RowCount][];
             for (int row = 0; row < RowCount; row++)
             {
-                FieldContents[row] = new TetrisBlock[ColCount];
+                FieldContents[row] = new NominoBlock[ColCount];
             }
         }
         public void SetStandardHotLines()
@@ -539,7 +540,7 @@ namespace BASeTris
         public void SetFieldColors()
         {
             lock (this)
-            {
+            { 
                 foreach (var iteraterow in FieldContents)
                 {
                     foreach (var iteratecell in iteraterow)

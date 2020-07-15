@@ -88,11 +88,15 @@
     <Compile Include="BackgroundDrawers\IBackground.cs" />
     <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
+    <Compile Include="Blocks\LineSeriesBlock.cs" />
     <Compile Include="Cheats\SetPieceCheat.cs" />
+    <Compile Include="Duomino\Duomino.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
+    <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
     <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />
+    <Compile Include="GameStates\GameHandlers\TetrisHandlerThemeAttribute.cs" />
     <Compile Include="GameStates\IMouseInputState.cs" />
     <Compile Include="GameStates\Menu\GenericMenuState.cs" />
     <Compile Include="GameStates\ICompositeState.cs" />
@@ -186,6 +190,7 @@
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\ShowHighScoresStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\TetrisGameHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
@@ -201,8 +206,8 @@
     <Compile Include="StandardSettings.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="AssetManager\QColorMatrix.cs" />
-    <Compile Include="TetrisBlocks\StandardColouredBlock.cs" />
-    <Compile Include="TetrisBlocks\TetrisBlock.cs" />
+    <Compile Include="Blocks\StandardColouredBlock.cs" />
+    <Compile Include="Blocks\NominoBlock.cs" />
     <Compile Include="TetrisField.cs" />
     <Compile Include="TetrisGame.cs" />
     <Compile Include="TetrisHighScoreData.cs" />
@@ -213,6 +218,7 @@
     <Compile Include="Theme\Audio\AudioThemeManager.cs" />
     <Compile Include="Theme\Block\BasicBlockTheme.cs" />
     <Compile Include="Theme\Block\CustomPixelTheme.cs" />
+    <Compile Include="Theme\Block\DrMarioTheme.cs" />
     <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />
     <Compile Include="Theme\Block\MappedPixelBlockTheme.cs" />
     <Compile Include="Theme\Block\NESTetrominoTheme.cs" />

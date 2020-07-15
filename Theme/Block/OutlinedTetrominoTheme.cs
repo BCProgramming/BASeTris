@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using BASeTris.AssetManager;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris

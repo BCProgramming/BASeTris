@@ -79,7 +79,7 @@ namespace BASeTris.Rendering.GDIPlus
         }
         private void InitDrawData(IStateOwner pOwner,PauseGameState Source, BaseDrawParameters Element)
         {
-            if (Source.PausedState is StandardTetrisGameState std)
+            if (Source.PausedState is GameplayGameState std)
             {
                 var rgen = new Random();
                 //TODO: well this clearly shouldn't be here...

@@ -81,7 +81,9 @@ namespace BASeTris.GameStates.Menu
                     //start a new game.
                     if(pOwner is IGamePresenter igp)
                     {
-                        pOwner.CurrentState = new StandardTetrisGameState(new StandardTetrisHandler(), null,TetrisGame.Soundman);
+                        var Handler =  new StandardTetrisHandler(); //new DrMarioHandler(); 
+                        pOwner.CurrentState = new GameplayGameState(Handler, null,TetrisGame.Soundman);
+                        
                         igp.StartGame();
                     }
                 }

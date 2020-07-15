@@ -5,7 +5,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.FieldInitializers
 {

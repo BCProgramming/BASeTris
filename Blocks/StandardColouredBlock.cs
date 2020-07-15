@@ -12,9 +12,9 @@ using BASeTris.AssetManager;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 
-namespace BASeTris.TetrisBlocks
+namespace BASeTris.Blocks
 {
-    public class ImageBlock : TetrisBlock
+    public class ImageBlock : NominoBlock
     {
         internal bool DoRotateTransform = false; //if true, we'll RotateTransform the image based on this blocks rotation.
         internal Image[] _RotationImages; //array of images, indexed based on rotation.

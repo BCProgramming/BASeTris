@@ -17,7 +17,7 @@ using BASeTris.Rendering.MenuItems;
 using BASeTris.Rendering.Skia;
 using BASeTris.Rendering.Skia.Backgrounds;
 using BASeTris.Rendering.Skia.GameStates;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.Rendering
 {

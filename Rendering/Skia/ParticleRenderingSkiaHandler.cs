@@ -86,12 +86,12 @@ namespace BASeTris.Rendering.Skia
         protected BCPoint TranslatePosition(IStateOwner pOwner, SKCanvas pRenderTarget, BCPoint Position, GameStateSkiaDrawParameters Element)
         {
             BCPoint Result = Position;
-            StandardTetrisGameState foundstandard = null;
-            if (pOwner.CurrentState is StandardTetrisGameState standard)
+            GameplayGameState foundstandard = null;
+            if (pOwner.CurrentState is GameplayGameState standard)
             {
                 foundstandard = standard;
             }
-            else if (pOwner.CurrentState is ICompositeState<StandardTetrisGameState> composite)
+            else if (pOwner.CurrentState is ICompositeState<GameplayGameState> composite)
             {
                 foundstandard = composite.GetComposite();
             }

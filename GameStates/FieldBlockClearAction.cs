@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.GameStates
 {
@@ -15,12 +15,12 @@ namespace BASeTris.GameStates
     {
         public TimeSpan ClearTime;
         
-        protected List<TetrisBlock> BlocksEffect = new List<TetrisBlock>();
+        protected List<NominoBlock> BlocksEffect = new List<NominoBlock>();
         public FieldBlockClearAction(TimeSpan pClearTime)
         {
             ClearTime = pClearTime;
         }
-        public virtual void InitBlockAction(IEnumerable<TetrisBlock> Blocks)
+        public virtual void InitBlockAction(IEnumerable<NominoBlock> Blocks)
         {
             BlocksEffect = Blocks.ToList();
  }
@@ -33,7 +33,7 @@ namespace BASeTris.GameStates
             }
             return Elapsed > ClearTime;
         }
-        public abstract void ProcessBlock(IStateOwner pOwner, TetrisBlock Target, TimeSpan Elapsed);
+        public abstract void ProcessBlock(IStateOwner pOwner, NominoBlock Target, TimeSpan Elapsed);
     }
    
     public class FieldBlockClearShrinkAction : FieldBlockClearAction
@@ -43,7 +43,7 @@ namespace BASeTris.GameStates
 
         }
         
-        public override void ProcessBlock(IStateOwner pOwner, TetrisBlock Target, TimeSpan Elapsed)
+        public override void ProcessBlock(IStateOwner pOwner, NominoBlock Target, TimeSpan Elapsed)
         {
             double useClear = 0;
             if (Elapsed < ClearTime)

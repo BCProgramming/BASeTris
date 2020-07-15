@@ -19,7 +19,7 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
-    public class PauseGameState : MenuState,ICompositeState<StandardTetrisGameState>,IStateOwner
+    public class PauseGameState : MenuState,ICompositeState<GameplayGameState>,IStateOwner
     {
 
 
@@ -52,7 +52,7 @@ namespace BASeTris.GameStates
 
         //we implement IStateOwner as a delegate, so we can provide ourselves to the PausePlayerState as an owner and it won't actually interfere with the main state.
         public bool DrawDataInitialized = false;
-        public StandardTetrisGameState PausedState = null;
+        public GameplayGameState PausedState = null;
         public const int NumFallingItems = 65;
         public List<PauseFallImageBase> FallImages = null;
         public override DisplayMode SupportedDisplayMode { get{ return DisplayMode.Partitioned; } }
@@ -64,12 +64,12 @@ namespace BASeTris.GameStates
 
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
 
-        public StandardTetrisGameState GetComposite()
+        public GameplayGameState GetComposite()
         {
             return PausedState;
         }
         private IStateOwner PauseOwner = null;
-        public PauseGameState(IStateOwner pOwner, StandardTetrisGameState pPausedState)
+        public PauseGameState(IStateOwner pOwner, GameplayGameState pPausedState)
         {
             StateHeader = "PAUSED";
             PausedState = pPausedState;
@@ -79,7 +79,7 @@ namespace BASeTris.GameStates
             PopulatePauseMenu(pOwner);
             pOwner.GameClosing += POwner_GameClosing;
             
-            PauseGamePlayerState = new StandardTetrisGameState(pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman));
+            PauseGamePlayerState = new GameplayGameState(pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman));
             
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new TetrisAI(this);
@@ -186,7 +186,7 @@ namespace BASeTris.GameStates
             }
             PauseGamePlayerState.GameProc(this);
             //addendum: when blocks are higher than say 16, let's remove the 4 bottom lines or something.
-            if(PauseGamePlayerState is StandardTetrisGameState stgs)
+            if(PauseGamePlayerState is GameplayGameState stgs)
             {
                 if (stgs.PlayField.Contents[6].Any((w) => w != null))
                 {

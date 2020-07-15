@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BASeTris.Choosers;
 using BASeTris.Replay;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using Microsoft.Win32;
 
@@ -181,10 +181,10 @@ namespace BASeTris.AI
             List<Nomino> ChosenNominos = new List<Nomino>();
            
 
-            TetrisBlock[][] Contents = new TetrisBlock[TetrisField.DEFAULT_ROWCOUNT][];
+            NominoBlock[][] Contents = new NominoBlock[TetrisField.DEFAULT_ROWCOUNT][];
             for (int row = 0; row < TetrisField.DEFAULT_ROWCOUNT; row++)
             {
-                Contents[row] = new TetrisBlock[TetrisField.DEFAULT_COLCOUNT];
+                Contents[row] = new NominoBlock[TetrisField.DEFAULT_COLCOUNT];
             }
             int Placedpieces = 0;
             int rowsFinished = 9;
@@ -196,7 +196,7 @@ namespace BASeTris.AI
                 
                 
                 //get the next Nomino.
-                var nextNomino = bgc.GetNext();
+                var nextNomino = bgc.RetrieveNext();
                 ChosenNominos.Add(nextNomino);
                 //Debug.Print("Processing new Nomino:" + nextNomino.SpecialName);
                 var PossibleBoardResults = TetrisAI.GetPossibleResults(Contents, nextNomino,scoredata);
@@ -227,7 +227,7 @@ namespace BASeTris.AI
 
         }
 
-       public static int RemoveFinishedRows(ref TetrisBlock[][] Field)
+       public static int RemoveFinishedRows(ref NominoBlock[][] Field)
         {
             int removeCount = 0;
             //first, let's find all the finished rows.

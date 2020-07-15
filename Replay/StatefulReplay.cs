@@ -32,7 +32,7 @@ namespace BASeTris.Replay
         /// <param name="pOwner"></param>
         /// <param name="SourceState"></param>
         /// <returns></returns>
-        public StatefulReplayState CreateReplayState(IStateOwner pOwner, StandardTetrisGameState SourceState)
+        public StatefulReplayState CreateReplayState(IStateOwner pOwner, GameplayGameState SourceState)
         {
             StatefulReplayState newState = new StatefulReplayState(pOwner, SourceState);
             if (!ReplayData.ContainsKey(newState.ElapsedGameTime))
@@ -148,7 +148,7 @@ namespace BASeTris.Replay
                 }
 
             }
-            public StatefulReplayState(IStateOwner pOwner, StandardTetrisGameState Source)
+            public StatefulReplayState(IStateOwner pOwner, GameplayGameState Source)
             {
                 var Field = Source.PlayField;
                 Rows = Field.RowCount;

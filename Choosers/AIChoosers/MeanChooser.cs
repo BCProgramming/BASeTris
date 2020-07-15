@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeTris.AI;
 using BASeTris.GameStates;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.Choosers.AIChoosers
 {
@@ -17,7 +17,7 @@ namespace BASeTris.Choosers.AIChoosers
     public class MeanChooser : BaseAIChooser
     {
         StoredBoardState.AIScoringRuleData AIRules = new StoredBoardState.AIScoringRuleData();
-        public MeanChooser(StandardTetrisGameState _StandardState, Func<Nomino>[] pAvailable) : base(_StandardState, pAvailable)
+        public MeanChooser(GameplayGameState _StandardState, Func<Nomino>[] pAvailable) : base(_StandardState, pAvailable)
         {
         }
 
@@ -33,7 +33,7 @@ namespace BASeTris.Choosers.AIChoosers
             //We are slightly limited- if the functions give back varied results or something then it might act weird.
             //Take all the available groups and turn it into a Nomino.
             var availablegroups = from b in _Available select b();
-            TetrisBlock[][] CurrentState = BestCaseScenario != null ? BestCaseScenario.State : _State.PlayField.Contents;
+            NominoBlock[][] CurrentState = BestCaseScenario != null ? BestCaseScenario.State : _State.PlayField.Contents;
             //alrighty. Now, we take those available groups and get available board states for each one.
             Dictionary<Nomino, IEnumerable<StoredBoardState>> StateEvaluation = new Dictionary<Nomino, IEnumerable<StoredBoardState>>();
 

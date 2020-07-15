@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using BASeCamp.Rendering;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using SkiaSharp;
 
 namespace BASeTris.Rendering.Skia
@@ -14,7 +14,7 @@ namespace BASeTris.Rendering.Skia
         protected virtual void NoImage()
         {
         }
-        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TetrisBlock Source, TetrisBlockDrawParameters Element)
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, NominoBlock Source, TetrisBlockDrawParameters Element)
         {
             
             if(Source is ImageBlock)

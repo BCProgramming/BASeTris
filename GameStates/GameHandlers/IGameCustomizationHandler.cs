@@ -15,10 +15,11 @@ namespace BASeTris.GameStates.GameHandlers
     /// </summary>
     public interface IGameCustomizationHandler
     {
-        FieldChangeResult ProcessFieldChange(StandardTetrisGameState state, IStateOwner pOwner, Nomino Trigger);
+        FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger);
         IHighScoreList<TetrisHighScoreData> GetHighScores();
         Choosers.BlockGroupChooser Chooser { get;  }
         IGameCustomizationHandler NewInstance();
+        TetrominoTheme DefaultTheme { get; }
 
     }
 

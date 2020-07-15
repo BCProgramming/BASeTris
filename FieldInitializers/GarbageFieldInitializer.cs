@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.FieldInitializers
 {
@@ -12,10 +12,10 @@ namespace BASeTris.FieldInitializers
     {
         private int GarbageRows = 0;
         private Random rgen = null;
-        private Func<int, int, TetrisBlock> GenerateBlock = null;
+        private Func<int, int, NominoBlock> GenerateBlock = null;
         private TetrominoTheme _Theme;
 
-        private TetrisBlock DefaultGenerateBlock(int x, int y)
+        private NominoBlock DefaultGenerateBlock(int x, int y)
         {
             var standardfilled = new StandardColouredBlock();
             standardfilled.BlockColor = Color.FromArgb(rgen.Next(255), rgen.Next(255), rgen.Next(255));

@@ -56,7 +56,7 @@ namespace BASeTris.GameStates
             {
                 CompleteSummaryTime = DateTime.MaxValue;
                 TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOver.Key, pOwner.Settings.EffectVolume);
-                StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
+                GameplayGameState standardstate = GameOveredState as GameplayGameState;
                 if (standardstate != null)
                 {
                     var grabposition = standardstate.GetLocalScores().IsEligible(standardstate.GameStats.Score);
@@ -73,7 +73,7 @@ namespace BASeTris.GameStates
                 LastAdvance = DateTime.Now;
                 TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, pOwner.Settings.EffectVolume);
                 CoverBlocks++;
-                StandardTetrisGameState standardstate = GameOveredState as StandardTetrisGameState;
+                GameplayGameState standardstate = GameOveredState as GameplayGameState;
                 if (standardstate != null)
                 {
                     if (CoverBlocks >= standardstate.PlayField.RowCount)
@@ -118,12 +118,12 @@ namespace BASeTris.GameStates
             {
                 if (NewScorePosition > -1)
                 {
-                    if (GameOveredState is StandardTetrisGameState)
+                    if (GameOveredState is GameplayGameState)
                     {
                         EnterHighScoreState ehs = new EnterHighScoreState
                         (GameOveredState, pOwner,
-                            ((StandardTetrisGameState) GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((StandardTetrisGameState) GameOveredState).GameStats))
-                            , ((StandardTetrisGameState) GameOveredState).GameStats);
+                            ((GameplayGameState) GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((GameplayGameState) GameOveredState).GameStats))
+                            , ((GameplayGameState) GameOveredState).GameStats);
                         pOwner.CurrentState = ehs;
                         TetrisGame.Soundman.PlayMusic("highscoreentry",pOwner.Settings.MusicVolume,true);
                     }

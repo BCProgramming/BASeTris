@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BaseTris;
 using BASeTris.GameStates;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.Rendering.GDIPlus
 {

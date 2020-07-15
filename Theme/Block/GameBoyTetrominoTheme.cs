@@ -5,11 +5,13 @@ using System.Linq;
 using System.Windows.Forms;
 using BASeTris.AssetManager;
 using BASeTris.Rendering.GDIPlus;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris
 {
+    [HandlerTheme(typeof(StandardTetrisHandler))]
     public class GameBoyTetrominoTheme : TetrominoTheme
     {
         static readonly Size ImageSize;

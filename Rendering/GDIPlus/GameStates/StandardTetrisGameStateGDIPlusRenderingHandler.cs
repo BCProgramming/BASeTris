@@ -8,13 +8,13 @@ using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.GameStates;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris.Rendering.GDIPlus
 {
-    [RenderingHandler(typeof(StandardTetrisGameState), typeof(Graphics), typeof(BaseDrawParameters))]
-    public class StandardTetrisGameStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, StandardTetrisGameState, BaseDrawParameters>
+    [RenderingHandler(typeof(GameplayGameState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class StandardTetrisGameStateGDIPlusRenderingHandler : StandardStateRenderingHandler<Graphics, GameplayGameState, BaseDrawParameters>
     {
         public RectangleF LastDrawStat = Rectangle.Empty;
         //private Dictionary<System.Type, Image> TetrominoImages = null;
@@ -23,7 +23,7 @@ namespace BASeTris.Rendering.GDIPlus
       
         Image StatisticsBackground = null;
         TetrominoTheme GeneratedImageTheme = null; 
-        public void GenerateStatisticsBackground(StandardTetrisGameState Self)
+        public void GenerateStatisticsBackground(GameplayGameState Self)
         {
             Bitmap buildbg = new Bitmap(1120, 2576);
             Size BlockSize = new Size(128, 128);
@@ -59,7 +59,7 @@ namespace BASeTris.Rendering.GDIPlus
             return useCalc.ToString(@"hh\:mm\:ss");
         }
         public object LockTetImageRedraw = new Object();
-        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,StandardTetrisGameState State, RectangleF Bounds)
+        public void RedrawStatusbarTetrominoBitmaps(IStateOwner Owner,GameplayGameState State, RectangleF Bounds)
         {
             lock (LockTetImageRedraw)
             {
@@ -67,7 +67,7 @@ namespace BASeTris.Rendering.GDIPlus
                 State.SetTetrominoImages(TetrisGame.GetTetrominoBitmaps(Bounds, State.PlayField.Theme, State.PlayField, (float)Owner.ScaleFactor));
             }
         }
-        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, BaseDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, GameplayGameState Source, BaseDrawParameters Element)
         {
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
@@ -143,7 +143,7 @@ namespace BASeTris.Rendering.GDIPlus
                     PointF TextPos = new PointF(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
                     String StatText = "" + PieceCounts[i];
                     SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                    Image TetrominoImage = Source.TetrominoImages[useTypes[i]];
+                    Image TetrominoImage = Source.NominoImages[useTypes[i]];
                     PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
 
                     g.DrawImage(TetrominoImage, ImagePos);
@@ -158,7 +158,7 @@ namespace BASeTris.Rendering.GDIPlus
                 if (Source.NextBlocks.Count > 0)
                 {
                     var QueueList = Source.NextBlocks.ToArray();
-                    Image[] NextTetrominoes = (from t in QueueList select Source.TetrominoImages[t.GetType()]).ToArray();
+                    Image[] NextTetrominoes = (from t in QueueList select Source.NominoImages[t.GetType()]).ToArray();
                     Image DisplayBox = TetrisGame.Imageman["display_box"];
                     //draw it at 40,420. (Scaled).
                     float ScaleDiff = 0;
@@ -244,13 +244,13 @@ namespace BASeTris.Rendering.GDIPlus
 
                 if (Source.HoldBlock != null)
                 {
-                    Image HoldTetromino = Source.TetrominoImages[Source.HoldBlock.GetType()];
+                    Image HoldTetromino = Source.NominoImages[Source.HoldBlock.GetType()];
                     g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                 }
             }
         }
 
-        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, StandardTetrisGameState Source, BaseDrawParameters Element)
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, GameplayGameState Source, BaseDrawParameters Element)
         {
             Source._DrawHelper.DrawProc(Source, pOwner, pRenderTarget, Element.Bounds);
             //throw new NotImplementedException();

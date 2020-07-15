@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using BASeCamp.Rendering;
 using BaseTris;
 using BASeTris.Rendering.RenderElements;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.Rendering.GDIPlus
 {

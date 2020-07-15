@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Schema;
 using BASeTris.GameStates;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 
 namespace BASeTris.AI
 {
@@ -18,13 +18,13 @@ namespace BASeTris.AI
         {
         }
 
-        public static TetrisBlock[][] DuplicateField(TetrisBlock[][] Source)
+        public static NominoBlock[][] DuplicateField(NominoBlock[][] Source)
         {
-            TetrisBlock[][] Copied = new TetrisBlock[Source.Length][];
+            NominoBlock[][] Copied = new NominoBlock[Source.Length][];
             for (int r = 0; r < Source.Length; r++)
             {
-                TetrisBlock[] row = Source[r];
-                Copied[r] = new TetrisBlock[row.Length];
+                NominoBlock[] row = Source[r];
+                Copied[r] = new NominoBlock[row.Length];
                 for (int c = 0; c < row.Length; c++)
                 {
                     Copied[r][c] = row[c];
@@ -34,7 +34,7 @@ namespace BASeTris.AI
             return Copied;
         }
 
-        public static IEnumerable<StoredBoardState> GetPossibleResults(TetrisBlock[][] Source, Nomino bg, StoredBoardState.AIScoringRuleData rules)
+        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg, StoredBoardState.AIScoringRuleData rules)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for (int useRotation = 0; useRotation < 4; useRotation++)
@@ -65,9 +65,9 @@ namespace BASeTris.AI
             //do our hard thinking here.
             //first we only do stuff with the standard game state.
             if (_Owner == null) return;
-            if (_Owner.CurrentState is StandardTetrisGameState)
+            if (_Owner.CurrentState is GameplayGameState)
             {
-                StandardTetrisGameState stdState = _Owner.CurrentState as StandardTetrisGameState;
+                GameplayGameState stdState = _Owner.CurrentState as GameplayGameState;
                 //next, we only want to do stuff if there is one active blockgroup...
                 if (stdState.PlayField.BlockGroups.Count == 1)
                 {
@@ -135,9 +135,9 @@ namespace BASeTris.AI
     public class StoredBoardState
     {
         private Nomino _SourceGroup;
-        private TetrisBlock[][] _BoardState;
+        private NominoBlock[][] _BoardState;
 
-        public TetrisBlock[][] State
+        public NominoBlock[][] State
         {
             get { return _BoardState; }
         }
@@ -170,7 +170,7 @@ namespace BASeTris.AI
             return sb.ToString();
         }
 
-        public StoredBoardState(TetrisBlock[][] InitialState, Nomino pGroup, int pXOffset, int pRotationCount)
+        public StoredBoardState(NominoBlock[][] InitialState, Nomino pGroup, int pXOffset, int pRotationCount)
         {
             _BoardState = TetrisAI.DuplicateField(InitialState);
             _SourceGroup = new Nomino(pGroup);
@@ -237,7 +237,7 @@ namespace BASeTris.AI
             int FoundTotal = 0;
             for (int i = _BoardState.Length - 1; i > 0; i--)
             {
-                TetrisBlock ThisBlock = _BoardState[i][column];
+                NominoBlock ThisBlock = _BoardState[i][column];
                 if (ThisBlock == null) FoundSinceFilled++;
                 else
                 {
@@ -342,7 +342,7 @@ d = -0.184483
 a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
 
-        private void DropBlock(Nomino Source, ref TetrisBlock[][] FieldState, int XOffset)
+        private void DropBlock(Nomino Source, ref NominoBlock[][] FieldState, int XOffset)
         {
             bool result = true;
             int YOffset = 0;
@@ -375,7 +375,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             }
         }
 
-        private bool CanFit(Nomino Source, TetrisBlock[][] Field, int Y, int X)
+        private bool CanFit(Nomino Source, NominoBlock[][] Field, int Y, int X)
         {
             bool result = false;
             int ROWCOUNT = Field.Length - 1;

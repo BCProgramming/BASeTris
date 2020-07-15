@@ -1,5 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;

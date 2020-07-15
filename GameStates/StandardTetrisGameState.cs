@@ -24,14 +24,14 @@ using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Replay;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
 using SkiaSharp;
 
 namespace BASeTris.GameStates
 {
-    public class StandardTetrisGameState : GameState
+    public class GameplayGameState : GameState
     {
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
@@ -40,7 +40,8 @@ namespace BASeTris.GameStates
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
-        public Choosers.BlockGroupChooser Chooser {  get { return GameHandler.Chooser; } }
+        BlockGroupChooser overrideChooser = null;
+        public Choosers.BlockGroupChooser Chooser {  get { return overrideChooser==null?GameHandler.Chooser:overrideChooser; } set { overrideChooser = value; } }
 
 
         public override bool GamePlayActive { get{ return true; } }
@@ -97,14 +98,14 @@ namespace BASeTris.GameStates
         }
 
         public IAudioHandler Sounds = null;
-        public StandardTetrisGameState(IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer,IAudioHandler pAudio)
+        public GameplayGameState(IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer,IAudioHandler pAudio)
         {
 
             Sounds = pAudio;
             GameHandler = Handler;
             
             
-            PlayField = new TetrisField();
+            PlayField = new TetrisField(Handler.DefaultTheme);
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
@@ -116,8 +117,8 @@ namespace BASeTris.GameStates
         {
             lock (LockTetImageRedraw)
             {
-                TetrominoImages = null;
-                TetrominoSKBitmaps = null;
+                NominoImages = null;
+                NominoSKBitmaps = null;
                 f_RedrawStatusBitmap = true;
                 StatisticsBackground = null;
                 f_RedrawTetrominoImages = true;
@@ -128,7 +129,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        ~StandardTetrisGameState()
+        ~GameplayGameState()
         {
             if (Chooser != null) Chooser.Dispose();
         }
@@ -140,8 +141,8 @@ namespace BASeTris.GameStates
         {
             lock (LockTetImageRedraw)
             {
-                TetrominoImages = null;
-                TetrominoSKBitmaps = null;
+                NominoImages = null;
+                NominoSKBitmaps = null;
             }
 
             //throw new NotImplementedException();
@@ -149,39 +150,43 @@ namespace BASeTris.GameStates
 
         public bool f_RedrawTetrominoImages = false;
         public bool f_RedrawStatusBitmap = false;
-        public Dictionary<System.Type, Image> TetrominoImages { protected set; get; } = null;
+        public Dictionary<System.Type, Image> NominoImages { protected set; get; } = null;
 
-        private Dictionary<System.Type, SKBitmap> TetrominoSKBitmaps = null;
+        private Dictionary<System.Type, SKBitmap> NominoSKBitmaps = null;
         public SKBitmap GetTetrominoSKBitmap(System.Type Source)
         {
-            if (TetrominoSKBitmaps == null) TetrominoSKBitmaps = new Dictionary<Type, SKBitmap>();
-            if(!TetrominoSKBitmaps.ContainsKey(Source))
+            if (NominoSKBitmaps == null) NominoSKBitmaps = new Dictionary<Type, SKBitmap>();
+            if(!NominoSKBitmaps.ContainsKey(Source))
             {
-                if(TetrominoImages.ContainsKey(Source))
-                    TetrominoSKBitmaps.Add(Source,SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(TetrominoImages[Source])));
+                if(NominoImages!=null && NominoImages.ContainsKey(Source))
+                    NominoSKBitmaps.Add(Source,SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(NominoImages[Source])));
+                else
+                {
+                    return null;
+                }
 
             }
 
-            return TetrominoSKBitmaps[Source];
+            return NominoSKBitmaps[Source];
 
         }
 
-        public bool HasTetrominoSKBitmaps() => TetrominoSKBitmaps != null;
+        public bool HasTetrominoSKBitmaps() => NominoSKBitmaps != null;
         public void SetTetrominoSKBitmaps(Dictionary<Type,SKBitmap> bitmaps)
         {
-            TetrominoSKBitmaps = bitmaps;
+            NominoSKBitmaps = bitmaps;
         }
-        public bool HasTetrominoImages() => TetrominoImages != null;
+        public bool HasTetrominoImages() => NominoImages != null;
         public Image GetTetronimoImage(System.Type TetrominoType)
         {
-            return TetrominoImages[TetrominoType];
+            return NominoImages[TetrominoType];
         }
-        public SKBitmap[] GetTetrominoSKBitmaps() => TetrominoSKBitmaps.Values.ToArray();
-        public Image[] GetTetronimoImages() => TetrominoImages.Values.ToArray();
+        public SKBitmap[] GetTetrominoSKBitmaps() => NominoSKBitmaps.Values.ToArray();
+        public Image[] GetTetronimoImages() => NominoImages.Values.ToArray();
 
         public void SetTetrominoImages(Dictionary<Type,Image> images)
         {
-            TetrominoImages = images;
+            NominoImages = images;
         }
         public void InvokeBlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {

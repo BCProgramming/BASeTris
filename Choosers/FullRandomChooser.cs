@@ -13,7 +13,7 @@ namespace BASeTris.Choosers
         }
 
 
-        public override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             int RandomIndex = rgen.Next(_Available.Length);
             return _Available[RandomIndex]();

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates.GameHandlers;
 using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
+    [HandlerTheme(typeof(StandardTetrisHandler))]
     public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP,SimpleBlockTheme.BasicBlockTypes>
     {
         public enum BBP
@@ -60,7 +62,10 @@ namespace BASeTris.Theme.Block
             return SKColors.Black;
             
         }
-
+        protected override bool IsRotatable(NominoElement testvalue)
+        {
+            return false;
+        }
         public override Dictionary<BasicBlockTypes, BBP[][]> GetBlockTypeDictionary()
         {
             return new Dictionary<BasicBlockTypes, BBP[][]>()

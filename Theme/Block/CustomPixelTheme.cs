@@ -1,5 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;
@@ -27,6 +27,31 @@ namespace BASeTris.Theme.Block
 
         public abstract SKColor GetColor(TetrisField field, Nomino Element, BlockEnum BlockType, PixelEnum PixelType);
 
+        protected PixelEnum[][] RotateMatrix(PixelEnum[][] Source)
+        {
+            var FirstRank = Source.Length;
+            int SecondRank = -1;
+            PixelEnum[][] Result = new PixelEnum[FirstRank][];
+            for(int y=0;y<Source.Length;y++)
+            {
+                if(SecondRank == -1)
+                {
+                    SecondRank = Source[y].Length;
+
+                }
+                Result[y] = new PixelEnum[SecondRank];
+                for(int x=0;x<SecondRank;x++)
+                {
+                    Result[y][x] = Source[x][y];
+                }
+
+
+
+            }
+
+            return Result;
+
+        }
         //routine which gives a dictionary that provides PixelEnum bitmap for (ideally each of) a set of BlockEnum types understood by the implementing class.
         private Dictionary<BlockEnum, PixelEnum[][]> _BlockTypeDictionary = null;
         private Dictionary<BlockEnum, PixelEnum[][]> BlockTypeDictionary
@@ -147,7 +172,14 @@ namespace BASeTris.Theme.Block
                     var chosenType = GetBlockType(Group, iterate, Field);
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     sbc.BlockColor = Color.Black;
-                    sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
+                    if (IsRotatable(iterate))
+                    {
+                        sbc._RotationImages = GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
+                    }
+                    else
+                    {
+                        sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
+                    }
                 }
             }
 
@@ -162,10 +194,18 @@ namespace BASeTris.Theme.Block
                     var chosenType = TetrisGame.Choose(PossibleBlockTypes());
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     sbc.BlockColor = Color.Black;
-                    sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
+                    if(IsRotatable(iterate))
+                    {
+                        sbc._RotationImages = GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
+                    }
+                    else {
+                        sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
+                    }
+                    
                 }
             }
         }
+        protected abstract bool IsRotatable(NominoElement testvalue);
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
         {

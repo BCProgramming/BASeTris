@@ -15,7 +15,7 @@ namespace BASeTris.Rendering.Skia.GameStates
     {
         private void InitDrawData(IStateOwner pOwner, PauseGameState Source, GameStateSkiaDrawParameters Element)
         {
-            if (Source.PausedState is StandardTetrisGameState std)
+            if (Source.PausedState is GameplayGameState std)
             {
                 var rgen = new Random();
                 SKBitmap[] availableImages = std.GetTetrominoSKBitmaps();

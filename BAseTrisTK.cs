@@ -14,7 +14,7 @@ using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
-using BASeTris.TetrisBlocks;
+using BASeTris.Blocks;
 using BASeTris.Theme.Audio;
 using OpenTK;
 using OpenTK.Graphics;
@@ -129,13 +129,13 @@ namespace BASeTris
             _Present.IgnoreController = true;
             if (e.Key == Key.G)
             {
-                if (_Present.Game.CurrentState is StandardTetrisGameState)
+                if (_Present.Game.CurrentState is GameplayGameState)
                 {
-                    StandardTetrisGameState gs = _Present.Game.CurrentState as StandardTetrisGameState;
-                    TetrisBlock[][] inserts = new TetrisBlock[4][];
+                    GameplayGameState gs = _Present.Game.CurrentState as GameplayGameState;
+                    NominoBlock[][] inserts = new NominoBlock[4][];
                     for (int i = 0; i < inserts.Length; i++)
                     {
-                        inserts[i] = new TetrisBlock[gs.PlayField.ColCount];
+                        inserts[i] = new NominoBlock[gs.PlayField.ColCount];
                         for (int c = 1; c < inserts[i].Length; c++)
                         {
                             inserts[i][c] = new StandardColouredBlock() { BlockColor = Color.Red, DisplayStyle = StandardColouredBlock.BlockStyle.Style_CloudBevel };
