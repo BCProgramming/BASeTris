@@ -29,7 +29,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         
         private void BuildBackground(GameplayGameState Self,SKRect Size)
         {
-            var bgInfo = Self.PlayField.Theme.GetThemePlayFieldBackground(Self.PlayField);
+            var bgInfo = Self.PlayField.Theme.GetThemePlayFieldBackground(Self.PlayField,Self.GameHandler);
             
             _Background = new StandardImageBackgroundSkia();
             Bitmap bmp = new Bitmap(ImageManager.ReduceImage(bgInfo.BackgroundImage,
@@ -64,7 +64,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             StandardColouredBlock GenerateColorBlock = new StandardColouredBlock();
                             Nomino ArbitraryGroup = new Nomino();
                             ArbitraryGroup.AddBlock(new Point[] { Point.Empty }, GenerateColorBlock);
-                            Self.PlayField.Theme.ApplyRandom(ArbitraryGroup, Self.PlayField);
+                            Self.PlayField.Theme.ApplyRandom(ArbitraryGroup,Self.GameHandler, Self.PlayField);
                             //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
                             TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, new SKRect(DrawBlockX, DrawBlockY, DrawBlockX + BlockSize.Width, DrawBlockY + BlockSize.Height), null, new StandardSettings());
                             RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
@@ -194,7 +194,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             lock (LockTetImageRedraw)
             {
 
-                State.SetTetrominoSKBitmaps(TetrisGame.GetTetrominoBitmapsSK(Bounds, State.PlayField.Theme, State.PlayField, (float)Owner.ScaleFactor));
+                State.SetTetrominoSKBitmaps(TetrisGame.GetTetrominoBitmapsSK(Bounds, State.PlayField.Theme,State.GameHandler, State.PlayField, (float)Owner.ScaleFactor));
             }
         }
         SKPaint BlackBrush = new SKPaint() { Color = SKColors.Black, Style = SKPaintStyle.StrokeAndFill };
@@ -248,7 +248,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                     //g.DrawRect();
                     g.DrawRect(Bounds.Left, Bounds.Top + 5, Bounds.Width-10, (int)(450 * Factor), LightenBrush);
                     String[] StatLabels = new string[] { "Time:", "Score:", "Top:", "Lines:" };
-                    String[] StatValues = new string[] { FormatGameTime(pOwner), useStats.Score.ToString(), TopScore.ToString(), Source.GameStats.LineCount.ToString() };
+                    int LineCount = Source.GameStats is TetrisStatistics ? (Source.GameStats as TetrisStatistics).LineCount : 0;
+                    String[] StatValues = new string[] { FormatGameTime(pOwner), useStats.Score.ToString(), TopScore.ToString(), LineCount.ToString() };
                     
                     WhiteBrush.TextSize = BlackBrush.TextSize = DesiredFontSize;
                     WhiteBrush.Typeface = BlackBrush.Typeface = TetrisGame.RetroFontSK;
@@ -301,8 +302,16 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
                     Type[] useTypes = new Type[] { typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z) };
-                    int[] PieceCounts = new int[] { useStats.I_Piece_Count, useStats.O_Piece_Count, useStats.J_Piece_Count, useStats.T_Piece_Count, useStats.L_Piece_Count, useStats.S_Piece_Count, useStats.Z_Piece_Count };
+                    int[] PieceCounts = null;
 
+                    if (useStats is TetrisStatistics ts)
+                    {
+                        PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
+                    }
+                    else
+                    {
+                        PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+                    }
                     float StartYPos = Bounds.Top + (int)(140 * Factor);
                     float useXPos = Bounds.Left + (int)(30 * Factor);
                     //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();

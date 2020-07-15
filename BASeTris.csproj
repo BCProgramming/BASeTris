@@ -93,6 +93,7 @@
     <Compile Include="Duomino\Duomino.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
+    <Compile Include="GameStates\DropWaitState.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
     <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />

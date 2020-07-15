@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.Theme.Block
 {
@@ -116,7 +117,7 @@ namespace BASeTris.Theme.Block
 
         }
 
-        public sealed override void ApplyTheme(Nomino Group, TetrisField Field)
+        public sealed override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
             
             foreach (var iterate in Group)
@@ -133,7 +134,7 @@ namespace BASeTris.Theme.Block
             }
             
         }
-        public sealed override void ApplyRandom(Nomino Group, TetrisField Field)
+        public sealed override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
             foreach (var iterate in Group)
             {
@@ -148,7 +149,7 @@ namespace BASeTris.Theme.Block
             }
         }
         Bitmap DarkImage;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
             if (DarkImage == null)
             {

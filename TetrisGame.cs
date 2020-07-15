@@ -25,6 +25,7 @@ using BASeTris.Theme.Audio;
 using SkiaSharp;
 using OpenTK.Input;
 using BASeTris.Rendering.Adapters;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris
 {
@@ -652,7 +653,7 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
-        public static Dictionary<Type, SKBitmap> GetTetrominoBitmapsSK(SKRect Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<Type, SKBitmap> GetTetrominoBitmapsSK(SKRect Bounds, TetrominoTheme UseTheme, IGameCustomizationHandler handler,TetrisField PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<Type, SKBitmap> TetrominoImages = new Dictionary<Type, SKBitmap>();
             float useSize = 18 * ScaleFactor;
@@ -666,13 +667,13 @@ namespace BASeTris
             Tetromino_Z TetZ = new Tetromino_Z();
 
 
-            UseTheme.ApplyTheme(TetI, PlayField);
-            UseTheme.ApplyTheme(TetJ, PlayField);
-            UseTheme.ApplyTheme(TetL, PlayField);
-            UseTheme.ApplyTheme(TetO, PlayField);
-            UseTheme.ApplyTheme(TetS, PlayField);
-            UseTheme.ApplyTheme(TetT, PlayField);
-            UseTheme.ApplyTheme(TetZ, PlayField);
+            UseTheme.ApplyTheme(TetI, handler,PlayField);
+            UseTheme.ApplyTheme(TetJ, handler,PlayField);
+            UseTheme.ApplyTheme(TetL, handler,PlayField);
+            UseTheme.ApplyTheme(TetO, handler,PlayField);
+            UseTheme.ApplyTheme(TetS, handler,PlayField);
+            UseTheme.ApplyTheme(TetT, handler,PlayField);
+            UseTheme.ApplyTheme(TetZ, handler,PlayField);
             SKBitmap Image_I = OutlineImageSK(TetI.GetImageSK(useTetSize));
             SKBitmap Image_J = OutlineImageSK(TetJ.GetImageSK(useTetSize));
             SKBitmap Image_L = OutlineImageSK(TetL.GetImageSK(useTetSize));
@@ -691,7 +692,7 @@ namespace BASeTris
             TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
             return TetrominoImages;
         }
-        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme, TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme,IGameCustomizationHandler Handler, TetrisField PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<Type, Image> TetrominoImages = new Dictionary<Type, Image>();
             float useSize = 18 * ScaleFactor;
@@ -705,13 +706,13 @@ namespace BASeTris
             Tetromino_Z TetZ = new Tetromino_Z();
 
 
-            UseTheme.ApplyTheme(TetI, PlayField);
-            UseTheme.ApplyTheme(TetJ, PlayField);
-            UseTheme.ApplyTheme(TetL, PlayField);
-            UseTheme.ApplyTheme(TetO, PlayField);
-            UseTheme.ApplyTheme(TetS, PlayField);
-            UseTheme.ApplyTheme(TetT, PlayField);
-            UseTheme.ApplyTheme(TetZ, PlayField);
+            UseTheme.ApplyTheme(TetI,Handler, PlayField);
+            UseTheme.ApplyTheme(TetJ, Handler,PlayField);
+            UseTheme.ApplyTheme(TetL, Handler,PlayField);
+            UseTheme.ApplyTheme(TetO, Handler,PlayField);
+            UseTheme.ApplyTheme(TetS, Handler,PlayField);
+            UseTheme.ApplyTheme(TetT, Handler,PlayField);
+            UseTheme.ApplyTheme(TetZ, Handler,PlayField);
             Image Image_I = OutLineImage(TetI.GetImage(useTetSize));
             Image Image_J = OutLineImage(TetJ.GetImage(useTetSize));
             Image Image_L = OutLineImage(TetL.GetImage(useTetSize));

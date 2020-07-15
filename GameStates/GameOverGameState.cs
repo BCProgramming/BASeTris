@@ -120,12 +120,21 @@ namespace BASeTris.GameStates
                 {
                     if (GameOveredState is GameplayGameState)
                     {
-                        EnterHighScoreState ehs = new EnterHighScoreState
-                        (GameOveredState, pOwner,
-                            ((GameplayGameState) GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(((GameplayGameState) GameOveredState).GameStats))
-                            , ((GameplayGameState) GameOveredState).GameStats);
-                        pOwner.CurrentState = ehs;
-                        TetrisGame.Soundman.PlayMusic("highscoreentry",pOwner.Settings.MusicVolume,true);
+                        var useStats = ((GameplayGameState)GameOveredState).GameStats;
+                        if (useStats is TetrisStatistics)
+                        {
+
+                            EnterHighScoreState ehs = new EnterHighScoreState
+                            (GameOveredState, pOwner,
+                                ((GameplayGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats as TetrisStatistics))
+                                , useStats as TetrisStatistics);
+                            pOwner.CurrentState = ehs;
+                            TetrisGame.Soundman.PlayMusic("highscoreentry", pOwner.Settings.MusicVolume, true);
+                        }
+                        else
+                        {
+
+                        }
                     }
                 }
                 else if (CompleteSummary)

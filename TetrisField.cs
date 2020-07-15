@@ -16,6 +16,7 @@ using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using SkiaSharp;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris
 {
@@ -34,7 +35,7 @@ namespace BASeTris
                 Flags_Sticky = 4, //usually goes with Cascade but isn't required. This needs special tetromino handling, as well.
             }
 
-        public Statistics GameStats = new Statistics();
+        //public BaseStatistics GameStats = new TetrisStatistics();
         public event EventHandler<BlockGroupSetEventArgs> BlockGroupSet;
         
         private NominoBlock[][] FieldContents;
@@ -103,10 +104,10 @@ namespace BASeTris
             return Duplicator;
         }
 
-        public long LineCount
+        /*public long LineCount
         {
             get { return GameStats.LineCount; }
-        }
+        }*/
 
         //
         //private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
@@ -122,7 +123,7 @@ namespace BASeTris
             set
             {
                 _Theme = value;
-                SetFieldColors();
+                SetFieldColors(_Handler);
                 OnThemeChangeEvent?.Invoke(this,new OnThemeChangeEventArgs());
             }
         }
@@ -132,11 +133,7 @@ namespace BASeTris
         private List<Nomino> ActiveBlockGroups = new List<Nomino>();
 
         public IList<Nomino> GetActiveBlockGroups() => ActiveBlockGroups;
-        public int Level
-        {
-            get { return (int) LineCount / 10; }
-        }
-
+       
         public const int DEFAULT_ROWCOUNT = 22; //22;
         public const int DEFAULT_COLCOUNT = 10;//10;
         public const int DEFAULT_VISIBLEROWS = 20; //20;
@@ -210,9 +207,21 @@ namespace BASeTris
             }
 
         }
-        public TetrisField(TetrominoTheme theme, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
+        private IGameCustomizationHandler _Handler = null;
+        public IGameCustomizationHandler Handler {  get { return _Handler; } }
+
+        public int Level {
+            get { return (Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0; } }
+
+        public int LineCount
+        {
+            get {  return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
+        }
+
+        public TetrisField(TetrominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
         {
             _Theme = theme;
+            _Handler = Handler;
             this.RowCount = pRowCount;
             this.ColCount = pColCount;
             this.VisibleRows = RowCount - 2;
@@ -300,7 +309,7 @@ namespace BASeTris
                             FieldContents[RowPos][ColPos] = groupblock.Block;
                     }
 
-                    if (ActiveBlockGroups.Contains(bg)) ActiveBlockGroups.Remove(bg);
+                    if (ActiveBlockGroups.Contains(bg)) RemoveBlockGroup(bg);
                     BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
                     HasChanged = true;
                 }
@@ -537,7 +546,7 @@ namespace BASeTris
             }
         }
 
-        public void SetFieldColors()
+        public void SetFieldColors(IGameCustomizationHandler handler)
         {
             lock (this)
             { 
@@ -546,7 +555,7 @@ namespace BASeTris
                     foreach (var iteratecell in iteraterow)
                     {
                         if (iteratecell != null && iteratecell.Owner != null)
-                            Theme.ApplyTheme(iteratecell.Owner, this);
+                            Theme.ApplyTheme(iteratecell.Owner, handler,this);
                     }
                 }
 
@@ -577,5 +586,13 @@ namespace BASeTris
     public class OnThemeChangeEventArgs :EventArgs
     {
 
+    }
+    public class OnRemoveActiveBlockGroupEventArgs : EventArgs
+    {
+        public Nomino BlockGroupRemove;
+        public OnRemoveActiveBlockGroupEventArgs(Nomino RemovingGroup)
+        {
+            BlockGroupRemove = RemovingGroup;
+        }
     }
 }

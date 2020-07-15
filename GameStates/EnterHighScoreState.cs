@@ -9,7 +9,7 @@ namespace BASeTris.GameStates
 {
     public class EnterHighScoreState : EnterTextState
     {
-        Statistics GameStatistics = null;
+        TetrisStatistics GameStatistics = null;
         IHighScoreList ScoreListing = null;
         Func<string, int, IHighScoreEntry> ScoreToEntryFunc = null;
 
@@ -21,7 +21,7 @@ namespace BASeTris.GameStates
             get { return DisplayMode.Full; }
         }
 
-        public EnterHighScoreState(GameState pOriginalState, IStateOwner pStateOwner, IHighScoreList ScoreList, Func<string, int, IHighScoreEntry> ScoreFunc, Statistics SourceStats)
+        public EnterHighScoreState(GameState pOriginalState, IStateOwner pStateOwner, IHighScoreList ScoreList, Func<string, int, IHighScoreEntry> ScoreFunc, TetrisStatistics SourceStats)
             : base(pStateOwner, 10)
         {
             ScoreListing = ScoreList;

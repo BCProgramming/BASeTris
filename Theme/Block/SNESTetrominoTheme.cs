@@ -377,7 +377,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
             return drawimage;
 
         }
-        public override void ApplyRandom(Nomino Group, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
             //choose a random level...
             int Randomlevel = TetrisGame.rgen.Next(0, 13);
@@ -399,7 +399,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
 
         }
 
-        public override void ApplyTheme(Nomino Group, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
             char DesiredNomino = 'I';
             Dictionary<Type, char> NominoLookup = new Dictionary<Type, char>()
@@ -442,7 +442,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
             
         }
 
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent);
         }

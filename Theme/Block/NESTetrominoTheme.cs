@@ -13,7 +13,7 @@ namespace BASeTris.Theme.Block
     {
 
         Bitmap DarkImage;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
             if (DarkImage == null)
             {

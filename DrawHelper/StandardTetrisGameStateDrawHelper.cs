@@ -28,7 +28,7 @@ namespace BASeTris.DrawHelper
             useBackground = new Bitmap((int)buildSize.Width, (int)buildSize.Height, PixelFormat.Format32bppPArgb);
             using (Graphics bgg = Graphics.FromImage(useBackground))
             {
-                var bgdrawdata = pState.PlayField.Theme.GetThemePlayFieldBackground(pState.PlayField);
+                var bgdrawdata = pState.PlayField.Theme.GetThemePlayFieldBackground(pState.PlayField,pState.GameHandler);
                 var drawbg = bgdrawdata.BackgroundImage;
                 bgg.CompositingQuality = CompositingQuality.AssumeLinear;
                 bgg.InterpolationMode = InterpolationMode.NearestNeighbor;

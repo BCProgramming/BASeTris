@@ -20,6 +20,8 @@ namespace BASeTris.GameStates.GameHandlers
         Choosers.BlockGroupChooser Chooser { get;  }
         IGameCustomizationHandler NewInstance();
         TetrominoTheme DefaultTheme { get; }
+        void PrepareField(GameplayGameState state, IStateOwner pOwner); //prepare field for a new game. (or level or whatever- basically depends on the type of game)
+        BaseStatistics Statistics { get; }
 
     }
 
@@ -27,9 +29,11 @@ namespace BASeTris.GameStates.GameHandlers
     {
         public int ScoreResult { get; set; }
         public IList<Action> AfterClearActions { get; set; }
+    }
+    public interface IGameCustomizationStatAreaRenderer<TRenderTarget,TRenderSource,TDataElement,TOwnerType> : BASeCamp.Rendering.Interfaces.IRenderingHandler<TRenderTarget,TRenderSource,TDataElement,TOwnerType>
+         where TRenderSource : class
+    {
 
-        
-        
     }
 
 }

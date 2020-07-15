@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace BASeTris.Duomino
 {
     public class Duomino : Nomino
@@ -31,15 +32,21 @@ namespace BASeTris.Duomino
     };
         private static Point[] Duomino_Point_2 = new Point[]
     {
-            new Point(2, 1), new Point(1, 0),new Point(0, 1),new Point(1, 2)
+            new Point(2, 1), new Point(1, 2),new Point(0, 1),new Point(1, 0)
     };
+
+
 
         public Duomino()
         {
             //generate a new Duomino. Duomino's don't actually use StandardColouredBlocks.
 
 
-            BlockData = Nomino.GetNominoEntries(new[] { Duomino_Point_1, Duomino_Point_2 }, () => new LineSeriesBlock()).ToList();
+            BlockData = Nomino.GetNominoEntries(new[] { Duomino_Point_1, Duomino_Point_2 }, 
+                (i) => new LineSeriesBlock()
+                {
+                    CombiningIndex = TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue })
+                }  ).ToList();
             
             base.SpecialName = "Pill";
             base.SetBlockOwner();

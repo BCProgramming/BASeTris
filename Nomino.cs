@@ -268,24 +268,28 @@ namespace BASeTris
             return bg;
         }
         
-        public static IEnumerable<NominoElement> GetNominoEntries(Point[] Source, Size AreaSize,Func<NominoBlock> BuildBlock = null)
+        public static IEnumerable<NominoElement> GetNominoEntries(Point[] Source, Size AreaSize,Func<int,NominoBlock> BuildBlock = null)
         {
-            if (BuildBlock == null) BuildBlock = () => new StandardColouredBlock();
+            if (BuildBlock == null) BuildBlock = (i) => new StandardColouredBlock();
             //assumes a "single" set of blocks, we rotate it with the NominoElement Constructor for the needed rotation points.
+            int index = 0;
             foreach (Point BlockPos in Source)
             {
-                NominoBlock CreateBlock = BuildBlock();
+                NominoBlock CreateBlock = BuildBlock(index);
                 yield return new NominoElement(BlockPos, AreaSize, CreateBlock);
+                index++;
             }
         }
 
-        public static IEnumerable<NominoElement> GetNominoEntries(Point[][] Source, Func<NominoBlock> BuildBlock = null)
+        public static IEnumerable<NominoElement> GetNominoEntries(Point[][] Source, Func<int,NominoBlock> BuildBlock = null)
         {
-            if (BuildBlock == null) BuildBlock = () => new StandardColouredBlock();
+            if (BuildBlock == null) BuildBlock = (i) => new StandardColouredBlock();
+            int index = 0;
             foreach (Point[] loopposdata in Source)
             {
-                NominoBlock CreateBlock = BuildBlock();
+                NominoBlock CreateBlock = BuildBlock(index);
                 yield return new NominoElement(loopposdata, CreateBlock);
+                index++;
             }
         }
 

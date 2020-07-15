@@ -1,4 +1,5 @@
 ﻿using BASeTris.Blocks;
+using BASeTris.Theme.Block;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,9 +83,14 @@ namespace BASeTris.Blocks
     /// </summary>
     public class LineSeriesBlock:CascadingBlock
     {
-        
+        public enum CombiningTypes
+        {
+            Blue,
+            Red,
+            Yellow
+        }
         public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
-        public int CombiningIndex { get; set; } //this is more or less the "color" of the block in question.
+        public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question.
  
         
     }

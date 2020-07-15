@@ -31,7 +31,7 @@ namespace BASeTris
 
         }
         private Bitmap LightImage = null;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
             if (LightImage == null)
             {
@@ -130,7 +130,7 @@ namespace BASeTris
         private static Image I_Horizontal;
         private static Image I_Left_Cap;
 
-        public override void ApplyRandom(Nomino Group, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
             int RandomLevel = TetrisGame.rgen.Next(25);
             Action<Nomino,TetrisField,int> SelectL = Apply_L;
@@ -142,9 +142,10 @@ namespace BASeTris
             selected(Group, Field, RandomLevel);
         }
 
-        public override void ApplyTheme(Nomino Group, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
-            int CurrLevel = Field == null ? 0 : (int)(Field.LineCount / 10);
+            var LineCount = (GameHandler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;
+            int CurrLevel = Field == null ? 0 : (int)(LineCount / 10);
 
             if(Group is Tetromino_L)
             {

@@ -7,21 +7,36 @@ using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
-    public class Statistics
+    public abstract class BaseStatistics
     {
-        private TimeSpan[] LevelReachTimes = new TimeSpan[] {TimeSpan.Zero};
+        public int Score = 0;
+        private TimeSpan[] LevelReachTimes = new TimeSpan[] { TimeSpan.Zero };
 
         public TimeSpan[] LevelTimes
         {
             get { return new List<TimeSpan>(LevelReachTimes).ToArray(); }
         }
-
         public TimeSpan TotalGameTime = TimeSpan.MinValue;
-
         public void SetLevelTime(TimeSpan ReachedTime)
         {
-            LevelReachTimes = LevelReachTimes.Concat(new TimeSpan[] {ReachedTime}).ToArray();
+            LevelReachTimes = LevelReachTimes.Concat(new TimeSpan[] { ReachedTime }).ToArray();
         }
+        public void AddScore(int AddScore)
+        {
+            this.Score += AddScore;
+        }
+    }
+    public class DrMarioStatistics : BaseStatistics
+    {
+
+    }
+    public class TetrisStatistics:BaseStatistics
+    {
+        
+
+        
+
+      
 
         public Dictionary<String, int> GetPieceCounts()
         {
@@ -49,7 +64,13 @@ namespace BASeTris
         {
             get { return LineCounts.Sum((w) => w.Value); }
         }
-
+        public int Level
+        {
+            get
+            {
+                return (int)(LineCount / 10);
+            }
+        }
         public int I_Piece_Count
         {
             get => PieceCounts[typeof(Tetromino_I)];
@@ -92,7 +113,7 @@ namespace BASeTris
             set => PieceCounts[typeof(Tetromino_Z)] = value;
         }
 
-        public int Score = 0;
+        
 
         public int GetPieceCount(Type TetronimoType)
         {
@@ -127,10 +148,7 @@ namespace BASeTris
             LineCounts[TetrominoType] = pValue;
         }
 
-        public void AddScore(int AddScore)
-        {
-            this.Score += AddScore;
-        }
+     
 
         public void AddLineCount(Type TetronimoType, int AddLines)
         {

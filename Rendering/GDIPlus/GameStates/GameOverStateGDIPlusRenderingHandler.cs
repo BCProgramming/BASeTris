@@ -12,12 +12,14 @@ namespace BASeTris.Rendering.GDIPlus
         Brush useCoverBrush = null;
         private void DrawTetrominoStat(GameOverGameState Self,  Type TetronimoType, PointF BasePosition, Graphics Target, RectangleF Bounds, Font GameOverFont)
         {
+            
             GameplayGameState standardgame = Self.GameOveredState as GameplayGameState;
+            var useStats = standardgame.GameStats as TetrisStatistics;
             Image I_Tet = standardgame.GetTetronimoImage(TetronimoType);
             Target.DrawImage(I_Tet, new PointF(BasePosition.X - (float)(I_Tet.Width) / 2, BasePosition.Y));
             PointF TextPos = new PointF(BasePosition.X + Bounds.Width / 2, BasePosition.Y - 10);
-            Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.White, 5 + TextPos.X, 5 + TextPos.Y);
-            Target.DrawString(standardgame.GameStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.Black, TextPos.X, TextPos.Y);
+            Target.DrawString(useStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.White, 5 + TextPos.X, 5 + TextPos.Y);
+            Target.DrawString(useStats.GetLineCount(TetronimoType).ToString(), GameOverFont, Brushes.Black, TextPos.X, TextPos.Y);
         }
         public override void Render(IStateOwner pOwner, Graphics pRenderTarget, GameOverGameState Source, BaseDrawParameters Element)
         {

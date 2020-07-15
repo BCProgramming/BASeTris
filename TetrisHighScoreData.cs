@@ -48,7 +48,7 @@ namespace BASeTris
         /// 
         /// </summary>
         /// <param name="InitializationData"></param>
-        public TetrisHighScoreData(Statistics InitializationData)
+        public TetrisHighScoreData(TetrisStatistics InitializationData)
         {
             if (InitializationData == null)
             {

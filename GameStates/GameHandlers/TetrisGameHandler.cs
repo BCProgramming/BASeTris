@@ -19,6 +19,9 @@ namespace BASeTris.GameStates.GameHandlers
         private int LastScoreLines = 0;
         public IList<HotLine> HotLines { get; set; } = new List<HotLine>();
         private Choosers.BlockGroupChooser _Chooser;
+        
+        public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
+        BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
         public Choosers.BlockGroupChooser Chooser
         {
             get
@@ -44,7 +47,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
         private int GetScore(int LinesCleared, IList<HotLine> ClearedHotLines, GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
-            var GameStats = state.GameStats;
+            var GameStats = Statistics;
             int result = LinesCleared;
             int AddScore = 0;
             if (result >= 1) AddScore += ((GameStats.LineCount / 10) + 1) * 15;
@@ -119,19 +122,19 @@ namespace BASeTris.GameStates.GameHandlers
                 }
             }
 
-            long PreviousLineCount = PlayField.LineCount;
+            long PreviousLineCount = Statistics.LineCount;
             if (Trigger != null)
             {
-                PlayField.GameStats.AddLineCount(Trigger.GetType(), rowsfound);
+                Statistics.AddLineCount(Trigger.GetType(), rowsfound);
             }
 
-            if ((PreviousLineCount % 10) > (PlayField.LineCount % 10))
+            if ((PreviousLineCount % 10) > (Statistics.LineCount % 10))
             {
-                state.InvokePlayFieldLevelChanged(state, new TetrisField.LevelChangeEventArgs((int)PlayField.LineCount / 10));
-                PlayField.GameStats.SetLevelTime(pOwner.GetElapsedTime());
+                state.InvokePlayFieldLevelChanged(state, new TetrisField.LevelChangeEventArgs((int)Statistics.LineCount / 10));
+                Statistics.SetLevelTime(pOwner.GetElapsedTime());
 
                 state.Sounds.PlaySound(pOwner.AudioThemeMan.LevelUp.Key, pOwner.Settings.EffectVolume);
-                PlayField.SetFieldColors();
+                PlayField.SetFieldColors(this);
             }
 
             if (rowsfound > 0 && rowsfound < 4)
@@ -211,5 +214,10 @@ namespace BASeTris.GameStates.GameHandlers
 
         }
         public TetrominoTheme DefaultTheme { get { return new SNESTetrominoTheme(); } }
+
+        public void PrepareField(GameplayGameState state, IStateOwner pOwner)
+        {
+            //nothing needed here.
+        }
     }
 }

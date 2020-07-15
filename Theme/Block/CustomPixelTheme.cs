@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.Theme.Block
 {
@@ -95,7 +96,7 @@ namespace BASeTris.Theme.Block
 
         private System.Drawing.Image GetMappedImageGDI(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
         {
-            var level = field.Level;
+            var level = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
             if (!CachedImageDataGDI.ContainsKey(level))
             {
 
@@ -116,7 +117,7 @@ namespace BASeTris.Theme.Block
         }
         private SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
         {
-            var LevelIndex = field.Level;
+            var LevelIndex = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
             if (!CachedImageData.ContainsKey(LevelIndex))
             {
                 CachedImageData.Add(LevelIndex, new Dictionary<BlockEnum, Dictionary<Type, SKBitmap>>());
@@ -160,7 +161,7 @@ namespace BASeTris.Theme.Block
 
         }
 
-        public sealed override void ApplyTheme(Nomino Group, TetrisField Field)
+        public sealed override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
 
             foreach (var iterate in Group)
@@ -174,7 +175,8 @@ namespace BASeTris.Theme.Block
                     sbc.BlockColor = Color.Black;
                     if (IsRotatable(iterate))
                     {
-                        sbc._RotationImages = GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
+                        
+                        sbc._RotationImages = TetrominoTheme.GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
                     }
                     else
                     {
@@ -184,7 +186,7 @@ namespace BASeTris.Theme.Block
             }
 
         }
-        public sealed override void ApplyRandom(Nomino Group, TetrisField Field)
+        public sealed override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
             foreach (var iterate in Group)
             {
@@ -196,7 +198,7 @@ namespace BASeTris.Theme.Block
                     sbc.BlockColor = Color.Black;
                     if(IsRotatable(iterate))
                     {
-                        sbc._RotationImages = GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
+                        sbc._RotationImages = TetrominoTheme.GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
                     }
                     else {
                         sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
@@ -207,7 +209,7 @@ namespace BASeTris.Theme.Block
         }
         protected abstract bool IsRotatable(NominoElement testvalue);
         Bitmap DarkImage;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
             if (DarkImage == null)
             {

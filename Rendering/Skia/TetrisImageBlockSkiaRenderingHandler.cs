@@ -3,6 +3,7 @@ using BASeCamp.Rendering;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Blocks;
 using SkiaSharp;
+using System;
 
 namespace BASeTris.Rendering.Skia
 {
@@ -31,9 +32,10 @@ namespace BASeTris.Rendering.Skia
                 base.Render(pOwner, pRenderTarget, Source, Element);
                 if (Source._RotationImages == null) NoImage();
                 int usemodulo = Source.Rotation;
-                if (usemodulo < 0) usemodulo = Source._RotationImages.Length - usemodulo;
+                if(usemodulo != 0) {; }
+                //if (usemodulo < 0) usemodulo = Source._RotationImages.Length - Math.Abs(usemodulo);
 
-                Image useImageA = Source._RotationImages[usemodulo % Source._RotationImages.Length];
+                Image useImageA = Source._RotationImages[MathHelper.mod(usemodulo,Source._RotationImages.Length)];
                 SKImage useImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useImageA));
                 float Degrees = usemodulo * 90;
                 PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));

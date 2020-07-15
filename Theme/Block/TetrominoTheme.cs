@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using BASeTris.Choosers;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris
 {
@@ -19,9 +20,9 @@ namespace BASeTris
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class TetrominoTheme
     {
-        public abstract void ApplyTheme(Nomino Group, TetrisField Field);
-        public abstract void ApplyRandom(Nomino Group, TetrisField Field);
-        public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field);
+        public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
+        public abstract void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
+        public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler);
         
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
 
@@ -119,7 +120,7 @@ namespace BASeTris
         }
 
         
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background",0.5f],Color.Transparent);
         }
@@ -129,15 +130,16 @@ namespace BASeTris
             _Style = pBlockStyle;
         }
 
-        public override void ApplyRandom(Nomino Group, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
             int useLevel = TetrisGame.rgen.Next(50);
             ApplyColorSet(Group,useLevel);
         }
 
-        public override void ApplyTheme(Nomino Group, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
-            int CurrLevel = Field == null ? 0 : (int) (Field.LineCount / 10);
+            var LineCount = (GameHandler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;
+            int CurrLevel = Field == null ? 0 : (int) (LineCount / 10);
             ApplyColorSet(Group, CurrLevel);
         }
 

@@ -56,6 +56,8 @@ namespace BASeTris.GameStates.Menu
                 new SoundOption("journey3","Journey 3"),
                 new SoundOption("tetris_nes_theme","NES"),
                 new SoundOption("tetris_gb_theme","GB"),
+                new SoundOption("DrMarioFever","Fever"),
+                new SoundOption("DrMarioChill","Chill"),
                 new SoundOption("<RANDOM>","Random")
 
             }, 0);

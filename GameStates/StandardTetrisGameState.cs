@@ -73,9 +73,9 @@ namespace BASeTris.GameStates
         {
             return new PointF((float)(GetScaledHorizontal(Bounds, Value.X)), (float)(GetScaledVertical(Bounds, Value.Y)));
         }
-        public Statistics GameStats
+        public BaseStatistics GameStats
         {
-            get { return PlayField?.GameStats; }
+            get { return GameHandler.Statistics; }
         }
         
 
@@ -105,7 +105,7 @@ namespace BASeTris.GameStates
             GameHandler = Handler;
             
             
-            PlayField = new TetrisField(Handler.DefaultTheme);
+            PlayField = new TetrisField(Handler.DefaultTheme,Handler);
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
@@ -124,7 +124,7 @@ namespace BASeTris.GameStates
                 f_RedrawTetrominoImages = true;
                 foreach (var refreshgroup in PlayField.BlockGroups)
                 {
-                    PlayField.Theme.ApplyTheme(refreshgroup, PlayField);
+                    PlayField.Theme.ApplyTheme(refreshgroup,GameHandler, PlayField);
                     }
             }
         }
@@ -203,7 +203,7 @@ namespace BASeTris.GameStates
             var firstBlock = e._group.FirstOrDefault();
             Nomino useGroup = e._group;
             if (firstBlock != null) useGroup = firstBlock.Block.Owner ?? e._group;
-            PlayField.Theme.ApplyTheme(useGroup,PlayField);
+            PlayField.Theme.ApplyTheme(useGroup,GameHandler, PlayField);
         }
 
        
@@ -228,6 +228,23 @@ namespace BASeTris.GameStates
         private bool FirstRun = false;
         private StatefulReplay ReplayData = null;
        
+        private void HandleActiveGroups(IStateOwner pOwner,bool ForceFall = false)
+        {
+            foreach (var iterate in PlayField.BlockGroups)
+            {
+                if (ForceFall || (pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
+                {
+                    if (HandleGroupOperation(pOwner, iterate))
+                    {
+                        GameHandler.ProcessFieldChange(this, pOwner, iterate);
+                        //ProcessFieldChangeWithScore(pOwner, iterate);
+
+                    }
+
+                    iterate.LastFall = pOwner.GetElapsedTime();
+                }
+            }
+        }
         public override void GameProc(IStateOwner pOwner)
         {
             if(ReplayData==null) ReplayData = new StatefulReplay();
@@ -251,6 +268,7 @@ namespace BASeTris.GameStates
                         musicplay.Tempo = 1f;
                     }
                     FirstRun = true;
+                    GameHandler.PrepareField(this, pOwner);
                 }
             }
 
@@ -269,22 +287,9 @@ namespace BASeTris.GameStates
                 }
             }
           
-            //TODO: Animate line clears. Tetris should get some weird flashing thing or something too.
+            
             PlayField.AnimateFrame();
-            foreach (var iterate in PlayField.BlockGroups)
-            {
-                if ((pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
-                {
-                    if (HandleGroupOperation(pOwner,iterate))
-                    {
-                        GameHandler.ProcessFieldChange(this, pOwner, iterate);
-                        //ProcessFieldChangeWithScore(pOwner, iterate);
-                        
-                    }
-
-                    iterate.LastFall = pOwner.GetElapsedTime();
-                }
-            }
+            HandleActiveGroups(pOwner);
 
             if (GameOvered)
             {
@@ -292,7 +297,7 @@ namespace BASeTris.GameStates
                 //ReplayData.WriteStateImages("T:\\ReplayData");
                 Sounds.StopMusic();
                 pOwner.FinalGameTime = DateTime.Now - pOwner.GameStartTime;
-                PlayField.GameStats.TotalGameTime = pOwner.FinalGameTime;
+                GameHandler.Statistics.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
                 pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this); });
             }
@@ -382,35 +387,38 @@ namespace BASeTris.GameStates
 
             nextget.X = (int) (((float) PlayField.ColCount / 2) - ((float) nextget.GroupExtents.Width / 2));
             nextget.SetY(null,0);
-
-            if (nextget is Tetromino_I)
+            if (GameStats is TetrisStatistics ts)
             {
-                GameStats.I_Piece_Count++;
+                if (nextget is Tetromino_I)
+                {
+                    ts.I_Piece_Count++;
+                }
+                else if (nextget is Tetromino_J)
+                    ts.J_Piece_Count++;
+                else if (nextget is Tetromino_L)
+                    ts.L_Piece_Count++;
+                else if (nextget is Tetromino_O)
+                    ts.O_Piece_Count++;
+                else if (nextget is Tetromino_S)
+                    ts.S_Piece_Count++;
+                else if (nextget is Tetromino_T)
+                    ts.T_Piece_Count++;
+                else if (nextget is Tetromino_Z)
+                    ts.Z_Piece_Count++;
+                //FallSpeed is 1000 -50 for each level. Well, for now.
             }
-            else if (nextget is Tetromino_J)
-                GameStats.J_Piece_Count++;
-            else if (nextget is Tetromino_L)
-                GameStats.L_Piece_Count++;
-            else if (nextget is Tetromino_O)
-                GameStats.O_Piece_Count++;
-            else if (nextget is Tetromino_S)
-                GameStats.S_Piece_Count++;
-            else if (nextget is Tetromino_T)
-                GameStats.T_Piece_Count++;
-            else if (nextget is Tetromino_Z)
-                GameStats.Z_Piece_Count++;
-            //FallSpeed is 1000 -50 for each level. Well, for now.
-
             SetLevelSpeed(nextget);
             NextAngleOffset += Math.PI * 2 / 5;
             nextget.LastFall = pOwner.GetElapsedTime().Add(new TimeSpan(0,0,0,0,100));
             PlayField.AddBlockGroup(nextget);
-            PlayField.Theme.ApplyTheme(nextget, PlayField);
+            PlayField.Theme.ApplyTheme(nextget,GameHandler, PlayField);
         }
 
         private void SetLevelSpeed(Nomino group)
         {
-            group.FallSpeed = Math.Max(1000 - (PlayField.Level * 100), 50);
+            var Level = (GameHandler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
+
+            group.FallSpeed = Math.Max(1000 - (Level * 100), 50);
         }
 
 
@@ -440,7 +448,7 @@ namespace BASeTris.GameStates
                         StandardColouredBlock GenerateColorBlock = new StandardColouredBlock();
                         Nomino ArbitraryGroup = new Nomino();
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
-                        this.PlayField.Theme.ApplyRandom(ArbitraryGroup,this.PlayField);
+                        this.PlayField.Theme.ApplyRandom(ArbitraryGroup,GameHandler,this.PlayField);
                         //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
                         TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null,new StandardSettings());
                         RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
@@ -547,15 +555,8 @@ namespace BASeTris.GameStates
             }
             else if (g == GameKeys.GameKey_Down)
             {
-                foreach (var activeitem in PlayField.BlockGroups)
-                {
-                    if (HandleGroupOperation(pOwner,activeitem))
-                    {
-                        pOwner.Feedback(0.4f, 100);
-                        //ProcessFieldChangeWithScore(pOwner, activeitem);
-                        GameHandler.ProcessFieldChange(this, pOwner, activeitem);
-                    }
-                }
+                HandleActiveGroups(pOwner, true);
+               
             }
             else if (g == GameKeys.GameKey_Drop)
             {
@@ -588,7 +589,10 @@ namespace BASeTris.GameStates
                         activeitem.SetY(pOwner, ghosted.Y);
                         PlayField.SetGroupToField(activeitem);
                         PlayField.RemoveBlockGroup(activeitem);
-                        GameStats.AddScore((dropqty * (5 + (GameStats.LineCount / 10))));
+                        if (GameStats is TetrisStatistics ts)
+                        {
+                            GameStats.AddScore((dropqty * (5 + (ts.LineCount / 10))));
+                        }
                         
                     }
 
@@ -646,7 +650,7 @@ namespace BASeTris.GameStates
 
                         //We probably should set the speed appropriately here for the level. As is it will retain the speed from whe nthe hold block was
                         //held.
-                        PlayField.Theme.ApplyTheme(HoldBlock, PlayField);
+                        PlayField.Theme.ApplyTheme(HoldBlock,GameHandler, PlayField);
                         HoldBlock.X = (int) (((float) PlayField.ColCount / 2) - ((float) HoldBlock.GroupExtents.Width / 2));
                         HoldBlock.SetY(pOwner,0);
                         HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof

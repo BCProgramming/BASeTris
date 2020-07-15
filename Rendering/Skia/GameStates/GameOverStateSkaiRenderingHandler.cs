@@ -29,11 +29,12 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
             GameplayGameState standardgame = Self.GameOveredState as GameplayGameState;
+            var useStats = standardgame.GameStats as TetrisStatistics;
             SKBitmap I_Tet = standardgame.GetTetrominoSKBitmap(TetronimoType);
             Target.DrawBitmap(I_Tet, new SKPoint(BasePosition.X - (float)(I_Tet.Width) / 2, BasePosition.Y));
             
             SKPoint TextPos = new SKPoint(BasePosition.X + Bounds.Width / 2, BasePosition.Y - 10);
-            String LineCount = standardgame.GameStats.GetLineCount(TetronimoType).ToString();
+            String LineCount = useStats.GetLineCount(TetronimoType).ToString();
             paint.Color = SKColors.White;
             Target.DrawText(LineCount, TextPos.X+5, TextPos.Y+5, paint);
             paint.Color = SKColors.Black;
