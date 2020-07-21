@@ -66,6 +66,7 @@ namespace BASeTris
         }
         private void UpdateSize()
         {
+            this.Location = new Point(140);
             this.ClientSize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
             //this.renderTarget = CreateRenderTarget(this);
         }

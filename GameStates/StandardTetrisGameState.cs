@@ -150,10 +150,12 @@ namespace BASeTris.GameStates
 
         public bool f_RedrawTetrominoImages = false;
         public bool f_RedrawStatusBitmap = false;
+
         public Dictionary<String, List<Image>> NominoImages { protected set; get; } = null;
 
         private Dictionary<String, List<SKBitmap>> NominoSKBitmaps = null;
 
+      
         public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner,Nomino nom)
         {
             String GetKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);

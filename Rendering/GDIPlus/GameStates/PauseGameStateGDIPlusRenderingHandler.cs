@@ -7,6 +7,24 @@ using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Rendering.GDIPlus
 {
+
+    [RenderingHandler(typeof(TemporaryInputPauseGameState), typeof(Graphics), typeof(BaseDrawParameters))]
+    public class TemporaryPauseGameStateGDIRenderingHandler : StandardStateRenderingHandler<Graphics, TemporaryInputPauseGameState, BaseDrawParameters>
+    {
+        public override void Render(IStateOwner pOwner, Graphics pRenderTarget, TemporaryInputPauseGameState Source, BaseDrawParameters Element)
+        {
+            Graphics g = pRenderTarget;
+            var Bounds = Element.Bounds;
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.GetComposite(), Element);
+        }
+
+        public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, TemporaryInputPauseGameState Source, BaseDrawParameters Element)
+        {
+            RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source.GetComposite(), Element);
+        }
+    }
+
+
     [RenderingHandler(typeof(PauseGameState), typeof(Graphics), typeof(BaseDrawParameters))]
     public class PauseGameStateGDIPlusRenderingHandler:  MenuStateGDIPlusRenderingHandler, IStateRenderingHandler<Graphics,PauseGameState,BaseDrawParameters>
     {

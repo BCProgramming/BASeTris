@@ -10,6 +10,7 @@ using BASeTris.GameStates;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.Rendering.GDIPlus
 {
@@ -90,7 +91,8 @@ namespace BASeTris.Rendering.GDIPlus
                 double Factor = Bounds.Height / 644d;
                 int DesiredFontPixelHeight = (int)(Bounds.Height * (23d / 644d));
                 Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
-                var TopScore = Source.GetLocalScores().GetScores().First().Score;
+                var LocalScores = Source.GetLocalScores();
+                var TopScore = LocalScores==null?0:LocalScores.GetScores().First().Score;
                 int MaxScoreLength = Math.Max(TopScore.ToString().Length, useStats.Score.ToString().Length);
 
                 String CurrentScoreStr = useStats.Score.ToString().PadLeft(MaxScoreLength + 2);
@@ -149,19 +151,22 @@ namespace BASeTris.Rendering.GDIPlus
                 int StartYPos = (int)(140 * Factor);
                 int useXPos = (int)(30 * Factor);
                 ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
-                for (int i = 0; i < useTypes.Length; i++)
+                if (Source.GameHandler is StandardTetrisHandler)
                 {
-                    PointF BaseCoordinate = new PointF(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
-                    PointF TextPos = new PointF(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
-                    String StatText = "" + PieceCounts[i];
-                    SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                    String sNomTypeKey = Source.PlayField.Theme.GetNominoTypeKey(useTypes[i], Source.GameHandler, Source.PlayField);
-                    Image TetrominoImage = TetrisGame.Choose(Source.NominoImages[sNomTypeKey]);
-                    PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
+                    for (int i = 0; i < useTypes.Length; i++)
+                    {
+                        PointF BaseCoordinate = new PointF(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
+                        PointF TextPos = new PointF(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
+                        String StatText = "" + PieceCounts[i];
+                        SizeF StatTextSize = g.MeasureString(StatText, standardFont);
+                        String sNomTypeKey = Source.PlayField.Theme.GetNominoTypeKey(useTypes[i], Source.GameHandler, Source.PlayField);
+                        Image TetrominoImage = TetrisGame.Choose(Source.NominoImages[sNomTypeKey]);
+                        PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
 
-                    g.DrawImage(TetrominoImage, ImagePos);
-                    g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
-                    g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
+                        g.DrawImage(TetrominoImage, ImagePos);
+                        g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
+                        g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
+                    }
                 }
 
                 Point NextDrawPosition = new Point((int)(40f * Factor), (int)(420 * Factor));
@@ -171,7 +176,8 @@ namespace BASeTris.Rendering.GDIPlus
                 if (Source.NextBlocks.Count > 0)
                 {
                     var QueueList = Source.NextBlocks.ToArray();
-                    Image[] NextTetrominoes = (from t in QueueList select TetrisGame.Choose(Source.NominoImages[Source.PlayField.Theme.GetNominoKey(t,Source.GameHandler,Source.PlayField)])).ToArray();
+                    //(from t in QueueList select Source.GetTetrominoSKBitmap(pOwner,t)).ToArray()
+                    Image[] NextTetrominoes = (from t in QueueList select Source.GetTetrominoImage(pOwner, t)).ToArray(); //  TetrisGame.Choose(Source.NominoImages[Source.PlayField.Theme.GetNominoKey(t,Source.GameHandler,Source.PlayField)])).ToArray();
                     Image DisplayBox = TetrisGame.Imageman["display_box"];
                     //draw it at 40,420. (Scaled).
                     float ScaleDiff = 0;

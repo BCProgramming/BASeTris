@@ -36,8 +36,28 @@ namespace BASeTris.Rendering.GDIPlus
                 }*/
                 int usemodulo = Source.Rotation;
                 //if (usemodulo < 0) usemodulo = Source._RotationImages.Length - usemodulo;
-                var useindex = MathHelper.mod(usemodulo, Source._RotationImages.Length);
-                Image useImage = Source._RotationImages[useindex];
+
+                Image useImage = null;
+
+                if (Source.SpecialImageFunctionSK != null)
+                {
+                    if (Source is LineSeriesMasterBlock)
+                    {
+                        ;
+                    }
+                    useImage =  SkiaSharp.Views.Desktop.Extensions.ToBitmap(Source.SpecialImageFunctionSK(Source));
+                }
+                else
+                {
+                    int usemoduloin = Source.Rotation;
+                    if (usemoduloin != 0) {; }
+                    //if (usemodulo < 0) usemodulo = Source._RotationImages.Length - Math.Abs(usemodulo);
+
+                    useImage = Source._RotationImages[MathHelper.mod(usemoduloin, Source._RotationImages.Length)];
+                }
+
+
+
                 ImageAttributes useAttrib = parameters.ApplyAttributes ?? (Source.useAttributes == null ? null : Source.useAttributes[usemodulo % Source.useAttributes.Length]);
 
                 float Degrees = usemodulo * 90;

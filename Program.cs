@@ -37,7 +37,7 @@ namespace BASeTris
             Mode_WinForms,
             Mode_OpenTK
         }
-        public static StartMode RunMode = StartMode.Mode_OpenTK;
+        public static StartMode RunMode = StartMode.Mode_WinForms;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -84,7 +84,7 @@ namespace BASeTris
                 var DesiredWidth = (int)((float)DesiredHeight * .95f);
 
 
-
+                Debug.Print($"Starting BTTK: {DesiredWidth},{DesiredHeight}");
                 new BASeTrisTK(DesiredWidth,DesiredHeight).Run();
             }
         }
