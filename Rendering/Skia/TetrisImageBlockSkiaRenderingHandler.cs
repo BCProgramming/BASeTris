@@ -31,12 +31,27 @@ namespace BASeTris.Rendering.Skia
                 var parameters = (TetrisBlockDrawSkiaParameters)drawparameters;
                 base.Render(pOwner, pRenderTarget, Source, Element);
                 if (Source._RotationImages == null) NoImage();
+                SKImage useImage = null;
                 int usemodulo = Source.Rotation;
-                if(usemodulo != 0) {; }
-                //if (usemodulo < 0) usemodulo = Source._RotationImages.Length - Math.Abs(usemodulo);
+                usemodulo = MathHelper.mod(usemodulo, Source._RotationImages.Length);
+                if (Source.SpecialImageFunctionSK != null)
+                {
+                    if(Source is LineSeriesMasterBlock)
+                    {
+                        ;
+                    }
+                    useImage = Source.SpecialImageFunctionSK(Source);
+                }
+                else
+                {
+                    int usemoduloin = Source.Rotation;
+                    if (usemoduloin != 0) {; }
+                    //if (usemodulo < 0) usemodulo = Source._RotationImages.Length - Math.Abs(usemodulo);
 
-                Image useImageA = Source._RotationImages[MathHelper.mod(usemodulo,Source._RotationImages.Length)];
-                SKImage useImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useImageA));
+                    useImage = Source._RotationImagesSK[MathHelper.mod(usemoduloin ,Source._RotationImagesSK.Length)];
+                }
+                
+                
                 float Degrees = usemodulo * 90;
                 PointF Center = new PointF(parameters.region.Left + (float)(parameters.region.Width / 2), parameters.region.Top + (float)(parameters.region.Height / 2));
 

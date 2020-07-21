@@ -41,35 +41,35 @@ namespace BASeTris.GameStates
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
         BlockGroupChooser overrideChooser = null;
-        public Choosers.BlockGroupChooser Chooser {  get { return overrideChooser==null?GameHandler.Chooser:overrideChooser; } set { overrideChooser = value; } }
+        public Choosers.BlockGroupChooser Chooser { get { return overrideChooser == null ? GameHandler.Chooser : overrideChooser; } set { overrideChooser = value; } }
 
 
-        public override bool GamePlayActive { get{ return true; } }
+        public override bool GamePlayActive { get { return true; } }
 
         //given a value, translates from an unscaled horizontal coordinate in the default width to the appropriate size of the playing field based on the presented bounds.
-        public double GetScaledHorizontal(RectangleF Bounds,double Value)
+        public double GetScaledHorizontal(RectangleF Bounds, double Value)
         {
             return Value * (Bounds.Width / BASeTris.DefaultWidth);
         }
-        public double GetScaledVertical(RectangleF Bounds,double Value)
+        public double GetScaledVertical(RectangleF Bounds, double Value)
         {
             return Value * (Bounds.Height / BASeTris.DefaultHeight);
         }
 
-        public double GetUnScaledHorizontal(RectangleF Bounds,double ScaledValue)
+        public double GetUnScaledHorizontal(RectangleF Bounds, double ScaledValue)
         {
             return ScaledValue / (Bounds.Width / BASeTris.DefaultWidth);
         }
-        public double GetUnscaledVertical(RectangleF Bounds,double ScaledValue)
+        public double GetUnscaledVertical(RectangleF Bounds, double ScaledValue)
         {
             return ScaledValue / (Bounds.Height / BASeTris.DefaultHeight);
         }
-        public PointF GetScaledPoint(RectangleF Bounds,PointF Value)
+        public PointF GetScaledPoint(RectangleF Bounds, PointF Value)
         {
-            return new PointF((float)(GetUnScaledHorizontal(Bounds,Value.X)),(float)(GetUnscaledVertical(Bounds,Value.Y)));
+            return new PointF((float)(GetUnScaledHorizontal(Bounds, Value.X)), (float)(GetUnscaledVertical(Bounds, Value.Y)));
         }
 
-        public PointF GetUnscaledPoint(RectangleF Bounds,PointF Value)
+        public PointF GetUnscaledPoint(RectangleF Bounds, PointF Value)
         {
             return new PointF((float)(GetScaledHorizontal(Bounds, Value.X)), (float)(GetScaledVertical(Bounds, Value.Y)));
         }
@@ -77,13 +77,13 @@ namespace BASeTris.GameStates
         {
             get { return GameHandler.Statistics; }
         }
-        
+
 
         public virtual IHighScoreList<TetrisHighScoreData> GetLocalScores()
         {
             return GameHandler.GetHighScores();
         }
-     
+
 
 
         public int currenttempo = 1;
@@ -98,14 +98,14 @@ namespace BASeTris.GameStates
         }
 
         public IAudioHandler Sounds = null;
-        public GameplayGameState(IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer,IAudioHandler pAudio)
+        public GameplayGameState(IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio)
         {
 
             Sounds = pAudio;
             GameHandler = Handler;
-            
-            
-            PlayField = new TetrisField(Handler.DefaultTheme,Handler);
+
+
+            PlayField = new TetrisField(Handler.DefaultTheme, Handler);
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
@@ -124,8 +124,8 @@ namespace BASeTris.GameStates
                 f_RedrawTetrominoImages = true;
                 foreach (var refreshgroup in PlayField.BlockGroups)
                 {
-                    PlayField.Theme.ApplyTheme(refreshgroup,GameHandler, PlayField);
-                    }
+                    PlayField.Theme.ApplyTheme(refreshgroup, GameHandler, PlayField);
+                }
             }
         }
 
@@ -133,7 +133,7 @@ namespace BASeTris.GameStates
         {
             if (Chooser != null) Chooser.Dispose();
         }
-        public void InvokePlayFieldLevelChanged(object sender,TetrisField.LevelChangeEventArgs e)
+        public void InvokePlayFieldLevelChanged(object sender, TetrisField.LevelChangeEventArgs e)
         {
             PlayField_LevelChanged(sender, e);
         }
@@ -150,16 +150,37 @@ namespace BASeTris.GameStates
 
         public bool f_RedrawTetrominoImages = false;
         public bool f_RedrawStatusBitmap = false;
-        public Dictionary<System.Type, Image> NominoImages { protected set; get; } = null;
+        public Dictionary<String, List<Image>> NominoImages { protected set; get; } = null;
 
-        private Dictionary<System.Type, SKBitmap> NominoSKBitmaps = null;
-        public SKBitmap GetTetrominoSKBitmap(System.Type Source)
+        private Dictionary<String, List<SKBitmap>> NominoSKBitmaps = null;
+
+        public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner,Nomino nom)
         {
-            if (NominoSKBitmaps == null) NominoSKBitmaps = new Dictionary<Type, SKBitmap>();
-            if(!NominoSKBitmaps.ContainsKey(Source))
+            String GetKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
+            if (!NominoSKBitmaps.ContainsKey(GetKey))
             {
-                if(NominoImages!=null && NominoImages.ContainsKey(Source))
-                    NominoSKBitmaps.Add(Source,SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(NominoImages[Source])));
+                return AddTetrominoBitmapSK(pOwner, nom);
+            }
+            return GetTetrominoSKBitmap(GetKey);
+        }
+        public SKBitmap GetTetrominoSKBitmap(Type sType)
+        {
+            String GetKey = PlayField.Theme.GetNominoTypeKey(sType, GameHandler, PlayField);
+            return GetTetrominoSKBitmap(GetKey);
+        }
+        public SKBitmap GetTetrominoSKBitmap(String Source)
+        {
+            if (NominoSKBitmaps == null) NominoSKBitmaps = new Dictionary<String, List<SKBitmap>>();
+            if (!NominoSKBitmaps.ContainsKey(Source))
+            {
+                if (NominoImages != null && NominoImages.ContainsKey(Source))
+                {
+                    NominoSKBitmaps.Add(Source, new List<SKBitmap>());
+                    foreach (var copyGDI in NominoImages[Source])
+                    {
+                        NominoSKBitmaps[Source].Add(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(copyGDI)));
+                    }
+                }
                 else
                 {
                     return null;
@@ -167,24 +188,76 @@ namespace BASeTris.GameStates
 
             }
 
-            return NominoSKBitmaps[Source];
+            return TetrisGame.Choose(NominoSKBitmaps[Source]);
 
         }
 
         public bool HasTetrominoSKBitmaps() => NominoSKBitmaps != null;
-        public void SetTetrominoSKBitmaps(Dictionary<Type,SKBitmap> bitmaps)
+        public void SetTetrominoSKBitmaps(Dictionary<String, List<SKBitmap>> bitmaps)
         {
             NominoSKBitmaps = bitmaps;
         }
         public bool HasTetrominoImages() => NominoImages != null;
-        public Image GetTetronimoImage(System.Type TetrominoType)
+        public Image AddTetrominoImage(IStateOwner pOwner,Nomino Source)
         {
-            return NominoImages[TetrominoType];
-        }
-        public SKBitmap[] GetTetrominoSKBitmaps() => NominoSKBitmaps.Values.ToArray();
-        public Image[] GetTetronimoImages() => NominoImages.Values.ToArray();
+            String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
+            float useSize = 18 * (float)pOwner.ScaleFactor;
+            SizeF useTetSize = new SizeF(useSize, useSize);
 
-        public void SetTetrominoImages(Dictionary<Type,Image> images)
+
+            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField);
+
+            Image buildBitmap = TetrisGame.OutLineImage(Source.GetImage(useTetSize));
+            if (!NominoImages.ContainsKey(sAddKey))
+                NominoImages.Add(sAddKey, new List<Image>() { buildBitmap });
+
+
+            return buildBitmap;
+
+        }
+        public SKBitmap AddTetrominoBitmapSK(IStateOwner pOwner, Nomino Source)
+        {
+            String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
+            float useSize = 18 * (float)pOwner.ScaleFactor;
+            SKSize useTetSize = new SKSize(useSize, useSize);
+
+
+            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField);
+
+            SKBitmap buildBitmap = TetrisGame.OutlineImageSK(Source.GetImageSK(useTetSize));
+            if (!NominoSKBitmaps.ContainsKey(sAddKey))
+                NominoSKBitmaps.Add(sAddKey, new List<SKBitmap>() { buildBitmap });
+
+
+            return buildBitmap;
+        }
+        public Image GetTetrominoImage(IStateOwner pOwner,Nomino nom)
+        {
+            
+            String sKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
+            if(!NominoImages.ContainsKey(sKey))
+            {
+                return AddTetrominoImage(pOwner, nom);
+            }
+            return GetTetrominoImage(sKey);
+        }
+        public Image GetTetrominoImage(Type pType)
+        {
+            String sKey = PlayField.Theme.GetNominoTypeKey(pType, GameHandler, PlayField);
+            return GetTetrominoImage(sKey);
+        }
+        public Image GetTetrominoImage(String TetrominoType)
+        {
+            return TetrisGame.Choose(NominoImages[TetrominoType]);
+        }
+        public SKBitmap[] GetTetrominoSKBitmaps() => TetrisGame.Coalesce(NominoSKBitmaps);
+        public Image[] GetTetronimoImages() => TetrisGame.Coalesce(NominoImages);
+            
+
+
+
+
+        public void SetTetrominoImages(Dictionary<String,List<Image>> images)
         {
             NominoImages = images;
         }
@@ -230,20 +303,41 @@ namespace BASeTris.GameStates
        
         private void HandleActiveGroups(IStateOwner pOwner,bool ForceFall = false)
         {
-            foreach (var iterate in PlayField.BlockGroups)
+        reprocess:
+            List<Nomino> HandledGroups = new List<Nomino>();
+            if(PlayField.BlockGroups.Count > 1)
+            {
+                ;
+            }
+            var AnyMoved = false;
+            foreach (var iterate in from b in PlayField.BlockGroups orderby b.Y,PlayField.ColCount-b.X ascending select b)
             {
                 if (ForceFall || (pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
                 {
                     if (HandleGroupOperation(pOwner, iterate))
                     {
-                        GameHandler.ProcessFieldChange(this, pOwner, iterate);
-                        //ProcessFieldChangeWithScore(pOwner, iterate);
-
+                        if (!SuspendFieldSet)
+                        {
+                            GameHandler.ProcessFieldChange(this, pOwner, iterate);
+                            //ProcessFieldChangeWithScore(pOwner, iterate);
+                            HandledGroups.Add(iterate);
+                            goto reprocess;
+                        }
                     }
+                    else 
+                    {
+                        AnyMoved = true;
 
-                    iterate.LastFall = pOwner.GetElapsedTime();
+                        if(iterate.MoveSound && !SuspendFieldSet)
+                        {
+                            //Make a movement sound as we fall.
+                            Sounds.PlaySound(pOwner.AudioThemeMan.BlockFalling.Key);
+                        }
+                        iterate.LastFall = pOwner.GetElapsedTime();
+                    }
                 }
             }
+            if (SuspendFieldSet && !AnyMoved) SuspendFieldSet = false; //all blocks fell...
         }
         public override void GameProc(IStateOwner pOwner)
         {
@@ -302,7 +396,7 @@ namespace BASeTris.GameStates
                 pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this); });
             }
 
-            if (PlayField.BlockGroups.Count == 0 && !SpawnWait && !pOwner.CurrentState.GameProcSuspended)
+            if (PlayField.BlockGroups.Count == 0 && !SpawnWait && !pOwner.CurrentState.GameProcSuspended && !NoTetrominoSpawn)
             {
                 SpawnWait = true;
                 pOwner.EnqueueAction
@@ -369,9 +463,11 @@ namespace BASeTris.GameStates
                 NextBlocks.Enqueue(Generated);
             }
         }
-
+        public bool SuspendFieldSet { get; set; } = false;
+        public bool NoTetrominoSpawn { get; set; } = false;
         protected virtual void SpawnNewTetromino(IStateOwner pOwner)
         {
+            if (NoTetrominoSpawn) return;
             BlockHold = false;
             if (NextBlocks.Count == 0)
             {
@@ -491,6 +587,7 @@ namespace BASeTris.GameStates
 
         private void PerformRotation(IStateOwner pOwner, Nomino grp, bool ccw)
         {
+            if (!grp.Controllable) return;
             grp.Rotate(ccw);
             Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key, pOwner.Settings.EffectVolume);
             pOwner.Feedback(0.3f, 100);
@@ -501,7 +598,10 @@ namespace BASeTris.GameStates
             bool AnyTrue = false;
             foreach(var activeitem in PlayField.BlockGroups)
             {
-                AnyTrue |= activeitem.HandleGameKey(pOwner, key);
+                if (activeitem.Controllable)
+                {
+                    AnyTrue |= activeitem.HandleGameKey(pOwner, key);
+                }
             }
 
             return AnyTrue;
@@ -519,6 +619,7 @@ namespace BASeTris.GameStates
                 bool ccw = g == GameKeys.GameKey_RotateCCW;
                 foreach (var activeitem in PlayField.BlockGroups)
                 {
+                    if (!activeitem.Controllable) continue;
                     if (PlayField.CanRotate(activeitem, ccw))
                     {
                         PerformRotation(pOwner, activeitem, ccw);
@@ -572,6 +673,7 @@ namespace BASeTris.GameStates
 
                     foreach (var activeitem in PlayField.BlockGroups)
                     {
+                        if (!activeitem.Controllable) continue;
                         List<Tuple<BCPoint,NominoElement>> StartBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
                         List<Tuple<BCPoint, NominoElement>> EndBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
                         foreach (var element in activeitem)
@@ -607,7 +709,8 @@ namespace BASeTris.GameStates
                 int XMove = g == GameKeys.GameKey_Right ? 1 : -1;
                 foreach (var ActiveItem in PlayField.BlockGroups)
                 {
-                    if (PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y))
+                    if (!ActiveItem.Controllable) continue;
+                    if (PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y,false)==TetrisField.CanFitResultConstants.CanFit)
                     {
                         lastHorizontalMove = DateTime.Now;
                         ActiveItem.X += XMove;
@@ -644,20 +747,23 @@ namespace BASeTris.GameStates
                     Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                     if (FirstGroup != null)
                     {
-                        PlayField.RemoveBlockGroup(FirstGroup);
+                        if (FirstGroup.Controllable)
+                        {
+                            PlayField.RemoveBlockGroup(FirstGroup);
 
-                        PlayField.AddBlockGroup(HoldBlock);
+                            PlayField.AddBlockGroup(HoldBlock);
 
-                        //We probably should set the speed appropriately here for the level. As is it will retain the speed from whe nthe hold block was
-                        //held.
-                        PlayField.Theme.ApplyTheme(HoldBlock,GameHandler, PlayField);
-                        HoldBlock.X = (int) (((float) PlayField.ColCount / 2) - ((float) HoldBlock.GroupExtents.Width / 2));
-                        HoldBlock.SetY(pOwner,0);
-                        HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
-                        HoldBlock = FirstGroup;
-                        Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
-                        pOwner.Feedback(0.9f, 40);
-                        BlockHold = true;
+                            //We probably should set the speed appropriately here for the level. As is it will retain the speed from whe nthe hold block was
+                            //held.
+                            PlayField.Theme.ApplyTheme(HoldBlock, GameHandler, PlayField);
+                            HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
+                            HoldBlock.SetY(pOwner, 0);
+                            HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
+                            HoldBlock = FirstGroup;
+                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
+                            pOwner.Feedback(0.9f, 40);
+                            BlockHold = true;
+                        }
                     }
                 }
                 else if (!BlockHold)
@@ -665,10 +771,13 @@ namespace BASeTris.GameStates
                     Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                     if (FirstGroup != null)
                     {
-                        PlayField.RemoveBlockGroup(FirstGroup);
-                        HoldBlock = FirstGroup;
-                        BlockHold = true;
-                        Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
+                        if (FirstGroup.Controllable)
+                        {
+                            PlayField.RemoveBlockGroup(FirstGroup);
+                            HoldBlock = FirstGroup;
+                            BlockHold = true;
+                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
+                        }
                     }
                 }
             }
@@ -809,11 +918,12 @@ namespace BASeTris.GameStates
         {
 
             if (activeItem.HandleBlockOperation(pOwner)) return true;
-            if (PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1))
+            var fitresult = PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1, false);
+            if (fitresult == TetrisField.CanFitResultConstants.CanFit)
             {
                 activeItem.SetY(pOwner,activeItem.Y+1);
             }
-            else
+            else if (fitresult==TetrisField.CanFitResultConstants.CantFit_Field)
             {
                 if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.LockTime)
                 {
@@ -824,6 +934,7 @@ namespace BASeTris.GameStates
                     return true;
                 }
             }
+            
 
             return false;
         }

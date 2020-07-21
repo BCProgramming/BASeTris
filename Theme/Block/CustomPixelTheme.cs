@@ -19,14 +19,54 @@ namespace BASeTris.Theme.Block
     /// </summary>
     public abstract class CustomPixelTheme<PixelEnum, BlockEnum> : TetrominoTheme
     {
+        public class BlockTypeReturnData
+        {
+            public BlockEnum BlockType;
+            public bool Animated;
+            public BlockTypeReturnData(BlockEnum pEnum)
+            {
+                BlockType = pEnum;
+            }
+            public BlockTypeReturnData(BlockEnum pEnum,bool pAnimated)
+            {
+                BlockType = pEnum;
+                Animated = pAnimated;
+            }
+        }
+        
         public enum BlockFlags
         {
             Static,
-            Rotatable
+            Rotatable,
+            CustomSelector
         }
         public abstract SKPointI GetBlockSize(TetrisField field, BlockEnum BlockType);
 
         public abstract SKColor GetColor(TetrisField field, Nomino Element, BlockEnum BlockType, PixelEnum PixelType);
+
+
+        public static PixelEnum[][] GetPixelsFromSKImage(SKImage Source, Func<SKColor, PixelEnum> PixelMapRoutine)
+        {
+            PixelEnum[][] Result = new PixelEnum[Source.Height][];
+            using (SKBitmap WorkMap = SKBitmap.FromImage(Source))
+            {
+
+                for (int y = 0; y < Source.Height; y++)
+                {
+                    Result[y] = new PixelEnum[Source.Width];
+                    for (int x = 0; x < Source.Width; x++)
+                    {
+                        SKColor currPixel = WorkMap.GetPixel(x, y);
+                        PixelEnum result = PixelMapRoutine(currPixel);
+                        Result[y][x] = result;
+                    }
+
+                }
+
+            }
+            return Result;
+        }
+
 
         protected PixelEnum[][] RotateMatrix(PixelEnum[][] Source)
         {
@@ -86,7 +126,7 @@ namespace BASeTris.Theme.Block
         }
 
         public abstract BlockFlags GetBlockFlags(Nomino Group, NominoElement element, TetrisField field);
-        public abstract BlockEnum GetBlockType(Nomino group, NominoElement element, TetrisField field);
+        public abstract BlockTypeReturnData GetBlockType(Nomino group, NominoElement element, TetrisField field);
 
         public abstract BlockEnum[] PossibleBlockTypes();
         //dictionary indexed by a level which indexes a dictionary that indexes image by block type.
@@ -94,7 +134,8 @@ namespace BASeTris.Theme.Block
 
         private Dictionary<int, Dictionary<BlockEnum, Dictionary<Type, Image>>> CachedImageDataGDI = new Dictionary<int, Dictionary<BlockEnum, Dictionary<Type, Image>>>();
 
-        private System.Drawing.Image GetMappedImageGDI(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
+#if false
+        protected System.Drawing.Image GetMappedImageGDI(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
         {
             var level = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
             if (!CachedImageDataGDI.ContainsKey(level))
@@ -115,7 +156,8 @@ namespace BASeTris.Theme.Block
             }
             return CachedImageDataGDI[level][BlockTypeIndex][Element.GetType()];
         }
-        private SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
+#endif
+        protected SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
         {
             var LevelIndex = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
             if (!CachedImageData.ContainsKey(LevelIndex))
@@ -143,10 +185,11 @@ namespace BASeTris.Theme.Block
         private SKBitmap DrawMappedImageSkia(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
         {
             SKPointI blocksize = GetBlockSize(field, BlockTypeIndex);
-            SKImageInfo drawinfo = new SKImageInfo(blocksize.X, blocksize.Y, SKColorType.Rgb888x, SKAlphaType.Opaque);
+            SKImageInfo drawinfo = new SKImageInfo(blocksize.X, blocksize.Y, SKColorType.Rgba8888, SKAlphaType.Premul);
 
             SKBitmap drawimage = new SKBitmap(drawinfo, SKBitmapAllocFlags.ZeroPixels);
             SKCanvas skc = new SKCanvas(drawimage);
+            skc.Clear(SKColors.Transparent);
             SKColor[][] blockpixels = GetBlockPixels(field, Element, BlockTypeIndex);
             for (int y = 0; y < blocksize.Y; y++)
             {
@@ -173,14 +216,19 @@ namespace BASeTris.Theme.Block
                     var chosenType = GetBlockType(Group, iterate, Field);
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     sbc.BlockColor = Color.Black;
-                    if (IsRotatable(iterate))
+                    var flagvalues = GetBlockFlags(iterate);
+                    if (flagvalues==BlockFlags.Rotatable)
                     {
                         
-                        sbc._RotationImages = TetrominoTheme.GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
+                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, chosenType.BlockType));
                     }
-                    else
+                    else if (flagvalues == BlockFlags.Static)
                     {
-                        sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
+                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, chosenType.BlockType)) };
+                    }
+                    else if(flagvalues == BlockFlags.CustomSelector)
+                    {
+                        sbc._RotationImagesSK = ApplyFunc_Custom(Field, Group,iterate.Block, chosenType.BlockType);
                     }
                 }
             }
@@ -196,18 +244,35 @@ namespace BASeTris.Theme.Block
                     var chosenType = TetrisGame.Choose(PossibleBlockTypes());
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     sbc.BlockColor = Color.Black;
-                    if(IsRotatable(iterate))
+                    var Flags = GetBlockFlags(iterate);
+                    if(Flags == BlockFlags.Rotatable)
                     {
-                        sbc._RotationImages = TetrominoTheme.GetImageRotations(GetMappedImageGDI(Field, Group, chosenType));
+                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, chosenType));
                     }
-                    else {
-                        sbc._RotationImages = new Image[] { GetMappedImageGDI(Field, Group, chosenType) };
+                    else if (Flags== BlockFlags.Static) {
+                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, chosenType)) };
+                    }
+                    else if(Flags==BlockFlags.CustomSelector)
+                    {
+                        sbc._RotationImagesSK = ApplyFunc_Custom(Field, Group, iterate.Block,chosenType);
                     }
                     
                 }
             }
         }
-        protected abstract bool IsRotatable(NominoElement testvalue);
+        private SKImage[] ApplyFunc_GetRotations(TetrisField field,Nomino Group,BlockEnum chosentype)
+        {
+            return TetrominoTheme.GetImageRotations(GetMappedImageSkia(field, Group, chosentype));
+        }
+        private SKImage[] ApplyFunc_Static(TetrisField field,Nomino Group, BlockEnum chosentype)
+        {
+            return new SKImage[] {SKImage.FromBitmap(GetMappedImageSkia(field, Group, chosentype)) };
+        }
+        protected virtual SKImage[] ApplyFunc_Custom(TetrisField field,Nomino Group,NominoBlock Target,BlockEnum chosentype)
+        {
+            return null;
+        }
+        protected abstract BlockFlags GetBlockFlags(NominoElement testvalue);
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {

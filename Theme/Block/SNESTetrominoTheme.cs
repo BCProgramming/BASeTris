@@ -306,7 +306,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
             Center,
             Shaded
         }
-        private static SKImageInfo blockinfo = new SKImageInfo(8, 8, SKColorType.Rgb888x,SKAlphaType.Opaque);
+        private static SKImageInfo blockinfo = new SKImageInfo(8, 8, SKColorType.Rgba8888,SKAlphaType.Opaque);
         readonly static PT[][] SetByNumbers = new PT[][]
             {
                 new PT[]{PT.Center,PT.Center, PT.Center , PT.Center , PT.Center , PT.Center , PT.Center ,PT.Shaded},
@@ -393,7 +393,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
                 {
                     StandardColouredBlock sbc = iterate.Block as StandardColouredBlock;
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    sbc._RotationImages = new Image[] { GetSetImageGDI(ColourData[Randomlevel].GetColor(randomTet)) };
+                    sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetSetImage(ColourData[Randomlevel].GetColor(randomTet))) };
                 }
             }
 
@@ -428,10 +428,10 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     sbc.BlockColor = Color.Black;
                     if (Field.GetActiveBlockGroups().Contains(Group))
-                        sbc._RotationImages = new Image[] { GetUnsetImageGDI(ColourData[Field.Level > 12 ? 12 : Field.Level].GetColor(DesiredNomino)) };
+                        sbc._RotationImagesSK = new SKImage[] {  SKImage.FromBitmap(GetUnsetImage(ColourData[Field.Level > 12 ? 12 : Field.Level].GetColor(DesiredNomino)) )};
                     else
                     {
-                        sbc._RotationImages = new Image[] { GetSetImageGDI(ColourData[Field.Level > 12 ? 12 : Field.Level].GetColor(DesiredNomino)) };
+                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetSetImage(ColourData[Field.Level > 12 ? 12 : Field.Level].GetColor(DesiredNomino)) ) };
                     }
                 }
             }

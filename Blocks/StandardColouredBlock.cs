@@ -11,16 +11,49 @@ using BaseTris;
 using BASeTris.AssetManager;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
+using SkiaSharp;
 
 namespace BASeTris.Blocks
 {
     public class ImageBlock : NominoBlock
     {
         internal bool DoRotateTransform = false; //if true, we'll RotateTransform the image based on this blocks rotation.
-        internal Image[] _RotationImages; //array of images, indexed based on rotation.
-        internal ImageAttributes[] useAttributes; //array of Attributes to apply to the image when drawing. Same indexing as above.
+        private Image[] RotationImagesCache = null;
+        internal Image[] _RotationImages
+        {
+            get
+            {
+                if(RotationImagesCache==null)
+                {
+                    RotationImagesCache = (from p in _RotationImagesSK select SkiaSharp.Views.Desktop.Extensions.ToBitmap(p)).ToArray();
+                }
+                return RotationImagesCache;
+            }
+            private set
+            {
+                RotationImagesCache = value;
+            }
+        }
 
+        internal SKImage[] _RotationImagesSK = null;
+        internal ImageAttributes[] useAttributes; //array of Attributes to apply to the image when drawing. Same indexing as above.
+        //internal Func<ImageBlock, Image> SpecialImageFunction = RotationFunc;
+        internal Func<ImageBlock, SKImage> SpecialImageFunctionSK = RotationFuncSK;
+        private static Image RotationFunc(ImageBlock ib)
+        {
+
+            SKImage result = RotationFuncSK(ib);
+            return SkiaSharp.Views.Desktop.Extensions.ToBitmap(result);
+
+        }
         
+        private static SKImage RotationFuncSK(ImageBlock ib)
+        {
+            int usemodulo = ib.Rotation;
+            SKImage UseImageA = ib._RotationImagesSK[MathHelper.mod(usemodulo, ib._RotationImagesSK.Length)];
+            return UseImageA;
+        }
+
         protected virtual void NoImage()
         {
         }

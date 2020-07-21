@@ -1629,7 +1629,7 @@ namespace BASeTris.AssetManager
         private Dictionary<String, Image> loadedimages = new Dictionary<String, Image>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
-        private Dictionary<String, SKBitmap> SkiaImages = new Dictionary<String, SKBitmap>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<String, SKBitmap> SkiaImages { get; set; } = new Dictionary<String, SKBitmap>(StringComparer.OrdinalIgnoreCase);
         public SKBitmap GetSKBitmap(String man_key)
         {
             if(!SkiaImages.ContainsKey(man_key))
@@ -1642,6 +1642,7 @@ namespace BASeTris.AssetManager
 
             
         }
+        
         public Image this[String man_key,float reductionFactor=1]
         {
             get
@@ -2090,7 +2091,7 @@ namespace BASeTris.AssetManager
 
             return totalcount;
         }
-
+        public bool ImagePrepped = false;
         public int LoadImages(IEnumerable<string> paths)
         {
             int countaccum = 0;
@@ -2173,8 +2174,9 @@ namespace BASeTris.AssetManager
                     }
                 }
             }
-
+            ImagePrepped = true;
             return countaccum;
+            
         }
 
         /// <summary>
@@ -2209,19 +2211,23 @@ namespace BASeTris.AssetManager
 
         private bool AddImage(Stream streamread, string basenameonly)
         {
+            long startpos = streamread.Position;
             Image loadedimage = Image.FromStream(streamread);
-
-
+            streamread.Seek(startpos, SeekOrigin.Begin);
+            SKBitmap readbitmap = SKBitmap.Decode(streamread);
+            
             if (!loadedimages.ContainsKey(basenameonly))
             {
                 loadedimages.Add(basenameonly, loadedimage);
-                return true;
             }
             else
             {
                 Debug.Print("image already loaded with key " + basenameonly);
             }
-
+            if(!SkiaImages.ContainsKey(basenameonly))
+            {
+                SkiaImages.Add(basenameonly, readbitmap);
+            }
             return false;
         }
 

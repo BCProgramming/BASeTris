@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 namespace BASeTris.Rendering.Skia.GameStates
 {
     
+
+    
     [RenderingHandler(typeof(MenuState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class MenuStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, MenuState, GameStateSkiaDrawParameters>
     {
@@ -67,19 +69,24 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
             if (CursorBitmap == null)
             {
-                CursorBitmap = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new System.Drawing.Bitmap(TetrisGame.Imageman["cursor"]));
-                using (SKCanvas canvo = new SKCanvas(new SKBitmap(CursorBitmap.Width, CursorBitmap.Height)))
+                CursorBitmap = TetrisGame.Imageman.GetSKBitmap("cursor");
+                /*var CursorImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new System.Drawing.Bitmap(TetrisGame.Imageman["cursor"]));
+                
+                SKImageInfo CursorInfo = new SKImageInfo(CursorImage.Width, CursorImage.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+                var skversion = new SKBitmap(CursorInfo);
+                using (SKCanvas canvo = new SKCanvas(skversion))
                 {
                     canvo.Clear(SKColors.Transparent);
-                    canvo.DrawImage(CursorBitmap, new SKPoint(0, 0));
+                    canvo.DrawImage(CursorImage, new SKPoint(0, 0));
                 }
+                CursorBitmap = skversion;*/
             }
 
-
-            g.DrawImage(CursorBitmap, Source.LastMouseMovement, null);
+            
+            g.DrawBitmap(CursorBitmap, Source.LastMouseMovement, null);
 
         }
-        SKImage CursorBitmap = null;
+        SKBitmap CursorBitmap = null;
         protected SKFontInfo GetScaledHeaderFont(IStateOwner pOwner, MenuState Source)
         {
             return MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.HeaderTypeSize);

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,10 +14,17 @@ namespace BASeTris.GameObjects
         public BCPoint Velocity { get; set; }
         public BCPoint Decay { get; set; } = new BCPoint(0.95f, 0.95f);
         public BCColor Color { get; set; }
+        
+        
 
-        public TimeSpan TTL { get; set; } = new TimeSpan(0, 0, 0, 0, 300);
-        public DateTime? Birth { get; set; }
-        public TimeSpan Age { get { return Birth == null ? TimeSpan.Zero : DateTime.Now - Birth.Value; } }
+        private static uint GetTickCount()
+        {
+            return TetrisGame.GetTickCount();
+        }
+
+        public uint TTL { get; set; } = 300;
+        public uint? Birth { get; set; }
+        public uint Age { get { return Birth == null ? 0 : GetTickCount() - Birth.Value; } }
         public BaseParticle(BCPoint pPosition,BCPoint pVelocity,BCColor pColor)
         {
             Position = pPosition;
@@ -26,7 +34,7 @@ namespace BASeTris.GameObjects
         //returns true if we should die.
         public virtual bool GameProc(IStateOwner pOwner)
         {
-            if (Birth == null) Birth = DateTime.Now;
+            if (Birth == null) Birth = GetTickCount();
             Position += Velocity;
             Velocity *= Decay;
             return Age > TTL;

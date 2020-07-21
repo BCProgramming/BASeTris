@@ -12,6 +12,7 @@ using BASeTris.Choosers;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using BASeTris.GameStates.GameHandlers;
+using SkiaSharp;
 
 namespace BASeTris
 {
@@ -20,6 +21,18 @@ namespace BASeTris
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class TetrominoTheme
     {
+        public virtual bool IsAnimated(NominoBlock block)
+        {
+            return false;
+        }
+        public virtual String GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        {
+            return GetNominoTypeKey(Group.GetType(), GameHandler, Field);
+        }
+        public virtual String GetNominoTypeKey(Type src, IGameCustomizationHandler GameHandler,TetrisField Field)
+        {
+            return src.FullName;
+        }
         public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
         public abstract void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler);
@@ -72,6 +85,38 @@ namespace BASeTris
                 return new Image[] { Source, Rotate90, Rotate180, Rotate270 };
             }
         }
+
+
+        public static SKBitmap RotateBitmap(SKBitmap bitmap, int degrees)
+        {
+            var rotated = new SKBitmap(bitmap.Width, bitmap.Height);
+
+            var surface = new SKCanvas(rotated);
+            surface.Clear(SKColors.Transparent);
+            surface.Translate(rotated.Width / 2, rotated.Height / 2);
+            surface.RotateDegrees(degrees);
+            surface.Translate(-rotated.Width / 2, -rotated.Height / 2);
+            surface.DrawBitmap(bitmap, 0, 0);
+
+            return rotated;
+        }
+
+        public static SKImage[] GetImageRotations(SKBitmap Source)
+        {
+            lock(Source)
+            {
+                
+                SKBitmap Rotate90 = RotateBitmap(Source,90);
+                SKBitmap Rotate180 = RotateBitmap(Source,180);
+                SKBitmap Rotate270 = RotateBitmap(Source, 270);
+                
+                
+                return new SKImage[] { SKImage.FromBitmap(Source), SKImage.FromBitmap(Rotate90), SKImage.FromBitmap(Rotate180), SKImage.FromBitmap(Rotate270) };
+
+
+            }
+        }
+
         static Color DefaultTint = Color.Transparent;
         protected PlayFieldBackgroundInfo GetColoredBackground(Color MainColor,Color? TintColor = null)
         {
@@ -108,7 +153,7 @@ namespace BASeTris
             BlockInnerColor = InnerColor;
         }
     }
-
+    
     public class StandardTetrominoTheme : TetrominoTheme
     {
         StandardColouredBlock.BlockStyle _Style;

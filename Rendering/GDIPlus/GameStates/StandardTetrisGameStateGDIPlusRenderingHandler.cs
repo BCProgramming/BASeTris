@@ -155,7 +155,8 @@ namespace BASeTris.Rendering.GDIPlus
                     PointF TextPos = new PointF(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
                     String StatText = "" + PieceCounts[i];
                     SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                    Image TetrominoImage = Source.NominoImages[useTypes[i]];
+                    String sNomTypeKey = Source.PlayField.Theme.GetNominoTypeKey(useTypes[i], Source.GameHandler, Source.PlayField);
+                    Image TetrominoImage = TetrisGame.Choose(Source.NominoImages[sNomTypeKey]);
                     PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
 
                     g.DrawImage(TetrominoImage, ImagePos);
@@ -170,7 +171,7 @@ namespace BASeTris.Rendering.GDIPlus
                 if (Source.NextBlocks.Count > 0)
                 {
                     var QueueList = Source.NextBlocks.ToArray();
-                    Image[] NextTetrominoes = (from t in QueueList select Source.NominoImages[t.GetType()]).ToArray();
+                    Image[] NextTetrominoes = (from t in QueueList select TetrisGame.Choose(Source.NominoImages[Source.PlayField.Theme.GetNominoKey(t,Source.GameHandler,Source.PlayField)])).ToArray();
                     Image DisplayBox = TetrisGame.Imageman["display_box"];
                     //draw it at 40,420. (Scaled).
                     float ScaleDiff = 0;
@@ -256,7 +257,8 @@ namespace BASeTris.Rendering.GDIPlus
 
                 if (Source.HoldBlock != null)
                 {
-                    Image HoldTetromino = Source.NominoImages[Source.HoldBlock.GetType()];
+                    var GetKey = Source.PlayField.Theme.GetNominoKey(Source.HoldBlock, Source.GameHandler, Source.PlayField);
+                    Image HoldTetromino = Source.GetTetrominoImage(pOwner, Source.HoldBlock);
                     g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                 }
             }

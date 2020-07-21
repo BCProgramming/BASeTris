@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>BASeTris</RootNamespace>
     <AssemblyName>BASeTris</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -27,9 +27,10 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -38,6 +39,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -51,6 +53,49 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>BaseTris.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Bass.Net, Version=2.4.10.3, Culture=neutral, PublicKeyToken=b7566c273e6ef480, processorArchitecture=MSIL">
@@ -85,6 +130,7 @@
     <Compile Include="AssetManager\AssetManager.cs" />
     <Compile Include="AssetManager\DeletionHelper.cs" />
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
+    <Compile Include="AssetManager\NullSoundDriver.cs" />
     <Compile Include="BackgroundDrawers\IBackground.cs" />
     <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
@@ -102,6 +148,7 @@
     <Compile Include="GameStates\Menu\GenericMenuState.cs" />
     <Compile Include="GameStates\ICompositeState.cs" />
     <Compile Include="GameStates\Menu\MenuStateMusicMenuItem.cs" />
+    <Compile Include="GameStates\TemporaryPauseGameState.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />
@@ -191,7 +238,6 @@
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\ShowHighScoresStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\TetrisGameHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
@@ -221,7 +267,6 @@
     <Compile Include="Theme\Block\CustomPixelTheme.cs" />
     <Compile Include="Theme\Block\DrMarioTheme.cs" />
     <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />
-    <Compile Include="Theme\Block\MappedPixelBlockTheme.cs" />
     <Compile Include="Theme\Block\NESTetrominoTheme.cs" />
     <Compile Include="Theme\Block\OutlinedTetrominoTheme.cs" />
     <Compile Include="Theme\Block\SNESTetrominoTheme.cs" />
@@ -240,6 +285,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Pixel.ttf" />
     <EmbeddedResource Include="LCD.ttf" />

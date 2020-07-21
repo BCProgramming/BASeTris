@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using BASeTris.AssetManager;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
@@ -167,7 +168,7 @@ namespace BASeTris
                 if (BlockData[i].Block is StandardColouredBlock)
                 {
                     ((StandardColouredBlock)BlockData[i].Block).DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    ((StandardColouredBlock)BlockData[i].Block)._RotationImages = GetImageRotations(BlockImages[i]);
+                    ((StandardColouredBlock)BlockData[i].Block)._RotationImagesSK =  (from p in GetImageRotations(BlockImages[i]) select SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(p))).ToArray();
                 }
             }
         }

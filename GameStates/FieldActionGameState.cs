@@ -230,7 +230,7 @@ namespace BASeTris.GameStates
         {
             Color.Red,Color.White,Color.Yellow,Color.Orange,Color.Pink };
         const int ParticleCountPerBlock = 50;
-        private readonly TimeSpan ClearParticleTTL = new TimeSpan(0, 0, 0, 2);
+        private readonly long ClearParticleTTL = 600;
         private void AddParticles(IStateOwner pOwner,int BlockX,int BlockY,int DirectionMultiplier)
         {
             //the actual block we are clearing...
@@ -268,7 +268,7 @@ namespace BASeTris.GameStates
                     
 
                     BaseParticle p = new BaseParticle(NewParticlePoint, Velocity, ChosenColor);
-                    p.TTL = ClearParticleTTL;
+                    p.TTL = (uint)ClearParticleTTL;
                     _BaseState.Particles.Add(p);
 
                 }

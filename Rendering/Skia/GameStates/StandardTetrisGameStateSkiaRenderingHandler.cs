@@ -17,6 +17,7 @@ using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
@@ -109,7 +110,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 
                 TetrisFieldDrawSkiaParameters parameters = (TetrisFieldDrawSkiaParameters)grabdata;
                 parameters.LastFieldSave = Element.Bounds;
-
+                //if (!Source.GameHandler.AllowFieldImageCache) parameters.FieldBitmap = null;
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
             }
             var particledrawer = RenderingProvider.Static.GetHandler(typeof(List<BaseParticle>), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters));
@@ -247,9 +248,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                     //SKPaint skp = new SKPaint(){Style = SKPaintStyle.Fill,Color=;
                     //g.DrawRect();
                     g.DrawRect(Bounds.Left, Bounds.Top + 5, Bounds.Width-10, (int)(450 * Factor), LightenBrush);
-                    String[] StatLabels = new string[] { "Time:", "Score:", "Top:", "Lines:" };
-                    int LineCount = Source.GameStats is TetrisStatistics ? (Source.GameStats as TetrisStatistics).LineCount : 0;
-                    String[] StatValues = new string[] { FormatGameTime(pOwner), useStats.Score.ToString(), TopScore.ToString(), LineCount.ToString() };
+                    //String[] StatLabels = new string[] { "Time:", "Score:", "Top:", "Lines:" };
+                    //int LineCount = Source.GameStats is TetrisStatistics ? (Source.GameStats as TetrisStatistics).LineCount : 0;
+                    //String[] StatValues = new string[] { FormatGameTime(pOwner), useStats.Score.ToString(), TopScore.ToString(), LineCount.ToString() };
                     
                     WhiteBrush.TextSize = BlackBrush.TextSize = DesiredFontSize;
                     WhiteBrush.Typeface = BlackBrush.Typeface = TetrisGame.RetroFontSK;
@@ -258,10 +259,15 @@ namespace BASeTris.Rendering.Skia.GameStates
                     BlackBrush.MeasureText("#", ref MeasureValue);
                     SKPoint StatPosition = new SKPoint(Bounds.Left + (int)(7 * Factor), Bounds.Top + MeasureLabel.Height + (int)(14 * Factor));
                     float CurrentYPosition = StatPosition.Y+MeasureLabel.Height;
-                    for (int statindex = 0; statindex < StatLabels.Length; statindex++)
+                    var StatData = useStats.GetDisplayStatistics(pOwner, Source);
+
+                    foreach(var statkvp in StatData)
+                    //for (int statindex = 0; statindex < StatLabels.Length; statindex++)
                     {
-                       float LabelWidth = BlackBrush.MeasureText(StatLabels[statindex] + "##", ref MeasureLabel);
-                       float ValueWidth = BlackBrush.MeasureText(StatValues[statindex] + "##", ref MeasureValue);
+                        String Label = statkvp.Key;
+                        String Value = statkvp.Value;
+                       float LabelWidth = BlackBrush.MeasureText(Label + "##", ref MeasureLabel);
+                       float ValueWidth = BlackBrush.MeasureText(Value + "##", ref MeasureValue);
 
                         //var MeasureLabel = g.MeasureString(StatLabels[statindex], standardFont);
                         //var MeasureValue = g.MeasureString(StatValues[statindex], standardFont);
@@ -274,14 +280,14 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
                         //draw labels...
-                        g.DrawText(StatLabels[statindex], new SKPoint(StatPosition.X + 5, CurrentYPosition + 5), WhiteBrush);
-                        g.DrawText(StatLabels[statindex], new SKPoint(StatPosition.X, CurrentYPosition), BlackBrush);
+                        g.DrawText(Label, new SKPoint(StatPosition.X + 5, CurrentYPosition + 5), WhiteBrush);
+                        g.DrawText(Label, new SKPoint(StatPosition.X, CurrentYPosition), BlackBrush);
 
 
                         SKPoint ValuePosition = new SKPoint((float)(Bounds.Right - ((MeasureValue.Width) + (5 * Factor))), CurrentYPosition);
 
-                        g.DrawText(StatValues[statindex], new SKPoint(ValuePosition.X + 5, ValuePosition.Y + 5), WhiteBrush);
-                        g.DrawText(StatValues[statindex], new SKPoint(ValuePosition.X , ValuePosition.Y ), BlackBrush);
+                        g.DrawText(Value, new SKPoint(ValuePosition.X + 5, ValuePosition.Y + 5), WhiteBrush);
+                        g.DrawText(Value, new SKPoint(ValuePosition.X , ValuePosition.Y ), BlackBrush);
                         //TetrisGame.DrawTextSK(g, PaintInfo);
 
 
@@ -317,7 +323,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                     //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
                     for (int i = 0; i < useTypes.Length; i++)
                     {
-                        BlackBrush.TextSize = DesiredFontSize;
+                        if (Source.GameHandler is StandardTetrisHandler)
+                        {
+                            BlackBrush.TextSize = DesiredFontSize;
                         WhiteBrush.TextSize = DesiredFontSize;
                         SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
                         SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
@@ -328,8 +336,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                         SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
                         PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
                         SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width*1.5f, ImagePos.Y + TetrominoImage.Height*1.5f);
-                        if (Source.GameHandler is TetrisGameHandler)
-                        {
+
                             g.DrawBitmap(TetrominoImage, DrawRect, null);
 
                             TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
@@ -346,7 +353,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     if (Source.NextBlocks.Count > 0)
                     {
                         var QueueList = Source.NextBlocks.ToArray();
-                        SKBitmap[] NextTetrominoes = (from t in QueueList select Source.GetTetrominoSKBitmap(t.GetType())).ToArray();
+                        SKBitmap[] NextTetrominoes = (from t in QueueList select Source.GetTetrominoSKBitmap(pOwner,t)).ToArray();
                         SKBitmap DisplayBox = TetrisGame.Imageman.GetSKBitmap("display_box");
                         //draw it at 40,420. (Scaled).
                         float ScaleDiff = 0;

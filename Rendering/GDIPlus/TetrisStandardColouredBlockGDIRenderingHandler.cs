@@ -6,6 +6,7 @@ using BASeCamp.Rendering;
 using BaseTris;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Blocks;
+using SkiaSharp;
 
 namespace BASeTris.Rendering.GDIPlus
 {
@@ -37,7 +38,7 @@ namespace BASeTris.Rendering.GDIPlus
                 }
 
                 Source.GummyBitmap = GummyBitmaps[IndexData];
-                Source._RotationImages = new Image[] { Source.GummyBitmap };
+                Source._RotationImagesSK = new SKImage[] {SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(Source.GummyBitmap))};
                 Source.CurrentImageHash = IndexData.GetHashCode();
             }
         }

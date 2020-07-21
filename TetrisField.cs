@@ -85,7 +85,9 @@ namespace BASeTris
             dropLength = 0;
             while (true)
             {
-                if (CanFit(Duplicator, Duplicator.X, Duplicator.Y + 1))
+                var fitresult = CanFit(Duplicator, Duplicator.X, Duplicator.Y + 1, true, new Nomino[] { Source });
+                //ghost drops will show up "through" any active blocks, since active blocks don't actual set blocks..
+                if (new CanFitResultConstants[] { CanFitResultConstants.CanFit, CanFitResultConstants.CantFit_Active }.Contains(fitresult))
                 {
                     dropLength++;
                     Duplicator.SetY(pOwner, Duplicator.Y + 1);
@@ -291,8 +293,9 @@ namespace BASeTris
 
         DateTime LastSetGroup = DateTime.MinValue;
 
-        public void SetGroupToField(Nomino bg)
+        public IList<Point> SetGroupToField(Nomino bg)
         {
+            List<Point> Result = new List<Point>();
             lock (this)
             {
                 lock (ActiveBlockGroups)
@@ -306,7 +309,19 @@ namespace BASeTris
                         int RowPos = groupblock.Y + bg.Y;
                         int ColPos = groupblock.X + bg.X;
                         if (FieldContents[RowPos][ColPos] == null)
+                        {
                             FieldContents[RowPos][ColPos] = groupblock.Block;
+                            Result.Add(new Point(ColPos, RowPos));
+                        }
+                        else
+                        {
+                            //let's hope this is a falling block...
+                            //go up until we can apply the block.
+
+
+
+                            ;
+                        }
                     }
 
                     if (ActiveBlockGroups.Contains(bg)) RemoveBlockGroup(bg);
@@ -314,12 +329,45 @@ namespace BASeTris
                     HasChanged = true;
                 }
             }
+            return Result;
         }
-
-        public bool CanFit(Nomino bg, int X, int Y)
+        public enum CanFitResultConstants
         {
+            /// <summary>
+            /// The nomino Can fit
+            /// </summary>
+            CanFit,
+            /// <summary>
+            /// The nomino cannot fit, because it is blocked by a fixed block on the field.
+            /// </summary>
+            CantFit_Field,
+            /// <summary>
+            /// The Nomino can't fit because it is blocked by an active nomino.
+            /// </summary>
+            CantFit_Active
+        }
+        public CanFitResultConstants CanFit(Nomino bg, int X, int Y,bool SkipActiveChecks,Nomino[] AdditionalIgnores = null)
+        {
+            
+            HashSet<Point> ActiveBlocks = new HashSet<Point>();
+            //this routine handles other Block Groups as well, allowing multiple to exist at once in the play field, and be moved.
+            //eg you cannot rotate or move an Active Group such that it will interfere with another active Group.
+            //One consideration here is that the order of the groups will matter, in the sense that if one is processed to move first then it can be blocked even if it would be able to move
+            //after a later group moves, which may create as few unusual side-effects.
+            //let's start off by creating a HashSet of Point structs listing the field positions of other active groups than the specified Nomino.
+            foreach (var active in ActiveBlockGroups)
+            {
+                if(active != bg && (AdditionalIgnores==null|| !AdditionalIgnores.Contains(active)))
+                {
+                    foreach(var check in active)
+                    {
+                        ActiveBlocks.Add(new Point(active.X+check.X, active.Y+check.Y));
+                    }
+                }
+            }
             IList<NominoElement> Contacts = new List<NominoElement>();
             bool result = true;
+            bool ActiveTouched = false;
             foreach (var checkblock in bg)
             {
                 int CheckRow = Y + checkblock.Y;
@@ -337,23 +385,29 @@ namespace BASeTris
                 else
                 {
                     var grabpos = FieldContents[CheckRow][CheckCol];
-                    if (grabpos != null)
+                    var touchesactive = !SkipActiveChecks && ActiveBlocks.Contains(new Point(CheckCol, CheckRow));
+                    if(touchesactive)
+                    {
+                        ActiveTouched |= touchesactive;
+                    }
+                    if (grabpos != null || touchesactive)
                     {
                         result = false;
                         Contacts.Add(checkblock);
                     }
                 }
             }
-
-            return result;
+            return ActiveTouched ? CanFitResultConstants.CantFit_Active : result ? CanFitResultConstants.CanFit : CanFitResultConstants.CantFit_Field;
         }
 
         public bool CanRotate(Nomino bg, bool ccw)
         {
+            
             Nomino duped = new Nomino(bg);
             duped.Rotate(ccw);
             duped.Clamp(RowCount, ColCount);
-            return CanFit(duped, bg.X, bg.Y);
+            //we need to pass in bg for the additional argument this time, since we duplicated to a new nomino it will incorrectly get blocked by the original by CanFit otherwise.
+            return CanFit(duped, bg.X, bg.Y,false,new Nomino[] { bg })==CanFitResultConstants.CanFit;
         }
 
         public float GetBlockWidth(RectangleF ForBounds)

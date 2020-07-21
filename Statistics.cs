@@ -3,12 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.GameStates;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
     public abstract class BaseStatistics
     {
+        public virtual Dictionary<String, String> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
+        {
+
+            //stats:  Time, Score, Top Score
+
+
+            var TopScore = Source.GetLocalScores() == null ? 0 : Source.GetLocalScores().GetScores().First().Score;
+            int MaxScoreLength = Math.Max(TopScore.ToString().Length, Score.ToString().Length);
+
+            String CurrentScoreStr = Score.ToString().PadLeft(MaxScoreLength);
+            String TopScoreStr = TopScore.ToString().PadLeft(MaxScoreLength);
+
+            String[] StatLabels = new string[] { "Time:", "Score:", "Top:", "Lines:" };
+            
+
+
+            return new Dictionary<string, string>()
+            {
+                {"Time",FormatGameTime(pOwner) },
+                { "Score",CurrentScoreStr },
+                { "Top",TopScoreStr }
+            };
+
+            
+
+
+
+        }
+        protected String FormatGameTime(IStateOwner stateowner)
+        {
+            TimeSpan useCalc = stateowner.GetElapsedTime();
+            return useCalc.ToString(@"hh\:mm\:ss");
+        }
         public int Score = 0;
         private TimeSpan[] LevelReachTimes = new TimeSpan[] { TimeSpan.Zero };
 
@@ -28,15 +62,26 @@ namespace BASeTris
     }
     public class DrMarioStatistics : BaseStatistics
     {
-
+        public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
+        {
+            return base.GetDisplayStatistics(pOwner, Source);
+            //we want to show a VIRUS: count too, but we need to 
+            //implement that into the handler first for us to access here!.
+        }
     }
     public class TetrisStatistics:BaseStatistics
     {
-        
 
-        
 
-      
+
+
+        public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
+        {
+            var result = base.GetDisplayStatistics(pOwner, Source);
+            int LineCount = Source.GameStats is TetrisStatistics ? (Source.GameStats as TetrisStatistics).LineCount : 0;
+            result.Add("Lines", LineCount.ToString());
+            return result;
+        }
 
         public Dictionary<String, int> GetPieceCounts()
         {

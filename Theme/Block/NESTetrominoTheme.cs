@@ -63,9 +63,9 @@ namespace BASeTris.Theme.Block
         {
             return new SKPointI(9, 9);
         }
-        protected override bool IsRotatable(NominoElement testvalue)
+        protected override BlockFlags GetBlockFlags(NominoElement testvalue)
         {
-            return false;
+            return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
         public override SKColor GetColor(TetrisField field, Nomino Element, NESBlockTypes BlockType, BCT PixelType)
         {
@@ -104,19 +104,19 @@ namespace BASeTris.Theme.Block
             return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
 
-        public override NESBlockTypes GetBlockType(Nomino group, NominoElement element, TetrisField field)
+        public override BlockTypeReturnData  GetBlockType(Nomino group, NominoElement element, TetrisField field)
         {
             var bg = group;
             if (bg is Tetromino_I || bg is Tetromino_T || bg is Tetromino_O)
             {
-                return NESBlockTypes.Boxed;
+                return new BlockTypeReturnData(NESBlockTypes.Boxed);
             }
             else if (bg is Tetromino_J || bg is Tetromino_Z)
-                return NESBlockTypes.Darker;
+                return new BlockTypeReturnData(NESBlockTypes.Darker);
             else if (bg is Tetromino)
-                return NESBlockTypes.Lighter;
+                return new BlockTypeReturnData(NESBlockTypes.Lighter);
             else
-                return TetrisGame.Choose(new NESBlockTypes[] { NESBlockTypes.Boxed, NESBlockTypes.Darker, NESBlockTypes.Lighter });
+                return new BlockTypeReturnData(TetrisGame.Choose(new NESBlockTypes[] { NESBlockTypes.Boxed, NESBlockTypes.Darker, NESBlockTypes.Lighter }));
 
 
 

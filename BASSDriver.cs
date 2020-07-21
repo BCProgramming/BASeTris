@@ -264,7 +264,7 @@ namespace BASeTris.AssetManager
             string pathuse = LoadProperDLL(x86DLL, x64DLL); //load the x64 or x86 version as needed
             loadedbassplugs = Bass.BASS_PluginLoadDirectory(pathuse);
 
-            Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
+            var result = Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
 
             //Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 10 + info.minbuf + 1);
             // default buffer size = update period + 'minbuf' + 1ms extra margin

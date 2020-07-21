@@ -16,10 +16,10 @@ namespace BASeTris.Duomino
             new Func<Nomino>[]
             {
                 () => new Duomino(),
-                
+
             };
 
-       
+
 
         public static Choosers.BlockGroupChooser BagTetrominoChooser()
         {
@@ -28,14 +28,27 @@ namespace BASeTris.Duomino
         }
         private static Point[] Duomino_Point_1 = new Point[]
     {
-            new Point(1, 1), new Point(1, 1),new Point(1, 1),new Point(1, 1)
+            new Point(0, 0), new Point(0, 0),new Point(1, 0),new Point(0, 1)
     };
         private static Point[] Duomino_Point_2 = new Point[]
     {
-            new Point(2, 1), new Point(1, 2),new Point(0, 1),new Point(1, 0)
+            new Point(1, 0), new Point(0, 1),new Point(0, 0),new Point(0, 0)
     };
 
-
+        public NominoElement FirstBlock
+        {
+            get
+            {
+                return BlockData.First();
+            }
+        }
+        public NominoElement SecondBlock
+        {
+            get
+            {
+                return BlockData.Last();
+            }
+        }
 
         public Duomino()
         {

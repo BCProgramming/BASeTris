@@ -81,7 +81,7 @@ namespace BASeTris.GameStates.Menu
                     //start a new game.
                     if(pOwner is IGamePresenter igp)
                     {
-                        bool DrMarioGame = false;
+                        bool DrMarioGame = true;
                         IGameCustomizationHandler Handler =  DrMarioGame? (IGameCustomizationHandler)new DrMarioHandler():(IGameCustomizationHandler)new StandardTetrisHandler(); 
                         pOwner.CurrentState = new GameplayGameState(Handler, null,TetrisGame.Soundman);
                         

@@ -19,9 +19,10 @@ namespace BASeTris.GameStates.GameHandlers
         private int LastScoreLines = 0;
         public IList<HotLine> HotLines { get; set; } = new List<HotLine>();
         private Choosers.BlockGroupChooser _Chooser;
-        
+        public bool AllowFieldImageCache { get { return true; } }
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
+        public StandardGameOptions GameOptions { get;  } = new StandardGameOptions();
         public Choosers.BlockGroupChooser Chooser
         {
             get
@@ -30,6 +31,17 @@ namespace BASeTris.GameStates.GameHandlers
                 { _Chooser = GetChooser(); }
                 return _Chooser;
             }
+        }
+        public Nomino[] GetNominos()
+        {
+            Tetromino_I TetI = new Tetromino_I();
+            Tetromino_J TetJ = new Tetromino_J();
+            Tetromino_L TetL = new Tetromino_L();
+            Tetromino_O TetO = new Tetromino_O();
+            Tetromino_S TetS = new Tetromino_S();
+            Tetromino_T TetT = new Tetromino_T();
+            Tetromino_Z TetZ = new Tetromino_Z();
+            return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ };
         }
         private Choosers.BlockGroupChooser GetChooser()
         {

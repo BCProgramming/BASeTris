@@ -26,11 +26,14 @@ using SkiaSharp;
 using OpenTK.Input;
 using BASeTris.Rendering.Adapters;
 using BASeTris.GameStates.GameHandlers;
+using System.Runtime.InteropServices;
 
 namespace BASeTris
 {
     public class TetrisGame : IStateOwner
     {
+        [DllImport("kernel32.dll")]
+        public static extern uint GetTickCount();
         public enum KeyInputSource
         {
             Input_Keyboard,
@@ -287,11 +290,12 @@ namespace BASeTris
             if (ScoreMan == null) ScoreMan = new XMLScoreManager<TetrisHighScoreData>(ScoreFile);
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
-
+            
             Imageman = new ImageManager(TetrisGame.GetSearchFolders());
 
             String[] AudioAssets = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Audio")).ToArray();
-            Soundman = new cNewSoundManager(new BASSDriver(), AudioAssets);
+            var Driver = new BASSDriver();
+            Soundman = new cNewSoundManager(Driver, AudioAssets);
 
             RetroFont = GetResourceFont("BASeTris.Pixel.ttf");
             LCDFont = GetResourceFont("BASeTris.LCD.ttf");
@@ -653,86 +657,65 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
-        public static Dictionary<Type, SKBitmap> GetTetrominoBitmapsSK(SKRect Bounds, TetrominoTheme UseTheme, IGameCustomizationHandler handler,TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<String, List<SKBitmap>> GetTetrominoBitmapsSK(SKRect Bounds, TetrominoTheme UseTheme, IGameCustomizationHandler handler,TetrisField PlayField = null, float ScaleFactor = 1)
         {
-            Dictionary<Type, SKBitmap> TetrominoImages = new Dictionary<Type, SKBitmap>();
+            Dictionary<String, List<SKBitmap>> TetrominoImages = new Dictionary<String, List<SKBitmap>>();
             float useSize = 18 * ScaleFactor;
             SKSize useTetSize = new SKSize(useSize, useSize);
-            Tetromino_I TetI = new Tetromino_I();
-            Tetromino_J TetJ = new Tetromino_J();
-            Tetromino_L TetL = new Tetromino_L();
-            Tetromino_O TetO = new Tetromino_O();
-            Tetromino_S TetS = new Tetromino_S();
-            Tetromino_T TetT = new Tetromino_T();
-            Tetromino_Z TetZ = new Tetromino_Z();
+            Nomino[] AllNominos = handler.GetNominos();
+            SKBitmap[] bitmaps = new SKBitmap[AllNominos.Length];
+            foreach(var iterate in AllNominos)
+            {
+                UseTheme.ApplyTheme(iterate, handler, PlayField);
+            }
 
-
-            UseTheme.ApplyTheme(TetI, handler,PlayField);
-            UseTheme.ApplyTheme(TetJ, handler,PlayField);
-            UseTheme.ApplyTheme(TetL, handler,PlayField);
-            UseTheme.ApplyTheme(TetO, handler,PlayField);
-            UseTheme.ApplyTheme(TetS, handler,PlayField);
-            UseTheme.ApplyTheme(TetT, handler,PlayField);
-            UseTheme.ApplyTheme(TetZ, handler,PlayField);
-            SKBitmap Image_I = OutlineImageSK(TetI.GetImageSK(useTetSize));
-            SKBitmap Image_J = OutlineImageSK(TetJ.GetImageSK(useTetSize));
-            SKBitmap Image_L = OutlineImageSK(TetL.GetImageSK(useTetSize));
-            SKBitmap Image_O = OutlineImageSK(TetO.GetImageSK(useTetSize));
-            SKBitmap Image_S = OutlineImageSK(TetS.GetImageSK(useTetSize));
-            SKBitmap Image_T = OutlineImageSK(TetT.GetImageSK(useTetSize));
-            SKBitmap Image_Z = OutlineImageSK(TetZ.GetImageSK(useTetSize));
-
-
-            TetrominoImages.Add(typeof(Tetromino_I), Image_I);
-            TetrominoImages.Add(typeof(Tetromino_J), Image_J);
-            TetrominoImages.Add(typeof(Tetromino_L), Image_L);
-            TetrominoImages.Add(typeof(Tetromino_O), Image_O);
-            TetrominoImages.Add(typeof(Tetromino_S), Image_S);
-            TetrominoImages.Add(typeof(Tetromino_T), Image_T);
-            TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
+            for(int i=0;i<AllNominos.Length;i++)
+            {
+                bitmaps[i] = TetrisGame.OutlineImageSK(AllNominos[i].GetImageSK(useTetSize));
+                String GetNominoKey = UseTheme.GetNominoKey(AllNominos[i], handler, PlayField);
+                if (!TetrominoImages.ContainsKey(GetNominoKey)) TetrominoImages.Add(GetNominoKey, new List<SKBitmap>());
+                TetrominoImages[GetNominoKey].Add(bitmaps[i]);
+            }
+            
             return TetrominoImages;
         }
-        public static Dictionary<Type, Image> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme,IGameCustomizationHandler Handler, TetrisField PlayField = null, float ScaleFactor = 1)
+        public static T[] Coalesce<K,T>(Dictionary<K,List<T>> Input)
         {
-            Dictionary<Type, Image> TetrominoImages = new Dictionary<Type, Image>();
+            List<T> Result = new List<T>();
+            foreach(var iterate in Input)
+            {
+                Result.AddRange(iterate.Value);
+            }
+
+            return Result.ToArray();
+
+        }
+        public static Dictionary<String, List<Image>> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme,IGameCustomizationHandler Handler, TetrisField PlayField = null, float ScaleFactor = 1)
+        {
+            Dictionary<String, List<Image>> TetrominoImages = new Dictionary<String, List<Image>>();
             float useSize = 18 * ScaleFactor;
             SizeF useTetSize = new SizeF(useSize, useSize);
-            Tetromino_I TetI = new Tetromino_I();
-            Tetromino_J TetJ = new Tetromino_J();
-            Tetromino_L TetL = new Tetromino_L();
-            Tetromino_O TetO = new Tetromino_O();
-            Tetromino_S TetS = new Tetromino_S();
-            Tetromino_T TetT = new Tetromino_T();
-            Tetromino_Z TetZ = new Tetromino_Z();
+            Nomino[] AllNominos = Handler.GetNominos();
+            Image[] bitmaps = new Image[AllNominos.Length];
+            
+            foreach(var nom in AllNominos)
+            {
+                UseTheme.ApplyTheme(nom, Handler, PlayField);
+            }
 
+            for(int i=0;i<AllNominos.Length;i++)
+            {
+                bitmaps[i] = OutLineImage(AllNominos[i].GetImage(useTetSize));
+                String NominoKey = UseTheme.GetNominoKey(AllNominos[i], Handler, PlayField);
+                if (!TetrominoImages.ContainsKey(NominoKey))
+                    TetrominoImages.Add(NominoKey, new List<Image>());
+                TetrominoImages[NominoKey].Add(bitmaps[i]);
+            }
 
-            UseTheme.ApplyTheme(TetI,Handler, PlayField);
-            UseTheme.ApplyTheme(TetJ, Handler,PlayField);
-            UseTheme.ApplyTheme(TetL, Handler,PlayField);
-            UseTheme.ApplyTheme(TetO, Handler,PlayField);
-            UseTheme.ApplyTheme(TetS, Handler,PlayField);
-            UseTheme.ApplyTheme(TetT, Handler,PlayField);
-            UseTheme.ApplyTheme(TetZ, Handler,PlayField);
-            Image Image_I = OutLineImage(TetI.GetImage(useTetSize));
-            Image Image_J = OutLineImage(TetJ.GetImage(useTetSize));
-            Image Image_L = OutLineImage(TetL.GetImage(useTetSize));
-            Image Image_O = OutLineImage(TetO.GetImage(useTetSize));
-            Image Image_S = OutLineImage(TetS.GetImage(useTetSize));
-            Image Image_T = OutLineImage(TetT.GetImage(useTetSize));
-            Image Image_Z = OutLineImage(TetZ.GetImage(useTetSize));
-
-
-            TetrominoImages.Add(typeof(Tetromino_I), Image_I);
-            TetrominoImages.Add(typeof(Tetromino_J), Image_J);
-            TetrominoImages.Add(typeof(Tetromino_L), Image_L);
-            TetrominoImages.Add(typeof(Tetromino_O), Image_O);
-            TetrominoImages.Add(typeof(Tetromino_S), Image_S);
-            TetrominoImages.Add(typeof(Tetromino_T), Image_T);
-            TetrominoImages.Add(typeof(Tetromino_Z), Image_Z);
             return TetrominoImages;
         }
 
-        private static Image OutLineImage(Image Input)
+        public static Image OutLineImage(Image Input)
         {
             Bitmap BuildImage = new Bitmap(Input.Width + 6, Input.Height + 6);
             using (Graphics useG = Graphics.FromImage(BuildImage))
@@ -764,7 +747,7 @@ namespace BASeTris
 
 
         //SkiaSharp implementation of OutlineImage.
-        private static SKBitmap OutlineImageSK(SKBitmap Input)
+        public static SKBitmap OutlineImageSK(SKBitmap Input)
         {
             int OutlineWidth = 3;
             SKImageInfo skinfo = new SKImageInfo(Input.Width + (OutlineWidth * 2), Input.Height + (OutlineWidth * 2));
@@ -772,7 +755,7 @@ namespace BASeTris
             using (SKCanvas useG = new SKCanvas(BuildImage))
             {
                 //may need to use a Color Matrix like the GDI+ version.
-
+                useG.Clear(SKColors.Transparent);
                 SKPaint Blacken = new SKPaint();
                 Blacken.ColorFilter = SKColorMatrices.GetBlackener();
                 int offset = OutlineWidth / 2;

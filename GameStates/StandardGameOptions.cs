@@ -1,12 +1,14 @@
-﻿using System;
+﻿using BASeCamp.Elementizer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace BASeTris.GameStates
 {
-    public class StandardGameOptions
+    public class StandardGameOptions:IXmlPersistable
     {
         //options for the standard game.
         public bool AllowHold = true;
@@ -29,5 +31,34 @@ namespace BASeTris.GameStates
                 if (!_MusicEnabled) TetrisGame.Soundman.StopMusic();
             }
         }
+        public StandardGameOptions()
+        {
+
+        }
+        public StandardGameOptions(XElement src,Object Data)
+        {
+
+        }
+
+        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class OptionsManager
+    {
+        private Dictionary<String, StandardGameOptions> OptionData = new Dictionary<string, StandardGameOptions>();
+
+        public static OptionsManager Static = null;
+
+        public OptionsManager(String pXmlFileSource)
+        {
+
+        }
+
+
+
+
+
     }
 }

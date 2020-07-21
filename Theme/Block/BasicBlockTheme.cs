@@ -63,9 +63,9 @@ namespace BASeTris.Theme.Block
             return SKColors.Black;
             
         }
-        protected override bool IsRotatable(NominoElement testvalue)
+        protected override BlockFlags GetBlockFlags(NominoElement testvalue)
         {
-            return false;
+            return CustomPixelTheme<BBP, BasicBlockTypes>.BlockFlags.Static;
         }
         public override Dictionary<BasicBlockTypes, BBP[][]> GetBlockTypeDictionary()
         {
@@ -80,9 +80,9 @@ namespace BASeTris.Theme.Block
             return CustomPixelTheme<BBP, BasicBlockTypes>.BlockFlags.Static;
         }
 
-        public override BasicBlockTypes GetBlockType(Nomino group, NominoElement element, TetrisField field)
+        public override BlockTypeReturnData GetBlockType(Nomino group, NominoElement element, TetrisField field)
         {
-            return BasicBlockTypes.Basic;
+            return new BlockTypeReturnData(BasicBlockTypes.Basic);
         }
 
         public override BasicBlockTypes[] PossibleBlockTypes()

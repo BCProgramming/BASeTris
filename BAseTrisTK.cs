@@ -222,13 +222,15 @@ namespace BASeTris
        
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            if (!TetrisGame.Imageman.ImagePrepped) return;
             Debug.Print("RenderFrame");
             base.OnRenderFrame(e);
             try
             {
                 var CurrentGameState = _Present.Game.CurrentState;
-                Title = $"State:{CurrentGameState.GetType().Name}  (Vsync: {VSync}) FPS: {1f / e.Time:0}";
-
+                //int ParticleCount = CurrentGameState is GameplayGameState ? (CurrentGameState as GameplayGameState).Particles.Count : CurrentGameState is ICompositeState<GameplayGameState>?(CurrentGameState as ICompositeState<GameplayGameState>).GetComposite().Particles.Count :0;
+                Title = $"FPS: {1f / e.Time:0} State:{CurrentGameState.GetType().Name}";
+                
                 Color4 backColor;
                 backColor.A = 1.0f;
                 backColor.R = 0.1f;

@@ -38,7 +38,7 @@ namespace BASeTris.Rendering.Skia
                 }
 
                 Source.GummyBitmap =  SkiaSharp.Views.Desktop.Extensions.ToBitmap(GummyBitmaps[IndexData]);
-                Source._RotationImages = new Image[] { Source.GummyBitmap };
+                Source._RotationImagesSK = new SKImage[] { GummyBitmaps[IndexData] };
                 Source.CurrentImageHash = IndexData.GetHashCode();
             }
         }
@@ -170,7 +170,7 @@ namespace BASeTris.Rendering.Skia
         private SKImage ResizeImage(SKImage Source, Size newSize)
         {
             
-            SKBitmap result = new SKBitmap(newSize.Width, newSize.Height, SKColorType.Rgba8888,SKAlphaType.Premul);
+            SKBitmap result = new SKBitmap(newSize.Width, newSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
             
             using (SKCanvas bgr = new SKCanvas(result))
             {

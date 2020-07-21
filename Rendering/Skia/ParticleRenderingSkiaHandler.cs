@@ -65,19 +65,19 @@ namespace BASeTris.Rendering.Skia
 
             BCPoint PrevPosition = TranslatePosition(pOwner, pRenderTarget, Source.Position - Source.Velocity, Element);
 
-            var useAlpha = TranslateAlpha(Source);
-
-            using (SKPaint skp = new SKPaint() { Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha),StrokeWidth= 1.2f })
-            {
-                pRenderTarget.DrawLine(PrevPosition, usePosition, skp);
+            byte useAlpha =  TranslateAlpha(Source);
+            if (SharePaint == null) SharePaint = new SKPaint() { Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha), StrokeWidth = 1.2f };
+            else SharePaint.Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha);
+            pRenderTarget.DrawLine(PrevPosition, usePosition, SharePaint);
                 //pRenderTarget.DrawRect(new SKRect(usePosition.X, usePosition.Y, usePosition.X + 2, usePosition.Y + 2), skp);
-            }
+            
         }
+        private SKPaint SharePaint = null;
         protected byte TranslateAlpha(BaseParticle Source)
         {
             byte useAlpha = 255;
 
-            var PercentAlpha = 1 - ((float)Source.Age.Ticks / (float)Source.TTL.Ticks);
+            var PercentAlpha = 1 - ((float)Source.Age / (float)Source.TTL);
             //clamp
             PercentAlpha = PercentAlpha > 1 ? 1 : PercentAlpha < 0 ? 0 : PercentAlpha;
             useAlpha = (byte)(PercentAlpha * 255);

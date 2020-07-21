@@ -153,9 +153,10 @@ namespace BASeTris
         }
         private void GamepadInputThread()
         {
+            Thread.CurrentThread.IsBackground = true;
             while (true)
             {
-                Thread.Sleep(1);
+                Thread.Sleep(5);
                 CIS.CheckState();
             }
             ;

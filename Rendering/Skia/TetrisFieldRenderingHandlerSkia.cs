@@ -33,11 +33,11 @@ namespace BASeTris.Rendering.Skia
         {
             Draw(Source,Element,pOwner,pRenderTarget,Element.Bounds);
         }
-        public void DrawFieldContents(IStateOwner pState, TetrisField Source, TetrisFieldDrawSkiaParameters Element, SKCanvas g, SKRect Bounds)
+        public bool DrawFieldContents(IStateOwner pState, TetrisField Source, TetrisFieldDrawSkiaParameters Element, SKCanvas g, SKRect Bounds,bool animated)
         {
             float BlockWidth = Bounds.Width / Element.COLCOUNT;
             float BlockHeight = Bounds.Height / (Element.VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
-
+            bool FoundAnimated = false;
             for (int drawRow = Element.HIDDENROWS; drawRow < Element.ROWCOUNT; drawRow++)
             {
                 float YPos = (drawRow - Element.HIDDENROWS) * BlockHeight;
@@ -71,16 +71,26 @@ namespace BASeTris.Rendering.Skia
                 {
                     float XPos = drawCol * BlockWidth;
                     var TetBlock = currRow[drawCol];
+                    bool isAnim = false;
                     if (TetBlock != null)
                     {
-                        SKRect BlockBounds = new SKRect(XPos, YPos, XPos+BlockWidth, YPos+BlockHeight);
-                        TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState.Settings);
-                        RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);
+                        isAnim = Source.Theme.IsAnimated(TetBlock);
+                        if (isAnim == animated)
+                        {
+
+                            SKRect BlockBounds = new SKRect(XPos, YPos, XPos + BlockWidth, YPos + BlockHeight);
+                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState.Settings);
+                            RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);
+                        }
                     }
+                    FoundAnimated |= isAnim;
                 }
 
             }
+            if (FoundAnimated) {; }
+            return FoundAnimated;
         }
+        bool hadAnimated = false;
         public void Draw(TetrisField Source,TetrisFieldDrawSkiaParameters parms,IStateOwner pState, SKCanvas g, SKRect Bounds)
         {
             //first how big is each block?
@@ -94,8 +104,8 @@ namespace BASeTris.Rendering.Skia
                     SKBitmap BuildField = new SKBitmap(info, SKBitmapAllocFlags.ZeroPixels);
                     using (SKCanvas gfield = new SKCanvas(BuildField))
                     {
-                        gfield.Clear(SKColor.Empty);
-                        DrawFieldContents(pState, Source, parms, gfield, Bounds);
+                        gfield.Clear(SKColors.Transparent);
+                        hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds,false);
                         if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
                         parms.FieldBitmap = BuildField;
                     }
@@ -104,6 +114,12 @@ namespace BASeTris.Rendering.Skia
                 }
             }
             g.DrawBitmap(parms.FieldBitmap,new SKPoint(0,0));
+
+            if(hadAnimated)
+            {
+                DrawFieldContents(pState, Source, parms, g, Bounds, true);
+            }
+
 
             var activegroups = Source.GetActiveBlockGroups();
 
@@ -191,33 +207,34 @@ namespace BASeTris.Rendering.Skia
                     }
                     g.ResetMatrix();
 
-
-                    var GrabGhost = Source.GetGhostDrop(pState, bg, out int dl);
-                    if (GrabGhost != null)
+                    if (!bg.NoGhost)
                     {
-                        foreach (var iterateblock in bg)
+                        var GrabGhost = Source.GetGhostDrop(pState, bg, out int dl);
+                        if (GrabGhost != null)
                         {
+                            foreach (var iterateblock in bg)
+                            {
 
-                            float drawGhostX = BlockWidth * (GrabGhost.X+iterateblock.X);
-                            float drawGhostY = BlockHeight * (GrabGhost.Y + iterateblock.Y - 2);
+                                float drawGhostX = BlockWidth * (GrabGhost.X + iterateblock.X);
+                                float drawGhostY = BlockHeight * (GrabGhost.Y + iterateblock.Y - 2);
 
-                            SKRect BlockBounds = new SKRect(drawGhostX, drawGhostY, drawGhostX + BlockWidth, drawGhostY + BlockHeight);
+                                SKRect BlockBounds = new SKRect(drawGhostX, drawGhostY, drawGhostX + BlockWidth, drawGhostY + BlockHeight);
 
-                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, GrabGhost, pState.Settings);
-                            //ImageAttributes Shade = new ImageAttributes();
-                            //SKColorMatrices.GetFader
-                            //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
-                            //tbd.ApplyAttributes = Shade;
-                            //tbd.OverrideBrush = GhostBrush;
-                            tbd.ColorFilter = SKColorMatrices.GetFader(0.5f);
-                            var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
-                            GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
-                            //iterateblock.Block.DrawBlock(tbd);
+                                TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, GrabGhost, pState.Settings);
+                                //ImageAttributes Shade = new ImageAttributes();
+                                //SKColorMatrices.GetFader
+                                //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
+                                //tbd.ApplyAttributes = Shade;
+                                //tbd.OverrideBrush = GhostBrush;
+                                tbd.ColorFilter = SKColorMatrices.GetFader(0.5f);
+                                var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
+                                GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
+                                //iterateblock.Block.DrawBlock(tbd);
+                            }
+
+
                         }
-
-
                     }
-
 
                 }
             }

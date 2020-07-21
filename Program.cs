@@ -45,7 +45,7 @@ namespace BASeTris
         static void Main()
         {
 
-           
+
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);
@@ -56,7 +56,8 @@ namespace BASeTris
             //var testresult = SimpleAIEvolver.RunSimulation(new StoredBoardState.AIScoringRuleData());
             //SimpleAIEvolver.RunSimulations();
             //return;
-            
+            DebugLogger.EnableLogging = true;
+            Debug.Print("Started");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;

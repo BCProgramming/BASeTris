@@ -27,10 +27,13 @@ namespace BASeTris
     {
         public String SpecialName { get; set; }
 
+        public bool Controllable { get; set; } = true;
+        public bool MoveSound { get; set; } = false;
         public int FallSpeed { get; set; } = 250; //Higher is slower, number of ms between movements.
         public int X { get; set; }
         private int _Y = 0;
         public int Y { get { return _Y; } private set{ _Y = value; } }
+        public bool NoGhost { get; set; } = false;
         public void SetY(IStateOwner pOwner,int Value)
         {
             if(pOwner!=null) LastFall = pOwner.GetElapsedTime();
@@ -140,6 +143,7 @@ namespace BASeTris
         {
             return pField.BlockGroups.Any((b) => b == this);
         }
+        
         public Image GetImage(SizeF BlockSize)
         {
             RecalcExtents();
@@ -170,10 +174,11 @@ namespace BASeTris
         {
             RecalcExtents();
             Size BitmapSize = new Size((int)BlockSize.Width * (_GroupExtents.Width + 1), (int)BlockSize.Height * (_GroupExtents.Height + 1));
-            SKImageInfo info = new SKImageInfo(BitmapSize.Width,BitmapSize.Height,SKColorType.Rgba8888,SKAlphaType.Premul);
+            SKImageInfo info = new SKImageInfo(BitmapSize.Width,BitmapSize.Height,SKColorType.Rgba8888, SKAlphaType.Premul);
             SKBitmap BuiltRepresentation = new SKBitmap(info,SKBitmapAllocFlags.ZeroPixels);
             using (SKCanvas DrawRep = new SKCanvas(BuiltRepresentation))
             {
+                DrawRep.Clear(SKColors.Transparent);
                 foreach(NominoElement bge in this)
                 {
                     //RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
@@ -213,11 +218,19 @@ namespace BASeTris
             _GroupExtents = new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
             BlockData.Add(bge);
         }
-
+        public bool HasBlock(NominoBlock block)
+        {
+            return BlockDataLookup.ContainsKey(block);
+        }
         public void AddBlock(Point[] RotationPoints, NominoBlock tb)
         {
             NominoElement bge = new NominoElement(RotationPoints, tb);
             AddBlock(bge);
+        }
+        public void RemoveBlock(NominoBlock tb)
+        {
+            BlockData.Remove(FindEntry(tb));
+            //_DataLookup = null;
         }
 
         public NominoElement FindEntry(NominoBlock findBlock)

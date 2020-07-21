@@ -9,6 +9,24 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
+
+    [RenderingHandler(typeof(TemporaryInputPauseGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class TemporaryPauseGameStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, TemporaryInputPauseGameState, GameStateSkiaDrawParameters>
+    {
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TemporaryInputPauseGameState Source, GameStateSkiaDrawParameters Element)
+        {
+            SKCanvas g = pRenderTarget;
+            var Bounds = Element.Bounds;
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.GetComposite(), Element);
+        }
+
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, TemporaryInputPauseGameState Source, GameStateSkiaDrawParameters Element)
+        {
+            RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source.GetComposite(), Element);
+        }
+    }
+
+
     [RenderingHandler(typeof(UnpauseDelayGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
 
     public class UnpauseDelayStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, UnpauseDelayGameState, GameStateSkiaDrawParameters>

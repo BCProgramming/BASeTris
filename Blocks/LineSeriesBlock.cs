@@ -10,17 +10,17 @@ namespace BASeTris.Blocks
 {
     public class CascadingBlock :StandardColouredBlock
     {
-        public bool Fixed { get; set; } = false;
+        public virtual bool Fixed { get; set; } = false;
         public bool IsSupported(Nomino Owner, TetrisField field, List<CascadingBlock> RecursionBlocks = null)
         {
             if (Fixed) return true;
             if (RecursionBlocks == null)
             {
-                RecursionBlocks = new List<CascadingBlock>() { this };
+                RecursionBlocks = new List<CascadingBlock>() { };
             }
             else
             {
-                RecursionBlocks.Add(this);
+                
             }
           
 
@@ -52,24 +52,33 @@ namespace BASeTris.Blocks
                         NominoBlock belowBlock = field.Contents[CheckPosY][CheckPosX];
                         if (belowBlock != null)
                         {
-                            if (belowBlock is CascadingBlock cb && !RecursionBlocks.Contains(cb))
+                            //If the block below is part of the same nomino as the one we are checking, then we must disregard it as supporting this one. A Nomino cannot support itself!
+                            if (!Owner.HasBlock(belowBlock))
                             {
-                                if(cb.IsSupported(Owner,field,RecursionBlocks))
+                                if (belowBlock is CascadingBlock cb && !RecursionBlocks.Contains(cb))
                                 {
-                                    return true;
+                                    RecursionBlocks.Add(this);
+                                    if (cb.IsSupported(Owner, field, RecursionBlocks))
+                                    {
+                                        return true;
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                //we consider other block types to be solid.
-                                return true;
+                                else
+                                {
+                                    //we consider other block types to be solid.
+                                    return true;
 
+                                }
                             }
 
                         }
                     }
 
 
+                }
+                else
+                {
+                    ;
                 }
             }
 
@@ -89,8 +98,14 @@ namespace BASeTris.Blocks
             Red,
             Yellow
         }
+        public bool Popping { get; set; } = false;
         public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
         public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question.
+
+
+        //while part of a Nomino, items that are part of different sets will remain joined as expected. However when the nomino comes to 'rest' the sets are separated and any set that 
+        //can still freely fall will be split out to new Active Groups.
+        public int NominoSet { get; set; } = 0; 
  
         
     }
@@ -98,9 +113,10 @@ namespace BASeTris.Blocks
     
     public class LineSeriesMasterBlock : LineSeriesBlock
     {
+        public override bool Fixed { get { return true; }  set { } }
         public LineSeriesMasterBlock()
         {
-            this.Fixed = true;
+           
         }
 
     }

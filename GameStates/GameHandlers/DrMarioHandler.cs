@@ -16,6 +16,8 @@ namespace BASeTris.GameStates.GameHandlers
     {
         public DrMarioStatistics Statistics { get; private set; } = new DrMarioStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; }  }
+        public bool AllowFieldImageCache { get { return false; } }
+        public StandardGameOptions GameOptions { get; } = new StandardGameOptions() {AllowWallKicks = false } ;
         public BlockGroupChooser Chooser  {
             get {
                 var result = Duomino.Duomino.BagTetrominoChooser();
@@ -23,9 +25,14 @@ namespace BASeTris.GameStates.GameHandlers
                 return result;
     } }
 
+        public Nomino[] GetNominos()
+        {
+            return new Nomino[] { new Duomino.Duomino() };
+        }
         private void DrMarioNominoTweaker(Nomino Source)
         {
-            foreach(var iterate in Source)
+            //tweak the nomino and set a random combining index.
+            foreach (var iterate in Source)
             {
                 if (iterate.Block is LineSeriesBlock lsb)
                 {
@@ -33,7 +40,7 @@ namespace BASeTris.GameStates.GameHandlers
                 }
             }
             
-            //tweak the nomino and set a random combining index.
+            
         }
         public IHighScoreList<TetrisHighScoreData> GetHighScores()
         {
@@ -64,6 +71,8 @@ namespace BASeTris.GameStates.GameHandlers
                     if (CheckPos == null) break;
                     if (CheckPos.CombiningIndex == OurPos.CombiningIndex)
                         FirstCol = X;
+                    else
+                        break;
                 }
 
                 //starting from FirstCol we will work through and find all matching combining indices....
@@ -74,12 +83,17 @@ namespace BASeTris.GameStates.GameHandlers
             for(int X = FirstCol;X<state.PlayField.ColCount;X++)
                 {
                     var CheckPos = state.PlayField.Contents[StartPosition.Y][X] as LineSeriesBlock;
+                    if(CheckPos==null) break;
                     if(CheckPos.CombiningIndex==OurPos.CombiningIndex)
                     {
                         MaxCriticalHorz = Math.Max(MaxCriticalHorz, CheckPos.CriticalMass);
                         Horizontals.Add(new Point(X, StartPosition.Y));
                         HorizontalMass++;
 
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
             
@@ -105,7 +119,7 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 int CurrentMass = 0;
                 int FirstRow = StartPosition.Y;
-                //first, we look to the left until we no longer find a matching block.
+                //first, we look up until we no longer find a matching block.
 
                 for (int Y = StartPosition.Y - 1; Y > 0; Y--)
                 {
@@ -113,16 +127,22 @@ namespace BASeTris.GameStates.GameHandlers
                     if (CheckPos == null) break;
                     if (CheckPos.CombiningIndex == OurPos.CombiningIndex)
                         FirstRow = Y;
+                    else
+                        break;
                 }
 
+                
+
+
                 //starting from FirstCol we will work through and find all matching combining indices....
-                int VerticalMass = 1; //start at one since we know we have one block.
+                int VerticalMass = 0; //start at one since we know we have one block.
                 int MaxCriticalVert = 4;
                 List<Point> Verticals = new List<Point>();
                 Verticals.Add(StartPosition);
                 for (int Y = FirstRow; Y < state.PlayField.RowCount; Y++)
                 {
                     var CheckPos = state.PlayField.Contents[Y][StartPosition.X] as LineSeriesBlock;
+                    if (CheckPos == null) break;
                     if (CheckPos.CombiningIndex == OurPos.CombiningIndex)
                     {
                         MaxCriticalVert = Math.Max(MaxCriticalVert, CheckPos.CriticalMass);
@@ -130,9 +150,13 @@ namespace BASeTris.GameStates.GameHandlers
                         VerticalMass++;
 
                     }
+                    else
+                    {
+                        break;
+                    }
                 }
 
-                if (VerticalMass > MaxCriticalVert)
+                if (VerticalMass >= MaxCriticalVert)
                 {
                     foreach (var iterate in Verticals)
                     {
@@ -145,9 +169,20 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return FoundPoints;
         }
+        /// <summary>
+        /// Searches the Field to find Critical masses. These are cases where the necessary number of blocks are lined up.
+        /// returns the position (X=Column, Y=Row) in the gamefield that these were found.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="pOwner"></param>
+        /// <param name="StartPosition"></param>
+        /// <returns></returns>
         private HashSet<Point> FindCriticalMasses(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
         {
-
+            if (StartPosition.X==7 && StartPosition.Y==5)
+            {
+                ;
+            }
             HashSet<Point> Horizontal = FindCriticalMassesHorizontal(state, pOwner, StartPosition);
             HashSet<Point> Vertical = FindCriticalMassesVertical(state, pOwner, StartPosition);
             foreach(Point verticalpoint in Vertical)
@@ -157,10 +192,207 @@ namespace BASeTris.GameStates.GameHandlers
             return Horizontal;
 
         }
+        public List<Nomino> ProcessBlockDroppage(GameplayGameState state, int Column,int Row, ref HashSet<Nomino> AdditionalSkipBlocks)
+        {
+            List<Nomino> CreateResult = new List<Nomino>();
+            var currentblock = state.PlayField.Contents[Row][Column];
+            bool isPopping = false;
+            if (currentblock != null)
+            {
+                if (currentblock is CascadingBlock cb)
+                {
+                    if (currentblock is LineSeriesBlock lsb)
+                    {
+                        isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
+                    }
+                    if (!cb.IsSupported(cb.Owner, state.PlayField) && !AdditionalSkipBlocks.Contains(cb.Owner))
+                    {
+                        //resurrect this block and other blocks that are in the same nomino.
+                        //since we remove busted blocks from the nomino, we can take the Duomino this
+                        //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
+                        foreach (var iterate in cb.Owner)
+                        {
+                            var useX = iterate.X + cb.Owner.X;
+                            var useY = iterate.Y + cb.Owner.Y;
+                            state.PlayField.Contents[useY][useX] = null;
+                        }
+
+                        Nomino resurrect = cb.Owner;
+                        resurrect.Controllable = false;
+                        resurrect.FallSpeed = 250;
+                        resurrect.MoveSound = true;
+                        resurrect.NoGhost = true;
+                        AdditionalSkipBlocks.Add(resurrect);
+                        CreateResult.Add(resurrect);
+                        
+                    }
+                }
+            
+            //now recursively process for the block to our left, the block to our right, and the block above. But only if that block is not part of the same nomino as currentblock or currentblock is null.
+
+            foreach(Point offset in new Point[] { new Point(-1,0),new Point(0,-1),new Point(1,0)})
+            {
+                var checkblock = state.PlayField.Contents[Row + offset.Y][Column + offset.X];
+                if(checkblock!=null && (currentblock==null || currentblock.Owner.HasBlock(checkblock)))
+                {
+                    List<Nomino> CurrResult = ProcessBlockDroppage(state, Column + offset.X, Row + offset.Y, ref AdditionalSkipBlocks);
+                    foreach(var iterateresult in CurrResult)
+                        {
+                            CreateResult.Add(iterateresult);
+                        }
+                }
+                
+            }
+
+            }
+
+
+            return CreateResult;
+        }
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
 
             //here we would go through the field and handle where the blocks line up to more than the required critical mass. 
+            
+            //Nomino's have two blocks. Well, I guess they can have more
+            //in any case we want to check all the positions of the trigger nomino and check for critical masses.
+            HashSet<Point> CriticalMasses = null;
+            for (int y = 0; y < state.PlayField.RowCount ; y++)
+            {
+                var currRow = state.PlayField.Contents[y];
+                for (int x =0;x<state.PlayField.ColCount;x++)
+                {
+                    if (state.PlayField.Contents[y][x] is LineSeriesBlock)
+                    {
+                        var foundmasses = FindCriticalMasses(state, pOwner, new Point(x, y));
+                        foreach (var iterate in foundmasses)
+                        {
+                            if (CriticalMasses == null) CriticalMasses = new HashSet<Point>(foundmasses);
+                            else if (!CriticalMasses.Contains(iterate)) CriticalMasses.Add(iterate);
+                        }
+                    }
+
+                }
+            }
+
+            
+            if(CriticalMasses!=null && CriticalMasses.Any())
+            {
+
+                //process the critical masses.
+                //first: we need to switch the blocks in question to "pop" them.
+                //then we need to switch to a temporary state that allows them to display as "popped" for a moment or so, without processing drops or other actions.
+
+                //after the delay expires, the state will then process the critical mass blocks, changing the underlying nomino to remove the deleted block, so that if only part of a nomino is cleared
+                //the other parts are separated from it.
+
+                //then it will check the full field again, changing unsupported field blocks into active groups and removing them from the field. 
+                // Blocks that are part of a nomino will be resurrected with the other blocks that are part of that nomino.)
+
+                //check the field again and change unsupported field blocks back into active groups.
+
+                HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
+                foreach(var iterate in CriticalMasses)
+                {
+                    
+                    var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
+                    
+                    if (popItem is LineSeriesBlock lsb)
+                    {
+                        lsb.Popping = true;
+                        if(popItem.Owner!=null)
+                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField);
+
+                        
+                    }
+                    if (popItem.Owner != null)
+                        popItem.Owner.RemoveBlock(popItem);
+                    state.PlayField.HasChanged = true;
+                }
+                var originalstate = state;
+                state.Sounds.PlaySound(pOwner.AudioThemeMan.BlockPop.Key);
+
+
+                //scan the field and update the virus count
+                //if there are no viruses left, this level is now complete. We need a "Level complete" screen state with ah overlay- we would switch to that state. It should
+                //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
+
+
+                state.NoTetrominoSpawn = true;
+                
+                TemporaryInputPauseGameState tpause = new TemporaryInputPauseGameState(state, 1000, (owner) =>
+                {
+                    //first, remove the CriticalMasses altogether.
+                    foreach (var iterate in CriticalMasses)
+                    {
+                        state.PlayField.Contents[iterate.Y][iterate.X] = null;
+                    }
+                    //algorithm change: instead of going through the entire field, we'll go through all the critical masses.
+                    //With Each one:
+                    //check the block to the left, to the right, and above.
+
+
+                    //next, go through the entire field.
+                    List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
+                    HashSet<Nomino> AddedAlready = new HashSet<Nomino>();
+                    //keep track of the blocks we've examined already.
+                    for(int row =0;row<state.PlayField.RowCount;row++)
+                    {
+                        for (int column = 0; column < state.PlayField.ColCount; column++)
+                        {
+
+                            var currentblock = state.PlayField.Contents[row][column];
+                            bool isPopping = false;
+                            if (currentblock != null)
+                            {
+                                if (currentblock is CascadingBlock cb)
+                                {
+                                    if (currentblock is LineSeriesBlock lsb)
+                                    {
+                                        isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
+                                    }
+                                    if (!cb.IsSupported(cb.Owner, state.PlayField) && !AddedAlready.Contains(cb.Owner))
+                                    {
+                                        //resurrect this block and other blocks that are in the same nomino.
+                                        //since we remove busted blocks from the nomino, we can take the Duomino this
+                                        //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
+                                        foreach (var iterate in cb.Owner)
+                                        {
+                                            var useX = iterate.X + cb.Owner.X;
+                                            var useY = iterate.Y + cb.Owner.Y;
+                                            state.PlayField.Contents[useY][useX] = null;
+                                        }
+
+                                        Nomino resurrect = cb.Owner;
+                                        resurrect.Controllable = false;
+                                        resurrect.FallSpeed = 250;
+                                        resurrect.MoveSound = true;
+                                        resurrect.NoGhost = true;
+                                        AddedAlready.Add(resurrect);
+                                        state.PlayField.AddBlockGroup(resurrect);
+                                    }
+                                }
+
+                                //now recursively process for the block to our left, the block to our right, and the block above. But only if that block is not part of the same nomino as currentblock or currentblock is null.
+
+
+                            }
+
+                        }
+                    }
+                    originalstate.NoTetrominoSpawn = false;
+                    originalstate.PlayField.HasChanged = true;
+                    originalstate.SuspendFieldSet = true;
+                    owner.CurrentState = originalstate;
+                });
+                pOwner.CurrentState = tpause;
+
+
+            }
+            
+            
+
+
             //Remove those blocks from the field.
             //then, reprocess the field: find any unsupported blocks, and generate new ActiveBlockGroups for them. Add them to the list of active block groups. Set the fallspeed appropriately.
             //if we found any unsupported blocks groups, change the state to the GroupFallState (not defined) which is a composite state that doesn't allow input, and waits for all active block groups to come to rest before
@@ -184,7 +416,7 @@ namespace BASeTris.GameStates.GameHandlers
             //for now, we'll generate say 25 random viruses and toss them in the lower half of the playfield.
 
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
-            for(int i=0;i<25;i++)
+            for(int i=0;i<50;i++)
             {
                 //choose a random virus type.
                 var chosentype = TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue });

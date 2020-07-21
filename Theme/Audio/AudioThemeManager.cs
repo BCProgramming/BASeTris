@@ -44,7 +44,12 @@ namespace BASeTris.Theme.Audio
                 return TetrisGame.Choose(CastResult.AudioKeys);
             }
         }
-
+        //BlockFalling
+        //ScoreChime
+        //BlockPop
+        public AudioThemeSelection BlockFalling => GetThemeProperty(nameof(this.BlockFalling));
+        public AudioThemeSelection ScoreChime => GetThemeProperty(nameof(this.ScoreChime));
+        public AudioThemeSelection BlockPop => GetThemeProperty(nameof(this.BlockPop));
         public AudioThemeSelection BlockGroupMove => GetThemeProperty(nameof(this.BlockGroupMove));
         public AudioThemeSelection BlockGroupPlace => GetThemeProperty(nameof(this.BlockGroupPlace));
 

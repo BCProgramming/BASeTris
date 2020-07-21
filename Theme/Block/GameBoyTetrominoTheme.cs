@@ -8,6 +8,7 @@ using BASeTris.Rendering.GDIPlus;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using BASeTris.GameStates.GameHandlers;
+using SkiaSharp;
 
 namespace BASeTris
 {
@@ -184,7 +185,7 @@ namespace BASeTris
                         StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                         TetrisGame.Choose(new Image[] { GetSolidSquare(CurrLevel), GetDottedLight(CurrLevel), GetDottedDark(CurrLevel), GetFatDotted(CurrLevel), GetInsetBevel(CurrLevel) });
-                        scb._RotationImages = new Image[] { GetInsetBevel(CurrLevel) };
+                        scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GetInsetBevel(CurrLevel))) };
                         //scb.BaseImageKey = Solid_Square; 
                     }
                 }
@@ -201,7 +202,7 @@ namespace BASeTris
                 {
                     StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                     scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    scb._RotationImages = new Image[] { GetSolidSquare(CurrLevel) };
+                    scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GetSolidSquare(CurrLevel))) };
                     //scb.BaseImageKey = Solid_Square; 
                 }
             }
@@ -215,7 +216,7 @@ namespace BASeTris
                 {
                     StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                     scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    scb._RotationImages = new Image[] { GetDottedLight(CurrLevel)};
+                    scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GetDottedLight(CurrLevel)))};
                     //scb.BaseImageKey = Solid_Square; 
                 }
             }
@@ -251,7 +252,7 @@ namespace BASeTris
             {
                 var scb = (LeftSide.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImages = TetrominoTheme.GetImageRotations(GetLeftCap(CurrLevel));
+                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetLeftCap(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("FLIPX:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("FLIPXROT90:mottle_right_cap",ReductionFactor),
                 //        TetrisGame.Imageman.getLoadedImage("FLIPXROT180:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("FLIPXROT270:mottle_right_cap",ReductionFactor) };
             }
@@ -260,7 +261,7 @@ namespace BASeTris
             {
                 var scb = (LeftMiddle.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImages = TetrominoTheme.GetImageRotations(GetHorizontal(CurrLevel));
+                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetHorizontal(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_horizontal",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_horizontal",ReductionFactor) };
             }
@@ -269,7 +270,7 @@ namespace BASeTris
             {
                 var scb = (RightMiddle.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImages = TetrominoTheme.GetImageRotations(GetHorizontal(CurrLevel));
+                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetHorizontal(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_horizontal",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_horizontal",ReductionFactor) };
             }
@@ -277,7 +278,7 @@ namespace BASeTris
             {
                 var scb = (RightSide.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImages = TetrominoTheme.GetImageRotations(GetRightCap(CurrLevel));
+                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetRightCap(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_right_cap",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_right_cap",ReductionFactor) };
             }
@@ -294,7 +295,7 @@ namespace BASeTris
                 {
                     StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                     scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    scb._RotationImages = new Image[] { GetDottedDark(CurrLevel)};
+                    scb._RotationImagesSK = new SKImage[] {  SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GetDottedDark(CurrLevel)))};
                     //scb.BaseImageKey = Solid_Square; 
                 }
             }
@@ -308,7 +309,7 @@ namespace BASeTris
                 {
                     StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                     scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    scb._RotationImages = new Image[] {GetFatDotted(CurrLevel)};
+                    scb._RotationImagesSK = new SKImage[] {SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(  GetFatDotted(CurrLevel)))};
                     //scb.BaseImageKey = Solid_Square; 
                 }
             }
@@ -322,7 +323,7 @@ namespace BASeTris
                 {
                     StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                     scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    scb._RotationImages = new Image[] { GetDottedLight(CurrLevel) };
+                    scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GetDottedLight(CurrLevel))) };
                     //scb.BaseImageKey = Solid_Square; 
                 }
             }
@@ -336,7 +337,7 @@ namespace BASeTris
                 {
                     StandardColouredBlock scb = blockcheck.Block as StandardColouredBlock;
                     scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    scb._RotationImages = new Image[] { GetInsetBevel(CurrLevel)};
+                    scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GetInsetBevel(CurrLevel))) };
                     //scb.BaseImageKey = Solid_Square; 
                 }
             }
