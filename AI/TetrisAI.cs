@@ -69,7 +69,7 @@ namespace BASeTris.AI
             {
                 GameplayGameState stdState = _Owner.CurrentState as GameplayGameState;
                 //next, we only want to do stuff if there is one active blockgroup...
-                if (stdState.PlayField.BlockGroups.Count == 1)
+                if (stdState.PlayField.GetActiveBlockGroups().Count == 1)
                 {
                     //todo: we want to copy the playfield for our inspection here... we'll want to see what happens based on moving the blockgroup left or right up to each side and dropping it and evaluate the result to select the ideal
                     //then slap those keys into the queue.

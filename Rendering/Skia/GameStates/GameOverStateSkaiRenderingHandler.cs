@@ -1,5 +1,6 @@
 ﻿using BASeCamp.Rendering;
 using BASeTris.GameStates;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.GDIPlus;
 using SkiaSharp;
 using System;
@@ -81,8 +82,62 @@ namespace BASeTris.Rendering.Skia.GameStates
                 g.DrawText(Source.GameOverText, new SKPoint(GameOverPos.X+5,GameOverPos.Y+5), GameOverTitlePaint);
                 GameOverTitlePaint.Color = SKColors.Black;
                 g.DrawText(Source.GameOverText, new SKPoint(GameOverPos.X, GameOverPos.Y), GameOverTitlePaint);
-                for (int i = 0;i<Source.ShowExtraLines; i++)
+                var useStats = Source.GameOverInfo;
+                SKRect DesiredRect = new SKRect(Bounds.Width * 0.18f, 20, Bounds.Width * (1 - .18f), Bounds.Height - 20);
+                XPosition = DesiredRect.Left;
+                
+                for (int i = 0;i<Source.CurrentLinesDisplay; i++)
                 {
+                    var currentLine = useStats.Statistics[i];
+
+                    SKPoint CellSize = new SKPoint(DesiredRect.Width/currentLine.ColumnData.Count(),DesiredRect.Height/useStats.Statistics.Count-1);
+
+                    
+                    YPosition = GameOverPos.Y + ((2 + i) * (measured.Height * 2.25f)) + measuremini.Height * 2;
+                    float MaxYSize = 0;
+                    for (int columnindex =0;columnindex<currentLine.ColumnData.Count;columnindex++)
+                    {
+                        var currentcolumn = currentLine.ColumnData[columnindex];
+                        
+                        SKRect CellPosition = new SKRect(XPosition, YPosition, XPosition + CellSize.X, YPosition + CellSize.Y);
+
+                        switch (currentcolumn.InfoType)
+                        {
+                            case GameOverStatisticColumnData.CellType.Image:
+
+                                SKPoint DrawPosition;
+                                SKImage useimage = currentcolumn.CellImage;
+                                var targetposition = GameOverStatisticColumnData.AlignRect(CellPosition, new SKPoint(useimage.Width, useimage.Height),
+                                    currentcolumn.ContentAlignmentHorizontal, currentcolumn.ContentAlignmentVertical);
+                                pRenderTarget.DrawImage(useimage, targetposition);
+                                if (useimage.Height > MaxYSize) MaxYSize = useimage.Height;
+                                break;
+                            case GameOverStatisticColumnData.CellType.Text:
+
+                                //measure the text for this item.
+                                //TODO: custom font support?
+                                SKRect TextSize = new SKRect();
+                                GameOverEntryPaint.MeasureText(currentcolumn.CellText, ref TextSize);
+                                var targetpositiontext = GameOverStatisticColumnData.AlignRect(CellPosition, new SKPoint(TextSize.Width, TextSize.Height),
+                                    currentcolumn.ContentAlignmentHorizontal, currentcolumn.ContentAlignmentVertical);
+                                SKPoint TargetPos = new SKPoint(targetpositiontext.Left, targetpositiontext.Top - TextSize.Height); //add height because Skia paints from text baseline.
+
+                                //paint the text shadow...
+                                GameOverEntryPaint.Color = SKColors.White;
+                                pRenderTarget.DrawText(currentcolumn.CellText, new SKPoint(TargetPos.X + 5, TargetPos.Y + 5), GameOverEntryPaint);
+                                GameOverEntryPaint.Color = SKColors.Black;
+                                pRenderTarget.DrawText(currentcolumn.CellText, TargetPos, GameOverEntryPaint);
+                                if (targetpositiontext.Height > MaxYSize) MaxYSize = targetpositiontext.Height;
+
+                                break;
+
+                        }
+
+
+                    }
+
+
+                    /*
                     Type[] TetTypes = new Type[] {typeof(Tetrominoes.Tetromino_I),
                             typeof(Tetrominoes.Tetromino_I) ,
                             typeof(Tetrominoes.Tetromino_O) ,
@@ -107,9 +162,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                     if (i >= 2)
                     {
                         DrawTetrominoStat(Source, TetTypes[i - 1], new SKPoint(XPosition, YPosition), g, Bounds, GameOverEntryPaint);
-                    }
+                    }*/
 
-                    
+
                 }
                 if (Source.NewScorePosition > -1)
                 {

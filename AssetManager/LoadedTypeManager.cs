@@ -37,7 +37,7 @@ public interface iManagerCallback
     void FlagError(String ErrorDescription, Exception AttachedException);
 }
 
-internal class Nullcallback : iManagerCallback
+public class Nullcallback : iManagerCallback
 {
     #region iManagerCallback Members
 
@@ -791,7 +791,15 @@ internal class Nullcallback : iManagerCallback
             return ltm.ManagedTypes;
         }
 
-
+        public IEnumerable<Type> GetManagedTypes()
+        {
+            return ManagedTypes;
+        }
+        public IEnumerable<Type> GetManagedTypes(Predicate<Type> Filter)
+        {
+            return (from m in ManagedTypes where Filter(m) select m);
+        }
+        
         public List<Type> RemoveNulls(List<Type> removefrom)
         {
             removefrom.RemoveAll((a) => a == null);

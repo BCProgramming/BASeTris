@@ -56,8 +56,9 @@ namespace BASeTris.GameStates.Menu
         public void PopulateMenu(GenericMenuState Target,IStateOwner pOwner)
         {
             Target.StateHeader = "BASeTris";
-            
-            var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
+
+            //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
+            var NewGameItem = new MenuStateNewGameMenuItem(pOwner);
             var OptionsItem = new MenuStateTextMenuItem() { Text = "Options" };
             var scaleitem = new MenuStateScaleMenuItem(pOwner);
             var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" };
@@ -74,20 +75,27 @@ namespace BASeTris.GameStates.Menu
                     ((BASeTris)pOwner).Close();
                 }
             };
+            
+            NewGameItem.OnDeactivateOption += (o, eventarg) =>
+             {
+                 //start a new game.
+                 //this actually pops a submenu...
+
+                 if (pOwner is IGamePresenter igp)
+                 {
+                     IGameCustomizationHandler Handler = (eventarg.Option.Handler);
+                     if (Handler != null)
+                     {
+                         //IGameCustomizationHandler Handler = DrMarioGame ? (IGameCustomizationHandler)new DrMarioHandler() : (IGameCustomizationHandler)new StandardTetrisHandler();
+                         pOwner.CurrentState = new GameplayGameState(Handler, null, TetrisGame.Soundman);
+
+                         igp.StartGame();
+                     }
+                 }
+             };
             Target.MenuItemActivated += (o, e) =>
             {
-                if(e.MenuElement == NewGameItem)
-                {
-                    //start a new game.
-                    if(pOwner is IGamePresenter igp)
-                    {
-                        bool DrMarioGame = true;
-                        IGameCustomizationHandler Handler =  DrMarioGame? (IGameCustomizationHandler)new DrMarioHandler():(IGameCustomizationHandler)new StandardTetrisHandler(); 
-                        pOwner.CurrentState = new GameplayGameState(Handler, null,TetrisGame.Soundman);
-                        
-                        igp.StartGame();
-                    }
-                }
+               
                 if(e.MenuElement == OptionsItem)
                 {
                     //Show the options menu

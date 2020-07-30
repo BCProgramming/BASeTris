@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.BASeScores;
 using BASeTris.BackgroundDrawers;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Properties;
 
@@ -19,21 +20,26 @@ namespace BASeTris.GameStates
         public int CoverBlocks = 0;
         public bool CompleteSummary = false;
         public bool CompleteScroll = false;
-        public int ShowExtraLines = 0;
-        public int MaxExtraLines = 7;
+        public int CurrentLinesDisplay = 0;
+        public int LineMaxIndex = 7;
         public DateTime CompleteScrollTime = DateTime.MaxValue;
         public DateTime CompleteSummaryTime = DateTime.MaxValue;
+
+
+
+        public GameOverStatistics GameOverInfo { get; set; } = null;
 
         public DateTime InitTime;
 
         //if the score is a high score, this will be changed to the position after the game stats are displayed.
         public int NewScorePosition = -1;
 
-        public GameOverGameState(GameState paused)
+        public GameOverGameState(GameState paused,GameOverStatistics StatInfo)
         {
+            GameOverInfo = StatInfo;
             GameOveredState = paused;
             InitTime = DateTime.Now;
-            
+            LineMaxIndex = StatInfo.Statistics.Count-1;
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
@@ -91,15 +97,15 @@ namespace BASeTris.GameStates
                 int calcresult = (int) ((DateTime.Now - CompleteScrollTime).TotalMilliseconds) / 750;
                 if (calcresult > 0)
                 {
-                    if (ShowExtraLines != calcresult)
+                    if (CurrentLinesDisplay != calcresult)
                     {
                         TetrisGame.Soundman.PlaySound("block_place_2", pOwner.Settings.EffectVolume);
                     }
 
-                    ShowExtraLines = calcresult;
+                    CurrentLinesDisplay = calcresult;
                 }
 
-                if (ShowExtraLines > MaxExtraLines)
+                if (CurrentLinesDisplay > LineMaxIndex)
                 {
                     CompleteSummary = true;
                     CompleteSummaryTime = DateTime.Now;
@@ -110,7 +116,7 @@ namespace BASeTris.GameStates
         }
 
         Brush useCoverBrush = null;
-        public String GameOverText = "GAME     OVER"; //+ ShowExtraLines.ToString();
+        public String GameOverText = "GAME    OVER"; //+ ShowExtraLines.ToString();
         
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {

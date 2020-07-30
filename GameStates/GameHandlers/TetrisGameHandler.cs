@@ -1,9 +1,13 @@
 ﻿using BASeCamp.BASeScores;
 using BASeTris.Choosers;
+using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.Skia;
 using BASeTris.Tetrominoes;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +19,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// </summary>
     public class StandardTetrisHandler : IGameCustomizationHandler
     {
+        public String Name { get { return "Tetris"; } }
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
         public IList<HotLine> HotLines { get; set; } = new List<HotLine>();
@@ -22,6 +27,67 @@ namespace BASeTris.GameStates.GameHandlers
         public bool AllowFieldImageCache { get { return true; } }
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
+        
+
+        public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
+        {
+
+          
+
+
+            Type[] TetTypes = new Type[] {typeof(Tetrominoes.Tetromino_I),
+                            typeof(Tetrominoes.Tetromino_I) ,
+                            typeof(Tetrominoes.Tetromino_O) ,
+                            typeof(Tetrominoes.Tetromino_T) ,
+                            typeof(Tetrominoes.Tetromino_J) ,
+                            typeof(Tetrominoes.Tetromino_L) ,
+                            typeof(Tetrominoes.Tetromino_S),
+                        typeof(Tetrominoes.Tetromino_Z)};
+
+
+            GameOverStatistic I_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_I));
+            GameOverStatistic O_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_O));
+            GameOverStatistic T_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_T));
+            GameOverStatistic J_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_J));
+            GameOverStatistic L_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_L));
+            GameOverStatistic S_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_S));
+            GameOverStatistic Z_Stat = GetTetrominoStatistic(state, typeof(Tetrominoes.Tetromino_Z));
+
+
+
+            GameOverStatistics StatResult = new GameOverStatistics(
+              new GameOverStatistic(new GameOverStatisticColumnData("---Line Clears---", Color.White, Color.Black, GameOverStatisticColumnData.HorizontalAlignment.Middle)),
+              
+              I_Stat,
+              O_Stat,
+              T_Stat,
+              J_Stat,
+              L_Stat,
+              S_Stat,
+              Z_Stat);
+
+            return StatResult;
+
+
+
+        }
+        private GameOverStatistic GetTetrominoStatistic(GameplayGameState state,Type TetrominoType)
+        {
+            GameplayGameState standardgame = state;
+            var useStats = standardgame.GameStats as TetrisStatistics;
+            SKBitmap I_Tet = standardgame.GetTetrominoSKBitmap(TetrominoType);
+
+            SKImage ski = SKImage.FromBitmap(I_Tet);
+
+            GameOverStatistic result = new GameOverStatistic(
+                new GameOverStatisticColumnData(ski, GameOverStatisticColumnData.HorizontalAlignment.Left, GameOverStatisticColumnData.VerticalAlignment.Top),
+                new GameOverStatisticColumnData(Statistics.GetLineCount(TetrominoType).ToString(), SKColors.White, SKColors.Black, GameOverStatisticColumnData.HorizontalAlignment.Right, GameOverStatisticColumnData.VerticalAlignment.Middle));
+
+
+
+            return result;
+        }
+
         public StandardGameOptions GameOptions { get;  } = new StandardGameOptions();
         public Choosers.BlockGroupChooser Chooser
         {
@@ -133,6 +199,7 @@ namespace BASeTris.GameStates.GameHandlers
                     });
                 }
             }
+            AfterClearActions.Add(() => { PlayField.HasChanged = true; });
 
             long PreviousLineCount = Statistics.LineCount;
             if (Trigger != null)
@@ -230,6 +297,79 @@ namespace BASeTris.GameStates.GameHandlers
         public void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
             //nothing needed here.
+        }
+        private StandardTetrisSkiaStatAreaRenderer StatRenderer = null;
+        public IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>()
+        {
+            if (typeof(TRenderTarget) == typeof(SKCanvas))
+            {
+                if (StatRenderer == null)
+                    StatRenderer = new StandardTetrisSkiaStatAreaRenderer();
+                return (IGameCustomizationStatAreaRenderer < TRenderTarget, GameplayGameState, TDataElement, IStateOwner > )StatRenderer;
+            }
+            return null;
+        }
+    }
+    public class StandardTetrisSkiaStatAreaRenderer : IGameCustomizationStatAreaRenderer<SKCanvas, GameplayGameState, GameStateSkiaDrawParameters, IStateOwner>
+    {
+        SKPaint BlackBrush = new SKPaint() { Color = SKColors.Black, Style = SKPaintStyle.StrokeAndFill };
+        SKPaint WhiteBrush = new SKPaint() { Color = SKColors.White, Style = SKPaintStyle.StrokeAndFill };
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, GameplayGameState Source, GameStateSkiaDrawParameters Element)
+        {
+            var g = pRenderTarget;
+            SKTypeface standardFont = TetrisGame.RetroFontSK;
+            Type[] useTypes = new Type[] { typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z) };
+            int[] PieceCounts = null;
+            var useStats = Source.GameStats;
+            var Bounds = Element.Bounds;
+            var Factor = Bounds.Height / 280.28d;
+            var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
+            float DesiredFontSize = (float)(DesiredFontPixelHeight * pOwner.ScaleFactor);
+            if (useStats is TetrisStatistics ts)
+            {
+                PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
+            }
+            else
+            {
+                PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+            }
+            float StartYPos = Bounds.Top; // + (int)(140 * Factor);
+            float useXPos = Bounds.Left;// + (int)(30 * Factor);
+            //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
+            for (int i = 0; i < useTypes.Length; i++)
+            {
+                if (Source.GameHandler is StandardTetrisHandler)
+                {
+                    BlackBrush.TextSize = DesiredFontSize;
+                    WhiteBrush.TextSize = DesiredFontSize;
+                    SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
+                    
+                    
+                    String StatText = "" + PieceCounts[i];
+                    SKRect StatTextSize = new SKRect();
+                    BlackBrush.MeasureText(StatText, ref StatTextSize);
+                    SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor), BaseCoordinate.Y + StatTextSize.Height);
+                    //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
+                    SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
+                    PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
+                    SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width * 1.5f, ImagePos.Y + TetrominoImage.Height * 1.5f);
+
+                    g.DrawBitmap(TetrominoImage, DrawRect, null);
+
+                    TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
+                    TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
+                }
+                //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
+                //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
+            }
+        }
+
+        public void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
+        {
+            if(pRenderTarget is SKCanvas && RenderSource is GameplayGameState && Element is GameStateSkiaDrawParameters)
+            {
+                Render(pOwner, pRenderTarget as SKCanvas, RenderSource as GameplayGameState, Element as GameStateSkiaDrawParameters);
+            }
         }
     }
 }

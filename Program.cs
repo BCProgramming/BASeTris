@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeCamp.Logging;
 using BASeTris.AI;
+using BASeTris.GameStates.GameHandlers;
 using OpenTK;
 using OpenTK.Input;
 
@@ -17,7 +19,7 @@ namespace BASeTris
 {
     static class Program
     {
-
+        
         private const int SPI_GETWORKAREA = 48;
         [DllImport("user32.dll", EntryPoint = "SystemParametersInfoA")]
         private static extern int SystemParametersInfo(int uAction, IntPtr uParam, ref RECT lpvParam, int fuWinIni);
@@ -30,14 +32,46 @@ namespace BASeTris
             internal int Bottom;
         }
 
-
+        public static System.Reflection.BASeCamp.MultiTypeManager DITypes = null;
+        public static Type[] LoadTypes = new Type[] { typeof(TetrominoTheme), typeof(IGameCustomizationHandler) };
 
         public enum StartMode
         {
             Mode_WinForms,
             Mode_OpenTK
         }
-        public static StartMode RunMode = StartMode.Mode_WinForms;
+        public static StartMode RunMode = StartMode.Mode_OpenTK;
+
+        private static Dictionary<Type, Type[]> CacheHandlerTheme = new Dictionary<Type, Type[]>();
+        public static IEnumerable<Type> GetHandlerThemes(Type HandlerType)
+        {
+            if(CacheHandlerTheme.ContainsKey(HandlerType))
+            {
+                return CacheHandlerTheme[HandlerType];
+            }
+
+            var TheTypes = DITypes[typeof(TetrominoTheme)].GetManagedTypes();
+            List<Type> ConstructType = new List<Type>();
+            foreach(var iteratetype in TheTypes)
+            {
+                var attrib = (HandlerThemeAttribute)iteratetype.GetCustomAttribute(typeof(HandlerThemeAttribute));
+                if(attrib!=null)
+                {
+                    if(attrib.HandlerType.Contains(HandlerType))
+                    {
+                        ConstructType.Add(iteratetype);
+                    }
+                }
+            }
+            CacheHandlerTheme.Add(HandlerType, ConstructType.ToArray());
+            return CacheHandlerTheme[HandlerType];
+
+        }
+        public static IEnumerable<Type> GetGameHandlers()
+        {
+            return DITypes[typeof(IGameCustomizationHandler)].ManagedTypes;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -61,6 +95,16 @@ namespace BASeTris
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;
+            System.Reflection.BASeCamp.Nullcallback nc = new System.Reflection.BASeCamp.Nullcallback();
+            DITypes = new System.Reflection.BASeCamp.MultiTypeManager(
+                new Assembly[] { Assembly.GetExecutingAssembly() }.AsEnumerable(),
+                LoadTypes,
+                nc,
+                null,
+                null,
+                null);
+
+
             if (RunMode == StartMode.Mode_WinForms)
             {
              

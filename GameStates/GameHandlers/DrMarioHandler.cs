@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using BASeCamp.BASeScores;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
+using BASeTris.GameObjects;
+using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
 using SkiaSharp;
 
@@ -14,6 +16,7 @@ namespace BASeTris.GameStates.GameHandlers
 {
     public class DrMarioHandler : IGameCustomizationHandler
     {
+        public String Name { get { return "Dr. Mario"; } }
         public DrMarioStatistics Statistics { get; private set; } = new DrMarioStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; }  }
         public bool AllowFieldImageCache { get { return false; } }
@@ -24,7 +27,10 @@ namespace BASeTris.GameStates.GameHandlers
                 result.ResultAffector = DrMarioNominoTweaker;
                 return result;
     } }
-
+        public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
+        {
+            return null;
+        }
         public Nomino[] GetNominos()
         {
             return new Nomino[] { new Duomino.Duomino() };
@@ -70,7 +76,9 @@ namespace BASeTris.GameStates.GameHandlers
                     var CheckPos = state.PlayField.Contents[StartPosition.Y][X] as LineSeriesBlock;
                     if (CheckPos == null) break;
                     if (CheckPos.CombiningIndex == OurPos.CombiningIndex)
+                    {
                         FirstCol = X;
+                    }
                     else
                         break;
                 }
@@ -179,10 +187,7 @@ namespace BASeTris.GameStates.GameHandlers
         /// <returns></returns>
         private HashSet<Point> FindCriticalMasses(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
         {
-            if (StartPosition.X==7 && StartPosition.Y==5)
-            {
-                ;
-            }
+           
             HashSet<Point> Horizontal = FindCriticalMassesHorizontal(state, pOwner, StartPosition);
             HashSet<Point> Vertical = FindCriticalMassesVertical(state, pOwner, StartPosition);
             foreach(Point verticalpoint in Vertical)
@@ -221,6 +226,7 @@ namespace BASeTris.GameStates.GameHandlers
                         resurrect.Controllable = false;
                         resurrect.FallSpeed = 250;
                         resurrect.MoveSound = true;
+                        resurrect.PlaceSound = false;
                         resurrect.NoGhost = true;
                         AdditionalSkipBlocks.Add(resurrect);
                         CreateResult.Add(resurrect);
@@ -300,9 +306,17 @@ namespace BASeTris.GameStates.GameHandlers
                     if (popItem is LineSeriesBlock lsb)
                     {
                         lsb.Popping = true;
-                        if(popItem.Owner!=null)
+                        GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
+                        if (popItem.Owner!=null)
                             state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField);
-
+                        else
+                        {
+                            var Dummino = new Nomino() { };
+                            Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
+                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField);
+                        }
+                        
+                        
                         
                     }
                     if (popItem.Owner != null)
@@ -317,6 +331,7 @@ namespace BASeTris.GameStates.GameHandlers
                 //if there are no viruses left, this level is now complete. We need a "Level complete" screen state with ah overlay- we would switch to that state. It should
                 //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
 
+                //need to determine a way to detect chains here, where we create an active block and then it results in another "pop".
 
                 state.NoTetrominoSpawn = true;
                 
@@ -334,7 +349,9 @@ namespace BASeTris.GameStates.GameHandlers
 
                     //next, go through the entire field.
                     List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
-                    HashSet<Nomino> AddedAlready = new HashSet<Nomino>();
+                    HashSet<Nomino> ResurrectNominos = new HashSet<Nomino>();
+                    HashSet<CascadingBlock> AddedBlockAlready = new HashSet<CascadingBlock>();
+                    
                     //keep track of the blocks we've examined already.
                     for(int row =0;row<state.PlayField.RowCount;row++)
                     {
@@ -351,7 +368,7 @@ namespace BASeTris.GameStates.GameHandlers
                                     {
                                         isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
                                     }
-                                    if (!cb.IsSupported(cb.Owner, state.PlayField) && !AddedAlready.Contains(cb.Owner))
+                                    if (!cb.IsSupported(cb.Owner, state.PlayField) && !ResurrectNominos.Contains(cb.Owner) && !AddedBlockAlready.Contains(cb))
                                     {
                                         //resurrect this block and other blocks that are in the same nomino.
                                         //since we remove busted blocks from the nomino, we can take the Duomino this
@@ -367,9 +384,11 @@ namespace BASeTris.GameStates.GameHandlers
                                         resurrect.Controllable = false;
                                         resurrect.FallSpeed = 250;
                                         resurrect.MoveSound = true;
+                                        resurrect.PlaceSound = false;
                                         resurrect.NoGhost = true;
-                                        AddedAlready.Add(resurrect);
-                                        state.PlayField.AddBlockGroup(resurrect);
+                                        ResurrectNominos.Add(resurrect);
+                                        AddedBlockAlready.Add(cb);
+                                        //state.PlayField.AddBlockGroup(resurrect);
                                     }
                                 }
 
@@ -379,7 +398,28 @@ namespace BASeTris.GameStates.GameHandlers
                             }
 
                         }
+
                     }
+
+                    if (ResurrectNominos.Any())
+                    {
+                        HashSet<Point> AddedPoints = new HashSet<Point>();
+                        foreach (var addresurrected in ResurrectNominos)
+                        {
+                            List<Point> AllPoints = (from b in addresurrected select new Point(b.X + addresurrected.X, b.Y + addresurrected.Y)).ToList();
+
+                            if (!AllPoints.Any((w) => AddedPoints.Contains(w)))
+                            {
+                                state.PlayField.AddBlockGroup(addresurrected);
+                                foreach(var point in AllPoints)
+                                {
+                                    AddedPoints.Add(point);
+                                }
+                            }
+                        }
+                    }
+
+
                     originalstate.NoTetrominoSpawn = false;
                     originalstate.PlayField.HasChanged = true;
                     originalstate.SuspendFieldSet = true;
@@ -408,6 +448,59 @@ namespace BASeTris.GameStates.GameHandlers
             return new FieldChangeResult() { ScoreResult = 5 };
 
         }
+        const int ParticlesPerPop = 400;
+        static BCColor[] RedColors = new BCColor[] { SKColors.Red, SKColors.IndianRed, SKColors.OrangeRed, SKColors.DarkRed };
+        static BCColor[] BlueColors = new BCColor[] { SKColors.Blue, SKColors.Navy, SKColors.SkyBlue, SKColors.LightBlue };
+        static BCColor[] YellowColors = new BCColor[] { SKColors.Yellow, SKColors.LightYellow, SKColors.LightGoldenrodYellow, SKColors.Goldenrod, SKColors.DarkGoldenrod };
+        static BCPoint[] CardinalOptions = new BCPoint[] { new BCPoint(1, 0), new BCPoint(0, 1) };
+        const float MAX_SPEED = 0.25f;
+        const float MIN_SPEED = 0.35f;
+        //GeneratePopParticles(pOwner, state, iterate);
+        private void GeneratePopParticles(IStateOwner pOwner,GameplayGameState gstate,SKPointI pt)
+        {
+            var rgen = TetrisGame.rgen;
+            var popItem = gstate.PlayField.Contents[pt.Y][pt.X];
+            BCColor[] useColor = YellowColors;
+            if(popItem is LineSeriesBlock lsb)
+            {
+                switch(lsb.CombiningIndex)
+                {
+                    case LineSeriesBlock.CombiningTypes.Red:
+                        useColor = RedColors;
+                        break;
+                    case LineSeriesBlock.CombiningTypes.Blue:
+                        useColor = BlueColors;
+                        break;
+                    case LineSeriesBlock.CombiningTypes.Yellow:
+                        useColor = YellowColors;
+                        break;
+                }
+                for(int i=0;i<ParticlesPerPop;i++)
+                {
+                    PointF Offset = new PointF((float)rgen.NextDouble(),(float)rgen.NextDouble());
+                    BCColor selColor = TetrisGame.Choose(useColor);
+                    BCPoint Velocity = TetrisGame.Choose(CardinalOptions);
+                    float Speed = (float)rgen.NextDouble() * (MAX_SPEED-MIN_SPEED) + MIN_SPEED;
+                    float Sign = TetrisGame.Choose(new float[] { -1f, 1f });
+
+                    BCPoint VelocityUse = new BCPoint(Velocity.X * Speed * Sign, Velocity.Y * Speed * Sign);
+
+                    BaseParticle bp = new BaseParticle(new BCPoint(pt.X + Offset.X, pt.Y + Offset.Y), VelocityUse, selColor);
+                    gstate.Particles.Add(bp);
+                    
+                }
+
+
+            }
+
+            for (int i=0;i<ParticlesPerPop;i++)
+            {
+
+            }
+
+
+        }
+
         public TetrominoTheme DefaultTheme { get { return new DrMarioTheme(); } }
         public void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
@@ -443,6 +536,11 @@ namespace BASeTris.GameStates.GameHandlers
             }
 
 
+        }
+
+        public IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>()
+        {
+            return null;
         }
     }
 }

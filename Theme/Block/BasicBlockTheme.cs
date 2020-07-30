@@ -45,7 +45,7 @@ namespace BASeTris.Theme.Block
             return new SKPointI(9, 9);
         }
 
-        public override SKColor GetColor(TetrisField field, Nomino Element, BasicBlockTypes BlockType, BBP PixelType)
+        public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement Block, BasicBlockTypes BlockType, BBP PixelType)
         {
             var Level = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
             int LevelField = MathHelper.mod(Level, LevelColors.Length);

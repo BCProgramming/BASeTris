@@ -148,7 +148,9 @@
     <Compile Include="GameStates\Menu\GenericMenuState.cs" />
     <Compile Include="GameStates\ICompositeState.cs" />
     <Compile Include="GameStates\Menu\MenuStateMusicMenuItem.cs" />
+    <Compile Include="GameStates\Menu\MenuStateNewGameMenuItem.cs" />
     <Compile Include="GameStates\TemporaryPauseGameState.cs" />
+    <Compile Include="GlobalResources.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />

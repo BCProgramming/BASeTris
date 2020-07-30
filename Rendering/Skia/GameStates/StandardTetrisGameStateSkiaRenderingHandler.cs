@@ -81,6 +81,10 @@ namespace BASeTris.Rendering.Skia.GameStates
 
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, GameplayGameState Source, GameStateSkiaDrawParameters Element)
         {
+            GamePlayGameStateDataTagInfo tagData = Element.TagData as GamePlayGameStateDataTagInfo;
+
+            bool SkipParticles = tagData != null && tagData.SkipParticlePaint;
+
             //testing code for background.
             if (_Background==null || CurrentTheme!=Source.PlayField.Theme)
             {
@@ -92,7 +96,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,_Background, new SkiaBackgroundDrawData(Element.Bounds));
             //draw particles.
             
-            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.Particles, Element);
+            if(!SkipParticles) RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.Particles, Element);
             var PlayField = Source.PlayField;
             if (PlayField != null)
             {
@@ -118,64 +122,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 ;
             }
-            /* foreach(var activeblock in PlayField.BlockGroups)
-             {
-                 int dl = 0;
-                 var GrabGhost = Source.GetGhostDrop(pOwner, activeblock, out dl, 3);
-                 if(GrabGhost!=null)
-                 {
-                     var BlockWidth = PlayField.GetBlockWidth(Element.Bounds.ToDrawingRect());
-                     var BlockHeight = PlayField.GetBlockHeight(Element.Bounds.ToDrawingRect());
-
-                     foreach(var iterateblock in activeblock)
-                     {
-                         SKRect BlockBounds = new SKRect(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), 
-                             PlayField.GetBlockWidth( Element.Bounds.ToDrawingRect()), PlayField.GetBlockHeight(Element.Bounds.ToDrawingRect()));
-                         TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(pRenderTarget, BlockBounds, GrabGhost, pOwner.Settings);
-                         //ImageAttributes Shade = new ImageAttributes();
-                         //SKColorMatrices.GetFader
-                         //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
-                         //tbd.ApplyAttributes = Shade;
-                         //tbd.OverrideBrush = GhostBrush;
-                         tbd.ColorFilter =  SKColorMatrices.GetFader(0.5f);
-                         var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
-                         GetHandler.Render(pOwner, tbd.g, iterateblock.Block, tbd);
-                         //iterateblock.Block.DrawBlock(tbd);
-                     }
-
-
-                 }
-             }*/
-
-
-            //draw the active block groups...
-            /*
-            foreach (var activeblock in PlayField.BlockGroups)
-            {
-                int dl = 0;
-                var GrabGhost = pState.GetGhostDrop(pOwner, activeblock, out dl, 3);
-                if (GrabGhost != null)
-                {
-                    var BlockWidth = PlayField.GetBlockWidth(Bounds);
-                    var BlockHeight = PlayField.GetBlockHeight(Bounds);
-
-                    foreach (var iterateblock in activeblock)
-                    {
-                        RectangleF BlockBounds = new RectangleF(BlockWidth * (GrabGhost.X + iterateblock.X), BlockHeight * (GrabGhost.Y + iterateblock.Y - 2), PlayField.GetBlockWidth(Bounds), PlayField.GetBlockHeight(Bounds));
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, BlockBounds, GrabGhost, pOwner.Settings);
-                        ImageAttributes Shade = new ImageAttributes();
-                        Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
-                        tbd.ApplyAttributes = Shade;
-                        //tbd.OverrideBrush = GhostBrush;
-                        var GetHandler = RenderingProvider.Static.GetHandler(typeof(Graphics), iterateblock.Block.GetType(), typeof(TetrisBlockDrawGDIPlusParameters));
-                        GetHandler.Render(pOwner, tbd.g, iterateblock.Block, tbd);
-                        //iterateblock.Block.DrawBlock(tbd);
-                    }
-                }
-            }*/
-
-
-            //TetrisGame.DrawTextSK(pRenderTarget,"Greetings!",new SKPoint(50,50),TetrisGame.RetroFontSK,new SKColor(0,0,255,128),28,pOwner.ScaleFactor);
+            
 
         }
         private String FormatGameTime(IStateOwner stateowner)
@@ -303,49 +250,61 @@ namespace BASeTris.Rendering.Skia.GameStates
                     }
 
 
-
-
-
-
-                    Type[] useTypes = new Type[] { typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z) };
-                    int[] PieceCounts = null;
-
-                    if (useStats is TetrisStatistics ts)
+                    var findRenderer = Source.GameHandler.GetStatAreaRenderer<SKCanvas, GameStateSkiaDrawParameters>();
+                    if (findRenderer != null)
                     {
-                        PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
+                        //bounds of stat area.
+                        var LeftBound = Bounds.Left + (int)(30 * Factor);
+                        var TopBound = Bounds.Top + (int)(140 * Factor);
+                        SKRect useBounds = new SKRect(LeftBound, TopBound, Bounds.Right, (float)(420 * Factor));
+                        GameStateSkiaDrawParameters parameters = new GameStateSkiaDrawParameters(useBounds);
+                        findRenderer.Render(pOwner, pRenderTarget, Source, parameters);
+
                     }
                     else
                     {
-                        PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
-                    }
-                    float StartYPos = Bounds.Top + (int)(140 * Factor);
-                    float useXPos = Bounds.Left + (int)(30 * Factor);
-                    //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
-                    for (int i = 0; i < useTypes.Length; i++)
-                    {
-                        if (Source.GameHandler is StandardTetrisHandler)
+#if false
+                        Type[] useTypes = new Type[] { typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z) };
+                        int[] PieceCounts = null;
+
+                        if (useStats is TetrisStatistics ts)
                         {
-                            BlackBrush.TextSize = DesiredFontSize;
-                        WhiteBrush.TextSize = DesiredFontSize;
-                        SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
-                        SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor), BaseCoordinate.Y);
-                        String StatText = "" + PieceCounts[i];
-                        SKRect StatTextSize = new SKRect();
-                        BlackBrush.MeasureText(StatText, ref StatTextSize);
-                        //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                        SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
-                        PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
-                        SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width*1.5f, ImagePos.Y + TetrominoImage.Height*1.5f);
-
-                            g.DrawBitmap(TetrominoImage, DrawRect, null);
-
-                            TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
-                            TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, Color.Black.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
+                            PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
                         }
-                        //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
-                        //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
-                    }
+                        else
+                        {
+                            PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+                        }
+                        float StartYPos = Bounds.Top + (int)(140 * Factor);
+                        float useXPos = Bounds.Left + (int)(30 * Factor);
+                        //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
+                        for (int i = 0; i < useTypes.Length; i++)
+                        {
+                            if (Source.GameHandler is StandardTetrisHandler)
+                            {
+                                BlackBrush.TextSize = DesiredFontSize;
+                                WhiteBrush.TextSize = DesiredFontSize;
+                                SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
+                                
+                                String StatText = "" + PieceCounts[i];
+                                SKRect StatTextSize = new SKRect();
+                                BlackBrush.MeasureText(StatText, ref StatTextSize);
+                                SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor), BaseCoordinate.Y + StatTextSize.Height*2);
+                                //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
+                                SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
+                                PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
+                                SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width * 1.5f, ImagePos.Y + TetrominoImage.Height * 1.5f);
 
+                                g.DrawBitmap(TetrominoImage, DrawRect, null);
+
+                                TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
+                                TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, Color.Black.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
+                            }
+                            //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
+                            //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
+                        }
+#endif
+                    }
                     SKPoint NextDrawPosition = new SKPoint(Bounds.Left + (int)(40f * Factor), Bounds.Top + (int)(420 * Factor));
                     Size NextSize = new Size((int)(200f * Factor), (int)(200f * Factor));
                     SKPoint CenterPoint = new SKPoint(NextDrawPosition.X + NextSize.Width / 2, NextDrawPosition.Y + NextSize.Height / 2);

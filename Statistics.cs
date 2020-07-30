@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.GameStates;
+using BASeTris.Rendering.Adapters;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris
@@ -60,6 +61,12 @@ namespace BASeTris
             this.Score += AddScore;
         }
     }
+
+
+        
+
+
+
     public class DrMarioStatistics : BaseStatistics
     {
         public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)

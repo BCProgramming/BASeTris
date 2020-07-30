@@ -67,7 +67,7 @@ namespace BASeTris.Theme.Block
         {
             return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
-        public override SKColor GetColor(TetrisField field, Nomino Element, NESBlockTypes BlockType, BCT PixelType)
+        public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block,NESBlockTypes BlockType, BCT PixelType)
         {
             int LevelNum = field.Level;
             int LevelIndex = MathHelper.mod(LevelNum, AllLevelColors.Length);

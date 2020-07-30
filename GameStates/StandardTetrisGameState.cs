@@ -269,16 +269,19 @@ namespace BASeTris.GameStates
         }
         private void PlayField_BlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {
-            if (e._group.Y < 1)
+            if (e._groups.All((n)=>n.Y < 1))
             {
                 GameOvered = true;
             }
             //reapply the theme when setting it down. Some themes may want
             //to have different appearances for blocks that are "set" versus those that are still "active".
-            var firstBlock = e._group.FirstOrDefault();
-            Nomino useGroup = e._group;
-            if (firstBlock != null) useGroup = firstBlock.Block.Owner ?? e._group;
-            PlayField.Theme.ApplyTheme(useGroup,GameHandler, PlayField);
+            foreach (var group in e._groups)
+            {
+                var firstBlock = group.FirstOrDefault();
+                Nomino useGroup = group;
+                if (firstBlock != null) useGroup = firstBlock.Block.Owner ?? group;
+                PlayField.Theme.ApplyTheme(useGroup, GameHandler, PlayField);
+            }
         }
 
        
@@ -314,6 +317,7 @@ namespace BASeTris.GameStates
             var AnyMoved = false;
             foreach (var iterate in from b in PlayField.BlockGroups orderby b.Y,PlayField.ColCount-b.X ascending select b)
             {
+                if (iterate.Count() == 0) continue;
                 if (ForceFall || (pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
                 {
                     if (HandleGroupOperation(pOwner, iterate))
@@ -395,7 +399,7 @@ namespace BASeTris.GameStates
                 pOwner.FinalGameTime = DateTime.Now - pOwner.GameStartTime;
                 GameHandler.Statistics.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
-                pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this); });
+                pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); });
             }
 
             if (PlayField.BlockGroups.Count == 0 && !SpawnWait && !pOwner.CurrentState.GameProcSuspended && !NoTetrominoSpawn)
@@ -929,10 +933,13 @@ namespace BASeTris.GameStates
             {
                 if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.LockTime)
                 {
+                    var elapsed = pOwner.GetElapsedTime();
+                    //if there are multiple active groups, we must wait for all to "settle" before applying them all at once.
+                    
                     PlayField.SetGroupToField(activeItem);
                     GameStats.AddScore(25 - activeItem.Y);
-
-                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
+                    if(activeItem.PlaceSound)
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
                     return true;
                 }
             }

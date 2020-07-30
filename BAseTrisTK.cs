@@ -21,12 +21,13 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using SkiaSharp;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris
 {
     public class BASeTrisTK : GameWindow,IStateOwner,IGamePresenter
     {
-        private static SKColorType DefaultColorType = SKColorType.Rgba8888;
+        
         GameState.DisplayMode CurrentDisplayMode = GameState.DisplayMode.Partitioned;
         private GamePresenter _Present = null;
         private GRContext context;
@@ -51,7 +52,7 @@ namespace BASeTris
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferWidth, out bufferWidth);
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferHeight, out bufferHeight);
             
-            return new GRBackendRenderTarget(Window.ClientSize.Width,Window.ClientSize.Height,3,stencil,new GRGlFramebufferInfo((uint)framebuffer,DefaultColorType.ToGlSizedFormat()));
+            return new GRBackendRenderTarget(Window.ClientSize.Width,Window.ClientSize.Height,3,stencil,new GRGlFramebufferInfo((uint)framebuffer,GlobalResources.DefaultColorType.ToGlSizedFormat()));
            
         }
         public const int DEFAULT_GAME_WIDTH = 520;
@@ -74,9 +75,9 @@ namespace BASeTris
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            var glInterface = GRGlInterface.CreateNativeGlInterface();
-            Debug.Assert(glInterface.Validate());
-            this.context = GRContext.Create(GRBackend.OpenGL, glInterface);
+            GlobalResources.OpenGLInterface = GRGlInterface.CreateNativeGlInterface();
+            Debug.Assert(GlobalResources.OpenGLInterface.Validate());
+            this.context = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
             Debug.Assert(this.context.Handle != IntPtr.Zero);
             this.renderTarget = CreateRenderTarget(this);
             CursorVisible = true;
@@ -229,6 +230,10 @@ namespace BASeTris
             try
             {
                 var CurrentGameState = _Present.Game.CurrentState;
+                if(CurrentGameState is FieldLineActionGameState)
+                {
+                    ;
+                }
                 //int ParticleCount = CurrentGameState is GameplayGameState ? (CurrentGameState as GameplayGameState).Particles.Count : CurrentGameState is ICompositeState<GameplayGameState>?(CurrentGameState as ICompositeState<GameplayGameState>).GetComposite().Particles.Count :0;
                 Title = $"FPS: {1f / e.Time:0} State:{CurrentGameState.GetType().Name}";
                 
@@ -239,7 +244,7 @@ namespace BASeTris
                 backColor.B = 0.3f;
                 GL.ClearColor(backColor);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-                using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, DefaultColorType))
+                using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType))
                 {
                     Debug.Assert(surface != null);
                     Debug.Assert(surface.Handle != IntPtr.Zero);

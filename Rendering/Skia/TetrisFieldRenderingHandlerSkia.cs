@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -20,7 +21,7 @@ namespace BASeTris.Rendering.Skia
         public int VISIBLEROWS;
         public SKRect Bounds;
         public SKRect LastFieldSave;
-        public SKBitmap FieldBitmap;
+        public SKImage FieldBitmap;
         public int HIDDENROWS
         {
             get { return ROWCOUNT - VISIBLEROWS; }
@@ -90,9 +91,13 @@ namespace BASeTris.Rendering.Skia
             if (FoundAnimated) {; }
             return FoundAnimated;
         }
+        private SKSurface FieldSurface = null;
         bool hadAnimated = false;
+        public bool bitmapMode = true;
         public void Draw(TetrisField Source,TetrisFieldDrawSkiaParameters parms,IStateOwner pState, SKCanvas g, SKRect Bounds)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             //first how big is each block?
             float BlockWidth = Bounds.Width / parms.COLCOUNT;
             float BlockHeight = Bounds.Height / (parms.VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
@@ -100,29 +105,67 @@ namespace BASeTris.Rendering.Skia
             {
                 if (parms.FieldBitmap == null || !parms.LastFieldSave.Equals(Bounds) || Source.HasChanged)
                 {
-                    SKImageInfo info = new SKImageInfo((int)Bounds.Width, (int)Bounds.Height);
-                    SKBitmap BuildField = new SKBitmap(info, SKBitmapAllocFlags.ZeroPixels);
-                    using (SKCanvas gfield = new SKCanvas(BuildField))
+                    Debug.Print("Beginning Field Paint:" + sw.Elapsed.ToString());
+                    SKImageInfo info = new SKImageInfo((int)Bounds.Width, (int)Bounds.Height,SKColorType.Bgra8888);
+                    //Note: what we want to do here is actually allocate the field bitmap using a Surface texture. doing it this way paints more slowly,
+                    //because it is backed by a bitmap and drawn largely by the CPU.
+                    //(nmote using the surface we can retrieve an image snapshot).
+
+
+                    if (bitmapMode)
                     {
-                        gfield.Clear(SKColors.Transparent);
-                        hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds,false);
-                        if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
-                        parms.FieldBitmap = BuildField;
+                        SKBitmap BuildField = new SKBitmap(info, SKBitmapAllocFlags.None);
+                        using (SKCanvas gfield = new SKCanvas(BuildField))
+                        {
+                            gfield.Clear(SKColors.Transparent);
+                            hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds, false);
+                            if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
+                            parms.FieldBitmap = SKImage.FromBitmap(BuildField);
+                        }
                     }
+                    else
+                    {
+                        var CreateContext = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
+                        SKCanvas gfield = null;
+
+
+
+                        if (FieldSurface == null)
+                            FieldSurface = SKSurface.Create(CreateContext, GlobalResources.CreateRenderTarget((int)Bounds.Width, (int)Bounds.Height), GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType);
+
+                     
+                        var FieldCanvas = FieldSurface.Canvas;
+                        FieldCanvas.Flush();
+                        
+                        gfield = FieldCanvas;
+                        gfield.Clear(SKColors.Transparent);
+                        hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds, false);
+                        if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
+                        parms.FieldBitmap = FieldSurface.Snapshot();
+
+                    }
+
+
+                    
                     parms.LastFieldSave = Bounds;
                     Source.HasChanged = false;
+                    Debug.Print("Finished Field Paint:" + sw.Elapsed.ToString());
+
                 }
             }
-            g.DrawBitmap(parms.FieldBitmap,new SKPoint(0,0));
-
-            if(hadAnimated)
+            Debug.Print("Drawing Field Bitmap" + sw.Elapsed.ToString());
+            g.DrawImage(parms.FieldBitmap, new SKPoint(0, 0));
+            //g.DrawBitmap(parms.FieldBitmap,new SKPoint(0,0));
+            Debug.Print("Field Bitmap finished" + sw.Elapsed.ToString());
+            if (hadAnimated)
             {
+                Debug.Print("Animated Field blocks found");
                 DrawFieldContents(pState, Source, parms, g, Bounds, true);
             }
 
 
             var activegroups = Source.GetActiveBlockGroups();
-
+            Debug.Print("Painting Active Groups" + sw.Elapsed.ToString());
             lock (activegroups)
             {
                 foreach (Nomino bg in activegroups)
@@ -238,6 +281,7 @@ namespace BASeTris.Rendering.Skia
 
                 }
             }
+            Debug.Print("Painting Active Groups Finished:" + sw.Elapsed.ToString());
         }
     }
 }

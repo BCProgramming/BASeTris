@@ -28,6 +28,7 @@ namespace BASeTris.GameStates.Menu
     {
         public IMultiOptionManager<T> OptionManager { get { return OptionManagerBase as IMultiOptionManager<T>; } set { OptionManagerBase = value; } }
         public event EventHandler<OptionActivated<T>> OnActivateOption;
+        public event EventHandler<OptionActivated<T>> OnDeactivateOption;
 
         public T CurrentOption { get { return (T)CurrentOptionBase; } set { CurrentOptionBase = value; } }
         public MenuStateMultiOption(IMultiOptionManager<T> pOptionManager):base(pOptionManager)
@@ -53,13 +54,15 @@ namespace BASeTris.GameStates.Menu
         }
         public override MenuEventResultConstants OnDeactivated()
         {
+            OnDeactivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption, LastOwner));
             _Activated = false;
             return MenuEventResultConstants.Handled;
         }
-       
 
+        private IStateOwner LastOwner = null;
         public override void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
         {
+            LastOwner = pStateOwner;
             if (_Activated)
             {
                 if (pKey == GameState.GameKeys.GameKey_Left)

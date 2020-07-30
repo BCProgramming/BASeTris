@@ -336,20 +336,28 @@ namespace BASeTris.Theme.Block
         
         protected override SKImage[] ApplyFunc_Custom(TetrisField field, Nomino Group, NominoBlock Target,BlockTypes chosentype)
         {
+            var getElement = Group.FindEntry(Target);
             if(Target is LineSeriesBlock lsb)
             {
                 if(lsb.Popping)
                 {
-                    BlockTypes useType = BlockTypes.Yellow_Pop;
-                    if (chosentype == BlockTypes.Blue_Virus_1 || chosentype == BlockTypes.Blue_Virus_2)
-                        useType = BlockTypes.Blue_Pop;
-                    else if (chosentype == BlockTypes.Yellow_Virus_1 || chosentype == BlockTypes.Yellow_Virus_2)
-                        useType = BlockTypes.Yellow_Pop;
-                    else if (chosentype == BlockTypes.Red_Virus_1 || chosentype == BlockTypes.Red_Virus_2)
-                        useType = BlockTypes.Red_Pop;
+                    if (Target is LineSeriesMasterBlock)
+                    {
+                        ;
+                    }
+                    BlockTypes useType  = BlockTypes.Yellow_Pop;
+                    if (chosentype == BlockTypes.Blue_Virus_1 || chosentype == BlockTypes.Blue_Virus_2 || chosentype == BlockTypes.Blue_Pop)
+                        useType = chosentype = BlockTypes.Blue_Pop;
+                    else if (chosentype == BlockTypes.Yellow_Virus_1 || chosentype == BlockTypes.Yellow_Virus_2 || chosentype==BlockTypes.Yellow_Pop)
+                        useType = chosentype = BlockTypes.Yellow_Pop;
+                    else if (chosentype == BlockTypes.Red_Virus_1 || chosentype == BlockTypes.Red_Virus_2 || chosentype==BlockTypes.Red_Pop)
+                        useType = chosentype = BlockTypes.Red_Pop;
 
+
+                    
                     lsb.SpecialImageFunctionSK = null;
-                    lsb._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(field, Group, useType)) };
+                    lsb._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(field, Group, getElement, useType)) };
+                    return lsb._RotationImagesSK;
                 }
             }
             
@@ -374,8 +382,9 @@ namespace BASeTris.Theme.Block
                 usetype1 = BlockTypes.Green_Virus_1;
                 usetype2 = BlockTypes.Green_Virus_2;
             }
-            var firstImage = SKImage.FromBitmap(GetMappedImageSkia(field, Group, usetype1));
-            var secondImage = SKImage.FromBitmap(GetMappedImageSkia(field, Group, usetype2));
+            
+            var firstImage = SKImage.FromBitmap(GetMappedImageSkia(field, Group,getElement, usetype1));
+            var secondImage = SKImage.FromBitmap(GetMappedImageSkia(field, Group,getElement, usetype2));
             foreach(var iterate in Group)
             {
                 if (iterate.Block is ImageBlock ib)
@@ -397,6 +406,10 @@ namespace BASeTris.Theme.Block
             {
                 if(lsb.Popping)
                 {
+                    if(element.Block is LineSeriesMasterBlock lsm2)
+                    {
+                        ;
+                    }
                     return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(PopTypes_1[lsb.CombiningIndex]);
                 }
                 if (element.Block is LineSeriesMasterBlock lsm)
@@ -434,7 +447,7 @@ namespace BASeTris.Theme.Block
             return BitmapIndex;
         }
 
-        public override SKColor GetColor(TetrisField field, Nomino Element, BlockTypes BlockType, BCT PixelType)
+        public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockTypes BlockType, BCT PixelType)
         {
             if (BlockType == BlockTypes.Yellow_Virus_1 || BlockType == BlockTypes.Yellow_Virus_2)
                 return YellowColourSet[PixelType];

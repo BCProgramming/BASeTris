@@ -78,7 +78,8 @@ namespace BASeTris.GameStates
         private bool _Stagger = true;
         public bool Stagger {  get { return _Stagger; } set { _Stagger = value; } }
         protected LineClearStyle _ClearStyle = LineClearStyle.LineClear_Middle_Out;
-        
+
+        protected int MSBlockClearTime = 20; //number of ms between blocks being removed/cleared.
         public FieldBlockClearAction ClearAction { get; set; } = new FieldBlockClearShrinkAction(new TimeSpan(0,0,0,0,100));
 
         public LineClearStyle ClearStyle
@@ -87,18 +88,39 @@ namespace BASeTris.GameStates
             set { _ClearStyle = value; }
         }
 
-        protected int[] RowNumbers = null;
 
         private IEnumerable<Action> AfterClear = Enumerable.Empty<Action>();
         public bool FlashState = false;
 
+        public Dictionary<int, NominoBlock[]> ClearRowInfo = null;
+        public TetrisField PlayField { get; set; }
+
         public FieldLineActionGameState(GameplayGameState _BaseState, int[] ClearRows, IEnumerable<Action> pAfterClearActions) : base(_BaseState)
         {
+            PlayField = _BaseState.PlayField;
+            //prep the ClearRowInfo. take the row information from the state at the specified row indices, and plop them into ClearRowInfo at those keys.
+            var ContentData = _BaseState.PlayField.Contents;
+            ClearRowInfo = new Dictionary<int, NominoBlock[]>();
+            foreach(var index in ClearRows)
+            {
+                NominoBlock[] thisrow = new NominoBlock[ContentData[index].Length];
+                Array.Copy(ContentData[index], thisrow, ContentData[index].Length);
+                //add to Dictionary.
+                ClearRowInfo.Add(index, thisrow);
+                //wipe out the original row to all be nulls.
+                for(int i=0;i<ContentData[index].Length;i++)
+                {
+                    ContentData[index][i] = null;
+                }
+            }
+
+            
+            
             AfterClear = pAfterClearActions;
-            RowNumbers = ClearRows;
+           // RowNumbers = ClearRows;
         }
 
-        protected int MSBlockClearTime = 20; //number of ms between blocks being removed/cleared.
+        
         protected int CurrentClearIndex = 0;
         DateTime StartOperation = DateTime.MaxValue;
         DateTime LastOperation = DateTime.MaxValue;
@@ -108,7 +130,7 @@ namespace BASeTris.GameStates
             base.GameProc(pOwner);
             if (pOwner.CurrentState is GameplayGameState stgs1)
             {
-                pOwner.EnqueueAction(() => { stgs1.PlayField.HasChanged = true; });
+                //pOwner.EnqueueAction(() => { stgs1.PlayField.HasChanged = true; });
 
             }
             if (StartOperation == DateTime.MaxValue)
@@ -132,7 +154,7 @@ namespace BASeTris.GameStates
             {
                 //clear another block on each row.
                 var ClearResult = ClearFrame(pOwner);
-                if (RowNumbers.Length >= 4)
+                if (ClearRowInfo.Keys.Count >= 4)
                 {
                     FlashState = !FlashState;
                 }
@@ -157,7 +179,7 @@ namespace BASeTris.GameStates
                     }
                     if (pOwner.CurrentState is GameplayGameState stgs2)
                     {
-                        pOwner.EnqueueAction(() => { stgs2.PlayField.HasChanged = true; });
+                       // pOwner.EnqueueAction(() => { stgs2.PlayField.HasChanged = true; });
                         
                     }
                 }
@@ -175,51 +197,51 @@ namespace BASeTris.GameStates
             switch (useStyle)
             {
                 case LineClearStyle.LineClear_Left_To_Right:
-                    foreach (int rowClear in RowNumbers)
+                    foreach (var rowClear in ClearRowInfo)
                     {
-                        if(_Stagger && rowClear%2==0) ClearFrame_Right_To_Left(pOwner,rowClear);
+                        if(_Stagger && rowClear.Key%2==0) ClearFrame_Right_To_Left(pOwner,rowClear);
                         else
                             ClearFrame_Left_To_Right(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
-                    _BaseState.PlayField.HasChanged = true;
+                    //_BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
                 case LineClearStyle.LineClear_Right_To_Left:
-                    foreach (int rowClear in RowNumbers)
+                    foreach (var rowClear in ClearRowInfo)
                     {
-                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Left_To_Right(pOwner,rowClear);
+                        if (_Stagger && rowClear.Key % 2 == 0) ClearFrame_Left_To_Right(pOwner,rowClear);
                         else
                             ClearFrame_Right_To_Left(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
-                    _BaseState.PlayField.HasChanged = true;
+                    //_BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
                 case LineClearStyle.LineClear_Middle_Out:
                     //middle out
-                    foreach (int rowClear in RowNumbers)
+                    foreach (var rowClear in ClearRowInfo)
                     {
-                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(pOwner,rowClear);
+                        if (_Stagger && rowClear.Key % 2 == 0) ClearFrame_Outside_In(pOwner,rowClear);
                         else
                             ClearFrame_Middle_Out(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
-                    _BaseState.PlayField.HasChanged = true;
+                    //_BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
                 case LineClearStyle.LineClear_Outside_In:
                 {
                     //middle out
-                    foreach (int rowClear in RowNumbers)
+                    foreach (var rowClear in ClearRowInfo)
                     {
-                        if (_Stagger && rowClear % 2 == 0) ClearFrame_Outside_In(pOwner,rowClear);
+                        if (_Stagger && rowClear.Key % 2 == 0) ClearFrame_Outside_In(pOwner,rowClear);
                                 else
                             ClearFrame_Outside_In(pOwner,rowClear);
                     }
 
                     CurrentClearIndex++;
-                    _BaseState.PlayField.HasChanged = true;
+                    //_BaseState.PlayField.HasChanged = true;
                     return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
                 }
             }
@@ -276,9 +298,9 @@ namespace BASeTris.GameStates
 
             
         }
-        private void ClearFrame_Outside_In(IStateOwner pOwner,int rowClear)
+        private void ClearFrame_Outside_In(IStateOwner pOwner, KeyValuePair<int, NominoBlock[]> row)
         {
-            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            var GrabRow = row.Value;
             int processindex = GrabRow.Length - CurrentClearIndex;
             int i = GrabRow.Length >> 1;
             int useindex = i + ((processindex % 2 == 0) ? processindex / 2 : -(processindex / 2 + 1));
@@ -290,14 +312,14 @@ namespace BASeTris.GameStates
                 {
                     ParticleSign = 1;
                 }
-                AddParticles(pOwner, useindex, rowClear, ParticleSign);
+                AddParticles(pOwner, useindex, row.Key, ParticleSign);
                 PerformClearAct(GrabRow, useindex);
             }
         }
 
-        private void ClearFrame_Middle_Out(IStateOwner pOwner, int rowClear)
+        private void ClearFrame_Middle_Out(IStateOwner pOwner, KeyValuePair<int, NominoBlock[]> row)
         {
-            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            var GrabRow = row.Value;
 
             int i = GrabRow.Length >> 1;
             int useindex = i + ((CurrentClearIndex % 2 == 0) ? CurrentClearIndex / 2 : -(CurrentClearIndex / 2 + 1));
@@ -311,14 +333,14 @@ namespace BASeTris.GameStates
                 {
                     ParticleSign = -1;
                 }
-                AddParticles(pOwner, useindex, rowClear, ParticleSign);
+                AddParticles(pOwner, useindex, row.Key, ParticleSign);
                 PerformClearAct(GrabRow, useindex);
             }
         }
 
-        private void ClearFrame_Right_To_Left(IStateOwner pOwner, int rowClear)
+        private void ClearFrame_Right_To_Left(IStateOwner pOwner, KeyValuePair<int, NominoBlock[]> row)
         {
-            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            var GrabRow = row.Value;
             int useIndex = GrabRow.Length - CurrentClearIndex - 1;
             //find the block, and clear it out if needed.
             var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[useIndex];
@@ -327,21 +349,21 @@ namespace BASeTris.GameStates
             {
                 int ParticleSign = -1;
                 
-                AddParticles(pOwner, useIndex, rowClear, ParticleSign);
+                AddParticles(pOwner, useIndex, row.Key, ParticleSign);
                 PerformClearAct(GrabRow, useIndex);
             }
         }
 
-        private void ClearFrame_Left_To_Right(IStateOwner pOwner, int rowClear)
+        private void ClearFrame_Left_To_Right(IStateOwner pOwner, KeyValuePair<int, NominoBlock[]> row)
         {
-            var GrabRow = _BaseState.PlayField.Contents[rowClear];
+            var GrabRow = row.Value;
             //find the block, and clear it out if needed.
             var FindClear = CurrentClearIndex >= GrabRow.Length ? null : GrabRow[CurrentClearIndex];
             if (FindClear != null)
             {
                 int ParticleSign = 1;
                 
-                AddParticles(pOwner, CurrentClearIndex, rowClear, ParticleSign);
+                AddParticles(pOwner, CurrentClearIndex, row.Key, ParticleSign);
                 PerformClearAct(GrabRow, CurrentClearIndex);
             }
         }
@@ -419,7 +441,7 @@ namespace BASeTris.GameStates
                 if (ClearBlockList.Count == 0) return true;
                 var grabnext = ClearBlockList.Dequeue();
                 _BaseState.PlayField.Contents[grabnext.X][grabnext.Y] = null;
-                _BaseState.PlayField.HasChanged = true;
+                //_BaseState.PlayField.HasChanged = true;
             }
 
             return false;

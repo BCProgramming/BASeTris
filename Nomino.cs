@@ -28,6 +28,7 @@ namespace BASeTris
         public String SpecialName { get; set; }
 
         public bool Controllable { get; set; } = true;
+        public bool PlaceSound { get; set; } = true;
         public bool MoveSound { get; set; } = false;
         public int FallSpeed { get; set; } = 250; //Higher is slower, number of ms between movements.
         public int X { get; set; }

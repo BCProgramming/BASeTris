@@ -47,7 +47,7 @@ namespace BASeTris.Rendering.GDIPlus
 
                 //draw each "line" of summary statistical information based on ShowExtraLines.
 
-                for (int i = 0; i < Source.ShowExtraLines; i++)
+                for (int i = 0; i < Source.CurrentLinesDisplay; i++)
                 {
                     float XPosition = Bounds.Width * 0.25f;
                     float YPosition = GameOverPos.Y + ((1 + i) * measuremini.Height) + measuremini.Height;

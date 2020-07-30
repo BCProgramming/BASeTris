@@ -293,7 +293,7 @@ namespace BASeTris
 
         DateTime LastSetGroup = DateTime.MinValue;
 
-        public IList<Point> SetGroupToField(Nomino bg)
+        public IList<Point> SetGroupToField(params Nomino[] groups)
         {
             List<Point> Result = new List<Point>();
             lock (this)
@@ -302,30 +302,33 @@ namespace BASeTris
                 {
                     LastSetGroup = DateTime.Now;
 
-
-                    Debug.Print("Setting Nomino to Field:" + bg.ToString());
-                    foreach (var groupblock in bg)
+                    foreach (var bg in groups)
                     {
-                        int RowPos = groupblock.Y + bg.Y;
-                        int ColPos = groupblock.X + bg.X;
-                        if (FieldContents[RowPos][ColPos] == null)
+                        Debug.Print("Setting Nomino to Field:" + bg.ToString());
+                        foreach (var groupblock in bg)
                         {
-                            FieldContents[RowPos][ColPos] = groupblock.Block;
-                            Result.Add(new Point(ColPos, RowPos));
+                            int RowPos = groupblock.Y + bg.Y;
+                            int ColPos = groupblock.X + bg.X;
+                            if (FieldContents[RowPos][ColPos] == null)
+                            {
+                                FieldContents[RowPos][ColPos] = groupblock.Block;
+                                Result.Add(new Point(ColPos, RowPos));
+                            }
+                            else
+                            {
+                                //let's hope this is a falling block...
+                                //go up until we can apply the block.
+
+
+
+                                ;
+                            }
                         }
-                        else
-                        {
-                            //let's hope this is a falling block...
-                            //go up until we can apply the block.
-
-
-
-                            ;
-                        }
+                    
+                    if (ActiveBlockGroups.Contains(bg)) RemoveBlockGroup(bg);
                     }
 
-                    if (ActiveBlockGroups.Contains(bg)) RemoveBlockGroup(bg);
-                    BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(bg));
+                    BlockGroupSet?.Invoke(this, new BlockGroupSetEventArgs(groups));
                     HasChanged = true;
                 }
             }
@@ -428,7 +431,7 @@ namespace BASeTris
             return ForBounds.Height / (VisibleRows);
         }
         Pen LinePen = new Pen(Color.Black, 1) {DashPattern = new float[] {4, 1, 3, 1, 2, 1, 3, 1}};
-        RectangleF LastFieldSave = RectangleF.Empty;
+        public RectangleF LastFieldSave = RectangleF.Empty;
         Image FieldBitmap = null;
 
         public void DrawFieldContents(IStateOwner pState,Graphics g, RectangleF Bounds)
@@ -629,11 +632,11 @@ namespace BASeTris
 
         public class BlockGroupSetEventArgs : EventArgs
         {
-            public Nomino _group = null;
+            public List<Nomino> _groups = null;
 
-            public BlockGroupSetEventArgs(Nomino bg)
+            public BlockGroupSetEventArgs(params Nomino[] bg)
             {
-                _group = bg;
+                _groups = bg.ToList();
             }
         }
     }

@@ -294,6 +294,39 @@ namespace BASeTris.Rendering.Adapters
         }
         
     }
+
+    public class BCImage
+    {
+        private Image GDIImage = null;
+        private SKImage SkiaImage = null;
+
+        public BCImage(Image src)
+        {
+            GDIImage = src;
+            SkiaImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(GDIImage));
+        }
+        public BCImage (SKImage src)
+        {
+            SkiaImage = src;
+            GDIImage = SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaImage);
+        }
+        public static implicit operator SKImage(BCImage src)
+        {
+            return src.SkiaImage;
+        }
+        public static implicit operator BCImage(SKImage src)
+        {
+            return new BCImage(src);
+        }
+        public static implicit operator Image(BCImage src)
+        {
+            return src.GDIImage;
+        }
+        public static implicit operator BCImage(Image src)
+        {
+            return new BCImage(src);
+        }
+    }
     
 
 }

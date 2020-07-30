@@ -42,7 +42,7 @@ namespace BASeTris.Theme.Block
         }
         public abstract SKPointI GetBlockSize(TetrisField field, BlockEnum BlockType);
 
-        public abstract SKColor GetColor(TetrisField field, Nomino Element, BlockEnum BlockType, PixelEnum PixelType);
+        public abstract SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockEnum BlockType, PixelEnum PixelType);
 
 
         public static PixelEnum[][] GetPixelsFromSKImage(SKImage Source, Func<SKColor, PixelEnum> PixelMapRoutine)
@@ -106,7 +106,7 @@ namespace BASeTris.Theme.Block
         }
         public abstract Dictionary<BlockEnum, PixelEnum[][]> GetBlockTypeDictionary();
 
-        public SKColor[][] GetBlockPixels(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
+        public SKColor[][] GetBlockPixels(TetrisField field, Nomino Element, NominoElement block, BlockEnum BlockTypeIndex)
         {
             SKColor[][] createresult;
             if (!BlockTypeDictionary.ContainsKey(BlockTypeIndex)) throw new InvalidOperationException("Invalid BlockTypeIndex: Not defined");
@@ -119,7 +119,7 @@ namespace BASeTris.Theme.Block
                 for (int xval = 0; xval < blocksize.X; xval++)
                 {
                     var ColorType = BlockPixelMatrix[yval][xval];
-                    createresult[yval][xval] = GetColor(field, Element, BlockTypeIndex, ColorType);
+                    createresult[yval][xval] = GetColor(field, Element, block, BlockTypeIndex, ColorType);
                 }
             }
             return createresult;
@@ -157,7 +157,7 @@ namespace BASeTris.Theme.Block
             return CachedImageDataGDI[level][BlockTypeIndex][Element.GetType()];
         }
 #endif
-        protected SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
+        protected SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, NominoElement Block,BlockEnum BlockTypeIndex)
         {
             var LevelIndex = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
             if (!CachedImageData.ContainsKey(LevelIndex))
@@ -171,7 +171,7 @@ namespace BASeTris.Theme.Block
             if (!CachedImageData[LevelIndex][BlockTypeIndex].ContainsKey(Element.GetType()))
             {
 
-                SKBitmap buildbitmap = DrawMappedImageSkia(field, Element, BlockTypeIndex);
+                SKBitmap buildbitmap = DrawMappedImageSkia(field, Element,Block, BlockTypeIndex);
                 CachedImageData[LevelIndex][BlockTypeIndex].Add(Element.GetType(), buildbitmap);
 
             }
@@ -182,7 +182,7 @@ namespace BASeTris.Theme.Block
 
         }
 
-        private SKBitmap DrawMappedImageSkia(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
+        private SKBitmap DrawMappedImageSkia(TetrisField field, Nomino Element, NominoElement Block,BlockEnum BlockTypeIndex)
         {
             SKPointI blocksize = GetBlockSize(field, BlockTypeIndex);
             SKImageInfo drawinfo = new SKImageInfo(blocksize.X, blocksize.Y, SKColorType.Rgba8888, SKAlphaType.Premul);
@@ -190,7 +190,7 @@ namespace BASeTris.Theme.Block
             SKBitmap drawimage = new SKBitmap(drawinfo, SKBitmapAllocFlags.ZeroPixels);
             SKCanvas skc = new SKCanvas(drawimage);
             skc.Clear(SKColors.Transparent);
-            SKColor[][] blockpixels = GetBlockPixels(field, Element, BlockTypeIndex);
+            SKColor[][] blockpixels = GetBlockPixels(field, Element, Block,BlockTypeIndex);
             for (int y = 0; y < blocksize.Y; y++)
             {
                 for (int x = 0; x < blocksize.X; x++)
@@ -220,11 +220,11 @@ namespace BASeTris.Theme.Block
                     if (flagvalues==BlockFlags.Rotatable)
                     {
                         
-                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, chosenType.BlockType));
+                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, iterate,chosenType.BlockType));
                     }
                     else if (flagvalues == BlockFlags.Static)
                     {
-                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, chosenType.BlockType)) };
+                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, iterate,chosenType.BlockType)) };
                     }
                     else if(flagvalues == BlockFlags.CustomSelector)
                     {
@@ -247,10 +247,10 @@ namespace BASeTris.Theme.Block
                     var Flags = GetBlockFlags(iterate);
                     if(Flags == BlockFlags.Rotatable)
                     {
-                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, chosenType));
+                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group,iterate, chosenType));
                     }
                     else if (Flags== BlockFlags.Static) {
-                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, chosenType)) };
+                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, iterate,chosenType)) };
                     }
                     else if(Flags==BlockFlags.CustomSelector)
                     {
@@ -260,14 +260,7 @@ namespace BASeTris.Theme.Block
                 }
             }
         }
-        private SKImage[] ApplyFunc_GetRotations(TetrisField field,Nomino Group,BlockEnum chosentype)
-        {
-            return TetrominoTheme.GetImageRotations(GetMappedImageSkia(field, Group, chosentype));
-        }
-        private SKImage[] ApplyFunc_Static(TetrisField field,Nomino Group, BlockEnum chosentype)
-        {
-            return new SKImage[] {SKImage.FromBitmap(GetMappedImageSkia(field, Group, chosentype)) };
-        }
+       
         protected virtual SKImage[] ApplyFunc_Custom(TetrisField field,Nomino Group,NominoBlock Target,BlockEnum chosentype)
         {
             return null;
