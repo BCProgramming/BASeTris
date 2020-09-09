@@ -16,6 +16,7 @@ namespace BASeTris.Theme.Block
     //of those we've got 3 colors. We could add more, I suppose, but Dr. Mario has three so let's keep things a bit simpler.
     public class DrMarioTheme : CustomPixelTheme<DrMarioTheme.BCT, DrMarioTheme.BlockTypes>
     {
+        public override String Name { get { return "NES"; } }
         public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
 

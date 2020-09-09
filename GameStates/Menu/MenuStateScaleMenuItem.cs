@@ -32,7 +32,7 @@ namespace BASeTris.GameStates.Menu
             var closest = (from so in ScaleOptions orderby Math.Abs(so.Scale - pOwner.ScaleFactor) ascending select so).First();
             this.Text = closest.Text;
             OptionManager.SetCurrentIndex(Array.IndexOf(ScaleOptions, closest));
-            OnActivateOption += ScaleActivate;
+            OnChangeOption += ScaleActivate;
 
         }
         public void ScaleActivate(Object sender,OptionActivated<MenuItemScaleItemSelection> e)

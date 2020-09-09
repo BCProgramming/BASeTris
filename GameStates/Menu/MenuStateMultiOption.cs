@@ -27,9 +27,9 @@ namespace BASeTris.GameStates.Menu
     public class MenuStateMultiOption<T> : MenuStateMultiOption
     {
         public IMultiOptionManager<T> OptionManager { get { return OptionManagerBase as IMultiOptionManager<T>; } set { OptionManagerBase = value; } }
-        public event EventHandler<OptionActivated<T>> OnActivateOption;
+        public event EventHandler<OptionActivated<T>> OnChangeOption;
         public event EventHandler<OptionActivated<T>> OnDeactivateOption;
-
+        public event EventHandler<OptionActivated<T>> OnActivateOption;
         public T CurrentOption { get { return (T)CurrentOptionBase; } set { CurrentOptionBase = value; } }
         public MenuStateMultiOption(IMultiOptionManager<T> pOptionManager):base(pOptionManager)
         {
@@ -49,6 +49,7 @@ namespace BASeTris.GameStates.Menu
 
         public override MenuEventResultConstants OnActivated()
         {
+            OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption, LastOwner));
             _Activated = true;
             return MenuEventResultConstants.Handled;
         }
@@ -68,12 +69,12 @@ namespace BASeTris.GameStates.Menu
                 if (pKey == GameState.GameKeys.GameKey_Left)
                 {
                     CurrentOption = OptionManager.MovePrevious();
-                    OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption,pStateOwner));
+                    OnChangeOption?.Invoke(this, new OptionActivated<T>(CurrentOption,pStateOwner));
                 }
                 else if (pKey == GameState.GameKeys.GameKey_Right)
                 {
                     CurrentOption = OptionManager.MoveNext();
-                    OnActivateOption?.Invoke(this,new OptionActivated<T>(CurrentOption,pStateOwner));
+                    OnChangeOption?.Invoke(this,new OptionActivated<T>(CurrentOption,pStateOwner));
                 }
 
                 if (OptionManager != null && CurrentOption!=null)

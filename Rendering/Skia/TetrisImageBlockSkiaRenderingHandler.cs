@@ -25,6 +25,7 @@ namespace BASeTris.Rendering.Skia
 
         public virtual void Render(IStateOwner pOwner,SKCanvas pRenderTarget,ImageBlock Source, TetrisBlockDrawParameters Element)
         {
+            if (!Source.Visible) return; //no need to do anything if the block is Invisible...
             var drawparameters = Element;
             if (drawparameters is TetrisBlockDrawSkiaParameters)
             {

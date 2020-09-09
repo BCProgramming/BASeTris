@@ -15,6 +15,7 @@ namespace BASeTris
     [HandlerTheme(typeof(StandardTetrisHandler))]
     public class GameBoyTetrominoTheme : TetrominoTheme
     {
+        public override String Name { get { return "Game Boy"; } }
         static readonly Size ImageSize;
         static GameBoyTetrominoTheme() 
         {

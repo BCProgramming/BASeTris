@@ -18,6 +18,7 @@ namespace BASeTris.Blocks
     public class ImageBlock : NominoBlock
     {
         internal bool DoRotateTransform = false; //if true, we'll RotateTransform the image based on this blocks rotation.
+        public bool Visible { get; set; } = true;
         private Image[] RotationImagesCache = null;
         internal Image[] _RotationImages
         {

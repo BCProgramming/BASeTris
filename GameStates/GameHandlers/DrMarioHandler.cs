@@ -8,6 +8,7 @@ using BASeCamp.BASeScores;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameObjects;
+using BASeTris.GameStates.GameHandlers.HandlerStates;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
 using SkiaSharp;
@@ -255,19 +256,25 @@ namespace BASeTris.GameStates.GameHandlers
 
             return CreateResult;
         }
+        public int VirusCount = 0;
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
 
             //here we would go through the field and handle where the blocks line up to more than the required critical mass. 
-            
+
             //Nomino's have two blocks. Well, I guess they can have more
             //in any case we want to check all the positions of the trigger nomino and check for critical masses.
+            int MasterCount = 0;
             HashSet<Point> CriticalMasses = null;
             for (int y = 0; y < state.PlayField.RowCount ; y++)
             {
                 var currRow = state.PlayField.Contents[y];
                 for (int x =0;x<state.PlayField.ColCount;x++)
                 {
+                    if(state.PlayField.Contents[y][x] is LineSeriesMasterBlock)
+                    {
+                        MasterCount++;
+                    }
                     if (state.PlayField.Contents[y][x] is LineSeriesBlock)
                     {
                         var foundmasses = FindCriticalMasses(state, pOwner, new Point(x, y));
@@ -280,9 +287,14 @@ namespace BASeTris.GameStates.GameHandlers
 
                 }
             }
+            VirusCount = MasterCount;
 
-            
-            if(CriticalMasses!=null && CriticalMasses.Any())
+            //if MasterCount is 0 then we completed this level.
+            //if there are no viruses left, this level is now complete. We need a "Level complete" screen state with an overlay- we would switch to that state. It should
+            //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
+
+
+            if (CriticalMasses!=null && CriticalMasses.Any())
             {
 
                 //process the critical masses.
@@ -327,10 +339,8 @@ namespace BASeTris.GameStates.GameHandlers
                 state.Sounds.PlaySound(pOwner.AudioThemeMan.BlockPop.Key);
 
 
-                //scan the field and update the virus count
-                //if there are no viruses left, this level is now complete. We need a "Level complete" screen state with ah overlay- we would switch to that state. It should
-                //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
-
+                
+                
                 //need to determine a way to detect chains here, where we create an active block and then it results in another "pop".
 
                 state.NoTetrominoSpawn = true;
@@ -340,7 +350,18 @@ namespace BASeTris.GameStates.GameHandlers
                     //first, remove the CriticalMasses altogether.
                     foreach (var iterate in CriticalMasses)
                     {
+                        var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
                         state.PlayField.Contents[iterate.Y][iterate.X] = null;
+                        if (popItem.Owner != null)
+                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField);
+                        else
+                        {
+                            var Dummino = new Nomino() { };
+                            Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
+                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField);
+                        }
+
+
                     }
                     //algorithm change: instead of going through the entire field, we'll go through all the critical masses.
                     //With Each one:
@@ -383,6 +404,7 @@ namespace BASeTris.GameStates.GameHandlers
                                         Nomino resurrect = cb.Owner;
                                         resurrect.Controllable = false;
                                         resurrect.FallSpeed = 250;
+                                        resurrect.LastFall = pOwner.GetElapsedTime();
                                         resurrect.MoveSound = true;
                                         resurrect.PlaceSound = false;
                                         resurrect.NoGhost = true;
@@ -493,10 +515,10 @@ namespace BASeTris.GameStates.GameHandlers
 
             }
 
-            for (int i=0;i<ParticlesPerPop;i++)
+            /*for (int i=0;i<ParticlesPerPop;i++)
             {
 
-            }
+            }*/
 
 
         }
@@ -507,7 +529,7 @@ namespace BASeTris.GameStates.GameHandlers
             //need to come up with a proper way of implementing progressive levels.
             //lkikely will need to have stats and stuff abstracted to each Handler.
             //for now, we'll generate say 25 random viruses and toss them in the lower half of the playfield.
-
+            
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
             for(int i=0;i<50;i++)
             {
@@ -529,11 +551,13 @@ namespace BASeTris.GameStates.GameHandlers
                      randomPos = new SKPointI(rndXPos, rndYPos);
                 }
                 state.PlayField.Contents[RandomYPos][RandomXPos] = lsmb;
-
+                VirusCount++;
 
 
 
             }
+            ViriiAppearanceState appearstate = new ViriiAppearanceState(state);
+            pOwner.CurrentState = appearstate;
 
 
         }

@@ -1914,7 +1914,7 @@ namespace BASeTris.AssetManager
                 if (!loadedimages.ContainsKey(paramvalue)) throw new KeyNotFoundException("Key \"" + paramvalue + "\" not found.");
                 //Image acquiredimage = loadedimages[paramvalue];
                 Image acquiredimage = getLoadedImage(paramvalue);
-                Image changedimage = (Image) acquiredimage.Clone();
+                Image changedimage = (Image) new Bitmap(acquiredimage);
 
                 //commandcode could have parameters- check for parens.
                 String[] parameters = null;

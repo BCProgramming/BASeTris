@@ -66,7 +66,7 @@ namespace BASeTris.GameStates.Menu
             MenuStateMultiOption<SoundOption> MusicOptionItem = new MenuStateMultiOption<SoundOption>(SoundOptions);
             MusicOptionItem.Text = "Music";
 
-            MusicOptionItem.OnActivateOption += MusicOptionItem_OnActivateOption;
+            MusicOptionItem.OnChangeOption += MusicOptionItem_OnActivateOption;
             ReturnItem.FontFace = SoundLabel.FontFace = MusicOptionItem.FontFace = ItemFont.FontFamily.Name;
             ReturnItem.FontSize = SoundLabel.FontSize = MusicOptionItem.FontSize = ItemFont.Size;
             MenuElements.Add(ReturnItem);

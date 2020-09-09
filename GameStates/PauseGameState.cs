@@ -122,7 +122,7 @@ namespace BASeTris.GameStates
             scaleitem.FontSize = FontSrc.Size;
             
 
-            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner);
+            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner,PausedState.GameHandler);
             ThemeItem.FontFace = FontSrc.FontFamily.Name;
             ThemeItem.FontSize = FontSrc.Size;
 

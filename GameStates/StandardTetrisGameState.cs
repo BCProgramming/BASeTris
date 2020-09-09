@@ -455,7 +455,7 @@ namespace BASeTris.GameStates
             pOwner.Feedback(0.9f * (float) result, result * 250);
         }*/
 
-        static bool SpawnWait = false;
+        bool SpawnWait = false;
         static Random rgen = new Random();
         
         
@@ -934,13 +934,26 @@ namespace BASeTris.GameStates
                 if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.LockTime)
                 {
                     var elapsed = pOwner.GetElapsedTime();
-                    //if there are multiple active groups, we must wait for all to "settle" before applying them all at once.
-                    
-                    PlayField.SetGroupToField(activeItem);
-                    GameStats.AddScore(25 - activeItem.Y);
-                    if(activeItem.PlaceSound)
-                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
-                    return true;
+                    //any and all blockgroups in the field that are set not to allow input must have not moved in the last 750ms before we allow any groups to set.
+
+                    var allgroups = PlayField.GetActiveBlockGroups();
+                    var Applicable = allgroups.All((f) =>
+                    {
+                        return !f.Controllable || (elapsed - f.LastFall).TotalMilliseconds > 750;
+                    });
+                    Applicable = true;
+                    if (Applicable)
+                    {
+
+
+
+
+                        PlayField.SetGroupToField(activeItem);
+                        GameStats.AddScore(25 - activeItem.Y);
+                        if (activeItem.PlaceSound)
+                            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
+                        return true;
+                    }
                 }
             }
             

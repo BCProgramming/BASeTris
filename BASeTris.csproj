@@ -141,6 +141,8 @@
     <Compile Include="GamePresenter.cs" />
     <Compile Include="GameStates\DropWaitState.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
+    <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioLevelCompleteState.cs" />
+    <Compile Include="GameStates\GameHandlers\HandlerStates\ViriiAppearanceState.cs" />
     <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisHandlerThemeAttribute.cs" />
@@ -236,12 +238,14 @@
     <Compile Include="Rendering\Skia\GameStates\EnterTextStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\FieldActionStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\GameOverStateSkaiRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\LineSeriesLevelCompletionStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\MenuStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\ShowHighScoresStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\ViriiAppearanceStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
     <Compile Include="Rendering\Skia\ParticleRenderingSkiaHandler.cs" />
     <Compile Include="Rendering\Skia\SkiaExtensions.cs" />

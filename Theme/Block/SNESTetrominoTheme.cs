@@ -17,7 +17,7 @@ namespace BASeTris
     {
         //This theme is based on the colour and appearance of the Tetris game in SNES Tetris and Dr.Mario.
         //First we have some data structure classes which hold some of the colour information.
-
+        public override String Name { get { return "SNES"; } }
         public class BlockColors
         {
             public BCColor LightColor;

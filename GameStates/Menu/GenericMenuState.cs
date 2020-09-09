@@ -4,6 +4,7 @@ using BASeTris.Tetrominoes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -58,7 +59,7 @@ namespace BASeTris.GameStates.Menu
             Target.StateHeader = "BASeTris";
 
             //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
-            var NewGameItem = new MenuStateNewGameMenuItem(pOwner);
+            var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
             var OptionsItem = new MenuStateTextMenuItem() { Text = "Options" };
             var scaleitem = new MenuStateScaleMenuItem(pOwner);
             var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" };
@@ -76,10 +77,10 @@ namespace BASeTris.GameStates.Menu
                 }
             };
             
-            NewGameItem.OnDeactivateOption += (o, eventarg) =>
+            /*NewGameItem.OnDeactivateOption += (o, eventarg) =>
              {
                  //start a new game.
-                 //this actually pops a submenu...
+
 
                  if (pOwner is IGamePresenter igp)
                  {
@@ -91,25 +92,44 @@ namespace BASeTris.GameStates.Menu
 
                          igp.StartGame();
                      }
+                     else
+                     {
+                         NewGameItem.Reset();
+                     }
                  }
              };
+            NewGameItem.OnActivateOption += (o, eventarg) =>
+            {
+                
+            };
+            NewGameItem.OnChangeOption += (o2, eventarg2) =>
+            {
+                //nothing for when we change the option.
+            };*/
+            
             Target.MenuItemActivated += (o, e) =>
             {
+                if(e.MenuElement==NewGameItem)
+                {
+                    GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target));
+                    pOwner.CurrentState = gms;
+                    Target.ActivatedItem = null;
+                }
                
-                if(e.MenuElement == OptionsItem)
+                else if(e.MenuElement == OptionsItem)
                 {
                     //Show the options menu
                     var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
                     pOwner.CurrentState = OptionsMenu;
                     Target.ActivatedItem = null;
                 }
-                if(e.MenuElement == HighScoresItem)
+                else if(e.MenuElement == HighScoresItem)
                 {
                     ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], Target, null);
                     pOwner.CurrentState = scorestate;
                     Target.ActivatedItem = null;
                 }
-                if(e.MenuElement == ExitItem)
+                else if(e.MenuElement == ExitItem)
                 {
                     //nothing, this needs confirmation so is handled separate.
                 }
@@ -131,6 +151,75 @@ namespace BASeTris.GameStates.Menu
      
         }
     }
+
+    public class NewGameMenuPopulator : IMenuPopulator
+    {
+        private GameState RevertState = null;
+        public NewGameMenuPopulator(GameState ReversionState)
+        {
+            RevertState = ReversionState;
+        }
+
+        public void PopulateMenu(GenericMenuState Target, IStateOwner pOwner)
+        {
+            Target.StateHeader = "Select Game Type";
+
+            //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
+            List<MenuStateMenuItem> AllItems = new List<MenuStateMenuItem>();
+            Dictionary<MenuStateMenuItem, IGameCustomizationHandler> HandlerLookup = new Dictionary<MenuStateMenuItem, IGameCustomizationHandler>();
+            var BackItem = new MenuStateTextMenuItem() { Text = "Back to Main" };
+            foreach(var iterate in Program.GetGameHandlers())
+            {
+                ConstructorInfo ci = iterate.GetConstructor(new Type[] { });
+                if(ci!=null)
+                {
+                    IGameCustomizationHandler handler = (IGameCustomizationHandler)ci.Invoke(new object[] { });
+                    MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name };
+                    HandlerLookup.Add(builditem, handler);
+                    AllItems.Add(builditem);
+                }
+            }
+            AllItems.Add(BackItem);
+
+           
+
+           
+
+            Target.MenuItemActivated += (o, e) =>
+            {
+                if(HandlerLookup.ContainsKey(e.MenuElement))
+                {
+                    IGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
+                    if (pOwner is IGamePresenter igp)
+                    {
+                        pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman);
+
+                        igp.StartGame();
+                    }
+                }
+               
+
+
+            };
+
+
+
+            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
+            Target.HeaderTypeface = FontSrc.FontFamily.Name;
+            Target.HeaderTypeSize = (float)(28f * pOwner.ScaleFactor);
+            foreach (var iterate in AllItems)
+            {
+                if (iterate is MenuStateTextMenuItem titem)
+                {
+                    titem.FontFace = FontSrc.FontFamily.Name;
+                    titem.FontSize = FontSrc.Size;
+                }
+                Target.MenuElements.Add(iterate);
+            }
+
+        }
+    }
+
 
     public class OptionsMenuPopulator : IMenuPopulator
     {

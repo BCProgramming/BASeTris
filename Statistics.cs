@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.GameStates;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Tetrominoes;
 
@@ -71,9 +72,12 @@ namespace BASeTris
     {
         public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
         {
-            return base.GetDisplayStatistics(pOwner, Source);
-            //we want to show a VIRUS: count too, but we need to 
+            var stats = base.GetDisplayStatistics(pOwner, Source);
+
+            stats.Add("Virus", (Source.GameHandler as DrMarioHandler).VirusCount.ToString());
+            //we want to show a VIRUS: count too.
             //implement that into the handler first for us to access here!.
+            return stats;
         }
     }
     public class TetrisStatistics:BaseStatistics

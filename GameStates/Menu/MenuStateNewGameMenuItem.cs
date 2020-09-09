@@ -15,7 +15,7 @@ namespace BASeTris.GameStates.Menu
         //Small = 1
         //Large = 1.3
         //Biggliest = 1.6
-        
+        private MenuItemNewGameSelection DefaultOption = null;
         public MenuStateNewGameMenuItem(IStateOwner pOwner) : base(null)
         {
             _Owner = pOwner;
@@ -23,7 +23,8 @@ namespace BASeTris.GameStates.Menu
             var HandlerOptions = Program.GetGameHandlers();
             List<MenuItemNewGameSelection> Options = new List<MenuItemNewGameSelection>();
             var Default = new MenuItemNewGameSelection(null);
-            Options.Add(Default);
+            DefaultOption= Default;
+            //Options.Add(Default);
             foreach (var iterate in HandlerOptions)
             {
                 var findconstruct = iterate.GetConstructor(new Type[] { });
@@ -40,6 +41,11 @@ namespace BASeTris.GameStates.Menu
             this.CurrentOption = Default;
             //OnActivateOption += ScaleActivate;
 
+
+        }
+        public void Reset()
+        {
+            CurrentOption = DefaultOption;
         }
       
     }

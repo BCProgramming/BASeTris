@@ -15,6 +15,7 @@ namespace BASeTris
     /// </summary>
     public class OutlinedTetrominoTheme : TetrominoTheme
     {
+        public override string Name { get { return "Outlined"; } }
         [Flags]
         public enum BlockOutlines
         {

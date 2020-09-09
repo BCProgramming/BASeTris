@@ -11,6 +11,7 @@ namespace BASeTris.Theme.Block
     [HandlerTheme(typeof(StandardTetrisHandler))]
     public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP,SimpleBlockTheme.BasicBlockTypes>
     {
+        public override String Name { get { return "Simple"; }  }
         public enum BBP
         {
             Transparent,Glint,Center,Shade,DoubleShade

@@ -12,7 +12,7 @@ namespace BASeTris.GameStates.GameHandlers
         public Type[] HandlerType { get; set; }
         public HandlerThemeAttribute(params Type[] typespecifiers)
         {
-            if (typespecifiers.Any((w) => !(w is IGameCustomizationHandler)))
+            if (typespecifiers.Any((w) => (w.GetInterface("IGameCustomizationHandler")==null)))
                 throw new ArgumentException("All types provided to TetrisHandlerThemeAttribute must be a Game Handler");
             HandlerType = typespecifiers;
         }

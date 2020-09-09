@@ -21,6 +21,7 @@ namespace BASeTris
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class TetrominoTheme
     {
+        public abstract String Name { get; }
         public virtual bool IsAnimated(NominoBlock block)
         {
             return false;
@@ -29,22 +30,22 @@ namespace BASeTris
         {
             return GetNominoTypeKey(Group.GetType(), GameHandler, Field);
         }
-        public virtual String GetNominoTypeKey(Type src, IGameCustomizationHandler GameHandler,TetrisField Field)
+        public virtual String GetNominoTypeKey(Type src, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
             return src.FullName;
         }
         public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
         public abstract void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler);
-        
+
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
 
-        private Image AddCachedImage(String Key,Image pImage)
+        private Image AddCachedImage(String Key, Image pImage)
         {
             if (_Cache.ContainsKey(Key)) _Cache[Key] = pImage;
             else
             {
-                _Cache.Add(Key,pImage);
+                _Cache.Add(Key, pImage);
                 return pImage;
             }
             return null;
@@ -55,12 +56,12 @@ namespace BASeTris
                 return _Cache[Key];
             else return null;
         }
-        protected Image AddCachedImage(String pKey,Size pSize,Color pColor,Image pImage)
+        protected Image AddCachedImage(String pKey, Size pSize, Color pColor, Image pImage)
         {
             String pBuildKey = BuildCacheKey(pKey, pSize, pColor);
             return AddCachedImage(pBuildKey, pImage);
         }
-        protected Image GetCachedImage(String pKey,Size pSize,Color pColor)
+        protected Image GetCachedImage(String pKey, Size pSize, Color pColor)
         {
             String pBuildKey = BuildCacheKey(pKey, pSize, pColor);
             return GetCachedImage(pBuildKey);
@@ -103,14 +104,14 @@ namespace BASeTris
 
         public static SKImage[] GetImageRotations(SKBitmap Source)
         {
-            lock(Source)
+            lock (Source)
             {
-                
-                SKBitmap Rotate90 = RotateBitmap(Source,90);
-                SKBitmap Rotate180 = RotateBitmap(Source,180);
+
+                SKBitmap Rotate90 = RotateBitmap(Source, 90);
+                SKBitmap Rotate180 = RotateBitmap(Source, 180);
                 SKBitmap Rotate270 = RotateBitmap(Source, 270);
-                
-                
+
+
                 return new SKImage[] { SKImage.FromBitmap(Source), SKImage.FromBitmap(Rotate90), SKImage.FromBitmap(Rotate180), SKImage.FromBitmap(Rotate270) };
 
 
@@ -118,13 +119,13 @@ namespace BASeTris
         }
 
         static Color DefaultTint = Color.Transparent;
-        protected PlayFieldBackgroundInfo GetColoredBackground(Color MainColor,Color? TintColor = null)
+        protected PlayFieldBackgroundInfo GetColoredBackground(Color MainColor, Color? TintColor = null)
         {
-                Image ResultImage = new Bitmap(250, 500);
-                using (Graphics drawdark = Graphics.FromImage(ResultImage))
-                {
-                    drawdark.Clear(MainColor);
-                }
+            Image ResultImage = new Bitmap(250, 500);
+            using (Graphics drawdark = Graphics.FromImage(ResultImage))
+            {
+                drawdark.Clear(MainColor);
+            }
             Color UseTint = TintColor == null ? Color.Transparent : TintColor.Value;
             return new PlayFieldBackgroundInfo(ResultImage, UseTint);
         }
@@ -133,7 +134,7 @@ namespace BASeTris
     {
         public Image BackgroundImage;
         public Color TintColor = Color.Transparent;
-        public PlayFieldBackgroundInfo(Image pBackgroundImage,Color pTintColor)
+        public PlayFieldBackgroundInfo(Image pBackgroundImage, Color pTintColor)
         {
             BackgroundImage = pBackgroundImage;
             TintColor = pTintColor;
@@ -153,11 +154,12 @@ namespace BASeTris
             BlockInnerColor = InnerColor;
         }
     }
-    
+
     public class StandardTetrominoTheme : TetrominoTheme
     {
         StandardColouredBlock.BlockStyle _Style;
 
+        public override String Name { get { return "Standard";} }
         public StandardColouredBlock.BlockStyle BlockStyle
         {
             get { return _Style; }
@@ -169,7 +171,10 @@ namespace BASeTris
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background",0.5f],Color.Transparent);
         }
+        public StandardTetrominoTheme():this(StandardColouredBlock.BlockStyle.Style_Shine)
+        {
 
+        }
         public StandardTetrominoTheme(StandardColouredBlock.BlockStyle pBlockStyle)
         {
             _Style = pBlockStyle;

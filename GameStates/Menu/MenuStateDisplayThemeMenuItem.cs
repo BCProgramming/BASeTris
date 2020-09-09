@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Blocks;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Theme.Block;
 namespace BASeTris.GameStates.Menu
 {
@@ -11,8 +13,8 @@ namespace BASeTris.GameStates.Menu
     {
         private IStateOwner _Owner = null;
 
-        
-        MenuStateThemeSelection[] ThemeOptions = new MenuStateThemeSelection[] {
+
+        MenuStateThemeSelection[] ThemeOptions = null; /*new MenuStateThemeSelection[] {
 
             new MenuStateThemeSelection("Standard",typeof(StandardTetrominoTheme), ()=>new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine)),
             new MenuStateThemeSelection("Nintendo NES",typeof(NESTetrominoTheme),() => new NESTetrominoTheme()),
@@ -21,17 +23,56 @@ namespace BASeTris.GameStates.Menu
             new MenuStateThemeSelection("Outlined",typeof(OutlinedTetrominoTheme), ()=>new OutlinedTetrominoTheme()),
             new MenuStateThemeSelection("Simple",typeof(SimpleBlockTheme), ()=>new SimpleBlockTheme()),
 
-        };
-        public MenuStateDisplayThemeMenuItem(IStateOwner pOwner) : base(null)
+        };*/
+
+        private IEnumerable<MenuStateThemeSelection> GetThemeSelectionsForHandler(IGameCustomizationHandler handler)
+        {
+
+            var themetypes = Program.GetHandlerThemes(handler.GetType());
+            foreach(var themeiter in themetypes)
+            {
+                ConstructorInfo ci = themeiter.GetConstructor(new Type[] { });
+                if(ci!=null)
+                {
+                    TetrominoTheme buildResult = (TetrominoTheme)ci.Invoke(new object[] { });
+                    MenuStateThemeSelection msst = new MenuStateThemeSelection(buildResult.Name, themeiter, () => buildResult);
+                    yield return msst;
+                }
+            }
+
+
+        }
+        private IGameCustomizationHandler _Handler;
+        public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, IGameCustomizationHandler handler) : base(null)
         {
             _Owner = pOwner;
-            
+            ThemeOptions = GetThemeSelectionsForHandler(handler).ToArray();
             base.OptionManager = new MultiOptionManagerList<MenuStateThemeSelection>(ThemeOptions, 1);
             var closest = ThemeOptions.First();
             
             this.Text = closest.Description;
-            OptionManager.SetCurrentIndex(Array.IndexOf(ThemeOptions, closest));
-            OnActivateOption += ThemeActivate;
+            Type currentthemetype = null;
+
+            if(_Owner.CurrentState is GameplayGameState gs)
+            {
+                currentthemetype = gs.PlayField.Theme.GetType();
+            }
+            else if(_Owner.CurrentState is ICompositeState<GameplayGameState> comp)
+            {
+                currentthemetype = comp.GetComposite().PlayField.Theme.GetType();
+            }
+
+            int currentIndex = 0;
+            for(int i=0;i<0;i++)
+            {
+                if(ThemeOptions[i].GetType()==currentthemetype)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+            OptionManager.SetCurrentIndex(currentIndex);
+            OnChangeOption += ThemeActivate;
 
         }
         private OptionActivated<MenuStateThemeSelection> ActivatedOption = null;
