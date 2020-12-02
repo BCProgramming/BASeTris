@@ -118,6 +118,7 @@ namespace BASeCamp.Logging
 
         public override void Write(String LogMessage)
         {
+            if (!EnableLogging) return;
             if (writerecursion) return;
             writerecursion = true;
             try

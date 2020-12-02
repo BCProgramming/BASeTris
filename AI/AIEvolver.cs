@@ -18,12 +18,12 @@ namespace BASeTris.AI
 {
     //this is a simple evolver for the AI, which tweaks the Scoring rules.
     //AIEvolver interface. takes a ScoringRuleData interface and mutates it into a new generation. 
-    public interface BASetrisAIEvolver<T> where T:StoredBoardState.AIScoringRuleData
+    public interface BASetrisAIEvolver<T> where T:StoredBoardState.TetrisScoringRuleData
     {
-        IEnumerable<StoredBoardState.AIScoringRuleData> Mutate(StoredBoardState.AIScoringRuleData Parent, int NumChildren);
+        IEnumerable<StoredBoardState.TetrisScoringRuleData> Mutate(StoredBoardState.TetrisScoringRuleData Parent, int NumChildren);
     }
 
-    public class SimpleAIEvolver : BASetrisAIEvolver<StoredBoardState.AIScoringRuleData>
+    public class SimpleAIEvolver : BASetrisAIEvolver<StoredBoardState.TetrisScoringRuleData>
     {
         //double a = -0.610066f;
         //double b = 0.760666;
@@ -33,7 +33,7 @@ namespace BASeTris.AI
         private double MutationMinimum = 0.0000001;
         private double MutationMaximum = 0.1;
         public static Random rgen = new Random();
-        public IEnumerable<StoredBoardState.AIScoringRuleData> Mutate(StoredBoardState.AIScoringRuleData Parent,int NumChildren)
+        public IEnumerable<StoredBoardState.TetrisScoringRuleData> Mutate(StoredBoardState.TetrisScoringRuleData Parent,int NumChildren)
         {
             var HeightScore = Parent.AggregateHeightScore - Parent.RowScore;
             var BumpinessScore = Parent.BumpinessScore;
@@ -47,7 +47,7 @@ namespace BASeTris.AI
                 var MutateHole = MutateValue(HoleScore, MutationMinimum, MutationMaximum);
                 var MutateRow = MutateValue(RowScore, MutationMinimum, MutationMaximum);
                 var MutateCrevice = MutateValue(CreviceScore, MutationMinimum, MutationMaximum);
-                StoredBoardState.AIScoringRuleData scoreresult = new StoredBoardState.AIScoringRuleData() { AggregateHeightScore = MutateHeight, BumpinessScore = MutateBumpiness, HoleScore = MutateHole, RowScore = MutateRow,CrevasseScore = MutateCrevice };
+                StoredBoardState.TetrisScoringRuleData scoreresult = new StoredBoardState.TetrisScoringRuleData() { AggregateHeightScore = MutateHeight, BumpinessScore = MutateBumpiness, HoleScore = MutateHole, RowScore = MutateRow,CrevasseScore = MutateCrevice };
                 //yield this mutation
                 yield return scoreresult;
             }
@@ -61,8 +61,8 @@ namespace BASeTris.AI
 
 
         }
-        private static ConcurrentQueue<StoredBoardState.AIScoringRuleData> ThreadWorkItems = new ConcurrentQueue<StoredBoardState.AIScoringRuleData>();
-        private static ConcurrentDictionary<StoredBoardState.AIScoringRuleData, double> ThreadWorkResults = new ConcurrentDictionary<StoredBoardState.AIScoringRuleData, double>();
+        private static ConcurrentQueue<StoredBoardState.TetrisScoringRuleData> ThreadWorkItems = new ConcurrentQueue<StoredBoardState.TetrisScoringRuleData>();
+        private static ConcurrentDictionary<StoredBoardState.TetrisScoringRuleData, double> ThreadWorkResults = new ConcurrentDictionary<StoredBoardState.TetrisScoringRuleData, double>();
         
         public static void RunSimulations(int ChildrenPerGeneration = 50)
         {
@@ -70,17 +70,17 @@ namespace BASeTris.AI
             //"RunSimulations" is my attempt at a single AI Evolver.
             SimpleAIEvolver evolver = new SimpleAIEvolver();
             //we start with the default.
-            StoredBoardState.AIScoringRuleData ScoreData = new StoredBoardState.AIScoringRuleData();
+            StoredBoardState.TetrisScoringRuleData ScoreData = new StoredBoardState.TetrisScoringRuleData();
             bool LocalMaxFound = false;
             const int MaxRetries = 5;
             int RetryCount = 0;
             double CurrentBestScore = RunMultipleSimulations(ScoreData);
-            StoredBoardState.AIScoringRuleData BestScorer = ScoreData;
+            StoredBoardState.TetrisScoringRuleData BestScorer = ScoreData;
             while(!LocalMaxFound &&RetryCount<MaxRetries)
             {
                 //With the current score Data, create 100 mutations.
                 var Mutations = evolver.Mutate(ScoreData, ChildrenPerGeneration);
-                Dictionary<double, StoredBoardState.AIScoringRuleData> GenerationScores = new Dictionary<double, StoredBoardState.AIScoringRuleData>();
+                Dictionary<double, StoredBoardState.TetrisScoringRuleData> GenerationScores = new Dictionary<double, StoredBoardState.TetrisScoringRuleData>();
                 foreach (var iterate in Mutations)
                 {
                     ThreadWorkItems.Enqueue(iterate);
@@ -89,7 +89,7 @@ namespace BASeTris.AI
                 {
                     while (!ThreadWorkItems.IsEmpty)
                     {
-                        if (ThreadWorkItems.TryDequeue(out StoredBoardState.AIScoringRuleData result))
+                        if (ThreadWorkItems.TryDequeue(out StoredBoardState.TetrisScoringRuleData result))
                         {
                             double MutationScore = RunMultipleSimulations(result);
                             ThreadWorkResults.TryAdd(result, MutationScore);
@@ -155,7 +155,7 @@ namespace BASeTris.AI
 
 
         }
-        public static double RunMultipleSimulations(StoredBoardState.AIScoringRuleData scoredata, int BoardWidth = 20, int BoardHeight = 22,int NumSimulations=10)
+        public static double RunMultipleSimulations(StoredBoardState.TetrisScoringRuleData scoredata, int BoardWidth = 20, int BoardHeight = 22,int NumSimulations=10)
         {
             Debug.Print("Running multiple simulations with specified Score Information:");
             List<double> AllScores = new List<double>();
@@ -172,7 +172,7 @@ namespace BASeTris.AI
       
         //Runs a simulation with a given piece of scoring data, and board width and height, and runs one simulated game using that scoring for AI determination and 
         //returns a valuation of the resulting gameplay using the scoring algorithm with those weights.
-        public static double RunSimulation(StoredBoardState.AIScoringRuleData scoredata,int BoardWidth=10,int BoardHeight=22)
+        public static double RunSimulation(StoredBoardState.TetrisScoringRuleData scoredata,int BoardWidth=10,int BoardHeight=22)
         {
             Debug.Print($"--------Running Simulation " + scoredata.ToString() + "-----");
                 
@@ -201,7 +201,7 @@ namespace BASeTris.AI
                 //Debug.Print("Processing new Nomino:" + nextNomino.SpecialName);
                 var PossibleBoardResults = TetrisAI.GetPossibleResults(Contents, nextNomino,scoredata);
                 //score each one based on the scoring rules.
-                var BestScore = (from p in PossibleBoardResults orderby p.GetScore(scoredata) descending select p).FirstOrDefault();
+                var BestScore = (from p in PossibleBoardResults orderby p.GetScore(typeof(GameStates.GameHandlers.StandardTetrisHandler), scoredata) descending select p).FirstOrDefault();
                 if(BestScore!=null)
                 {
                     // we go with the best scoring value of course.

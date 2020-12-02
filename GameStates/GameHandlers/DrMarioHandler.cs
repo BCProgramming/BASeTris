@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.BASeScores;
+using BASeTris.AI;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameObjects;
@@ -15,6 +16,8 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+    //placeholder attribute: a Dr Mario scoring handler should be implemented...
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler))]
     public class DrMarioHandler : IGameCustomizationHandler
     {
         public String Name { get { return "Dr. Mario"; } }
@@ -240,7 +243,7 @@ namespace BASeTris.GameStates.GameHandlers
             foreach(Point offset in new Point[] { new Point(-1,0),new Point(0,-1),new Point(1,0)})
             {
                 var checkblock = state.PlayField.Contents[Row + offset.Y][Column + offset.X];
-                if(checkblock!=null && (currentblock==null || currentblock.Owner.HasBlock(checkblock)))
+                if(checkblock!=null && (currentblock==null || !currentblock.Owner.HasBlock(checkblock)))
                 {
                     List<Nomino> CurrResult = ProcessBlockDroppage(state, Column + offset.X, Row + offset.Y, ref AdditionalSkipBlocks);
                     foreach(var iterateresult in CurrResult)

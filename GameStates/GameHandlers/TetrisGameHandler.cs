@@ -1,4 +1,5 @@
 ﻿using BASeCamp.BASeScores;
+using BASeTris.AI;
 using BASeTris.Choosers;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
@@ -17,6 +18,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// <summary>
     /// ICustomizationHandler that handles the standard tetris game.
     /// </summary>
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler))]
     public class StandardTetrisHandler : IGameCustomizationHandler
     {
         public String Name { get { return "Tetris"; } }

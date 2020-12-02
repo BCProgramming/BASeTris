@@ -165,7 +165,7 @@ namespace BASeTris.Rendering.Skia
 
 
             var activegroups = Source.GetActiveBlockGroups();
-            Debug.Print("Painting Active Groups" + sw.Elapsed.ToString());
+            Debug.Print("Painting Active Groups:" + sw.Elapsed.ToString());
             lock (activegroups)
             {
                 foreach (Nomino bg in activegroups)

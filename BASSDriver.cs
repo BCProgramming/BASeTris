@@ -5,11 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Un4seen.Bass;
-using Un4seen.Bass.AddOn.Fx;
-using Un4seen.Bass.AddOn.Mix;
-using Un4seen.Bass.Misc;
-using Un4seen.Bass.AddOn.Wma;
+
 
 namespace BASeTris.AssetManager
 {
@@ -24,7 +20,7 @@ namespace BASeTris.AssetManager
 
         private readonly int _soundStream;
         private readonly int _tempoStream;
-        private readonly SYNCPROC soundstopproc;
+        private readonly ManagedBass.SyncProcedure soundstopproc;
         private bool _disposed;
         private bool _paused = false;
         private IntPtr _UnmanagedBlock = IntPtr.Zero;
@@ -38,18 +34,35 @@ namespace BASeTris.AssetManager
         {
             get
             {
-                // return Bass.BASS_StreamGetFilePosition(SoundStream, BASSStreamFilePosition.BASS_FILEPOS_CURRENT);
-                return Bass.BASS_ChannelGetPosition(ActiveStream) / ((float) Bass.BASS_ChannelGetLength(ActiveStream));
+                // return ManagedBass.Bass.StreamGetFilePosition(SoundStream, BASSStreamFilePosition.BASS_FILEPOS_CURRENT);
+                return ManagedBass.Bass.ChannelGetPosition(ActiveStream) / ((float) ManagedBass.Bass.ChannelGetLength(ActiveStream));
             }
         }
+        /*
+         //Get the higher order value.
+        var high = number >> 16;
+        Console.WriteLine($"High: {high:X}");
 
+        //Get the lower order value.
+        var low = number & 0xFFFF; //Or use 0x0000FFFF
+        Console.WriteLine($"Low: {low:X}");
+
+                     */
+                     public int HighWord(int Source)
+        {
+            return Source >> 16;
+        }
+        public int LoWord(int Source)
+        {
+            return Source & 0xFFFF;
+        }
         public float Level
         {
             get
             {
-                int levelresult = Bass.BASS_ChannelGetLevel(ActiveStream);
-                int left = Utils.LowWord32(levelresult); // the left level
-                int right = Utils.HighWord32(levelresult); // the right level
+                int levelresult = ManagedBass.Bass.ChannelGetLevel(ActiveStream);
+                int left = LoWord(levelresult); // the left level
+                int right = HighWord(levelresult); // the right level
                 return 32767f / ((left + (float) right) / 2);
             }
         }
@@ -78,7 +91,7 @@ namespace BASeTris.AssetManager
             {
                 try
                 {
-                    _tempoStream = BassFx.BASS_FX_TempoCreate(streamnum, BASSFlag.BASS_FX_FREESOURCE);
+                    _tempoStream = ManagedBass.Fx.BassFx.TempoCreate(streamnum, ManagedBass.BassFlags.FxFreeSource);
                 }
                 catch (DllNotFoundException exx)
                 {
@@ -120,8 +133,8 @@ namespace BASeTris.AssetManager
 
         public float getLength()
         {
-            var len = Bass.BASS_ChannelGetLength(ActiveStream, BASSMode.BASS_POS_BYTES);
-            float result = (float) Bass.BASS_ChannelBytes2Seconds(ActiveStream, len);
+            var len = ManagedBass.Bass.ChannelGetLength(ActiveStream,ManagedBass.PositionFlags.Bytes);
+            float result = (float) ManagedBass.Bass.ChannelBytes2Seconds(ActiveStream, len);
             return result;
             //QWORD len = BASS_ChannelGetLength(channel, BASS_POS_BYTE); // the length in bytes
             //double time = BASS_ChannelBytes2Seconds(channel, len); // the length in seconds
@@ -129,7 +142,7 @@ namespace BASeTris.AssetManager
 
         public iActiveSoundObject Play(bool playlooped)
         {
-            //Bass.BASS_SetVolume(1.0f);
+            //ManagedBass.Bass.SetVolume(1.0f);
 
             return Play(playlooped, 1.0f);
         }
@@ -141,11 +154,11 @@ namespace BASeTris.AssetManager
 
         public iActiveSoundObject Play(bool playlooped, float volume)
         {
-            Bass.BASS_ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_VOL, volume);
+            ManagedBass.Bass.ChannelSetAttribute(ActiveStream,ManagedBass.ChannelAttribute.Volume , volume);
 
-            if (playlooped) Bass.BASS_ChannelFlags(ActiveStream, BASSFlag.BASS_SAMPLE_LOOP, BASSFlag.BASS_SAMPLE_LOOP);
-            Bass.BASS_ChannelSetSync(ActiveStream, BASSSync.BASS_SYNC_END | BASSSync.BASS_SYNC_ONETIME, 0, soundstopproc, IntPtr.Zero);
-            Bass.BASS_ChannelPlay(ActiveStream, true);
+            if (playlooped) ManagedBass.Bass.ChannelFlags(ActiveStream, ManagedBass.BassFlags.Loop, ManagedBass.BassFlags.Loop);
+            ManagedBass.Bass.ChannelSetSync(ActiveStream, ManagedBass.SyncFlags.End |  ManagedBass.SyncFlags.Onetime, 0, soundstopproc, IntPtr.Zero);
+            ManagedBass.Bass.ChannelPlay(ActiveStream, true);
 
             return this;
         }
@@ -156,22 +169,22 @@ namespace BASeTris.AssetManager
 
         public bool Finished
         {
-            get { return Bass.BASS_ChannelGetPosition(ActiveStream) >= Bass.BASS_ChannelGetLength(ActiveStream); }
+            get { return ManagedBass.Bass.ChannelGetPosition(ActiveStream) >= ManagedBass.Bass.ChannelGetLength(ActiveStream); }
         }
 
         public void Stop()
         {
-            Bass.BASS_ChannelStop(ActiveStream);
+            ManagedBass.Bass.ChannelStop(ActiveStream);
         }
 
         public void Pause()
         {
-            Bass.BASS_ChannelPause(ActiveStream);
+            ManagedBass.Bass.ChannelPause(ActiveStream);
         }
 
         public void UnPause()
         {
-            Bass.BASS_ChannelPlay(ActiveStream, false);
+            ManagedBass.Bass.ChannelPlay(ActiveStream, false);
         }
 
         public float Tempo
@@ -179,42 +192,42 @@ namespace BASeTris.AssetManager
             get
             {
                 float result = 0;
-                Bass.BASS_ChannelGetAttribute(_tempoStream, BASSAttribute.BASS_ATTRIB_TEMPO, ref result);
+                ManagedBass.Bass.ChannelGetAttribute(_tempoStream,ManagedBass.ChannelAttribute.Tempo, out result);
                 if (result == 0)
-                    Bass.BASS_ChannelGetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, ref result);
+                    ManagedBass.Bass.ChannelGetAttribute(ActiveStream, ManagedBass.ChannelAttribute.MusicSpeed, out result);
                 return result;
             }
             set
             {
                 Debug.Print("Setting Tempo of Channel ID" + _soundStream + " (Tempo ID#" + _tempoStream + ")to " + value);
-                Bass.BASS_ChannelSetAttribute(_tempoStream, BASSAttribute.BASS_ATTRIB_TEMPO, value);
+                ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Tempo, value);
                 int CalculatedValue;
                 CalculatedValue = TetrisGame.ClampValue((int) (value * 128), 0, 255);
 
 
-                // Bass.BASS_ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, CalculatedValue);
+                // ManagedBass.Bass.ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, CalculatedValue);
             }
         }
 
         public bool Paused
         {
-            get { return (Bass.BASS_ChannelIsActive(ActiveStream) == BASSActive.BASS_ACTIVE_PAUSED); }
+            get { return (ManagedBass.Bass.ChannelIsActive(ActiveStream) ==  ManagedBass.PlaybackState.Paused); }
             set
             {
                 if (value)
                 {
-                    Bass.BASS_ChannelPause(ActiveStream);
+                    ManagedBass.Bass.ChannelPause(ActiveStream);
                 }
                 else
                 {
-                    Bass.BASS_ChannelPlay(ActiveStream, false);
+                    ManagedBass.Bass.ChannelPlay(ActiveStream, false);
                 }
             }
         }
 
         public void setVolume(float volumeset)
         {
-            Bass.BASS_ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_VOL_CHAN, volumeset);
+            ManagedBass.Bass.ChannelSetAttribute(ActiveStream, ManagedBass.ChannelAttribute.MusicVolumeChannel, volumeset);
         }
 
         #endregion
@@ -224,7 +237,7 @@ namespace BASeTris.AssetManager
     {
         public static string DrvName = "NBASS";
 
-        Bass _bassInstance;
+        
         private Dictionary<int, String> loadedbassplugs;
 
         public override string ToString()
@@ -239,15 +252,28 @@ namespace BASeTris.AssetManager
 
         public void Dispose()
         {
-            // Bass.BASS_Free();
-            Bass.FreeMe();
-            BassMix.FreeMe();
+            ManagedBass.Bass.Free();
+            
+            //BassMix.FreeMe();
             foreach (var disposeplugin in loadedbassplugs)
             {
-                Bass.BASS_PluginFree(disposeplugin.Key);
+                ManagedBass.Bass.PluginFree(disposeplugin.Key);
             }
         }
-
+        private Dictionary<int,String> BassLoadPluginsDir(String pPath)
+        {
+            DirectoryInfo di = new DirectoryInfo(pPath);
+            Dictionary<int, String> result = new Dictionary<int, string>();
+            foreach(var iterate in di.GetFiles("*.dll"))
+            {
+                int PluginResult = ManagedBass.Bass.PluginLoad(iterate.FullName);
+                if(PluginResult != 0)
+                {
+                    result.Add(PluginResult, iterate.FullName);
+                }
+            }
+            return result;
+        }
         public BASSDriver(String pluginFolder)
         {
             SupportedExtensions = ".MP3|.WAV|.OGG|.MID|.IT|.S3M|.XM";
@@ -262,11 +288,14 @@ namespace BASeTris.AssetManager
             String[] x64DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x64")).ToArray();
 
             string pathuse = LoadProperDLL(x86DLL, x64DLL); //load the x64 or x86 version as needed
-            loadedbassplugs = Bass.BASS_PluginLoadDirectory(pathuse);
-
-            var result = Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
-
-            //Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 10 + info.minbuf + 1);
+            
+            
+            //Interestingly, switching to ManagedBass seems to have <removed> the ability to load DLLs from a particular folder.
+            //Though- turns out the program was set to always build x86 anyway.
+            
+            var result = ManagedBass.Bass.Init(-1, 44100,ManagedBass.DeviceInitFlags.Default, IntPtr.Zero);
+            loadedbassplugs = BassLoadPluginsDir(pathuse);
+            //ManagedBass.Bass.SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 10 + info.minbuf + 1);
             // default buffer size = update period + 'minbuf' + 1ms extra margin
 
             //buflen = BASS_GetConfig(BASS_CONFIG_BUFFER);
@@ -275,7 +304,7 @@ namespace BASeTris.AssetManager
             /*
               if (PluginFolder.Length > 0)
               {
-                  Dictionary<int,String> loadedbassplugs = Bass.BASS_PluginLoadDirectory(PluginFolder);
+                  Dictionary<int,String> loadedbassplugs = ManagedBass.Bass.PluginLoadDirectory(PluginFolder);
                   if (loadedbassplugs != null) //added Feb 16 2010
                   {
                       foreach (KeyValuePair<int, String> kvp in loadedbassplugs)
@@ -315,16 +344,18 @@ namespace BASeTris.AssetManager
         {
             String dlltoload;
             //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
-            if (Utils.Is64Bit)
+            if (Environment.Is64BitProcess)
                 dlltoload = x64Path.FirstOrDefault(a => Directory.Exists(a));
             else
                 dlltoload = x86Path.FirstOrDefault(a => Directory.Exists(a));
 
             Debug.Print("Loading bass.net from:" + dlltoload);
-            Bass.LoadMe(dlltoload);
-            BassMix.LoadMe(dlltoload);
+            
+            
+            //Bass.LoadMe(dlltoload);
+            //BassMix.LoadMe(dlltoload);
             //Don't forget BassFX too!
-            BassFx.LoadMe(dlltoload);
+            //BassFx.LoadMe(dlltoload);
             return dlltoload;
         }
 
@@ -350,7 +381,7 @@ namespace BASeTris.AssetManager
 
         public iSoundSourceObject LoadSound(Stream fromstream)
         {
-            //int stmake = Bass.BASS_StreamCreateFile(
+            //int stmake = ManagedBass.Bass.StreamCreateFile(
             return null;
         }
 
@@ -365,23 +396,22 @@ namespace BASeTris.AssetManager
             int stmake = 0;
 
             //we need to allocate some unmanaged memory.
-            IntPtr unmanagedPointer = Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, unmanagedPointer, data.Length);
+            
 
 
             if (new[] {".xm", ".it"}.Contains(extension.ToLower()))
             {
-                stmake = Bass.BASS_MusicLoad(unmanagedPointer, 0, 0, BASSFlag.BASS_DEFAULT, 0);
+                stmake = ManagedBass.Bass.MusicLoad(data, 0, 0);
             }
             else
             {
-                stmake = Bass.BASS_StreamCreateFile(unmanagedPointer, 0, 0, BASSFlag.BASS_STREAM_DECODE);
+                stmake = ManagedBass.Bass.CreateStream(data, 0, 0,ManagedBass.BassFlags.Decode);
             }
 
             if (stmake != 0)
             {
                 //create the BASSSound object; we need to give it the unManagedPointer, so that it will be able to properly free that resource when it is destructed.
-                BASSSound returnsound = new BASSSound(stmake, unmanagedPointer);
+                BASSSound returnsound = new BASSSound(stmake);
                 returnsound.BASS_SoundStopped += BasssoundStop;
                 return returnsound;
             }
@@ -401,11 +431,11 @@ namespace BASeTris.AssetManager
 
             if (new[] {".xm", ".it", ".mod"}.Contains(extension.ToLower()))
             {
-                stmake = Bass.BASS_MusicLoad(filename, 0, 0, BASSFlag.BASS_DEFAULT, 0);
+                stmake = ManagedBass.Bass.MusicLoad(filename, 0, 0);
             }
             else
             {
-                stmake = Bass.BASS_StreamCreateFile(filename, 0, 0, BASSFlag.BASS_STREAM_DECODE);
+                stmake = ManagedBass.Bass.CreateStream(filename, 0, 0, ManagedBass.BassFlags.Decode);
             }
 
             if (stmake != 0)

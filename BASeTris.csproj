@@ -98,10 +98,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bass.Net, Version=2.4.10.3, Culture=neutral, PublicKeyToken=b7566c273e6ef480, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>ThirdParty\Bass.Net.dll</HintPath>
-    </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>ThirdParty\Ionic.Zip.dll</HintPath>
@@ -119,18 +115,18 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="XInput.Wrapper, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\XInput.Wrapper.0.3.1\lib\net40\XInput.Wrapper.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\AIEvolver.cs" />
     <Compile Include="AI\BaseAI.cs" />
+    <Compile Include="AI\IStateScoringHandler.cs" />
+    <Compile Include="AI\StandardTetrisAIScoringHandler.cs" />
     <Compile Include="AI\TetrisAI.cs" />
     <Compile Include="AssetManager\AssetManager.cs" />
     <Compile Include="AssetManager\DeletionHelper.cs" />
     <Compile Include="AssetManager\LoadedTypeManager.cs" />
     <Compile Include="AssetManager\NullSoundDriver.cs" />
+    <Compile Include="AssetManager\SoundInterfaces.cs" />
     <Compile Include="BackgroundDrawers\IBackground.cs" />
     <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
@@ -322,6 +318,15 @@
       <Project>{850a1563-ac23-4b60-bbcf-503b2bb69547}</Project>
       <Name>Elementizer</Name>
     </ProjectReference>
+    <PackageReference Include="ManagedBass">
+      <Version>3.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="ManagedBass.Fx">
+      <Version>3.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="ManagedBass.Mix">
+      <Version>3.0.0</Version>
+    </PackageReference>
     <PackageReference Include="OpenGL.Net.WinForms">
       <Version>0.8.4</Version>
     </PackageReference>
@@ -337,6 +342,126 @@
     <PackageReference Include="XInput.Wrapper" Version="0.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Audio\BCsong.ogg" />
+    <Content Include="Assets\Audio\block_falling.ogg" />
+    <Content Include="Assets\Audio\block_move.ogg" />
+    <Content Include="Assets\Audio\block_move_2.ogg" />
+    <Content Include="Assets\Audio\block_move_3.ogg" />
+    <Content Include="Assets\Audio\block_place.ogg" />
+    <Content Include="Assets\Audio\block_place_2.ogg" />
+    <Content Include="Assets\Audio\block_place_3.ogg" />
+    <Content Include="Assets\Audio\block_pop.ogg" />
+    <Content Include="Assets\Audio\block_rotate.ogg" />
+    <Content Include="Assets\Audio\block_rotate_2.ogg" />
+    <Content Include="Assets\Audio\block_rotate_3.ogg" />
+    <Content Include="Assets\Audio\block_rotate_4.ogg" />
+    <Content Include="Assets\Audio\block_rotate_5.ogg" />
+    <Content Include="Assets\Audio\block_stop.ogg" />
+    <Content Include="Assets\Audio\brickbreak.ogg" />
+    <Content Include="Assets\Audio\chain_chime.ogg" />
+    <Content Include="Assets\Audio\char_change.ogg" />
+    <Content Include="Assets\Audio\DrMarioChill.ogg" />
+    <Content Include="Assets\Audio\DrMarioFever.ogg" />
+    <Content Include="Assets\Audio\drop.ogg" />
+    <Content Include="Assets\Audio\emerge.ogg" />
+    <Content Include="Assets\Audio\gren.ogg" />
+    <Content Include="Assets\Audio\highscoreentry.ogg" />
+    <Content Include="Assets\Audio\high_score_list.ogg" />
+    <Content Include="Assets\Audio\journey3.ogg" />
+    <Content Include="Assets\Audio\kirbysand.ogg" />
+    <Content Include="Assets\Audio\level_up.ogg" />
+    <Content Include="Assets\Audio\line_clear.ogg" />
+    <Content Include="Assets\Audio\line_clear_2.ogg" />
+    <Content Include="Assets\Audio\line_clear_3.ogg" />
+    <Content Include="Assets\Audio\line_clear_4.ogg" />
+    <Content Include="Assets\Audio\line_tetris.ogg" />
+    <Content Include="Assets\Audio\line_tetris_2.ogg" />
+    <Content Include="Assets\Audio\menu_select.ogg" />
+    <Content Include="Assets\Audio\metal1.ogg" />
+    <Content Include="Assets\Audio\metal2.ogg" />
+    <Content Include="Assets\Audio\metal3.ogg" />
+    <Content Include="Assets\Audio\mmDeath.ogg" />
+    <Content Include="Assets\Audio\pause.ogg" />
+    <Content Include="Assets\Audio\right.ogg" />
+    <Content Include="Assets\Audio\score_chime.ogg" />
+    <Content Include="Assets\Audio\shade_move.ogg" />
+    <Content Include="Assets\Audio\silius1.ogg" />
+    <Content Include="Assets\Audio\smb3_tetris.ogg" />
+    <Content Include="Assets\Audio\switch_active.ogg" />
+    <Content Include="Assets\Audio\switch_inactive.ogg" />
+    <Content Include="Assets\Audio\TDM_A_theme.ogg" />
+    <Content Include="Assets\Audio\TetrisDS.ogg" />
+    <Content Include="Assets\Audio\tetris_2.ogg" />
+    <Content Include="Assets\Audio\tetris_2_A.ogg" />
+    <Content Include="Assets\Audio\tetris_a_theme_techno.ogg" />
+    <Content Include="Assets\Audio\tetris_a_theme_techno_A.ogg" />
+    <Content Include="Assets\Audio\tetris_game_over.ogg" />
+    <Content Include="Assets\Audio\tetris_gb_theme.ogg" />
+    <Content Include="Assets\Audio\tetris_nes_theme.ogg" />
+    <Content Include="Assets\Audio\tetris_theme_A.ogg" />
+    <Content Include="Assets\Audio\tetris_theme_B.ogg" />
+    <Content Include="Assets\Audio\tetris_theme_C.ogg" />
+    <Content Include="Assets\Audio\wrong.ogg" />
+    <Content Include="Assets\background.png" />
+    <Content Include="Assets\background_2.png" />
+    <Content Include="Assets\block_arrangement.png" />
+    <Content Include="Assets\block_chisel_red.png" />
+    <Content Include="Assets\block_lightbevel_red.png" />
+    <Content Include="Assets\block_mottled.png" />
+    <Content Include="Assets\block_pixeled_red.png" />
+    <Content Include="Assets\block_pixeled_red_outline.png" />
+    <Content Include="Assets\block_shine_red.png" />
+    <Content Include="Assets\block_std.png" />
+    <Content Include="Assets\block_std_red.png" />
+    <Content Include="Assets\blue_virus_1.png" />
+    <Content Include="Assets\blue_virus_2.png" />
+    <Content Include="Assets\bubble.png" />
+    <Content Include="Assets\cursor.png" />
+    <Content Include="Assets\dark_dotted.png" />
+    <Content Include="Assets\display_box.png" />
+    <Content Include="Assets\green_virus_1.png" />
+    <Content Include="Assets\green_virus_2.png" />
+    <Content Include="bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassflac.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassmidi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassopus.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bass_fx.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\lighter_big_dotted.png" />
+    <Content Include="Assets\light_dotted.png" />
+    <Content Include="Assets\Mottle_horizontal.png" />
+    <Content Include="Assets\mottle_right_cap.png" />
+    <Content Include="Assets\pill_left.png" />
+    <Content Include="Assets\pill_pop.png" />
+    <Content Include="Assets\pill_right.png" />
+    <Content Include="Assets\pill_single.png" />
+    <Content Include="Assets\red_virus_1.png" />
+    <Content Include="Assets\red_virus_2.png" />
+    <Content Include="Assets\Settings.xml" />
+    <Content Include="Assets\smoke1.png" />
+    <Content Include="Assets\smoke2.png" />
+    <Content Include="Assets\smoke3.png" />
+    <Content Include="Assets\smoke4.png" />
+    <Content Include="Assets\smoke5.png" />
+    <Content Include="Assets\smoke6.png" />
+    <Content Include="Assets\smoke7.png" />
+    <Content Include="Assets\smoke8.png" />
+    <Content Include="Assets\solid_beveled.png" />
+    <Content Include="Assets\standard_square.png" />
+    <Content Include="Assets\yellow_virus_1.png" />
+    <Content Include="Assets\yellow_virus_2.png" />
     <Content Include="BaseTris.ico" />
     <Content Include="to-do-list.txt" />
   </ItemGroup>

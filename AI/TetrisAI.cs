@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml.Schema;
 using BASeTris.GameStates;
 using BASeTris.Blocks;
+using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.AI
 {
@@ -34,7 +35,7 @@ namespace BASeTris.AI
             return Copied;
         }
 
-        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg, StoredBoardState.AIScoringRuleData rules)
+        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg, StoredBoardState.TetrisScoringRuleData rules)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for (int useRotation = 0; useRotation < 4; useRotation++)
@@ -59,7 +60,7 @@ namespace BASeTris.AI
             }
         }
 
-        public StoredBoardState.AIScoringRuleData ScoringRules { get; set; } = new StoredBoardState.AIScoringRuleData();
+        public StoredBoardState.TetrisScoringRuleData ScoringRules { get; set; } = new StoredBoardState.TetrisScoringRuleData();
         public override void AIActionFrame()
         {
             //do our hard thinking here.
@@ -77,7 +78,7 @@ namespace BASeTris.AI
                     var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup,ScoringRules).ToList();
                     
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
-                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.rgen.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(ScoringRules))).ToList();
+                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.rgen.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(stdState.GameHandler.GetType(), ScoringRules))).ToList();
 
                     //var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
                     /*foreach (var writedebug in Scores)
@@ -88,7 +89,7 @@ namespace BASeTris.AI
                     }*/
 
                     var maximumValue = Sorted.FirstOrDefault();
-                    Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(ScoringRules));
+                    Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(stdState.GameHandler.GetType(), ScoringRules));
                     Debug.Print("What it will look like\n" + maximumValue.GetBoardString());
                     Debug.Print("------");
 
@@ -306,15 +307,30 @@ namespace BASeTris.AI
 
         }
 
-        public double GetScore(AIScoringRuleData Rules)
+        public double GetScore(Type CustomizationType,  TetrisScoringRuleData Rules)
         {
+            //Gamehandler types should have an attribute that points to another type implementing the IGameScoringHandler interface. That will accept a board state
+            //and provide the score.
+            
+            var scoreattributes = CustomizationType.GetCustomAttributes(typeof(GameScoringHandlerAttribute),true);
+            if(scoreattributes.Length > 0)
+            {
+                //take the first one.
+                GameScoringHandlerAttribute attrib = scoreattributes.First() as GameScoringHandlerAttribute;
+                return attrib.Handler.CalculateScore(Rules, this);
+
+
+
+            }
+
+            throw new TypeLoadException("Failed to find GameScoringHandler for type " + CustomizationType.GetType().ToString());
             //calculate the "value" of this state.
             //we need:
             //number of completed rows/lines
             //Aggregate Height (sum of the height of the highest block in each column)
             //Holes- where we have null blocks with non-null blocks above it.
             //bumpiness: sum of the absolute differences of the heights of each adjacent column
-
+            /*
             int Rows = GetCompletedLines();
             int Aggregate = GetAggregateHeight();
             int Holes = GetHoles();
@@ -332,7 +348,7 @@ namespace BASeTris.AI
                    (Rules.HoleScore * (double)Holes) +
                    (Rules.BumpinessScore * (double)Bumpy) +
                     CreviceScore;
-                
+              */  
 
             /*a = -0.510066
 b = 0.760666
@@ -404,7 +420,11 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
 
             return true;
         }
-        public class AIScoringRuleData
+        public abstract class BoardScoringRuleData
+        {
+            public bool Moronic { get; set; } = false;
+        }
+        public class TetrisScoringRuleData:BoardScoringRuleData
         {
             //Height:-3.56765739215024,Row:0.627171085947044,Hole:-0.717625853214083,Bumpiness:-0.49091002708371,Crevasse:-0.40348813763272
             //Bump:-0.46105559660822,Height:-2.87825892656684,Hole:-0.631400211245207,Row:0.680445781380349   
@@ -419,7 +439,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
                 return $"Height:{AggregateHeightScore},Row:{RowScore},Hole:{HoleScore},Bumpiness:{BumpinessScore},Crevasse:{CrevasseScore}";
             }
             public float StupidFactor { get; set; } = 1.0f;
-            public bool Moronic { get; set; } = false;
+            
         }
     }
 }
