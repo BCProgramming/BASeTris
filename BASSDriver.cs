@@ -252,6 +252,7 @@ namespace BASeTris.AssetManager
 
         public void Dispose()
         {
+            
             ManagedBass.Bass.Free();
             
             //BassMix.FreeMe();
