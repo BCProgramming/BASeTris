@@ -111,10 +111,10 @@ done:
 
   ;X86 lib files
   SetOutPath "$INSTDIR\Assets\Lib\x86"
-  File "${PROGPATH}\..\..\Assets\Lib\x86\*.*"
+  File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x86\*.*"
   ;x64 lib files
   SetOutPath "$INSTDIR\Assets\Lib\x64"
-  File "${PROGPATH}\..\..\Assets\Lib\x64\*.*"
+  File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x64\*.*"
 
 
 
