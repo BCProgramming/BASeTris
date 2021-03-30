@@ -17,11 +17,20 @@ namespace BASeTris.GameStates.Menu
     /// </summary>
     public class GenericMenuState : MenuState
     {
-        public GameState PreviousState = null; //may not be needed (or useful) depending largely on if there was a previous state or if we ever want to go back to it.
+        public GameState ParentState = null; //may not be needed (or useful) depending largely on if there was a previous state or if we ever want to go back to it.
                                                //whatever is calling to set the state could blank it out as it should know if it is relevant or not.
 
         private GameState.DisplayMode _DisplayMode = GameState.DisplayMode.Full;
 
+        public GenericMenuState PrimaryMenu { get
+            {
+                var copied = ParentState;
+
+                return (ParentState as GenericMenuState)?.PrimaryMenu ?? this;
+                
+
+
+            } }
         public override DisplayMode SupportedDisplayMode 
             {get { return _DisplayMode;} }
         public void SetDisplayMode(DisplayMode src)
@@ -32,7 +41,7 @@ namespace BASeTris.GameStates.Menu
         {
             
             StateHeader = "";
-            PreviousState = pOwner.CurrentState;
+            ParentState = pOwner.CurrentState;
             Populator.PopulateMenu(this, pOwner);
             
         }
@@ -192,7 +201,7 @@ namespace BASeTris.GameStates.Menu
                     IGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
                     if (pOwner is IGamePresenter igp)
                     {
-                        pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman);
+                        pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman,Target.PrimaryMenu);
 
                         igp.StartGame();
                     }

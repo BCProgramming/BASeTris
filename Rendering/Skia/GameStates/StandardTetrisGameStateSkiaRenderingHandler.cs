@@ -208,13 +208,27 @@ namespace BASeTris.Rendering.Skia.GameStates
                     float CurrentYPosition = StatPosition.Y+MeasureLabel.Height;
                     var StatData = useStats.GetDisplayStatistics(pOwner, Source);
 
+                    int MaxLabelLength = 0;
+                    int MaxValueLength = 0;
+                    foreach(var statkvp in StatData)
+                    {
+                        if(MaxLabelLength < statkvp.Key.Length)
+                        {
+                            MaxLabelLength = statkvp.Key.Length;
+                        }
+                        if(MaxValueLength < statkvp.Value.Length)
+                        {
+                            MaxValueLength = statkvp.Value.Length;
+                        }
+                    }
+
                     foreach(var statkvp in StatData)
                     //for (int statindex = 0; statindex < StatLabels.Length; statindex++)
                     {
                         String Label = statkvp.Key;
-                        String Value = statkvp.Value;
-                       float LabelWidth = BlackBrush.MeasureText(Label + "##", ref MeasureLabel);
-                       float ValueWidth = BlackBrush.MeasureText(Value + "##", ref MeasureValue);
+                        String Value = statkvp.Value.PadLeft(MaxValueLength,' ');
+                       float LabelWidth = BlackBrush.MeasureText(Label.Replace(" ", "_") + "###" , ref MeasureLabel);
+                       float ValueWidth = BlackBrush.MeasureText(Value.Replace(" ","_")+ "###" , ref MeasureValue);
 
                         //var MeasureLabel = g.MeasureString(StatLabels[statindex], standardFont);
                         //var MeasureValue = g.MeasureString(StatValues[statindex], standardFont);
@@ -224,14 +238,14 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                         // TetrisGame.DrawTextSK(g, StatLabels[statindex], new SKPoint(StatPosition.X, CurrentYPosition),
                         //     TetrisGame.RetroFontSK, SKColors.Black, DesiredFontSize, (float)pOwner.ScaleFactor);
-
+                        
 
                         //draw labels...
                         g.DrawText(Label, new SKPoint(StatPosition.X + 5, CurrentYPosition + 5), WhiteBrush);
                         g.DrawText(Label, new SKPoint(StatPosition.X, CurrentYPosition), BlackBrush);
 
 
-                        SKPoint ValuePosition = new SKPoint((float)(Bounds.Right - ((MeasureValue.Width) + (5 * Factor))), CurrentYPosition);
+                        SKPoint ValuePosition = new SKPoint((float)(Bounds.Right - ((MeasureValue.Width) + (7 * Factor))), CurrentYPosition);
 
                         g.DrawText(Value, new SKPoint(ValuePosition.X + 5, ValuePosition.Y + 5), WhiteBrush);
                         g.DrawText(Value, new SKPoint(ValuePosition.X , ValuePosition.Y ), BlackBrush);

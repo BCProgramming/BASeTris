@@ -9,6 +9,7 @@ namespace BASeTris.GameStates
 {
     public class EnterHighScoreState : EnterTextState
     {
+        GameState ReversionState = null;
         TetrisStatistics GameStatistics = null;
         IHighScoreList ScoreListing = null;
         Func<string, int, IHighScoreEntry> ScoreToEntryFunc = null;
@@ -21,7 +22,7 @@ namespace BASeTris.GameStates
             get { return DisplayMode.Full; }
         }
 
-        public EnterHighScoreState(GameState pOriginalState, IStateOwner pStateOwner, IHighScoreList ScoreList, Func<string, int, IHighScoreEntry> ScoreFunc, TetrisStatistics SourceStats)
+        public EnterHighScoreState(GameState pOriginalState, IStateOwner pStateOwner, GameState pReversionState,IHighScoreList ScoreList, Func<string, int, IHighScoreEntry> ScoreFunc, TetrisStatistics SourceStats)
             : base(pStateOwner, 10)
         {
             ScoreListing = ScoreList;
@@ -49,7 +50,7 @@ namespace BASeTris.GameStates
             ScoreListing.Submit(submitscore);
             TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.EffectVolume);
             TetrisGame.Soundman.PlayMusic("high_score_list");
-            pOwner.CurrentState = new ShowHighScoresState(ScoreListing, null, new int[] {AchievedPosition});
+            pOwner.CurrentState = new ShowHighScoresState(ScoreListing, ReversionState, new int[] {AchievedPosition});
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)

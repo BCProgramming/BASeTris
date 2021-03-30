@@ -127,11 +127,12 @@ namespace BASeTris.GameStates
                     if (GameOveredState is GameplayGameState)
                     {
                         var useStats = ((GameplayGameState)GameOveredState).GameStats;
+                        var MenuState = ((GameplayGameState)GameOveredState).MainMenuState;
                         if (useStats is TetrisStatistics)
                         {
 
                             EnterHighScoreState ehs = new EnterHighScoreState
-                            (GameOveredState, pOwner,
+                            (GameOveredState, pOwner,MenuState,
                                 ((GameplayGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats as TetrisStatistics))
                                 , useStats as TetrisStatistics);
                             pOwner.CurrentState = ehs;
