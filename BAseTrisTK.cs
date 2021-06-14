@@ -65,6 +65,7 @@ namespace BASeTris
         {
             
         }
+      
         private void UpdateSize()
         {
             this.Location = new Point(140);

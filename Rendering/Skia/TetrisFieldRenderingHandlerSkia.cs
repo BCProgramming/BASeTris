@@ -114,35 +114,38 @@ namespace BASeTris.Rendering.Skia
 
                     if (bitmapMode)
                     {
-                        SKBitmap BuildField = new SKBitmap(info, SKBitmapAllocFlags.None);
-                        using (SKCanvas gfield = new SKCanvas(BuildField))
+                        using (SKBitmap BuildField = new SKBitmap(info, SKBitmapAllocFlags.None))
                         {
-                            gfield.Clear(SKColors.Transparent);
-                            hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds, false);
-                            if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
-                            parms.FieldBitmap = SKImage.FromBitmap(BuildField);
+                            using (SKCanvas gfield = new SKCanvas(BuildField))
+                            {
+                                gfield.Clear(SKColors.Transparent);
+                                hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds, false);
+                                if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
+                                parms.FieldBitmap = SKImage.FromBitmap(BuildField);
+                            }
                         }
                     }
                     else
                     {
-                        var CreateContext = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
-                        SKCanvas gfield = null;
+                        using (var CreateContext = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface))
+                        {
+                            SKCanvas gfield = null;
 
 
 
-                        if (FieldSurface == null)
-                            FieldSurface = SKSurface.Create(CreateContext, GlobalResources.CreateRenderTarget((int)Bounds.Width, (int)Bounds.Height), GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType);
+                            if (FieldSurface == null)
+                                FieldSurface = SKSurface.Create(CreateContext, GlobalResources.CreateRenderTarget((int)Bounds.Width, (int)Bounds.Height), GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType);
 
-                     
-                        var FieldCanvas = FieldSurface.Canvas;
-                        FieldCanvas.Flush();
-                        
-                        gfield = FieldCanvas;
-                        gfield.Clear(SKColors.Transparent);
-                        hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds, false);
-                        if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
-                        parms.FieldBitmap = FieldSurface.Snapshot();
 
+                            var FieldCanvas = FieldSurface.Canvas;
+                            FieldCanvas.Flush();
+
+                            gfield = FieldCanvas;
+                            gfield.Clear(SKColors.Transparent);
+                            hadAnimated = DrawFieldContents(pState, Source, parms, gfield, Bounds, false);
+                            if (parms.FieldBitmap != null) parms.FieldBitmap.Dispose();
+                            parms.FieldBitmap = FieldSurface.Snapshot();
+                        }
                     }
 
 

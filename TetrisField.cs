@@ -227,11 +227,17 @@ namespace BASeTris
             this.RowCount = pRowCount;
             this.ColCount = pColCount;
             this.VisibleRows = RowCount - 2;
+            Reset();
+        }
+        public void Reset()
+        {
             FieldContents = new NominoBlock[RowCount][];
             for (int row = 0; row < RowCount; row++)
             {
                 FieldContents[row] = new NominoBlock[ColCount];
             }
+            ActiveBlockGroups.Clear();
+
         }
         public void SetStandardHotLines()
         {

@@ -117,8 +117,27 @@ namespace BASeTris.GameStates
         {
             lock (LockTetImageRedraw)
             {
+                
+                var copiedGDI = NominoImages;
+                var CopiedSK = NominoSKBitmaps;
                 NominoImages = null;
                 NominoSKBitmaps = null;
+                //dispose the old ones too.
+                foreach (var iterate in CopiedSK)
+                {
+                    foreach(var skb in iterate.Value)
+                    {
+                        skb.Dispose();
+                    }
+                }
+                
+                foreach(var iterate in copiedGDI)
+                {
+                    foreach (var bmp in iterate.Value)
+                    {
+                        bmp.Dispose();
+                    }
+                }
                 f_RedrawStatusBitmap = true;
                 StatisticsBackground = null;
                 f_RedrawTetrominoImages = true;
@@ -303,7 +322,7 @@ namespace BASeTris.GameStates
 
         }
 
-        private bool FirstRun = false;
+        internal bool FirstRun = false;
         private StatefulReplay ReplayData = null;
        
         private void HandleActiveGroups(IStateOwner pOwner,bool ForceFall = false)

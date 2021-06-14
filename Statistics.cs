@@ -73,7 +73,7 @@ namespace BASeTris
         public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
         {
             var stats = base.GetDisplayStatistics(pOwner, Source);
-
+            stats.Add("Level", (Source.GameHandler as DrMarioHandler).Level.ToString());
             stats.Add("Virus", (Source.GameHandler as DrMarioHandler).VirusCount.ToString());
             //we want to show a VIRUS: count too.
             //implement that into the handler first for us to access here!.

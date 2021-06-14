@@ -234,6 +234,7 @@
     <Compile Include="Rendering\Skia\GameStates\EnterTextStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\FieldActionStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\GameOverStateSkaiRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\HandlerStates\DrMarioLevelCompleteStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\LineSeriesLevelCompletionStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\MenuStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />

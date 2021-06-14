@@ -62,7 +62,7 @@ namespace BASeTris
         //Obbsolete("Use Rendering Providers")]
         /*public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void HandleGameKey(IStateOwner pOwner, GameKeys g);
-
+        [Obsolete("This method will be removed eventually... the rendering adapters are where this sort of behaviour should be.")]
         public abstract void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds);
 
         protected IBackground _BG;

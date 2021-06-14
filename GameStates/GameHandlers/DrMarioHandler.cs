@@ -259,6 +259,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             return CreateResult;
         }
+        public int Level { get; set; } = 0;
         public int VirusCount = 0;
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
@@ -268,6 +269,7 @@ namespace BASeTris.GameStates.GameHandlers
             //Nomino's have two blocks. Well, I guess they can have more
             //in any case we want to check all the positions of the trigger nomino and check for critical masses.
             int MasterCount = 0;
+            bool LevelCompleted = false;
             HashSet<Point> CriticalMasses = null;
             for (int y = 0; y < state.PlayField.RowCount ; y++)
             {
@@ -295,7 +297,10 @@ namespace BASeTris.GameStates.GameHandlers
             //if MasterCount is 0 then we completed this level.
             //if there are no viruses left, this level is now complete. We need a "Level complete" screen state with an overlay- we would switch to that state. It should
             //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
-
+            if(MasterCount==0)
+            {
+                LevelCompleted = true;
+            }
 
             if (CriticalMasses!=null && CriticalMasses.Any())
             {
@@ -448,15 +453,31 @@ namespace BASeTris.GameStates.GameHandlers
                     originalstate.NoTetrominoSpawn = false;
                     originalstate.PlayField.HasChanged = true;
                     originalstate.SuspendFieldSet = true;
-                    owner.CurrentState = originalstate;
+                    //if we determined the level was completed earlier, 
+                    //we need to switch to the level completion state, and from there will need to resume starting with that new level.
+                    if (LevelCompleted)
+                    {
+                        LevelCompleted = false;
+                        var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
+                        owner.CurrentState = completionState;
+                    }
+                    else
+                    {
+                        owner.CurrentState = originalstate;
+                    }
                 });
                 pOwner.CurrentState = tpause;
 
 
             }
-            
-            
 
+
+            if (LevelCompleted)
+            {
+                LevelCompleted = false;
+                var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
+                pOwner.CurrentState = completionState;
+            }
 
             //Remove those blocks from the field.
             //then, reprocess the field: find any unsupported blocks, and generate new ActiveBlockGroups for them. Add them to the list of active block groups. Set the fallspeed appropriately.
@@ -525,16 +546,27 @@ namespace BASeTris.GameStates.GameHandlers
 
 
         }
-
+        /// <summary>
+        /// mutates the given GameplayGameState to prepare it for a new level, and returns it to the caller.
+        /// </summary>
+        /// <param name="mutate"></param>
+        /// <returns></returns>
+        public GameState SetupNextLevel(GameplayGameState mutate,IStateOwner pOwner)
+        {
+            PrepareField(mutate, pOwner);
+            ViriiAppearanceState levelstarter = new ViriiAppearanceState(mutate);
+            return levelstarter;
+        }
         public TetrominoTheme DefaultTheme { get { return new DrMarioTheme(); } }
         public void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
-            //need to come up with a proper way of implementing progressive levels.
-            //lkikely will need to have stats and stuff abstracted to each Handler.
-            //for now, we'll generate say 25 random viruses and toss them in the lower half of the playfield.
+            //likely will need to have stats and stuff abstracted to each Handler.
+            state.PlayField.Reset();
             
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
-            for(int i=0;i<50;i++)
+            //virus count is based on out level.
+            int numViruses = (int)((Level * 1.25f) + 4);
+            for(int i=0;i<numViruses;i++)
             {
                 //choose a random virus type.
                 var chosentype = TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue });

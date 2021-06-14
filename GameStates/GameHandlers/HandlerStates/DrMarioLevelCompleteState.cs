@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.GameHandlers.HandlerStates
 {
+    
     //State which is used to display the "level complete" indication when a level completes in Dr.Mario.
     //
     public class DrMarioLevelCompleteState : GameState, ICompositeState<GameplayGameState>
     {
+        public String LevelCompleteMusic { get; set; } = "kirbysand";
         private GameplayGameState OriginalState = null;
         Func<GameState> StateProcessionFunction = null;
         public DrMarioLevelCompleteState(GameplayGameState pState,Func<GameState> AdvanceToStateFunc)
@@ -23,12 +25,12 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
         {
             //throw new NotImplementedException();
         }
-        
+        private AssetManager.iActiveSoundObject CompletionMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
-            
-            //implementation for now, assumes that the caller will change the music, and AdvanceToStateFunc will handle setting the normal music.
-            //throw new NotImplementedException();
+            //start the victory music... or whatever music we are told to I suppose.
+            CompletionMusic = TetrisGame.Soundman.PlayMusic(LevelCompleteMusic, true);
+
         }
 
         public GameplayGameState GetComposite()
@@ -38,7 +40,23 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-            //throw new NotImplementedException();
+            if(new GameKeys[] { GameKeys.GameKey_RotateCW,GameKeys.GameKey_RotateCCW}.Contains(g))
+            {
+                //proceed with procession function.
+                var NextState = StateProcessionFunction();
+                if (NextState == null) throw new NullReferenceException("DrMarioLevelCompleteState: StateProcessionFunction returned null.");
+                if(NextState is GameplayGameState ggst)
+                {
+                    ggst.FirstRun = false;
+                }
+                else if(NextState is ICompositeState<GameplayGameState> ggc)
+                {
+                    ggc.GetComposite().FirstRun = false;
+                }
+                pOwner.CurrentState = NextState;
+                //play the default music...
+                
+            }
         }
     }
 }
