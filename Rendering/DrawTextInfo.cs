@@ -108,7 +108,18 @@ namespace BASeTris.Rendering
     }
     public class DrawCharacterHandlerSkia : DrawCharacterHandler<DrawCharacterPositionCalculatorSkia, SKCanvas, DrawTextInformationSkia, SKPoint, SKPoint>
     {
+        public DrawCharacterHandlerSkia(IEnumerable<DrawCharacterPositionCalculatorSkia> pExtensions):this()
+        {
+            _Extensions = pExtensions.ToList();
+        }
+        public DrawCharacterHandlerSkia( params DrawCharacterPositionCalculatorSkia[] pExtensions):this(pExtensions.ToList())
+        {
 
+        }
+        public DrawCharacterHandlerSkia()
+        {
+
+        }
         public override void DrawCharacter(SKCanvas g, char character, DrawTextInformationSkia DrawData, SKPoint Position, SKPoint CharacterSize, int CharacterNumber, int TotalCharacters, int Pass)
         {
             if (DrawData.PreDrawData != null)
@@ -206,42 +217,61 @@ namespace BASeTris.Rendering
     {
 
     }
+    
     public class RotatingPositionCharacterPositionCalculatorGDI : DrawCharacterPositionCalculatorGDI
     {
-        private float Radius = 10;
-        private float CharacterNumberModifier = 0.5f;
+        public float Radius { get; set; } = 10;
+        public float CharacterNumberModifier { get; set; } = 0.5f;
+        public float XScale { get; set; } = 1;
+        public float YScale { get; set; } = 1;
+        
         public override sealed void AdjustPositioning(ref PointF Position, SizeF size, DrawTextInformationGDI DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
         {
             //rotate once every 3/4's of a second.
             float XPos = Position.X, YPos = Position.Y;
-            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.Width, size.Height, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius);
+            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.Width, size.Height, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius,XScale,YScale);
             Position.X = XPos;
             Position.Y = YPos;
         }
     }
     public class RotatingPositionCharacterPositionCalculatorSkia :DrawCharacterPositionCalculatorSkia
     {
-        private float Radius = 10;
-        private float CharacterNumberModifier = 0.5f;
+        public float Radius { get; set; } = 10;
+        public float CharacterNumberModifier { get; set; } = 0.5f;
+
+        public float XScale { get; set; } = 1;
+        public float YScale { get; set; } = 1;
         public sealed override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
         {
             float XPos = Position.X, YPos = Position.Y;
-            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.X, size.Y, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius);
+            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.X, size.Y, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius,XScale,YScale);
+            Position.X = XPos;
+            Position.Y = YPos;
+        }
+    }
+    public class VerticalWavePositionCharacterPositionCalculatorSkia : DrawCharacterPositionCalculatorSkia
+    {
+        public float CharacterNumberModifier { get; set; } = 0.5f;
+        public float Height { get; set; } = 5;
+        public sealed override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
+        {
+            float XPos = Position.X, YPos = Position.Y;
+            StandardPositionCalculators.VerticalWavePositionCalculator(ref XPos, ref YPos, Height, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier);
             Position.X = XPos;
             Position.Y = YPos;
         }
     }
     public static class StandardPositionCalculators
     {
-        public static void RotatingPositionCalculator(ref float XPos, ref float YPos, float Width, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f, float Radius = 10)
+        public static void RotatingPositionCalculator(ref float XPos, ref float YPos, float Width, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f, float Radius = 10, float XScale = 1,float YScale = 1)
         {
             var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
             var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
             double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
             float NewXPos = (float)Math.Cos(Angle) * Radius;
             float NewYPos = (float)Math.Sin(Angle) * Radius;
-            XPos = XPos + NewXPos;
-            YPos = YPos + NewYPos;
+            XPos = XPos + (NewXPos*XScale);
+            YPos = YPos + (NewYPos * YScale) ;
 
         }
         public static void VerticalWavePositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)

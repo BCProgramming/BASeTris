@@ -13,7 +13,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
     //
     public class DrMarioLevelCompleteState : GameState, ICompositeState<GameplayGameState>
     {
-        public String LevelCompleteMusic { get; set; } = "kirbysand";
+        public String LevelCompleteMusic { get; set; } = "drm_complete";
         private GameplayGameState OriginalState = null;
         Func<GameState> StateProcessionFunction = null;
         public DrMarioLevelCompleteState(GameplayGameState pState,Func<GameState> AdvanceToStateFunc)
@@ -28,8 +28,9 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
         private AssetManager.iActiveSoundObject CompletionMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
+            if(CompletionMusic==null)
             //start the victory music... or whatever music we are told to I suppose.
-            CompletionMusic = TetrisGame.Soundman.PlayMusic(LevelCompleteMusic, true);
+                CompletionMusic = TetrisGame.Soundman.PlayMusic(LevelCompleteMusic, 3.0f,false);
 
         }
 

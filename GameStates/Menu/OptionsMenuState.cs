@@ -22,14 +22,14 @@ namespace BASeTris.GameStates.Menu
         private void PopulateOptions(IStateOwner pOwner)
         {
             int DesiredFontPixelHeight = (int)(pOwner.GameArea.Height * (23d / 644d));
-            Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
-            Font ItemFont = new Font(TetrisGame.RetroFont, (int)((float)DesiredFontPixelHeight * (3f / 4f)), FontStyle.Bold, GraphicsUnit.Pixel);
+            Font standardFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight, 1.0f);
+            Font ItemFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight * .75f, 1.0);
             MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
             StateHeader = "Options";
-            HeaderTypeface = TetrisGame.RetroFont.Name;
-            HeaderTypeSize = DesiredFontPixelHeight;
-            
+            HeaderTypeface = TetrisGame.GetRetroFont(14, 1.0f).FontFamily.Name;
+            HeaderTypeSize = DesiredFontPixelHeight*.75f;
 
+            
             MenuItemActivated += (obj, e) =>
             {
                 if (e.MenuElement == ReturnItem)

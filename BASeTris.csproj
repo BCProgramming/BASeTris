@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="AI\AIEvolver.cs" />
     <Compile Include="AI\BaseAI.cs" />
+    <Compile Include="AI\DrMarioAIScoringHandler.cs" />
     <Compile Include="AI\IStateScoringHandler.cs" />
     <Compile Include="AI\StandardTetrisAIScoringHandler.cs" />
     <Compile Include="AI\TetrisAI.cs" />
@@ -235,6 +236,7 @@
     <Compile Include="Rendering\Skia\GameStates\FieldActionStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\GameOverStateSkaiRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\HandlerStates\DrMarioLevelCompleteStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\IMouseHandling.cs" />
     <Compile Include="Rendering\Skia\GameStates\LineSeriesLevelCompletionStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\MenuStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />

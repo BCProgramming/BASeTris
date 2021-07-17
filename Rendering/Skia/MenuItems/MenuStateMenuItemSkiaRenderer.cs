@@ -155,9 +155,9 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
 
             ForePaint.Typeface = useFont.TypeFace;
-            ForePaint.TextSize = (int)(15 * pOwner.ScaleFactor);
+            ForePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
             ShadePaint.Typeface = useFont.TypeFace;
-            ShadePaint.TextSize = (int)(15 * pOwner.ScaleFactor); 
+            ShadePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor); 
 
             var useStyle = new DrawTextInformationSkia()
             {
@@ -175,7 +175,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
                 useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia());
             }
 
-            TetrisGame.DrawTextSK(pRenderTarget, useStyle);
+            pRenderTarget.DrawTextSK(useStyle);
 
 
             //            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y, 5f, 5f, central);
@@ -240,9 +240,9 @@ namespace BASeTris.Rendering.Skia.MenuItems
             if (Source.Activated)
             {
                 dtis.Text = sLeftCover;
-                TetrisGame.DrawTextSK(pRenderTarget, dtis);
+                pRenderTarget.DrawTextSK(dtis);
                 dtis.Text = sRightCover;
-                TetrisGame.DrawTextSK(pRenderTarget, dtis);
+                pRenderTarget.DrawTextSK(dtis);
             }
             base.Render(pOwner, pRenderTarget, Source, Element);
         }

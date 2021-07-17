@@ -334,7 +334,9 @@ namespace BASeTris.GameStates
                 ;
             }
             var AnyMoved = false;
-            foreach (var iterate in from b in PlayField.BlockGroups orderby b.Y,PlayField.ColCount-b.X ascending select b)
+            
+
+                foreach (var iterate in from abg in PlayField.BlockGroups orderby abg.Max((i) => i.Y) ascending select abg)
             {
                 if (iterate.Count() == 0) continue;
                 if (ForceFall || (pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)

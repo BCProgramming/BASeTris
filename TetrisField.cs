@@ -189,7 +189,13 @@ namespace BASeTris
                 ActiveBlockGroups.Add(newGroup);
             }
         }
-
+        public void ClearActiveBlockGroups()
+        {
+            lock(ActiveBlockGroups)
+            {
+                ActiveBlockGroups.Clear();
+            }
+        }
         public void RemoveBlockGroup(Nomino oldGroup)
         {
             lock (ActiveBlockGroups)
@@ -285,7 +291,7 @@ namespace BASeTris
                     }
                 }
             }
-            foreach (var bg in ActiveBlockGroups)
+            foreach (var bg in from abg in ActiveBlockGroups orderby abg.Max((i)=>i.Y) ascending select abg)
             {
                 foreach (var iterateblock in bg)
                 {

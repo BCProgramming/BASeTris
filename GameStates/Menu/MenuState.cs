@@ -32,7 +32,7 @@ namespace BASeTris.GameStates.Menu
         public BCPoint LastMouseMovement { get; set; }
 
         public String HeaderTypeface { get; set; } = "Arial";
-        public float HeaderTypeSize { get; set; } = 28;
+        public float HeaderTypeSize { get; set; } = 18;
         
 
         //Our menu elements.

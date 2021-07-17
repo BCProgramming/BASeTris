@@ -52,7 +52,10 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
             {
                 if(AppearanceBlocks.Count == 0)
                 {
+                    if (StandardState.NoTetrominoSpawn) StandardState.NoTetrominoSpawn = false;
+                    StandardState.PlayField.ClearActiveBlockGroups();
                     pOwner.CurrentState = StandardState;
+                    
                     return;
                 }
                 var nextAppear = AppearanceBlocks.Dequeue();

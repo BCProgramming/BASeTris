@@ -18,7 +18,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// <summary>
     /// ICustomizationHandler that handles the standard tetris game.
     /// </summary>
-    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler))]
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
     public class StandardTetrisHandler : IGameCustomizationHandler
     {
         public String Name { get { return "Tetris"; } }
@@ -358,8 +358,8 @@ namespace BASeTris.GameStates.GameHandlers
 
                     g.DrawBitmap(TetrominoImage, DrawRect, null);
 
-                    TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
-                    TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
+                    g.DrawTextSK(StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
+                    g.DrawTextSK(StatText, TextPos, standardFont, SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
                 }
                 //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
                 //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);

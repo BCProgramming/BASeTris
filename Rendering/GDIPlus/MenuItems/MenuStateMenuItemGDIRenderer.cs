@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeCamp.Rendering;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering.GDIPlus;
 
 namespace BASeTris.Rendering.MenuItems
 {
@@ -141,8 +142,8 @@ namespace BASeTris.Rendering.MenuItems
             {
                 useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorGDI());
             }
-            TetrisGame.DrawText(pRenderTarget, useStyle);
-
+            pRenderTarget.DrawText(useStyle);
+            
 
             //            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y, 5f, 5f, central);
 

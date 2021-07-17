@@ -96,6 +96,10 @@ namespace BASeTris.Rendering.Skia.GameStates
         static SKPaint BackPainter = null;
         public virtual float DrawHeader(IStateOwner pOwner, MenuState Source, SKCanvas Target, SKRect Bounds)
         {
+            if(Source.StateHeader=="Options")
+            {
+                Source.StateHeader = "Menu";
+            }
             if (String.IsNullOrEmpty(Source.StateHeader)) return 0;
             SKFontInfo useHeaderFont = GetScaledHeaderFont(pOwner, Source);
             Painter = new SKPaint() { Color = SKColors.Black };
@@ -106,12 +110,34 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             SKRect HeaderSize = new SKRect();
             Painter.MeasureText(Source.StateHeader??"", ref HeaderSize);
-            
+            while(HeaderSize.Width > Bounds.Width)
+            {
+                BackPainter.TextSize = Painter.TextSize = BackPainter.TextSize * .9f;
+                Painter.MeasureText(Source.StateHeader ?? "", ref HeaderSize);
+            }
             float UseX = (Bounds.Width / 2) - (HeaderSize.Width / 2) + Source.MainXOffset;
-            float UseY = HeaderSize.Height + HeaderSize.Height / 3;
+            float UseY = HeaderSize.Height * 3f;
+            DrawTextInformationSkia sktext = new DrawTextInformationSkia();
+            sktext.CharacterHandler = new DrawCharacterHandlerSkia(new VerticalWavePositionCharacterPositionCalculatorSkia() {Height = HeaderSize.Height/2 });
+            sktext.ShadowPaint = BackPainter;
+            sktext.ForegroundPaint = Painter;
+            sktext.BackgroundPaint = new SKPaint() { Color = SKColors.Transparent };
+            sktext.Text = Source.StateHeader ?? "";
+            sktext.ScalePercentage = 1;
+            sktext.DrawFont = useHeaderFont;
+            sktext.Position = new SKPoint(UseX, UseY);
+            
+            try
+            {
+                Target.DrawTextSK(sktext);
+            }
+            catch(Exception exr)
+            {
+                ;
+            }
             //paint foreground.
-            Target.DrawText(Source.StateHeader ?? "", new SKPoint(UseX + 5, UseY + 5), BackPainter);
-            Target.DrawText(Source.StateHeader ?? "", new SKPoint(UseX, UseY), Painter);
+            //Target.DrawText(Source.StateHeader ?? "", new SKPoint(UseX + 5, UseY + 5), BackPainter);
+            //Target.DrawText(Source.StateHeader ?? "", new SKPoint(UseX, UseY), Painter);
 
 
             //TetrisGame.DrawTextSK(Target, Source.StateHeader,new SKPoint(UseX, UseY), useHeaderFont, SKColors.Black, SKColors.White);

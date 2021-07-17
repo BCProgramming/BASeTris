@@ -17,7 +17,7 @@ using SkiaSharp;
 namespace BASeTris.GameStates.GameHandlers
 {
     //placeholder attribute: a Dr Mario scoring handler should be implemented...
-    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler))]
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler),typeof(StoredBoardState.DrMarioScoringRuleData))]
     public class DrMarioHandler : IGameCustomizationHandler
     {
         public String Name { get { return "Dr. Mario"; } }
@@ -214,8 +214,9 @@ namespace BASeTris.GameStates.GameHandlers
                     {
                         isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
                     }
-                    if (!cb.IsSupported(cb.Owner, state.PlayField) && !AdditionalSkipBlocks.Contains(cb.Owner))
+                    if (!cb.IsSupported(cb.Owner, state.PlayField,new[] { cb }.ToList()) && !AdditionalSkipBlocks.Contains(cb.Owner))
                     {
+                        //we initialize the list of recursion blocks to the block we are testing, since it cannot support itself.
                         //resurrect this block and other blocks that are in the same nomino.
                         //since we remove busted blocks from the nomino, we can take the Duomino this
                         //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
@@ -263,10 +264,10 @@ namespace BASeTris.GameStates.GameHandlers
         public int VirusCount = 0;
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
-
+            if (state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult=0};
             //here we would go through the field and handle where the blocks line up to more than the required critical mass. 
-
-            //Nomino's have two blocks. Well, I guess they can have more
+            
+            //Nomino's have two blocks- usually. But, we should account for more. This handler may be expanded for the Tetris2 handler, (if we ever bother to make one)
             //in any case we want to check all the positions of the trigger nomino and check for critical masses.
             int MasterCount = 0;
             bool LevelCompleted = false;
@@ -304,6 +305,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             if (CriticalMasses!=null && CriticalMasses.Any())
             {
+                state.NoTetrominoSpawn = true;
 
                 //process the critical masses.
                 //first: we need to switch the blocks in question to "pop" them.
@@ -351,19 +353,22 @@ namespace BASeTris.GameStates.GameHandlers
                 
                 //need to determine a way to detect chains here, where we create an active block and then it results in another "pop".
 
-                state.NoTetrominoSpawn = true;
+                
                 
                 TemporaryInputPauseGameState tpause = new TemporaryInputPauseGameState(state, 1000, (owner) =>
                 {
                     //first, remove the CriticalMasses altogether.
                     foreach (var iterate in CriticalMasses)
                     {
+                        //clear out the cell at the appropriate position.
                         var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
                         state.PlayField.Contents[iterate.Y][iterate.X] = null;
+                        //now apply the theme to the specified location
                         if (popItem.Owner != null)
                             state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField);
                         else
                         {
+                            //create a "dummy" nomino for the application of the "pop" theme animation.
                             var Dummino = new Nomino() { };
                             Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
                             state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField);
@@ -553,6 +558,7 @@ namespace BASeTris.GameStates.GameHandlers
         /// <returns></returns>
         public GameState SetupNextLevel(GameplayGameState mutate,IStateOwner pOwner)
         {
+            Level++;
             PrepareField(mutate, pOwner);
             ViriiAppearanceState levelstarter = new ViriiAppearanceState(mutate);
             return levelstarter;

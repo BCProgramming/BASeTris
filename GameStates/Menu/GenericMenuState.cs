@@ -201,12 +201,19 @@ namespace BASeTris.GameStates.Menu
                     IGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
                     if (pOwner is IGamePresenter igp)
                     {
+                        
+
                         pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman,Target.PrimaryMenu);
 
                         igp.StartGame();
                     }
                 }
-               
+                else if(e.MenuElement == BackItem)
+                {
+                    pOwner.CurrentState = RevertState;
+                }
+
+
 
 
             };
@@ -283,7 +290,7 @@ namespace BASeTris.GameStates.Menu
 
 
 
-            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
+            var FontSrc = TetrisGame.GetRetroFont(20, 1.0f);
             foreach (var iterate in new[] { NewGameItem, OptionsItem, HighScoresItem, ExitItem })
             {
                 iterate.FontFace = FontSrc.FontFamily.Name;

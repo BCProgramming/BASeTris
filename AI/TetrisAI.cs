@@ -9,6 +9,7 @@ using System.Xml.Schema;
 using BASeTris.GameStates;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
+using System.Reflection;
 
 namespace BASeTris.AI
 {
@@ -35,7 +36,7 @@ namespace BASeTris.AI
             return Copied;
         }
 
-        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg, StoredBoardState.TetrisScoringRuleData rules)
+        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg, StoredBoardState.BoardScoringRuleData rules)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for (int useRotation = 0; useRotation < 4; useRotation++)
@@ -60,7 +61,39 @@ namespace BASeTris.AI
             }
         }
 
-        public StoredBoardState.TetrisScoringRuleData ScoringRules { get; set; } = new StoredBoardState.TetrisScoringRuleData();
+        private Dictionary<Type, StoredBoardState.BoardScoringRuleData> HandlerRuleDataDictionary = new Dictionary<Type, StoredBoardState.BoardScoringRuleData>();
+        public StoredBoardState.BoardScoringRuleData ScoringRules { get
+            {
+                Type HandlerType = null;
+                if(_Owner.CurrentState is GameplayGameState gps)
+                {
+                    HandlerType = gps.PlayField.Handler.GetType();
+                }
+                else if(_Owner.CurrentState is ICompositeState<GameplayGameState> igps)
+                {
+                    HandlerType = igps.GetComposite().PlayField.Handler.GetType();
+                }
+
+                if(HandlerType!=null)
+                {
+
+                    if (!HandlerRuleDataDictionary.ContainsKey(HandlerType))
+                    {
+
+                        var foundattrib = HandlerType.GetCustomAttributes(typeof(GameScoringHandlerAttribute));
+                        foreach (var iterate in foundattrib)
+                        {
+                            if (iterate is GameScoringHandlerAttribute gsh)
+                            {
+                                HandlerRuleDataDictionary.Add(HandlerType, (StoredBoardState.BoardScoringRuleData)Activator.CreateInstance(gsh.RuleDataType));
+                            }
+                        }
+                    }
+                    return HandlerRuleDataDictionary[HandlerType];
+                }
+                return null;
+            }
+        }
         public override void AIActionFrame()
         {
             //do our hard thinking here.
@@ -170,9 +203,12 @@ namespace BASeTris.AI
 
             return sb.ToString();
         }
-
+        public int RowCount { get; private set; }
+        public int ColCount { get; private set; }
         public StoredBoardState(NominoBlock[][] InitialState, Nomino pGroup, int pXOffset, int pRotationCount)
         {
+            RowCount = InitialState.GetUpperBound(0);
+            ColCount = InitialState[0].GetUpperBound(0);
             _BoardState = TetrisAI.DuplicateField(InitialState);
             _SourceGroup = new Nomino(pGroup);
             XOffset = pXOffset;
@@ -307,7 +343,7 @@ namespace BASeTris.AI
 
         }
 
-        public double GetScore(Type CustomizationType,  TetrisScoringRuleData Rules)
+        public double GetScore(Type CustomizationType,  StoredBoardState.BoardScoringRuleData Rules)
         {
             //Gamehandler types should have an attribute that points to another type implementing the IGameScoringHandler interface. That will accept a board state
             //and provide the score.
@@ -423,6 +459,13 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         public abstract class BoardScoringRuleData
         {
             public bool Moronic { get; set; } = false;
+            public float StupidFactor { get; set; } = 1.0f;
+        }
+        public class DrMarioScoringRuleData : BoardScoringRuleData
+        {
+            public double MasterBlockColumnMultiplier { get; set; } = 1.25f;
+            public double MasterBlockMassValue { get; set; } = 4f;
+
         }
         public class TetrisScoringRuleData:BoardScoringRuleData
         {
@@ -438,7 +481,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             {
                 return $"Height:{AggregateHeightScore},Row:{RowScore},Hole:{HoleScore},Bumpiness:{BumpinessScore},Crevasse:{CrevasseScore}";
             }
-            public float StupidFactor { get; set; } = 1.0f;
+            
             
         }
     }
