@@ -32,7 +32,7 @@ namespace BASeTris.Blocks
 
         private int _Rotation = 0;
 
-       
+        public bool IgnoreRotation { get; set; } = false;
 
 
         //rotation can be set but if owned by a Nomino we use it's rotation.
@@ -40,6 +40,7 @@ namespace BASeTris.Blocks
         {
             get
             {
+                if (IgnoreRotation) return 0;
                 if (Owner != null)
                 {
                     NominoElement getbge = Owner.FindEntry(this);
@@ -62,7 +63,10 @@ namespace BASeTris.Blocks
             
             InvokeBeforeDraw(parameters);            
         }*/
-
+        public virtual char GetCharacterRepresentation()
+        {
+            return '#';
+        }
         public virtual void AnimateFrame()
         {
             //nothing by default. Well, for now anyway....

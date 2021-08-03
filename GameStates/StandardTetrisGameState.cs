@@ -143,7 +143,7 @@ namespace BASeTris.GameStates
                 f_RedrawTetrominoImages = true;
                 foreach (var refreshgroup in PlayField.BlockGroups)
                 {
-                    PlayField.Theme.ApplyTheme(refreshgroup, GameHandler, PlayField);
+                    PlayField.Theme.ApplyTheme(refreshgroup, GameHandler, PlayField, TetrominoTheme.ThemeApplicationReason.Theme_Changed);
                 }
             }
         }
@@ -226,7 +226,7 @@ namespace BASeTris.GameStates
             SizeF useTetSize = new SizeF(useSize, useSize);
 
 
-            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField);
+            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
 
             Image buildBitmap = TetrisGame.OutLineImage(Source.GetImage(useTetSize));
             if (!NominoImages.ContainsKey(sAddKey))
@@ -243,7 +243,7 @@ namespace BASeTris.GameStates
             SKSize useTetSize = new SKSize(useSize, useSize);
 
 
-            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField);
+            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
 
             SKBitmap buildBitmap = TetrisGame.OutlineImageSK(Source.GetImageSK(useTetSize));
             if (!NominoSKBitmaps.ContainsKey(sAddKey))
@@ -294,12 +294,17 @@ namespace BASeTris.GameStates
             }
             //reapply the theme when setting it down. Some themes may want
             //to have different appearances for blocks that are "set" versus those that are still "active".
+
+            //TODO: for Dr Mario theme, the block set is using the "original" rotation when setting.
+            //I suspect setting it to the field must be resetting the rotation of the blocks,
+            
             foreach (var group in e._groups)
             {
                 var firstBlock = group.FirstOrDefault();
                 Nomino useGroup = group;
                 if (firstBlock != null) useGroup = firstBlock.Block.Owner ?? group;
-                PlayField.Theme.ApplyTheme(useGroup, GameHandler, PlayField);
+                
+                PlayField.Theme.ApplyTheme(useGroup, GameHandler, PlayField, TetrominoTheme.ThemeApplicationReason.FieldSet);
             }
         }
 
@@ -534,7 +539,7 @@ namespace BASeTris.GameStates
             NextAngleOffset += Math.PI * 2 / 5;
             nextget.LastFall = pOwner.GetElapsedTime().Add(new TimeSpan(0,0,0,0,100));
             PlayField.AddBlockGroup(nextget);
-            PlayField.Theme.ApplyTheme(nextget,GameHandler, PlayField);
+            PlayField.Theme.ApplyTheme(nextget,GameHandler, PlayField, TetrominoTheme.ThemeApplicationReason.NewNomino);
         }
 
         private void SetLevelSpeed(Nomino group)
@@ -782,7 +787,7 @@ namespace BASeTris.GameStates
 
                             //We probably should set the speed appropriately here for the level. As is it will retain the speed from whe nthe hold block was
                             //held.
-                            PlayField.Theme.ApplyTheme(HoldBlock, GameHandler, PlayField);
+                            PlayField.Theme.ApplyTheme(HoldBlock, GameHandler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
                             HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
                             HoldBlock.SetY(pOwner, 0);
                             HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof

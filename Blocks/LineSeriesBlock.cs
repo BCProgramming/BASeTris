@@ -10,6 +10,10 @@ namespace BASeTris.Blocks
 {
     public class CascadingBlock :StandardColouredBlock
     {
+        public override char GetCharacterRepresentation()
+        {
+            return 'C';
+        }
         public virtual bool Fixed { get; set; } = false;
         public bool IsSupported(Nomino Owner, TetrisField field, List<CascadingBlock> RecursionBlocks = null)
         {
@@ -98,6 +102,11 @@ namespace BASeTris.Blocks
             Red,
             Yellow
         }
+        public override char GetCharacterRepresentation()
+        {
+            return CombiningIndex.ToString()[0];    
+        }
+        
         public bool Popping { get; set; } = false;
         public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
         public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question.

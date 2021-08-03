@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.Rendering;
 using BASeTris.AssetManager;
+using BASeTris.Blocks;
 using BASeTris.Rendering.RenderElements;
 using SkiaSharp;
 
@@ -75,10 +76,11 @@ namespace BASeTris.Rendering.Skia
                     bool isAnim = false;
                     if (TetBlock != null)
                     {
+                        if (TetBlock is LineSeriesBlock && !(TetBlock is LineSeriesMasterBlock)) ;
                         isAnim = Source.Theme.IsAnimated(TetBlock);
                         if (isAnim == animated)
                         {
-
+                            
                             SKRect BlockBounds = new SKRect(XPos, YPos, XPos + BlockWidth, YPos + BlockHeight);
                             TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState.Settings);
                             RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);

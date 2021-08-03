@@ -599,7 +599,7 @@ namespace BASeTris
             SKBitmap[] bitmaps = new SKBitmap[AllNominos.Length];
             foreach(var iterate in AllNominos)
             {
-                UseTheme.ApplyTheme(iterate, handler, PlayField);
+                UseTheme.ApplyTheme(iterate, handler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
             }
 
             for(int i=0;i<AllNominos.Length;i++)
@@ -633,7 +633,7 @@ namespace BASeTris
             
             foreach(var nom in AllNominos)
             {
-                UseTheme.ApplyTheme(nom, Handler, PlayField);
+                UseTheme.ApplyTheme(nom, Handler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
             }
 
             for(int i=0;i<AllNominos.Length;i++)

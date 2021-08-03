@@ -204,7 +204,7 @@ namespace BASeTris.Theme.Block
 
         }
 
-        public sealed override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public sealed override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
 
             foreach (var iterate in Group)

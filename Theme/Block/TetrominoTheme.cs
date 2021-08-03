@@ -21,6 +21,13 @@ namespace BASeTris
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class TetrominoTheme
     {
+        public enum ThemeApplicationReason
+        {
+            Normal,
+            NewNomino,
+            Theme_Changed,
+            FieldSet
+        }
         public abstract String Name { get; }
         public virtual bool IsAnimated(NominoBlock block)
         {
@@ -34,7 +41,7 @@ namespace BASeTris
         {
             return src.FullName;
         }
-        public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
+        public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
         public abstract void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler);
 
@@ -186,7 +193,7 @@ namespace BASeTris
             ApplyColorSet(Group,useLevel);
         }
 
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
+        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field, ThemeApplicationReason Reason)
         {
             var LineCount = (GameHandler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;
             int CurrLevel = Field == null ? 0 : (int) (LineCount / 10);

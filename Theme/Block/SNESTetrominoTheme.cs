@@ -399,7 +399,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
 
         }
 
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             char DesiredNomino = 'I';
             Dictionary<Type, char> NominoLookup = new Dictionary<Type, char>()

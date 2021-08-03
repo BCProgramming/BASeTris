@@ -321,6 +321,9 @@ namespace BASeTris
                         {
                             int RowPos = groupblock.Y + bg.Y;
                             int ColPos = groupblock.X + bg.X;
+                            //Investigate: is this resetting the Rotation?
+                            //is it losing it's owner or something? Dr.Mario theme gets confused when setting a block to the field.
+                            
                             if (FieldContents[RowPos][ColPos] == null)
                             {
                                 FieldContents[RowPos][ColPos] = groupblock.Block;
@@ -624,7 +627,7 @@ namespace BASeTris
                     foreach (var iteratecell in iteraterow)
                     {
                         if (iteratecell != null && iteratecell.Owner != null)
-                            Theme.ApplyTheme(iteratecell.Owner, handler,this);
+                            Theme.ApplyTheme(iteratecell.Owner, handler,this, TetrominoTheme.ThemeApplicationReason.Normal);
                     }
                 }
 

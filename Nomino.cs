@@ -351,7 +351,7 @@ namespace BASeTris
     public class NominoElement
     {
         //Represents a single block within a group. the RotationPoints represent the positions this specific block will rotate/change to when rotated.
-        private int sMod(int A, int B)
+        public static int sMod(int A, int B)
         {
             return (A % B + B) % B;
         }
@@ -385,7 +385,7 @@ namespace BASeTris
         }
 
         
-
+        //each rotationmodule
         public int RotationModulo = 0;
 
         public NominoBlock Block;

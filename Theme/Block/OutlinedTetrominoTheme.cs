@@ -117,7 +117,7 @@ namespace BASeTris
 
         }
 
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler handler,TetrisField Field)
+        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler handler,TetrisField Field, ThemeApplicationReason Reason)
         {
             var LineCount = (handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;
             int CurrLevel = Field == null ? 0 : (int)(LineCount / 10);

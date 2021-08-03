@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,38 @@ namespace BASeTris.Rendering.Skia
 {
     public static class SkiaExtensions
     {
+
+        public static void SaveToFile(this SKImage bitmap,String sFileName)
+        {
+            SKEncodedImageFormat imageFormat = SKEncodedImageFormat.Png;
+            int quality = (int)100;
+
+            using (MemoryStream memStream = new MemoryStream())
+            {
+
+                SKData skd = bitmap.Encode(imageFormat, quality);
+                skd.SaveTo(memStream);
+                byte[] data = memStream.ToArray();
+
+                if (data == null)
+                {
+                    return;
+                }
+                else if (data.Length == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    using (StreamWriter sw = new StreamWriter(new FileStream(sFileName, FileMode.Create)))
+                    {
+                        sw.Write(data);
+                    }
+                }
+            }
+            
+        }
+
         public static RectangleF ToRectangleF(this SKRect Source)
         {
             return new RectangleF(Source.Left, Source.Top, Source.Width, Source.Height);

@@ -124,7 +124,7 @@ namespace BASeTris
                 RECT returnedvalue = new RECT();
                 SystemParametersInfo(SPI_GETWORKAREA, IntPtr.Zero, ref returnedvalue, 0);
 
-                var DesiredHeight = (returnedvalue.Bottom - returnedvalue.Top)- 64;
+                var DesiredHeight = (int)(((returnedvalue.Bottom - returnedvalue.Top)- 64)*.80f);
                 var DesiredWidth = (int)((float)DesiredHeight * .95f);
 
 
