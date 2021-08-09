@@ -26,7 +26,7 @@ namespace BASeTris.GameStates.GameHandlers
         void PrepareField(GameplayGameState state, IStateOwner pOwner); //prepare field for a new game. (or level or whatever- basically depends on the type of game)
         BaseStatistics Statistics { get; }
         Nomino[] GetNominos();
-        StandardGameOptions GameOptions { get; }
+        GameOptions GameOptions { get; }
 
         GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner);
 

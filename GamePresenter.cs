@@ -154,12 +154,19 @@ namespace BASeTris
         private void GamepadInputThread()
         {
             Thread.CurrentThread.IsBackground = true;
-            while (true)
+            try
             {
-                Thread.Sleep(5);
-                CIS.CheckState();
+                while (true)
+                {
+                    Thread.Sleep(5);
+                    CIS.CheckState();
+                }
             }
-            ;
+            catch(ThreadAbortException tae)
+            {
+                return;
+            }
+            
         }
         public GameState.GameKeys? TranslateKey(Key source)
         {

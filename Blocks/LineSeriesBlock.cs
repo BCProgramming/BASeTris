@@ -10,6 +10,11 @@ namespace BASeTris.Blocks
 {
     public class CascadingBlock :StandardColouredBlock
     {
+        private int _ConnectionIndex = 0; 
+        public int ConnectionIndex {  get { return _ConnectionIndex; } set { _ConnectionIndex = value; } }
+        //normally, all blocks connect to each other in a nomino, if one is supported, they all are.
+        //ConnectionIndex can be used so that only blocks that have the same connectionIndex actually support each other.
+        
         public override char GetCharacterRepresentation()
         {
             return 'C';
@@ -40,6 +45,10 @@ namespace BASeTris.Blocks
                 var fieldblock = field.Contents[PosY][PosX];
                 if (fieldblock == iterate.Block)
                 {
+                    if(fieldblock is CascadingBlock cb2)
+                    {
+                        if (cb2.ConnectionIndex != this.ConnectionIndex) continue; //since the connection index is different, this block in our nomino cannot support us.
+                    }
                     //ensure the block that is in the field is the one we reference.
                     //we need to do this because a destroyed block will be removed from the field,
                     //but it will not be removed from our owning nomino.
@@ -100,7 +109,10 @@ namespace BASeTris.Blocks
         {
             Blue,
             Red,
-            Yellow
+            Yellow,
+            Green,
+            Orange,
+            Magenta
         }
         public override char GetCharacterRepresentation()
         {
@@ -109,7 +121,7 @@ namespace BASeTris.Blocks
         
         public bool Popping { get; set; } = false;
         public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
-        public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question.
+        public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question. 
 
 
         //while part of a Nomino, items that are part of different sets will remain joined as expected. However when the nomino comes to 'rest' the sets are separated and any set that 

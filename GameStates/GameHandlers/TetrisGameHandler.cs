@@ -90,7 +90,8 @@ namespace BASeTris.GameStates.GameHandlers
             return result;
         }
 
-        public StandardGameOptions GameOptions { get;  } = new StandardGameOptions();
+        public TetrisGameOptions GameOptions { get;  } = new TetrisGameOptions();
+        GameOptions IGameCustomizationHandler.GameOptions => this.GameOptions;
         public Choosers.BlockGroupChooser Chooser
         {
             get

@@ -1561,7 +1561,6 @@ namespace BASeTris.AssetManager
         private Dictionary<String, SKBitmap> SkiaImages { get; set; } = new Dictionary<String, SKBitmap>(StringComparer.OrdinalIgnoreCase);
         public SKBitmap GetSKBitmap(String man_key)
         {
-            if (man_key.Contains("single")) {; }
             if (!SkiaImages.ContainsKey(man_key))
             {
                 Image findkey = this[man_key];

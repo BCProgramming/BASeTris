@@ -53,12 +53,12 @@ namespace BASeTris.Duomino
         public Duomino()
         {
             //generate a new Duomino. Duomino's don't actually use StandardColouredBlocks.
-
+            
 
             BlockData = Nomino.GetNominoEntries(new[] { Duomino_Point_1, Duomino_Point_2 }, 
                 (i) => new LineSeriesBlock()
                 {
-                    CombiningIndex = TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue })
+                    CombiningIndex =  TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue } )
                 }  ).ToList();
             
             base.SpecialName = "Pill";

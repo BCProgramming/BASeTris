@@ -11,11 +11,31 @@ using SkiaSharp;
 namespace BASeTris.Theme.Block
 {
     [HandlerTheme(typeof(DrMarioHandler))]
+    public class DrMarioThemeEnhanced : DrMarioTheme
+    {
+        public DrMarioThemeEnhanced() : base(InitializationFlags.Flags_EnhancedPillGraphics)
+        {
+
+        }
+
+    }
+
+
+
+
+    [HandlerTheme(typeof(DrMarioHandler))]
     //DrMarioTheme will need to specify the DrMario customization Handler as it's valid Theme once ready.
     //this one doesn't care about the game level- it has two block types- the pills, and the virii.
     //of those we've got 3 colors. We could add more, I suppose, but Dr. Mario has three so let's keep things a bit simpler.
+    //ideally, we'd have some more generic way of defining different colours, rather than having to define all the different block types for each colour
     public class DrMarioTheme : CustomPixelTheme<DrMarioTheme.BCT, DrMarioTheme.BlockTypes>
     {
+        [Flags]
+        public enum InitializationFlags
+        {
+            Flags_None,
+            Flags_EnhancedPillGraphics = 1
+        }
         public bool UseEnhancedImages = true;
         public static bool AllowAdvancedRotations = true;
         public override String Name { get { return "NES"; } }
@@ -56,6 +76,7 @@ namespace BASeTris.Theme.Block
         private static BCT[][] GetBCTBitmap(String ImageKey)
         {
             if (ImageKey.Contains("single")) {; }
+            
             SKImage sourceBitmap = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(ImageKey));
             return GetPixelsFromSKImage(sourceBitmap, ColorMapLookupFunc);
 
@@ -116,6 +137,10 @@ namespace BASeTris.Theme.Block
             Blue_Virii_2 = GetBCTBitmap("blue_virus_2");
             Green_Virii_1 = GetBCTBitmap("green_virus_1");
             Green_Virii_2 = GetBCTBitmap("green_virus_2");
+            Orange_Virii_1 = GetBCTBitmap("orange_virus_1");
+            Orange_Virii_2 = GetBCTBitmap("orange_virus_2");
+            Magenta_Virii_1 = GetBCTBitmap("magenta_virus_1");
+            Magenta_Virii_2 = GetBCTBitmap("magenta_virus_2");
             BitmapIndex = new Dictionary<BlockTypes, BCT[][]>()
         {
             {BlockTypes.Pill_Left_Yellow,Pill_Left },
@@ -133,6 +158,25 @@ namespace BASeTris.Theme.Block
             {BlockTypes.Pill_Right_Blue,Pill_Right },
             {BlockTypes.Pill_Bottom_Blue,Pill_Bottom },
             {BlockTypes.Pill_Single_Blue,Pill_Single },
+
+            {BlockTypes.Pill_Left_Orange,Pill_Left },
+            {BlockTypes.Pill_Top_Orange,Pill_Top },
+            {BlockTypes.Pill_Right_Orange,Pill_Right },
+            {BlockTypes.Pill_Bottom_Orange,Pill_Bottom },
+            {BlockTypes.Pill_Single_Orange,Pill_Single },
+
+            {BlockTypes.Pill_Left_Magenta,Pill_Left },
+            {BlockTypes.Pill_Top_Magenta,Pill_Top },
+            {BlockTypes.Pill_Right_Magenta,Pill_Right },
+            {BlockTypes.Pill_Bottom_Magenta,Pill_Bottom },
+            {BlockTypes.Pill_Single_Magenta,Pill_Single },
+
+            {BlockTypes.Pill_Left_Green,Pill_Left },
+            {BlockTypes.Pill_Top_Green,Pill_Top },
+            {BlockTypes.Pill_Right_Green,Pill_Right },
+            {BlockTypes.Pill_Bottom_Green,Pill_Bottom },
+            {BlockTypes.Pill_Single_Green,Pill_Single },
+
             {BlockTypes.Blue_Virus_1,Blue_Virii_1 },
             {BlockTypes.Blue_Virus_2,Blue_Virii_2 },
             {BlockTypes.Yellow_Virus_1,Yellow_Virii_1 },
@@ -141,9 +185,16 @@ namespace BASeTris.Theme.Block
             {BlockTypes.Red_Virus_2,Red_Virii_2 },
             {BlockTypes.Green_Virus_1,Green_Virii_1 },
             {BlockTypes.Green_Virus_2,Green_Virii_2 },
+            {BlockTypes.Orange_Virus_1,Orange_Virii_1 },
+            {BlockTypes.Orange_Virus_2,Orange_Virii_2 },
+            {BlockTypes.Magenta_Virus_1,Magenta_Virii_1 },
+            {BlockTypes.Magenta_Virus_2,Magenta_Virii_2 },
             {BlockTypes.Red_Pop,Pill_Pop},
             {BlockTypes.Blue_Pop,Pill_Pop},
-            {BlockTypes.Yellow_Pop,Pill_Pop}
+            {BlockTypes.Yellow_Pop,Pill_Pop},
+            {BlockTypes.Magenta_Pop,Pill_Pop},
+            {BlockTypes.Orange_Pop,Pill_Pop},
+            {BlockTypes.Green_Pop,Pill_Pop},
 
 
         };
@@ -151,9 +202,13 @@ namespace BASeTris.Theme.Block
 
             ThemeDataPrepared = true;
         }
-        public DrMarioTheme()
+        
+        public DrMarioTheme(InitializationFlags flags)
         {
             PrepareThemeData();
+        }
+        public DrMarioTheme():this(InitializationFlags.Flags_None)
+        {
         }
         static BCT[][] Pill_Left; /*= new BCT[][]
                     {
@@ -191,7 +246,7 @@ namespace BASeTris.Theme.Block
         //TODO: BCT Bitmaps for a Single pill piece, as well as the Red,Blue, and Yellow Virii.
         static BCT[][] Pill_Pop;
         //Frame 1 Yellow Virii
-        static BCT[][] Yellow_Virii_1 = new BCT[][]
+        static BCT[][] Yellow_Virii_1 = null; /* new BCT[][]
                {
                 new BCT[]{BCT.Transparent,BCT.Transparent, BCT.Transparent , BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent,BCT.Transparent},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Accent, BCT.Transparent, BCT.Accent, BCT.Transparent, BCT.Transparent},
@@ -201,9 +256,9 @@ namespace BASeTris.Theme.Block
                 new BCT[]{BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary},
                 new BCT[]{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black,BCT.Primary},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Transparent }
-               };
+               };*/
         //Frame 2 Yellow Virii unchanged currently...
-        static BCT[][] Yellow_Virii_2 = new BCT[][]
+        static BCT[][] Yellow_Virii_2 = null; /* new BCT[][]
                {
                 new BCT[]{BCT.Transparent,BCT.Transparent, BCT.Transparent , BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent,BCT.Transparent},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Accent, BCT.Transparent, BCT.Accent, BCT.Transparent, BCT.Transparent},
@@ -213,9 +268,9 @@ namespace BASeTris.Theme.Block
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Transparent},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Accent2, BCT.Primary, BCT.Primary,BCT.Transparent},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Accent2, BCT.Primary, BCT.Transparent, BCT.Transparent }
-               };
+               };*/
 
-        static BCT[][] Red_Virii_1 = new BCT[][]
+        static BCT[][] Red_Virii_1 = null; /* new BCT[][]
               {
                   new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent },
                 new BCT[]{BCT.Transparent,BCT.Transparent, BCT.Transparent , BCT.Primary, BCT.Primary, BCT.Primary, BCT.Transparent,BCT.Accent},
@@ -226,8 +281,8 @@ namespace BASeTris.Theme.Block
                 new BCT[]{BCT.Transparent, BCT.Accent2, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Primary, BCT.Transparent},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black,BCT.Accent2}
 
-              };
-        static BCT[][] Red_Virii_2 = new BCT[][]
+              };*/
+        static BCT[][] Red_Virii_2 = null; /*new BCT[][]
               {
                   new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent },
                 new BCT[]{BCT.Transparent,BCT.Accent, BCT.Transparent , BCT.Primary, BCT.Primary, BCT.Primary, BCT.Transparent,BCT.Transparent},
@@ -238,8 +293,8 @@ namespace BASeTris.Theme.Block
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Primary, BCT.Accent2},
                 new BCT[]{BCT.Transparent, BCT.Accent2, BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black,BCT.Transparent}
 
-              };
-        static BCT[][] Blue_Virii_1 = new BCT[][]
+              };*/
+        static BCT[][] Blue_Virii_1 = null;/* new BCT[][]
               {
                   new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent },
                 new BCT[]{BCT.Transparent,BCT.Transparent, BCT.Transparent , BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent,BCT.Transparent},
@@ -250,8 +305,8 @@ namespace BASeTris.Theme.Block
                 new BCT[]{BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Black, BCT.Accent, BCT.Black, BCT.Primary, BCT.Primary},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary,BCT.Transparent}
 
-              };
-        static BCT[][] Blue_Virii_2 = new BCT[][]
+              };*/
+        static BCT[][] Blue_Virii_2 = null; /*new BCT[][]
               {
                   new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent },
                 new BCT[]{BCT.Transparent,BCT.Primary, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary,BCT.Primary},
@@ -262,9 +317,14 @@ namespace BASeTris.Theme.Block
                 new BCT[]{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Black, BCT.Accent, BCT.Black, BCT.Black, BCT.Primary},
                 new BCT[]{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary,BCT.Transparent}
 
-              };
+              };*/
+        static BCT[][] Orange_Virii_1 = null;
+        static BCT[][] Orange_Virii_2 = null;
+        static BCT[][] Magenta_Virii_1 = null;
+        static BCT[][] Magenta_Virii_2 = null;
         static BCT[][] Green_Virii_1 = null;
         static BCT[][] Green_Virii_2 = null;
+        
         static Dictionary<BlockTypes, BCT[][]> BitmapIndex = null;
         static SKPointI nine = new SKPointI(9, 9);
         static SKPointI eight = new SKPointI(8, 8);
@@ -287,17 +347,43 @@ namespace BASeTris.Theme.Block
             {BlockTypes.Pill_Right_Blue,doublenine},
             {BlockTypes.Pill_Bottom_Blue,doublenine},
             {BlockTypes.Pill_Single_Blue,doublenine},
+
+            {BlockTypes.Pill_Left_Orange,doublenine},
+            {BlockTypes.Pill_Top_Orange,doublenine},
+            {BlockTypes.Pill_Right_Orange,doublenine},
+            {BlockTypes.Pill_Bottom_Orange,doublenine},
+            {BlockTypes.Pill_Single_Orange,doublenine},
+
+            {BlockTypes.Pill_Left_Magenta,doublenine},
+            {BlockTypes.Pill_Top_Magenta,doublenine},
+            {BlockTypes.Pill_Right_Magenta,doublenine},
+            {BlockTypes.Pill_Bottom_Magenta,doublenine},
+            {BlockTypes.Pill_Single_Magenta,doublenine},
+
+            {BlockTypes.Pill_Left_Green,doublenine},
+            {BlockTypes.Pill_Top_Green,doublenine},
+            {BlockTypes.Pill_Right_Green,doublenine},
+            {BlockTypes.Pill_Bottom_Green,doublenine},
+            {BlockTypes.Pill_Single_Green,doublenine},
+
             {BlockTypes.Blue_Virus_1,nine },
             {BlockTypes.Blue_Virus_2,nine},
             {BlockTypes.Yellow_Virus_1,nine},
             {BlockTypes.Yellow_Virus_2,nine},
             {BlockTypes.Red_Virus_1,nine },
             {BlockTypes.Red_Virus_2,nine},
+            {BlockTypes.Orange_Virus_1,nine},
+            {BlockTypes.Orange_Virus_2,nine},
+            {BlockTypes.Magenta_Virus_1,nine},
+            {BlockTypes.Magenta_Virus_2,nine},
             {BlockTypes.Green_Virus_1,nine},
             {BlockTypes.Green_Virus_2,nine},
             {BlockTypes.Red_Pop,doublenine},
             {BlockTypes.Yellow_Pop,doublenine},
-            {BlockTypes.Blue_Pop,doublenine}
+            {BlockTypes.Blue_Pop,doublenine},
+            {BlockTypes.Orange_Pop,doublenine},
+            {BlockTypes.Magenta_Pop,doublenine},
+            {BlockTypes.Green_Pop,doublenine}
         };
 
         static SKColor BlueColor = new SKColor(60, 188, 252);
@@ -406,7 +492,7 @@ namespace BASeTris.Theme.Block
             {BCT.Enhanced_11,new SKColor(1,1,1) },
 
             };
-
+        //weird idea, Green, Orange, and Magenta colours.
         Dictionary<BCT, SKColor> GreenColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
@@ -438,6 +524,68 @@ namespace BASeTris.Theme.Block
 
             };
 
+        Dictionary<BCT, SKColor> OrangeColourSet = new Dictionary<BCT, SKColor>()
+        {
+            {BCT.Transparent,SKColors.Transparent },
+            {BCT.Black,SKColors.Black },
+            {BCT.Primary,SKColors.Orange  },
+            {BCT.Accent,SKColors.PaleGoldenrod },
+            {BCT.Accent2,SKColors.LightBlue }
+
+        };
+
+        Dictionary<BCT, SKColor> EnhancedOrangeColourSet = new Dictionary<BCT, SKColor>()
+            {
+            {BCT.Transparent,SKColors.Transparent },
+            {BCT.Black,SKColors.Black },
+            {BCT.Primary,SKColors.Orange  },
+            {BCT.Accent,SKColors.PaleGoldenrod },
+            {BCT.Accent2,SKColors.LightBlue },
+            {BCT.Enhanced_1,new SKColor(205,103,0) },
+            {BCT.Enhanced_2,new SKColor(157,75,0) },
+            {BCT.Enhanced_3,new SKColor(116,55,0) },
+            {BCT.Enhanced_4,new SKColor(249,128,3) },
+            {BCT.Enhanced_5,new SKColor(67,30,1) },
+            {BCT.Enhanced_6,new SKColor(255,128,18) },
+            {BCT.Enhanced_7,new SKColor(255,128,45) },
+            {BCT.Enhanced_8,new SKColor(255,128,75) },
+            {BCT.Enhanced_9,new SKColor(255,50,103) },
+            {BCT.Enhanced_10,new SKColor(88,88,88) },
+            {BCT.Enhanced_11,new SKColor(1,1,1) },
+
+            };
+
+        Dictionary<BCT, SKColor> MagentaColourSet = new Dictionary<BCT, SKColor>()
+        {
+            {BCT.Transparent,SKColors.Transparent },
+            {BCT.Black,SKColors.Black },
+            {BCT.Primary,SKColors.Magenta  },
+            {BCT.Accent,SKColors.Pink },
+            {BCT.Accent2,SKColors.Orchid },
+           
+
+        };
+
+        Dictionary<BCT, SKColor> EnhancedMagentaColourSet = new Dictionary<BCT, SKColor>()
+        {
+            {BCT.Transparent,SKColors.Transparent },
+            {BCT.Black,SKColors.Black },
+            {BCT.Primary,SKColors.Magenta  },
+            {BCT.Accent,SKColors.Pink },
+            {BCT.Accent2,SKColors.Orchid },
+            {BCT.Enhanced_1,new SKColor(205,0,205) },
+            {BCT.Enhanced_2,new SKColor(157,0,157) },
+            {BCT.Enhanced_3,new SKColor(116,0,116) },
+            {BCT.Enhanced_4,new SKColor(249,3,249) },
+            {BCT.Enhanced_5,new SKColor(67,1,67) },
+            {BCT.Enhanced_6,new SKColor(255,18,255) },
+            {BCT.Enhanced_7,new SKColor(255,45,255) },
+            {BCT.Enhanced_8,new SKColor(255,75,255) },
+            {BCT.Enhanced_9,new SKColor(255,103,255) },
+            {BCT.Enhanced_10,new SKColor(88,88,88) },
+            {BCT.Enhanced_11,new SKColor(1,1,1) }
+
+        };
 
         public override SKPointI GetBlockSize(TetrisField field, BlockTypes BlockType)
         {
@@ -447,54 +595,83 @@ namespace BASeTris.Theme.Block
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Red_Pop },
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Yellow_Pop},
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Blue_Pop }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Blue_Pop },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Orange_Pop },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Magenta_Pop },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Green_Pop }
+            
         };
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> VirusTypes_1 = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Red_Virus_1 },
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Yellow_Virus_1 },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Blue_Virus_1 }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Blue_Virus_1 },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Orange_Virus_1 },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Magenta_Virus_1 },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Green_Virus_1 }
         };
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> VirusTypes_2 = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Red_Virus_2 },
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Yellow_Virus_2 },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Blue_Virus_2 }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Blue_Virus_2 },
+            { LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Orange_Virus_2 },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Magenta_Virus_2 },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Green_Virus_2 },
         };
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> PillLeft = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Pill_Left_Red},
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Pill_Left_Yellow },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Left_Blue }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Left_Blue },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Pill_Left_Orange },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Pill_Left_Magenta },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Pill_Left_Green }
         };
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> PillTop = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Pill_Top_Red},
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Pill_Top_Yellow },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Top_Blue }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Top_Blue },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Pill_Top_Orange },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Pill_Top_Magenta },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Pill_Top_Green }
         };
 
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> PillRight = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Pill_Right_Red},
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Pill_Right_Yellow },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Right_Blue }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Right_Blue },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Pill_Right_Orange },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Pill_Right_Magenta },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Pill_Right_Green }
+
         };
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> PillBottom = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Pill_Bottom_Red},
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Pill_Bottom_Yellow },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Bottom_Blue }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Bottom_Blue },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Pill_Bottom_Orange },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Pill_Bottom_Magenta },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Pill_Bottom_Green },
         };
         Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes> PillSingle = new Dictionary<LineSeriesBlock.CombiningTypes, BlockTypes>()
         {
             {LineSeriesBlock.CombiningTypes.Red,BlockTypes.Pill_Single_Red},
             {LineSeriesBlock.CombiningTypes.Yellow,BlockTypes.Pill_Single_Yellow },
-            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Single_Blue }
+            {LineSeriesBlock.CombiningTypes.Blue,BlockTypes.Pill_Single_Blue },
+            {LineSeriesBlock.CombiningTypes.Orange,BlockTypes.Pill_Single_Orange },
+            {LineSeriesBlock.CombiningTypes.Magenta,BlockTypes.Pill_Single_Magenta },
+            {LineSeriesBlock.CombiningTypes.Green,BlockTypes.Pill_Single_Green },
         };
         private BlockTypes[] YellowRotationTypes = new BlockTypes[] { BlockTypes.Pill_Left_Yellow, BlockTypes.Pill_Top_Yellow, BlockTypes.Pill_Right_Yellow, BlockTypes.Pill_Bottom_Yellow };
         private BlockTypes[] RedRotationTypes = new BlockTypes[] { BlockTypes.Pill_Left_Red, BlockTypes.Pill_Top_Red, BlockTypes.Pill_Right_Red, BlockTypes.Pill_Bottom_Red };
         private BlockTypes[] BlueRotationTypes = new BlockTypes[] { BlockTypes.Pill_Left_Blue, BlockTypes.Pill_Top_Blue, BlockTypes.Pill_Right_Blue, BlockTypes.Pill_Bottom_Blue };
+        private BlockTypes[] GreenRotationTypes = new BlockTypes[] { BlockTypes.Pill_Left_Green, BlockTypes.Pill_Top_Green, BlockTypes.Pill_Right_Green, BlockTypes.Pill_Bottom_Green };
+        private BlockTypes[] OrangeRotationTypes = new BlockTypes[] { BlockTypes.Pill_Left_Orange, BlockTypes.Pill_Top_Orange, BlockTypes.Pill_Right_Orange, BlockTypes.Pill_Bottom_Orange };
+        private BlockTypes[] MagentaRotationTypes = new BlockTypes[] { BlockTypes.Pill_Left_Magenta, BlockTypes.Pill_Top_Magenta, BlockTypes.Pill_Right_Magenta, BlockTypes.Pill_Bottom_Magenta };
 
         protected IEnumerable<T> GetArrayRun<T>(T[] src,int StartIndex,int Count)
         {
@@ -534,8 +711,31 @@ namespace BASeTris.Theme.Block
                     return GetArrayRun(BlueRotationTypes, 2, 4).ToArray();
                 case BlockTypes.Pill_Bottom_Blue:
                     return GetArrayRun(BlueRotationTypes, 3, 4).ToArray();
+                case BlockTypes.Pill_Left_Green:
+                    return GetArrayRun(GreenRotationTypes, 0, 4).ToArray();
+                case BlockTypes.Pill_Top_Green:
+                    return GetArrayRun(GreenRotationTypes, 1, 4).ToArray();
+                case BlockTypes.Pill_Right_Green:
+                    return GetArrayRun(GreenRotationTypes, 2, 4).ToArray();
+                case BlockTypes.Pill_Bottom_Green:
+                    return GetArrayRun(GreenRotationTypes, 3, 4).ToArray();
+                case BlockTypes.Pill_Left_Magenta:
+                    return GetArrayRun(MagentaRotationTypes, 0, 4).ToArray();
+                case BlockTypes.Pill_Top_Magenta:
+                    return GetArrayRun(MagentaRotationTypes, 1, 4).ToArray();
+                case BlockTypes.Pill_Right_Magenta:
+                    return GetArrayRun(MagentaRotationTypes, 2, 4).ToArray();
+                case BlockTypes.Pill_Bottom_Magenta:
+                    return GetArrayRun(MagentaRotationTypes, 3, 4).ToArray();
+                case BlockTypes.Pill_Left_Orange:
+                    return GetArrayRun(OrangeRotationTypes, 0, 4).ToArray();
+                case BlockTypes.Pill_Top_Orange:
+                    return GetArrayRun(OrangeRotationTypes, 1, 4).ToArray();
+                case BlockTypes.Pill_Right_Orange:
+                    return GetArrayRun(OrangeRotationTypes, 2, 4).ToArray();
+                case BlockTypes.Pill_Bottom_Orange:
+                    return GetArrayRun(OrangeRotationTypes, 3, 4).ToArray();
 
-                
                 default:
                     return new BlockTypes[] { Original };
             }
@@ -558,6 +758,18 @@ namespace BASeTris.Theme.Block
                         useType = new[] { chosentype = BlockTypes.Yellow_Pop };
                     else if (chosentype == BlockTypes.Red_Virus_1 || chosentype == BlockTypes.Red_Virus_2 || chosentype == BlockTypes.Red_Pop)
                         useType = new[] { chosentype = BlockTypes.Red_Pop };
+                    else if (new[] { BlockTypes.Green_Virus_1,BlockTypes.Green_Virus_2,BlockTypes.Green_Pop}.Contains(chosentype))
+                    {
+                        useType = new[] { chosentype = BlockTypes.Green_Pop };
+                    }
+                    else if (new[] { BlockTypes.Magenta_Virus_1, BlockTypes.Magenta_Virus_2, BlockTypes.Magenta_Pop }.Contains(chosentype))
+                    {
+                        useType = new[] { chosentype = BlockTypes.Magenta_Pop };
+                    }
+                    else if (new[] { BlockTypes.Orange_Virus_1, BlockTypes.Orange_Virus_2, BlockTypes.Orange_Pop }.Contains(chosentype))
+                    {
+                        useType = new[] { chosentype = BlockTypes.Orange_Pop };
+                    }
                     else
                     {
                         
@@ -602,9 +814,23 @@ namespace BASeTris.Theme.Block
                 usetype1 = BlockTypes.Green_Virus_1;
                 usetype2 = BlockTypes.Green_Virus_2;
             }
+            else if(chosentype==BlockTypes.Orange_Virus_1 || chosentype == BlockTypes.Orange_Virus_2)
+            {
+                usetype1 = BlockTypes.Orange_Virus_1;
+                usetype2 = BlockTypes.Orange_Virus_2;
+            }
+            else if (chosentype == BlockTypes.Magenta_Virus_1 || chosentype == BlockTypes.Magenta_Virus_2)
+            {
+                usetype1 = BlockTypes.Magenta_Virus_1;
+                usetype2 = BlockTypes.Magenta_Virus_2;
+            }
             else
             {
                 usetype1 = usetype2 = chosentype;
+            }
+            if(usetype1==BlockTypes.Yellow_Virus_1 && !(chosentype==BlockTypes.Yellow_Virus_1 || chosentype==BlockTypes.Yellow_Virus_2))
+            {
+                ;
             }
             var firstImage = SKImage.FromBitmap(GetMappedImageSkia(field, Group,getElement, usetype1));
             var secondImage = SKImage.FromBitmap(GetMappedImageSkia(field, Group,getElement, usetype2));
@@ -676,27 +902,71 @@ namespace BASeTris.Theme.Block
         {
             return BitmapIndex;
         }
+        private static BlockTypes[] YellowVirusTypes = new BlockTypes[] { BlockTypes.Yellow_Virus_1, BlockTypes.Yellow_Virus_2 };
+        private static BlockTypes[] RedVirusTypes = new BlockTypes[] { BlockTypes.Red_Virus_1, BlockTypes.Red_Virus_2 };
+        private static BlockTypes[] BlueVirusTypes = new BlockTypes[] { BlockTypes.Blue_Virus_1, BlockTypes.Blue_Virus_2 };
+        private static BlockTypes[] MagentaVirusTypes = new BlockTypes[] { BlockTypes.Magenta_Virus_1, BlockTypes.Magenta_Virus_2 };
+        private static BlockTypes[] OrangeVirusTypes = new BlockTypes[] { BlockTypes.Orange_Virus_1, BlockTypes.Orange_Virus_2 };
+        private static BlockTypes[] GreenVirusTypes = new BlockTypes[] { BlockTypes.Green_Virus_1, BlockTypes.Green_Virus_2 };
+        private static BlockTypes[] YellowPillTypes = new BlockTypes[] { BlockTypes.Pill_Left_Yellow, BlockTypes.Pill_Right_Yellow, BlockTypes.Pill_Single_Yellow, BlockTypes.Yellow_Pop, BlockTypes.Pill_Top_Yellow, BlockTypes.Pill_Bottom_Yellow };
+        private static BlockTypes[] RedPillTypes = new BlockTypes[] { BlockTypes.Pill_Left_Red, BlockTypes.Pill_Right_Red, BlockTypes.Pill_Single_Red, BlockTypes.Red_Pop, BlockTypes.Pill_Top_Red, BlockTypes.Pill_Bottom_Red };
+        private static BlockTypes[] BluePillTypes = new BlockTypes[] { BlockTypes.Pill_Left_Blue, BlockTypes.Pill_Right_Blue, BlockTypes.Pill_Single_Blue, BlockTypes.Blue_Pop, BlockTypes.Pill_Top_Blue, BlockTypes.Pill_Bottom_Blue };
+        private static BlockTypes[] MagentaPillTypes = new BlockTypes[] { BlockTypes.Pill_Left_Magenta, BlockTypes.Pill_Right_Magenta, BlockTypes.Pill_Single_Magenta, BlockTypes.Magenta_Pop, BlockTypes.Pill_Top_Magenta, BlockTypes.Pill_Bottom_Magenta };
+        private static BlockTypes[] OrangePillTypes = new BlockTypes[] { BlockTypes.Pill_Left_Orange, BlockTypes.Pill_Right_Orange, BlockTypes.Pill_Single_Orange, BlockTypes.Orange_Pop, BlockTypes.Pill_Top_Orange, BlockTypes.Pill_Bottom_Orange };
+        private static BlockTypes[] GreenPillTypes = new BlockTypes[] { BlockTypes.Pill_Left_Green, BlockTypes.Pill_Right_Green, BlockTypes.Pill_Single_Green, BlockTypes.Green_Pop, BlockTypes.Pill_Top_Green, BlockTypes.Pill_Bottom_Green };
 
+        private static bool IsInTypes(BlockTypes value,BlockTypes[] Virii,BlockTypes[] Pills)
+        {
+            return Virii.Contains(value) || Pills.Contains(value);
+        }
+        public static bool IsYellowType(BlockTypes value)
+        {
+            return IsInTypes(value, YellowVirusTypes, YellowPillTypes);
+        }
+        public static bool IsRedType(BlockTypes value)
+        {
+            return IsInTypes(value, RedVirusTypes, RedPillTypes);
+        }
+        public static bool IsBlueType(BlockTypes value)
+        {
+            return IsInTypes(value, BlueVirusTypes, BluePillTypes);
+        }
+        public static bool IsOrangeType(BlockTypes value)
+        {
+            return IsInTypes(value, OrangeVirusTypes, OrangePillTypes);
+        }
+        public static bool IsMagentaType(BlockTypes value)
+        {
+            return IsInTypes(value, MagentaVirusTypes, MagentaPillTypes);
+        }
+        public static bool IsGreenType(BlockTypes value)
+        {
+            return IsInTypes(value, GreenVirusTypes, GreenPillTypes);
+        }
         public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockTypes BlockType, BCT PixelType)
         {
             if (new BlockTypes[] { BlockTypes.Pill_Single_Red, BlockTypes.Pill_Single_Yellow, BlockTypes.Pill_Single_Blue }.Contains(BlockType))
                 {
                 ;
             }
-            if (BlockType == BlockTypes.Yellow_Virus_1 || BlockType == BlockTypes.Yellow_Virus_2)
+            
+            if(BlockType==BlockTypes.Magenta_Virus_1 || BlockType==BlockTypes.Magenta_Virus_2)
+            {
+                ;
+            }
+
+            if (IsYellowType(BlockType))
                 return UseEnhancedImages ? EnhancedYellowColourSet[PixelType] : YellowColourSet[PixelType];
-            else if (BlockType == BlockTypes.Red_Virus_1 || BlockType == BlockTypes.Red_Virus_2)
+            else if (IsRedType(BlockType))
                 return UseEnhancedImages ? EnhancedRedColourSet[PixelType] : RedColourSet[PixelType];
-            else if (BlockType == BlockTypes.Blue_Virus_1 || BlockType == BlockTypes.Blue_Virus_2)
+            else if (IsBlueType(BlockType))
                 return UseEnhancedImages?EnhancedBlueColourSet[PixelType]:BlueColourSet[PixelType];
-            else if (new BlockTypes[] { BlockTypes.Pill_Left_Yellow, BlockTypes.Pill_Right_Yellow, BlockTypes.Pill_Single_Yellow, BlockTypes.Yellow_Pop,BlockTypes.Pill_Top_Yellow,BlockTypes.Pill_Bottom_Yellow}.Contains(BlockType))
-                return UseEnhancedImages ? EnhancedYellowColourSet[PixelType] : YellowColourSet[PixelType];
-            else if (new BlockTypes[] { BlockTypes.Pill_Left_Red, BlockTypes.Pill_Right_Red, BlockTypes.Pill_Single_Red, BlockTypes.Red_Pop, BlockTypes.Pill_Top_Red, BlockTypes.Pill_Bottom_Red }.Contains(BlockType))
-                return UseEnhancedImages ? EnhancedRedColourSet[PixelType] : RedColourSet[PixelType];
-            else if (new BlockTypes[] { BlockTypes.Pill_Left_Blue, BlockTypes.Pill_Right_Blue, BlockTypes.Pill_Single_Blue, BlockTypes.Blue_Pop, BlockTypes.Pill_Top_Blue, BlockTypes.Pill_Bottom_Blue }.Contains(BlockType))
-                return UseEnhancedImages ? EnhancedBlueColourSet[PixelType] : BlueColourSet[PixelType];
-            else if (new BlockTypes[] { BlockTypes.Green_Virus_1, BlockTypes.Green_Virus_2 }.Contains(BlockType))
+            else if (IsOrangeType(BlockType))
+                return UseEnhancedImages ? EnhancedOrangeColourSet[PixelType] : OrangeColourSet[PixelType];
+            else if(IsGreenType(BlockType))
                 return UseEnhancedImages ? EnhancedGreenColourSet[PixelType] : GreenColourSet[PixelType];
+            else if (IsMagentaType(BlockType))
+                return UseEnhancedImages ? EnhancedMagentaColourSet[PixelType] : MagentaColourSet[PixelType];
             return SKColors.Magenta;
         }
         protected override BlockFlags GetBlockFlags(NominoElement testvalue)
@@ -718,9 +988,10 @@ namespace BASeTris.Theme.Block
         }
         public override BlockTypes[] PossibleBlockTypes()
         {
-            return new BlockTypes[]
+            return (BlockTypes[])Enum.GetValues(typeof(BlockTypes));
+            /*return new BlockTypes[]
             {
-                            BlockTypes.Pill_Left_Yellow,
+            BlockTypes.Pill_Left_Yellow,
             BlockTypes.Pill_Right_Yellow,
             BlockTypes.Pill_Single_Yellow,
             BlockTypes.Pill_Left_Red,
@@ -740,7 +1011,7 @@ namespace BASeTris.Theme.Block
             BlockTypes.Blue_Pop,
             BlockTypes.Green_Virus_1,
             BlockTypes.Green_Virus_2
-            };
+            };*/
         }
         //The "A" BCT Types are used for the hi-color "sprites".
         public enum BCT
@@ -797,6 +1068,21 @@ namespace BASeTris.Theme.Block
             Pill_Right_Blue,
             Pill_Bottom_Blue,
             Pill_Single_Blue,
+            Pill_Left_Green,
+            Pill_Top_Green,
+            Pill_Right_Green,
+            Pill_Bottom_Green,
+            Pill_Single_Green,
+            Pill_Left_Magenta,
+            Pill_Top_Magenta,
+            Pill_Right_Magenta,
+            Pill_Bottom_Magenta,
+            Pill_Single_Magenta,
+            Pill_Left_Orange,
+            Pill_Top_Orange,
+            Pill_Right_Orange,
+            Pill_Bottom_Orange,
+            Pill_Single_Orange,
             Red_Virus_1,
             Red_Virus_2,
             Yellow_Virus_1,
@@ -805,9 +1091,16 @@ namespace BASeTris.Theme.Block
             Blue_Virus_2,
             Green_Virus_1,
             Green_Virus_2,
+            Magenta_Virus_1,
+            Magenta_Virus_2,
+            Orange_Virus_1,
+            Orange_Virus_2,
             Red_Pop,
             Yellow_Pop,
-            Blue_Pop
+            Blue_Pop,
+            Magenta_Pop,
+            Orange_Pop,
+            Green_Pop
             
         }
 

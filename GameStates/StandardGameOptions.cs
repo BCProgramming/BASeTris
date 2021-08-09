@@ -1,4 +1,5 @@
 ﻿using BASeCamp.Elementizer;
+using BASeTris.GameStates.GameHandlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,8 @@ using System.Xml.Linq;
 
 namespace BASeTris.GameStates
 {
-    public class StandardGameOptions:IXmlPersistable
+    //game options that apply to all handlers.
+    public abstract class GameOptions:IXmlPersistable
     {
         //options for the standard game.
         public bool AllowHold = true;
@@ -31,23 +33,50 @@ namespace BASeTris.GameStates
                 if (!_MusicEnabled) TetrisGame.Soundman.StopMusic();
             }
         }
-        public StandardGameOptions()
+        public GameOptions()
         {
 
         }
-        public StandardGameOptions(XElement src,Object Data)
+        public GameOptions(XElement src,Object Data)
         {
 
         }
 
-        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        public virtual XElement GetXmlData(string pNodeName, object PersistenceData)
         {
-            throw new NotImplementedException();
+            return new XElement(pNodeName,
+                new XAttribute("AllowHold", AllowHold ? "True" : "False"),
+                new XAttribute("NextQueueSize", NextQueueSize),
+                new XAttribute("MoveResetsSetTimer", MoveResetsSetTimer ? "True" : "False"),
+                new XAttribute("RotateResetsSetTimer", RotateResetsSetTimer ? "True" : "False"),
+                new XAttribute("DrawGhostDrop", DrawGhostDrop ? "True" : "False"),
+                new XAttribute("MusicRestartsOnTempoChange", MusicRestartsOnTempoChange ? "True" : "False"),
+                new XAttribute("AllowWallKicks", AllowWallKicks ? "True" : "False"),
+                new XAttribute("MusicEnabled", _MusicEnabled ? "True" : "False"));
+
+
+        }
+        
+    }
+    //options for each specific type.
+    public class TetrisGameOptions : GameOptions
+    {
+        public override XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            return base.GetXmlData(pNodeName, PersistenceData);
         }
     }
+    public class DrMarioGameOptions : GameOptions
+    {
+        public override XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            return base.GetXmlData(pNodeName, PersistenceData);
+        }
+    }
+
     public class OptionsManager
     {
-        private Dictionary<String, StandardGameOptions> OptionData = new Dictionary<string, StandardGameOptions>();
+        private Dictionary<String, GameOptions> OptionData = new Dictionary<string, GameOptions>();
 
         public static OptionsManager Static = null;
 

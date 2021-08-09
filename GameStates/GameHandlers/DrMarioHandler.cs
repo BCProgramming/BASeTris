@@ -24,7 +24,8 @@ namespace BASeTris.GameStates.GameHandlers
         public DrMarioStatistics Statistics { get; private set; } = new DrMarioStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; }  }
         public bool AllowFieldImageCache { get { return false; } }
-        public StandardGameOptions GameOptions { get; } = new StandardGameOptions() {AllowWallKicks = false } ;
+        public DrMarioGameOptions GameOptions { get; } = new DrMarioGameOptions() {AllowWallKicks = false } ;
+        
         public BlockGroupChooser Chooser  {
             get {
                 var result = Duomino.Duomino.BagTetrominoChooser();
@@ -39,6 +40,33 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return new Nomino[] { new Duomino.Duomino() };
         }
+
+        public LineSeriesBlock.CombiningTypes[] GetValidPillCombiningTypes()
+        {
+            List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Red_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Red);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Blue_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Blue);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Orange_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Orange);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Magenta_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Magenta);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Green_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Green);
+
+            return buildresult.ToArray();
+        }
+
+        public LineSeriesBlock.CombiningTypes[] GetValidVirusCombiningTypes()
+        {
+            List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Red_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Red);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Blue_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Blue);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Orange_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Orange);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Magenta_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Magenta);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Green_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Green);
+
+            return buildresult.ToArray();
+        }
+
         private void DrMarioNominoTweaker(Nomino Source)
         {
             //tweak the nomino and set a random combining index.
@@ -46,7 +74,7 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 if (iterate.Block is LineSeriesBlock lsb)
                 {
-                    lsb.CombiningIndex = TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue });
+                    lsb.CombiningIndex = TetrisGame.Choose(GetValidPillCombiningTypes());
                 }
             }
             
@@ -260,7 +288,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             return CreateResult;
         }
-        public int Level { get; set; } = 0;
+        public int Level { get; set; } = 22;
         public int VirusCount = 0;
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
@@ -503,6 +531,9 @@ namespace BASeTris.GameStates.GameHandlers
         static BCColor[] RedColors = new BCColor[] { SKColors.Red, SKColors.IndianRed, SKColors.OrangeRed, SKColors.DarkRed };
         static BCColor[] BlueColors = new BCColor[] { SKColors.Blue, SKColors.Navy, SKColors.SkyBlue, SKColors.LightBlue };
         static BCColor[] YellowColors = new BCColor[] { SKColors.Yellow, SKColors.LightYellow, SKColors.LightGoldenrodYellow, SKColors.Goldenrod, SKColors.DarkGoldenrod };
+        static BCColor[] OrangeColors = new BCColor[] { SKColors.Orange, SKColors.OrangeRed,SKColors.DarkGoldenrod };
+        static BCColor[] MagentaColors = new BCColor[] { SKColors.Magenta, SKColors.Purple, SKColors.Indigo, SKColors.MediumPurple };
+        static BCColor[] GreenColors = new BCColor[] { SKColors.Green, SKColors.Olive, SKColors.OliveDrab, SKColors.YellowGreen};
         static BCPoint[] CardinalOptions = new BCPoint[] { new BCPoint(1, 0), new BCPoint(0, 1) };
         const float MAX_SPEED = 0.25f;
         const float MIN_SPEED = 0.35f;
@@ -524,6 +555,15 @@ namespace BASeTris.GameStates.GameHandlers
                         break;
                     case LineSeriesBlock.CombiningTypes.Yellow:
                         useColor = YellowColors;
+                        break;
+                    case LineSeriesBlock.CombiningTypes.Orange:
+                        useColor = OrangeColors;
+                        break;
+                    case LineSeriesBlock.CombiningTypes.Magenta:
+                        useColor = MagentaColors;
+                        break;
+                    case LineSeriesBlock.CombiningTypes.Green:
+                        useColor = GreenColors;
                         break;
                 }
                 for(int i=0;i<ParticlesPerPop;i++)
@@ -563,7 +603,37 @@ namespace BASeTris.GameStates.GameHandlers
             ViriiAppearanceState levelstarter = new ViriiAppearanceState(mutate);
             return levelstarter;
         }
+        [Flags]
+        public enum AllowedSpawnsFlags
+        {
+            Spawn_Invalid = 0,
+            Spawn_Red_Virus = 1,
+            Spawn_Blue_Virus = 2,
+            Spawn_Yellow_Virus = 4,
+            Spawn_Red_Pill = 8,
+            Spawn_Blue_Pill = 16,
+            Spawn_Yellow_Pill = 32,
+            Spawn_Orange_Virus = 64,
+            Spawn_Magenta_Virus = 128,
+            Spawn_Green_Virus = 256,
+            Spawn_Orange_Pill = 512,
+            Spawn_Magenta_Pill = 1024,
+            Spawn_Green_Pill = 2048,
+            Spawn_Standard = Spawn_Red_Virus | Spawn_Blue_Virus | Spawn_Yellow_Virus | Spawn_Red_Pill | Spawn_Blue_Pill | Spawn_Yellow_Pill,
+            Spawn_Alternate = Spawn_Orange_Virus | Spawn_Magenta_Virus | Spawn_Green_Virus | Spawn_Orange_Pill | Spawn_Magenta_Pill | Spawn_Green_Pill,
+            Spawn_Full = Spawn_Standard | Spawn_Alternate
+
+        }
+
+        
+
+        public AllowedSpawnsFlags AllowedSpawns { get; set; } = AllowedSpawnsFlags.Spawn_Standard;
         public TetrominoTheme DefaultTheme { get { return new DrMarioTheme(); } }
+
+        
+
+        GameOptions IGameCustomizationHandler.GameOptions => this.GameOptions;
+
         public void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
             //likely will need to have stats and stuff abstracted to each Handler.
@@ -575,7 +645,7 @@ namespace BASeTris.GameStates.GameHandlers
             for(int i=0;i<numViruses;i++)
             {
                 //choose a random virus type.
-                var chosentype = TetrisGame.Choose(new LineSeriesBlock.CombiningTypes[] { LineSeriesBlock.CombiningTypes.Yellow, LineSeriesBlock.CombiningTypes.Red, LineSeriesBlock.CombiningTypes.Blue });
+                var chosentype = TetrisGame.Choose(GetValidVirusCombiningTypes());
                 LineSeriesMasterBlock lsmb = new LineSeriesMasterBlock() { CombiningIndex = chosentype };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, lsmb);
@@ -607,5 +677,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return null;
         }
+
+
     }
 }

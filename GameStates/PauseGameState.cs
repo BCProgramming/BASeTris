@@ -80,7 +80,7 @@ namespace BASeTris.GameStates
             pOwner.GameClosing += POwner_GameClosing;
             
             PauseGamePlayerState = new GameplayGameState(pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman),null);
-            
+            (PauseGamePlayerState as GameplayGameState).Flags = GameplayGameState.GameplayStateFlags.Paused;
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new TetrisAI(this);
             PausePlayerAI.ScoringRules.StupidFactor = 0.75f;

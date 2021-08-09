@@ -138,6 +138,7 @@
     <Compile Include="GamePresenter.cs" />
     <Compile Include="GameStates\DropWaitState.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
+    <Compile Include="GameStates\GameHandlers\HandlerOptions\HandlerOptionsAttribute.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioLevelCompleteState.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\ViriiAppearanceState.cs" />
     <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />

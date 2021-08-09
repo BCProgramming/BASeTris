@@ -422,8 +422,15 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             {
                 int Row = iterate.Y + Duplicator.Y;
                 int Col = iterate.X + Duplicator.X + XOffset;
-                if (FieldState[Row][Col] != null) throw new ArgumentException("Invalid state...");
-                FieldState[Row][Col] = iterate.Block;
+                if (Row > RowCount - 1 || Col > ColCount - 1 || Row < 0 || Col < 0)
+                {
+
+                }
+                else
+                {
+                    if (FieldState[Row][Col] != null) throw new ArgumentException("Invalid state...");
+                    FieldState[Row][Col] = iterate.Block;
+                }
             }
         }
 

@@ -8,8 +8,15 @@ namespace BASeTris.Choosers
 {
     public abstract class BlockGroupChooser : IDisposable
     {
+        /// <summary>
+        /// array of Nomino-producing functions. Things like tetris for example provide a function for each Tetromino type. Dr.Mario just gives back a Duomino.
+        /// </summary>
         protected Func<Nomino>[] _Available;
         protected Random rgen = null;
+        /// <summary>
+        /// Action delegate that is called that can make additional changes to chosen Nomino's.
+        /// used by things like the Dr.Mario handler to change the colours of the blocks in the pill.
+        /// </summary>
         public Action<Nomino> ResultAffector { get; set; } = null;
         public BlockGroupChooser(Func<Nomino>[] pAvailable)
         {

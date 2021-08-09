@@ -25,6 +25,7 @@ namespace BASeTris.Rendering.Skia.GameStates.HandlerStates
                 CompleteBox = TetrisGame.Imageman.GetSKBitmap("Level_Complete_Box");
                 CompletionTextPaint = new SKPaint();
                 CompletionTextPaint.ApplySizedFont(pOwner, 24, SKColors.White);
+                CompletionTextPaint.Color = SKColors.White;
                 CompletionTextPaintShadow = new SKPaint();
                 CompletionTextPaintShadow.ApplySizedFont(pOwner, 24, SKColors.Black);
             }

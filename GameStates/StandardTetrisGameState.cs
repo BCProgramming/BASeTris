@@ -33,6 +33,12 @@ namespace BASeTris.GameStates
 {
     public class GameplayGameState : GameState
     {
+        [Flags]
+        public enum GameplayStateFlags
+        {
+            Normal,
+            Paused = 1
+        }
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
         public Nomino HoldBlock = null;
@@ -40,6 +46,7 @@ namespace BASeTris.GameStates
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
+        public GameplayStateFlags Flags { get; set; } = GameplayStateFlags.Normal;
         BlockGroupChooser overrideChooser = null;
         public Choosers.BlockGroupChooser Chooser { get { return overrideChooser == null ? GameHandler.Chooser : overrideChooser; } set { overrideChooser = value; } }
 
@@ -483,9 +490,17 @@ namespace BASeTris.GameStates
 
         bool SpawnWait = false;
         static Random rgen = new Random();
-        
-        
-        public StandardGameOptions GameOptions { get; set; } = new StandardGameOptions();
+
+
+        public GameOptions GameOptions
+        {
+            get
+            {
+                return this.GameHandler.GameOptions;        
+            }
+        }
+
+
 
         public void RefillBlockQueue()
         {
