@@ -57,7 +57,9 @@ namespace BASeTris.GameStates.Menu
                 new SoundOption("tetris_nes_theme","NES"),
                 new SoundOption("tetris_gb_theme","GB"),
                 new SoundOption("DrMarioFever","Fever"),
+                new SoundOption("DrMarioFever_Rock","Fever Rock"),
                 new SoundOption("DrMarioChill","Chill"),
+                new SoundOption("DrMarioChill_Rock","Chill Rock"),
                 new SoundOption("<RANDOM>","Random")
 
             }, 0);

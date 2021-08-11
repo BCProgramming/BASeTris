@@ -105,6 +105,16 @@ namespace BASeTris.Blocks
     /// </summary>
     public class LineSeriesBlock:CascadingBlock
     {
+        public class AdditionalCombineInfo
+        {
+            public CombiningTypes CombineType { get; set; }
+            public double CombineAddWeight { get; set; } //amount to combine. negative values mean that while this block is compatible, it will take more pills to actually "pop".
+            public AdditionalCombineInfo(CombiningTypes pCombineType,double pCombineWeight)
+            {
+                CombineType = pCombineType;
+                CombineAddWeight = pCombineWeight;
+            }
+        }
         public enum CombiningTypes
         {
             Blue,

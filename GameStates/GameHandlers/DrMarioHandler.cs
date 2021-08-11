@@ -288,7 +288,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             return CreateResult;
         }
-        public int Level { get; set; } = 22;
+        public int Level { get; set; } = 0;
         public int VirusCount = 0;
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
