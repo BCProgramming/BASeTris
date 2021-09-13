@@ -110,10 +110,11 @@ namespace BASeTris.GameStates.GameHandlers
             Tetromino_S TetS = new Tetromino_S();
             Tetromino_T TetT = new Tetromino_T();
             Tetromino_Z TetZ = new Tetromino_Z();
-            return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ };
+            return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ};
         }
         private Choosers.BlockGroupChooser GetChooser()
         {
+            //TODO: proper per-handler configs should include the chooser class to use.
             var resultChooser = new BagChooser(Tetromino.StandardTetrominoFunctions);
             return resultChooser;
         }

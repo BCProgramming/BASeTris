@@ -105,6 +105,9 @@ namespace BASeTris.Blocks
     /// </summary>
     public class LineSeriesBlock:CascadingBlock
     {
+        //encapsulates data regarding additional combining types which can interact with this block.
+        //(technically I guess it could have the actual combining index of the block too, which would make for some weird stuff!)
+        
         public class AdditionalCombineInfo
         {
             public CombiningTypes CombineType { get; set; }
@@ -133,6 +136,7 @@ namespace BASeTris.Blocks
         public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
         public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question. 
 
+        public List<AdditionalCombineInfo> AdditionalCombinations { get; private set; } = new List<AdditionalCombineInfo>();
 
         //while part of a Nomino, items that are part of different sets will remain joined as expected. However when the nomino comes to 'rest' the sets are separated and any set that 
         //can still freely fall will be split out to new Active Groups.
@@ -142,13 +146,20 @@ namespace BASeTris.Blocks
     }
     //a "Master" block is a block that spawns as part of the level. eg. Dr. Mario Viruses or the flashing blocks in Tetris 2. The main difference is in behaviour.
     
-    public class LineSeriesMasterBlock : LineSeriesBlock
+    public class LineSeriesPrimaryBlock : LineSeriesBlock
     {
         public override bool Fixed { get { return true; }  set { } }
-        public LineSeriesMasterBlock()
+        public LineSeriesPrimaryBlock()
         {
            
         }
+    }
+    /// <summary>
+    /// exactly the same as LineSeriesPrimaryBlock, however this has special logic in the cascading game type where
+    /// destroying one will destroy all other lineseriesprimaryblocks of the same.
+    /// </summary>
+    public class LineSeriesPrimaryShinyBlock : LineSeriesPrimaryBlock
+    {
 
     }
 }

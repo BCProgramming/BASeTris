@@ -37,7 +37,7 @@ namespace BASeTris.AI
                     ResetHandled = false;
                     if (state.State[r][c] is LineSeriesBlock lsb)
                     {
-                        if (state.State[r][c] is LineSeriesMasterBlock)
+                        if (state.State[r][c] is LineSeriesPrimaryBlock)
                         {
                             MasterCount++;
                         }
@@ -181,7 +181,7 @@ namespace BASeTris.AI
             double MassScore = 0;
             foreach(var iterate in FindMasses(dat,state))
             {
-                int VirusCount = (from c in iterate.MassContents where c is LineSeriesMasterBlock select c).Count();
+                int VirusCount = (from c in iterate.MassContents where c is LineSeriesPrimaryBlock select c).Count();
                 double AddScore = ((double)VirusCount) * dat.MasterBlockMassValue + iterate.MassSize;
                 MassScore += AddScore;
             }

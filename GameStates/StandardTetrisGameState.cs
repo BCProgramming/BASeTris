@@ -897,7 +897,7 @@ namespace BASeTris.GameStates
                     var _Present = gp.GetPresenter();
                     if (_Present.ai == null)
                 {
-                        _Present.ai = new TetrisAI(pOwner);
+                        _Present.ai = new StandardNominoAI(pOwner);
                     }
                 else
                 {

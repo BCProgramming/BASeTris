@@ -259,7 +259,7 @@ namespace BASeTris
         {
             if (bg == null) return;
 
-            if (UseStyles == null) UseStyles = GetBlockStyleLookup(new Type[] {typeof(Tetromino_I), typeof(Tetromino_J), typeof(Tetromino_L), typeof(Tetromino_O), typeof(Tetromino_S), typeof(Tetromino_T), typeof(Tetromino_Z)});
+            if (UseStyles == null) UseStyles = GetBlockStyleLookup(new Type[] {typeof(Tetromino_I), typeof(Tetromino_J), typeof(Tetromino_L), typeof(Tetromino_O), typeof(Tetromino_S), typeof(Tetromino_T), typeof(Tetromino_Z), typeof(Tetromino_Y) });
             StandardColouredBlock.BlockStyle applystyle = _Style;
             if (UseStyles.ContainsKey(bg.GetType())) applystyle = UseStyles[bg.GetType()];
 

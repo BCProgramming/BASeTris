@@ -9,6 +9,7 @@ using BASeTris.AI;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameObjects;
+using BASeTris.GameStates.GameHandlers.HandlerOptions;
 using BASeTris.GameStates.GameHandlers.HandlerStates;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
@@ -16,55 +17,23 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-    //placeholder attribute: a Dr Mario scoring handler should be implemented...
+    
+
+
+
     [GameScoringHandler(typeof(DrMarioAIScoringHandler),typeof(StoredBoardState.DrMarioScoringRuleData))]
-    public class DrMarioHandler : IGameCustomizationHandler
+    [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
+    public class DrMarioHandler : CascadingPopBlockGameHandler<DrMarioStatistics,DrMarioGameOptions>
     {
-        public String Name { get { return "Dr. Mario"; } }
-        public DrMarioStatistics Statistics { get; private set; } = new DrMarioStatistics();
-        BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; }  }
-        public bool AllowFieldImageCache { get { return false; } }
-        public DrMarioGameOptions GameOptions { get; } = new DrMarioGameOptions() {AllowWallKicks = false } ;
-        
-        public BlockGroupChooser Chooser  {
-            get {
-                var result = Duomino.Duomino.BagTetrominoChooser();
-                result.ResultAffector = DrMarioNominoTweaker;
-                return result;
-    } }
-        public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
+        public override string GetName()
         {
-            return null;
+            return "Dr.Mario";
         }
-        public Nomino[] GetNominos()
+        public override BlockGroupChooser GetChooser()
         {
-            return new Nomino[] { new Duomino.Duomino() };
-        }
-
-        public LineSeriesBlock.CombiningTypes[] GetValidPillCombiningTypes()
-        {
-            List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Red_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Red);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Blue_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Blue);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Orange_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Orange);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Magenta_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Magenta);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Green_Pill)) buildresult.Add(LineSeriesBlock.CombiningTypes.Green);
-
-            return buildresult.ToArray();
-        }
-
-        public LineSeriesBlock.CombiningTypes[] GetValidVirusCombiningTypes()
-        {
-            List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Red_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Red);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Blue_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Blue);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Orange_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Orange);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Magenta_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Magenta);
-            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Green_Virus)) buildresult.Add(LineSeriesBlock.CombiningTypes.Green);
-
-            return buildresult.ToArray();
+            var result = Duomino.Duomino.BagTetrominoChooser();
+            result.ResultAffector = DrMarioNominoTweaker;
+            return result;
         }
 
         private void DrMarioNominoTweaker(Nomino Source)
@@ -74,21 +43,84 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 if (iterate.Block is LineSeriesBlock lsb)
                 {
-                    lsb.CombiningIndex = TetrisGame.Choose(GetValidPillCombiningTypes());
+                    lsb.CombiningIndex = TetrisGame.Choose(GetValidBlockCombiningTypes());
                 }
             }
-            
-            
+
+
         }
+        public override Nomino[] GetNominos()
+        {
+            return new Nomino[] { new Duomino.Duomino() };
+        }
+        public override IGameCustomizationHandler NewInstance()
+        {
+            return new DrMarioHandler();
+        }
+        public override void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state)
+        {
+            var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
+            pOwner.CurrentState = completionState;
+        }
+    }
+    public abstract class CascadingPopBlockGameHandler<STATT,OPTT>: IGameCustomizationHandler 
+        where STATT:BaseStatistics,new()
+        where OPTT: GameOptions,new()
+    {
+        public String Name { get { return GetName(); } }
+        public abstract String GetName();
+        
+        
+        public STATT Statistics { get; private set; } = new STATT();
+        BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; }  }
+        public bool AllowFieldImageCache { get { return false; } }
+        public OPTT GameOptions { get; } = new OPTT() {AllowWallKicks = false } ;
+
+        public abstract BlockGroupChooser GetChooser();
+        public abstract void HandleLevelComplete(IStateOwner pOwner,GameplayGameState state);
+        
+        public BlockGroupChooser Chooser  {
+            get {
+                return GetChooser();
+    } }
+        public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
+        {
+            return null;
+        }
+        public abstract Nomino[] GetNominos();
+        public LineSeriesBlock.CombiningTypes[] GetValidBlockCombiningTypes()
+        {
+            List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Red_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Red);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Blue_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Blue);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Orange_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Orange);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Magenta_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Magenta);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Green_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Green);
+
+            return buildresult.ToArray();
+        }
+
+        public LineSeriesBlock.CombiningTypes[] GetValidPrimaryCombiningTypes()
+        {
+            List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Red_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Red);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Blue_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Blue);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Orange_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Orange);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Magenta_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Magenta);
+            if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Green_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Green);
+
+            return buildresult.ToArray();
+        }
+
+       
         public IHighScoreList<TetrisHighScoreData> GetHighScores()
         {
             return null;
         }
 
-        public IGameCustomizationHandler NewInstance()
-        {
-            return new DrMarioHandler();
-        }
+        public abstract IGameCustomizationHandler NewInstance();
     
         //finds critical mass excesses starting from the given position.
         //this basically only finds one specific "critical mass"
@@ -289,7 +321,7 @@ namespace BASeTris.GameStates.GameHandlers
             return CreateResult;
         }
         public int Level { get; set; } = 0;
-        public int VirusCount = 0;
+        public int PrimaryBlockCount = 0;
         public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
         {
             if (state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult=0};
@@ -305,7 +337,7 @@ namespace BASeTris.GameStates.GameHandlers
                 var currRow = state.PlayField.Contents[y];
                 for (int x =0;x<state.PlayField.ColCount;x++)
                 {
-                    if(state.PlayField.Contents[y][x] is LineSeriesMasterBlock)
+                    if(state.PlayField.Contents[y][x] is LineSeriesPrimaryBlock)
                     {
                         MasterCount++;
                     }
@@ -321,10 +353,10 @@ namespace BASeTris.GameStates.GameHandlers
 
                 }
             }
-            VirusCount = MasterCount;
+            PrimaryBlockCount = MasterCount;
 
             //if MasterCount is 0 then we completed this level.
-            //if there are no viruses left, this level is now complete. We need a "Level complete" screen state with an overlay- we would switch to that state. It should
+            //if there are no primary blocks left, this level is now complete. We need a "Level complete" screen state with an overlay- we would switch to that state. It should
             //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
             if(MasterCount==0)
             {
@@ -365,8 +397,6 @@ namespace BASeTris.GameStates.GameHandlers
                             Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
                             state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
                         }
-                        
-                        
                         
                     }
                     if (popItem.Owner != null)
@@ -445,12 +475,14 @@ namespace BASeTris.GameStates.GameHandlers
                                         Nomino resurrect = cb.Owner;
                                         resurrect.Controllable = false;
                                         resurrect.FallSpeed = 250;
+                                        resurrect.InitialY = resurrect.Y;
                                         resurrect.LastFall = pOwner.GetElapsedTime();
                                         resurrect.MoveSound = true;
                                         resurrect.PlaceSound = false;
                                         resurrect.NoGhost = true;
                                         ResurrectNominos.Add(resurrect);
                                         AddedBlockAlready.Add(cb);
+                                        }
                                         //state.PlayField.AddBlockGroup(resurrect);
                                     }
                                 }
@@ -462,7 +494,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                         }
 
-                    }
+                    
 
                     if (ResurrectNominos.Any())
                     {
@@ -490,9 +522,10 @@ namespace BASeTris.GameStates.GameHandlers
                     //we need to switch to the level completion state, and from there will need to resume starting with that new level.
                     if (LevelCompleted)
                     {
+                        
                         LevelCompleted = false;
-                        var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
-                        owner.CurrentState = completionState;
+                        HandleLevelComplete(owner,state);
+                        
                     }
                     else
                     {
@@ -600,27 +633,27 @@ namespace BASeTris.GameStates.GameHandlers
         {
             Level++;
             PrepareField(mutate, pOwner);
-            ViriiAppearanceState levelstarter = new ViriiAppearanceState(mutate);
+            PrimaryBlockAppearanceState levelstarter = new PrimaryBlockAppearanceState(mutate);
             return levelstarter;
         }
         [Flags]
         public enum AllowedSpawnsFlags
         {
             Spawn_Invalid = 0,
-            Spawn_Red_Virus = 1,
-            Spawn_Blue_Virus = 2,
-            Spawn_Yellow_Virus = 4,
-            Spawn_Red_Pill = 8,
-            Spawn_Blue_Pill = 16,
-            Spawn_Yellow_Pill = 32,
-            Spawn_Orange_Virus = 64,
-            Spawn_Magenta_Virus = 128,
-            Spawn_Green_Virus = 256,
-            Spawn_Orange_Pill = 512,
-            Spawn_Magenta_Pill = 1024,
-            Spawn_Green_Pill = 2048,
-            Spawn_Standard = Spawn_Red_Virus | Spawn_Blue_Virus | Spawn_Yellow_Virus | Spawn_Red_Pill | Spawn_Blue_Pill | Spawn_Yellow_Pill,
-            Spawn_Alternate = Spawn_Orange_Virus | Spawn_Magenta_Virus | Spawn_Green_Virus | Spawn_Orange_Pill | Spawn_Magenta_Pill | Spawn_Green_Pill,
+            Spawn_Red_Primary = 1,
+            Spawn_Blue_Primary = 2,
+            Spawn_Yellow_Primary = 4,
+            Spawn_Red_Block = 8,
+            Spawn_Blue_Block = 16,
+            Spawn_Yellow_Block = 32,
+            Spawn_Orange_Primary = 64,
+            Spawn_Magenta_Primary = 128,
+            Spawn_Green_Primary = 256,
+            Spawn_Orange_Block = 512,
+            Spawn_Magenta_Block = 1024,
+            Spawn_Green_Block = 2048,
+            Spawn_Standard = Spawn_Red_Primary | Spawn_Blue_Primary | Spawn_Yellow_Primary | Spawn_Red_Block | Spawn_Blue_Block | Spawn_Yellow_Block,
+            Spawn_Alternate = Spawn_Orange_Primary | Spawn_Magenta_Block | Spawn_Green_Block | Spawn_Orange_Block | Spawn_Magenta_Block | Spawn_Green_Block,
             Spawn_Full = Spawn_Standard | Spawn_Alternate
 
         }
@@ -640,17 +673,17 @@ namespace BASeTris.GameStates.GameHandlers
             state.PlayField.Reset();
             
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
-            //virus count is based on out level.
-            int numViruses = (int)((Level * 1.25f) + 4);
-            for(int i=0;i<numViruses;i++)
+            //primary count is based on our level.
+            int numPrimaries = (int)((Level * 1.33f) + 4);
+            for(int i=0;i<numPrimaries;i++)
             {
-                //choose a random virus type.
-                var chosentype = TetrisGame.Choose(GetValidVirusCombiningTypes());
-                LineSeriesMasterBlock lsmb = new LineSeriesMasterBlock() { CombiningIndex = chosentype };
+                //choose a random primary type.
+                var chosentype = TetrisGame.Choose(GetValidPrimaryCombiningTypes());
+                LineSeriesPrimaryBlock lsmb = new LineSeriesPrimaryBlock() { CombiningIndex = chosentype };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, lsmb);
                 state.PlayField.Theme.ApplyTheme(Dummino,this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
-                lsmb.CriticalMass = 4;
+                lsmb.CriticalMass = 4; //TODO: should this be changed?
                 
                 int RandomXPos = TetrisGame.rgen.Next(state.PlayField.ColCount);
                 int RandomYPos = state.PlayField.RowCount - 1 -TetrisGame.rgen.Next(state.PlayField.RowCount / 2);
@@ -662,16 +695,19 @@ namespace BASeTris.GameStates.GameHandlers
                      randomPos = new SKPointI(rndXPos, rndYPos);
                 }
                 state.PlayField.Contents[RandomYPos][RandomXPos] = lsmb;
-                VirusCount++;
+                PrimaryBlockCount++;
 
 
 
             }
-            ViriiAppearanceState appearstate = new ViriiAppearanceState(state);
+            PrimaryBlockAppearanceState appearstate = new PrimaryBlockAppearanceState(state);
             pOwner.CurrentState = appearstate;
 
 
         }
+
+       
+
 
         public IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>()
         {

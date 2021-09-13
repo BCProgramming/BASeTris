@@ -37,7 +37,7 @@ namespace BASeTris.Rendering.Skia
                 usemodulo = MathHelper.mod(usemodulo, Source._RotationImages.Length);
                 if (Source.SpecialImageFunctionSK != null)
                 {
-                    if(Source is LineSeriesMasterBlock)
+                    if(Source is LineSeriesPrimaryBlock)
                     {
                         ;
                     }

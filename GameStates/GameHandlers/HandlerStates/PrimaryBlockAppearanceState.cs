@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.GameHandlers.HandlerStates
 {
-    public class ViriiAppearanceState : GameState,ICompositeState<GameplayGameState>
+    public class PrimaryBlockAppearanceState : GameState,ICompositeState<GameplayGameState>
     {
         private GameplayGameState StandardState = null;
-        Queue<Blocks.LineSeriesMasterBlock> AppearanceBlocks = null;
+        Queue<Blocks.LineSeriesPrimaryBlock> AppearanceBlocks = null;
         uint LastAppearanceTick = 0;
         uint AppearanceTimeDifference = 500; //aiming for 50ms here
-        public ViriiAppearanceState(GameplayGameState startupState)
+        public PrimaryBlockAppearanceState(GameplayGameState startupState)
         {
-            SortedList<Guid, Blocks.LineSeriesMasterBlock> appearanceshuffler = new SortedList<Guid, Blocks.LineSeriesMasterBlock>();
+            SortedList<Guid, Blocks.LineSeriesPrimaryBlock> appearanceshuffler = new SortedList<Guid, Blocks.LineSeriesPrimaryBlock>();
             StandardState = startupState;
-            //set all Viruses to invisible and force a redraw.
+            //set all Primary Blocks to invisible and force a redraw.
 
             var field = StandardState.PlayField.Contents;
             for(int x=0;x<StandardState.PlayField.ColCount;x++)
@@ -25,7 +25,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
                 for(int y=0;y<StandardState.PlayField.RowCount;y++)
                 {
                     var block = field[y][x];
-                    if (block is Blocks.LineSeriesMasterBlock lsmb)
+                    if (block is Blocks.LineSeriesPrimaryBlock lsmb)
                     {
                         lsmb.Visible = false;
                         appearanceshuffler.Add(Guid.NewGuid(), lsmb);
@@ -33,7 +33,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
                 }
 
             }
-            AppearanceBlocks = new Queue<Blocks.LineSeriesMasterBlock>(appearanceshuffler.Values);
+            AppearanceBlocks = new Queue<Blocks.LineSeriesPrimaryBlock>(appearanceshuffler.Values);
             StandardState.PlayField.HasChanged = true; //since we made them all invisible I'd say that counts as a change!
             LastAppearanceTick = TetrisGame.GetTickCount();
 

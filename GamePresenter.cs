@@ -53,7 +53,7 @@ namespace BASeTris
         public DASRepeatHandler RepeatHandler { get; set; } = null;
         public Thread GameThread = null;
         public Thread InputThread = null;
-        public TetrisAI ai { get; set; }
+        public StandardNominoAI ai { get; set; }
 
         public ConcurrentQueue<Action> ProcThreadActions { get; set; } = new ConcurrentQueue<Action>();
         public void EnqueueAction(Action pAction)

@@ -410,7 +410,8 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
                 {typeof(Tetromino_L),'L' },
                 {typeof(Tetromino_J),'J' },
                 {typeof(Tetromino_O),'O' },
-                {typeof(Tetromino_I),'I' }
+                {typeof(Tetromino_I),'I' },
+                {typeof(Tetromino_Y),'Y' }
             };
             if(NominoLookup.ContainsKey(Group.GetType()))
             {

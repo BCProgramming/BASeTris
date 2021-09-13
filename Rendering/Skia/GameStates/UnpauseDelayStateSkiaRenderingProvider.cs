@@ -55,6 +55,8 @@ namespace BASeTris.Rendering.Skia.GameStates
             double Millis = (double)Source.timeremaining.Milliseconds / 1000d; //millis in percent. We will use this to animate the unpause time left.
             Millis = Math.Min(Millis, Source.lastMillis);
             float useSize = (float)(64f * (1 - (Millis)))*(float)pOwner.ScaleFactor;
+            float FullSize = 1.33f*(float)(64f) * (float)pOwner.ScaleFactor;
+            
             var CurrentColor = SKColors.White;
             if(SecondsPaint==null)
             {
@@ -63,9 +65,19 @@ namespace BASeTris.Rendering.Skia.GameStates
             SecondsPaint.TextSize = useSize;
             SKRect MeasureText = new SKRect();
             SecondsPaint.MeasureText(sSecondsLeft, ref MeasureText);
-
+            SKRect SecondBound = new SKRect(Bounds.Width / 2 - FullSize / 2, Bounds.Height / 2 - FullSize / 2, Bounds.Width / 2 - FullSize / 2 + FullSize, Bounds.Height / 2 - FullSize / 2+FullSize);
             SKPoint DrawPosition = new SKPoint(Bounds.Width / 2 - MeasureText.Width / 2, Bounds.Height / 2 + MeasureText.Height / 2);
 
+            //g.DrawOval(SecondBound, new SKPaint() { Color = SKColors.Red, StrokeWidth = 1,Style=SKPaintStyle.Stroke });
+            using (SKPath path = new SKPath())
+            {
+                path.FillType = SKPathFillType.EvenOdd;
+                path.AddArc(SecondBound, 0, (float)(360 * (1 - Millis)));
+                
+                //g.DrawPath(path, new SKPaint() { StrokeWidth = 0.01f, Color = SKColors.White, Style = SKPaintStyle.Stroke });
+            }
+            //this arc drawing doesn't work, for some reason.
+            //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), false, new SKPaint() { StrokeWidth = 0.05f, Color = SKColors.Yellow, Style = SKPaintStyle.Stroke, IsStroke = true,StrokeCap = SKStrokeCap.Square,StrokeMiter = 0 });
             g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
             Source.lastMillis = Millis;
         }

@@ -85,4 +85,40 @@ namespace BASeTris.Tetrominoes
             RecalcExtents();
         }
     }
+
+    public class Tetromino_Y : Tetromino
+    {
+        public Tetromino_Y()
+        {
+            base.BlockData = GetNominoEntries(new Point[] { TetrominoData.Tetromino_Y_1[0], TetrominoData.Tetromino_Y_2[0], TetrominoData.Tetromino_Y_3[0], TetrominoData.Tetromino_Y_4[0] }, new Size(2, 2)).ToList();
+            this.SpecialName = "Y Tetromino";
+            base.SetBlockOwner();
+            RecalcExtents();
+        }
+    }
+
+
+    public class Tetromino_G : Tetromino
+    {
+        public Tetromino_G()
+        {
+            base.BlockData = GetNominoEntries(new Point[] { TetrominoData.Tetromino_G_1[0], TetrominoData.Tetromino_G_2[0], TetrominoData.Tetromino_G_3[0], TetrominoData.Tetromino_G_4[0] }, new Size(3, 3)).ToList();
+            this.SpecialName = "G Tetromino";
+            base.SetBlockOwner();
+            RecalcExtents();
+        }
+    }
+
+    public class Tetromino_F : Tetromino
+    {
+        public Tetromino_F()
+        {
+            base.BlockData = GetNominoEntries(new Point[] { TetrominoData.Tetromino_F_1[0], TetrominoData.Tetromino_F_2[0], TetrominoData.Tetromino_F_3[0], TetrominoData.Tetromino_F_4[0] }, new Size(3, 3)).ToList();
+            this.SpecialName = "F Tetromino";
+            base.SetBlockOwner();
+            RecalcExtents();
+        }
+    }
+
+
 }

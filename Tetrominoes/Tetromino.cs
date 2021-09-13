@@ -18,7 +18,8 @@ namespace BASeTris.Tetrominoes
                 () => new Tetromino_L(),
                 () => new Tetromino_O(),
                 () => new Tetromino_S(),
-                () => new Tetromino_T()
+                () => new Tetromino_T(),
+                
             };
 
         private static float[] StandardTetrominoWeights = new float[]
@@ -31,6 +32,37 @@ namespace BASeTris.Tetrominoes
             1f,
             1f
         };
+
+        internal static Func<Nomino>[] Tetris2TetrominoFunctions =
+           new Func<Nomino>[]
+           {
+                () => new Tetromino_Z(),
+                () => new Tetromino_I(),
+                () => new Tetromino_J(),
+                () => new Tetromino_L(),
+                () => new Tetromino_O(),
+                () => new Tetromino_S(),
+                () => new Tetromino_T(),
+                () => new Tetromino_Y(),
+                () => new Tetromino_G(),
+                () => new Tetromino_F()
+
+           };
+
+        private static float[] Tetris2TetrominoWeights = new float[]
+        {
+            1f,
+            3f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f
+        };
+        //TODO: make these able to work with the tetris two sets. Probably (ideally) a standard one for each that allows for an arbitrary Func<Nomino>[].
 
         public static Choosers.BlockGroupChooser NESTetrominoChooser()
         {

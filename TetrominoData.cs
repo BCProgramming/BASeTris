@@ -198,5 +198,83 @@ namespace BASeTris
         };
 
         #endregion
+
+        //added tetrominoes for Tetris 2. y and g (better named as j, but that is already used...)
+        #region Y Tetromino Data
+
+        public static Point[] Tetromino_Y_1 = new Point[]
+        {
+            new Point(0, 1), new Point(1, 0), new Point(2, 1), new Point(1, 2)
+        };
+
+        public static Point[] Tetromino_Y_2 = new Point[]
+        {
+            new Point(1, 1), new Point(1, 1), new Point(1, 1), new Point(1, 1)
+        };
+
+        public static Point[] Tetromino_Y_3 = new Point[]
+        {
+            new Point(2, 0), new Point(2, 2), new Point(0, 2), new Point(0, 0)
+        };
+
+        public static Point[] Tetromino_Y_4 = new Point[]
+        {
+            new Point(2, 2), new Point(0, 2), new Point(0, 0), new Point(2, 0)
+        };
+
+        #endregion
+
+
+        #region g Tetromino Data
+
+        public static Point[] Tetromino_G_1 = new Point[]
+        {
+            new Point(0, 1), new Point(1, 0), new Point(3, 1), new Point(2, 3)
+        };
+
+        public static Point[] Tetromino_G_2 = new Point[]
+        {
+            new Point(1, 1), new Point(1, 1), new Point(2, 1), new Point(2, 2)
+        };
+
+        public static Point[] Tetromino_G_3 = new Point[]
+        {
+            new Point(2, 1), new Point(1, 2), new Point(1, 1), new Point(2, 1)
+        };
+
+        public static Point[] Tetromino_G_4 = new Point[]
+        {
+            new Point(3, 0), new Point(2, 3), new Point(0, 2), new Point(1, 0)
+        };
+
+        #endregion
+
+        #region f Tetromino Data
+
+        public static Point[] Tetromino_F_1 = new Point[]
+        {
+            new Point(0, 1), new Point(2, 0), new Point(3, 2), new Point(1, 3)
+        };
+
+        public static Point[] Tetromino_F_2 = new Point[]
+        {
+            new Point(1, 1), new Point(2, 1), new Point(2, 2), new Point(1, 2)
+        };
+
+        public static Point[] Tetromino_F_3 = new Point[]
+        {
+            new Point(2, 1), new Point(2, 2), new Point(1, 2), new Point(1, 1)
+        };
+
+        public static Point[] Tetromino_F_4 = new Point[]
+        {
+            new Point(3, 2), new Point(1, 3), new Point(0, 1), new Point(2, 0)
+        };
+
+        #endregion
+
+
+
+
     }
 }

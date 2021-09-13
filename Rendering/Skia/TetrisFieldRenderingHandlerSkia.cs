@@ -76,7 +76,7 @@ namespace BASeTris.Rendering.Skia
                     bool isAnim = false;
                     if (TetBlock != null)
                     {
-                        if (TetBlock is LineSeriesBlock && !(TetBlock is LineSeriesMasterBlock)) ;
+                        if (TetBlock is LineSeriesBlock && !(TetBlock is LineSeriesPrimaryBlock)) ;
                         isAnim = Source.Theme.IsAnimated(TetBlock);
                         if (isAnim == animated)
                         {

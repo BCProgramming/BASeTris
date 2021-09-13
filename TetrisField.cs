@@ -323,7 +323,7 @@ namespace BASeTris
                             int ColPos = groupblock.X + bg.X;
                             //Investigate: is this resetting the Rotation?
                             //is it losing it's owner or something? Dr.Mario theme gets confused when setting a block to the field.
-                            
+                           
                             if (FieldContents[RowPos][ColPos] == null)
                             {
                                 FieldContents[RowPos][ColPos] = groupblock.Block;
@@ -331,12 +331,8 @@ namespace BASeTris
                             }
                             else
                             {
-                                //let's hope this is a falling block...
-                                //go up until we can apply the block.
+                                
 
-
-
-                                ;
                             }
                         }
                     

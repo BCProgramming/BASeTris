@@ -31,6 +31,7 @@ namespace BASeTris
         public bool PlaceSound { get; set; } = true;
         public bool MoveSound { get; set; } = false;
         public int FallSpeed { get; set; } = 250; //Higher is slower, number of ms between movements.
+        public int InitialY { get; set; } = 0;
         public int X { get; set; }
         private int _Y = 0;
         public int Y { get { return _Y; } private set{ _Y = value; } }
@@ -290,7 +291,8 @@ namespace BASeTris
             foreach (Point BlockPos in Source)
             {
                 NominoBlock CreateBlock = BuildBlock(index);
-                yield return new NominoElement(BlockPos, AreaSize, CreateBlock);
+                var ne = new NominoElement(BlockPos, AreaSize, CreateBlock);
+                yield return ne;
                 index++;
             }
         }

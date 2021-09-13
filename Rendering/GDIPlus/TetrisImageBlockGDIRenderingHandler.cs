@@ -41,7 +41,7 @@ namespace BASeTris.Rendering.GDIPlus
 
                 if (Source.SpecialImageFunctionSK != null)
                 {
-                    if (Source is LineSeriesMasterBlock)
+                    if (Source is LineSeriesPrimaryBlock)
                     {
                         ;
                     }

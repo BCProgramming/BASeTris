@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Tetrominoes;
 using SkiaSharp;
 
 namespace BASeTris.Theme.Block
@@ -24,7 +25,7 @@ namespace BASeTris.Theme.Block
 
 
     [HandlerTheme(typeof(DrMarioHandler))]
-    //DrMarioTheme will need to specify the DrMario customization Handler as it's valid Theme once ready.
+    //CascadingBlockTheme will need to specify the DrMario customization Handler as it's valid Theme once ready.
     //this one doesn't care about the game level- it has two block types- the pills, and the virii.
     //of those we've got 3 colors. We could add more, I suppose, but Dr. Mario has three so let's keep things a bit simpler.
     //ideally, we'd have some more generic way of defining different colours, rather than having to define all the different block types for each colour
@@ -38,7 +39,7 @@ namespace BASeTris.Theme.Block
         }
         public bool UseEnhancedImages = true;
         public static bool AllowAdvancedRotations = true;
-        public override String Name { get { return "NES"; } }
+        public override String Name { get { return "Cascading Style"; } }
         public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
 
@@ -54,8 +55,22 @@ namespace BASeTris.Theme.Block
                 {
                     return "1:" + sb1.CombiningIndex + ";2:" + sb2.CombiningIndex;
                 }
-
-
+            }
+            else if(Group is Tetromino)
+            {
+                //means we are servicing a Tetris 2 Handler.
+                //Since tetrominoes use 4 blocks, we've got our work cut out for us in terms of
+                //creating the correct keys. means we have a lot of possibilities to cache!
+                StringBuilder sbKey = new StringBuilder();
+                int index = 0;
+                foreach(var block in Group)
+                {
+                    if (block.Block is LineSeriesBlock b)
+                    {
+                        sbKey.Append($"{index++}:{b.CombiningIndex};");
+                    }
+                }
+                return sbKey.ToString();
             }
 
             return base.GetNominoKey(Group, GameHandler, Field);
@@ -64,7 +79,7 @@ namespace BASeTris.Theme.Block
         }
         public override BlockFlags GetBlockFlags(Nomino Group, NominoElement element, TetrisField field)
         {
-            if (element.Block is LineSeriesBlock lsb && lsb is LineSeriesMasterBlock)
+            if (element.Block is LineSeriesBlock lsb && lsb is LineSeriesPrimaryBlock)
             {
                 return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Static;
             }
@@ -75,11 +90,12 @@ namespace BASeTris.Theme.Block
         }
         private static BCT[][] GetBCTBitmap(String ImageKey)
         {
-            if (ImageKey.Contains("single")) {; }
-            
-            SKImage sourceBitmap = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(ImageKey));
-            return GetPixelsFromSKImage(sourceBitmap, ColorMapLookupFunc);
-
+            return GetBCTBitmap(ImageKey, ColorMapLookupFunc);
+        }
+        
+        private static BCT ColorMapLookupFunc(SKColor Src)
+        {
+            if (bitmappixels_enhanced.ContainsKey(Src)) return bitmappixels_enhanced[Src]; else return BCT.Transparent;
         }
         private static readonly Dictionary<SKColor, BCT> bitmappixels = new Dictionary<SKColor, BCT>()
             {
@@ -112,17 +128,11 @@ namespace BASeTris.Theme.Block
 
        
 
-        private static BCT ColorMapLookupFunc(SKColor Src)
-        {
-            
-            if (bitmappixels_enhanced.ContainsKey(Src)) return bitmappixels_enhanced[Src]; else return BCT.Transparent;
-        }
+
         private static bool ThemeDataPrepared = false;
         private static void PrepareThemeData()
         {
             if (ThemeDataPrepared) return;
-            //TODO: ideally we'd have more representations so that the "shine" on top of pills doesn't rotate. eg representations of all four possible orientations for each side of a Duomino.
-            // ideally we'd have left, right, top, bottom to represent each, instead of rotating left and right. 
             Pill_Left = GetBCTBitmap("pill_left_enhanced");
             Pill_Single = GetBCTBitmap("pill_single_enhanced");
             Pill_Right = GetBCTBitmap("pill_right_enhanced");
@@ -141,6 +151,8 @@ namespace BASeTris.Theme.Block
             Orange_Virii_2 = GetBCTBitmap("orange_virus_2");
             Magenta_Virii_1 = GetBCTBitmap("magenta_virus_1");
             Magenta_Virii_2 = GetBCTBitmap("magenta_virus_2");
+
+
             BitmapIndex = new Dictionary<BlockTypes, BCT[][]>()
         {
             {BlockTypes.Pill_Left_Yellow,Pill_Left },
@@ -210,6 +222,11 @@ namespace BASeTris.Theme.Block
         public DrMarioTheme():this(InitializationFlags.Flags_None)
         {
         }
+
+        static BCT[][] Tetris2NormalBlock;
+        static BCT[][] Tetris2FixedBlock;
+        static BCT[][] Tetris2ShinyBlock;
+
         static BCT[][] Pill_Left; /*= new BCT[][]
                     {
                 new BCT[]{BCT.Transparent,BCT.Transparent, BCT.Black , BCT.Black, BCT.Black, BCT.Black, BCT.Black,BCT.Black,BCT.Black},
@@ -390,7 +407,7 @@ namespace BASeTris.Theme.Block
         //Virii are animated, usually. We can deal with that later by implementing additional block types, with the chosen block type depending on the current timer to return one or another animation bitmap frame.
         //but, we'll deal with that as it comes up.
 
-        Dictionary<BCT, SKColor> YellowColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> YellowColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -400,7 +417,7 @@ namespace BASeTris.Theme.Block
 
         };
 
-        Dictionary<BCT, SKColor> EnhancedYellowColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> EnhancedYellowColourSet = new Dictionary<BCT, SKColor>()
             {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -422,7 +439,7 @@ namespace BASeTris.Theme.Block
             };
 
 
-        Dictionary<BCT, SKColor> RedColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> RedColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -442,7 +459,7 @@ namespace BASeTris.Theme.Block
         255,103,103
         88,88,88
         1,1,1*/
-        Dictionary<BCT,SKColor> EnhancedRedColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT,SKColor> EnhancedRedColourSet = new Dictionary<BCT, SKColor>()
             {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -463,7 +480,7 @@ namespace BASeTris.Theme.Block
 
             };
 
-        Dictionary<BCT, SKColor> BlueColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> BlueColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -472,7 +489,7 @@ namespace BASeTris.Theme.Block
             {BCT.Accent2,SKColors.Red }
 
         };
-        Dictionary<BCT, SKColor> EnhancedBlueColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> EnhancedBlueColourSet = new Dictionary<BCT, SKColor>()
             {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -493,7 +510,7 @@ namespace BASeTris.Theme.Block
 
             };
         //weird idea, Green, Orange, and Magenta colours.
-        Dictionary<BCT, SKColor> GreenColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> GreenColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -503,7 +520,7 @@ namespace BASeTris.Theme.Block
 
         };
 
-        Dictionary<BCT, SKColor> EnhancedGreenColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> EnhancedGreenColourSet = new Dictionary<BCT, SKColor>()
             {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -524,7 +541,7 @@ namespace BASeTris.Theme.Block
 
             };
 
-        Dictionary<BCT, SKColor> OrangeColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> OrangeColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -534,7 +551,7 @@ namespace BASeTris.Theme.Block
 
         };
 
-        Dictionary<BCT, SKColor> EnhancedOrangeColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> EnhancedOrangeColourSet = new Dictionary<BCT, SKColor>()
             {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -555,7 +572,7 @@ namespace BASeTris.Theme.Block
 
             };
 
-        Dictionary<BCT, SKColor> MagentaColourSet = new Dictionary<BCT, SKColor>()
+        static Dictionary<BCT, SKColor> MagentaColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -566,7 +583,7 @@ namespace BASeTris.Theme.Block
 
         };
 
-        Dictionary<BCT, SKColor> EnhancedMagentaColourSet = new Dictionary<BCT, SKColor>()
+        public static Dictionary<BCT, SKColor> EnhancedMagentaColourSet = new Dictionary<BCT, SKColor>()
         {
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
@@ -746,6 +763,9 @@ namespace BASeTris.Theme.Block
         protected override SKImage[] ApplyFunc_Custom(TetrisField field, Nomino Group, NominoBlock Target,BlockTypes chosentype)
         {
             //I think this messes up when applying to the field because it changes the blocktype being used based on the rotation, which gives a different sequence of blocks.
+
+
+
             var getElement = Group.FindEntry(Target);
             if(Target is LineSeriesBlock lsb)
             {
@@ -785,7 +805,7 @@ namespace BASeTris.Theme.Block
                     //lsb._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(field, Group, getElement, useType)) };
                     return lsb._RotationImagesSK;
                 }
-                else if(!(lsb is LineSeriesMasterBlock))
+                else if(!(lsb is LineSeriesPrimaryBlock))
                 {
                     BlockTypes[] useType = GetRotationBlockTypes(chosentype);
                     lsb._RotationImagesSK = (from s in useType select SKImage.FromBitmap(GetMappedImageSkia(field, Group, getElement, s))).ToArray();
@@ -855,13 +875,13 @@ namespace BASeTris.Theme.Block
             {
                 if(lsb.Popping)
                 {
-                    if(element.Block is LineSeriesMasterBlock lsm2)
+                    if(element.Block is LineSeriesPrimaryBlock lsm2)
                     {
                         ;
                     }
                     return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(PopTypes_1[lsb.CombiningIndex]);
                 }
-                if (element.Block is LineSeriesMasterBlock lsm)
+                if (element.Block is LineSeriesPrimaryBlock lsm)
                 {
                     if (lsb.Popping)
                     {
@@ -971,7 +991,7 @@ namespace BASeTris.Theme.Block
         }
         protected override BlockFlags GetBlockFlags(NominoElement testvalue)
         {
-            if(testvalue.Block is LineSeriesMasterBlock)
+            if(testvalue.Block is LineSeriesPrimaryBlock)
             {
                 return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.CustomSelector;
             }
@@ -982,9 +1002,13 @@ namespace BASeTris.Theme.Block
             }
             
         }
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        {
+            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_3", 0.5f], Color.Transparent);
+        }
         public override bool IsAnimated(NominoBlock block)
         {
-            return (block is LineSeriesMasterBlock);
+            return (block is LineSeriesPrimaryBlock);
         }
         public override BlockTypes[] PossibleBlockTypes()
         {

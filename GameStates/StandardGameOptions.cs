@@ -39,7 +39,7 @@ namespace BASeTris.GameStates
         }
         public GameOptions(XElement src,Object Data)
         {
-
+            
         }
 
         public virtual XElement GetXmlData(string pNodeName, object PersistenceData)
@@ -73,6 +73,14 @@ namespace BASeTris.GameStates
             return base.GetXmlData(pNodeName, PersistenceData);
         }
     }
+    public class Tetris2GameOptions :GameOptions
+    {
+        public override XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            return base.GetXmlData(pNodeName, PersistenceData);
+        }
+    }
+
 
     public class OptionsManager
     {

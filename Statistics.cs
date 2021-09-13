@@ -74,11 +74,15 @@ namespace BASeTris
         {
             var stats = base.GetDisplayStatistics(pOwner, Source);
             stats.Add("Level", (Source.GameHandler as DrMarioHandler).Level.ToString());
-            stats.Add("Virus", (Source.GameHandler as DrMarioHandler).VirusCount.ToString());
+            stats.Add("Virus", (Source.GameHandler as DrMarioHandler).PrimaryBlockCount.ToString());
             //we want to show a VIRUS: count too.
             //implement that into the handler first for us to access here!.
             return stats;
         }
+    }
+    public class Tetris2Statistics :BaseStatistics
+    {
+
     }
     public class TetrisStatistics:BaseStatistics
     {
@@ -206,9 +210,10 @@ namespace BASeTris
 
      
 
-        public void AddLineCount(Type TetronimoType, int AddLines)
+        public void AddLineCount(Type TetrominoType, int AddLines)
         {
-            LineCounts[TetronimoType] += AddLines;
+            if (!LineCounts.ContainsKey(TetrominoType)) LineCounts.Add(TetrominoType, 0);
+            LineCounts[TetrominoType] += AddLines;
         }
 
         private Dictionary<Type, int> LineCounts =

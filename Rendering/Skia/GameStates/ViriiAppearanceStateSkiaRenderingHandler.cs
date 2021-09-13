@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
-    [RenderingHandler(typeof(ViriiAppearanceState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class ViriiAppearanceStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, ViriiAppearanceState, GameStateSkiaDrawParameters>
+    [RenderingHandler(typeof(PrimaryBlockAppearanceState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class PrimaryBlockAppearanceStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, PrimaryBlockAppearanceState, GameStateSkiaDrawParameters>
     {
-        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, ViriiAppearanceState Source, GameStateSkiaDrawParameters Element)
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, PrimaryBlockAppearanceState Source, GameStateSkiaDrawParameters Element)
         {
             SKCanvas g = pRenderTarget;
             var Bounds = Element.Bounds;
             RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.GetComposite(), Element);
         }
 
-        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, ViriiAppearanceState Source, GameStateSkiaDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, PrimaryBlockAppearanceState Source, GameStateSkiaDrawParameters Element)
         {
             RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source.GetComposite(), Element);
         }

@@ -475,7 +475,7 @@ namespace BASeTris
             aIToolStripMenuItem.Checked = !aIToolStripMenuItem.Checked;
             if (_Present.ai == null)
             {
-                _Present.ai = new TetrisAI(this);
+                _Present.ai = new StandardNominoAI(this);
             }
             else
             {

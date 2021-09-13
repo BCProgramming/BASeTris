@@ -14,9 +14,14 @@ using System.Reflection;
 namespace BASeTris.AI
 {
     //AI experiments. highly ungood implementation IMO.
-    public class TetrisAI : BaseAI
+    //Main issue with this AI is that it will only evaluate possibilities involving moving a block, rotating it, and dropping it. This leaves out for example wall-kicks and in the case
+    //of cascading styles sliding the blockgroup underneath existing blocks.
+    //strictly speaking such capabilities are not outside the purview of the underlying infrastructure, but we'd need
+    //a way to figure out those possibilities and how to properly encode them- technically we could do it with down keys, but the fallspeed
+    //could mess t hat up- press down X times and who knows if an 'auto-fall' had been triggered too, which would mess it up.
+    public class StandardNominoAI : BaseAI
     {
-        public TetrisAI(IStateOwner pOwner) : base(pOwner)
+        public StandardNominoAI(IStateOwner pOwner) : base(pOwner)
         {
         }
 
@@ -209,7 +214,7 @@ namespace BASeTris.AI
         {
             RowCount = InitialState.GetUpperBound(0);
             ColCount = InitialState[0].GetUpperBound(0);
-            _BoardState = TetrisAI.DuplicateField(InitialState);
+            _BoardState = StandardNominoAI.DuplicateField(InitialState);
             _SourceGroup = new Nomino(pGroup);
             XOffset = pXOffset;
             RotationCount = pRotationCount;

@@ -39,7 +39,7 @@ namespace BASeTris.Choosers.AIChoosers
 
             foreach (Nomino b in availablegroups)
             {
-                StateEvaluation.Add(b, TetrisAI.GetPossibleResults(CurrentState, b,AIRules));
+                StateEvaluation.Add(b, StandardNominoAI.GetPossibleResults(CurrentState, b,AIRules));
             }
 
             Dictionary<Nomino, double> FinalScores = new Dictionary<Nomino, double>();

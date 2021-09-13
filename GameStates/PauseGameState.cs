@@ -60,7 +60,7 @@ namespace BASeTris.GameStates
         public GameState PauseGamePlayerState { get; set; }
         //public GamePresenter PauseGamePresenter { get; set; }
       
-        public TetrisAI PausePlayerAI = null;
+        public StandardNominoAI PausePlayerAI = null;
 
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
 
@@ -82,7 +82,7 @@ namespace BASeTris.GameStates
             PauseGamePlayerState = new GameplayGameState(pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman),null);
             (PauseGamePlayerState as GameplayGameState).Flags = GameplayGameState.GameplayStateFlags.Paused;
             //PauseGamePresenter = new GamePresenter(this);
-            PausePlayerAI = new TetrisAI(this);
+            PausePlayerAI = new StandardNominoAI(this);
             PausePlayerAI.ScoringRules.StupidFactor = 0.75f;
             //PausePlayerAI.ScoringRules.Moronic = true;
             
