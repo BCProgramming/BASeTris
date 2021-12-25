@@ -27,6 +27,7 @@ namespace BASeTris
         public String MusicOption { get; set; } = "<RANDOM>";
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
+            
             return new XElement
             (pNodeName,
                 new XAttribute("Music", MusicVolume),
@@ -60,6 +61,7 @@ namespace BASeTris
 
         public StandardSettings(XElement Source)
         {
+            
             InitFromNode(Source);
         }
         public void Save()
@@ -79,6 +81,7 @@ namespace BASeTris
         }
         private void InitFromNode(XElement Node)
         {
+            
             MusicVolume = Node.GetAttributeFloat("Music", 0.7f);
             EffectVolume = Node.GetAttributeFloat("Effects", 1.0f);
             DisplayScaleFactor = Node.GetAttributeFloat("DisplayScaleFactor", 1.6f);

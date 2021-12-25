@@ -339,44 +339,47 @@ namespace BASeTris.GameStates
        
         private void HandleActiveGroups(IStateOwner pOwner,bool ForceFall = false)
         {
-        reprocess:
-            List<Nomino> HandledGroups = new List<Nomino>();
-            if(PlayField.BlockGroups.Count > 1)
+            bool reprocess = true;
+            while (reprocess)
             {
-                ;
-            }
-            var AnyMoved = false;
-            
+                reprocess = false;
+                List<Nomino> HandledGroups = new List<Nomino>();
 
+                var AnyMoved = false;
+
+                //go through each active block group, starting from the lowest to the highest.
                 foreach (var iterate in from abg in PlayField.BlockGroups orderby abg.Max((i) => i.Y) ascending select abg)
-            {
-                if (iterate.Count() == 0) continue;
-                if (ForceFall || (pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
                 {
-                    if (HandleGroupOperation(pOwner, iterate))
+                    //if this blockgroup is empty (somehow) we don't need to waste time with the rest of it.
+                    if (iterate.Count() == 0) continue;
+                    //if forcing a fall (down key was pressed for example) Or if we need to make it fall naturally because the appropriate fall speed elapsed, do so.
+                    if (ForceFall || (pOwner.GetElapsedTime() - iterate.LastFall).TotalMilliseconds > iterate.FallSpeed)
                     {
-                        if (!SuspendFieldSet)
+                        if (HandleGroupOperation(pOwner, iterate)==GroupOperationResult.Operation_Success)
                         {
-                            GameHandler.ProcessFieldChange(this, pOwner, iterate);
-                            //ProcessFieldChangeWithScore(pOwner, iterate);
-                            HandledGroups.Add(iterate);
-                            goto reprocess;
+                            if (!SuspendFieldSet)
+                            {
+                                GameHandler.ProcessFieldChange(this, pOwner, iterate);
+                                HandledGroups.Add(iterate);
+                                reprocess = true;
+                                continue;
+                            }
                         }
-                    }
-                    else 
-                    {
-                        AnyMoved = true;
+                        else
+                        {
+                            AnyMoved = true;
 
-                        if(iterate.MoveSound && !SuspendFieldSet)
-                        {
-                            //Make a movement sound as we fall.
-                            Sounds.PlaySound(pOwner.AudioThemeMan.BlockFalling.Key);
+                            if (iterate.MoveSound && !SuspendFieldSet)
+                            {
+                                //Make a movement sound as we fall.
+                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockFalling.Key);
+                            }
+                            iterate.LastFall = pOwner.GetElapsedTime();
                         }
-                        iterate.LastFall = pOwner.GetElapsedTime();
                     }
                 }
+                if (SuspendFieldSet && !AnyMoved) SuspendFieldSet = false; //all blocks fell...
             }
-            if (SuspendFieldSet && !AnyMoved) SuspendFieldSet = false; //all blocks fell...
         }
         public override void GameProc(IStateOwner pOwner)
         {
@@ -514,6 +517,11 @@ namespace BASeTris.GameStates
         public bool NoTetrominoSpawn { get; set; } = false;
         protected virtual void SpawnNewTetromino(IStateOwner pOwner)
         {
+            //TODO (Possibly)- could we animate the next nomino in about 250ms from the position it is in in the "next" circle group, to above the playfield? 
+            //Maybe we can implement that as part of the drawing code instead? it can record when the last nomino dropped and use that as a basis for
+            //tweening between the "last" position of the next nomino and the middle top of the playfield.
+            
+
             if (NoTetrominoSpawn) return;
             BlockHold = false;
             if (NextBlocks.Count == 0)
@@ -622,7 +630,7 @@ namespace BASeTris.GameStates
         }
 
      
-
+        [Obsolete]
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //throw new NotImplementedException();
@@ -960,11 +968,15 @@ namespace BASeTris.GameStates
             }
         }
         bool BlockHold = false;
-        
-        private bool HandleGroupOperation(IStateOwner pOwner,Nomino activeItem)
+        public enum GroupOperationResult
+        {
+            Operation_Success,
+            Operation_Error
+        }
+        private GroupOperationResult HandleGroupOperation(IStateOwner pOwner,Nomino activeItem)
         {
 
-            if (activeItem.HandleBlockOperation(pOwner)) return true;
+            if (activeItem.HandleBlockOperation(pOwner)) return GroupOperationResult.Operation_Success;
             var fitresult = PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1, false);
             if (fitresult == TetrisField.CanFitResultConstants.CanFit)
             {
@@ -993,13 +1005,13 @@ namespace BASeTris.GameStates
                         GameStats.AddScore(25 - activeItem.Y);
                         if (activeItem.PlaceSound)
                             Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
-                        return true;
+                        return GroupOperationResult.Operation_Success;
                     }
                 }
             }
             
 
-            return false;
+            return GroupOperationResult.Operation_Error;
         }
     }
 }

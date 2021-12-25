@@ -246,7 +246,7 @@
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\ViriiAppearanceStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\PrimaryBlockAppearanceStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
     <Compile Include="Rendering\Skia\ParticleRenderingSkiaHandler.cs" />
     <Compile Include="Rendering\Skia\SkiaExtensions.cs" />

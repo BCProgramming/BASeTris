@@ -277,47 +277,6 @@ namespace BASeTris.Rendering.Skia.GameStates
                     }
                     else
                     {
-#if false
-                        Type[] useTypes = new Type[] { typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z) };
-                        int[] PieceCounts = null;
-
-                        if (useStats is TetrisStatistics ts)
-                        {
-                            PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
-                        }
-                        else
-                        {
-                            PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
-                        }
-                        float StartYPos = Bounds.Top + (int)(140 * Factor);
-                        float useXPos = Bounds.Left + (int)(30 * Factor);
-                        //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
-                        for (int i = 0; i < useTypes.Length; i++)
-                        {
-                            if (Source.GameHandler is StandardTetrisHandler)
-                            {
-                                BlackBrush.TextSize = DesiredFontSize;
-                                WhiteBrush.TextSize = DesiredFontSize;
-                                SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
-                                
-                                String StatText = "" + PieceCounts[i];
-                                SKRect StatTextSize = new SKRect();
-                                BlackBrush.MeasureText(StatText, ref StatTextSize);
-                                SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor), BaseCoordinate.Y + StatTextSize.Height*2);
-                                //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                                SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
-                                PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
-                                SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width * 1.5f, ImagePos.Y + TetrominoImage.Height * 1.5f);
-
-                                g.DrawBitmap(TetrominoImage, DrawRect, null);
-
-                                TetrisGame.DrawTextSK(g, StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, Color.White.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
-                                TetrisGame.DrawTextSK(g, StatText, TextPos, standardFont, Color.Black.ToSKColor(), DesiredFontSize, pOwner.ScaleFactor);
-                            }
-                            //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
-                            //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);
-                        }
-#endif
                     }
                     SKPoint NextDrawPosition = new SKPoint(Bounds.Left + (int)(40f * Factor), Bounds.Top + (int)(420 * Factor));
                     Size NextSize = new Size((int)(200f * Factor), (int)(200f * Factor));
@@ -361,11 +320,13 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                         for (int i = NextTetrominoes.Length - 1; i > -1; i--)
                         {
-                            
-                            
-                            var AngleAdd = Math.Sin(((double)(DateTime.Now.Ticks+(250000*i)) / 5000000)) * 10;
+
+                            var baseval = ((double)(DateTime.Now.Ticks + (250000 * i)) / 5000000);
+                            //var AngleAdd = Math.Sin(baseval) * 10; //old approach.
+                            var AngleAdd =(Math.Sin(baseval)*Math.Cos(baseval*2)) * 7; //new approach, tries to be a little bit different...
+
                             //var AngleAdd = Math.Sin(((double)DateTime.Now.Millisecond / 166)) * 15;
-                            
+
 
                             double StartAngle = Math.PI;
                             double AngleIncrementSize = (Math.PI * 1.8) / (double)NextTetrominoes.Length;

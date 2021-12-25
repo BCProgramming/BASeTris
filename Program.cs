@@ -71,7 +71,12 @@ namespace BASeTris
         {
             return DITypes[typeof(IGameCustomizationHandler)].ManagedTypes;
         }
-
+        const double Phi = 1.618033988749895;
+        const double phi = -1 /Phi;
+        public static double Fibonacci(int n)
+        {
+            return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5),2);
+        }
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
