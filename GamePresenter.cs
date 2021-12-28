@@ -162,7 +162,7 @@ namespace BASeTris
                     CIS.CheckState();
                 }
             }
-            catch(ThreadAbortException tae)
+            catch(ThreadAbortException)
             {
                 return;
             }

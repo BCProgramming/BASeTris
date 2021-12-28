@@ -178,7 +178,6 @@ namespace BASeTris.Rendering.Skia.GameStates
                     double Factor = Bounds.Height / 644d;
                     var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
                     float DesiredFontSize = (float)(DesiredFontPixelHeight * pOwner.ScaleFactor);
-                    SKPaint skp;
                     SKTypeface standardFont = TetrisGame.RetroFontSK;
                     //Font standardFont = new Font(TetrisGame.RetroFont, DesiredFontPixelHeight, FontStyle.Bold, GraphicsUnit.Pixel);
 

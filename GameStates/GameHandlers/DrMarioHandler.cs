@@ -131,7 +131,6 @@ namespace BASeTris.GameStates.GameHandlers
             if (OurPos == null) return new HashSet<Point>();
             else
             {
-               int CurrentMass = 0;
                 int FirstCol = StartPosition.X;
                //first, we look to the left until we no longer find a matching block.
 
@@ -189,7 +188,6 @@ namespace BASeTris.GameStates.GameHandlers
             if (OurPos == null) return new HashSet<Point>();
             else
             {
-                int CurrentMass = 0;
                 int FirstRow = StartPosition.Y;
                 //first, we look up until we no longer find a matching block.
 
