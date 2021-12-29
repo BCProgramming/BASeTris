@@ -17,7 +17,7 @@ namespace BASeTris.Theme.Block
     /// T: Type for representing each Pixel
     /// K: Type for representing each Block.
     /// </summary>
-    public abstract class CustomPixelTheme<PixelEnum, BlockEnum> : TetrominoTheme
+    public abstract class CustomPixelTheme<PixelEnum, BlockEnum> : NominoTheme
     {
         public class BlockTypeReturnData
         {
@@ -224,7 +224,7 @@ namespace BASeTris.Theme.Block
                     if (flagvalues==BlockFlags.Rotatable)
                     {
                         
-                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, iterate,chosenType.BlockType));
+                        sbc._RotationImagesSK = NominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group, iterate,chosenType.BlockType));
                     }
                     else if (flagvalues == BlockFlags.Static)
                     {
@@ -251,7 +251,7 @@ namespace BASeTris.Theme.Block
                     var Flags = GetBlockFlags(iterate);
                     if(Flags == BlockFlags.Rotatable)
                     {
-                        sbc._RotationImagesSK = TetrominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group,iterate, chosenType));
+                        sbc._RotationImagesSK = NominoTheme.GetImageRotations(GetMappedImageSkia(Field, Group,iterate, chosenType));
                     }
                     else if (Flags== BlockFlags.Static) {
                         sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetMappedImageSkia(Field, Group, iterate,chosenType)) };

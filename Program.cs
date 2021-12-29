@@ -33,7 +33,7 @@ namespace BASeTris
         }
 
         public static System.Reflection.BASeCamp.MultiTypeManager DITypes = null;
-        public static Type[] LoadTypes = new Type[] { typeof(TetrominoTheme), typeof(IGameCustomizationHandler) };
+        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IGameCustomizationHandler) };
 
         public enum StartMode
         {
@@ -50,7 +50,7 @@ namespace BASeTris
                 return CacheHandlerTheme[HandlerType];
             }
 
-            var TheTypes = DITypes[typeof(TetrominoTheme)].GetManagedTypes();
+            var TheTypes = DITypes[typeof(NominoTheme)].GetManagedTypes();
             List<Type> ConstructType = new List<Type>();
             foreach(var iteratetype in TheTypes)
             {

@@ -13,7 +13,7 @@ namespace BASeTris.FieldInitializers
         private int GarbageRows = 0;
         private Random rgen = null;
         private Func<int, int, NominoBlock> GenerateBlock = null;
-        private TetrominoTheme _Theme;
+        private NominoTheme _Theme;
 
         private NominoBlock DefaultGenerateBlock(int x, int y)
         {
@@ -22,7 +22,7 @@ namespace BASeTris.FieldInitializers
             return standardfilled;
         }
 
-        public GarbageFieldInitializer(Random prgen, TetrominoTheme pTheme, int NumRows)
+        public GarbageFieldInitializer(Random prgen, NominoTheme pTheme, int NumRows)
         {
             rgen = prgen;
             GarbageRows = NumRows;

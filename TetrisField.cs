@@ -113,10 +113,10 @@ namespace BASeTris
 
         //
         //private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
-        private TetrominoTheme _Theme = null;
+        private NominoTheme _Theme = null;
 
 
-        public TetrominoTheme Theme
+        public NominoTheme Theme
         {
             get
             {
@@ -226,7 +226,7 @@ namespace BASeTris
             get {  return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
         }
 
-        public TetrisField(TetrominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
+        public TetrisField(NominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
         {
             _Theme = theme;
             _Handler = Handler;
@@ -623,7 +623,7 @@ namespace BASeTris
                     foreach (var iteratecell in iteraterow)
                     {
                         if (iteratecell != null && iteratecell.Owner != null)
-                            Theme.ApplyTheme(iteratecell.Owner, handler,this, TetrominoTheme.ThemeApplicationReason.Normal);
+                            Theme.ApplyTheme(iteratecell.Owner, handler,this, NominoTheme.ThemeApplicationReason.Normal);
                     }
                 }
 

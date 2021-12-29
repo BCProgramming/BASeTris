@@ -19,7 +19,7 @@ namespace BASeTris
     //placed here for reference:
     //possible theme idea: a theme which itself is a preference-based setup.
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
-    public abstract class TetrominoTheme
+    public abstract class NominoTheme
     {
         public enum ThemeApplicationReason
         {
@@ -162,7 +162,7 @@ namespace BASeTris
         }
     }
 
-    public class StandardTetrominoTheme : TetrominoTheme
+    public class StandardTetrominoTheme : NominoTheme
     {
         StandardColouredBlock.BlockStyle _Style;
 

@@ -25,7 +25,7 @@ namespace BASeTris.Rendering.Skia.GameStates
     public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,GameplayGameState,GameStateSkiaDrawParameters>
     {
         private StandardImageBackgroundSkia _Background = null;
-        private TetrominoTheme CurrentTheme = null;
+        private NominoTheme CurrentTheme = null;
         public SKRect LastDrawStat = SKRect.Empty;
         
         private void BuildBackground(GameplayGameState Self,SKRect Size)

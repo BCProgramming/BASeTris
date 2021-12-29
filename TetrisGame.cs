@@ -15,7 +15,6 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using BASeTris.AssetManager;
 using BASeCamp.BASeScores;
-using BASeTris.AssetManager;
 using BASeTris.GameStates;
 using BASeTris.Rendering;
 using BASeTris.Rendering.GDIPlus;
@@ -590,7 +589,7 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
-        public static Dictionary<String, List<SKBitmap>> GetTetrominoBitmapsSK(SKRect Bounds, TetrominoTheme UseTheme, IGameCustomizationHandler handler,TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<String, List<SKBitmap>> GetTetrominoBitmapsSK(SKRect Bounds, NominoTheme UseTheme, IGameCustomizationHandler handler,TetrisField PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<String, List<SKBitmap>> TetrominoImages = new Dictionary<String, List<SKBitmap>>();
             float useSize = 18 * ScaleFactor;
@@ -599,7 +598,7 @@ namespace BASeTris
             SKBitmap[] bitmaps = new SKBitmap[AllNominos.Length];
             foreach(var iterate in AllNominos)
             {
-                UseTheme.ApplyTheme(iterate, handler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                UseTheme.ApplyTheme(iterate, handler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
             }
 
             for(int i=0;i<AllNominos.Length;i++)
@@ -623,7 +622,7 @@ namespace BASeTris
             return Result.ToArray();
 
         }
-        public static Dictionary<String, List<Image>> GetTetrominoBitmaps(RectangleF Bounds, TetrominoTheme UseTheme,IGameCustomizationHandler Handler, TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<String, List<Image>> GetTetrominoBitmaps(RectangleF Bounds, NominoTheme UseTheme,IGameCustomizationHandler Handler, TetrisField PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<String, List<Image>> TetrominoImages = new Dictionary<String, List<Image>>();
             float useSize = 18 * ScaleFactor;
@@ -633,7 +632,7 @@ namespace BASeTris
             
             foreach(var nom in AllNominos)
             {
-                UseTheme.ApplyTheme(nom, Handler, PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                UseTheme.ApplyTheme(nom, Handler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
             }
 
             for(int i=0;i<AllNominos.Length;i++)

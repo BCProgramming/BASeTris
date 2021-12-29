@@ -13,7 +13,7 @@ using SkiaSharp;
 namespace BASeTris
 {
     [HandlerTheme(typeof(StandardTetrisHandler))]
-    public class GameBoyTetrominoTheme : TetrominoTheme
+    public class GameBoyTetrominoTheme : NominoTheme
     {
         public override String Name { get { return "Game Boy"; } }
         static readonly Size ImageSize;
@@ -253,16 +253,15 @@ namespace BASeTris
             {
                 var scb = (LeftSide.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetLeftCap(CurrLevel))));
+                scb._RotationImagesSK = NominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetLeftCap(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("FLIPX:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("FLIPXROT90:mottle_right_cap",ReductionFactor),
                 //        TetrisGame.Imageman.getLoadedImage("FLIPXROT180:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("FLIPXROT270:mottle_right_cap",ReductionFactor) };
             }
-            Image i;
             if(LeftMiddle !=null && LeftMiddle.Block is StandardColouredBlock)
             {
                 var scb = (LeftMiddle.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetHorizontal(CurrLevel))));
+                scb._RotationImagesSK = NominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetHorizontal(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_horizontal",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_horizontal",ReductionFactor) };
             }
@@ -271,7 +270,7 @@ namespace BASeTris
             {
                 var scb = (RightMiddle.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetHorizontal(CurrLevel))));
+                scb._RotationImagesSK = NominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetHorizontal(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_horizontal",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_horizontal",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_horizontal",ReductionFactor) };
             }
@@ -279,7 +278,7 @@ namespace BASeTris
             {
                 var scb = (RightSide.Block as StandardColouredBlock);
                 scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                scb._RotationImagesSK = TetrominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetRightCap(CurrLevel))));
+                scb._RotationImagesSK = NominoTheme.GetImageRotations(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(GetRightCap(CurrLevel))));
                 //scb._RotationImages = new Image[] {TetrisGame.Imageman.getLoadedImage("mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT90:mottle_right_cap",ReductionFactor),
                 //    TetrisGame.Imageman.getLoadedImage("ROT180:mottle_right_cap",ReductionFactor), TetrisGame.Imageman.getLoadedImage("ROT270:mottle_right_cap",ReductionFactor) };
             }

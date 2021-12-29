@@ -23,7 +23,7 @@ namespace BASeTris.Rendering.GDIPlus
         
       
         Image StatisticsBackground = null;
-        TetrominoTheme GeneratedImageTheme = null; 
+        NominoTheme GeneratedImageTheme = null; 
         public void GenerateStatisticsBackground(GameplayGameState Self)
         {
             Bitmap buildbg = new Bitmap(1120, 2576);
@@ -83,7 +83,6 @@ namespace BASeTris.Rendering.GDIPlus
             g.DrawImage(StatisticsBackground, Bounds);
             //g.Clear(Color.Black);
             if (!Source.HasTetrominoImages() || RedrawsNeeded) RedrawStatusbarTetrominoBitmaps(pOwner,Source, Bounds);
-            Process p;
             
             lock (Source.LockTetImageRedraw)
             {

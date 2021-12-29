@@ -13,7 +13,7 @@ using BASeTris.GameStates.GameHandlers;
 namespace BASeTris
 {
     [HandlerTheme(typeof(StandardTetrisHandler))]
-    public class SNESTetrominoTheme : TetrominoTheme
+    public class SNESTetrominoTheme : NominoTheme
     {
         //This theme is based on the colour and appearance of the Tetris game in SNES Tetris and Dr.Mario.
         //First we have some data structure classes which hold some of the colour information.

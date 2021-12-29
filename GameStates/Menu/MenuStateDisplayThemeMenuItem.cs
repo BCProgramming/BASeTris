@@ -34,7 +34,7 @@ namespace BASeTris.GameStates.Menu
                 ConstructorInfo ci = themeiter.GetConstructor(new Type[] { });
                 if(ci!=null)
                 {
-                    TetrominoTheme buildResult = (TetrominoTheme)ci.Invoke(new object[] { });
+                    NominoTheme buildResult = (NominoTheme)ci.Invoke(new object[] { });
                     MenuStateThemeSelection msst = new MenuStateThemeSelection(buildResult.Name, themeiter, () => buildResult);
                     yield return msst;
                 }
@@ -104,8 +104,8 @@ namespace BASeTris.GameStates.Menu
     {
         public String Description;
         public Type ThemeType;
-        public Func<TetrominoTheme> GenerateThemeFunc = null;
-        public MenuStateThemeSelection(String pDescription,Type pThemeType, Func<TetrominoTheme> pThemeFunc)
+        public Func<NominoTheme> GenerateThemeFunc = null;
+        public MenuStateThemeSelection(String pDescription,Type pThemeType, Func<NominoTheme> pThemeFunc)
         {
             Description = pDescription;
             ThemeType = pThemeType;

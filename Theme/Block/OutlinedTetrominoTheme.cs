@@ -13,7 +13,7 @@ namespace BASeTris
     /// <summary>
     /// Theme which has tetrominoes be outlined rather than draw as distinct blocks.
     /// </summary>
-    public class OutlinedTetrominoTheme : TetrominoTheme
+    public class OutlinedTetrominoTheme : NominoTheme
     {
         public override string Name { get { return "Outlined"; } }
         [Flags]

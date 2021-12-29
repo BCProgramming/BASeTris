@@ -296,7 +296,7 @@ namespace BASeTris.GameStates.GameHandlers
             return FCR;
 
         }
-        public TetrominoTheme DefaultTheme { get { return new SNESTetrominoTheme(); } }
+        public NominoTheme DefaultTheme { get { return new SNESTetrominoTheme(); } }
 
         public void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {

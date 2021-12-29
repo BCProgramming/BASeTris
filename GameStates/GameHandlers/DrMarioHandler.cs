@@ -388,12 +388,12 @@ namespace BASeTris.GameStates.GameHandlers
                         lsb.Popping = true;
                         GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
                         if (popItem.Owner!=null)
-                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
                         else
                         {
                             var Dummino = new Nomino() { };
                             Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
-                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
                         }
                         
                     }
@@ -421,13 +421,13 @@ namespace BASeTris.GameStates.GameHandlers
                         state.PlayField.Contents[iterate.Y][iterate.X] = null;
                         //now apply the theme to the specified location
                         if (popItem.Owner != null)
-                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
                         else
                         {
                             //create a "dummy" nomino for the application of the "pop" theme animation.
                             var Dummino = new Nomino() { };
                             Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
-                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
                         }
 
 
@@ -659,7 +659,7 @@ namespace BASeTris.GameStates.GameHandlers
         
 
         public AllowedSpawnsFlags AllowedSpawns { get; set; } = AllowedSpawnsFlags.Spawn_Standard;
-        public TetrominoTheme DefaultTheme { get { return new DrMarioTheme(); } }
+        public NominoTheme DefaultTheme { get { return new DrMarioTheme(); } }
 
         
 
@@ -680,7 +680,7 @@ namespace BASeTris.GameStates.GameHandlers
                 LineSeriesPrimaryBlock lsmb = new LineSeriesPrimaryBlock() { CombiningIndex = chosentype };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, lsmb);
-                state.PlayField.Theme.ApplyTheme(Dummino,this, state.PlayField, TetrominoTheme.ThemeApplicationReason.Normal);
+                state.PlayField.Theme.ApplyTheme(Dummino,this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
                 lsmb.CriticalMass = 4; //TODO: should this be changed?
                 
                 int RandomXPos = TetrisGame.rgen.Next(state.PlayField.ColCount);
