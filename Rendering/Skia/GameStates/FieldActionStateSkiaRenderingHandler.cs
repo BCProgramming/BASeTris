@@ -67,6 +67,7 @@ namespace BASeTris.Rendering.Skia
             }
             //we told the main state not to paint particles, so we should paint them now.
             RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.GetComposite().Particles, Element);
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.GetComposite().TopParticles, Element);
 
 
             if (Source is FieldLineActionGameState linestate)

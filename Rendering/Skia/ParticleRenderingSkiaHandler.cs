@@ -20,7 +20,30 @@ namespace BASeTris.Rendering.Skia
         SKPaint skp = new SKPaint() { Color = SKColors.White, TextSize = 18 };
         public void Render(IStateOwner pOwner,SKCanvas pRenderTarget,CharParticle Source,GameStateSkiaDrawParameters Element)
         {
+            var Alphause = TranslateAlpha(Source);
             var CharPoint = TranslatePosition(pOwner, pRenderTarget, Source.Position, Element);
+            var FontSizeTranslate = new BCPoint(1, Source.FontInfo.FontSize);
+            var TranslatedFontSize = TranslatePosition(pOwner, pRenderTarget, FontSizeTranslate, Element);
+            var useColor = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, Alphause);
+
+            SKRect Bound = new SKRect();
+            skp.MeasureText(Source.Text, ref Bound);
+            skp.TextSize = TranslatedFontSize.Y;
+            SKPaint Foreground = new SKPaint() { Color = useColor,TextSize = TranslatedFontSize.Y,Typeface = TetrisGame.RetroFontSK };
+            SKPaint Background = new SKPaint() { Color = new SKColor(0,0,0,Alphause), TextSize = TranslatedFontSize.Y, Typeface = TetrisGame.RetroFontSK };
+            DrawTextInformationSkia skinfo = new DrawTextInformationSkia()
+            {
+                Text = Source.Text,
+                Position = CharPoint,
+                CharacterHandler = new DrawCharacterHandlerSkia(new VerticalWavePositionCharacterPositionCalculatorSkia() { Height = (float)(pOwner.ScaleFactor * 6) }),
+                ForegroundPaint = Foreground,
+                ShadowPaint = Background
+                
+            };
+            skinfo.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, TranslatedFontSize.Y);
+            //pRenderTarget.DrawText(Source.Text, CharPoint.X,CharPoint.Y,TetrisGame.RetroFontSK,  skp);
+            //pRenderTarget.DrawTextSK(Source.Text, CharPoint, TetrisGame.RetroFontSK, useColor, skp.TextSize,1);
+            pRenderTarget.DrawTextSK(skinfo);
             //CharPoint -= new BCPoint(skp)
             //    skp.MeasureText(Source.Character);
         }
@@ -83,6 +106,7 @@ namespace BASeTris.Rendering.Skia
             useAlpha = (byte)(PercentAlpha * 255);
             return useAlpha;
         }
+        
         protected BCPoint TranslatePosition(IStateOwner pOwner, SKCanvas pRenderTarget, BCPoint Position, GameStateSkiaDrawParameters Element)
         {
             BCPoint Result = Position;

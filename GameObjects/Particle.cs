@@ -1,4 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,10 @@ namespace BASeTris.GameObjects
         public BCPoint Position { get; set; }
         public BCPoint Velocity { get; set; }
         public BCPoint Decay { get; set; } = new BCPoint(0.95f, 0.95f);
-        public BCColor Color { get; set; }
-        
-        
+        private BCColor _SingleColor;
+        public BCColor Color { get { if (ColorCalculatorFunction != null) return ColorCalculatorFunction(this); else return _SingleColor; } set { _SingleColor = value; } }
+
+        public Func<BaseParticle, BCColor> ColorCalculatorFunction = null;
 
         private static uint GetTickCount()
         {
@@ -54,13 +56,44 @@ namespace BASeTris.GameObjects
         }
 
     }
+    public class BitmapParticle : BaseParticle
+    {
+        public String Text = " ";
+        public SKImage _Image = null;
+        public BitmapParticle(BCPoint pPosition, BCPoint pVelocity, BCColor pColor, SKImage img) : base(pPosition, pVelocity, pColor)
+        {
+            _Image = img;
+        }
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override bool GameProc(IStateOwner pOwner)
+        {
+            return base.GameProc(pOwner);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+    }
     public class CharParticle : BaseParticle
     {
         public String Text = " ";
-        public BCFont FontInfo = new BCFont("Pixel Emulator", 16, BCFont.BCFontStyle.Regular);
+        public BCFont FontInfo = new BCFont("Pixel Emulator", 32, BCFont.BCFontStyle.Regular);
+        System.Drawing.Font useFont = TetrisGame.GetRetroFont(1, 1, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
         public CharParticle(BCPoint pPosition,BCPoint pVelocity,BCColor pColor,String pText) :base(pPosition,pVelocity,pColor)
         {
             Text = pText;
+            
+            FontInfo = new BCFont(useFont.FontFamily.Name, 1, BCFont.BCFontStyle.Regular);
         }
         public override bool Equals(object obj)
         {

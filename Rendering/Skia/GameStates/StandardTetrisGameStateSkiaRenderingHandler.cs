@@ -118,9 +118,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
             }
             var particledrawer = RenderingProvider.Static.GetHandler(typeof(List<BaseParticle>), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters));
-            if (Source.Particles.Count > 0)
+            if(Source.TopParticles!=null && Source.TopParticles.Count > 0)
             {
-                ;
+                if (!SkipParticles) RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.TopParticles, Element);
             }
             
 

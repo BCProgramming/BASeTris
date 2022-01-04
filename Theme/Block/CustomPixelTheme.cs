@@ -33,7 +33,24 @@ namespace BASeTris.Theme.Block
                 Animated = pAnimated;
             }
         }
-        
+        [Flags]
+        public enum AdjacentBlockFlags
+        {
+            None = 0,
+            Left = 1,
+            Top = 2,
+            Right=4,
+            Bottom=8,
+            TopLeft = 16,
+            TopRight = 32,
+            BottomLeft = 64,
+            BottomRight=128
+        }
+        public enum AdjacentBlockFlagResultTypes
+        {
+            Cardinal = 1,
+            Diagonal = 2
+        }
         public enum BlockFlags
         {
             Static,
@@ -107,6 +124,58 @@ namespace BASeTris.Theme.Block
                     _BlockTypeDictionary = GetBlockTypeDictionary();
                 return _BlockTypeDictionary;
             }
+        }
+        protected AdjacentBlockFlags GetAdjacentFlags(TetrisField Field,int pColumn,int pRow,AdjacentBlockFlagResultTypes flags)
+        {
+            AdjacentBlockFlags flagresult = AdjacentBlockFlags.None;
+
+
+            Dictionary<AdjacentBlockFlags, BCPointI> Cardinals = new Dictionary<AdjacentBlockFlags, BCPointI>()
+            {
+                { AdjacentBlockFlags.Left,(-1,0) },
+                { AdjacentBlockFlags.Top,(0,-1) },
+                { AdjacentBlockFlags.Right,(1,0) },
+                { AdjacentBlockFlags.Bottom,(0,1) }
+
+            };
+
+            Dictionary<AdjacentBlockFlags, BCPointI> Diagonals = new Dictionary<AdjacentBlockFlags, BCPointI>()
+            {
+                { AdjacentBlockFlags.TopLeft,(-1,-1) },
+                { AdjacentBlockFlags.TopRight,(1,-1) },
+                { AdjacentBlockFlags.BottomRight,(1,1) },
+                { AdjacentBlockFlags.BottomLeft,(-1,1) }
+
+            };
+            Dictionary<AdjacentBlockFlagResultTypes, Dictionary<AdjacentBlockFlags, BCPointI>> Vals = new Dictionary<AdjacentBlockFlagResultTypes, Dictionary<AdjacentBlockFlags, BCPointI>>()
+            { {AdjacentBlockFlagResultTypes.Cardinal,Cardinals },
+            {AdjacentBlockFlagResultTypes.Diagonal,Diagonals } };
+            
+
+            foreach(var useset in Vals)
+            {
+                if(flags.HasFlag(useset.Key))
+                {
+                    foreach(var iterateoffset in useset.Value)
+                    {
+                        var OffsetTuple = iterateoffset.Value;
+                        BCPointI newposition = ((pColumn + OffsetTuple.X), pRow + OffsetTuple.Y);
+
+                        if(newposition.X >=0 && newposition.X < Field.ColCount &&
+                            newposition.Y >=0 && newposition.Y < Field.RowCount)
+                        {
+                            if(Field.Contents[newposition.Y][newposition.X]!=null)
+                            {
+                                flagresult &= iterateoffset.Key;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            return flagresult;
+
         }
         public abstract Dictionary<BlockEnum, PixelEnum[][]> GetBlockTypeDictionary();
 

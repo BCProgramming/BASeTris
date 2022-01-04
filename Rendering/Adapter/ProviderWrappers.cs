@@ -14,6 +14,7 @@ namespace BASeTris.Rendering.Adapters
     
     public struct BCPoint
     {
+        public static BCPoint Empty = new BCPoint(0, 0);
         private SKPoint Main;
         public float X {  get { return Main.X; } set { Main.X = value; } }
         public float Y {  get { return Main.Y; }  set { Main.Y = value; } }
@@ -49,6 +50,10 @@ namespace BASeTris.Rendering.Adapters
         {
             return new Point((int)src.X, (int)src.Y);
         }
+        public static implicit operator BCPoint((int,int) src)
+        {
+            return new BCPoint(src.Item1, src.Item2);
+        }
         public static BCPoint operator +(BCPoint first,BCPoint other)
         {
             return new BCPoint(first.X + other.X, first.Y + other.Y);
@@ -67,6 +72,69 @@ namespace BASeTris.Rendering.Adapters
         }
 
     }
+
+
+    public struct BCPointI
+    {
+        private SKPointI Main;
+        public int X { get { return Main.X; } set { Main.X = value; } }
+        public int Y { get { return Main.Y; } set { Main.Y = value; } }
+        public BCPointI(SKPointI Source)
+        {
+            Main = Source;
+        }
+        public BCPointI(int X, int Y) : this(new SKPointI(X, Y))
+        {
+
+        }
+        public BCPointI(Point Source) : this(Source.X, Source.Y)
+        {
+
+        }
+        public static implicit operator SKPointI(BCPointI src)
+        {
+            return src.Main;
+        }
+        public static implicit operator BCPointI(SKPointI src)
+        {
+            return new BCPointI(src);
+        }
+        public static implicit operator BCPointI(Point src)
+        {
+            return new BCPointI(src);
+        }
+        public static implicit operator PointF(BCPointI src)
+        {
+            return new PointF(src.X, src.Y);
+        }
+        public static implicit operator Point(BCPointI src)
+        {
+            return new Point((int)src.X, (int)src.Y);
+        }
+        public static implicit operator BCPointI((int, int) src)
+        {
+            return new BCPointI(src.Item1, src.Item2);
+        }
+        public static BCPointI operator +(BCPointI first, BCPointI other)
+        {
+            return new BCPointI(first.X + other.X, first.Y + other.Y);
+        }
+        public static BCPointI operator -(BCPointI first, BCPointI other)
+        {
+            return new BCPointI(first.X - other.X, first.Y - other.Y);
+        }
+        public static BCPointI operator *(BCPointI first, int other)
+        {
+            return new BCPointI(first.X * other, first.Y * other);
+        }
+        public static BCPointI operator *(BCPointI first, BCPointI other)
+        {
+            return new BCPointI(first.X * other.X, first.Y * other.Y);
+        }
+
+    }
+
+
     public struct BCRect
     {
         private SKRect Main;
@@ -101,6 +169,10 @@ namespace BASeTris.Rendering.Adapters
             return new BCRect(src);
         }
         public static implicit operator BCRect(RectangleF src)
+        {
+            return new BCRect(src);
+        }
+        public static implicit operator BCRect(Rectangle src)
         {
             return new BCRect(src);
         }
@@ -327,6 +399,7 @@ namespace BASeTris.Rendering.Adapters
             return new BCImage(src);
         }
     }
-    
 
+
+    
 }

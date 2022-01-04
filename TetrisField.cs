@@ -17,6 +17,7 @@ using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
 using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Rendering.Adapters;
 
 namespace BASeTris
 {
@@ -440,6 +441,18 @@ namespace BASeTris
         public float GetBlockHeight(SKRect ForBounds)
         {
             return ForBounds.Height / (VisibleRows);
+        }
+        public BCRect GetBlockBounds(IStateOwner pOwner,SKRect Bounds,BCPointI TopLeft,BCPointI BottomRight)
+        {
+            float BlockWidth = (float)(GetBlockWidth(Bounds));
+            float BlockHeight = (float)(GetBlockHeight(Bounds));
+
+
+            BCPoint TopLeftF = new BCPoint((float)TopLeft.X * BlockWidth, (float)TopLeft.Y * BlockHeight);
+            BCPoint BottomRightF = new BCPoint((float)BottomRight.X + BlockWidth + BlockWidth, (float)TopLeft.Y * BlockHeight + BlockHeight);
+            return new BCRect(TopLeftF.X, TopLeftF.Y, BottomRightF.X, BottomRightF.Y);
+
+
         }
         Pen LinePen = new Pen(Color.Black, 1) {DashPattern = new float[] {4, 1, 3, 1, 2, 1, 3, 1}};
         public RectangleF LastFieldSave = RectangleF.Empty;

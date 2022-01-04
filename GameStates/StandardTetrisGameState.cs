@@ -42,6 +42,7 @@ namespace BASeTris.GameStates
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
         public Nomino HoldBlock = null;
+        public List<BaseParticle> TopParticles = new List<BaseParticle>();
         public List<BaseParticle> Particles = new List<BaseParticle>();
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
