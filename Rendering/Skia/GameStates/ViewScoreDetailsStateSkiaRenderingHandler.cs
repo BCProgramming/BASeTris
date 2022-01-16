@@ -17,7 +17,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, ViewScoreDetailsState Source, GameStateSkiaDrawParameters Element)
         {
-            
+            //TODO: finish this!
             var g = pRenderTarget;
             var Bounds = Element.Bounds;
             RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new SkiaBackgroundDrawData(Bounds));

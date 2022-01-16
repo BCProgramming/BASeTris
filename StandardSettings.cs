@@ -25,6 +25,8 @@ namespace BASeTris
         public bool SmoothRotate = true;
         private String sLoadedSource = null;
         public String MusicOption { get; set; } = "<RANDOM>";
+
+        public String SoundScheme { get; set; } = "Default";
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
             

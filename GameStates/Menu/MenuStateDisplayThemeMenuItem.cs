@@ -46,32 +46,33 @@ namespace BASeTris.GameStates.Menu
         public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, IGameCustomizationHandler handler) : base(null)
         {
             _Owner = pOwner;
-            ThemeOptions = GetThemeSelectionsForHandler(handler).ToArray();
-            base.OptionManager = new MultiOptionManagerList<MenuStateThemeSelection>(ThemeOptions, 1);
-            var closest = ThemeOptions.First();
-            
-            this.Text = closest.Description;
             Type currentthemetype = null;
 
-            if(_Owner.CurrentState is GameplayGameState gs)
+            if (_Owner.CurrentState is GameplayGameState gs)
             {
                 currentthemetype = gs.PlayField.Theme.GetType();
             }
-            else if(_Owner.CurrentState is ICompositeState<GameplayGameState> comp)
+            else if (_Owner.CurrentState is ICompositeState<GameplayGameState> comp)
             {
                 currentthemetype = comp.GetComposite().PlayField.Theme.GetType();
             }
-
+            ThemeOptions = GetThemeSelectionsForHandler(handler).ToArray();
             int currentIndex = 0;
-            for(int i=0;i<0;i++)
+            for (int i = 0; i < ThemeOptions.Length; i++)
             {
-                if(ThemeOptions[i].GetType()==currentthemetype)
+                if (ThemeOptions[i].ThemeType == currentthemetype)
                 {
                     currentIndex = i;
                     break;
                 }
             }
-            OptionManager.SetCurrentIndex(currentIndex);
+
+
+            base.OptionManager = new MultiOptionManagerList<MenuStateThemeSelection>(ThemeOptions,currentIndex);
+            var closest = ThemeOptions[currentIndex];
+            this.Text = closest.Description;
+
+           
             OnChangeOption += ThemeActivate;
 
         }

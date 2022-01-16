@@ -1,4 +1,5 @@
-﻿using BASeTris.Rendering.Adapters;
+﻿using BASeTris.AssetManager;
+using BASeTris.Rendering.Adapters;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -15,9 +16,23 @@ namespace BASeTris.GameObjects
         public BCPoint Velocity { get; set; }
         public BCPoint Decay { get; set; } = new BCPoint(0.95f, 0.95f);
         private BCColor _SingleColor;
-        public BCColor Color { get { if (ColorCalculatorFunction != null) return ColorCalculatorFunction(this); else return _SingleColor; } set { _SingleColor = value; } }
+        public BCColor Color { get { if (ColorCalculatorFunction == null) return _SingleColor; else  return ColorCalculatorFunction(this); } set { _SingleColor = value; } }
 
         public Func<BaseParticle, BCColor> ColorCalculatorFunction = null;
+
+
+        public static Func<BaseParticle, BCColor> GetRainbowColorFunc(IStateOwner pOwner, int cycletime = 2000)
+        {
+            return new Func<BaseParticle, BCColor>((o) =>
+            {
+                int timebase = cycletime;
+                int hue = (int)((float)(pOwner.GetElapsedTime().Ticks % timebase) / (float)timebase * 240);
+                BCColor usecolor = new HSLColor(hue, 200d, 128d);
+
+                return usecolor;
+            });
+        }
+        
 
         private static uint GetTickCount()
         {
@@ -56,13 +71,35 @@ namespace BASeTris.GameObjects
         }
 
     }
-    public class BitmapParticle : BaseParticle
+    public abstract class RotatableBaseParticle :BaseParticle
     {
-        public String Text = " ";
-        public SKImage _Image = null;
-        public BitmapParticle(BCPoint pPosition, BCPoint pVelocity, BCColor pColor, SKImage img) : base(pPosition, pVelocity, pColor)
+        protected RotatableBaseParticle(BCPoint pPosition,BCPoint pVelocity,BCColor pColor):base(pPosition,pVelocity,pColor)
         {
-            _Image = img;
+        }
+
+        public override bool GameProc(IStateOwner pOwner)
+        {
+            Angle += AngleDelta;
+            AngleDelta *= AngleDecay;
+            return base.GameProc(pOwner);
+        }
+        public double Angle { get; set; } = 0;
+        public double AngleDelta { get; set; } = 0;
+
+        public double AngleDecay { get; set; } = 0.95d;
+    }
+    public class BitmapParticle : RotatableBaseParticle
+    {
+        public int Width { get; set; } = 3;
+        public int Height { get; set; } = 3;
+        public String Text { get; set; } = " ";
+        public BCImage Image { get; set; } = null;
+
+        public BCRect SourceClip = BCRect.Empty;
+        
+        public BitmapParticle(BCPoint pPosition, BCPoint pVelocity, BCColor pColor, BCImage img) : base(pPosition, pVelocity, pColor)
+        {
+            Image = img;
         }
         public override bool Equals(object obj)
         {
@@ -84,7 +121,7 @@ namespace BASeTris.GameObjects
             return base.ToString();
         }
     }
-    public class CharParticle : BaseParticle
+    public class CharParticle : RotatableBaseParticle
     {
         public String Text = " ";
         public BCFont FontInfo = new BCFont("Pixel Emulator", 32, BCFont.BCFontStyle.Regular);

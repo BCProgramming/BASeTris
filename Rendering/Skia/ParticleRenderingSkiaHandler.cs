@@ -13,6 +13,31 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia
 {
+    [RenderingHandler(typeof(BitmapParticle), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class BitmapParticleRenderingSkiaHandler : BaseParticleRenderingSkiaHandler
+    {
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, BitmapParticle Source, GameStateSkiaDrawParameters Element)
+        {
+            var PosX = Source.Position.X - Source.Width / 2;
+            var PosY = Source.Position.Y - Source.Height / 2;
+            SKMatrix cloned = SKMatrix.Identity;
+            if (Source.Angle != 0)
+            {
+                cloned = pRenderTarget.TotalMatrix;
+                pRenderTarget.RotateDegrees((float)Source.Angle);
+            }
+            
+            pRenderTarget.DrawImage(Source.Image, new SKRect(PosX, PosY, PosX + Source.Width, PosY + Source.Height));
+            if (Source.Angle != 0)
+            {
+                pRenderTarget.SetMatrix(cloned);
+            }
+        }
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, BaseParticle Source, GameStateSkiaDrawParameters Element)
+        {
+            Render(pOwner, pRenderTarget, (CharParticle)Source, Element);
+        }
+    }
 
     [RenderingHandler(typeof(CharParticle),typeof(SKCanvas),typeof(GameStateSkiaDrawParameters))]
     public class CharParticleRenderingSkiaHandler :BaseParticleRenderingSkiaHandler
@@ -43,7 +68,19 @@ namespace BASeTris.Rendering.Skia
             skinfo.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, TranslatedFontSize.Y);
             //pRenderTarget.DrawText(Source.Text, CharPoint.X,CharPoint.Y,TetrisGame.RetroFontSK,  skp);
             //pRenderTarget.DrawTextSK(Source.Text, CharPoint, TetrisGame.RetroFontSK, useColor, skp.TextSize,1);
+            SKMatrix cloned = SKMatrix.Identity;
+            if (Source.Angle != 0)
+            {
+                cloned = pRenderTarget.TotalMatrix;
+                pRenderTarget.RotateDegrees((float)Source.Angle);
+            }
+
             pRenderTarget.DrawTextSK(skinfo);
+
+            if (Source.Angle != 0)
+            {
+                pRenderTarget.SetMatrix(cloned);
+            }
             //CharPoint -= new BCPoint(skp)
             //    skp.MeasureText(Source.Character);
         }

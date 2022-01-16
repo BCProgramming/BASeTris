@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.BackgroundDrawers;
+using BASeTris.Theme.Audio;
 
 namespace BASeTris.GameStates.Menu
 {
@@ -39,8 +40,8 @@ namespace BASeTris.GameStates.Menu
             };
             //add the sound options label.
             MenuStateLabelMenuItem SoundLabel = new MenuStateLabelMenuItem() { Text = "--Sound--" };
-            
-            MultiOptionManagerList<SoundOption> SoundOptions = new MultiOptionManagerList<SoundOption>(new SoundOption[]
+
+            var useMusicOptions = new SoundOption[]
             {
                 new SoundOption("TDM_A_THEME","Classic"),
                 new SoundOption("tetris_a_theme_techno","Korotechno"),
@@ -62,19 +63,56 @@ namespace BASeTris.GameStates.Menu
                 new SoundOption("DrMarioChill_Rock","Chill Rock"),
                 new SoundOption("<RANDOM>","Random")
 
-            }, 0);
+            };
+           
+
+            var ThemeArray = (from s in AudioTheme.AvailableSoundThemes select new SoundOption(s.Item1, s.Item2)).ToArray();
+            int startIndex = 0;
+
+            String CurrentTheme = pOwner.Settings.SoundScheme;
+            for(int i=0;i<ThemeArray.Length;i++)
+            {
+                if (ThemeArray[i].Equals(CurrentTheme))
+                {
+                    startIndex = i;
+                    break;
+                }
+
+            }
 
 
+            int startMusicIndex = 0;
+            String CurrentMusic = pOwner.Settings.MusicOption;
+
+            for(int i=0;i<useMusicOptions.Length;i++)
+            {
+                if (useMusicOptions[i].SoundKey.Equals(CurrentMusic, StringComparison.OrdinalIgnoreCase))
+                    startMusicIndex = i;
+            }
+
+
+            MultiOptionManagerList<SoundOption> SoundOptions = new MultiOptionManagerList<SoundOption>(useMusicOptions, startMusicIndex);
+            MultiOptionManagerList<SoundOption> SoundThemeOptions = new MultiOptionManagerList<SoundOption>(
+                ThemeArray,startIndex);
             MenuStateMultiOption<SoundOption> MusicOptionItem = new MenuStateMultiOption<SoundOption>(SoundOptions);
+            MenuStateMultiOption<SoundOption> SoundThemeOptionItem = new MenuStateMultiOption<SoundOption>(SoundThemeOptions);
             MusicOptionItem.Text = "Music";
-
+            SoundThemeOptionItem.Text = "Sound Theme";
             MusicOptionItem.OnChangeOption += MusicOptionItem_OnActivateOption;
-            ReturnItem.FontFace = SoundLabel.FontFace = MusicOptionItem.FontFace = ItemFont.FontFamily.Name;
-            ReturnItem.FontSize = SoundLabel.FontSize = MusicOptionItem.FontSize = ItemFont.Size;
+            SoundThemeOptionItem.OnChangeOption += SoundThemeOptionItem_OnChangeOption;
+            ReturnItem.FontFace = SoundLabel.FontFace = MusicOptionItem.FontFace = SoundThemeOptionItem.FontFace =   ItemFont.FontFamily.Name;
+            ReturnItem.FontSize = SoundLabel.FontSize = MusicOptionItem.FontSize = SoundThemeOptionItem.FontSize = ItemFont.Size;
             MenuElements.Add(ReturnItem);
             MenuElements.Add(SoundLabel);
             MenuElements.Add(MusicOptionItem);
 
+            MenuElements.Add(SoundThemeOptionItem);
+
+        }
+
+        private void SoundThemeOptionItem_OnChangeOption(object sender, OptionActivated<SoundOption> e)
+        {
+            e.Owner.Settings.SoundScheme = e.Option.SoundKey;
         }
 
         private void MusicOptionItem_OnActivateOption(object sender, OptionActivated<SoundOption> e)
@@ -104,5 +142,6 @@ namespace BASeTris.GameStates.Menu
                 return Text;
             }
         }
+        
     }
 }

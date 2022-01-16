@@ -55,6 +55,7 @@ namespace BASeTris
         void StartGame();
 
         GamePresenter GetPresenter();
+        Type GetCanvasType();
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

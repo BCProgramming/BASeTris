@@ -93,9 +93,12 @@ namespace BASeTris
             InitializeComponent();
         }
 
-  
 
-      
+        public Type GetCanvasType()
+        {
+            return typeof(Graphics);
+        }
+
 
         public double ScaleFactor
         {

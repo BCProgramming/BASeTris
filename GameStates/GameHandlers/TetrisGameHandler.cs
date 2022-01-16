@@ -218,6 +218,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                 state.Sounds.PlaySound(pOwner.AudioThemeMan.LevelUp.Key, pOwner.Settings.EffectVolume);
                 PlayField.SetFieldColors(this);
+                state.f_RedrawStatusBitmap = true;
             }
 
             if (rowsfound > 0 && rowsfound < 4)

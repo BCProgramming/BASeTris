@@ -50,6 +50,7 @@ namespace BASeTris.BackgroundDrawers
     public abstract class Background : IBackground
     {
         public abstract void FrameProc(IStateOwner pState);
+        
     }
     public interface IBackground<T> : IBackground where T:BackgroundDrawData
     {
@@ -159,6 +160,7 @@ namespace BASeTris.BackgroundDrawers
             BackgroundBrush.WrapMode = WrapMode.Tile;
         }
     }
+    [BackgroundInformation(typeof(SKCanvas), "STANDARD")]
     public class StandardImageBackgroundSkia : Background<StandardImageBackgroundDrawSkiaCapsule>
     {
         public static StandardImageBackgroundSkia  GetStandardBackgroundDrawer()
@@ -206,7 +208,7 @@ namespace BASeTris.BackgroundDrawers
             //might need to do something weird for tiling.
         }
     }
-  
+    [BackgroundInformation(typeof(Graphics),"STANDARD")]
     public class StandardImageBackgroundGDI : Background<StandardImageBackgroundDrawGDICapsule> 
     {
         
@@ -255,5 +257,16 @@ namespace BASeTris.BackgroundDrawers
 
             return sib;
         }
+    }
+    public class BackgroundInformationAttribute : Attribute
+    {
+        public Type CanvasType { get; set; }
+        public String StyleName { get; set; }
+        public BackgroundInformationAttribute(Type pCanvasType,String pStyleName)
+        {
+            CanvasType = pCanvasType;
+            StyleName = pStyleName;
+        }
+        public static String Style_Standard = "STANDARD";
     }
 }

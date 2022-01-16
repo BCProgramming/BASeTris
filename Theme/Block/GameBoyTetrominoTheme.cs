@@ -16,9 +16,19 @@ namespace BASeTris
     public class GameBoyTetrominoTheme : NominoTheme
     {
         public override String Name { get { return "Game Boy"; } }
-        static readonly Size ImageSize;
+        static Size ImageSize;
         static GameBoyTetrominoTheme() 
         {
+          
+
+
+
+        }
+        bool Prepared = false;
+        private void PrepareTheme()
+        {
+            if (Prepared) return;
+
             I_Right_Cap = TetrisGame.Imageman.getLoadedImage("mottle_right_cap", 0.25f);
             I_Left_Cap = TetrisGame.Imageman.getLoadedImage("FLIPX:mottle_right_cap", 0.25f);
             I_Horizontal = TetrisGame.Imageman.getLoadedImage("mottle_horizontal", 0.25f);
@@ -28,13 +38,12 @@ namespace BASeTris
             Fat_Dotted_Light = TetrisGame.Imageman.getLoadedImage("lighter_big_dotted", 0.25f);
             Inset_Bevel = TetrisGame.Imageman.getLoadedImage("solid_beveled", 0.25f);
             ImageSize = I_Right_Cap.Size;
-
-
-
+            Prepared = true;
         }
         private Bitmap LightImage = null;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {
+            
             if (LightImage == null)
             {
                 LightImage = new Bitmap(250, 500);
@@ -48,46 +57,55 @@ namespace BASeTris
 
         protected Image GetRightCap(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(I_Right_Cap, "Right_Cap", LevelColor);
         }
         protected Image GetLeftCap(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(I_Left_Cap, "Left_Cap", LevelColor);
         }
         protected Image GetHorizontal(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(I_Horizontal, "Horizontal", LevelColor);
         }
         protected Image GetSolidSquare(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(Solid_Square, "Solid_Square", LevelColor);
         }
         protected Image GetDottedDark(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(Dotted_Dark, "Dotted_Dark", LevelColor);
         }
         protected Image GetDottedLight(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(Dotted_Light, "Dotted_Light", LevelColor);
         }
         protected Image GetInsetBevel(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(Inset_Bevel, "Inset_Bevel", LevelColor);
         }
         protected Image GetFatDotted(int Level)
         {
+            PrepareTheme();
             Color LevelColor = GetLevelColor(Level);
             return GetCached(Fat_Dotted_Light, "Fat_Dotted", LevelColor);
         }
         protected Image GetCached(Image Original,String pKey,Color pColor)
         {
+            PrepareTheme();
             var found = GetCachedImage(pKey, ImageSize, pColor);
             if(found==null)
             {
@@ -134,6 +152,7 @@ namespace BASeTris
 
         public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
+            PrepareTheme();
             int RandomLevel = TetrisGame.rgen.Next(25);
             Action<Nomino,TetrisField,int> SelectL = Apply_L;
             Action<Nomino, TetrisField, int>[] Types = new Action<Nomino, TetrisField, int>[]
@@ -146,6 +165,7 @@ namespace BASeTris
 
         public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
+            PrepareTheme();
             var LineCount = (GameHandler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;
             int CurrLevel = Field == null ? 0 : (int)(LineCount / 10);
 

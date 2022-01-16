@@ -73,14 +73,15 @@ namespace BASeTris
         bool GameLoopsRunning = false;
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
+            
             if (GameLoopsRunning) return;
+            
             GameLoopsRunning = true;
-            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault());
+            
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
             GameSettings = new StandardSettings(sSettingsFile);
-
-            
+            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.SoundScheme));
             var standardstate = new GameplayGameState(new StandardTetrisHandler(),null,TetrisGame.Soundman,null);
             //_Owner.GameStartTime = DateTime.MinValue;
             Game = new TetrisGame(_Owner, standardstate);

@@ -42,6 +42,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 _Background.Data.theFilter = SKColorMatrices.GetColourizer(bgInfo.TintColor.R, bgInfo.TintColor.G, bgInfo.TintColor.B, bgInfo.TintColor.A);
             }
+            Self.DoRefreshBackground = false;
         }
         SKImage StatisticsBackground = null;
         //redraws the StatisticsBackground SKImage.
@@ -75,6 +76,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                 }
 
                 StatisticsBackground = SKImage.FromBitmap(sourcebit);
+                LastStatisticsTheme = Self.PlayField.Theme;
+                Self.f_RedrawStatusBitmap = false;
             }
         }
 
@@ -86,7 +89,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             bool SkipParticles = tagData != null && tagData.SkipParticlePaint;
 
             //testing code for background.
-            if (_Background==null || CurrentTheme!=Source.PlayField.Theme)
+            if (Source.DoRefreshBackground ||  _Background==null || CurrentTheme!=Source.PlayField.Theme)
             {
                 BuildBackground(Source,Element.Bounds);
                 CurrentTheme = Source.PlayField.Theme;
@@ -155,6 +158,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         {
             return pPixels * 72 / gscale.DpiX;
         }
+        NominoTheme LastStatisticsTheme = null;
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, GameplayGameState Source, GameStateSkiaDrawParameters Element)
         {
             var Bounds = Element.Bounds;
@@ -163,7 +167,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             bool RedrawsNeeded = !LastDrawStat.Equals(Bounds);
             try
             {
-                if (StatisticsBackground == null || RedrawsNeeded)
+                if (StatisticsBackground == null || RedrawsNeeded || Source.f_RedrawStatusBitmap ||  LastStatisticsTheme!=Source.PlayField.Theme)
                 {
                     GenerateStatisticsBackground(Source);
                 }

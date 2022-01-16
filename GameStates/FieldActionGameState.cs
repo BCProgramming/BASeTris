@@ -286,19 +286,13 @@ namespace BASeTris.GameStates
             {3, "TRIPLE " },
             {4, "TETRIS!" }
         };
+        
         const int ParticleCountPerBlock = 50;
         private readonly long ClearParticleTTL = 600;
         private void AddParticles_Row(IStateOwner pOwner,BCRect RowBounds,int Lines=1)
         {
             String UseText = RowClearText?[Lines] ?? $"{Lines}LINE";
-            Func<BaseParticle,BCColor> TetrisColorFunc = (o) =>
-            {
-                int timebase = 2000;
-                int hue = (int)((float)(pOwner.GetElapsedTime().Ticks % timebase) / (float)timebase * 240);
-                BCColor usecolor = (Color)new HSLColor(hue, 200d, 128d);
-
-                return usecolor;
-            };
+            Func<BaseParticle, BCColor> TetrisColorFunc = BaseParticle.GetRainbowColorFunc(pOwner);
             Func<BaseParticle, BCColor> SingleLineColorFunc = (o) =>
             {
                 int timebase = 2000;
@@ -369,7 +363,7 @@ namespace BASeTris.GameStates
 
 
 
-        private void AddParticles(IStateOwner pOwner,int BlockX,int BlockY,int DirectionMultiplier,int RowLength=1)
+        private void AddParticles(IStateOwner pOwner,int BlockX,int BlockY,int DirectionMultiplier,int RowsCleared)
         {
             //the actual block we are clearing...
             var ClearingBlock = _BaseState.PlayField.Contents[BlockY][BlockX];
@@ -386,6 +380,7 @@ namespace BASeTris.GameStates
                 BlockY-2);
             lock (_BaseState.Particles)
             {
+                List<BaseParticle> ToAdd = new List<BaseParticle>(ParticleCountPerBlock);
                 for (int i = 0; i < ParticleCountPerBlock; i++)
                 {
                     BCPoint ParticlePos = new BCPoint((float)TetrisGame.rgen.NextDouble(), (float)TetrisGame.rgen.NextDouble());
@@ -406,10 +401,18 @@ namespace BASeTris.GameStates
                     
 
                     BaseParticle p = new BaseParticle(NewParticlePoint, Velocity, ChosenColor);
+                    if (RowsCleared >= 4)
+                    {
+                        if(TetrisGame.rgen.NextDouble()>0.25d)
+                        {
+                            p.ColorCalculatorFunction = BaseParticle.GetRainbowColorFunc(pOwner, 500);
+                        }
+                    }
                     p.TTL = (uint)ClearParticleTTL;
-                    _BaseState.Particles.Add(p);
+                    ToAdd.Add(p);
 
                 }
+                _BaseState.Particles.AddRange(ToAdd);
             }
 
             
@@ -428,7 +431,7 @@ namespace BASeTris.GameStates
                 {
                     ParticleSign = 1;
                 }
-                AddParticles(pOwner, useindex, row.Key, ParticleSign);
+                AddParticles(pOwner, useindex, row.Key, ParticleSign,RowsCleared);
                 PerformClearAct(GrabRow, useindex);
             }
         }
@@ -449,7 +452,7 @@ namespace BASeTris.GameStates
                 {
                     ParticleSign = -1;
                 }
-                AddParticles(pOwner, useindex, row.Key, ParticleSign);
+                AddParticles(pOwner, useindex, row.Key, ParticleSign,RowsCleared);
                 PerformClearAct(GrabRow, useindex);
             }
         }
@@ -465,7 +468,7 @@ namespace BASeTris.GameStates
             {
                 int ParticleSign = -1;
                 
-                AddParticles(pOwner, useIndex, row.Key, ParticleSign);
+                AddParticles(pOwner, useIndex, row.Key, ParticleSign,RowsCleared);
                 PerformClearAct(GrabRow, useIndex);
             }
         }
@@ -479,7 +482,7 @@ namespace BASeTris.GameStates
             {
                 int ParticleSign = 1;
                 
-                AddParticles(pOwner, CurrentClearIndex, row.Key, ParticleSign);
+                AddParticles(pOwner, CurrentClearIndex, row.Key, ParticleSign,RowsCleared);
                 PerformClearAct(GrabRow, CurrentClearIndex);
             }
         }

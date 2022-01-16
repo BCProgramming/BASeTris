@@ -138,7 +138,7 @@ namespace BASeTris.GameStates
                         skb.Dispose();
                     }
                 }
-                
+                if(copiedGDI!=null)
                 foreach(var iterate in copiedGDI)
                 {
                     foreach (var bmp in iterate.Value)

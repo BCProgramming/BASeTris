@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.AssetManager;
 using SkiaSharp;
 
 namespace BASeTris.Rendering.Adapters
@@ -137,6 +138,7 @@ namespace BASeTris.Rendering.Adapters
 
     public struct BCRect
     {
+        public static readonly BCRect Empty = new BCRect(0, 0, 0, 0);
         private SKRect Main;
         public BCRect(SKRect Source)
         {
@@ -306,6 +308,11 @@ namespace BASeTris.Rendering.Adapters
         public static implicit operator BCColor(SKColor src)
         {
             return new BCColor(src);
+        }
+        public  static implicit operator BCColor(HSLColor src)
+        {
+            //HSLColor has an implicit conversion to a Color; we cast to Color and then can implicitly convert to BCColor.
+            return (Color)src;
         }
         public static BCColor Red = new BCColor(SKColors.Red);
         public static BCColor Orange = new BCColor(SKColors.Orange);

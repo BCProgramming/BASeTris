@@ -65,7 +65,10 @@ namespace BASeTris
         {
             
         }
-      
+        public Type GetCanvasType()
+        {
+            return typeof(SKCanvas);
+        }
         private void UpdateSize()
         {
             this.Location = new Point(140);
