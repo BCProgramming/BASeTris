@@ -12,7 +12,7 @@ using SkiaSharp;
 
 namespace BASeTris
 {
-    [HandlerTheme(typeof(StandardTetrisHandler))]
+    [HandlerTheme("Game Boy Style",typeof(StandardTetrisHandler))]
     public class GameBoyTetrominoTheme : NominoTheme
     {
         public override String Name { get { return "Game Boy"; } }

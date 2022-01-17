@@ -73,22 +73,25 @@ namespace BASeTris
         bool GameLoopsRunning = false;
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
-            
-            if (GameLoopsRunning) return;
-            
-            GameLoopsRunning = true;
-            
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
             GameSettings = new StandardSettings(sSettingsFile);
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.SoundScheme));
+            AudioThemeMan.ResetTheme();
+            if (GameLoopsRunning) return;
+            
+            GameLoopsRunning = true;
+            
+            
+            
+            
             var standardstate = new GameplayGameState(new StandardTetrisHandler(),null,TetrisGame.Soundman,null);
             //_Owner.GameStartTime = DateTime.MinValue;
             Game = new TetrisGame(_Owner, standardstate);
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);
 
             
-            AudioThemeMan.ResetTheme();
+            
             if (GameThread != null)
             {
                 GameThread.Abort();

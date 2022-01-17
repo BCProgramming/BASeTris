@@ -227,7 +227,7 @@ namespace BASeTris.GameStates.GameHandlers
             }
             else if (rowsfound == 4)
             {
-                Sounds.PlaySoundRnd(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.EffectVolume * 2);
+                Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.EffectVolume * 2);
             }
 
 
@@ -297,7 +297,16 @@ namespace BASeTris.GameStates.GameHandlers
             return FCR;
 
         }
-        public NominoTheme DefaultTheme { get { return new SNESTetrominoTheme(); } }
+        public NominoTheme DefaultTheme { 
+
+
+
+            get { 
+                
+                
+
+                return new SNESTetrominoTheme(); 
+            } }
 
         public void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {

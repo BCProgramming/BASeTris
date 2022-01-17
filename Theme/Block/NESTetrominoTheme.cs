@@ -5,10 +5,11 @@ using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
+using System.Linq;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme(typeof(StandardTetrisHandler))]
+    [HandlerTheme("NES Style",typeof(StandardTetrisHandler))]
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
     {
         public override string Name { get { return "NES"; } }
@@ -61,7 +62,7 @@ namespace BASeTris.Theme.Block
 
         public override SKPointI GetBlockSize(TetrisField field, NESBlockTypes BlockType)
         {
-            return new SKPointI(9, 9);
+            return new SKPointI(DarkerBlock.Length, DarkerBlock[0].Length);
         }
         protected override BlockFlags GetBlockFlags(NominoElement testvalue)
         {
@@ -81,6 +82,8 @@ namespace BASeTris.Theme.Block
                     return LevelColorSets[LevelIndex][0];
                 case BCT.Base_Light:
                     return LevelColorSets[LevelIndex][1];
+                case BCT.Black:
+                    return SKColors.Black;
                 default:
                     return LevelColorSets[LevelIndex][0];
             }
@@ -132,7 +135,8 @@ namespace BASeTris.Theme.Block
             Transparent,
             Glint,
             Base_Dark,
-            Base_Light
+            Base_Light,
+            Black
         }
         public enum NESBlockTypes
         {
@@ -140,8 +144,8 @@ namespace BASeTris.Theme.Block
             Lighter,
             Boxed
         }
-
-        public static BCT[][] DarkerBlock = new BCT[][]
+        
+        public static BCT[][] DarkerBlock_Core = new BCT[][]
         {
             new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
             new []{BCT.Transparent, BCT.Glint, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark},
@@ -153,8 +157,8 @@ namespace BASeTris.Theme.Block
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark}
         };
-
-        public static BCT[][] LighterBlock = new BCT[][]
+        public static BCT[][] DarkerBlock = DoubleAndOutline(DarkerBlock_Core);
+        public static BCT[][] LighterBlock_Core = new BCT[][]
         {
             new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
             new []{BCT.Transparent, BCT.Glint, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light},
@@ -166,20 +170,50 @@ namespace BASeTris.Theme.Block
             new []{BCT.Transparent, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light},
             new []{BCT.Transparent, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light, BCT.Base_Light}
         };
+        public static BCT[][] LighterBlock = DoubleAndOutline(LighterBlock_Core);
 
-        public static BCT[][] CenterWhiteBlock = new BCT[][]
+        public static BCT[][] CenterWhiteBlock_Core = new BCT[][]
         {
             new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
             new []{BCT.Transparent, BCT.Glint, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
-new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
+            new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Base_Dark},
             new []{BCT.Transparent, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark, BCT.Base_Dark}
         };
+        public static BCT[][] CenterWhiteBlock = DoubleAndOutline(CenterWhiteBlock_Core);
+        private static BCT[][] DoubleAndOutline(BCT[][] Source)
+        {
+            return Source;
+            /*return (from u in Source select (from f in u select (f==BCT.Transparent?BCT.Black:f)).ToArray()).ToArray(); 
+            //not used for now...
+            int UseWidth = Source[0].Length*2+2;
+            BCT[][] result = new BCT[Source.Length * 2 + 2][];
+            //add the top outline.
+            result[0] = Enumerable.Repeat<BCT>(BCT.Black, UseWidth).ToArray();
+            result[result.Length - 1] = result[0];
+            //iterate through each row in the source
+            for(int row = 0;row<Source.Length;row++)
+            {
+                BCT[] buildrow = new BCT[Source.Length * 2 + 2];
+                buildrow[0] = BCT.Black;
+                buildrow[buildrow.Length - 1] = BCT.Black;
+                int currentcopylocation = 0;
+                for(int copyindex=0;copyindex<Source[row].Length;copyindex++)
+                {
+                    //copy this value twice.
+                    buildrow[2 + currentcopylocation] = buildrow[1 + currentcopylocation] = Source[row][copyindex];
+                    currentcopylocation += 2;
+                }
+                result[row * 2+1] = result[row * 2 + 2] = buildrow;
 
+            }
+            return result;
+            */
+        }
 
         private static Dictionary<NESBlockTypes, BCT[][]> NESBlockMapLookup = new Dictionary<NESBlockTypes, BCT[][]>()
         {
@@ -209,17 +243,17 @@ new []{BCT.Transparent, BCT.Base_Dark, BCT.Glint, BCT.Glint, BCT.Glint, BCT.Glin
                 Level9Colors
         };
 
-        public static SKColor[] Level0Colors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue };
-        public static SKColor[] Level1Colors = new SKColor[] { SKColors.Green, SKColors.GreenYellow };
-        public static SKColor[] Level2Colors = new SKColor[] { SKColors.Purple, SKColors.Magenta };
-        public static SKColor[] Level3Colors = new SKColor[] { SKColors.Blue, SKColors.GreenYellow };
-        public static SKColor[] Level4Colors = new SKColor[] { SKColors.MediumVioletRed, SKColors.Aquamarine };
-        public static SKColor[] Level5Colors = new SKColor[] { SKColors.Aquamarine, SKColors.DeepSkyBlue };
-        public static SKColor[] Level6Colors = new SKColor[] { SKColors.Red, SKColors.SlateGray };
-        public static SKColor[] Level7Colors = new SKColor[] { SKColors.Indigo, SKColors.Brown };
-        public static SKColor[] Level8Colors = new SKColor[] { SKColors.DarkBlue, SKColors.Red };
+        public static SKColor[] Level0Colors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue,SKColors.Black };
+        public static SKColor[] Level1Colors = new SKColor[] { SKColors.Green, SKColors.GreenYellow, SKColors.Black };
+        public static SKColor[] Level2Colors = new SKColor[] { SKColors.Purple, SKColors.Magenta, SKColors.Black };
+        public static SKColor[] Level3Colors = new SKColor[] { SKColors.Blue, SKColors.GreenYellow, SKColors.Black };
+        public static SKColor[] Level4Colors = new SKColor[] { SKColors.MediumVioletRed, SKColors.Aquamarine, SKColors.Black };
+        public static SKColor[] Level5Colors = new SKColor[] { SKColors.Aquamarine, SKColors.DeepSkyBlue, SKColors.Black };
+        public static SKColor[] Level6Colors = new SKColor[] { SKColors.Red, SKColors.SlateGray, SKColors.Black };
+        public static SKColor[] Level7Colors = new SKColor[] { SKColors.Indigo, SKColors.Brown, SKColors.Black };
+        public static SKColor[] Level8Colors = new SKColor[] { SKColors.DarkBlue, SKColors.Red, SKColors.Black };
 
-        public static SKColor[] Level9Colors = new SKColor[] { SKColors.OrangeRed, SKColors.Orange };
+        public static SKColor[] Level9Colors = new SKColor[] { SKColors.OrangeRed, SKColors.Orange, SKColors.Black };
         //Level 0 style:
 
         public static SKColor[] AllThemeColors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue, SKColors.Green, SKColors.GreenYellow, SKColors.Purple, SKColors.Magenta, SKColors.MediumVioletRed, SKColors.Aquamarine, SKColors.Red, SKColors.SlateGray, SKColors.Indigo, SKColors.DarkBlue, SKColors.Orange, SKColors.OrangeRed };

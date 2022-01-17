@@ -87,7 +87,7 @@ namespace BASeTris.Theme.Audio
                { ATS("tetris_gb_theme") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
             BlockGroupMove = new AudioThemeElement(new[] { ATS("block_move_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupPlace = new AudioThemeElement(new[] { ATS("block_place_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-            BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+            BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate_4") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockStopped = new AudioThemeElement(new[] { ATS("block_stop") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
             ClearLine = new AudioThemeElement(new[] { ATS("line_clear_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
             ClearTetris = new AudioThemeElement(new[] { ATS("line_tetris_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),

@@ -35,6 +35,7 @@ namespace BASeTris.GameStates.Menu
             {
                 if (e.MenuElement == ReturnItem)
                 {
+                    pOwner.Settings.Save();
                     pOwner.CurrentState = _OriginalState;
                 }
             };

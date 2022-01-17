@@ -37,10 +37,10 @@ namespace BASeTris
     //That might benefit from other architectural changes involving random seeds, too...
     public class TetrisHighScoreData : IHighScoreEntryCustomData
     {
-        private TimeSpan[] LevelReachedTimes = new TimeSpan[] {TimeSpan.Zero};
+        public TimeSpan[] LevelReachedTimes = new TimeSpan[] {TimeSpan.Zero};
         public int TotalLines { get; set; }
-        private Dictionary<String, int> TetronimoPieceCounts = new Dictionary<string, int>(); //this is indexed by the GetType().Name value of the tetronimo instance(s) in question.
-        private Dictionary<String, int> TetronimoLineCounts = new Dictionary<string, int>();
+        public Dictionary<String, int> TetronimoPieceCounts = new Dictionary<string, int>(); //this is indexed by the GetType().Name value of the tetronimo instance(s) in question.
+        public Dictionary<String, int> TetronimoLineCounts = new Dictionary<string, int>();
 
         /// <summary>
         /// Initializes this High Score information from the information in a Statistics class.

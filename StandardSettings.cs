@@ -40,7 +40,8 @@ namespace BASeTris
                 new XAttribute("LockTime", LockTime),
                 new XAttribute("SmoothFall", SmoothFall),
                 new XAttribute("SmoothRotate", SmoothRotate),
-                new XAttribute("MusicOption",MusicOption));
+                new XAttribute("MusicOption",MusicOption),
+                new XAttribute("SoundScheme",SoundScheme));
 
         }
         public StandardSettings()
@@ -92,6 +93,7 @@ namespace BASeTris
             SmoothFall = Node.GetAttributeBool("SmoothFall", false);
             SmoothRotate = Node.GetAttributeBool("SmoothRotate", true);
             MusicOption = Node.GetAttributeString("MusicOption", "<RANDOM>");
+            SoundScheme = Node.GetAttributeString("SoundScheme", "Default");
         }
     }
 }

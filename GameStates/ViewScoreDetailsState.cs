@@ -17,10 +17,10 @@ namespace BASeTris.GameStates
         {
             get { return DisplayMode.Full; }
         }
-
+        
         public ShowHighScoresState _Owner = null;
         public IHighScoreEntry ShowEntry = null;
-
+        public int IncrementedDrawState = 255;
         public enum ViewScoreDetailsType
         {
             Details_Tetrominoes,

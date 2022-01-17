@@ -11,7 +11,7 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme(typeof(DrMarioHandler))]
+    [HandlerTheme("Dr.Mario NES Style",typeof(DrMarioHandler))]
     public class DrMarioThemeEnhanced : DrMarioTheme
     {
         public DrMarioThemeEnhanced() : base(InitializationFlags.Flags_EnhancedPillGraphics)
@@ -24,7 +24,7 @@ namespace BASeTris.Theme.Block
 
 
 
-    [HandlerTheme(typeof(DrMarioHandler))]
+    [HandlerTheme("Dr. Mario Enhanced Style",typeof(DrMarioHandler))]
     //CascadingBlockTheme will need to specify the DrMario customization Handler as it's valid Theme once ready.
     //this one doesn't care about the game level- it has two block types- the pills, and the virii.
     //of those we've got 3 colors. We could add more, I suppose, but Dr. Mario has three so let's keep things a bit simpler.

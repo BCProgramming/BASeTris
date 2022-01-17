@@ -8,7 +8,7 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme(typeof(StandardTetrisHandler))]
+    [HandlerTheme("Simple Style",typeof(StandardTetrisHandler))]
     public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP,SimpleBlockTheme.BasicBlockTypes>
     {
         public override String Name { get { return "Simple"; }  }

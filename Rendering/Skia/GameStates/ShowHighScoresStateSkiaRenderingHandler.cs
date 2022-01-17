@@ -146,34 +146,6 @@ namespace BASeTris.Rendering.Skia.GameStates
                         g.DrawText(PointerText, new SKPoint(ArrowX + 2, ArrowY + 2), ListingFontArrowShadow);
                         g.DrawText(PointerText, new SKPoint(ArrowX , ArrowY ), ListingFontArrow);
                     }
-                    /*g.DrawString(CurrentScorePosition.ToString(), ScoreFont, Brushes.Black, PosXPosition + 2, useYPosition + 2);
-                    g.DrawString(CurrentScorePosition.ToString(), ScoreFont, DrawScoreBrush, PosXPosition, useYPosition);
-                    //draw line between name and score.
-                    g.DrawLine(
-                    
-
-
-                    g.DrawString(sUseName, ScoreFont, Brushes.Black, NameXPosition + 2, useYPosition + 2);
-                    g.DrawString(sUseName, ScoreFont, DrawScoreBrush, NameXPosition, useYPosition);
-
-                    float ScoreXPosition = ScoreXPositionRight - MeasureScore.Width;
-
-                    g.DrawString(sUseScore.ToString(), ScoreFont, Brushes.Black, ScoreXPosition + 2, useYPosition + 2);
-                    g.DrawString(sUseScore.ToString(), ScoreFont, DrawScoreBrush, ScoreXPosition, useYPosition);
-
-                    g.DrawLine(new Pen(DrawScoreBrush, 3), NameXPosition + MeasureName.Width + 15, useYPosition + LineHeight / 2, ScoreXPosition - 15, useYPosition + LineHeight / 2);
-
-                    if (Source.SelectedScorePosition == CurrentScoreIndex)
-                    {
-                        //draw the selection arrow to the left of the NamePosition and useYPosition.
-                        var MeasureArrow = g.MeasureString(PointerText, ScoreFont);
-                        float ArrowX = PosXPosition - MeasureArrow.Width - 5;
-                        float ArrowY = useYPosition;
-                        g.DrawString(PointerText, ScoreFont, Brushes.Black, ArrowX + 2, ArrowY + 2);
-                        g.DrawString(PointerText, ScoreFont, DrawScoreBrush, ArrowX, ArrowY);
-                    }*/
-
-
                 }
                 
             }

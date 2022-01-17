@@ -10,7 +10,7 @@ namespace BASeTris.GameStates.GameHandlers
     public class HandlerThemeAttribute : Attribute 
     {
         public Type[] HandlerType { get; set; }
-        public HandlerThemeAttribute(params Type[] typespecifiers)
+        public HandlerThemeAttribute(String pName,params Type[] typespecifiers)
         {
             if (typespecifiers.Any((w) => (w.GetInterface("IGameCustomizationHandler")==null)))
                 throw new ArgumentException("All types provided to TetrisHandlerThemeAttribute must be a Game Handler");
