@@ -257,7 +257,8 @@
     <Compile Include="Rendering\Skia\TetrisStandardColouredBlockSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\StandardRenderingProvider.cs" />
     <Compile Include="Replay\StatefulReplay.cs" />
-    <Compile Include="StandardSettings.cs" />
+    <Compile Include="Settings\SettingsManager.cs" />
+    <Compile Include="Settings\StandardSettings.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="AssetManager\QColorMatrix.cs" />
     <Compile Include="Blocks\StandardColouredBlock.cs" />

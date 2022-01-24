@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.BackgroundDrawers;
+using BASeTris.Settings;
 using BASeTris.Theme.Audio;
 
 namespace BASeTris.GameStates.Menu
@@ -13,10 +14,13 @@ namespace BASeTris.GameStates.Menu
     public class OptionsMenuState:MenuState
     {
         private GameState _OriginalState;
-        
-        public OptionsMenuState(IBackground background,IStateOwner pOwner,GameState OriginalState):base(background)
+        private StandardSettings _AlterSet;
+        private String _SettingsTitle;
+        public OptionsMenuState(IBackground background,IStateOwner pOwner,GameState OriginalState,String pSettingsTitle,StandardSettings AlterSettingsSet):base(background)
         {
             _OriginalState = OriginalState;
+            _AlterSet = AlterSettingsSet;
+            _SettingsTitle = pSettingsTitle;
             PopulateOptions(pOwner);
         }
 
@@ -26,7 +30,7 @@ namespace BASeTris.GameStates.Menu
             Font standardFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight, 1.0f);
             Font ItemFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight * .75f, 1.0);
             MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
-            StateHeader = "Options";
+            StateHeader = "Options (" + _SettingsTitle + ")";
             HeaderTypeface = TetrisGame.GetRetroFont(14, 1.0f).FontFamily.Name;
             HeaderTypeSize = DesiredFontPixelHeight*.75f;
 
@@ -35,8 +39,9 @@ namespace BASeTris.GameStates.Menu
             {
                 if (e.MenuElement == ReturnItem)
                 {
-                    pOwner.Settings.Save();
+                    _AlterSet.Save();
                     pOwner.CurrentState = _OriginalState;
+                    
                 }
             };
             //add the sound options label.
@@ -70,7 +75,7 @@ namespace BASeTris.GameStates.Menu
             var ThemeArray = (from s in AudioTheme.AvailableSoundThemes select new SoundOption(s.Item1, s.Item2)).ToArray();
             int startIndex = 0;
 
-            String CurrentTheme = pOwner.Settings.SoundScheme;
+            String CurrentTheme = _AlterSet.SoundScheme;
             for(int i=0;i<ThemeArray.Length;i++)
             {
                 if (ThemeArray[i].Equals(CurrentTheme))
@@ -83,7 +88,7 @@ namespace BASeTris.GameStates.Menu
 
 
             int startMusicIndex = 0;
-            String CurrentMusic = pOwner.Settings.MusicOption;
+            String CurrentMusic = pOwner.Settings.std.MusicOption;
 
             for(int i=0;i<useMusicOptions.Length;i++)
             {
@@ -113,7 +118,7 @@ namespace BASeTris.GameStates.Menu
 
         private void SoundThemeOptionItem_OnChangeOption(object sender, OptionActivated<SoundOption> e)
         {
-            e.Owner.Settings.SoundScheme = e.Option.SoundKey;
+            e.Owner.Settings.std.SoundScheme = e.Option.SoundKey;
         }
 
         private void MusicOptionItem_OnActivateOption(object sender, OptionActivated<SoundOption> e)
@@ -124,9 +129,9 @@ namespace BASeTris.GameStates.Menu
             }
             else
             {
-                TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, e.Owner.Settings.MusicVolume, true);
+                TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, e.Owner.Settings.std.MusicVolume, true);
             }
-            e.Owner.Settings.MusicOption = e.Option.SoundKey;
+            e.Owner.Settings.std.MusicOption = e.Option.SoundKey;
         }
 
         private class SoundOption
@@ -144,5 +149,77 @@ namespace BASeTris.GameStates.Menu
             }
         }
         
+    }
+
+    public class OptionsMenuSettingsSelectorState: MenuState
+    {
+        private GameState _OriginalState;
+        
+        public OptionsMenuSettingsSelectorState(IBackground background, IStateOwner pOwner, GameState OriginalState) : base(background)
+        {
+            _OriginalState = OriginalState;
+            PopulateOptions(pOwner);
+        }
+
+        private void PopulateOptions(IStateOwner pOwner)
+        {
+            int DesiredFontPixelHeight = (int)(pOwner.GameArea.Height * (23d / 644d));
+            Font standardFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight, 1.0f);
+            Font ItemFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight * .75f, 1.0);
+            MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
+            StateHeader = "Choose Handler";
+            HeaderTypeface = TetrisGame.GetRetroFont(14, 1.0f).FontFamily.Name;
+            HeaderTypeSize = DesiredFontPixelHeight * .75f;
+
+
+            
+
+            var useDictionary = pOwner.Settings.AllSettings;
+            Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>> setlookup = new Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>>();
+            foreach (var iterateset in useDictionary)
+            {
+                MenuStateTextMenuItem submenuitem = new MenuStateTextMenuItem() { Text = iterateset.Key };
+                submenuitem.FontFace = ItemFont.FontFamily.Name;
+                submenuitem.FontSize = ItemFont.Size;
+                MenuElements.Add(submenuitem);
+                setlookup.Add(submenuitem, iterateset);
+            }
+            
+            MenuItemActivated += (obj, e) =>
+            {
+                if (e.MenuElement == ReturnItem)
+                {
+                    pOwner.Settings.Save();
+                    pOwner.CurrentState = _OriginalState;
+                }
+                else
+                {
+                    MenuStateTextMenuItem selecteditem = e.MenuElement as MenuStateTextMenuItem;
+                    var getkvp = setlookup[selecteditem];
+                    OptionsMenuState oms = new OptionsMenuState(this._BG, pOwner, this, getkvp.Key, getkvp.Value);
+                    pOwner.CurrentState = oms;
+                    this.ActivatedItem = null;
+                }
+            };
+            ReturnItem.FontFace = ItemFont.FontFamily.Name;
+            ReturnItem.FontSize =  ItemFont.Size;
+            MenuElements.Add(ReturnItem);
+
+
+        }
+
+
+        private class HandlerSettingsOption
+        {
+            private String _HandlerName;
+            private String _DisplayText;
+            private StandardSettings _Settings;
+            public String HandlerName {  get { return _HandlerName; } set { _HandlerName = value; } }
+            public String DisplayText {  get { return _DisplayText; } set { _DisplayText = value; } }
+            public StandardSettings Settings {  get { return _Settings; } set { _Settings = value; } }
+        }
+      
+
+
     }
 }

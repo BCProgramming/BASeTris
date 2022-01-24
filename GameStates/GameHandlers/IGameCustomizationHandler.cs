@@ -195,7 +195,37 @@ namespace BASeTris.GameStates.GameHandlers
         }
     }
 
+    public static class HandlerHelperExtensions
+    {
+        private static Dictionary<IStateOwner,IGameCustomizationHandler> LastHandlers = new Dictionary<IStateOwner, IGameCustomizationHandler>();
+        /// <summary>
+        /// Helper extension on IStateOwner. This attempts to get the IGameCustomizationHandler that is currently  "active" for the handler.
+        /// The customization handler is a part of the GameplayGameState, so this relies on either the current state being the gameplay game state, a Composite state of the gameplay gamestate. If neither of those
+        /// is the case, it will return the last handler that was previously retrieved through this method from that Owner, if this is the first call, it will return null.
+        /// </summary>
+        /// <param name="pOwner"></param>
+        /// <returns></returns>
+        public static IGameCustomizationHandler GetHandler(this IStateOwner pOwner)
+        {
+            IGameCustomizationHandler result = null;
+            if(pOwner.CurrentState is GameplayGameState ggs)
+            {
+                result = ggs.GameHandler;
+            }
+            else if(pOwner.CurrentState is ICompositeState<GameplayGameState> css)
+            {
+                result = css.GetComposite().GameHandler;
+            }
+            else
+            {
+                if (LastHandlers.ContainsKey(pOwner)) return LastHandlers[pOwner];
+            }
+            LastHandlers[pOwner] = result;
 
+            return result;
+        }
+
+    }
 
 
 }

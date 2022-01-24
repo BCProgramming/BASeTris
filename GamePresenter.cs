@@ -12,6 +12,7 @@ using BASeTris.AI;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
 using BASeTris.Theme.Block;
@@ -42,12 +43,12 @@ namespace BASeTris
         public ControllerInputState CIS { get; set; } = null;
         private IStateOwner _Owner = null;
         private IGamePresenter _Presenter = null;
-        private StandardSettings _GameSettings = null;
+        private SettingsManager _GameSettings = null;
         public AudioThemeManager AudioThemeMan { get; set; } = null;
         public bool IgnoreController = false;
         HashSet<GameState.GameKeys> ActiveKeys = new HashSet<GameState.GameKeys>();
         private TetrisGame _Game;
-        public StandardSettings GameSettings {  get { return _GameSettings; } set { _GameSettings = value; } }
+        public SettingsManager GameSettings {  get { return _GameSettings; } set { _GameSettings = value; } }
         
         public TetrisGame Game {  get { return _Game; } set { _Game = value; } }
         public DASRepeatHandler RepeatHandler { get; set; } = null;
@@ -75,8 +76,8 @@ namespace BASeTris
         {
             String sDataFolder = TetrisGame.AppDataFolder;
             String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
-            GameSettings = new StandardSettings(sSettingsFile);
-            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.SoundScheme));
+            GameSettings = new SettingsManager(sSettingsFile,_Owner);
+            AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();
             if (GameLoopsRunning) return;
             

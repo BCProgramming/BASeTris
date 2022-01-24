@@ -28,6 +28,7 @@ using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
 using SkiaSharp;
+using BASeTris.Settings;
 
 namespace BASeTris.GameStates
 {
@@ -390,13 +391,13 @@ namespace BASeTris.GameStates
                 if (GameOptions.MusicEnabled)
                 {
                     iActiveSoundObject musicplay = null;
-                    if(pOwner.Settings.MusicOption=="<RANDOM>")
+                    if(pOwner.Settings.std.MusicOption =="<RANDOM>")
                     {
-                        musicplay = Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.MusicVolume, true);
+                        musicplay = Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.std.MusicVolume, true);
                     }
                     else
                     {
-                        musicplay = Sounds.PlayMusic(pOwner.Settings.MusicOption, pOwner.Settings.MusicVolume, true);
+                        musicplay = Sounds.PlayMusic(pOwner.Settings.std.MusicOption, pOwner.Settings.std.MusicVolume, true);
                     }
 
                     
@@ -602,7 +603,7 @@ namespace BASeTris.GameStates
                         ArbitraryGroup.AddBlock(new Point[] {Point.Empty}, GenerateColorBlock);
                         this.PlayField.Theme.ApplyRandom(ArbitraryGroup,GameHandler,this.PlayField);
                         //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null,new StandardSettings());
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null,new SettingsManager());
                         RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
                         
                     }
@@ -645,7 +646,7 @@ namespace BASeTris.GameStates
         {
             if (!grp.Controllable) return;
             grp.Rotate(ccw);
-            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key, pOwner.Settings.EffectVolume);
+            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key, pOwner.Settings.std.EffectVolume);
             pOwner.Feedback(0.3f, 100);
             grp.Clamp(PlayField.RowCount, PlayField.ColCount);
         }
@@ -755,7 +756,7 @@ namespace BASeTris.GameStates
                     }
 
                     pOwner.Feedback(0.6f, 200);
-                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
                     GameHandler.ProcessFieldChange(this, pOwner, FirstGroup);
                     //ProcessFieldChangeWithScore(pOwner, FirstGroup);
                 }
@@ -770,12 +771,12 @@ namespace BASeTris.GameStates
                     {
                         lastHorizontalMove = DateTime.Now;
                         ActiveItem.X += XMove;
-                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.std.EffectVolume);
                         pOwner.Feedback(0.1f, 50);
                     }
                     else
                     {
-                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockStopped.Key, pOwner.Settings.EffectVolume);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockStopped.Key, pOwner.Settings.std.EffectVolume);
                         pOwner.Feedback(0.4f,75);
                     }
                 }
@@ -789,7 +790,7 @@ namespace BASeTris.GameStates
 
                     var playing = Sounds.GetPlayingMusic_Active();
                     playing?.Pause();
-                    Sounds.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.EffectVolume);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.std.EffectVolume);
                 }
 
                 //pOwner.CurrentState = new PauseGameState(this);
@@ -816,7 +817,7 @@ namespace BASeTris.GameStates
                             HoldBlock.SetY(pOwner, 0);
                             HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
                             HoldBlock = FirstGroup;
-                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
+                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.std.EffectVolume);
                             pOwner.Feedback(0.9f, 40);
                             BlockHold = true;
                         }
@@ -832,7 +833,7 @@ namespace BASeTris.GameStates
                             PlayField.RemoveBlockGroup(FirstGroup);
                             HoldBlock = FirstGroup;
                             BlockHold = true;
-                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.EffectVolume);
+                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.std.EffectVolume);
                         }
                     }
                 }
@@ -844,7 +845,7 @@ namespace BASeTris.GameStates
             else if (g == GameKeys.GameKey_Debug2)
             {
 
-                OptionsMenuState OptionState = new OptionsMenuState(BackgroundDrawers.StandardImageBackgroundGDI.GetStandardBackgroundDrawer(),
+                OptionsMenuSettingsSelectorState OptionState = new OptionsMenuSettingsSelectorState(BackgroundDrawers.StandardImageBackgroundGDI.GetStandardBackgroundDrawer(),
                     pOwner, pOwner.CurrentState);
 
                 pOwner.CurrentState = OptionState;
@@ -985,7 +986,7 @@ namespace BASeTris.GameStates
             }
             else if (fitresult==TetrisField.CanFitResultConstants.CantFit_Field)
             {
-                if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.LockTime)
+                if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.std.LockTime)
                 {
                     var elapsed = pOwner.GetElapsedTime();
                     //any and all blockgroups in the field that are set not to allow input must have not moved in the last 750ms before we allow any groups to set.
@@ -1005,7 +1006,7 @@ namespace BASeTris.GameStates
                         PlayField.SetGroupToField(activeItem);
                         GameStats.AddScore(25 - activeItem.Y);
                         if (activeItem.PlaceSound)
-                            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.EffectVolume);
+                            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
                         return GroupOperationResult.Operation_Success;
                     }
                 }

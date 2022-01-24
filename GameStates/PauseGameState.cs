@@ -12,6 +12,7 @@ using BASeTris.Choosers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
+using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;
 using OpenTK;
@@ -48,7 +49,7 @@ namespace BASeTris.GameStates
         public AudioThemeManager AudioThemeMan { get { return PauseOwner.AudioThemeMan; } set { PauseOwner.AudioThemeMan = value; } }
         public BCRect LastDrawBounds => PauseOwner.LastDrawBounds;
 
-        public StandardSettings Settings => PauseOwner.Settings;
+        public SettingsManager Settings => PauseOwner.Settings;
 
         //we implement IStateOwner as a delegate, so we can provide ourselves to the PausePlayerState as an owner and it won't actually interfere with the main state.
         public bool DrawDataInitialized = false;
@@ -234,7 +235,7 @@ namespace BASeTris.GameStates
 
         private static void UnPause(IStateOwner pOwner)
         {
-            TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.EffectVolume);
+            TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.std.EffectVolume);
             var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing2?.UnPause();
             playing2?.setVolume(1.0f);

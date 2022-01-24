@@ -37,6 +37,7 @@ using BASeTris.BackgroundDrawers;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Audio;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Settings;
 
 namespace BASeTris
 {
@@ -54,7 +55,7 @@ namespace BASeTris
             add => _Present.Game.BeforeGameStateChange += value;
             remove => _Present.Game.BeforeGameStateChange -= value;
         }
-        public StandardSettings Settings 
+        public SettingsManager Settings 
         {
             get
             {

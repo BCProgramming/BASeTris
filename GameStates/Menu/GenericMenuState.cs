@@ -128,7 +128,8 @@ namespace BASeTris.GameStates.Menu
                 else if(e.MenuElement == OptionsItem)
                 {
                     //Show the options menu
-                    var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
+                    //var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
+                    var OptionsMenu = new OptionsMenuSettingsSelectorState(Target.BG, pOwner, pOwner.CurrentState);
                     pOwner.CurrentState = OptionsMenu;
                     Target.ActivatedItem = null;
                 }

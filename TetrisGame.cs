@@ -26,6 +26,7 @@ using OpenTK.Input;
 using BASeTris.Rendering.Adapters;
 using BASeTris.GameStates.GameHandlers;
 using System.Runtime.InteropServices;
+using BASeTris.Settings;
 
 namespace BASeTris
 {
@@ -79,7 +80,7 @@ namespace BASeTris
             }
         }
         
-        public StandardSettings Settings
+        public SettingsManager Settings
         {
             get
             {

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Rendering.RenderElements;
+using BASeTris.Settings;
 
 namespace BASeTris.Rendering.Skia
 {
@@ -24,7 +25,7 @@ namespace BASeTris.Rendering.Skia
         public SkiaSharp.SKPaint OverrideBrush = null;
         public SkiaSharp.SKMatrix ApplyAttributes = SkiaSharp.SKMatrix.MakeIdentity();
         public SkiaSharp.SKColorFilter ColorFilter = null;
-        public TetrisBlockDrawSkiaParameters(SkiaSharp.SKCanvas pG, SkiaSharp.SKRect pRegion, Nomino pGroupOwner, StandardSettings pSettings) : base(pGroupOwner, pSettings)
+        public TetrisBlockDrawSkiaParameters(SkiaSharp.SKCanvas pG, SkiaSharp.SKRect pRegion, Nomino pGroupOwner, SettingsManager pSettings) : base(pGroupOwner, pSettings)
         {
             g = pG;
             region = pRegion;

@@ -11,6 +11,7 @@ using BASeTris.Rendering.RenderElements;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Settings;
 
 namespace BASeTris.Rendering.GDIPlus
 {
@@ -44,7 +45,7 @@ namespace BASeTris.Rendering.GDIPlus
                         ArbitraryGroup.AddBlock(new Point[] { Point.Empty }, GenerateColorBlock);
                         Self.PlayField.Theme.ApplyRandom(ArbitraryGroup,Self.GameHandler, Self.PlayField);
                         //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null, new StandardSettings());
+                        TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(g, new RectangleF(DrawBlockX, DrawBlockY, BlockSize.Width, BlockSize.Height), null, new SettingsManager());
                         RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
 
                     }

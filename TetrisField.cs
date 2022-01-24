@@ -579,10 +579,10 @@ namespace BASeTris
                         }
                    
                     PointF doTranslate = new PointF(0,translation);
-                    if(!pState.Settings.SmoothFall) doTranslate = new PointF(0,0);
+                    if(!pState.Settings.std.SmoothFall) doTranslate = new PointF(0,0);
                     //if (Settings.SmoothFall) g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y);
-                    if(pState.Settings.SmoothFall) g.TranslateTransform(doTranslate.X,-BlockHeight + doTranslate.Y);
-                    if (useAngle != 0 && pState.Settings.SmoothRotate)
+                    if(pState.Settings.std.SmoothFall) g.TranslateTransform(doTranslate.X,-BlockHeight + doTranslate.Y);
+                    if (useAngle != 0 && pState.Settings.std.SmoothRotate)
                     {
                         int MaxXBlock = (from p in bg select p.X).Max();
                         int MaxYBlock = (from p in bg select p.Y).Max();

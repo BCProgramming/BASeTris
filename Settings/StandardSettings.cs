@@ -7,14 +7,19 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using BASeCamp.Elementizer;
 
-namespace BASeTris
+namespace BASeTris.Settings
 {
     public class StandardSettings : IXmlPersistable
     {
         //Audio volume settings.
         public float MusicVolume = 1.0f;
         public float EffectVolume = 1.0f;
-
+        private WeakReference<SettingsManager> _ManagerOwner { get; set; } = new WeakReference<SettingsManager>(null);
+        
+        public void SetOwner(SettingsManager pOwner)
+        {
+            _ManagerOwner.SetTarget(pOwner);
+        }
         public float DisplayScaleFactor = 1.6f;
         //TODO (?) Support additional Audio Drivers other than BASSDriver. Probably not worthwhile to be fair.
 
@@ -69,7 +74,12 @@ namespace BASeTris
         }
         public void Save()
         {
-            Save(sLoadedSource);
+            if (_ManagerOwner.TryGetTarget(out SettingsManager mgr))
+            {
+                mgr.Save();
+            }
+            else
+                Save(sLoadedSource);
         }
         public void Save(String pTargetFile)
         {

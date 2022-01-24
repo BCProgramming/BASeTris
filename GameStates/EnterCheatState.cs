@@ -28,11 +28,11 @@ namespace BASeTris.GameStates
             pOwner.CurrentState = _PreviousState;
             if (Cheat.ProcessCheat(sCurrentEntry, pOwner))
             {
-                TetrisGame.Soundman.PlaySound("right", pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound("right", pOwner.Settings.std.EffectVolume);
             }
             else
             {
-                TetrisGame.Soundman.PlaySound("wrong", pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound("wrong", pOwner.Settings.std.EffectVolume);
             }
         }
     }

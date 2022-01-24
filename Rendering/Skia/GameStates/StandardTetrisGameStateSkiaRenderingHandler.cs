@@ -18,6 +18,7 @@ using BASeTris.Tetrominoes;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Settings;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
@@ -68,7 +69,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             ArbitraryGroup.AddBlock(new Point[] { Point.Empty }, GenerateColorBlock);
                             Self.PlayField.Theme.ApplyRandom(ArbitraryGroup,Self.GameHandler, Self.PlayField);
                             //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, new SKRect(DrawBlockX, DrawBlockY, DrawBlockX + BlockSize.Width, DrawBlockY + BlockSize.Height), null, new StandardSettings());
+                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, new SKRect(DrawBlockX, DrawBlockY, DrawBlockX + BlockSize.Width, DrawBlockY + BlockSize.Height), null, new SettingsManager());
                             RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
 
                         }
@@ -392,7 +393,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                     if (Source.HoldBlock != null)
                     {
                         SKBitmap HoldTetromino = Source.GetTetrominoSKBitmap(Source.HoldBlock.GetType());
-                        g.DrawBitmap(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
+                        if(HoldTetromino!=null)
+                            g.DrawBitmap(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                     }
                 }
             }

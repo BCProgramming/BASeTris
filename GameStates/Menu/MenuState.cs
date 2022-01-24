@@ -136,7 +136,7 @@ namespace BASeTris.GameStates.Menu
             {
                 if (ActivatedItem != null)
                 {
-                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.EffectVolume);
+                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
                     ActivatedItem.OnDeactivated();
                     ActivatedItem = null;
                 }
@@ -145,7 +145,7 @@ namespace BASeTris.GameStates.Menu
 
                     //Activate the currently selected item.
                     var currentitem = MenuElements[SelectedIndex];
-                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.EffectVolume);
+                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
                     ActivatedItem = currentitem;
                     MenuItemActivated?.Invoke(this, new MenuStateMenuItemActivatedEventArgs(currentitem));
 
@@ -156,7 +156,7 @@ namespace BASeTris.GameStates.Menu
 
             else if (OriginalIndex != SelectedIndex)
             {
-                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.std.EffectVolume);
                 var previousitem = MenuElements[OriginalIndex];
                 var currentitem = MenuElements[SelectedIndex];
                 MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previousitem));

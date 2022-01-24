@@ -20,7 +20,7 @@ namespace BASeTris.Rendering.GDIPlus
             if (Source.LastSecond != Source.timeremaining.Seconds)
             {
                 //emit a sound.
-                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, pOwner.Settings.std.EffectVolume);
                 Source.LastSecond = Source.timeremaining.Seconds;
                 Source.lastMillis = 1000;
             }

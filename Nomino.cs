@@ -19,6 +19,7 @@ using BASeTris.Rendering.RenderElements;
 using BASeTris.Rendering.Skia;
 using BASeTris.Blocks;
 using SkiaSharp;
+using BASeTris.Settings;
 
 namespace BASeTris
 {
@@ -162,7 +163,7 @@ namespace BASeTris
                 foreach (NominoElement bge in this)
                 {
                     RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
-                    TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this,new StandardSettings());
+                    TetrisBlockDrawGDIPlusParameters tbd = new TetrisBlockDrawGDIPlusParameters(DrawRep, DrawPos, this,new SettingsManager());
                     RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                     //bge.Block.DrawBlock(tbd);
                     
@@ -187,7 +188,7 @@ namespace BASeTris
                     var Left = BlockSize.Width * (bge.X - _GroupExtents.X);
                     var Top = BlockSize.Height * (bge.Y - _GroupExtents.Y);
                     SKRect DrawPos = new SKRect(Left, Top, Left + BlockSize.Width, Top + BlockSize.Height);
-                    TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(DrawRep,DrawPos,this,new StandardSettings());
+                    TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(DrawRep,DrawPos,this,new SettingsManager());
                     RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                 }
             }

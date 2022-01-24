@@ -56,12 +56,12 @@ namespace BASeTris.GameStates
             if(!PlayedDeathSound)
             {
                 PlayedDeathSound = true;
-                TetrisGame.Soundman.PlaySound("mmdeath", pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound("mmdeath", pOwner.Settings.std.EffectVolume);
             }
             if ((DateTime.Now - CompleteSummaryTime).TotalMilliseconds > 500)
             {
                 CompleteSummaryTime = DateTime.MaxValue;
-                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOver.Key, pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOver.Key, pOwner.Settings.std.EffectVolume);
                 GameplayGameState standardstate = GameOveredState as GameplayGameState;
                 if (standardstate != null)
                 {
@@ -77,7 +77,7 @@ namespace BASeTris.GameStates
             if ((DateTime.Now - LastAdvance).TotalMilliseconds > 50 && !CompleteScroll)
             {
                 LastAdvance = DateTime.Now;
-                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, pOwner.Settings.EffectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, pOwner.Settings.std.EffectVolume);
                 CoverBlocks++;
                 GameplayGameState standardstate = GameOveredState as GameplayGameState;
                 if (standardstate != null)
@@ -99,7 +99,7 @@ namespace BASeTris.GameStates
                 {
                     if (CurrentLinesDisplay != calcresult)
                     {
-                        TetrisGame.Soundman.PlaySound("block_place_2", pOwner.Settings.EffectVolume);
+                        TetrisGame.Soundman.PlaySound("block_place_2", pOwner.Settings.std.EffectVolume);
                     }
 
                     CurrentLinesDisplay = calcresult;
@@ -136,7 +136,7 @@ namespace BASeTris.GameStates
                                 ((GameplayGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats as TetrisStatistics))
                                 , useStats as TetrisStatistics);
                             pOwner.CurrentState = ehs;
-                            TetrisGame.Soundman.PlayMusic("highscoreentry", pOwner.Settings.MusicVolume, true);
+                            TetrisGame.Soundman.PlayMusic("highscoreentry", pOwner.Settings.std.MusicVolume, true);
                         }
                         else
                         {

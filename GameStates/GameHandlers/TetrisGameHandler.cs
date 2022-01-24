@@ -216,18 +216,18 @@ namespace BASeTris.GameStates.GameHandlers
                 state.InvokePlayFieldLevelChanged(state, new TetrisField.LevelChangeEventArgs((int)Statistics.LineCount / 10));
                 Statistics.SetLevelTime(pOwner.GetElapsedTime());
 
-                state.Sounds.PlaySound(pOwner.AudioThemeMan.LevelUp.Key, pOwner.Settings.EffectVolume);
+                state.Sounds.PlaySound(pOwner.AudioThemeMan.LevelUp.Key, pOwner.Settings.std.EffectVolume);
                 PlayField.SetFieldColors(this);
                 state.f_RedrawStatusBitmap = true;
             }
 
             if (rowsfound > 0 && rowsfound < 4)
             {
-                Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.EffectVolume * 2);
+                Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
             }
             else if (rowsfound == 4)
             {
-                Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.EffectVolume * 2);
+                Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.std.EffectVolume * 2);
             }
 
 
@@ -250,7 +250,7 @@ namespace BASeTris.GameStates.GameHandlers
                     state.currenttempo = 68;
                     if (GameOptions.MusicRestartsOnTempoChange)
                     {
-                        if (GameOptions.MusicEnabled) Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.MusicVolume, true);
+                        if (GameOptions.MusicEnabled) Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.std.MusicVolume, true);
                     }
 
                     var grabbed = Sounds.GetPlayingMusic_Active();
@@ -268,11 +268,11 @@ namespace BASeTris.GameStates.GameHandlers
                     if (GameOptions.MusicRestartsOnTempoChange)
                         if (GameOptions.MusicEnabled)
                         {
-                            if (pOwner.Settings.MusicOption == "<RANDOM>")
-                                Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.MusicVolume, true);
+                            if (pOwner.Settings.std.MusicOption == "<RANDOM>")
+                                Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.std.MusicVolume, true);
                             else
                             {
-                                Sounds.PlayMusic(pOwner.Settings.MusicOption, pOwner.Settings.MusicVolume, true);
+                                Sounds.PlayMusic(pOwner.Settings.std.MusicOption, pOwner.Settings.std.MusicVolume, true);
                             }
                         }
                     var grabbed = Sounds.GetPlayingMusic_Active();

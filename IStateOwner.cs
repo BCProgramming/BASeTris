@@ -1,5 +1,6 @@
 ﻿using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.Adapters;
+using BASeTris.Settings;
 using BASeTris.Theme.Audio;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace BASeTris
         TimeSpan GetElapsedTime();
 
         BCRect LastDrawBounds { get; }
-        StandardSettings Settings { get; }
+        SettingsManager Settings { get; }
         event EventHandler<GameClosingEventArgs> GameClosing;
     }
     public class StateOwnerEventArgs :EventArgs
