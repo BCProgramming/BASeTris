@@ -53,7 +53,7 @@ namespace BASeTris
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferWidth, out bufferWidth);
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferHeight, out bufferHeight);
             
-            return new GRBackendRenderTarget(Window.ClientSize.Width,Window.ClientSize.Height,3,stencil,new GRGlFramebufferInfo((uint)framebuffer,GlobalResources.DefaultColorType.ToGlSizedFormat()));
+            return new GRBackendRenderTarget(Window.ClientSize.Width, Window.ClientSize.Height, 3, stencil, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
            
         }
         public const int DEFAULT_GAME_WIDTH = 520;
@@ -248,7 +248,7 @@ namespace BASeTris
                 backColor.G = 0.1f;
                 backColor.B = 0.3f;
                 GL.ClearColor(backColor);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
                 using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType))
                 {
                     Debug.Assert(surface != null);
@@ -311,6 +311,7 @@ namespace BASeTris
                                 canvas.ClipRect(FieldRect);
                                 staterender.Render(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(FieldRect));
                                 canvas.Restore();
+                                
                                 //now, call rendder to render the stats.
                                 canvas.ClipRect(StatsRect);
                                 

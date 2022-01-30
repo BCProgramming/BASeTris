@@ -272,7 +272,7 @@ namespace BASeTris.GameStates.GameHandlers
                     {
                         isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
                     }
-                    if (!cb.IsSupported(cb.Owner, state.PlayField,new[] { cb }.ToList()) && !AdditionalSkipBlocks.Contains(cb.Owner))
+                    if (!isPopping && !cb.IsSupported(cb.Owner, state.PlayField,new[] { cb }.ToList()) && !AdditionalSkipBlocks.Contains(cb.Owner))
                     {
                         //we initialize the list of recursion blocks to the block we are testing, since it cannot support itself.
                         //resurrect this block and other blocks that are in the same nomino.
@@ -458,7 +458,11 @@ namespace BASeTris.GameStates.GameHandlers
                                     {
                                         isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
                                     }
-                                    if (!cb.IsSupported(cb.Owner, state.PlayField) && !ResurrectNominos.Contains(cb.Owner) && !AddedBlockAlready.Contains(cb))
+                                    if (row < 5)
+                                    {
+                                        ;
+                                    }
+                                    if (!isPopping && !cb.IsSupported(cb.Owner, state.PlayField) && !ResurrectNominos.Contains(cb.Owner) && !AddedBlockAlready.Contains(cb))
                                     {
                                         //resurrect this block and other blocks that are in the same nomino.
                                         //since we remove busted blocks from the nomino, we can take the Duomino this

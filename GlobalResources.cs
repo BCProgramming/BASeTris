@@ -25,7 +25,7 @@ namespace BASeTris
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferWidth, out bufferWidth);
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferHeight, out bufferHeight);
 
-            return new GRBackendRenderTarget(Width, Height, 3, stencil, new GRGlFramebufferInfo((uint)framebuffer, DefaultColorType.ToGlSizedFormat()));
+            return new GRBackendRenderTarget(Width, Height, samples, Math.Min(1,stencil), new GRGlFramebufferInfo((uint)framebuffer, DefaultColorType.ToGlSizedFormat()));
 
         }
     }

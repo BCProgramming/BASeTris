@@ -70,13 +70,22 @@ namespace BASeTris.Blocks
                             {
                                 if (belowBlock is CascadingBlock cb && !RecursionBlocks.Contains(cb))
                                 {
+                                    if(belowBlock is LineSeriesBlock lsb)
+                                    {
+                                        if (lsb.Popping) return false; //popping LineSeriesBlocks are not considered solid (this might make more sense as a property of the block... IsSolid or something....)
+                                        
+                                    }
                                     RecursionBlocks.Add(this);
                                     if (cb.IsSupported(Owner, field, RecursionBlocks))
                                     {
                                         return true;
                                     }
                                 }
-                                else
+                                else if((belowBlock is CascadingBlock cbx && RecursionBlocks.Contains(cbx)))
+                                {
+                                    //if recursionblocks contains this, we just skip evaluating it.
+                                }
+                                else 
                                 {
                                     //we consider other block types to be solid.
                                     return true;

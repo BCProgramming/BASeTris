@@ -32,14 +32,20 @@ namespace BASeTris.Rendering.Skia.GameStates
     public class UnpauseDelayStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, UnpauseDelayGameState, GameStateSkiaDrawParameters>
     {
         private SKPaint SecondsPaint = null;
+
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, UnpauseDelayGameState Source, GameStateSkiaDrawParameters Element)
         {
 
             SKCanvas g = pRenderTarget;
             var Bounds = Element.Bounds;
-            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source._ReturnState, Element);
+            var usePaint = new SKPaint() { Color = SKColors.Yellow, StrokeWidth = 6};
+            
+
+
+            //RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source._ReturnState, Element);
+            
             //Draw Faded out overlay to darken things up.
-            DrawFadeOverlay(g, Bounds);
+            //DrawFadeOverlay(g, Bounds);
             //draw a centered Countdown
 
             if (Source.LastSecond != Source.timeremaining.Seconds)
@@ -69,19 +75,44 @@ namespace BASeTris.Rendering.Skia.GameStates
             SKPoint DrawPosition = new SKPoint(Bounds.Width / 2 - MeasureText.Width / 2, Bounds.Height / 2 + MeasureText.Height / 2);
 
             //g.DrawOval(SecondBound, new SKPaint() { Color = SKColors.Red, StrokeWidth = 1,Style=SKPaintStyle.Stroke });
+            //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), true, new SKPaint() { StrokeWidth = 1f, StrokeCap=SKStrokeCap.Round,  Color = SKColors.Yellow, Style = SKPaintStyle.Stroke });
             using (SKPath path = new SKPath())
             {
-                path.FillType = SKPathFillType.EvenOdd;
-                path.AddArc(SecondBound, 0, (float)(360 * (1 - Millis)));
+                float StartAngle = 0;
+                float SweepAngle = (float)(360 * (1 - Millis));
+                //path.AddOval(SecondBound, SKPathDirection.CounterClockwise);
+                //path.AddArc(SecondBound, 0, SweepAngle);
+                double MinAngle = Math.PI / 180;
+                double XOffset = SecondBound.Left + SecondBound.Width / 2;
+                double YOffset = SecondBound.Top + SecondBound.Height / 2;
+                double CircleRadius = (SecondBound.Width / 2*5)*(1-Millis);
+                for(double drawAngle=StartAngle;drawAngle<SweepAngle;drawAngle+=MinAngle)
+                {
+                    double useAngle = drawAngle * (Math.PI / 180);
+                    double XPos1 = Math.Sin(useAngle - MinAngle) * CircleRadius / 2 +XOffset;
+                    double YPos1 = Math.Cos(useAngle - MinAngle) * CircleRadius  / 2 + YOffset;
+                    double XPos2 = Math.Sin(useAngle) * CircleRadius / 2 + XOffset;
+                    double YPos2 = Math.Cos(useAngle) * CircleRadius / 2 + YOffset;
+                    g.DrawLine((float)XPos1, (float)YPos1, (float)XPos2, (float)YPos2, usePaint);
+                }
+
+                //path.LineTo(67, 34);
+                //path.LineTo(145, 500);
+                //usePaint.PathEffect = SKPathEffect.CreateDiscrete(5, 0.5f, 0);
+               //g.DrawArc(SecondBound, 0, SweepAngle, true, usePaint);
+                //g.DrawLine(67, 34, 145, 500,usePaint);
                 
-                //g.DrawPath(path, new SKPaint() { StrokeWidth = 0.01f, Color = SKColors.White, Style = SKPaintStyle.Stroke });
+               //Something really fucked with SkiaSharp and/or OpenTK here, as anything seems to draw a sort of bounding box thing around what was drawn, and I don't know why.
+               
+               //g.DrawPath(path, usePaint) ;
+                
             }
             //this arc drawing doesn't work, for some reason.
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), false, new SKPaint() { StrokeWidth = 0.05f, Color = SKColors.Yellow, Style = SKPaintStyle.Stroke, IsStroke = true,StrokeCap = SKStrokeCap.Square,StrokeMiter = 0 });
             g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
             Source.lastMillis = Millis;
         }
-
+        
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, UnpauseDelayGameState Source, GameStateSkiaDrawParameters Element)
         {
             RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source._ReturnState, Element);
