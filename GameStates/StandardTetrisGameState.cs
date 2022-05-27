@@ -934,7 +934,7 @@ namespace BASeTris.GameStates
                 }
                 for (float y = Original.Item1.Y; y<Drop.Item1.Y-1;y++)
                 {
-                    GenerateDropParticles(new BCPoint(Original.Item1.X, y), 30, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)),
+                    GenerateDropParticles(new BCPoint(Original.Item1.X, y), 10, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)),
                         (xget,yget)=> {
                             var xposget = xget * ColorSource.Width;
                             var yposget = yget * ColorSource.Height;
@@ -960,8 +960,12 @@ namespace BASeTris.GameStates
             {
                 for (int i = 0; i < NumGenerate; i++)
                 {
-                    var genX = (float)rgen.NextDouble();
-                    var genY = (float)rgen.NextDouble();
+                    float genX;
+                    float genY;
+
+
+                    for (genX = 0; genX <= 0 || genX >=1; genX = (float)rgen.NextDouble()) ;
+                    for (genY = 0; genY <= 0 || genY >=1; genY = (float)rgen.NextDouble()) ;
                     BCPoint Genpos = new BCPoint(Location.X + genX, Location.Y + genY);
                     BCColor ChosenColor = ColorFunc(genX, genY);
                     BaseParticle MakeParticle = new BaseParticle(Genpos, VelocityGenerator(), ChosenColor);

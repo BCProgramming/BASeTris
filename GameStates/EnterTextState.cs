@@ -11,6 +11,8 @@ namespace BASeTris.GameStates
 {
     public abstract class EnterTextState : GameState, IDirectKeyboardInputState
     {
+        public DateTime InitialStateTime;
+        public TimeSpan EntryAllowanceDelay = new TimeSpan(0, 0, 1);
         public String[] EntryPrompt = null;
         public enum EntryDrawStyle
         {
@@ -45,9 +47,14 @@ namespace BASeTris.GameStates
         public abstract void CommitEntry(IStateOwner pOwner, String sCurrentEntry);
 
       
-
+        protected bool AllowTextEntry()
+        {
+            return (DateTime.Now - InitialStateTime) > EntryAllowanceDelay;
+        }
         public override void GameProc(IStateOwner pOwner)
         {
+            if(InitialStateTime==default(DateTime))
+                InitialStateTime = DateTime.Now;
             //throw new NotImplementedException();
         }
 
@@ -75,6 +82,7 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            if (!AllowTextEntry()) return;
             if (g == GameKeys.GameKey_Drop)
             {
                 ChangeChar(1);
@@ -124,6 +132,7 @@ namespace BASeTris.GameStates
 
         public void KeyPressed(IStateOwner pOwner, Keys pKey)
         {
+            if (!AllowTextEntry()) return;
             if (pKey == Keys.Enter) HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
             else if (pKey == Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
             else if (pKey == Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);

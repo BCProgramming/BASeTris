@@ -42,7 +42,14 @@ namespace BASeTris.Rendering.Skia
             }
             
         }
-
+        public static Color ToColor(this SKColor src)
+        {
+            return Color.FromArgb(src.Alpha, src.Red, src.Green, src.Blue);
+        }
+        public static SKColor ToSKColor(this Color src)
+        {
+            return new SKColor(src.R, src.G, src.B, src.A);
+        }
         public static RectangleF ToRectangleF(this SKRect Source)
         {
             return new RectangleF(Source.Left, Source.Top, Source.Width, Source.Height);
@@ -109,6 +116,7 @@ namespace BASeTris.Rendering.Skia
             }
             return results;
         }
+       
  
 
     }

@@ -15,17 +15,28 @@ namespace BASeTris.Rendering.Adapters
     
     public struct BCPoint
     {
+        private float _X;
+        private float _Y;
         public static BCPoint Empty = new BCPoint(0, 0);
-        private SKPoint Main;
-        public float X {  get { return Main.X; } set { Main.X = value; } }
-        public float Y {  get { return Main.Y; }  set { Main.Y = value; } }
+        private SKPoint? _SKPoint;
+        private PointF? _PointF;
+        private Point? _Point;
+        public SKPoint SKPoint { get { if (_SKPoint == null) _SKPoint = new SKPoint(_X, _Y); return _SKPoint.Value; } }
+        public PointF PointF { get { if (_PointF == null) _PointF = new PointF(_X, _Y); return _PointF.Value; } }
+        public Point Point { get { if (_Point == null) _Point = new Point((int)_X, (int)_Y); return _Point.Value; } }
+        public float X {  get { return _X; } set { _X = value; _SKPoint = null;_PointF = null;_Point = null; } }
+        public float Y {  get { return _Y; }  set { _Y = value; _SKPoint = null; _PointF = null; _Point = null; } }
         public BCPoint(SKPoint Source)
         {
-            Main = Source;
+            _X = Source.X;
+            _Y = Source.Y;
+            _SKPoint = null; _PointF = null; _Point = null;
         }
-        public BCPoint(float X, float Y):this(new SKPoint(X,Y))
+        public BCPoint(float X, float Y)
         {
-
+            _X = X;
+            _Y = Y;
+            _SKPoint = null; _PointF = null; _Point = null;
         }
         public BCPoint(PointF Source):this(Source.X,Source.Y)
         {
@@ -33,7 +44,7 @@ namespace BASeTris.Rendering.Adapters
         }
         public static implicit operator SKPoint(BCPoint src)
         {
-            return src.Main;
+            return src.SKPoint;
         }
         public static implicit operator BCPoint(SKPoint src)
         {
@@ -45,11 +56,11 @@ namespace BASeTris.Rendering.Adapters
         }
         public static implicit operator PointF(BCPoint src)
         {
-            return new PointF(src.X, src.Y);
+            return src.PointF;
         }
         public static implicit operator Point(BCPoint src)
         {
-            return new Point((int)src.X, (int)src.Y);
+            return src.Point;
         }
         public static implicit operator BCPoint((int,int) src)
         {

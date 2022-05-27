@@ -1424,6 +1424,7 @@ namespace BASeTris.AssetManager
                     String usekey = Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper();
                     if (!mSoundSources.ContainsKey(usekey))
                     {
+                        mCallback.ShowMessage($"Loaded sound file {loopfile.FullName} as key {usekey}.");
                         mSoundSources.Add(usekey, ss);
                     }
                 }

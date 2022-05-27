@@ -226,7 +226,11 @@ namespace BASeTris
             
             Imageman = new ImageManager(TetrisGame.GetSearchFolders());
 
-            String[] AudioAssets = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Audio")).ToArray();
+            var basesearchfolders = TetrisGame.GetSearchFolders();
+
+            String[] AudioAssets = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Audio")).Concat
+                (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Assets")).Concat
+                (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Assets","Audio")).Where((y)=>Directory.Exists(y)).ToArray();
             var Driver = new BASSDriver();
             Soundman = new cNewSoundManager(Driver, AudioAssets);
 

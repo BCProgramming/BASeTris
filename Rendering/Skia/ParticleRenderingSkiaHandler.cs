@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -93,15 +94,20 @@ namespace BASeTris.Rendering.Skia
     [RenderingHandler(typeof(LineParticle), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class LineParticleRenderingSkiaHandler : BaseParticleRenderingSkiaHandler //StandardRenderingHandler<SKCanvas, LineParticle, GameStateSkiaDrawParameters>
     {
+        ConditionalWeakTable<LineParticle, SKPaint> PaintCache = new ConditionalWeakTable<LineParticle, SKPaint>();
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, LineParticle Source, GameStateSkiaDrawParameters Element)
         {
             var PointA = TranslatePosition(pOwner, pRenderTarget, Source.Position, Element);
             var PointB = TranslatePosition(pOwner, pRenderTarget, Source.EndPoint, Element);
             var Alphause = TranslateAlpha(Source);
-            using (SKPaint skp = new SKPaint() { Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, Alphause), StrokeWidth = 2 })
+            SKPaint skp = null;
+            if (!PaintCache.TryGetValue(Source, out skp))
             {
-                pRenderTarget.DrawLine(PointA, PointB, skp);
+                skp = new SKPaint() { Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, Alphause), StrokeWidth = 2 };
+                PaintCache.Add(Source, skp);
             }
+            pRenderTarget.DrawLine(PointA, PointB, skp);
+            
         }
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, BaseParticle Source, GameStateSkiaDrawParameters Element)
         {
@@ -115,10 +121,7 @@ namespace BASeTris.Rendering.Skia
     {
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, BaseParticle Source, GameStateSkiaDrawParameters Element)
         {
-            if(Source.Color.R == 255 && Source.Color.B == 0 && Source.Color.G == 0)
-            {
-                ;
-            }
+            
             BCPoint usePosition = new BCPoint(Source.Position.X, Source.Position.Y);
             //have to try to get the standardRenderingProvider. If we can then we will use the coordinates as if they are a block position- otherwise, we use the coordinates directly.
             usePosition = TranslatePosition(pOwner, pRenderTarget, Source.Position, Element);
@@ -126,7 +129,8 @@ namespace BASeTris.Rendering.Skia
             BCPoint PrevPosition = TranslatePosition(pOwner, pRenderTarget, Source.Position - Source.Velocity, Element);
 
             byte useAlpha =  TranslateAlpha(Source);
-            if (SharePaint == null) SharePaint = new SKPaint() { Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha), StrokeWidth = 1.2f };
+            
+            if (SharePaint == null) SharePaint = new SKPaint() { IsAntialias =false, Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha), StrokeWidth = 1.2f };
             else SharePaint.Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha);
             pRenderTarget.DrawLine(PrevPosition, usePosition, SharePaint);
                 //pRenderTarget.DrawRect(new SKRect(usePosition.X, usePosition.Y, usePosition.X + 2, usePosition.Y + 2), skp);
@@ -148,11 +152,12 @@ namespace BASeTris.Rendering.Skia
         {
             BCPoint Result = Position;
             GameplayGameState foundstandard = null;
-            if (pOwner.CurrentState is GameplayGameState standard)
+            var CurrState = pOwner.CurrentState;
+            if (CurrState is GameplayGameState standard)
             {
                 foundstandard = standard;
             }
-            else if (pOwner.CurrentState is ICompositeState<GameplayGameState> composite)
+            else if (CurrState is ICompositeState<GameplayGameState> composite)
             {
                 foundstandard = composite.GetComposite();
             }

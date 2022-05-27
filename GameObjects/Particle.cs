@@ -12,6 +12,7 @@ namespace BASeTris.GameObjects
 {
     public class BaseParticle
     {
+        public Dictionary<String, Object> TagData = new Dictionary<string, object>();
         public BCPoint Position { get; set; }
         public BCPoint Velocity { get; set; }
         public BCPoint Decay { get; set; } = new BCPoint(0.95f, 0.95f);
@@ -20,6 +21,8 @@ namespace BASeTris.GameObjects
 
         public Func<BaseParticle, BCColor> ColorCalculatorFunction = null;
 
+
+        
 
         public static Func<BaseParticle, BCColor> GetRainbowColorFunc(IStateOwner pOwner, int cycletime = 2000)
         {

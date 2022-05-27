@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
+using System.Reflection.BASeCamp;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -100,11 +101,12 @@ namespace BASeTris
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;
-            System.Reflection.BASeCamp.Nullcallback nc = new System.Reflection.BASeCamp.Nullcallback();
+            iManagerCallback cback = new LoggingCallback();
+            
             DITypes = new System.Reflection.BASeCamp.MultiTypeManager(
                 new Assembly[] { Assembly.GetExecutingAssembly() }.AsEnumerable(),
                 LoadTypes,
-                nc,
+                cback,
                 null,
                 null,
                 null);

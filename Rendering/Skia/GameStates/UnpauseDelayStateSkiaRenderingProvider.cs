@@ -76,8 +76,9 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             //g.DrawOval(SecondBound, new SKPaint() { Color = SKColors.Red, StrokeWidth = 1,Style=SKPaintStyle.Stroke });
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), true, new SKPaint() { StrokeWidth = 1f, StrokeCap=SKStrokeCap.Round,  Color = SKColors.Yellow, Style = SKPaintStyle.Stroke });
-            using (SKPath path = new SKPath())
+            using (SKPath path = new SKPath() {    FillType = SKPathFillType.Winding, Convexity = SKPathConvexity.Concave })
             {
+                
                 float StartAngle = 0;
                 float SweepAngle = (float)(360 * (1 - Millis));
                 //path.AddOval(SecondBound, SKPathDirection.CounterClockwise);
@@ -85,27 +86,24 @@ namespace BASeTris.Rendering.Skia.GameStates
                 double MinAngle = Math.PI / 180;
                 double XOffset = SecondBound.Left + SecondBound.Width / 2;
                 double YOffset = SecondBound.Top + SecondBound.Height / 2;
-                double CircleRadius = (SecondBound.Width / 2*5)*(1-Millis);
-                for(double drawAngle=StartAngle;drawAngle<SweepAngle;drawAngle+=MinAngle)
+                double CircleRadius = (SecondBound.Width / 2 * 5) * (1 - Millis);
+                for (double drawAngle = StartAngle; drawAngle < SweepAngle; drawAngle += MinAngle)
                 {
                     double useAngle = drawAngle * (Math.PI / 180);
-                    double XPos1 = Math.Sin(useAngle - MinAngle) * CircleRadius / 2 +XOffset;
-                    double YPos1 = Math.Cos(useAngle - MinAngle) * CircleRadius  / 2 + YOffset;
+                    double XPos1 = Math.Sin(useAngle - MinAngle) * CircleRadius / 2 + XOffset;
+                    double YPos1 = Math.Cos(useAngle - MinAngle) * CircleRadius / 2 + YOffset;
                     double XPos2 = Math.Sin(useAngle) * CircleRadius / 2 + XOffset;
                     double YPos2 = Math.Cos(useAngle) * CircleRadius / 2 + YOffset;
                     g.DrawLine((float)XPos1, (float)YPos1, (float)XPos2, (float)YPos2, usePaint);
+                    
                 }
+                //g.DrawArc(SecondBound, StartAngle, SweepAngle, false, usePaint);
+                path.AddArc(SecondBound, 0, SweepAngle);
+                path.Close();
+                //Something really fucked with SkiaSharp and/or OpenTK here, as lots of stuff seems to draw a sort of bounding box thing around what was drawn, and I don't know why.
 
-                //path.LineTo(67, 34);
-                //path.LineTo(145, 500);
-                //usePaint.PathEffect = SKPathEffect.CreateDiscrete(5, 0.5f, 0);
-               //g.DrawArc(SecondBound, 0, SweepAngle, true, usePaint);
-                //g.DrawLine(67, 34, 145, 500,usePaint);
-                
-               //Something really fucked with SkiaSharp and/or OpenTK here, as anything seems to draw a sort of bounding box thing around what was drawn, and I don't know why.
-               
-               //g.DrawPath(path, usePaint) ;
-                
+                //g.DrawPath(path, usePaint) ;
+
             }
             //this arc drawing doesn't work, for some reason.
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), false, new SKPaint() { StrokeWidth = 0.05f, Color = SKColors.Yellow, Style = SKPaintStyle.Stroke, IsStroke = true,StrokeCap = SKStrokeCap.Square,StrokeMiter = 0 });

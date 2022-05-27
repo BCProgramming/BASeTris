@@ -36,8 +36,26 @@ public interface iManagerCallback
     void UpdateProgress(float ProgressPercentage);
     void FlagError(String ErrorDescription, Exception AttachedException);
 }
+    public class LoggingCallback : iManagerCallback
+    {
+        public void FlagError(string ErrorDescription, Exception AttachedException)
+        {
+            Debug.Print("ERROR:" + ErrorDescription);
+            Debug.Print("Stack Trace:" + AttachedException.ToString());
+        }
 
-public class Nullcallback : iManagerCallback
+        public void ShowMessage(string message)
+        {
+            Debug.Print(message);
+        }
+
+        public void UpdateProgress(float ProgressPercentage)
+        {
+            
+        }
+    }
+
+    public class Nullcallback : iManagerCallback
 {
     #region iManagerCallback Members
 

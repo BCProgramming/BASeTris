@@ -287,8 +287,8 @@ namespace BASeTris.GameStates
             {4, "TETRIS!" }
         };
         
-        const int ParticleCountPerBlock = 50;
-        private readonly long ClearParticleTTL = 600;
+        const int ParticleCountPerBlock = 15;
+        private readonly long ClearParticleTTL = 300;
         private void AddParticles_Row(IStateOwner pOwner,BCRect RowBounds,int Lines=1)
         {
             String UseText = RowClearText?[Lines] ?? $"{Lines}LINE";
