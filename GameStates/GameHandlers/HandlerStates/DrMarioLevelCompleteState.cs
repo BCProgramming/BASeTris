@@ -49,10 +49,12 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
                 if(NextState is GameplayGameState ggst)
                 {
                     ggst.FirstRun = false;
+                    //ggst.FieldPrepared = true;
                 }
                 else if(NextState is ICompositeState<GameplayGameState> ggc)
                 {
                     ggc.GetComposite().FirstRun = false;
+                    //ggc.GetComposite().FieldPrepared = true;
                 }
                 pOwner.CurrentState = NextState;
                 //play the default music...

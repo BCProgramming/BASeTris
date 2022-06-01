@@ -16,7 +16,7 @@ namespace BASeTris.Blocks
     {
         public Action<TetrisBlockDrawParameters> BeforeDraw = null;
         public Nomino Owner { get; set; }
-
+        public bool Visible { get; set; } = true;
         public virtual bool IsAnimated
         {
             get { return false; }

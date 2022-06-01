@@ -335,7 +335,7 @@ namespace BASeTris.GameStates
             }
 
         }
-
+        internal bool FieldPrepared = false;
         internal bool FirstRun = false;
         private StatefulReplay ReplayData = null;
        

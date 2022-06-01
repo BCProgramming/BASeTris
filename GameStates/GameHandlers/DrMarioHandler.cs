@@ -8,6 +8,7 @@ using BASeCamp.BASeScores;
 using BASeTris.AI;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
+using BASeTris.FieldInitializers;
 using BASeTris.GameObjects;
 using BASeTris.GameStates.GameHandlers.HandlerOptions;
 using BASeTris.GameStates.GameHandlers.HandlerStates;
@@ -569,6 +570,32 @@ namespace BASeTris.GameStates.GameHandlers
         const float MAX_SPEED = 0.25f;
         const float MIN_SPEED = 0.35f;
         //GeneratePopParticles(pOwner, state, iterate);
+        public BCColor[] GetCombiningColor(LineSeriesBlock.CombiningTypes ptype)
+        {
+            switch (ptype)
+            {
+                case LineSeriesBlock.CombiningTypes.Red:
+                    return RedColors;
+                    
+                case LineSeriesBlock.CombiningTypes.Blue:
+                    return BlueColors;
+                    
+                case LineSeriesBlock.CombiningTypes.Yellow:
+                    return YellowColors;
+                    
+                case LineSeriesBlock.CombiningTypes.Orange:
+                    return OrangeColors;
+                    
+                case LineSeriesBlock.CombiningTypes.Magenta:
+                    return MagentaColors;
+                    
+                case LineSeriesBlock.CombiningTypes.Green:
+                    return GreenColors;
+                    
+                default:
+                    return RedColors;
+            }
+        }
         private void GeneratePopParticles(IStateOwner pOwner,GameplayGameState gstate,SKPointI pt)
         {
             var rgen = TetrisGame.rgen;
@@ -576,27 +603,7 @@ namespace BASeTris.GameStates.GameHandlers
             BCColor[] useColor = YellowColors;
             if(popItem is LineSeriesBlock lsb)
             {
-                switch(lsb.CombiningIndex)
-                {
-                    case LineSeriesBlock.CombiningTypes.Red:
-                        useColor = RedColors;
-                        break;
-                    case LineSeriesBlock.CombiningTypes.Blue:
-                        useColor = BlueColors;
-                        break;
-                    case LineSeriesBlock.CombiningTypes.Yellow:
-                        useColor = YellowColors;
-                        break;
-                    case LineSeriesBlock.CombiningTypes.Orange:
-                        useColor = OrangeColors;
-                        break;
-                    case LineSeriesBlock.CombiningTypes.Magenta:
-                        useColor = MagentaColors;
-                        break;
-                    case LineSeriesBlock.CombiningTypes.Green:
-                        useColor = GreenColors;
-                        break;
-                }
+                useColor = GetCombiningColor(lsb.CombiningIndex);
                 for(int i=0;i<ParticlesPerPop;i++)
                 {
                     PointF Offset = new PointF((float)rgen.NextDouble(),(float)rgen.NextDouble());
@@ -630,9 +637,14 @@ namespace BASeTris.GameStates.GameHandlers
         public GameState SetupNextLevel(GameplayGameState mutate,IStateOwner pOwner)
         {
             Level++;
-            PrepareField(mutate, pOwner);
-            PrimaryBlockAppearanceState levelstarter = new PrimaryBlockAppearanceState(mutate);
-            return levelstarter;
+            //PrepareField(mutate, pOwner);
+            //the next field will be prepared later.
+            mutate.PlayField.Reset();
+            mutate.FirstRun = false;
+            mutate.FieldPrepared = false;
+            return mutate;
+            //DrMarioVirusAppearanceState levelstarter = new DrMarioVirusAppearanceState(mutate);
+            //return levelstarter;
         }
         [Flags]
         public enum AllowedSpawnsFlags
@@ -669,7 +681,11 @@ namespace BASeTris.GameStates.GameHandlers
         {
             //likely will need to have stats and stuff abstracted to each Handler.
             state.PlayField.Reset();
-            
+
+            DrMarioFieldInitializer fieldinit = new DrMarioFieldInitializer(this, GetValidPrimaryCombiningTypes(), Level);
+            fieldinit.Initialize(state.PlayField);
+            PrimaryBlockCount = state.PlayField.AllContents().Count((y) => y != null);
+            /*
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
             //primary count is based on our level.
             int numPrimaries = (int)((Level * 1.33f) + 4);
@@ -698,7 +714,8 @@ namespace BASeTris.GameStates.GameHandlers
 
 
             }
-            PrimaryBlockAppearanceState appearstate = new PrimaryBlockAppearanceState(state);
+            */
+            DrMarioVirusAppearanceState appearstate = new DrMarioVirusAppearanceState(state);
             pOwner.CurrentState = appearstate;
 
 

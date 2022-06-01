@@ -166,7 +166,37 @@ namespace BASeTris
         {
             get { return FieldContents; }
         }
+        public IEnumerable<NominoBlock> AllContents()
+        {
 
+            for(int r=0;r<RowCount;r++)
+            {
+                for(int c = 0;c<ColCount;c++)
+                {
+                    yield return Contents[r][c];
+                }
+            }
+
+
+
+        }
+        public Dictionary<NominoBlock,Point> FindBlockLocations(IList<NominoBlock> Target)
+        {
+            Dictionary<NominoBlock, Point> constructresult = new Dictionary<NominoBlock, Point>();
+            for (int r = 0; r < RowCount; r++)
+            {
+                for (int c = 0; c < ColCount; c++)
+                {
+                    var checkblock = Contents[r][c];
+                    if(Target.Any((t)=>checkblock==t))
+                    {
+                        constructresult.Add(checkblock, new Point(c, r));
+                    }
+                }
+            }
+            return constructresult;
+        }
+       
         public void ClearContents()
         {
             lock (ActiveBlockGroups)

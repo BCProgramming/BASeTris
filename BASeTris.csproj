@@ -134,13 +134,14 @@
     <Compile Include="Blocks\LineSeriesBlock.cs" />
     <Compile Include="Cheats\SetPieceCheat.cs" />
     <Compile Include="Duomino\Duomino.cs" />
+    <Compile Include="FieldInitializers\DrMarioFieldInitializer.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
     <Compile Include="GameStates\DropWaitState.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerOptions\HandlerOptionsMenuPopulator.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioLevelCompleteState.cs" />
-    <Compile Include="GameStates\GameHandlers\HandlerStates\PrimaryBlockAppearanceState.cs" />
+    <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioVirusAppearanceState.cs" />
     <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />
     <Compile Include="GameStates\GameHandlers\Tetris2Handler.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />
