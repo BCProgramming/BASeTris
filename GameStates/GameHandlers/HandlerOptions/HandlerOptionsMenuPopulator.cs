@@ -61,4 +61,12 @@ namespace BASeTris.GameStates.GameHandlers.HandlerOptions
         }
     }
 
+    public class Tetris2OptionsHandler : HandlerOptionsMenuPopulator<Tetris2GameOptions>
+    {
+        public override void SetOptions(GameState PreviousState, Tetris2GameOptions options)
+        {
+            _Options = options;
+
+        }
+    }
 }

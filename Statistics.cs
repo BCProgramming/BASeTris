@@ -43,7 +43,7 @@ namespace BASeTris
         protected String FormatGameTime(IStateOwner stateowner)
         {
             TimeSpan useCalc = stateowner.GetElapsedTime();
-            return useCalc.ToString(@"hh\:mm\:ss");
+            return useCalc.ToString(@"hh\:mm\:ss\:ff");
         }
         public int Score = 0;
         private TimeSpan[] LevelReachTimes = new TimeSpan[] { TimeSpan.Zero };

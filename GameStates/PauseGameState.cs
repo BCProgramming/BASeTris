@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -41,11 +42,17 @@ namespace BASeTris.GameStates
 
         public double ScaleFactor => PauseOwner.ScaleFactor;
 
-        //these hopefully aren't needed. We do not want to assign, that is for sure.
-        public DateTime GameStartTime { get => PauseOwner.GameStartTime; set {; } }
-        public TimeSpan FinalGameTime { get => PauseOwner.FinalGameTime; set  {; } }
-        public DateTime LastPausedTime { get => PauseOwner.LastPausedTime; set  { } }
+        public Stopwatch GameTime
+        {
+            get => PauseOwner.GameTime;
+            set { }
 
+        }
+
+
+        //these hopefully aren't needed. We do not want to assign, that is for sure.
+        
+        public TimeSpan FinalGameTime { get => PauseOwner.FinalGameTime; set  {; } }
         public AudioThemeManager AudioThemeMan { get { return PauseOwner.AudioThemeMan; } set { PauseOwner.AudioThemeMan = value; } }
         public BCRect LastDrawBounds => PauseOwner.LastDrawBounds;
 
@@ -167,6 +174,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
+            if(pOwner.GameTime.IsRunning) pOwner.GameTime.Stop();
             if (!DrawDataInitialized) return;
             foreach (var iterate in FallImages)
             {
@@ -224,6 +232,7 @@ namespace BASeTris.GameStates
             var unpauser = new UnpauseDelayGameState
                 (PausedState, () => { UnPause(pOwner); });
 
+
             var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing?.UnPause();
             playing?.setVolume(0.5f);
@@ -237,6 +246,7 @@ namespace BASeTris.GameStates
         {
             TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.std.EffectVolume);
             var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
+            pOwner.GameTime.Start();
             playing2?.UnPause();
             playing2?.setVolume(1.0f);
         }

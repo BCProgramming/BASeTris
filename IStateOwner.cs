@@ -5,6 +5,7 @@ using BASeTris.Theme.Audio;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -25,10 +26,10 @@ namespace BASeTris
         double ScaleFactor { get; }
         void SetScale(double pScale);
         event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
-        DateTime GameStartTime { get; set; }
-
-        TimeSpan FinalGameTime { get; set; }
-        DateTime LastPausedTime { get; set; }
+        //DateTime GameStartTime { get; set; }
+        Stopwatch GameTime { get; set; }
+        TimeSpan FinalGameTime { get; }
+        //DateTime LastPausedTime { get; set; }
         TimeSpan GetElapsedTime();
 
         BCRect LastDrawBounds { get; }

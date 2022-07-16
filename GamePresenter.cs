@@ -169,6 +169,7 @@ namespace BASeTris
             }
             catch(ThreadAbortException)
             {
+                
                 return;
             }
             
@@ -187,7 +188,7 @@ namespace BASeTris
             {
                 return Game.TranslateKey(source);
             }
-
+            
             return null;
         }
         public GameState.GameKeys? TranslateKey(X.Gamepad.GamepadButtons Button)

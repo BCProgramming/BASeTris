@@ -473,11 +473,19 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             public bool Moronic { get; set; } = false;
             public float StupidFactor { get; set; } = 1.0f;
         }
-        public class DrMarioScoringRuleData : BoardScoringRuleData
+        public class MasterBlockScoringRuleData : BoardScoringRuleData
         {
             public double MasterBlockColumnMultiplier { get; set; } = 1.25f;
             public double MasterBlockMassValue { get; set; } = 4f;
+        }
+        public class DrMarioScoringRuleData : MasterBlockScoringRuleData
+        {
+        
 
+        }
+        public class Tetris2ScoringRuleData : MasterBlockScoringRuleData
+        {
+        
         }
         public class TetrisScoringRuleData:BoardScoringRuleData
         {

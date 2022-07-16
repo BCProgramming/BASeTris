@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.Blocks;
 using BASeTris.Choosers;
 
 namespace BASeTris.Tetrominoes
@@ -36,19 +37,19 @@ namespace BASeTris.Tetrominoes
         internal static Func<Nomino>[] Tetris2TetrominoFunctions =
            new Func<Nomino>[]
            {
-                () => new Tetromino_Z(),
-                () => new Tetromino_I(),
-                () => new Tetromino_J(),
-                () => new Tetromino_L(),
-                () => new Tetromino_O(),
-                () => new Tetromino_S(),
-                () => new Tetromino_T(),
-                () => new Tetromino_Y(),
-                () => new Tetromino_G(),
-                () => new Tetromino_F()
+                () => new Tetromino_Z((a)=>new LineSeriesBlock()),
+                () => new Tetromino_I((a)=>new LineSeriesBlock()),
+                () => new Tetromino_J((a)=>new LineSeriesBlock()),
+                () => new Tetromino_L((a)=>new LineSeriesBlock()),
+                () => new Tetromino_O((a)=>new LineSeriesBlock()),
+                () => new Tetromino_S((a)=>new LineSeriesBlock()),
+                () => new Tetromino_T((a)=>new LineSeriesBlock()),
+                () => new Tetromino_Y((a)=>new LineSeriesBlock()),
+                () => new Tetromino_G((a)=>new LineSeriesBlock()),
+                () => new Tetromino_F((a)=>new LineSeriesBlock())
 
            };
-
+        
         private static float[] Tetris2TetrominoWeights = new float[]
         {
             1f,

@@ -398,10 +398,12 @@ namespace BASeTris
                 return _Present.GameSettings;
             }
         }
-        public DateTime GameStartTime
+
+        public Stopwatch GameTime
         {
-            get => _Present.Game.GameStartTime;
-            set => _Present.Game.GameStartTime = value;
+            get => _Present.Game.GameTime;
+            set => _Present.Game.GameTime = value;
+
         }
 
         public TimeSpan FinalGameTime
@@ -410,11 +412,6 @@ namespace BASeTris
             set => _Present.Game.FinalGameTime = value;
         }
 
-        public DateTime LastPausedTime
-        {
-            get => _Present.Game.LastPausedTime;
-            set => _Present.Game.LastPausedTime = value;
-        }
 
         public TimeSpan GetElapsedTime()
         {

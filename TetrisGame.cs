@@ -39,7 +39,7 @@ namespace BASeTris
             Input_Keyboard,
             Input_HID
         }
-
+        public Stopwatch GameTime { get; set; } = new Stopwatch();
         public static cNewSoundManager Soundman;
 
         public static ImageManager Imageman;
@@ -66,8 +66,8 @@ namespace BASeTris
                 GameOwner.AudioThemeMan = value;
             }
         }
-        private DateTime _GameStartTime = DateTime.MinValue;
-        private DateTime _LastPausedTime = DateTime.MinValue;
+        //private DateTime _GameStartTime = DateTime.MinValue;
+        //private DateTime _LastPausedTime = DateTime.MinValue;
         public event EventHandler<GameClosingEventArgs> GameClosing
         {
             add
@@ -91,31 +91,20 @@ namespace BASeTris
         {
             get { return GameOwner.LastDrawBounds; }
         }
-        public DateTime GameStartTime { get { return _GameStartTime; } set { _GameStartTime = value; } }
-        public DateTime LastPausedTime
-        {
-            get { return _LastPausedTime; }
-            set { _LastPausedTime = value; }
-        }
+        //public DateTime GameStartTime { get { return _GameStartTime; } set { _GameStartTime = value; } }
+        //public DateTime LastPausedTime
+       // {
+       //     get { return _LastPausedTime; }
+       //     set { _LastPausedTime = value; }
+       // }
 
         private TimeSpan _FinalGameTime = TimeSpan.MinValue;
         public TimeSpan FinalGameTime { get { return _FinalGameTime; } set { _FinalGameTime = value; } }
 
         public TimeSpan GetElapsedTime()
         {
-            TimeSpan useCalc = (DateTime.Now - GameStartTime);
-
-            if (FinalGameTime != TimeSpan.MinValue)
-            {
-                useCalc = FinalGameTime;
-            }
-
-            if (CurrentState is PauseGameState || CurrentState is UnpauseDelayGameState)
-            {
-                useCalc = LastPausedTime - GameStartTime;
-            }
-
-            return useCalc;
+            return GameTime.Elapsed;
+            
         }
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         public static Image StandardTiledTetrisBackground
@@ -155,20 +144,11 @@ namespace BASeTris
             foreach (T iterate in Shufflethese)
             {
                 sl.Add((float)rgen.NextDouble(), iterate);
-
-
             }
             Random rg = new Random();
 
             return sl.Select(iterator => iterator.Value);
-
-
-
-
         }
-       
-       
-
         public static Font GetRetroFont(float desiredSize, double ScaleFactor, FontStyle desiredStyle = FontStyle.Regular, GraphicsUnit GUnit = GraphicsUnit.Point)
         {
             return new Font(RetroFont, (float)(desiredSize * ScaleFactor), desiredStyle, GUnit);

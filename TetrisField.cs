@@ -18,6 +18,7 @@ using BASeTris.Rendering.RenderElements;
 using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.Adapters;
+using static BASeTris.CanFitResults;
 
 namespace BASeTris
 {
@@ -88,7 +89,7 @@ namespace BASeTris
             {
                 var fitresult = CanFit(Duplicator, Duplicator.X, Duplicator.Y + 1, true, new Nomino[] { Source });
                 //ghost drops will show up "through" any active blocks, since active blocks don't actual set blocks..
-                if (new CanFitResultConstants[] { CanFitResultConstants.CanFit, CanFitResultConstants.CantFit_Active }.Contains(fitresult))
+                if (fitresult.CanFit || fitresult.CantFit_Active )
                 {
                     dropLength++;
                     Duplicator.SetY(pOwner, Duplicator.Y + 1);
@@ -322,7 +323,7 @@ namespace BASeTris
                     }
                 }
             }
-            foreach (var bg in from abg in ActiveBlockGroups orderby abg.Max((i)=>i.Y) ascending select abg)
+            foreach (var bg in from abg in ActiveBlockGroups orderby abg.Max((i)=>i.Y) descending select abg)
             {
                 foreach (var iterateblock in bg)
                 {
@@ -376,24 +377,10 @@ namespace BASeTris
             }
             return Result;
         }
-        public enum CanFitResultConstants
+       
+        public CanFitResults CanFit(Nomino bg, int X, int Y,bool SkipActiveChecks,Nomino[] AdditionalIgnores = null)
         {
-            /// <summary>
-            /// The nomino Can fit
-            /// </summary>
-            CanFit,
-            /// <summary>
-            /// The nomino cannot fit, because it is blocked by a fixed block on the field.
-            /// </summary>
-            CantFit_Field,
-            /// <summary>
-            /// The Nomino can't fit because it is blocked by an active nomino.
-            /// </summary>
-            CantFit_Active
-        }
-        public CanFitResultConstants CanFit(Nomino bg, int X, int Y,bool SkipActiveChecks,Nomino[] AdditionalIgnores = null)
-        {
-            
+            Dictionary<Point, Nomino> GroupData = new Dictionary<Point, Nomino>();
             HashSet<Point> ActiveBlocks = new HashSet<Point>();
             //this routine handles other Block Groups as well, allowing multiple to exist at once in the play field, and be moved.
             //eg you cannot rotate or move an Active Group such that it will interfere with another active Group.
@@ -406,7 +393,10 @@ namespace BASeTris
                 {
                     foreach(var check in active)
                     {
-                        ActiveBlocks.Add(new Point(active.X+check.X, active.Y+check.Y));
+                        var pcheck = new Point(active.X + check.X, active.Y + check.Y);
+                        ActiveBlocks.Add(pcheck);
+                        GroupData.Add(pcheck, active);
+
                     }
                 }
             }
@@ -442,7 +432,19 @@ namespace BASeTris
                     }
                 }
             }
-            return ActiveTouched ? CanFitResultConstants.CantFit_Active : result ? CanFitResultConstants.CanFit : CanFitResultConstants.CantFit_Field;
+            if (ActiveTouched)
+            {
+                return new CanFitResults(CanFitResultConstants.CantFit_Active);
+            }
+            else if (result)
+            {
+                return new CanFitResults(CanFitResults.CanFitResultConstants.CanFit);
+            }
+            else
+            {
+                return new CanFitResults(CanFitResultConstants.CantFit_Field);
+            }
+            
         }
 
         public bool CanRotate(Nomino bg, bool ccw)
@@ -452,7 +454,7 @@ namespace BASeTris
             duped.Rotate(ccw);
             duped.Clamp(RowCount, ColCount);
             //we need to pass in bg for the additional argument this time, since we duplicated to a new nomino it will incorrectly get blocked by the original by CanFit otherwise.
-            return CanFit(duped, bg.X, bg.Y,false,new Nomino[] { bg })==CanFitResultConstants.CanFit;
+            return CanFit(duped, bg.X, bg.Y,false,new Nomino[] { bg }).Result==CanFitResultConstants.CanFit;
         }
 
         public float GetBlockWidth(RectangleF ForBounds)
@@ -704,6 +706,50 @@ namespace BASeTris
         public OnRemoveActiveBlockGroupEventArgs(Nomino RemovingGroup)
         {
             BlockGroupRemove = RemovingGroup;
+        }
+    }
+    public class CanFitResults
+    {
+        public enum CanFitResultConstants
+        {
+            /// <summary>
+            /// The nomino Can fit
+            /// </summary>
+            CanFit,
+            /// <summary>
+            /// The nomino cannot fit, because it is blocked by a fixed block on the field.
+            /// </summary>
+            CantFit_Field,
+            /// <summary>
+            /// The Nomino can't fit because it is blocked by an active nomino.
+            /// </summary>
+            CantFit_Active
+        }
+        public bool CanFit
+        {
+            get
+            {
+                return Result == CanFitResultConstants.CanFit;
+            }
+        }
+        public bool CantFit_Field
+        {
+            get
+            {
+                return Result == CanFitResultConstants.CantFit_Field;
+            }
+        }
+        public bool CantFit_Active
+        {
+            get
+            {
+                return Result == CanFitResultConstants.CantFit_Active;
+            }
+        }
+        public CanFitResultConstants Result { get; set; }
+        public CanFitResults(CanFitResultConstants pResult)
+        {
+            Result = pResult;
         }
     }
 }

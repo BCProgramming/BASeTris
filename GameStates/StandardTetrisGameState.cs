@@ -406,24 +406,17 @@ namespace BASeTris.GameStates
                         musicplay.Tempo = 1f;
                     }
                     FirstRun = true;
+                    
                     GameHandler.PrepareField(this, pOwner);
+                    pOwner.GameTime.Start();
+
                 }
             }
 
             //update particles.
             
             FrameUpdate();
-            if (pOwner.GameStartTime == DateTime.MinValue) pOwner.GameStartTime = DateTime.Now;
-            if (pOwner.LastPausedTime != DateTime.MinValue)
-            {
-                pOwner.GameStartTime += (DateTime.Now - pOwner.LastPausedTime);
-                pOwner.LastPausedTime = DateTime.MinValue;
-                foreach(var iterate in PlayField.BlockGroups)
-                {
-                    iterate.LastFall = pOwner.GetElapsedTime();
-                    iterate.HighestHeightValue = 0;
-                }
-            }
+            
           
             
             PlayField.AnimateFrame();
@@ -434,7 +427,7 @@ namespace BASeTris.GameStates
                 //For testing: write out the replay data as a sequence of little images.
                 //ReplayData.WriteStateImages("T:\\ReplayData");
                 Sounds.StopMusic();
-                pOwner.FinalGameTime = DateTime.Now - pOwner.GameStartTime;
+                pOwner.GameTime.Stop();
                 GameHandler.Statistics.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
                 pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); });
@@ -628,7 +621,7 @@ namespace BASeTris.GameStates
         private String FormatGameTime(IStateOwner stateowner)
         {
             TimeSpan useCalc = stateowner.GetElapsedTime();
-            return useCalc.ToString(@"hh\:mm\:ss");
+            return useCalc.ToString(@"hh\:mm\:ss\:ff");
         }
 
      
@@ -767,7 +760,7 @@ namespace BASeTris.GameStates
                 foreach (var ActiveItem in PlayField.BlockGroups)
                 {
                     if (!ActiveItem.Controllable) continue;
-                    if (PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y,false)==TetrisField.CanFitResultConstants.CanFit)
+                    if (PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y,false).Result== CanFitResults.CanFitResultConstants.CanFit)
                     {
                         lastHorizontalMove = DateTime.Now;
                         ActiveItem.X += XMove;
@@ -785,9 +778,9 @@ namespace BASeTris.GameStates
             {
                 if (g == GameKeys.GameKey_Pause)
                 {
-                    pOwner.LastPausedTime = DateTime.Now;
+                    
                     pOwner.CurrentState = new PauseGameState(pOwner, this);
-
+                    pOwner.GameTime.Stop();
                     var playing = Sounds.GetPlayingMusic_Active();
                     playing?.Pause();
                     Sounds.PlaySound(pOwner.AudioThemeMan.Pause.Key, pOwner.Settings.std.EffectVolume);
@@ -979,16 +972,21 @@ namespace BASeTris.GameStates
             Operation_Success,
             Operation_Error
         }
+        
         private GroupOperationResult HandleGroupOperation(IStateOwner pOwner,Nomino activeItem)
         {
 
             if (activeItem.HandleBlockOperation(pOwner)) return GroupOperationResult.Operation_Success;
             var fitresult = PlayField.CanFit(activeItem, activeItem.X, activeItem.Y + 1, false);
-            if (fitresult == TetrisField.CanFitResultConstants.CanFit)
+            if (fitresult.CanFit)
             {
                 activeItem.SetY(pOwner,activeItem.Y+1);
             }
-            else if (fitresult==TetrisField.CanFitResultConstants.CantFit_Field)
+            else if(fitresult.CantFit_Active)
+            {
+
+            }
+            else if (fitresult.CantFit_Field)
             {
                 if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.std.LockTime)
                 {

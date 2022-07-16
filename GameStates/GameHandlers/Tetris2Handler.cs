@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeTris.AI;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
+using BASeTris.GameStates.GameHandlers.HandlerOptions;
 using BASeTris.Tetrominoes;
+using BASeTris.Theme.Block;
 
 namespace BASeTris.GameStates.GameHandlers
 {
@@ -16,7 +19,8 @@ namespace BASeTris.GameStates.GameHandlers
     //2. In addition to "Viruses" (the fixed blocks that need to be destroyed) each stage has one glowing variant for each color that generated in the stage. If it is destroyed, then all the fixed
     //   blocks of that colour are destroyed as well.
     //3. Presumably we are going to want an appropriate Tetris2Theme.We may be able to re-use some of the internals of the line clear animations for the block clears though.
-    
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
+    [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
     public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>
     {
         public override BlockGroupChooser GetChooser()
@@ -38,6 +42,7 @@ namespace BASeTris.GameStates.GameHandlers
 
 
         }
+        public override NominoTheme DefaultTheme => new Tetris2Theme();
         public override string GetName()
         {
             return "Tetris 2";
@@ -46,16 +51,16 @@ namespace BASeTris.GameStates.GameHandlers
         public override Nomino[] GetNominos()
         {
 
-            Tetromino_I TetI = new Tetromino_I();
-            Tetromino_J TetJ = new Tetromino_J();
-            Tetromino_L TetL = new Tetromino_L();
-            Tetromino_O TetO = new Tetromino_O();
-            Tetromino_S TetS = new Tetromino_S();
-            Tetromino_T TetT = new Tetromino_T();
-            Tetromino_Z TetZ = new Tetromino_Z();
-            Tetromino_Y TetY = new Tetromino_Y();
-            Tetromino_G TetG = new Tetromino_G();
-            Tetromino_F TetF = new Tetromino_F();
+            Tetromino_I TetI = new Tetromino_I((a)=>new LineSeriesBlock());
+            Tetromino_J TetJ = new Tetromino_J((a) => new LineSeriesBlock());
+            Tetromino_L TetL = new Tetromino_L((a) => new LineSeriesBlock());
+            Tetromino_O TetO = new Tetromino_O((a) => new LineSeriesBlock());
+            Tetromino_S TetS = new Tetromino_S((a) => new LineSeriesBlock());
+            Tetromino_T TetT = new Tetromino_T((a) => new LineSeriesBlock());
+            Tetromino_Z TetZ = new Tetromino_Z((a) => new LineSeriesBlock());
+            Tetromino_Y TetY = new Tetromino_Y((a) => new LineSeriesBlock());
+            Tetromino_G TetG = new Tetromino_G((a) => new LineSeriesBlock());
+            Tetromino_F TetF = new Tetromino_F((a) => new LineSeriesBlock());
             return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ,TetY,TetG,TetF };
         }
 

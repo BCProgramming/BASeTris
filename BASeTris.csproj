@@ -138,6 +138,7 @@
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
     <Compile Include="GameStates\DropWaitState.cs" />
+    <Compile Include="GameStates\GameHandlers\CascadingBlockHandler.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerOptions\HandlerOptionsMenuPopulator.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioLevelCompleteState.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="Theme\Block\SNESTetrominoTheme.cs" />
     <Compile Include="Theme\Block\Tetris2Theme.cs" />
     <Compile Include="Theme\Block\NominoTheme.cs" />
+    <Compile Include="Theme\Block\XMLDefinedTheme.cs" />
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />
     <Compile Include="Win10MenuRenderer.cs" />
