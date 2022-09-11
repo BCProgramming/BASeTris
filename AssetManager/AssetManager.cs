@@ -1500,10 +1500,20 @@ namespace BASeTris.AssetManager
         {
             ActualImage = pActualImage;
         }
-
+        
         public SerializableImage(SerializationInfo information, StreamingContext context)
         {
             ImageSerializationMode modetype = (ImageSerializationMode) information.GetInt32(SerialImageModeName);
+
+            ActualImage = modetype switch
+            {
+                ImageSerializationMode.Serialize_Null => null,
+                ImageSerializationMode.Serialize_String => TetrisGame.Imageman.getLoadedImage(information.GetString(SerialImageDataName)),
+                ImageSerializationMode.Serialize_ImageData => (Image)information.GetValue(SerialImageDataName, typeof(Image)),
+                _ =>throw new ArgumentOutOfRangeException(nameof(modetype), $"unexpected modetype {modetype}")
+                
+            };
+            ///////
             switch (modetype)
             {
                 case ImageSerializationMode.Serialize_Null:
@@ -1516,6 +1526,7 @@ namespace BASeTris.AssetManager
                     ActualImage = (Image) information.GetValue(SerialImageDataName, typeof(Image));
                     break;
             }
+            
         }
 
         #region ISerializable Members

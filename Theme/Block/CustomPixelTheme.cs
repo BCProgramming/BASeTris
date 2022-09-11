@@ -19,7 +19,9 @@ namespace BASeTris.Theme.Block
     /// </summary>
     public abstract class CustomPixelTheme<PixelEnum, BlockEnum> : NominoTheme
     {
-        public class BlockTypeReturnData
+         public record class BlockTypeReturnData(BlockEnum BlockType,bool Animated = false);
+        
+        /*public class BlockTypeReturnData
         {
             public BlockEnum BlockType;
             public bool Animated;
@@ -32,7 +34,7 @@ namespace BASeTris.Theme.Block
                 BlockType = pEnum;
                 Animated = pAnimated;
             }
-        }
+        }*/
         [Flags]
         public enum AdjacentBlockFlags
         {
@@ -197,7 +199,13 @@ namespace BASeTris.Theme.Block
             }
             return createresult;
         }
-
+        /// <summary>
+        /// Retrieves the flags for a particular NominoElement. In particular, this determines whether the graphic will be automatically rotated or if the actual image should be retrieved with a custom selector routine.
+        /// </summary>
+        /// <param name="Group">Nomino that contains this Element</param>
+        /// <param name="element">actual NominoElement for which the block flags are being retrieved</param>
+        /// <param name="field">Field on which the Nomino and Element are present</param>
+        /// <returns>BlockFlags for this nominoelement.</returns>
         public abstract BlockFlags GetBlockFlags(Nomino Group, NominoElement element, TetrisField field);
         public abstract BlockTypeReturnData GetBlockType(Nomino group, NominoElement element, TetrisField field);
 
@@ -207,29 +215,7 @@ namespace BASeTris.Theme.Block
 
         private Dictionary<int, Dictionary<BlockEnum, Dictionary<Type, Image>>> CachedImageDataGDI = new Dictionary<int, Dictionary<BlockEnum, Dictionary<Type, Image>>>();
 
-#if false
-        protected System.Drawing.Image GetMappedImageGDI(TetrisField field, Nomino Element, BlockEnum BlockTypeIndex)
-        {
-            var level = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
-            if (!CachedImageDataGDI.ContainsKey(level))
-            {
 
-                CachedImageDataGDI.Add(level, new Dictionary<BlockEnum, Dictionary<Type, Image>>());
-            }
-            if (!CachedImageDataGDI[level].ContainsKey(BlockTypeIndex))
-            {
-                CachedImageDataGDI[level].Add(BlockTypeIndex, new Dictionary<Type, Image>());
-            }
-            if (!CachedImageDataGDI[level][BlockTypeIndex].ContainsKey(Element.GetType()))
-            {
-
-                var SKresult = GetMappedImageSkia(field, Element, BlockTypeIndex);
-                CachedImageDataGDI[level][BlockTypeIndex].Add(Element.GetType(), SkiaSharp.Views.Desktop.Extensions.ToBitmap(SKresult));
-
-            }
-            return CachedImageDataGDI[level][BlockTypeIndex][Element.GetType()];
-        }
-#endif
         protected SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, NominoElement Block,BlockEnum BlockTypeIndex)
         {
             var LevelIndex = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;

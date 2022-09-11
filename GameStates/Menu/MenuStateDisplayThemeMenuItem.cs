@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Theme;
 using BASeTris.Theme.Block;
 namespace BASeTris.GameStates.Menu
 {
@@ -39,6 +40,12 @@ namespace BASeTris.GameStates.Menu
                     yield return msst;
                 }
             }
+            if (handler is StandardTetrisHandler)
+            {
+                //NominoTheme testXMLTheme = new XMLDefinedTheme("T:\\simple_nes_theme.xml");
+                //MenuStateThemeSelection msstXML = new MenuStateThemeSelection(testXMLTheme.Name, typeof(XMLDefinedTheme), () => testXMLTheme);
+            }
+
 
 
         }

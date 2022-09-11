@@ -28,37 +28,7 @@ namespace BASeTris.Theme.Block
         }
         SKColor[][] LevelColorSets = new SKColor[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
 
-        /* private void ApplyColorSet(Nomino bg, Color[] set)
-         {
-             foreach (var iterate in bg)
-             {
-
-                 Color[] Hollow = new Color[] { set[0], SKColors.White };
-                 Color[] Dark = new Color[] { set[0], set[0] };
-                 Color[] Light = new Color[] { set[1], set[1] };
-                 Color[] selected;
-                 if (bg is Tetromino_I || bg is Tetromino_T || bg is Tetromino_O)
-                     selected = Hollow;
-                 else if (bg is Tetromino_J || bg is Tetromino_Z)
-                     selected = Dark;
-                 else if (bg is Tetromino)
-                     selected = Light;
-                 else
-                     selected = TetrisGame.Choose(new Color[][] { Hollow, Dark, Light });
-                 if (iterate.Block is StandardColouredBlock)
-                 {
-                     var coloured = (StandardColouredBlock)iterate.Block;
-                     coloured.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Pixeled;
-
-                     coloured.BlockColor = selected[0];
-                     coloured.InnerColor = selected[1];
-                     if (coloured.InnerColor != coloured.BlockColor)
-                     {
-                         coloured.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Pixeled_Outline;
-                     }
-                 }
-             }
-         }*/
+      
 
         public override SKPointI GetBlockSize(TetrisField field, NESBlockTypes BlockType)
         {

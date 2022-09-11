@@ -85,7 +85,13 @@ namespace BASeTris
         static void Main()
         {
 
+            String test = null;
 
+
+            if (Object.ReferenceEquals(test, null))
+            {
+                ;
+            }
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);

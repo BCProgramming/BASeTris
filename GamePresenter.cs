@@ -74,8 +74,8 @@ namespace BASeTris
         bool GameLoopsRunning = false;
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
-            String sDataFolder = TetrisGame.AppDataFolder;
-            String sSettingsFile = Path.Combine(sDataFolder, "Settings.xml");
+            String[] sDataFolders = TetrisGame.GetSearchFolders();
+            String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d)), "Settings.xml");
             GameSettings = new SettingsManager(sSettingsFile,_Owner);
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();

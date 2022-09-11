@@ -261,16 +261,21 @@ namespace BASeTris.AssetManager
                 ManagedBass.Bass.PluginFree(disposeplugin.Key);
             }
         }
-        private Dictionary<int,String> BassLoadPluginsDir(String pPath)
+        private Dictionary<int,String> BassLoadPluginsDir(String[] pPath)
         {
-            DirectoryInfo di = new DirectoryInfo(pPath);
             Dictionary<int, String> result = new Dictionary<int, string>();
-            foreach(var iterate in di.GetFiles("*.dll"))
+            foreach (var checkpath in pPath)
             {
-                int PluginResult = ManagedBass.Bass.PluginLoad(iterate.FullName);
-                if(PluginResult != 0)
+
+                DirectoryInfo di = new DirectoryInfo(checkpath);
+             
+                foreach (var iterate in di.GetFiles("*.dll"))
                 {
-                    result.Add(PluginResult, iterate.FullName);
+                    int PluginResult = ManagedBass.Bass.PluginLoad(iterate.FullName);
+                    if (PluginResult != 0)
+                    {
+                        result.Add(PluginResult, iterate.FullName);
+                    }
                 }
             }
             return result;
@@ -281,9 +286,7 @@ namespace BASeTris.AssetManager
 
             //C:\Users\BC_Programming\AppData\Roaming\BASeBlock\Lib\x86
             //or, the application data folder \Lib\x86...
-            if (!Directory.Exists(TetrisGame.AppDataFolder))
-            {
-            }
+          
 
             String[] x86DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x86")).ToArray();
             String[] x64DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x64")).ToArray();
@@ -295,7 +298,7 @@ namespace BASeTris.AssetManager
             //Though- turns out the program was set to always build x86 anyway.
             
             var result = ManagedBass.Bass.Init(-1, 44100,ManagedBass.DeviceInitFlags.Default, IntPtr.Zero);
-            loadedbassplugs = BassLoadPluginsDir(pathuse);
+            loadedbassplugs = BassLoadPluginsDir(new string[] { pathuse });
             //ManagedBass.Bass.SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 10 + info.minbuf + 1);
             // default buffer size = update period + 'minbuf' + 1ms extra margin
 
@@ -326,7 +329,7 @@ namespace BASeTris.AssetManager
 
 
         public BASSDriver()
-            : this(Path.Combine(TetrisGame.AppDataFolder, "SoundPlugin"))
+            : this(TetrisGame.AppDataFolder)
         {
         }
 

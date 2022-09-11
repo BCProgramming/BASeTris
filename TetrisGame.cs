@@ -79,7 +79,7 @@ namespace BASeTris
                 GameOwner.GameClosing -= value;
             }
         }
-        
+
         public SettingsManager Settings
         {
             get
@@ -93,10 +93,10 @@ namespace BASeTris
         }
         //public DateTime GameStartTime { get { return _GameStartTime; } set { _GameStartTime = value; } }
         //public DateTime LastPausedTime
-       // {
-       //     get { return _LastPausedTime; }
-       //     set { _LastPausedTime = value; }
-       // }
+        // {
+        //     get { return _LastPausedTime; }
+        //     set { _LastPausedTime = value; }
+        // }
 
         private TimeSpan _FinalGameTime = TimeSpan.MinValue;
         public TimeSpan FinalGameTime { get { return _FinalGameTime; } set { _FinalGameTime = value; } }
@@ -104,7 +104,7 @@ namespace BASeTris
         public TimeSpan GetElapsedTime()
         {
             return GameTime.Elapsed;
-            
+
         }
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         public static Image StandardTiledTetrisBackground
@@ -184,8 +184,8 @@ namespace BASeTris
                 Format = sf
             });
         }
-        
- 
+
+
         public static void InitState()
         {
             String ScoreFolder = Path.Combine
@@ -196,21 +196,21 @@ namespace BASeTris
                 Directory.CreateDirectory(ScoreFolder);
             }
 
-            
+
 
             String ScoreFile = Path.Combine(ScoreFolder, "hi_score.xml");
             ScoreMan = XMLScoreManager<TetrisHighScoreData>.FromFile(ScoreFile);
             if (ScoreMan == null) ScoreMan = new XMLScoreManager<TetrisHighScoreData>(ScoreFile);
             String ApplicationFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             String AssetsFolder = Path.Combine(ApplicationFolder, "Assets");
-            
+
             Imageman = new ImageManager(TetrisGame.GetSearchFolders());
 
             var basesearchfolders = TetrisGame.GetSearchFolders();
 
             String[] AudioAssets = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Audio")).Concat
                 (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Assets")).Concat
-                (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Assets","Audio")).Where((y)=>Directory.Exists(y)).ToArray();
+                (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Assets", "Audio")).Where((y) => Directory.Exists(y)).ToArray();
             var Driver = new BASSDriver();
             Soundman = new cNewSoundManager(Driver, AudioAssets);
 
@@ -348,7 +348,7 @@ namespace BASeTris
             GameOwner?.Feedback(Strength, Length);
         }
 
-       
+
 
 
 
@@ -417,7 +417,7 @@ namespace BASeTris
         }
         public GameState.GameKeys? TranslateKey(Key source)
         {
-            if(KeyMappingTK.ContainsKey(source))
+            if (KeyMappingTK.ContainsKey(source))
             {
                 return KeyMappingTK[source];
             }
@@ -479,7 +479,7 @@ namespace BASeTris
 
         public static String[] GetSearchFolders()
         {
-            return new String[] { GetLocalAssets(), AppDataFolder };
+            return new String[] { GetLocalAssets(), AppDataFolder }.Concat(CommandLineDataFolder??new string[] { }).ToArray();
         }
 
         private static String GetLocalAssets()
@@ -503,6 +503,54 @@ namespace BASeTris
         {
             GameOwner?.SetDisplayMode(pMode);
         }
+        private static String[] _CommandLineDataFolder;
+        public static string[] CommandLineDataFolder { 
+            
+            
+            get {
+                if (_CommandLineDataFolder != null)
+                {
+                    return _CommandLineDataFolder;
+                }
+                //check for commandline...
+                var allargs = System.Environment.GetCommandLineArgs().ToList();
+                int usefoundlocation = -1;
+                String joined = String.Join(" ", System.Environment.GetCommandLineArgs());
+
+                int hyphenfind = joined.IndexOf("-datafolder:", StringComparison.OrdinalIgnoreCase);
+                int slashfind = joined.IndexOf("/datafolder:", StringComparison.OrdinalIgnoreCase);
+                if (hyphenfind > -1) usefoundlocation = hyphenfind;
+                else if (slashfind > -1) usefoundlocation = slashfind;
+
+
+                if (usefoundlocation > -1)
+                {
+                    int firstchar = usefoundlocation + 12;
+                    int endchar = -1;
+                    //if the first character is a quote, find the next quote; increment firstchar to avoid capturing that quote later, as well.
+
+                    if (joined[firstchar] == '\'')
+                    {
+                        endchar = joined.IndexOf('\'', firstchar + 1);
+                        firstchar++;
+                    }
+                    else
+                    {
+                        endchar = joined.IndexOf(' ', firstchar + 1);
+                        if (endchar == -1) endchar = joined.Length;
+                    }
+
+                    _CommandLineDataFolder = joined.Substring(firstchar, endchar - firstchar).Split(';');
+                    return _CommandLineDataFolder;
+                }
+                else
+                {
+                    return null;
+                }
+
+            } }
+
+
         private static String _AppDataFolder = null;
         public static String AppDataFolder
         {
@@ -512,48 +560,18 @@ namespace BASeTris
                 String DataFolder = "";
                 try
                 {
-                    //check for commandline...
-                    var allargs = System.Environment.GetCommandLineArgs().ToList();
-                    int usefoundlocation = -1;
-                    String joined = String.Join(" ", System.Environment.GetCommandLineArgs());
-
-                    int hyphenfind = joined.IndexOf("-datafolder:", StringComparison.OrdinalIgnoreCase);
-                    int slashfind = joined.IndexOf("/datafolder:", StringComparison.OrdinalIgnoreCase);
-                    if (hyphenfind > -1) usefoundlocation = hyphenfind;
-                    else if (slashfind > -1) usefoundlocation = slashfind;
-
-
-                    if (usefoundlocation > -1)
+                    if (!PortableMode)
                     {
-                        int firstchar = usefoundlocation + 12;
-                        int endchar = -1;
-                        //if the first character is a quote, find the next quote; increment firstchar to avoid capturing that quote later, as well.
+                        String RealAppDataFolder = Path.Combine
+                        (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                            "BASeTris") ;
+                        return DataFolder = RealAppDataFolder;
 
-                        if (joined[firstchar] == '\'')
-                        {
-                            endchar = joined.IndexOf('\'', firstchar + 1);
-                            firstchar++;
-                        }
-                        else
-                        {
-                            endchar = joined.IndexOf(' ', firstchar + 1);
-                            if (endchar == -1) endchar = joined.Length;
-                        }
-
-                        DataFolder = joined.Substring(firstchar, endchar - firstchar);
-                        return DataFolder;
                     }
-                    else
-                    {
-                        if (!PortableMode)
-                        {
-                            DataFolder = Path.Combine
-                            (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                                "BASeTris");
-                        }
-
-
-                        return DataFolder;
+                    else {
+                        //if Portable Mode, use the location of the executable.
+                        String sExecutableLocation = Assembly.GetExecutingAssembly().Location;
+                        return DataFolder = Path.Combine(Path.GetDirectoryName(sExecutableLocation), "Assets");
                     }
                 }
                 finally

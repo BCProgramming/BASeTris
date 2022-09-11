@@ -292,6 +292,7 @@ namespace BASeTris.Rendering.Adapters
         public byte G { get { return Main.Green; } }
         public byte B { get { return Main.Blue; } }
         public byte A { get { return Main.Alpha; } }
+        public uint Value { get { return ((uint)Main); } }
         public BCColor(uint src)
         {
             Main = new SKColor(src);
