@@ -91,7 +91,7 @@ namespace BASeTris
             Location = new Point(Location.X, 0);
             _Present = new GamePresenter(this);
             StartGame();
-            CurrentState = new GenericMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this, new TitleMenuPopulator()) { StateHeader = "BASeTris" };
+            CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this) ;
         }
         public void StartGame()
         {

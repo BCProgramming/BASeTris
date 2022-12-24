@@ -13,6 +13,7 @@ using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using BASeTris.GameStates.GameHandlers;
 using SkiaSharp;
+using BASeTris.Theme.Block;
 
 namespace BASeTris
 {
@@ -28,6 +29,7 @@ namespace BASeTris
             Theme_Changed,
             FieldSet
         }
+        public virtual ThemeImageProvider ThemeProvider { get; set; }
         public abstract String Name { get; }
         public virtual bool IsAnimated(NominoBlock block)
         {

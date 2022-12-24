@@ -350,6 +350,7 @@ namespace BASeTris.GameStates
                 var AnyMoved = false;
 
                 //go through each active block group, starting from the lowest to the highest.
+                //TODO: can we optimize this better so we aren't sorting the groups constantly?
                 foreach (var iterate in from abg in PlayField.BlockGroups orderby abg.Max((i) => i.Y) ascending select abg)
                 {
                     //if this blockgroup is empty (somehow) we don't need to waste time with the rest of it.

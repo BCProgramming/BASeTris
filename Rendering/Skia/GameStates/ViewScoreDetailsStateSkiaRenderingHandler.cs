@@ -76,63 +76,16 @@ namespace BASeTris.Rendering.Skia.GameStates
                 switch (Source.CurrentView)
                 {
                     case ViewScoreDetailsState.ViewScoreDetailsType.Details_Tetrominoes:
-                        DrawTetronimoDetails(Source, g, Bounds,CurrentY);
+                        DrawTetronimoDetails(pOwner, Source, g, Bounds, CurrentY) ;
                         break;
                     case ViewScoreDetailsState.ViewScoreDetailsType.Details_LevelTimes:
-                        DrawLevelTimesDetails(Source, g, Bounds,CurrentY);
+                        DrawLevelTimesDetails(pOwner,Source, g, Bounds,CurrentY);
                         break;
                 }
-                //draw the high score listing entries.
-                //iterate from 2 to drawstate and draw the high score at position drawstate-2.
-                /*for (int scoreiterate = 2; scoreiterate < Source.IncrementedDrawState; scoreiterate++)
-                {
-                    int CurrentScoreIndex = scoreiterate - 2;
-                    int CurrentScorePosition = CurrentScoreIndex + 1;
-                    double useYPosition = StartY + (LineHeight * 2.5) + (LineHeight * 3) * CurrentScoreIndex;
-                    double useXPosition = Bounds.Width * 0.19d;
-                    String sUseName = "N/A";
-                    int sUseScore = 0;
-                    IHighScoreEntry currentScore = Source.hs.Count > CurrentScoreIndex ? Source.hs[CurrentScoreIndex] : null;
-                    if (currentScore != null)
-                    {
-                        sUseName = currentScore.Name;
-                        sUseScore = currentScore.Score;
-                    }
-                    SKRect MeasureName = new SKRect(), MeasureScore = new SKRect();
-                    ListingFont.MeasureText(sUseName, ref MeasureName);
-                    ListingFont.MeasureText(sUseScore.ToString(), ref MeasureScore);
-                    float PosXPosition = Bounds.Width * 0.1f;
-                    float NameXPosition = Bounds.Width * 0.20f;
-                    float ScoreXPositionRight = Bounds.Width * (1 - 0.10f);
-                    var useForegroundPaint = Source.HighlightedScorePositions.Contains(CurrentScorePosition) ? ListingFontRainbow : ListingFont;
 
-                    //draw position
-                    g.DrawText(CurrentScorePosition.ToString() + ".", new SKPoint(PosXPosition + 2, (float)useYPosition + 2), ListingFontShadow);
-                    g.DrawText(CurrentScorePosition.ToString() + ".", new SKPoint(PosXPosition, (float)useYPosition), useForegroundPaint);
-                    //draw high score name
-                    g.DrawText(sUseName, new SKPoint(PosXPosition + 2 + Math.Abs(resultitem.Height) * 2.25f, (float)useYPosition + 2), ListingFontShadow);
-                    g.DrawText(sUseName, new SKPoint(PosXPosition + Math.Abs(resultitem.Height) * 2.25f, (float)useYPosition), useForegroundPaint);
 
-                    //draw the high score
-                    float ScoreXPosition = ScoreXPositionRight - MeasureScore.Width;
 
-                    g.DrawText(sUseScore.ToString(), new SKPoint(ScoreXPosition + 2, (float)useYPosition + 2), ListingFontShadow);
-                    g.DrawText(sUseScore.ToString(), new SKPoint(ScoreXPosition, (float)useYPosition), useForegroundPaint);
-                    useForegroundPaint.StrokeWidth = 6;
 
-                    g.DrawLine(new SKPoint(NameXPosition + MeasureName.Width + 15, (float)useYPosition + LineHeight / 2), new SKPoint(ScoreXPosition - 15, (float)useYPosition + LineHeight / 2), useForegroundPaint);
-
-                    if (Source.SelectedScorePosition == CurrentScoreIndex)
-                    {
-                        //draw selection indicator if needed
-                        SKRect MeasureArrow = new SKRect();
-                        useForegroundPaint.MeasureText(PointerText, ref MeasureArrow);
-                        float ArrowX = PosXPosition - MeasureArrow.Width - 5;
-                        float ArrowY = (float)useYPosition;
-                        g.DrawText(PointerText, new SKPoint(ArrowX + 2, ArrowY + 2), ListingFontArrowShadow);
-                        g.DrawText(PointerText, new SKPoint(ArrowX, ArrowY), ListingFontArrow);
-                    }
-                }*/
 
             }
 
@@ -185,30 +138,41 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
             */
         }
-        private void DrawTetronimoDetails(ViewScoreDetailsState Source, SKCanvas g, SKRect Bounds,float YStart)
+        private void DrawTetronimoDetails(IStateOwner pOwner,ViewScoreDetailsState Source, SKCanvas g, SKRect Bounds,float YStart)
         {
             
             //draws the tetronimo pictures, the tetronimo stats, and the numberof lines down the screen.
         }
 
-        private void DrawLevelTimesDetails(ViewScoreDetailsState Source, SKCanvas g, SKRect Bounds,float YStart)
+        private void DrawLevelTimesDetails(IStateOwner pOwner,ViewScoreDetailsState Source, SKCanvas g, SKRect Bounds,float YStart)
         {
             //draw the times each level was achieved.
             //(Possible feature: support paging if  we can't fit them on one screen?)
-            if(Source.ShowEntry is IHighScoreEntry<TetrisHighScoreData> hsd)
+            var ScoreFont = TetrisGame.RetroFontSK; //point size 24.
+            SKPaint MainScoreFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(24 * pOwner.ScaleFactor), Color = SKColors.Black };
+            SKPaint ShadowScoreFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(24 * pOwner.ScaleFactor), Color = SKColors.White };
+            SKPaint ListingFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(18 * pOwner.ScaleFactor), Color = SKColors.Black };
+
+            if (Source.ShowEntry is IHighScoreEntry<TetrisHighScoreData> hsd)
             {
                 TimeSpan[] ShowTimes = hsd.CustomData.LevelReachedTimes;
-
-                for(int l=0;l<ShowTimes.Length;l++)
+                SKRect MeasuredRect = new SKRect();
+                MainScoreFont.MeasureText("##########", ref MeasuredRect);
+                var ElementHeight = (MeasuredRect.Height + 10);
+                for (int l=0;l<ShowTimes.Length;l++)
                 {
-
+                    String BuildLine = $"Level {l}:               " + ShowTimes[l].ToString("c");
+                    var YOffset =YStart + ElementHeight * (l + 5);
+                    SKPoint DrawPosition = new SKPoint(50, YOffset);
+                    g.DrawText(BuildLine, new SKPoint(DrawPosition.X + 2, DrawPosition.Y + 2), ShadowScoreFont);
+                    g.DrawText(BuildLine, DrawPosition, MainScoreFont);
                 }
 
 
             }
             else if(Source.ShowEntry is IHighScoreEntry<DrMarioHighScoreData> drhsd)
             {
-
+                //no details For Dr.Mario yet.
             }
 
             

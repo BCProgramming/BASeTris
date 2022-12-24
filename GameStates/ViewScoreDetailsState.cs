@@ -28,7 +28,7 @@ namespace BASeTris.GameStates
         }
 
         
-        public ViewScoreDetailsType CurrentView = ViewScoreDetailsType.Details_Tetrominoes;
+        public ViewScoreDetailsType CurrentView = ViewScoreDetailsType.Details_LevelTimes;
         public int _Position;
 
         public ViewScoreDetailsState(ShowHighScoresState pOwner, IHighScoreEntry pShowEntry, IBackground useBG, int DetailPosition)
@@ -52,11 +52,16 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            
             switch (g)
             {
                 case GameKeys.GameKey_Left:
+                    ViewScoreDetailsType[] Details = (ViewScoreDetailsType[])Enum.GetValues(typeof(ViewScoreDetailsType));
+                    CurrentView = CurrentView.Predecessor();
+                    
                     break;
                 case GameKeys.GameKey_Right:
+                    CurrentView = CurrentView.Successor();
                     break;
                 case GameKeys.GameKey_RotateCCW:
                     pOwner.CurrentState = _Owner;

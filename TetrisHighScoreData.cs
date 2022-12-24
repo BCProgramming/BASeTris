@@ -11,6 +11,9 @@ namespace BASeTris
 {
     public class DrMarioHighScoreData : IHighScoreEntryCustomData
     {
+
+        public Dictionary<int, int> BlocksDestroyedCounts = new Dictionary<int, int>();
+        public Dictionary<int, int> VirusDestroyedCounts = new Dictionary<int, int>();
         public DrMarioHighScoreData(XElement Source, object PersistenceData)
         {
             //

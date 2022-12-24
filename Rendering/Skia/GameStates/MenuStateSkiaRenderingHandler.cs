@@ -13,14 +13,30 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
-    
+    [RenderingHandler(typeof(TitleMenuState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class TitleMenuSkiaRenderingHandler : AbstractMenuStateSkiaRenderingHandler<TitleMenuState>
+    {
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TitleMenuState Source, GameStateSkiaDrawParameters Element)
+        {
+            base.Render(pOwner, pRenderTarget, Source, Element);
+            //custom addition should draw tetrominoes around the border. Primarily, the corners.
+        }
 
-    
+
+    }
+
+
+
+
     [RenderingHandler(typeof(MenuState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class MenuStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, MenuState, GameStateSkiaDrawParameters>
+    public class MenuStateSkiaRenderingHandler : AbstractMenuStateSkiaRenderingHandler<MenuState>
+    {
+    }
+
+    public abstract class AbstractMenuStateSkiaRenderingHandler<TSourceType> : StandardStateRenderingHandler<SKCanvas, TSourceType, GameStateSkiaDrawParameters> where TSourceType : MenuState
     {
         
-        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuState Source, GameStateSkiaDrawParameters Element)
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TSourceType Source, GameStateSkiaDrawParameters Element)
         {
             //draw the header text,
             //then draw each menu item.
@@ -87,14 +103,14 @@ namespace BASeTris.Rendering.Skia.GameStates
 
         }
         SKBitmap CursorBitmap = null;
-        protected SKFontInfo GetScaledHeaderFont(IStateOwner pOwner, MenuState Source)
+        protected SKFontInfo GetScaledHeaderFont(IStateOwner pOwner, TSourceType Source)
         {
             return MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.HeaderTypeSize);
             
         }
         static SKPaint Painter = null;
         static SKPaint BackPainter = null;
-        public virtual float DrawHeader(IStateOwner pOwner, MenuState Source, SKCanvas Target, SKRect Bounds)
+        public virtual float DrawHeader(IStateOwner pOwner, TSourceType Source, SKCanvas Target, SKRect Bounds)
         {
             if(Source.StateHeader=="Options")
             {
@@ -144,7 +160,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             return UseY + HeaderSize.Height;
         }
-        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, MenuState Source, GameStateSkiaDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, TSourceType Source, GameStateSkiaDrawParameters Element)
         {
             //throw new NotImplementedException();
         }

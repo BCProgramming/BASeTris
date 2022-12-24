@@ -74,7 +74,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                                 int useYPosition = (int)(StartYPosition + (MeasureBounds.Height + 5) * i);
                                 int useXPosition = Math.Max((int)(Bounds.Width / 2 - MeasureBounds.Width / 2), (int)(Bounds.Left + 15));
                                 g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), TitlePaintBackground);
-                                g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), LightRainPaint);
+                                g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), TitlePaintForeground);
                                 //g.DrawString(Source.EntryPrompt[i], Source.useFont, Brushes.Black, new PointF(useXPosition + 5, useYPosition + 5));
                                 //g.DrawString(Source.EntryPrompt[i], Source.useFont, new SolidBrush(useLightRain), new PointF(useXPosition, useYPosition));
                             }

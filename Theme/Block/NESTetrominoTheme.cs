@@ -13,6 +13,9 @@ namespace BASeTris.Theme.Block
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
     {
         public override string Name { get { return "NES"; } }
+
+        private StandardNESThemeImageProvider _ThemeProvider;
+        public override ThemeImageProvider ThemeProvider { get => _ThemeProvider; set => _ThemeProvider = (StandardNESThemeImageProvider)value; }
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
         {

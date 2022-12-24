@@ -75,4 +75,24 @@ namespace BASeTris
             return newimage;
         }
     }
+
+    public static class EnumExtensions
+    {
+        public static T Successor<T>(this T value) where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new ArgumentException("T must be an Enum");
+            T[] ValueArray = (T[])Enum.GetValues(typeof(T));
+            if ((value.Equals(ValueArray[ValueArray.Length - 1]))) return ValueArray[0];
+            return ValueArray[Convert.ToInt32(value) + 1];
+
+        }
+
+        public static T Predecessor<T>(this T value) where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new ArgumentException("T must be an Enum");
+            T[] ValueArray = (T[])Enum.GetValues(typeof(T));
+            if ((value.Equals(ValueArray[0]))) return ValueArray[ValueArray.Length - 1];
+            return ValueArray[Convert.ToInt32(value) - 1];
+        }
+    }
 }

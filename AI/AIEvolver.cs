@@ -202,6 +202,7 @@ namespace BASeTris.AI
                 var PossibleBoardResults = StandardNominoAI.GetPossibleResults(Contents, nextNomino,scoredata);
                 //score each one based on the scoring rules.
                 var BestScore = (from p in PossibleBoardResults orderby p.GetScore(typeof(GameStates.GameHandlers.StandardTetrisHandler), scoredata) descending select p).FirstOrDefault();
+
                 if(BestScore!=null)
                 {
                     // we go with the best scoring value of course.
