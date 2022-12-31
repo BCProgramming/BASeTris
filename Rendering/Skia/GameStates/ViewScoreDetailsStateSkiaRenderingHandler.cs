@@ -2,6 +2,8 @@
 using BASeCamp.Rendering;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
+using BASeTris.GameStates.GameHandlers;
+using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -15,7 +17,8 @@ namespace BASeTris.Rendering.Skia.GameStates
     public class ViewScoreDetailsStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, ViewScoreDetailsState, GameStateSkiaDrawParameters>
     {
         private SKPaint Separator = new SKPaint() { Color = SKColors.Black };
-        
+        private GameplayGameState Tet_State = null;
+        TetrisField tf = null;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, ViewScoreDetailsState Source, GameStateSkiaDrawParameters Element)
         {
             //TODO: finish this!
@@ -138,10 +141,30 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
             */
         }
+        private Type[] TetrominoTypes = new Type[] { typeof(Tetromino_F), typeof(Tetromino_G), typeof(Tetromino_I), typeof(Tetromino_J), typeof(Tetromino_L), typeof(Tetromino_O), typeof(Tetromino_S), typeof(Tetromino_T), typeof(Tetromino_Y), typeof(Tetromino_Z) };
+        private Dictionary<string, Type> TetrominoTypeMap = null;
+        private Dictionary<string, SKBitmap> TetrominoBitmaps = null;
+        private StandardTetrisHandler stubHandler = null;
         private void DrawTetronimoDetails(IStateOwner pOwner,ViewScoreDetailsState Source, SKCanvas g, SKRect Bounds,float YStart)
         {
             
             //draws the tetronimo pictures, the tetronimo stats, and the numberof lines down the screen.
+            var ScoreFont = TetrisGame.RetroFontSK; //point size 24.
+            SKPaint MainScoreFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(24 * pOwner.ScaleFactor), Color = SKColors.Black };
+            SKPaint ShadowScoreFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(24 * pOwner.ScaleFactor), Color = SKColors.White };
+            SKPaint ListingFont = new SKPaint() { Typeface = ScoreFont, TextSize = (float)(18 * pOwner.ScaleFactor), Color = SKColors.Black };
+            if (Source.ShowEntry is IHighScoreEntry<TetrisHighScoreData> hsd)
+            {
+              
+
+
+
+            }
+            else if (Source.ShowEntry is IHighScoreEntry<DrMarioHighScoreData> drhsd)
+            {
+                //no details For Dr.Mario yet.
+            }
+            
         }
 
         private void DrawLevelTimesDetails(IStateOwner pOwner,ViewScoreDetailsState Source, SKCanvas g, SKRect Bounds,float YStart)

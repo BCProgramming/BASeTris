@@ -22,6 +22,10 @@ namespace BASeTris
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
     public abstract class NominoTheme
     {
+
+     
+
+
         public enum ThemeApplicationReason
         {
             Normal,

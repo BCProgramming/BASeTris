@@ -29,6 +29,7 @@ using BASeTris.Tetrominoes;
 using Microsoft.SqlServer.Server;
 using SkiaSharp;
 using BASeTris.Settings;
+using BASeTris.Theme;
 
 namespace BASeTris.GameStates
 {
@@ -126,27 +127,8 @@ namespace BASeTris.GameStates
         {
             lock (LockTetImageRedraw)
             {
-                
-                var copiedGDI = NominoImages;
-                var CopiedSK = NominoSKBitmaps;
-                NominoImages = null;
-                NominoSKBitmaps = null;
-                //dispose the old ones too.
-                foreach (var iterate in CopiedSK)
-                {
-                    foreach(var skb in iterate.Value)
-                    {
-                        skb.Dispose();
-                    }
-                }
-                if(copiedGDI!=null)
-                foreach(var iterate in copiedGDI)
-                {
-                    foreach (var bmp in iterate.Value)
-                    {
-                        bmp.Dispose();
-                    }
-                }
+
+                ImageManager.Reset();
                 f_RedrawStatusBitmap = true;
                 StatisticsBackground = null;
                 f_RedrawTetrominoImages = true;
@@ -169,8 +151,7 @@ namespace BASeTris.GameStates
         {
             lock (LockTetImageRedraw)
             {
-                NominoImages = null;
-                NominoSKBitmaps = null;
+                ImageManager.Reset();
             }
 
             //throw new NotImplementedException();
@@ -179,28 +160,39 @@ namespace BASeTris.GameStates
         public bool f_RedrawTetrominoImages = false;
         public bool f_RedrawStatusBitmap = false;
 
-        public Dictionary<String, List<Image>> NominoImages { protected set; get; } = null;
+        //public Dictionary<String, List<Image>> NominoImages { protected set; get; } = null;
 
-        private Dictionary<String, List<SKBitmap>> NominoSKBitmaps = null;
+        //private Dictionary<String, List<SKBitmap>> NominoSKBitmaps = null;
 
-      
+        private TetrominoImageManager _ImageManager = null;
+        public TetrominoImageManager ImageManager
+        {
+            get
+            {
+                if (_ImageManager == null) _ImageManager = new TetrominoImageManager(GameHandler, PlayField);
+                return _ImageManager;
+            }
+        }
         public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner,Nomino nom)
         {
-            String GetKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
+            return ImageManager.GetTetrominoSKBitmap(pOwner, nom);
+            /*String GetKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
             if (!NominoSKBitmaps.ContainsKey(GetKey))
             {
                 return AddTetrominoBitmapSK(pOwner, nom);
             }
-            return GetTetrominoSKBitmap(GetKey);
+            return GetTetrominoSKBitmap(GetKey);*/
         }
         public SKBitmap GetTetrominoSKBitmap(Type sType)
         {
-            String GetKey = PlayField.Theme.GetNominoTypeKey(sType, GameHandler, PlayField);
-            return GetTetrominoSKBitmap(GetKey);
+            return ImageManager.GetTetrominoSKBitmap(sType);
+            /*String GetKey = PlayField.Theme.GetNominoTypeKey(sType, GameHandler, PlayField);
+            return GetTetrominoSKBitmap(GetKey);*/
         }
         public SKBitmap GetTetrominoSKBitmap(String Source)
         {
-            if (NominoSKBitmaps == null) NominoSKBitmaps = new Dictionary<String, List<SKBitmap>>();
+            return ImageManager.GetTetrominoSKBitmap(Source);
+            /*if (NominoSKBitmaps == null) NominoSKBitmaps = new Dictionary<String, List<SKBitmap>>();
             if (!NominoSKBitmaps.ContainsKey(Source))
             {
                 if (NominoImages != null && NominoImages.ContainsKey(Source))
@@ -219,17 +211,19 @@ namespace BASeTris.GameStates
             }
 
             return TetrisGame.Choose(NominoSKBitmaps[Source]);
-
+            */
         }
 
-        public bool HasTetrominoSKBitmaps() => NominoSKBitmaps != null;
+        public bool HasTetrominoSKBitmaps() => ImageManager.HasTetrominoSKBitmaps();
         public void SetTetrominoSKBitmaps(Dictionary<String, List<SKBitmap>> bitmaps)
         {
-            NominoSKBitmaps = bitmaps;
+            ImageManager.SetTetrominoSKBitmaps(bitmaps);
         }
-        public bool HasTetrominoImages() => NominoImages != null;
+        public bool HasTetrominoImages() => ImageManager.HasTetrominoImages();
         public Image AddTetrominoImage(IStateOwner pOwner,Nomino Source)
         {
+            return ImageManager.AddTetrominoImage(pOwner, Source);
+            /*
             String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
             float useSize = 18 * (float)pOwner.ScaleFactor;
             SizeF useTetSize = new SizeF(useSize, useSize);
@@ -243,11 +237,12 @@ namespace BASeTris.GameStates
 
 
             return buildBitmap;
-
+            */
         }
         public SKBitmap AddTetrominoBitmapSK(IStateOwner pOwner, Nomino Source)
         {
-            String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
+            return ImageManager.AddTetrominoBitmapSK(pOwner, Source);
+            /*String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
             float useSize = 18 * (float)pOwner.ScaleFactor;
             SKSize useTetSize = new SKSize(useSize, useSize);
 
@@ -259,29 +254,31 @@ namespace BASeTris.GameStates
                 NominoSKBitmaps.Add(sAddKey, new List<SKBitmap>() { buildBitmap });
 
 
-            return buildBitmap;
+            return buildBitmap;*/
         }
         public Image GetTetrominoImage(IStateOwner pOwner,Nomino nom)
         {
-            
-            String sKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
+            return ImageManager.GetTetrominoImage(pOwner, nom);   
+            /*String sKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
             if(!NominoImages.ContainsKey(sKey))
             {
                 return AddTetrominoImage(pOwner, nom);
             }
-            return GetTetrominoImage(sKey);
+            return GetTetrominoImage(sKey);*/
         }
         public Image GetTetrominoImage(Type pType)
         {
-            String sKey = PlayField.Theme.GetNominoTypeKey(pType, GameHandler, PlayField);
-            return GetTetrominoImage(sKey);
+            return ImageManager.GetTetrominoImage(pType);
+            /*String sKey = PlayField.Theme.GetNominoTypeKey(pType, GameHandler, PlayField);
+            return GetTetrominoImage(sKey);*/
         }
         public Image GetTetrominoImage(String TetrominoType)
         {
-            return TetrisGame.Choose(NominoImages[TetrominoType]);
+            return ImageManager.GetTetrominoImage(TetrominoType);
+            //return TetrisGame.Choose(NominoImages[TetrominoType]);
         }
-        public SKBitmap[] GetTetrominoSKBitmaps() => TetrisGame.Coalesce(NominoSKBitmaps);
-        public Image[] GetTetronimoImages() => TetrisGame.Coalesce(NominoImages);
+        public SKBitmap[] GetTetrominoSKBitmaps() => ImageManager.GetTetrominoSKBitmaps();
+        public Image[] GetTetronimoImages() => ImageManager.GetTetronimoImages();
             
 
 
@@ -289,7 +286,7 @@ namespace BASeTris.GameStates
 
         public void SetTetrominoImages(Dictionary<String,List<Image>> images)
         {
-            NominoImages = images;
+            ImageManager.SetTetrominoImages(images);
         }
         public void InvokeBlockGroupSet(object sender, TetrisField.BlockGroupSetEventArgs e)
         {

@@ -162,6 +162,7 @@
     <Compile Include="GameStates\Menu\TitleMenuState.cs" />
     <Compile Include="GlobalResources.cs" />
     <Compile Include="MathHelper.cs" />
+    <Compile Include="NNominoGenerator.cs" />
     <Compile Include="Nomino.cs" />
     <Compile Include="Cheats\Cheat.cs" />
     <Compile Include="Cheats\DebugCheat.cs" />
@@ -293,6 +294,7 @@
     <Compile Include="Theme\Block\NominoTheme.cs" />
     <Compile Include="Theme\Block\ThemeImageProvider.cs" />
     <Compile Include="Theme\Block\XMLDefinedTheme.cs" />
+    <Compile Include="Theme\TetrominoImageManager.cs" />
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />
     <Compile Include="Win10MenuRenderer.cs" />

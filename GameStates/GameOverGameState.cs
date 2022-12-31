@@ -158,7 +158,21 @@ namespace BASeTris.GameStates
                         pOwner.CurrentState = new TitleMenuState(bg, pOwner);
                     }
                 }
-              
+                else if (CompleteSummary)
+                {
+                    IBackground bg = null;
+                    if (pOwner is BASeTris bt)
+                    {
+                        bg = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
+                    }
+                    else if (pOwner is BASeTrisTK)
+                    {
+                        bg = StandardImageBackgroundSkia.GetMenuBackgroundDrawer();
+                    }
+                    //GenericMenuState TitleMenu = new GenericMenuState(bg, pOwner, new TitleMenuPopulator());
+                    pOwner.CurrentState = new TitleMenuState(bg, pOwner);
+                }
+
             }
            
         }

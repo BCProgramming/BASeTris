@@ -168,25 +168,49 @@ namespace BASeTris.Rendering.Skia.GameStates
                 }
                 if (Source.NewScorePosition > -1)
                 {
-                    SKPaint HighScoreEligible = new SKPaint()
+                    using (SKPaint HighScoreEligible = new SKPaint()
                     {
                         Color = SKColors.Black,
                         Typeface = TetrisGame.RetroFontSK,
                         TextSize = (float)(24 * pOwner.ScaleFactor)
-                    };
+                    })
+                    {
+                        SKPaint ShadowPaint = new SKPaint()
+                        {
+                            Color = SKColors.DarkGray,
+                            Typeface = TetrisGame.RetroFontSK,
+                            TextSize = (float)(24 * pOwner.ScaleFactor)
+                        };
+                        float XPos = Bounds.Width * .25f;
+                        float YPos = Bounds.Height - measured.Height - 10;
+                        String ScoreText = "New High Score!";
+                        SKRect MeasuredScoreText = new SKRect();
+                        HighScoreEligible.MeasureText(ScoreText, ref MeasuredScoreText);
+                        var useStyle = new DrawTextInformationSkia()
+                        {
+                            Text = ScoreText,
+                            BackgroundPaint = new SKPaint() { Color = SKColors.Transparent },
+                            DrawFont = new Adapters.SKFontInfo(TetrisGame.RetroFontSK, (float)(24 * pOwner.ScaleFactor)),
+                            ForegroundPaint = HighScoreEligible,
+                            ShadowPaint = new SKPaint(),
+                            Position = new SKPoint(XPos, YPos + MeasuredScoreText.Height / 2),
+                            ShadowOffset = new SKPoint(5f, 5f),
+                        };
+                        
+                        HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
+                        useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia());
+                        pRenderTarget.DrawTextSK(useStyle);
 
 
-                    //draw the awarded score position as well.
-                    float XPos = Bounds.Width * .25f;
-                    float YPos = Bounds.Height - measured.Height - 10;
-                    String ScoreText = "New High Score!";
-                    SKRect MeasuredScoreText = new SKRect();
-                    HighScoreEligible.MeasureText(ScoreText, ref MeasuredScoreText);
+                        //draw the awarded score position as well.
 
-                    g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
-                    HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
-                    g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                        
 
+
+                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                        HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
+                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                    }
                 }
             }
 

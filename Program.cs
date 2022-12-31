@@ -78,13 +78,23 @@ namespace BASeTris
         {
             return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5),2);
         }
+
+
+
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
-
+            var result = NNominoGenerator.GetPieces(5, null).ToList();
+            result = NNominoGenerator.FilterPieces(result).ToList();
+            foreach (var iterate in result)
+            {
+                String str = NNominoGenerator.GetDirectionString(iterate);
+                ;
+            }
 
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {

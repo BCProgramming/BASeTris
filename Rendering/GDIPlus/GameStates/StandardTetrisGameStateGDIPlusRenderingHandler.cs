@@ -161,7 +161,7 @@ namespace BASeTris.Rendering.GDIPlus
                             String StatText = "" + PieceCounts[i];
                             SizeF StatTextSize = g.MeasureString(StatText, standardFont);
                             String sNomTypeKey = Source.PlayField.Theme.GetNominoTypeKey(useTypes[i], Source.GameHandler, Source.PlayField);
-                            Image TetrominoImage = TetrisGame.Choose(Source.NominoImages[sNomTypeKey]);
+                            Image TetrominoImage = TetrisGame.Choose(Source.ImageManager.NominoImages[sNomTypeKey]);
                             PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
 
                             g.DrawImage(TetrominoImage, ImagePos);
