@@ -89,8 +89,8 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-            /*
-            var firstresult = NNominoGenerator.GetPieces(8, null).ToList();
+
+            var firstresult = NNominoGenerator.GetPieces(13, null).ToList();
             var result = NNominoGenerator.FilterPieces(firstresult).ToList();
             StringBuilder sbreport = new StringBuilder();
             int CurrentCount = 1;
@@ -106,7 +106,6 @@ namespace BASeTris
             }
             String strresult = sbreport.ToString();
             System.IO.File.WriteAllText("T:\\NominoOut.txt", strresult);
-            */
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);

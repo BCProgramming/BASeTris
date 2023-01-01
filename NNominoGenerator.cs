@@ -142,6 +142,19 @@ namespace BASeTris
             return ResetTranslation(BuildList);
 
         }
+        private static String HashPointSet(List<NominoPoint> input)
+        {
+            var reseted = ResetTranslation(input).OrderBy((a)=>a.X).OrderBy((b)=>b.Y).ToList();
+            StringBuilder sb = new StringBuilder();
+
+            String sHash = String.Join(",", from i in reseted select (i.GetHashCode()));
+
+            return sHash;
+
+
+
+
+        }
         public static String StringRepresentation(List<NominoPoint> Points)
         {
 
@@ -177,20 +190,40 @@ namespace BASeTris
         {
             HashSet<String> FilteredPieces = new HashSet<string>();
             List<List<NominoPoint>> ProcessedList = new List<List<NominoPoint>>();
+            HashSet<String> PreviouslyProcessed = new HashSet<string>();
             foreach (var iteratefilter in Input)
             {
-
-                if (ProcessedList.Any((p) => IsEqual(p, iteratefilter))) continue;
+                /*String sHash = HashPointSet(iteratefilter);
+                if (sHash == "-2,0,1,2,3")
+                {
+                    ;
+                }*/
+                String DebugAid = StringRepresentation(iteratefilter);
+                String sHash = DebugAid;
+                if (PreviouslyProcessed.Contains(sHash))
+                {
+                    continue;
+                }
+                //if (ProcessedList.Any((p) => IsEqual(p, iteratefilter))) continue;
                 //ProcessedList.Add(iteratefilter);
                 var CW1 = RotateCW(iteratefilter);
                 var CW2 = RotateCW(CW1);
                 var CW3 = RotateCW(CW2);
-                ProcessedList.AddRange(new[] { iteratefilter, CW1, CW2, CW3 });
+                PreviouslyProcessed.Add(sHash);
+                PreviouslyProcessed.Add(StringRepresentation(CW1));
+                PreviouslyProcessed.Add(StringRepresentation(CW2));
+                PreviouslyProcessed.Add(StringRepresentation(CW3));
+                //ProcessedList.AddRange(new[] { iteratefilter, CW1, CW2, CW3 });
                 var GetStr = GetDirectionString(iteratefilter);
                 if (!FilteredPieces.Contains(GetStr))
                 {
                     FilteredPieces.Add(GetStr);
                     yield return iteratefilter;
+                }
+                else
+                {
+                    ;
+                    //filtered out
                 }
 
             }

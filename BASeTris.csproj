@@ -213,7 +213,6 @@
     <Compile Include="GraphicsPathExtensions.cs" />
     <Compile Include="GummyImage.cs" />
     <Compile Include="IStateOwner.cs" />
-    <Compile Include="Pentominoes\Pentomino.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
