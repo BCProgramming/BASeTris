@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Reflection.BASeCamp;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BASeCamp.BASeScores;
@@ -15,6 +16,7 @@ using BASeTris.AI;
 using BASeTris.GameStates.GameHandlers;
 using OpenTK;
 using OpenTK.Input;
+using static BASeTris.NNominoGenerator;
 
 namespace BASeTris
 {
@@ -79,8 +81,7 @@ namespace BASeTris
             return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5),2);
         }
 
-
-
+        
 
         /// <summary>
         /// The main entry point for the application.
@@ -88,14 +89,24 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-            var result = NNominoGenerator.GetPieces(5, null).ToList();
-            result = NNominoGenerator.FilterPieces(result).ToList();
+            /*
+            var firstresult = NNominoGenerator.GetPieces(8, null).ToList();
+            var result = NNominoGenerator.FilterPieces(firstresult).ToList();
+            StringBuilder sbreport = new StringBuilder();
+            int CurrentCount = 1;
             foreach (var iterate in result)
             {
                 String str = NNominoGenerator.GetDirectionString(iterate);
-                ;
-            }
+                String strrep = NNominoGenerator.StringRepresentation(iterate);
+                sbreport.AppendLine("N-omino " + CurrentCount);
+                sbreport.AppendLine("");
+                sbreport.AppendLine(strrep);
+                CurrentCount++;
 
+            }
+            String strresult = sbreport.ToString();
+            System.IO.File.WriteAllText("T:\\NominoOut.txt", strresult);
+            */
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);
