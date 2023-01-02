@@ -26,6 +26,10 @@ namespace BASeTris
     //TODO: change it so that Nomino's can accept the gamekey input. Will have to refactor what we have already...
     public class Nomino : IEnumerable<NominoElement>
     {
+        public static Func<Nomino>[] NominoEnumToFuncList(IEnumerable<Nomino> input) //will be useful for generated Nominoes like Pentominoes and Hexominoes and such.
+        {
+            return (from p in input select (Func<Nomino>)(() => p)).ToArray();
+        }
         public String SpecialName { get; set; }
 
         public bool Controllable { get; set; } = true;
@@ -204,6 +208,14 @@ namespace BASeTris
             {
                 AddBlock(new NominoElement(cloneentry));
             }
+        }
+        public Nomino(IEnumerable<NominoElement> elements)
+        {
+            foreach (var iterate in elements)
+            {
+                AddBlock(iterate);
+            }
+
         }
 
         public Nomino()

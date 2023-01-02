@@ -568,6 +568,10 @@ namespace BASeTris.GameStates
 
         public virtual Nomino NominoTetromino()
         {
+            //HACK!
+            //var hexpiece = NNominoGenerator.GetPiece(6);
+            //var buildNomino = NNominoGenerator.CreateNomino(hexpiece);
+            //return buildNomino;
             var nextitem = Chooser.RetrieveNext();
             return nextitem;
         }

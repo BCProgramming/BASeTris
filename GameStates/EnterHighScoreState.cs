@@ -29,7 +29,7 @@ namespace BASeTris.GameStates
             ScoreToEntryFunc = ScoreFunc; //function which takes the score and gives back an appropriate IHighScoreEntry implementation.
             GameStatistics = SourceStats;
             AchievedPosition = ScoreListing.IsEligible(GameStatistics.Score);
-
+            ReversionState = pReversionState;
 
             EntryPrompt = (" Congratulations, your score is\n at position " + AchievedPosition + " \n Enter your name.").Split('\n');
         }

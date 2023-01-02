@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.Blocks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -142,22 +143,9 @@ namespace BASeTris
             return ResetTranslation(BuildList);
 
         }
-        private static String HashPointSet(List<NominoPoint> input)
-        {
-            var reseted = ResetTranslation(input).OrderBy((a)=>a.X).OrderBy((b)=>b.Y).ToList();
-            StringBuilder sb = new StringBuilder();
-
-            String sHash = String.Join(",", from i in reseted select (i.GetHashCode()));
-
-            return sHash;
-
-
-
-
-        }
+       
         public static String StringRepresentation(List<NominoPoint> Points)
         {
-
             int MinX = int.MaxValue, MaxX = int.MinValue;
             int MinY = int.MaxValue, MaxY = int.MinValue;
 
@@ -193,19 +181,12 @@ namespace BASeTris
             HashSet<String> PreviouslyProcessed = new HashSet<string>();
             foreach (var iteratefilter in Input)
             {
-                /*String sHash = HashPointSet(iteratefilter);
-                if (sHash == "-2,0,1,2,3")
-                {
-                    ;
-                }*/
                 String DebugAid = StringRepresentation(iteratefilter);
                 String sHash = DebugAid;
                 if (PreviouslyProcessed.Contains(sHash))
                 {
                     continue;
                 }
-                //if (ProcessedList.Any((p) => IsEqual(p, iteratefilter))) continue;
-                //ProcessedList.Add(iteratefilter);
                 var CW1 = RotateCW(iteratefilter);
                 var CW2 = RotateCW(CW1);
                 var CW3 = RotateCW(CW2);
@@ -213,28 +194,83 @@ namespace BASeTris
                 PreviouslyProcessed.Add(StringRepresentation(CW1));
                 PreviouslyProcessed.Add(StringRepresentation(CW2));
                 PreviouslyProcessed.Add(StringRepresentation(CW3));
-                //ProcessedList.AddRange(new[] { iteratefilter, CW1, CW2, CW3 });
-                var GetStr = GetDirectionString(iteratefilter);
-                if (!FilteredPieces.Contains(GetStr))
-                {
-                    FilteredPieces.Add(GetStr);
-                    yield return iteratefilter;
-                }
-                else
-                {
-                    ;
-                    //filtered out
-                }
 
+                yield return iteratefilter;
             }
         }
-        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null)
+        //the "String Representation" is an effective Hash. Of course the Hash only applies to one rotation, so really, a particular Point Set has three Hashes. One Hash can easily be used for any indexing, but testing against the Hash needs to check all three.
+        //or rather: if we handle this in the "generator" that creates tetrominoes, it can simply keep track of those it has already generated, and their three hashes. If it tries to give back one that has a hash that matches any of them, it can just give back the original instead.
+        private static String[] GetHashPointSet(List<NominoPoint> input)
+        {
+
+            var inputCW = RotateCW(input);
+            var inputCW2 = RotateCW(inputCW);
+            var inputCW3 = RotateCW(inputCW2);
+
+            return (from j in new[] { inputCW, inputCW2, inputCW3 } select StringRepresentation(j)).ToArray();
+        }
+        private static String GetStringForNomino(Nomino src)
+        {
+            return StringRepresentation(GetNominoPoints(src));
+        }
+        private static String[] GetStringsForNomino(Nomino src)
+        {
+            return GetHashPointSet(GetNominoPoints(src));
+        }
+
+        public static List<NominoPoint> GetNominoPoints(Nomino src)
+        {
+
+            List<NominoPoint> result = new List<NominoPoint>();
+            foreach (var iterate in src)
+            {
+                NominoPoint np = new NominoPoint(iterate.X, iterate.Y);
+                result.Add(np);
+            }
+
+            return ResetTranslation(result);
+        }
+        
+        public static Nomino CreateNomino(List<NominoPoint> src)
+        {
+
+            
+            NNominoGenerator.ResetTranslation(src);
+            int MaxX = 0;
+            int MaxY = 0;
+            foreach (var iterate in src)
+            {
+                if (Math.Abs(iterate.X) > MaxX) MaxX = Math.Abs(iterate.X);
+                if (Math.Abs(iterate.Y) > MaxY) MaxY = Math.Abs(iterate.Y);
+            }
+            List<NominoElement> Elements = new List<NominoElement>();
+            foreach (var iterate in src)
+            {
+                
+                NominoElement ne = new NominoElement(new System.Drawing.Point(iterate.X, iterate.Y), new System.Drawing.Size(MaxX, MaxY), new StandardColouredBlock());
+                Elements.Add(ne);
+                
+            }
+            Nomino buildresult = new Nomino(Elements);
+            return buildresult;
+        }
+        public static List<NominoPoint> GetPiece(int BlockCount)
+        {
+            return GetPieces(BlockCount, null, NominoPieceGenerationFlags.Flag_Randomize).FirstOrDefault();
+        }
+        [Flags]
+        public enum NominoPieceGenerationFlags
+        {
+            Flag_None = 0,
+            Flag_Randomize = 1
+        }
+        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None)
         {
             if (CurrentBuild == null)
             {
                 
                 CurrentBuild = new List<NominoPoint>() {new NominoPoint(0, 0), new NominoPoint(1, 0) }; //create first two blocks
-                var subreturn = GetPieces(BlockCount - 2, CurrentBuild); //-2 since we added two blocks.
+                var subreturn = GetPieces(BlockCount - 2, CurrentBuild,GenerationFlags); //-2 since we added two blocks.
                 foreach (var yieldit in subreturn)
                 {
                     yield return yieldit;
@@ -247,73 +283,47 @@ namespace BASeTris
                 var NextToLast = CurrentBuild[CurrentBuild.Count - 2];
                 var Direction = new NominoPoint(Last.X - NextToLast.X, Last.Y - NextToLast.Y);
                 //Create three copies of the current List.
-                List<NominoPoint>[] Copies = new List<NominoPoint>[] {new List<NominoPoint>(), new List<NominoPoint>(), new List<NominoPoint>() };
+                List<NominoPoint>[] DirectionLists = new List<NominoPoint>[] {new List<NominoPoint>(), new List<NominoPoint>(), new List<NominoPoint>() };
                 for (int i = 0; i < CurrentBuild.Count; i++)
                 {
                     for (int a = 0; a < 3; a++)
                     {
-                        Copies[a].Add(CurrentBuild[i]);
+                        DirectionLists[a].Add(CurrentBuild[i]);
                     }
                 }
 
                 //copies established. index zero is left (-y,x), 1 is forward (x,y) and 2 is right (y,-x)
 
-                List<NominoPoint> LeftwardList = Copies[0];
-                List<NominoPoint> ForwardList = Copies[1];
-                List<NominoPoint> RightwardList = Copies[2];
+                List<NominoPoint> LeftwardList = DirectionLists[0];
+                List<NominoPoint> ForwardList = DirectionLists[1];
+                List<NominoPoint> RightwardList = DirectionLists[2];
 
                 //what is the coordinate if we move leftward (-Y,X)
                 NominoPoint LeftMove = new NominoPoint(Last.X - Direction.Y, Last.Y + Direction.X);
                 NominoPoint ForwardMove = new NominoPoint(Last.X + Direction.X, Last.Y + Direction.Y);
                 NominoPoint RightwardMove = new NominoPoint(Last.X + Direction.Y, Last.Y - Direction.X);
 
-                if (!LeftwardList.Contains(LeftMove))
+                List<NominoPoint> MoveList = new List<NominoPoint>() { LeftMove, ForwardMove, RightwardMove };
+                int[] ArrayOrder = new int[] { 0, 1, 2 };
+                if (GenerationFlags.HasFlag(NominoPieceGenerationFlags.Flag_Randomize)) ArrayOrder = TetrisGame.Shuffle(ArrayOrder).ToArray();
+                foreach (int index in ArrayOrder)
                 {
-                    LeftwardList.Add(LeftMove);
-                    if (BlockCount-1 > 0)
+                    
+                    if (!DirectionLists[index].Contains(MoveList[index]))
                     {
-                        var LeftResult = GetPieces(BlockCount - 1, LeftwardList);
-                        foreach (var iterate in LeftResult)
+                        DirectionLists[index].Add(MoveList[index]);
+                        if (BlockCount - 1 > 0)
                         {
-                            yield return iterate;
+                            var Currresult = GetPieces(BlockCount - 1, DirectionLists[index],GenerationFlags);
+                            foreach (var iterate in Currresult)
+                                yield return iterate;
+                        }
+                        else
+                        {
+                            yield return DirectionLists[index];
                         }
                     }
-                    else
-                    {
-                        yield return LeftwardList;
-                    }
-                }
-                if (!ForwardList.Contains(ForwardMove))
-                {
-                    ForwardList.Add(ForwardMove);
-                    if (BlockCount-1 > 0)
-                    {
-                        var ForwardResult = GetPieces(BlockCount - 1, ForwardList);
-                        foreach (var iterate in ForwardResult)
-                        {
-                            yield return iterate;
-                        }
-                    }
-                    else
-                    {
-                        yield return ForwardList;
-                    }
-                }
-                if (!RightwardList.Contains(RightwardMove))
-                {
-                    RightwardList.Add(RightwardMove);
-                    if (BlockCount-1 > 0)
-                    {
-                        var RightResult = GetPieces(BlockCount-1, RightwardList);
-                        foreach (var iterate in RightResult)
-                        {
-                            yield return iterate;
-                        }
-                    }
-                    else
-                    {
-                        yield return RightwardList;
-                    }
+
                 }
 
             }

@@ -355,16 +355,21 @@ namespace BASeTris
                             int ColPos = groupblock.X + bg.X;
                             //Investigate: is this resetting the Rotation?
                             //is it losing it's owner or something? Dr.Mario theme gets confused when setting a block to the field.
-                           
-                            if (FieldContents[RowPos][ColPos] == null)
+                            try
                             {
-                                FieldContents[RowPos][ColPos] = groupblock.Block;
-                                Result.Add(new Point(ColPos, RowPos));
-                            }
-                            else
-                            {
-                                
+                                if (FieldContents[RowPos][ColPos] == null)
+                                {
+                                    FieldContents[RowPos][ColPos] = groupblock.Block;
+                                    Result.Add(new Point(ColPos, RowPos));
+                                }
+                                else
+                                {
 
+
+                                }
+                            }
+                            catch (IndexOutOfRangeException e)
+                            {
                             }
                         }
                     

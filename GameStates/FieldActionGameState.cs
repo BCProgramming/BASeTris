@@ -284,7 +284,15 @@ namespace BASeTris.GameStates
             {1, "SINGLE " },
             {2, "DOUBLE " },
             {3, "TRIPLE " },
-            {4, "TETRIS!" }
+            {4, "TETRIS!" },
+            {5, "PENTRIS!" },
+            {6, "HEXTRIS!" },
+            {7, "SEPTRIS!" },
+            {8, "OCTRIS!" },
+            {9, "NONTRIS!" },
+            {10, "DECTRIS!" },
+            {11, "UNODECTRIS!" },
+            {12, "DUODECTRIS!" }
         };
         
         const int ParticleCountPerBlock = 15;

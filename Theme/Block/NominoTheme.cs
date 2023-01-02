@@ -17,6 +17,10 @@ using BASeTris.Theme.Block;
 
 namespace BASeTris
 {
+
+    //TODO: both here, and elsewhere:
+    //remove reliance of Type for unique indexing of Nominoes. Instead, we need to come up with some unique way to hash each unique tetromino.
+
     //placed here for reference:
     //possible theme idea: a theme which itself is a preference-based setup.
     //Instead of defining themes of it's own, it can use existing Theme types and be configured to set certain tetrominos to specific themes.
