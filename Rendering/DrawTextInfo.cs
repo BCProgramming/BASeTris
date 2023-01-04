@@ -249,6 +249,18 @@ namespace BASeTris.Rendering
             Position.Y = YPos;
         }
     }
+    public class JitterCharacterPositionCalculatorSkia : DrawCharacterPositionCalculatorSkia
+    {
+        public float CharacterNumberModifier { get; set; } = 0.5f;
+        public float Height { get; set; } = 5;
+        public sealed override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
+        {
+            float XPos = Position.X, YPos = Position.Y;
+            StandardPositionCalculators.RandomPositionCalculator(ref XPos, ref YPos, Height, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier);
+            Position.X = XPos;
+            Position.Y = YPos;
+        }
+    }
     public class VerticalWavePositionCharacterPositionCalculatorSkia : DrawCharacterPositionCalculatorSkia
     {
         public float CharacterNumberModifier { get; set; } = 0.5f;
@@ -282,6 +294,16 @@ namespace BASeTris.Rendering
             
             float NewYPos = (float)Math.Sin(Angle) * Height;
             
+            YPos = YPos + NewYPos;
+        }
+        public static void RandomPositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)
+        {
+            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
+            var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
+            double Angle = TetrisGame.rgen.NextDouble() * Math.PI;
+
+            float NewYPos = (float)Math.Sin(Angle) * 3;
+
             YPos = YPos + NewYPos;
         }
         public static void HorizontalWavePositionCalculator(ref float XPos, ref float YPos, float Width, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)

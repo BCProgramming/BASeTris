@@ -139,10 +139,13 @@
     <Compile Include="Blocks\LineSeriesBlock.cs" />
     <Compile Include="Cheats\SetPieceCheat.cs" />
     <Compile Include="Choosers\ChooserCompatibilityAttribute.cs" />
+    <Compile Include="Choosers\CompositeChooser.cs" />
     <Compile Include="Choosers\IGameHandlerChooserInitializer.cs" />
+    <Compile Include="Choosers\NTrisChooser.cs" />
     <Compile Include="Choosers\SingleFunctionChooser.cs" />
     <Compile Include="CompilerNeeded.cs" />
     <Compile Include="Duomino\Duomino.cs" />
+    <Compile Include="EnumHelper.cs" />
     <Compile Include="FieldInitializers\DrMarioFieldInitializer.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />

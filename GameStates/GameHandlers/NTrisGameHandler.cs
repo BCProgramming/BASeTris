@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+    [HandlerMenuCategory("Multitris")]
     public abstract class NTrisGameHandler : StandardTetrisHandler
     {
+        
+        protected int MaxAddedBlockCount = 0;
         Dictionary<int, String> PrefixText = new Dictionary<int, string>()
         {
             {2,"Duo" },
@@ -43,7 +46,17 @@ namespace BASeTris.GameStates.GameHandlers
         public override BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
             _Owner = pOwner;
-            if (_Chooser == null) _Chooser = new Choosers.SingleFunctionChooser(NTrisChooserFunction);
+            if (_Chooser == null)
+            {
+                if (MaxAddedBlockCount == 0)
+                {
+                    _Chooser = new Choosers.SingleFunctionChooser(NTrisChooserFunction);
+                }
+                else
+                {
+                    
+                }
+            }
             return _Chooser;
         }
         public Nomino NTrisChooserFunction()
@@ -52,6 +65,7 @@ namespace BASeTris.GameStates.GameHandlers
             var buildNomino = NNominoGenerator.CreateNomino(newpiece);
             return buildNomino;
         }
+        
         public override int GetFieldColumnWidth()
         {
             return 6 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 1.1));

@@ -90,6 +90,78 @@ namespace BASeTris.Rendering.Skia.GameStates
                 //drawitem.Draw(pOwner, g, TargetBounds, useState);
                 CurrentY += ItemSize.Y + 5;
             }
+           
+            //draw the footer
+
+            if (!String.IsNullOrEmpty(Source.FooterText))
+            {
+
+                using (var skpFooterFore = new SKPaint(){ Color = SKColors.Black })
+                using (var skpFooterBack = new SKPaint() { Color = SKColors.Yellow })
+                {
+
+                    var useFooterFont = GetScaledFooterFont(pOwner, Source);
+                    skpFooterFore.Typeface = skpFooterBack.Typeface = useFooterFont.TypeFace;
+                    skpFooterFore.TextSize = skpFooterBack.TextSize = (float)(useFooterFont.FontSize);
+                    SKRect FooterSize = new SKRect();
+                    skpFooterFore.MeasureText(Source.FooterText ?? "", ref FooterSize);
+                    while (FooterSize.Width > Bounds.Width)
+                    {
+                        skpFooterFore.TextSize = skpFooterBack.TextSize = skpFooterFore.TextSize * .9f;
+                        skpFooterFore.MeasureText(Source.FooterText ?? "", ref FooterSize);
+                    }
+
+                    float UseX = 30f; // (Bounds.Width / 2) - (FooterSize.Width) ;
+                    float UseY = Bounds.Height-FooterSize.Height*1.1f;
+                    DrawTextInformationSkia sktext = new DrawTextInformationSkia();
+                    sktext.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia() { Height = 10 });
+                    sktext.ShadowPaint = skpFooterBack;
+                    sktext.ForegroundPaint = skpFooterFore;
+                    sktext.BackgroundPaint = new SKPaint() { Color = SKColors.Transparent };
+                    sktext.Text = Source.FooterText ?? "";
+                    sktext.ScalePercentage = 1;
+                    sktext.DrawFont = useFooterFont;
+                    sktext.Position = new SKPoint(UseX, UseY);
+
+                    try
+                    {
+
+                        var Gradcolors = new SKColor[] {
+        new SKColor(0, 255, 255),
+        new SKColor(255, 0, 255),
+        new SKColor(255, 255, 0),
+        new SKColor(0, 255, 255)
+    };
+                        var BottomBounds = new SKRect(0, Bounds.Height-FooterSize.Height*3 , Bounds.Right, Bounds.Bottom);
+                        var sweep = SKShader.CreateLinearGradient(new SKPoint(0, 0), new SKPoint(Element.Bounds.Width, Element.Bounds.Height), Gradcolors, null, SKShaderTileMode.Repeat);
+                        // create the second shader
+                        var turbulence = SKShader.CreatePerlinNoiseTurbulence(0.05f, 0.05f, 4, 0);
+
+                        // create the compose shader
+                        var shader = SKShader.CreateCompose(sweep, turbulence, SKBlendMode.SrcOver);
+
+
+
+                        GrayBG.BlendMode = SKBlendMode.Luminosity;
+                        
+                        GrayBG.Shader = shader;
+                        g.DrawRect(BottomBounds, GrayBG);
+                        var useShader = SKShader.CreateLinearGradient(new SKPoint(0, 0), new SKPoint(0, BottomBounds.Height), new SKColor[] { SKColors.Pink, SKColors.Coral, SKColors.LightYellow, SKColors.LightGreen, SKColors.LightBlue, SKColors.PaleVioletRed}, null, SKShaderTileMode.Mirror);
+
+                        SKPaint LinePaint = new SKPaint() { BlendMode = SKBlendMode.ColorBurn, StrokeWidth = 24, Shader = useShader };
+                        g.DrawRect(BottomBounds, LinePaint);
+
+                        pRenderTarget.DrawTextSK(sktext);
+                    }
+                    catch (Exception exr)
+                    {
+                        ;
+                    }
+                }
+
+
+            }
+
             if (CursorBitmap == null)
             {
                 CursorBitmap = TetrisGame.Imageman.GetSKBitmap("cursor");
@@ -105,15 +177,20 @@ namespace BASeTris.Rendering.Skia.GameStates
                 CursorBitmap = skversion;*/
             }
 
-            
+
             g.DrawBitmap(CursorBitmap, Source.LastMouseMovement, null);
 
         }
+        static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightGreen, BlendMode = SKBlendMode.HardLight };
         SKBitmap CursorBitmap = null;
         protected SKFontInfo GetScaledHeaderFont(IStateOwner pOwner, TSourceType Source)
         {
             return MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.HeaderTypeSize);
             
+        }
+        protected SKFontInfo GetScaledFooterFont(IStateOwner pOwner, TSourceType Source)
+        {
+            return MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.FooterTypeSize);
         }
         static SKPaint Painter = null;
         static SKPaint BackPainter = null;
@@ -167,6 +244,9 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             return UseY + HeaderSize.Height;
         }
+
+        
+
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, TSourceType Source, GameStateSkiaDrawParameters Element)
         {
             //throw new NotImplementedException();

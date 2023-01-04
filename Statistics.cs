@@ -24,8 +24,7 @@ namespace BASeTris
             String CurrentScoreStr = Score.ToString().PadLeft(MaxScoreLength);
             String TopScoreStr = TopScore.ToString().PadLeft(MaxScoreLength);
 
-            String[] StatLabels = new string[] { "Time:", "Score:", "Top:", "Lines:" };
-            
+           
 
 
             return new Dictionary<string, string>()

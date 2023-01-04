@@ -37,6 +37,16 @@ namespace BASeTris.GameStates.GameHandlers
         int GetHiddenRowCount();
         int GetFieldColumnWidth();
     }
+
+    public class HandlerMenuCategoryAttribute : Attribute
+    {
+        public String Category { get; set; }
+        public HandlerMenuCategoryAttribute(String pCategory)
+        {
+            Category = pCategory;
+        }
+    }
+
     public class GameOverStatistics
     {
         public List<GameOverStatistic> Statistics = null;

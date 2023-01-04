@@ -61,6 +61,6 @@ namespace BASeTris.Choosers
             }
             return null;
         }
-        protected abstract Nomino GetNext();
+        internal abstract Nomino GetNext();
     }
 }

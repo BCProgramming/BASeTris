@@ -29,11 +29,13 @@ namespace BASeTris.GameStates.Menu
 
         public String StateHeader { get; set; }
 
+        public String FooterText { get; set; } = "";
         public BCPoint LastMouseMovement { get; set; }
 
         public String HeaderTypeface { get; set; } = "Arial";
         public float HeaderTypeSize { get; set; } = 18;
-        
+
+        public float FooterTypeSize { get; set; } = 14;
 
         //Our menu elements.
         public List<MenuStateMenuItem> MenuElements = new List<MenuStateMenuItem>();
@@ -157,12 +159,14 @@ namespace BASeTris.GameStates.Menu
             else if (OriginalIndex != SelectedIndex)
             {
                 TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.std.EffectVolume);
+                
                 var previousitem = MenuElements[OriginalIndex];
                 var currentitem = MenuElements[SelectedIndex];
                 MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previousitem));
                 MenuItemSelected?.Invoke(this,new MenuStateMenuItemSelectedEventArgs(currentitem));
                 previousitem.OnDeselected();
                 currentitem.OnSelected();
+                FooterText = currentitem.TipText ?? "";
             }
 
             if(!triggered)

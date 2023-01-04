@@ -11,17 +11,23 @@ namespace BASeTris.Theme.Block
     [HandlerTheme("Simple Style",typeof(StandardTetrisHandler))]
     public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP,SimpleBlockTheme.BasicBlockTypes>
     {
+        public bool AdjacentConnection = false;
         public override String Name { get { return "Simple"; }  }
         public enum BBP
         {
             Transparent,Glint,Center,Shade,DoubleShade
         }
+        [Flags]
         public enum BasicBlockTypes
         {
-            Basic
+            Basic=0,
+            BasicTop = 1,
+            BasicLeft = 2,
+            BasicBottom = 4,
+            BasicRight = 8
         }
 
-
+        //Block with no other blocks adjacent to it.
         private static BBP[][] BasicBlock = new BBP[][]
 {
             new []{BBP.Transparent, BBP.Transparent,BBP.Transparent,BBP.Transparent,BBP.Transparent,BBP.Transparent,BBP.Transparent,BBP.Transparent,BBP.Transparent},
@@ -32,15 +38,76 @@ namespace BASeTris.Theme.Block
             new []{BBP.Transparent, BBP.Glint, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Shade},
             new []{BBP.Transparent, BBP.Glint, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Shade},
             new []{BBP.Transparent, BBP.Glint, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Center, BBP.Shade},
-            new []{BBP.Transparent, BBP.Glint, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade}
-};
+            new []{BBP.Transparent, BBP.Glint, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade} };
+
+
+
+
+
+        
+
+
+
         public SKColor[][] LevelColors = new SKColor[][]
             {
                 new SKColor[]{SKColors.White,SKColors.SkyBlue,SKColors.Blue,SKColors.DarkBlue},
-                new SKColor[]{SKColors.White,SKColors.Lime,SKColors.Green,SKColors.DarkGreen},
-                new SKColor[]{SKColors.White,SKColors.Pink,SKColors.Purple,SKColors.DarkViolet}
+                //new SKColor[]{SKColors.White,SKColors.Lime,SKColors.Green,SKColors.DarkGreen},
+                //new SKColor[]{SKColors.White,SKColors.Pink,SKColors.Purple,SKColors.DarkViolet}
 
             };
+        public SimpleBlockTheme()
+        {
+            LevelColors = LevelColors.Concat(from c in new SKColor[] { SKColors.Orange, SKColors.Purple, SKColors.Plum, SKColors.Gray, SKColors.DarkGray, SKColors.DarkCyan, SKColors.Goldenrod, SKColors.Brown } select GenerateColorSet(c)).ToArray();
+        }
+        private SKColor[] GenerateColorSet(SKColor Base)
+        {
+            return new SKColor[] { SKColors.White, Base, MixColor(Base, SKColors.DarkSlateGray, 40), MixColor(Base, SKColors.Black, 50) };
+           
+
+        }
+        public static T ClampValue<T>(T Value, T min, T max) where T : IComparable
+        {
+            //cast to IComparable
+            IComparable cvalue = (IComparable)Value;
+            IComparable cmin = (IComparable)min;
+            IComparable cmax = (IComparable)max;
+
+            //return (T)(cvalue.CompareTo(cmin)< 0 ?cmin:cvalue.CompareTo(cmax)>0?max:Value);
+            if (cvalue.CompareTo(cmin) < 0)
+            {
+                return min;
+            }
+            else if (cvalue.CompareTo(cmax) > 0)
+            {
+                return max;
+            }
+            return Value;
+
+        }
+        public static SKColor MixColor(SKColor FirstColor, SKColor SecondColor, float Percentbetween)
+        {
+            //first we get the RGBA differences.
+            float[] Firstdata = new float[] { FirstColor.Red, FirstColor.Green, FirstColor.Blue, FirstColor.Alpha };
+            float[] Diffs = new float[] { SecondColor.Red-FirstColor.Red,
+                                        SecondColor.Green-FirstColor.Green,
+                                        SecondColor.Blue-FirstColor.Blue,
+                                        SecondColor.Alpha-FirstColor.Alpha};
+            //multiply each by the percentage.
+            Diffs = (from c in Diffs select c * Percentbetween).ToArray();
+
+            //now select the firstcolor component plus this new difference, clamped.
+            int[] result = new int[Firstdata.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+
+                result[i] = (int)ClampValue(Firstdata[i] + Diffs[i], 0, 255);
+
+            }
+            
+            return new SKColor((byte)result[0], (byte)result[1], (byte)result[2], (byte)result[3]);
+        }
+
+
         public override SKPointI GetBlockSize(TetrisField field, BasicBlockTypes BlockType)
         {
             return new SKPointI(9, 9);
@@ -70,24 +137,126 @@ namespace BASeTris.Theme.Block
         }
         public override Dictionary<BasicBlockTypes, BBP[][]> GetBlockTypeDictionary()
         {
-            return new Dictionary<BasicBlockTypes, BBP[][]>()
+            var buildDictionary =  new Dictionary<BasicBlockTypes, BBP[][]>()
             {
                 {BasicBlockTypes.Basic,BasicBlock }
             };
-        }
 
+            //get the other combinations too...
+            var AllFlagOptions = EnumHelper.GetAllEnums<BasicBlockTypes>();
+            foreach (var possibleoptions in AllFlagOptions)
+            {
+                BBP[][] BuildBitmap = TweakForSideFlags(possibleoptions);
+                if(!buildDictionary.ContainsKey(possibleoptions))
+                    buildDictionary.Add(possibleoptions, BuildBitmap);
+            }
+
+                
+
+
+
+            return buildDictionary;
+        }
+        private BBP[][] TweakForSideFlags(BasicBlockTypes sideflags)
+        {
+            var Source = BasicBlock;
+            if (sideflags == BasicBlockTypes.Basic) return Source;
+            BBP[][] CreateArray = new BBP[Source.Length][];
+            for (int i = 0; i < Source.Length; i++)
+            {
+                CreateArray[i] = new BBP[Source[i].Length];
+                for (int p = 0; p < Source[i].Length; p++)
+                {
+                    CreateArray[i][p] = Source[i][p];
+                }
+            }
+
+
+            //with the array copy, we now munge it up a bit based on the flags.
+
+            if (sideflags.HasFlag(BasicBlockTypes.BasicTop))
+            {
+                //top flag, change top two rows, excepting far left and right, to center.
+                for (int r = 0; r < 2; r++)
+                {
+                    for (int c = 1; c < CreateArray[r].Length-1; c++)
+                    {
+                        CreateArray[r][c] = BBP.Center;
+                    }
+                }
+            }
+
+            if (sideflags.HasFlag(BasicBlockTypes.BasicBottom))
+            {
+                //bottom flag, change bottom two rows, excepting far left and right, to center.
+                for (int r = 0; r < 2; r++)
+                {
+                    for (int c = 1; c < CreateArray[CreateArray.Length-1-r].Length; c++)
+                    {
+                        CreateArray[CreateArray.Length-1-r][c] = BBP.Center;
+                    }
+                }
+            }
+
+            if (sideflags.HasFlag(BasicBlockTypes.BasicLeft))
+            {
+                //left flag, change first two columns to center.
+
+                for (int c = 0; c < 2; c++)
+                {
+                    for (int r = 1; r < CreateArray.Length; r++)
+                    {
+                        CreateArray[r][c] = BBP.Center;
+                    }
+                
+                }
+            
+            }
+            if (sideflags.HasFlag(BasicBlockTypes.BasicRight))
+            {
+                //left flag, change first two columns to center.
+
+                for (int c = 0; c < 2; c++)
+                {
+                    for (int r = 1; r < CreateArray.Length; r++)
+                    {
+                        CreateArray[r][CreateArray[r].Length-1-c] = BBP.Center;
+                    }
+
+                }
+
+            }
+
+
+            return CreateArray;
+
+        }
         public override BlockFlags GetBlockFlags(Nomino Group, NominoElement element, TetrisField field)
         {
-            return CustomPixelTheme<BBP, BasicBlockTypes>.BlockFlags.Static;
+            return AdjacentConnection? CustomPixelTheme<BBP, BasicBlockTypes>.BlockFlags.Rotatable:   CustomPixelTheme<BBP, BasicBlockTypes>.BlockFlags.Static;
         }
 
         public override BlockTypeReturnData GetBlockType(Nomino group, NominoElement element, TetrisField field)
         {
-            return new BlockTypeReturnData(BasicBlockTypes.Basic);
+            if (AdjacentConnection)
+            {
+                BasicBlockTypes bbt = BasicBlockTypes.Basic;
+                if (group.Any((b) => (b.X, b.Y) == (element.X - 1, element.Y))) bbt |= BasicBlockTypes.BasicLeft;
+                if (group.Any((b) => (b.X, b.Y) == (element.X + 1, element.Y))) bbt |= BasicBlockTypes.BasicRight;
+                if (group.Any((b) => (b.X, b.Y) == (element.X, element.Y+1))) bbt |= BasicBlockTypes.BasicBottom;
+                if (group.Any((b) => (b.X, b.Y) == (element.X, element.Y - 1))) bbt |= BasicBlockTypes.BasicTop;
+                return new BlockTypeReturnData(bbt);
+            }
+            else
+            {
+                return new BlockTypeReturnData(BasicBlockTypes.Basic);
+            }
         }
 
         public override BasicBlockTypes[] PossibleBlockTypes()
         {
+            if(AdjacentConnection)
+                return EnumHelper.GetAllEnums<BasicBlockTypes>().ToArray();
             return new BasicBlockTypes[] { BasicBlockTypes.Basic };
         }
     }

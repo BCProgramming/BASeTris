@@ -3,6 +3,7 @@ using BASeTris.GameStates.GameHandlers;
 using BASeTris.Tetrominoes;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -68,11 +69,11 @@ namespace BASeTris.GameStates.Menu
             Target.StateHeader = "BASeTris";
 
             //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
-            var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
-            var OptionsItem = new MenuStateTextMenuItem() { Text = "Options" };
-            var scaleitem = new MenuStateScaleMenuItem(pOwner);
-            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" };
-            var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit" };
+            var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game",TipText="I feel the menu text is already sufficiently descriptive." };
+            var OptionsItem = new MenuStateTextMenuItem() { Text = "Options",TipText="Adjust various options."};
+            var scaleitem = new MenuStateScaleMenuItem(pOwner) { TipText = "Change Scaling" };
+            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" ,TipText="View High scores"};
+            var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
                 
@@ -149,7 +150,7 @@ namespace BASeTris.GameStates.Menu
 
 
 
-            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
             Target.HeaderTypeSize = (float)(28f*pOwner.ScaleFactor);
             foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,HighScoresItem,ExitItem})
@@ -165,21 +166,62 @@ namespace BASeTris.GameStates.Menu
     public class NewGameMenuPopulator : IMenuPopulator
     {
         private GameState RevertState = null;
-        public NewGameMenuPopulator(GameState ReversionState)
+        String DesiredCategory = null;
+        public NewGameMenuPopulator(GameState ReversionState,String Category = null)
         {
             RevertState = ReversionState;
+            DesiredCategory = Category;
         }
 
         public void PopulateMenu(GenericMenuState Target, IStateOwner pOwner)
         {
-            Target.StateHeader = "Select Game Type";
-
+            if (DesiredCategory == null)
+                Target.StateHeader = "Select Game Type";
+            else
+                Target.StateHeader = "Game Type - " + DesiredCategory;
+            {
+            }
+            Dictionary<String, List<Type>> FoundHandlerCategories = new Dictionary<string, List<Type>>();
             //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
             List<MenuStateMenuItem> AllItems = new List<MenuStateMenuItem>();
+            List<MenuStateMenuItem> CategoryItems = new List<MenuStateMenuItem>();
             Dictionary<MenuStateMenuItem, IGameCustomizationHandler> HandlerLookup = new Dictionary<MenuStateMenuItem, IGameCustomizationHandler>();
             var BackItem = new MenuStateTextMenuItem() { Text = "Back to Main" };
             foreach(var iterate in Program.GetGameHandlers())
             {
+                var FindAttribute = iterate.GetCustomAttribute(typeof(HandlerMenuCategoryAttribute), true) as HandlerMenuCategoryAttribute;
+
+                //if Category is null, we only want to show the items that have no category.
+                //if it is not null, then the category needs to match the category we were told to show.
+                if (FindAttribute != null)
+                {
+                    if (!FoundHandlerCategories.ContainsKey(FindAttribute.Category))
+                        FoundHandlerCategories[FindAttribute.Category] = new List<Type>();
+
+                    FoundHandlerCategories[FindAttribute.Category].Add(iterate);
+                }
+
+                if (FindAttribute == null && DesiredCategory == null)
+                {
+                    //good to go...
+                }
+                else if (FindAttribute != null && DesiredCategory == null)
+                {
+                    continue;
+                }
+                else if (FindAttribute != null && DesiredCategory != null)
+                {
+                    if (String.Equals(FindAttribute.Category, DesiredCategory, StringComparison.OrdinalIgnoreCase))
+                    {
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else if (FindAttribute == null && DesiredCategory != null)
+                    continue;
+
                 ConstructorInfo ci = iterate.GetConstructor(new Type[] { });
                 if(ci!=null)
                 {
@@ -189,6 +231,16 @@ namespace BASeTris.GameStates.Menu
                     AllItems.Add(builditem);
                 }
             }
+            if (DesiredCategory == null)
+            {
+                foreach(var iterate in FoundHandlerCategories)
+                {
+                    MenuStateTextMenuItem buildcategoryitem = new MenuStateTextMenuItem { Text = iterate.Key + ">>",Tag = iterate.Key};
+                    buildcategoryitem.BackColor = Color.Yellow;
+                    AllItems.Add(buildcategoryitem);
+                    CategoryItems.Add(buildcategoryitem);
+                 }
+            }
             AllItems.Add(BackItem);
 
            
@@ -197,19 +249,27 @@ namespace BASeTris.GameStates.Menu
 
             Target.MenuItemActivated += (o, e) =>
             {
-                if(HandlerLookup.ContainsKey(e.MenuElement))
+                if (HandlerLookup.ContainsKey(e.MenuElement))
                 {
                     IGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
                     if (pOwner is IGamePresenter igp)
                     {
-                        
 
-                        pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman,Target.PrimaryMenu);
+
+                        pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
 
                         igp.StartGame();
                     }
                 }
-                else if(e.MenuElement == BackItem)
+                else if (CategoryItems.Contains(e.MenuElement))
+                {
+                    GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target,(String)(((MenuStateTextMenuItem)e.MenuElement).Tag)));
+                    pOwner.CurrentState = gms;
+                    Target.ActivatedItem = null;
+
+
+                }
+                else if (e.MenuElement == BackItem)
                 {
                     pOwner.CurrentState = RevertState;
                 }
@@ -221,7 +281,7 @@ namespace BASeTris.GameStates.Menu
 
 
 
-            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
             Target.HeaderTypeSize = (float)(28f * pOwner.ScaleFactor);
             foreach (var iterate in AllItems)

@@ -15,12 +15,27 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+
+    public class ProgressiveTetrisHandler : StandardTetrisHandler
+    {
+        public ProgressiveTetrisHandler()
+        {
+            ProgressiveMode = true;
+        }
+        public override string Name { get { return "Progressive Tetris"; } }
+        public override IHighScoreList<TetrisHighScoreData> GetHighScores()
+        {
+            return TetrisGame.ScoreMan["Progressive"];
+        }
+    }
+
     /// <summary>
     /// ICustomizationHandler that handles the standard tetris game.
     /// </summary>
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
     public class StandardTetrisHandler : IGameCustomizationHandler,IGameHandlerChooserInitializer
     {
+        public bool ProgressiveMode = false;
         public virtual String Name { get { return "Tetris"; } }
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
@@ -30,14 +45,14 @@ namespace BASeTris.GameStates.GameHandlers
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
 
-        public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT; }
+        public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT+ (ProgressiveMode ? 5 : 0); }
         public virtual int GetHiddenRowCount()
         {
             return 2;
         }
         public virtual int GetFieldColumnWidth()
         {
-            return TetrisField.DEFAULT_COLCOUNT;
+            return TetrisField.DEFAULT_COLCOUNT+(ProgressiveMode?4:0);
         }
         public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
         {
@@ -157,6 +172,38 @@ namespace BASeTris.GameStates.GameHandlers
                     createType = typeof(BagChooser);
                 }
                 _Chooser = CreateSupportedChooser(createType);
+            }
+            if (ProgressiveMode)
+            {
+                _Chooser = new CompositeChooser(new BlockGroupChooser[] { _Chooser, new NTrisChooser(5), new NTrisChooser(6) },
+                    (bgc) =>
+                    {
+                        if (bgc is NTrisChooser ntc)
+                        {
+                            //NTrischooser weight is based on the current level.
+                            if (pOwner.CurrentState is GameplayGameState ggs)
+                            {
+                                var lc = (ggs.GameStats as TetrisStatistics).LineCount;
+
+                                //if (lc < 30) return 0; //no chance at all before level 3.
+
+
+                                if (lc < 20 && ntc.BlockCount == 6) return 0; //no chance of sixers before level 2.
+                                //we are higher than level 3. chance starts at 0.5% and goes up by .25% each level.
+                                return 3*((float)lc) / 10 * 0.25f;
+
+
+                            }
+                            else
+                            {
+                                return 0f;
+                            }
+                        }
+                        else
+                        {
+                            return 100.0f;
+                        }
+                    });
             }
             return _Chooser;
         }

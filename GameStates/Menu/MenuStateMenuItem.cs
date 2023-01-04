@@ -34,6 +34,8 @@ namespace BASeTris.GameStates.Menu
     //TODO: implement RenderingProvider framework for MenuStateMenuItem and subclasses, replacing the Draw() abstract routine.
     public abstract class MenuStateMenuItem
     {
+        public String TipText { get; set; } = "";
+        public Object Tag { get; set; }
         public enum StateMenuItemState
         {
             State_Normal,

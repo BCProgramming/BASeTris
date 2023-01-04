@@ -72,6 +72,10 @@ namespace BASeTris.Rendering.GDIPlus
 
             return UseY + HeaderSize.Height;
         }
+        public virtual float DrawFooter(IStateOwner pOwner, MenuState Source, Graphics Target, RectangleF Bounds)
+        {
+            return 0;
+        }
         public override void RenderStats(IStateOwner pOwner, Graphics pRenderTarget, MenuState Source, BaseDrawParameters Element)
         {
             //throw new NotImplementedException();
