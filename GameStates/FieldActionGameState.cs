@@ -382,14 +382,15 @@ namespace BASeTris.GameStates
                 sourcebitmap = new Bitmap(ib._RotationImages[MathHelper.mod(ib.Rotation,ib._RotationImages.Length)]);
                 
             }
+            var ReductionFactor = 32 / (_BaseState.PlayField.ColCount + _BaseState.PlayField.RowCount);
             var blockWidth = _BaseState.PlayField.GetBlockWidth((SKRect)pOwner.LastDrawBounds);
             var blockHeight = _BaseState.PlayField.GetBlockHeight((SKRect)pOwner.LastDrawBounds);
             var CoordPos = new BCPoint( BlockX,
                 BlockY-2);
             lock (_BaseState.Particles)
             {
-                List<BaseParticle> ToAdd = new List<BaseParticle>(ParticleCountPerBlock);
-                for (int i = 0; i < ParticleCountPerBlock; i++)
+                List<BaseParticle> ToAdd = new List<BaseParticle>((int)(ParticleCountPerBlock*ReductionFactor));
+                for (int i = 0; i < (int)(ParticleCountPerBlock*ReductionFactor); i++)
                 {
                     BCPoint ParticlePos = new BCPoint((float)TetrisGame.rgen.NextDouble(), (float)TetrisGame.rgen.NextDouble());
                     //choose a new random position within the block.

@@ -8,6 +8,7 @@ using BASeTris.Choosers;
 
 namespace BASeTris.Tetrominoes
 {
+    [ConsistentNomino]
     public class Tetromino : Nomino
     {
         internal static Func<Nomino>[] StandardTetrominoFunctions =

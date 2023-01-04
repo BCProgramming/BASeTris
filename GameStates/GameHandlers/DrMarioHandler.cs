@@ -24,17 +24,18 @@ namespace BASeTris.GameStates.GameHandlers
 
     [GameScoringHandler(typeof(DrMarioAIScoringHandler),typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
-    public class DrMarioHandler : CascadingPopBlockGameHandler<DrMarioStatistics,DrMarioGameOptions>
+    public class DrMarioHandler : CascadingPopBlockGameHandler<DrMarioStatistics,DrMarioGameOptions>,IGameHandlerChooserInitializer
     {
         public override string GetName()
         {
             return "Dr.Mario";
         }
-        public override BlockGroupChooser GetChooser()
+        private BlockGroupChooser _Chooser = null;
+        public override BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
-            var result = Duomino.Duomino.BagTetrominoChooser();
-            result.ResultAffector = DrMarioNominoTweaker;
-            return result;
+            if (_Chooser != null) return _Chooser;
+            _Chooser = CreateSupportedChooser(typeof(SingleFunctionChooser));
+            return _Chooser;
         }
 
         private void DrMarioNominoTweaker(Nomino Source)
@@ -62,6 +63,18 @@ namespace BASeTris.GameStates.GameHandlers
         {
             var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
             pOwner.CurrentState = completionState;
+        }
+
+        public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
+        {
+            if (DesiredChooserType == typeof(SingleFunctionChooser))
+            {
+                var result = Duomino.Duomino.DrMarioDuominoChooser();
+                result.ResultAffector = DrMarioNominoTweaker;
+                return result;
+            }
+            return null;
+            //throw new NotImplementedException();
         }
     }
  

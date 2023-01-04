@@ -70,7 +70,7 @@ namespace BASeTris
                         return JColor;
                     case 'Z':
                         return ZColor;
-                        case 'O':
+                    case 'O':
                         return OColor;
                     case 'S':
                         return SColor;
@@ -280,25 +280,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
                     throw new ArgumentException("Tetromino " + TetrominoType + " not recognized.");
             }
         }
-        public static BlockColors GetBlockColors(int LevelNumber,Tetromino Source)
-        {
-            char sTetChar = 'T';
-            if (Source is Tetromino_T)
-                sTetChar = 'T';
-            else if (Source is Tetromino_J)
-                sTetChar = 'J';
-            else if (Source is Tetromino_Z)
-                sTetChar = 'Z';
-            else if (Source is Tetromino_O)
-                sTetChar = 'O';
-            else if (Source is Tetromino_S)
-                sTetChar = 'S';
-            else if (Source is Tetromino_L)
-                sTetChar = 'L';
-            else if (Source is Tetromino_I)
-                sTetChar = 'I';
-            return GetBlockColors(LevelNumber, sTetChar);
-        }
+        
         private enum PT
         {
             Light,
@@ -398,9 +380,11 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
             }
 
         }
-
+        Dictionary<String, int> ChosenNominoLevelAssignments = new Dictionary<string, int>();
+        Dictionary<String, char> ChosenNominoAssignments = new Dictionary<string, char>();
         public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
+            
             char DesiredNomino = 'I';
             Dictionary<Type, char> NominoLookup = new Dictionary<Type, char>()
             {
@@ -413,26 +397,64 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
                 {typeof(Tetromino_I),'I' },
                 {typeof(Tetromino_Y),'Y' }
             };
+            String sKey = null;
+            
             if(NominoLookup.ContainsKey(Group.GetType()))
             {
                DesiredNomino = NominoLookup[Group.GetType()];
             }
             else
             {
-                DesiredNomino = TetrisGame.Choose(TetOrder);
+                sKey = GetNominoKey(Group, GameHandler, Field);
+
+                if (!ChosenNominoAssignments.ContainsKey(sKey))
+                {
+                    char chooseNomino = TetrisGame.Choose(TetOrder);
+                    ChosenNominoAssignments.Add(sKey, chooseNomino);
+                    String[] Otherkeys = NNominoGenerator.GetOtherRotationStrings(Group);
+                    foreach (var assignkey in Otherkeys)
+                        ChosenNominoAssignments[assignkey] = chooseNomino;
+                }
+                else
+                {
+                    ;
+                }
+                DesiredNomino = ChosenNominoAssignments[sKey];
+                
+            }
+            var useLevel = Field.Level > 12 ? 12 : Field.Level;
+            if (!(Group is Tetromino))
+            {
+
+                if (!ChosenNominoLevelAssignments.ContainsKey(sKey))
+                {
+                    var generated = TetrisGame.rgen.Next(13);
+                    ChosenNominoLevelAssignments[sKey] = generated;
+                    //get the three rotations and add the key for them too.
+                    String[] Otherkeys = NNominoGenerator.GetOtherRotationStrings(Group);
+                    foreach (var setkey in Otherkeys)
+                        ChosenNominoLevelAssignments[setkey] = generated;
+
+                }
+                
+                useLevel = ChosenNominoLevelAssignments[sKey];
+                
             }
             foreach (var iterate in Group)
             {
+                
                 if (iterate.Block is StandardColouredBlock)
                 {
                     StandardColouredBlock sbc = iterate.Block as StandardColouredBlock;
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     sbc.BlockColor = Color.Black;
+                    
+                    
                     if (Field.GetActiveBlockGroups().Contains(Group))
-                        sbc._RotationImagesSK = new SKImage[] {  SKImage.FromBitmap(GetUnsetImage(ColourData[Field.Level > 12 ? 12 : Field.Level].GetColor(DesiredNomino)) )};
+                        sbc._RotationImagesSK = new SKImage[] {  SKImage.FromBitmap(GetUnsetImage(ColourData[useLevel].GetColor(DesiredNomino)) )};
                     else
                     {
-                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetSetImage(ColourData[Field.Level > 12 ? 12 : Field.Level].GetColor(DesiredNomino)) ) };
+                        sbc._RotationImagesSK = new SKImage[] { SKImage.FromBitmap(GetSetImage(ColourData[useLevel].GetColor(DesiredNomino)) ) };
                     }
                 }
             }

@@ -21,13 +21,25 @@ namespace BASeTris.GameStates.GameHandlers
     //3. Presumably we are going to want an appropriate Tetris2Theme.We may be able to re-use some of the internals of the line clear animations for the block clears though.
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
-    public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>
+    public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>,IGameHandlerChooserInitializer
     {
-        public override BlockGroupChooser GetChooser()
+        private BlockGroupChooser _Chooser = null;
+        private String CurrentChooserValue = "Default";
+        public override Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
-            BagChooser bc = new BagChooser(Tetromino.Tetris2TetrominoFunctions);
-            bc.ResultAffector = Tetris2NominoTweaker;
-            return bc;
+            //TODO: proper per-handler configs should include the chooser class to use.
+            if (_Chooser == null || CurrentChooserValue != pOwner.Settings.std.Chooser)
+            {
+                CurrentChooserValue = pOwner.Settings.std.Chooser;
+                Type createType = BlockGroupChooser.ChooserTypeFromString(CurrentChooserValue);
+                if (createType == null)
+                {
+                    CurrentChooserValue = pOwner.Settings.std.Chooser;
+                    createType = typeof(BagChooser);
+                }
+                _Chooser = CreateSupportedChooser(createType);
+            }
+            return _Chooser;
         }
         private void Tetris2NominoTweaker(Nomino Source)
         {
@@ -72,6 +84,35 @@ namespace BASeTris.GameStates.GameHandlers
         public override IGameCustomizationHandler NewInstance()
         {
             return new Tetris2Handler();
+        }
+
+        public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
+        {
+            if (DesiredChooserType == typeof(BagChooser))
+            {
+                BagChooser bc = new BagChooser(Tetromino.Tetris2TetrominoFunctions);
+                bc.ResultAffector = Tetris2NominoTweaker;
+                return bc;
+            }
+            else if (DesiredChooserType == typeof(NESChooser))
+            {
+                NESChooser nc = new NESChooser(Tetromino.Tetris2TetrominoFunctions);
+                nc.ResultAffector = Tetris2NominoTweaker;
+                return nc;
+            }
+            else if (DesiredChooserType == typeof(GameBoyChooser))
+            {
+                GameBoyChooser gbc = new GameBoyChooser(Tetromino.Tetris2TetrominoFunctions);
+                gbc.ResultAffector = Tetris2NominoTweaker;
+                return gbc;
+            }
+            else if (DesiredChooserType == typeof(FullRandomChooser))
+            {
+                FullRandomChooser frc = new FullRandomChooser(Tetromino.Tetris2TetrominoFunctions);
+                frc.ResultAffector = Tetris2NominoTweaker;
+                return frc;
+            }
+            return null;
         }
     }
 }

@@ -11,6 +11,8 @@ namespace BASeTris.Choosers
         /// <summary>
         /// array of Nomino-producing functions. Things like tetris for example provide a function for each Tetromino type. Dr.Mario just gives back a Duomino.
         /// </summary>
+        /// 
+
         protected Func<Nomino>[] _Available;
         protected Random rgen = null;
         /// <summary>
@@ -47,7 +49,18 @@ namespace BASeTris.Choosers
             if (ResultAffector != null) ResultAffector(result);
             return result;
         }
-        
+        public static Type ChooserTypeFromString(String strName)
+        {
+            if (strName == "Default") return typeof(BagChooser);
+            foreach (var iteratetype in Program.DITypes[typeof(BlockGroupChooser)].GetManagedTypes())
+            {
+
+                if (String.Equals(iteratetype.Name, strName, StringComparison.OrdinalIgnoreCase))
+                    return iteratetype;
+
+            }
+            return null;
+        }
         protected abstract Nomino GetNext();
     }
 }

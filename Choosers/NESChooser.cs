@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.GameStates.GameHandlers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,36 +7,10 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Choosers
 {
+    [ChooserCompatibility(typeof(StandardTetrisHandler))]
     public class NESChooser : BlockGroupChooser
     {
-        /*public class NintendoRandomizer extends Randomizer {
-
-	int prev;
-	int roll;
-
-	public NintendoRandomizer() {
-		super();
-	}
-
-	public NintendoRandomizer(boolean[] pieceEnable, long seed) {
-		super(pieceEnable, seed);
-	}
-
-	public void init() {
-		prev = pieces.length;
-		roll = pieces.length+1;
-	}
-
-	public int next() {
-		int id = r.nextInt(roll);
-		if (id == prev || id == pieces.length) {
-			id = r.nextInt(pieces.length);
-		}
-		prev = id;
-		return pieces[id];
-	}
-
-}*/
+        
         int prev, roll;
 
         public NESChooser(Func<Nomino>[] pAvailable) : base(pAvailable)

@@ -29,6 +29,7 @@ namespace BASeTris.Settings
         public bool SmoothFall = false;
         public bool SmoothRotate = true;
         private String sLoadedSource = null;
+        public String Chooser = "Default";
         public String MusicOption { get; set; } = "<RANDOM>";
 
         public String SoundScheme { get; set; } = "Default";
@@ -46,7 +47,8 @@ namespace BASeTris.Settings
                 new XAttribute("SmoothFall", SmoothFall),
                 new XAttribute("SmoothRotate", SmoothRotate),
                 new XAttribute("MusicOption",MusicOption),
-                new XAttribute("SoundScheme",SoundScheme));
+                new XAttribute("SoundScheme",SoundScheme),
+                new XAttribute("Chooser",Chooser));
 
         }
         public StandardSettings()
@@ -104,6 +106,7 @@ namespace BASeTris.Settings
             SmoothRotate = Node.GetAttributeBool("SmoothRotate", true);
             MusicOption = Node.GetAttributeString("MusicOption", "<RANDOM>");
             SoundScheme = Node.GetAttributeString("SoundScheme", "Default");
+            Chooser = Node.GetAttributeString("Chooser", "Default");
         }
     }
 }

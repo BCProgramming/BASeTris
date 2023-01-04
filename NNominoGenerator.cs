@@ -109,13 +109,13 @@ namespace BASeTris
             //translate all coordinates so that the upper-left corner is at 0,0.
 
             //Find minimum X and maximum Y.
-            int MinX = 0, MaxY = 0;
+            int MinX = 0, MinY = 0;
             foreach (var iterate in input)
             {
                 if (iterate.X < MinX) MinX = iterate.X;
-                if (iterate.Y > MaxY) MaxY = iterate.Y;
+                if (iterate.Y < MinY) MinY = iterate.Y;
             }
-            return (from n in input select new NominoPoint(n.X - MinX, n.Y - MaxY)).ToList();
+            return (from n in input select new NominoPoint(n.X - MinX, n.Y - MinY)).ToList();
         }
         private static bool IsEqual(List<NominoPoint> A, List<NominoPoint> B)
         {
@@ -135,7 +135,7 @@ namespace BASeTris
 
             return true;
         }
-        private static List<NominoPoint> RotateCW(List<NominoPoint> input)
+        public static List<NominoPoint> RotateCW(List<NominoPoint> input)
         {
 
             List<NominoPoint> BuildList = new List<NominoPoint>();
@@ -173,7 +173,33 @@ namespace BASeTris
 
             return sb.ToString();
         }
+        public static IEnumerable<List<NominoPoint>> FilterRotations(IEnumerable<List<NominoPoint>> Input, Dictionary<String, List<NominoPoint>> LookupTable)
+        {
+            if (LookupTable == null) LookupTable = new Dictionary<string, List<NominoPoint>>();
+            foreach (var filteritem in Input)
+            {
+                String CurrentRotation = StringRepresentation(filteritem);
 
+                if (LookupTable.ContainsKey(CurrentRotation))
+                    yield return LookupTable[CurrentRotation];
+                else
+                {
+                    String[] OtherRotations = GetOtherRotationStrings(filteritem);
+                    var stringrotations = new String[] { CurrentRotation }.Concat(OtherRotations);
+                    foreach (var setstrings in stringrotations)
+                    {
+                        if(!LookupTable.ContainsKey(setstrings))
+                            LookupTable.Add(setstrings, filteritem);
+                    }
+                    yield return filteritem;
+                }
+
+                
+
+
+
+            }
+        }
         public static IEnumerable<List<NominoPoint>> FilterPieces(IEnumerable<List<NominoPoint>> Input)
         {
             HashSet<String> FilteredPieces = new HashSet<string>();
@@ -216,8 +242,25 @@ namespace BASeTris
         private static String[] GetStringsForNomino(Nomino src)
         {
             return GetHashPointSet(GetNominoPoints(src));
-        }
 
+        }
+        public static String[] GetOtherRotationStrings(List<NominoPoint> Source)
+        {
+            var np1 = NNominoGenerator.RotateCW(Source);
+            var np2 = NNominoGenerator.RotateCW(np1);
+            var np3 = NNominoGenerator.RotateCW(np2);
+            return new string[] { StringRepresentation(np1), StringRepresentation(np2), StringRepresentation(np3) };
+        }
+        public static String[] GetOtherRotationStrings(Nomino Source)
+        {
+            var np = NNominoGenerator.GetNominoPoints(Source);
+            var np1 = NNominoGenerator.RotateCW(np);
+            var np2 = NNominoGenerator.RotateCW(np1);
+            var np3 = NNominoGenerator.RotateCW(np2);
+
+            return new string[] { StringRepresentation(np1), StringRepresentation(np2), StringRepresentation(np3) };
+
+        }
         public static List<NominoPoint> GetNominoPoints(Nomino src)
         {
 
@@ -235,7 +278,7 @@ namespace BASeTris
         {
 
             
-            NNominoGenerator.ResetTranslation(src);
+            src =NNominoGenerator.ResetTranslation(src);
             int MaxX = 0;
             int MaxY = 0;
             foreach (var iterate in src)
@@ -254,9 +297,11 @@ namespace BASeTris
             Nomino buildresult = new Nomino(Elements);
             return buildresult;
         }
+        private static Dictionary<String, List<NominoPoint>> CachedRotationResults = new Dictionary<string, List<NominoPoint>>();
         public static List<NominoPoint> GetPiece(int BlockCount)
         {
-            return GetPieces(BlockCount, null, NominoPieceGenerationFlags.Flag_Randomize).FirstOrDefault();
+            
+            return FilterRotations(FilterPieces(GetPieces(BlockCount, null, NominoPieceGenerationFlags.Flag_Randomize)),CachedRotationResults).FirstOrDefault();
         }
         [Flags]
         public enum NominoPieceGenerationFlags
@@ -327,7 +372,6 @@ namespace BASeTris
                 }
 
             }
-
             
         }
     }

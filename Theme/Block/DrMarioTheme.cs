@@ -14,6 +14,7 @@ namespace BASeTris.Theme.Block
     [HandlerTheme("Dr.Mario NES Style",typeof(DrMarioHandler))]
     public class DrMarioThemeEnhanced : DrMarioTheme
     {
+        public override String Name { get { return "SNES Style"; } }
         public DrMarioThemeEnhanced() : base(InitializationFlags.Flags_EnhancedPillGraphics)
         {
 
@@ -24,7 +25,7 @@ namespace BASeTris.Theme.Block
 
 
 
-    [HandlerTheme("Dr. Mario Enhanced Style",typeof(DrMarioHandler))]
+    [HandlerTheme("Dr. Mario Style",typeof(DrMarioHandler))]
     //CascadingBlockTheme will need to specify the DrMario customization Handler as it's valid Theme once ready.
     //this one doesn't care about the game level- it has two block types- the pills, and the virii.
     //of those we've got 3 colors. We could add more, I suppose, but Dr. Mario has three so let's keep things a bit simpler.
@@ -39,41 +40,12 @@ namespace BASeTris.Theme.Block
         }
         public bool UseEnhancedImages = true;
         public static bool AllowAdvancedRotations = true;
-        public override String Name { get { return "Cascading Style"; } }
+        public override String Name { get { return "NES Style"; } }
         public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
 
             //Dr Mario theme keys are based on the "Duomino" arrangement. We take the first type, and the second type and create a key for it.
-
-
-            if (Group is Duomino.Duomino dm)
-            {
-
-                var OneBlock = dm.FirstBlock;
-                var TwoBlock = dm.SecondBlock;
-                if (OneBlock.Block is LineSeriesBlock sb1 && TwoBlock.Block is LineSeriesBlock sb2)
-                {
-                    return "1:" + sb1.CombiningIndex + ";2:" + sb2.CombiningIndex;
-                }
-            }
-            else if(Group is Tetromino)
-            {
-                //means we are servicing a Tetris 2 Handler.
-                //Since tetrominoes use 4 blocks, we've got our work cut out for us in terms of
-                //creating the correct keys. means we have a lot of possibilities to cache!
-                StringBuilder sbKey = new StringBuilder();
-                int index = 0;
-                foreach(var block in Group)
-                {
-                    if (block.Block is LineSeriesBlock b)
-                    {
-                        sbKey.Append($"{index++}:{b.CombiningIndex};");
-                    }
-                }
-                return sbKey.ToString();
-            }
-
-            return base.GetNominoKey(Group, GameHandler, Field);
+            return base.GetNominoKey_LineSeries(Group, GameHandler, Field);
 
             //return base.GetNominoKey(Group, GameHandler, Field);
         }
@@ -217,6 +189,7 @@ namespace BASeTris.Theme.Block
         
         public DrMarioTheme(InitializationFlags flags)
         {
+            if (flags.HasFlag(InitializationFlags.Flags_EnhancedPillGraphics)) UseEnhancedImages = true;
             PrepareThemeData();
         }
         public DrMarioTheme():this(InitializationFlags.Flags_None)

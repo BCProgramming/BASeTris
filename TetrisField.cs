@@ -258,13 +258,13 @@ namespace BASeTris
             get {  return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
         }
 
-        public TetrisField(NominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT)
+        public TetrisField(NominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT,int pHiddenRowCount=2)
         {
             _Theme = theme;
             _Handler = Handler;
             this.RowCount = pRowCount;
             this.ColCount = pColCount;
-            this.VisibleRows = RowCount - 2;
+            this.VisibleRows = RowCount - pHiddenRowCount;
             Reset();
         }
         public void Reset()

@@ -20,7 +20,7 @@ namespace BASeTris.GameStates.GameHandlers
         String Name { get; }
         FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger);
         IHighScoreList<TetrisHighScoreData> GetHighScores();
-        Choosers.BlockGroupChooser Chooser { get;  }
+        Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner);
         IGameCustomizationHandler NewInstance();
         NominoTheme DefaultTheme { get; }
         void PrepareField(GameplayGameState state, IStateOwner pOwner); //prepare field for a new game. (or level or whatever- basically depends on the type of game)
@@ -33,7 +33,9 @@ namespace BASeTris.GameStates.GameHandlers
         IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>();
 
         //IGameCustomizationStatAreaRenderer<TRenderTarget,TRenderSource,TDataElement,TOwnerType>
-
+        int GetFieldRowHeight();
+        int GetHiddenRowCount();
+        int GetFieldColumnWidth();
     }
     public class GameOverStatistics
     {

@@ -24,6 +24,7 @@ namespace BASeTris.Theme
             NominoImages = null;
             NominoSKBitmaps = null;
             //dispose the old ones too.
+            if(CopiedSK!=null)
             foreach (var iterate in CopiedSK)
             {
                 foreach (var skb in iterate.Value)
@@ -92,7 +93,9 @@ namespace BASeTris.Theme
                 }
                 else
                 {
-                    return null;
+                    var GetImage = GetTetrominoImage(Source);
+                    return GetTetrominoSKBitmap(Source);
+                    
                 }
 
             }

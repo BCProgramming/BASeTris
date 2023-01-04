@@ -31,15 +31,17 @@ namespace BASeTris.GameStates.GameHandlers
         public bool AllowFieldImageCache { get { return false; } }
         public OPTT GameOptions { get; } = new OPTT() { AllowWallKicks = false };
 
-        public abstract BlockGroupChooser GetChooser();
+        public abstract BlockGroupChooser GetChooser(IStateOwner pOwner);
         public abstract void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state);
 
-        public BlockGroupChooser Chooser
+        public int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT; }
+        public int GetHiddenRowCount()
         {
-            get
-            {
-                return GetChooser();
-            }
+            return 2;
+        }
+        public int GetFieldColumnWidth()
+        {
+            return TetrisField.DEFAULT_COLCOUNT;
         }
         public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
         {

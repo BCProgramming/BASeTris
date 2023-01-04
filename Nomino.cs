@@ -428,5 +428,10 @@ namespace BASeTris
             Block.Rotation = clonesource.RotationModulo;
         }
     }
+
+    //means the Nomino implementation is consistent.
+    public class ConsistentNominoAttribute : Attribute
+    {
+    }
     
 }

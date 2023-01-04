@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeCamp.Logging;
 using BASeTris.AI;
+using BASeTris.Choosers;
 using BASeTris.GameStates.GameHandlers;
 using OpenTK;
 using OpenTK.Input;
@@ -36,7 +37,7 @@ namespace BASeTris
         }
 
         public static System.Reflection.BASeCamp.MultiTypeManager DITypes = null;
-        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IGameCustomizationHandler) };
+        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IGameCustomizationHandler),typeof(BlockGroupChooser) };
 
         public enum StartMode
         {

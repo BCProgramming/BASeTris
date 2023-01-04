@@ -214,9 +214,17 @@ namespace BASeTris.Rendering.Skia.MenuItems
             var Bounds = Element.Bounds;
             String sLeftCover = "< ";
             String sRightCover = ">";
-            
-            var PrevItem = OptionManager.GetTextBase(OptionManager.PeekPreviousBase());
-            var NextItem = OptionManager.GetTextBase(OptionManager.PeekNextBase());
+            String PrevItem = null, NextItem = null;
+            try
+            {
+                PrevItem = OptionManager.GetTextBase(OptionManager.PeekPreviousBase());
+                NextItem = OptionManager.GetTextBase(OptionManager.PeekNextBase());
+            }
+            catch (IndexOutOfRangeException ire)
+            {
+                PrevItem = "";
+                NextItem = "";
+            }
             sLeftCover = PrevItem + sLeftCover;
             sRightCover = sRightCover + NextItem;
             

@@ -343,6 +343,7 @@ namespace BASeTris
             }
             catch(Exception exr)
             {
+                Debug.Print("Render Exception:" + exr.ToString());
                 ;
             }
             finally

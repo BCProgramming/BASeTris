@@ -76,9 +76,12 @@ namespace BASeTris.GameStates.Menu
 
 
             base.OptionManager = new MultiOptionManagerList<MenuStateThemeSelection>(ThemeOptions,currentIndex);
-            var closest = ThemeOptions[currentIndex];
-            this.Text = closest.Description;
-
+            if (currentIndex == 0) this.Text = "Unknown";
+            else
+            {
+                var closest = ThemeOptions[currentIndex];
+                this.Text = closest.Description;
+            }
            
             OnChangeOption += ThemeActivate;
 

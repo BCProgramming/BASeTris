@@ -51,8 +51,16 @@ namespace BASeTris.GameStates
         public bool DoRefreshBackground = false;
         public GameplayStateFlags Flags { get; set; } = GameplayStateFlags.Normal;
         BlockGroupChooser overrideChooser = null;
-        public Choosers.BlockGroupChooser Chooser { get { return overrideChooser == null ? GameHandler.Chooser : overrideChooser; } set { overrideChooser = value; } }
 
+        public Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner)
+            {
+            if (overrideChooser != null) return overrideChooser;
+            return GameHandler.GetChooser(pOwner);
+            }
+        public void SetChooser(BlockGroupChooser value)
+        {
+            overrideChooser = value;
+        }
 
         public override bool GamePlayActive { get { return true; } }
 
@@ -115,7 +123,13 @@ namespace BASeTris.GameStates
             GameHandler = Handler;
             MainMenuState = MainMenu;
 
-            PlayField = new TetrisField(Handler.DefaultTheme, Handler);
+            int Columns = Handler.GetFieldColumnWidth();
+            int Rows = Handler.GetFieldRowHeight();
+            int HiddenRows = Handler.GetHiddenRowCount();
+
+            
+
+            PlayField = new TetrisField(Handler.DefaultTheme, Handler,Rows,Columns,HiddenRows);
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
@@ -141,7 +155,7 @@ namespace BASeTris.GameStates
 
         ~GameplayGameState()
         {
-            if (Chooser != null) Chooser.Dispose();
+            
         }
         public void InvokePlayFieldLevelChanged(object sender, TetrisField.LevelChangeEventArgs e)
         {
@@ -498,11 +512,11 @@ namespace BASeTris.GameStates
 
 
 
-        public void RefillBlockQueue()
+        public void RefillBlockQueue(IStateOwner pOwner)
         {
             while (GameOptions.NextQueueSize > NextBlocks.Count)
             {
-                var Generated = NominoTetromino();
+                var Generated = NominoTetromino(pOwner);
                 NextBlocks.Enqueue(Generated);
             }
         }
@@ -519,14 +533,14 @@ namespace BASeTris.GameStates
             BlockHold = false;
             if (NextBlocks.Count == 0)
             {
-                RefillBlockQueue();
+                RefillBlockQueue(pOwner);
             }
 
             var nextget = NextBlocks.Dequeue();
             
             if (NextBlocks.Count < GameOptions.NextQueueSize)
             {
-                RefillBlockQueue();
+                RefillBlockQueue(pOwner);
             }
 
             nextget.X = (int) (((float) PlayField.ColCount / 2) - ((float) nextget.GroupExtents.Width / 2));
@@ -566,13 +580,14 @@ namespace BASeTris.GameStates
         }
 
 
-        public virtual Nomino NominoTetromino()
+        public virtual Nomino NominoTetromino(IStateOwner pOwner)
         {
             //HACK!
             //var hexpiece = NNominoGenerator.GetPiece(6);
             //var buildNomino = NNominoGenerator.CreateNomino(hexpiece);
             //return buildNomino;
-            var nextitem = Chooser.RetrieveNext();
+            var useChooser = GetChooser(pOwner);
+            var nextitem = useChooser.RetrieveNext();
             return nextitem;
         }
         

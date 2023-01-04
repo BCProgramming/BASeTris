@@ -75,11 +75,18 @@ namespace BASeTris.Rendering.Skia.GameStates
             CurrentY += (float)(pOwner.ScaleFactor * 5);
             for (int menuitemindex = 0; menuitemindex < Source.MenuElements.Count; menuitemindex++)
             {
-                var drawitem = Source.MenuElements[menuitemindex];
-                var XPos = (int)(Bounds.Width / 2 - ItemSize.X / 2) + Source.MainXOffset;
-                SKRect TargetBounds = new SKRect(XPos, (int)CurrentY, XPos + (int)(ItemSize.X), CurrentY + (int)(ItemSize.Y));
-                MenuStateMenuItem.StateMenuItemState useState = menuitemindex == Source.SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
-                RenderingProvider.Static.DrawElement(pOwner, g, drawitem, new MenuStateMenuItemSkiaDrawData(TargetBounds, useState));
+                try
+                {
+                    var drawitem = Source.MenuElements[menuitemindex];
+                    var XPos = (int)(Bounds.Width / 2 - ItemSize.X / 2) + Source.MainXOffset;
+                    SKRect TargetBounds = new SKRect(XPos, (int)CurrentY, XPos + (int)(ItemSize.X), CurrentY + (int)(ItemSize.Y));
+                    MenuStateMenuItem.StateMenuItemState useState = menuitemindex == Source.SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
+                    RenderingProvider.Static.DrawElement(pOwner, g, drawitem, new MenuStateMenuItemSkiaDrawData(TargetBounds, useState));
+                }
+                catch (Exception exp)
+                {
+
+                }
                 //drawitem.Draw(pOwner, g, TargetBounds, useState);
                 CurrentY += ItemSize.Y + 5;
             }

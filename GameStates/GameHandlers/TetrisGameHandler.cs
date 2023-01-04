@@ -19,9 +19,9 @@ namespace BASeTris.GameStates.GameHandlers
     /// ICustomizationHandler that handles the standard tetris game.
     /// </summary>
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class StandardTetrisHandler : IGameCustomizationHandler
+    public class StandardTetrisHandler : IGameCustomizationHandler,IGameHandlerChooserInitializer
     {
-        public String Name { get { return "Tetris"; } }
+        public virtual String Name { get { return "Tetris"; } }
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
         public IList<HotLine> HotLines { get; set; } = new List<HotLine>();
@@ -29,8 +29,16 @@ namespace BASeTris.GameStates.GameHandlers
         public bool AllowFieldImageCache { get { return true; } }
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
-        
 
+        public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT; }
+        public virtual int GetHiddenRowCount()
+        {
+            return 2;
+        }
+        public virtual int GetFieldColumnWidth()
+        {
+            return TetrisField.DEFAULT_COLCOUNT;
+        }
         public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
         {
 
@@ -92,15 +100,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         public TetrisGameOptions GameOptions { get;  } = new TetrisGameOptions();
         GameOptions IGameCustomizationHandler.GameOptions => this.GameOptions;
-        public Choosers.BlockGroupChooser Chooser
-        {
-            get
-            {
-                if (_Chooser == null)
-                { _Chooser = GetChooser(); }
-                return _Chooser;
-            }
-        }
+      
         public Nomino[] GetNominos()
         {
             Tetromino_I TetI = new Tetromino_I();
@@ -112,11 +112,53 @@ namespace BASeTris.GameStates.GameHandlers
             Tetromino_Z TetZ = new Tetromino_Z();
             return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ};
         }
-        private Choosers.BlockGroupChooser GetChooser()
+
+        public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
+        {
+            if (DesiredChooserType == typeof(BagChooser))
+            {
+                BagChooser bc = new BagChooser(Tetromino.StandardTetrominoFunctions);
+                
+                return bc;
+            }
+            else if (DesiredChooserType == typeof(NESChooser))
+            {
+                NESChooser nc = new NESChooser(Tetromino.StandardTetrominoFunctions);
+                
+                return nc;
+            }
+            else if (DesiredChooserType == typeof(GameBoyChooser))
+            {
+                GameBoyChooser gbc = new GameBoyChooser(Tetromino.StandardTetrominoFunctions);
+                
+                return gbc;
+            }
+            else if (DesiredChooserType == typeof(FullRandomChooser))
+            {
+                FullRandomChooser frc = new FullRandomChooser(Tetromino.StandardTetrominoFunctions);
+                
+                return frc;
+            }
+            return null;
+        }
+
+        private String CurrentChooserValue = null;
+
+        public virtual Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
             //TODO: proper per-handler configs should include the chooser class to use.
-            var resultChooser = new BagChooser(Tetromino.StandardTetrominoFunctions);
-            return resultChooser;
+            if (_Chooser == null || CurrentChooserValue != pOwner.Settings.std.Chooser)
+            {
+                CurrentChooserValue = pOwner.Settings.std.Chooser;
+                Type createType = BlockGroupChooser.ChooserTypeFromString(CurrentChooserValue);
+                if (createType == null)
+                {
+                    CurrentChooserValue = pOwner.Settings.std.Chooser;
+                    createType = typeof(BagChooser);
+                }
+                _Chooser = CreateSupportedChooser(createType);
+            }
+            return _Chooser;
         }
         public virtual IHighScoreList<TetrisHighScoreData> GetHighScores()
         {
@@ -173,6 +215,7 @@ namespace BASeTris.GameStates.GameHandlers
             var PlayField = state.PlayField;
             var Sounds = state.Sounds;
             var GameOptions = state.GameOptions;
+            
             //checks the field contents for lines. If there are lines found, they are removed, and all rows above it are shifted down.
             for (int r = 0; r < PlayField.RowCount; r++)
             {

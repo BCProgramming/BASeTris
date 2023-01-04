@@ -392,7 +392,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     if (Source.HoldBlock != null)
                     {
-                        SKBitmap HoldTetromino = Source.GetTetrominoSKBitmap(Source.HoldBlock.GetType());
+                        SKBitmap HoldTetromino = Source.GetTetrominoSKBitmap(pOwner,Source.HoldBlock);
                         if(HoldTetromino!=null)
                             g.DrawBitmap(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
                     }

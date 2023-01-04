@@ -45,12 +45,64 @@ namespace BASeTris
         }
         public virtual String GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
-            return GetNominoTypeKey(Group.GetType(), GameHandler, Field);
+            return GetNominoKey_Tetris(Group, GameHandler, Field);
         }
         public virtual String GetNominoTypeKey(Type src, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
             return src.FullName;
         }
+        public String GetNominoKey_Tetris(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        {
+            if (Group is Tetromino)
+            {
+                return GetNominoTypeKey(Group.GetType(), GameHandler, Field);
+            }
+            else
+            {
+                String sStringRep = NNominoGenerator.StringRepresentation(NNominoGenerator.GetNominoPoints(Group));
+                return sStringRep;
+            }
+
+
+        }
+        public string GetNominoKey_LineSeries(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        {
+
+            //Dr Mario theme keys are based on the "Duomino" arrangement. We take the first type, and the second type and create a key for it.
+
+
+            if (Group is Duomino.Duomino dm)
+            {
+
+                var OneBlock = dm.FirstBlock;
+                var TwoBlock = dm.SecondBlock;
+                if (OneBlock.Block is LineSeriesBlock sb1 && TwoBlock.Block is LineSeriesBlock sb2)
+                {
+                    return "1:" + sb1.CombiningIndex + ";2:" + sb2.CombiningIndex;
+                }
+            }
+            else if (Group is Tetromino)
+            {
+                //means we are servicing a Tetris 2 Handler.
+                //Since tetrominoes use 4 blocks, we've got our work cut out for us in terms of
+                //creating the correct keys. means we have a lot of possibilities to cache!
+                StringBuilder sbKey = new StringBuilder();
+                int index = 0;
+                foreach (var block in Group)
+                {
+                    if (block.Block is LineSeriesBlock b)
+                    {
+                        sbKey.Append($"{index++}:{b.CombiningIndex};");
+                    }
+                }
+                return sbKey.ToString();
+            }
+
+            return GetNominoKey(Group, GameHandler, Field);
+
+            //return base.GetNominoKey(Group, GameHandler, Field);
+        }
+
         public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
         public abstract void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler);
@@ -171,6 +223,7 @@ namespace BASeTris
             BlockInnerColor = InnerColor;
         }
     }
+    [HandlerTheme("Standard", typeof(StandardTetrisHandler))]
 
     public class StandardTetrominoTheme : NominoTheme
     {
