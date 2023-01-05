@@ -46,6 +46,14 @@ namespace BASeTris.GameStates.GameHandlers
             Category = pCategory;
         }
     }
+    public class HandlerTipTextAttribute : Attribute
+    {
+        public String TipText { get; set; }
+        public HandlerTipTextAttribute(String pTipText)
+        {
+            TipText = pTipText;
+        }
+    }
 
     public class GameOverStatistics
     {

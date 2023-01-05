@@ -143,7 +143,22 @@ namespace BASeTris
             return ResetTranslation(BuildList);
 
         }
-       
+        public static IEnumerable<NominoPoint> FromString(String src)
+        {
+            
+            String[] linesplit = src.Split('\n');
+            for (int currrow = 0; currrow < linesplit.Length - 1; currrow++)
+            {
+                for (int currcol = 0; currcol < linesplit[currrow].Length - 1; currcol++)
+                {
+                    if (linesplit[currrow][currcol] != ' ')
+                    {
+                        NominoPoint np = new NominoPoint(currcol, currrow);
+                        yield return np;
+                    }
+                }
+            }
+        }
         public static String StringRepresentation(List<NominoPoint> Points)
         {
             int MinX = int.MaxValue, MaxX = int.MinValue;

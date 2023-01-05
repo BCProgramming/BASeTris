@@ -289,7 +289,7 @@ namespace BASeTris
                                 canvas.ClipRect(FullRect);
                                 staterender.Render(this, canvas, CurrentGameState,
                                     new GameStateSkiaDrawParameters(FullRect));
-                                canvas.DrawLine(new SKPoint(0, 0), new SKPoint(ClientSize.Width, ClientSize.Height), new SKPaint() { Color = SKColors.Black });
+                                //canvas.DrawLine(new SKPoint(0, 0), new SKPoint(ClientSize.Width, ClientSize.Height), new SKPaint() { Color = SKColors.Black });
                                 canvas.Restore();
                                 _LastDrawBounds = FullRect;
                                

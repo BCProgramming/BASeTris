@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.BackgroundDrawers;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
 using BASeTris.Theme.Audio;
 
@@ -154,10 +156,11 @@ namespace BASeTris.GameStates.Menu
     public class OptionsMenuSettingsSelectorState: MenuState
     {
         private GameState _OriginalState;
-        
-        public OptionsMenuSettingsSelectorState(IBackground background, IStateOwner pOwner, GameState OriginalState) : base(background)
+        private String _Category;
+        public OptionsMenuSettingsSelectorState(IBackground background, IStateOwner pOwner, GameState OriginalState,String pCategory=null) : base(background)
         {
             _OriginalState = OriginalState;
+            _Category = pCategory;
             PopulateOptions(pOwner);
         }
 
@@ -167,24 +170,77 @@ namespace BASeTris.GameStates.Menu
             Font standardFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight, 1.0f);
             Font ItemFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight * .75f, 1.0);
             MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
-            StateHeader = "Choose Handler";
-            HeaderTypeface = TetrisGame.GetRetroFont(14, 1.0f).FontFamily.Name;
-            HeaderTypeSize = DesiredFontPixelHeight * .75f;
+            StateHeader = "Option Set";
 
+            if (_Category != null) StateHeader = "Options:" + _Category;
+            HeaderTypeface = TetrisGame.GetRetroFont(12, 1.0f).FontFamily.Name;
+            HeaderTypeSize = DesiredFontPixelHeight * .75f;
+            //get the handlers....
+            var allHandlers = Program.DITypes[typeof(IGameCustomizationHandler)];
+            Dictionary<String, List<IGameCustomizationHandler>> AllHandlerCategories = new Dictionary<string, List<IGameCustomizationHandler>>();
+            Dictionary<MenuStateTextMenuItem, String> CategoryItems = new Dictionary<MenuStateTextMenuItem, string>();
+            foreach (var iterate in allHandlers.GetManagedTypes())
+            {
+                var HandlerAttrib = iterate.GetCustomAttributes(typeof(HandlerMenuCategoryAttribute),true).FirstOrDefault() as HandlerMenuCategoryAttribute;
+                String getCategory = HandlerAttrib == null ? "" : HandlerAttrib.Category;
+                if (!AllHandlerCategories.ContainsKey(getCategory))
+                    AllHandlerCategories.Add(getCategory, new List<IGameCustomizationHandler>());
+
+                ConstructorInfo ci = iterate.GetConstructor(new Type[] { });
+                if (ci != null)
+                {
+                    IGameCustomizationHandler handler = (IGameCustomizationHandler)ci.Invoke(new object[] { });
+                    AllHandlerCategories[getCategory].Add(handler);
+                    //MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name, TipText="Change Settings for " + handler.Name };
+                    //HandlerLookup.Add(builditem, handler);
+                    //AllItems.Add(builditem);
+                }
+
+
+                
+            }
 
             
 
             var useDictionary = pOwner.Settings.AllSettings;
             Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>> setlookup = new Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>>();
+            
             foreach (var iterateset in useDictionary)
             {
-                MenuStateTextMenuItem submenuitem = new MenuStateTextMenuItem() { Text = iterateset.Key };
-                submenuitem.FontFace = ItemFont.FontFamily.Name;
-                submenuitem.FontSize = ItemFont.Size;
-                MenuElements.Add(submenuitem);
-                setlookup.Add(submenuitem, iterateset);
+                //find the category of this entry.
+                String getCategory = AllHandlerCategories.Keys.FirstOrDefault((k) => AllHandlerCategories[k].Any((h) => h.Name == iterateset.Key));
+                getCategory = getCategory ?? "";
+                if (getCategory == (_Category??""))
+                {
+                    MenuStateTextMenuItem submenuitem = new MenuStateTextMenuItem() { Text = iterateset.Key };
+                    submenuitem.FontFace = ItemFont.FontFamily.Name;
+                    submenuitem.FontSize = ItemFont.Size;
+                    MenuElements.Add(submenuitem);
+                    setlookup.Add(submenuitem, iterateset);
+                }
             }
-            
+
+            if (String.IsNullOrEmpty(_Category))
+            {
+                //base category shows other categories.
+
+                foreach (var iterate in AllHandlerCategories)
+                {
+                    if (!String.IsNullOrEmpty(iterate.Key))
+                    {
+                        MenuStateTextMenuItem submenuitem = new MenuStateTextMenuItem() { Text = iterate.Key,TipText="View Handler Category" };
+                        submenuitem.FontFace = ItemFont.FontFamily.Name;
+                        submenuitem.FontSize = ItemFont.Size;
+                        MenuElements.Add(submenuitem);
+                        CategoryItems.Add(submenuitem, iterate.Key);
+                    }
+                }
+
+
+
+            }
+
+
             MenuItemActivated += (obj, e) =>
             {
                 if (e.MenuElement == ReturnItem)
@@ -194,11 +250,22 @@ namespace BASeTris.GameStates.Menu
                 }
                 else
                 {
+                    
                     MenuStateTextMenuItem selecteditem = e.MenuElement as MenuStateTextMenuItem;
-                    var getkvp = setlookup[selecteditem];
-                    OptionsMenuState oms = new OptionsMenuState(this._BG, pOwner, this, getkvp.Key, getkvp.Value);
-                    pOwner.CurrentState = oms;
-                    this.ActivatedItem = null;
+                    if (CategoryItems.ContainsKey(selecteditem))
+                    {
+                        OptionsMenuSettingsSelectorState oms = new OptionsMenuSettingsSelectorState(this._BG, pOwner, this, selecteditem.Text);
+                        pOwner.CurrentState = oms;
+                        this.ActivatedItem = null;
+
+                    }
+                    else
+                    {
+                        var getkvp = setlookup[selecteditem];
+                        OptionsMenuState oms = new OptionsMenuState(this._BG, pOwner, this, getkvp.Key, getkvp.Value);
+                        pOwner.CurrentState = oms;
+                        this.ActivatedItem = null;
+                    }
                 }
             };
             ReturnItem.FontFace = ItemFont.FontFamily.Name;

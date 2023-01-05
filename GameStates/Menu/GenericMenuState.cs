@@ -190,7 +190,7 @@ namespace BASeTris.GameStates.Menu
             foreach(var iterate in Program.GetGameHandlers())
             {
                 var FindAttribute = iterate.GetCustomAttribute(typeof(HandlerMenuCategoryAttribute), true) as HandlerMenuCategoryAttribute;
-
+                var FindTipAttribute = iterate.GetCustomAttribute(typeof(HandlerTipTextAttribute), false) as HandlerTipTextAttribute;
                 //if Category is null, we only want to show the items that have no category.
                 //if it is not null, then the category needs to match the category we were told to show.
                 if (FindAttribute != null)
@@ -226,7 +226,7 @@ namespace BASeTris.GameStates.Menu
                 if(ci!=null)
                 {
                     IGameCustomizationHandler handler = (IGameCustomizationHandler)ci.Invoke(new object[] { });
-                    MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name };
+                    MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name,TipText = (FindTipAttribute?.TipText)??"" };
                     HandlerLookup.Add(builditem, handler);
                     AllItems.Add(builditem);
                 }

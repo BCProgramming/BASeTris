@@ -11,6 +11,7 @@ namespace BASeTris.Settings
 {
     public class StandardSettings : IXmlPersistable
     {
+
         //Audio volume settings.
         public float MusicVolume = 1.0f;
         public float EffectVolume = 1.0f;

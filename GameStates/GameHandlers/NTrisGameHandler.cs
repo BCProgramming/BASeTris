@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace BASeTris.GameStates.GameHandlers
 {
     [HandlerMenuCategory("Multitris")]
+    
     public abstract class NTrisGameHandler : StandardTetrisHandler
     {
         
@@ -19,13 +20,15 @@ namespace BASeTris.GameStates.GameHandlers
             {3,"Tri" },
             {4,"Te" },
             {5,"Pen" },
-            {6,"Hex" },
-            {7,"Sep" },
+            {6,"Sex" },
+            {7,"Hep" },
             {8,"Oc" },
-            {9,"Non" },
+            {9,"Enne" },
             {10,"Dec" },
-            {11,"Unodec" },
-            {12,"Duodec" }
+            {11,"Hendec" },
+            {12,"Dodec" },
+            {13,"Decatria" },
+            {14,"Decatettara" }
         };
         private int BlockCount = 4;
         public override string Name
@@ -87,58 +90,69 @@ namespace BASeTris.GameStates.GameHandlers
     }
 
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class PentrisGameHandler:NTrisGameHandler
+    [HandlerTipText("Pentris - mino's have 5 blocks instead of 4.")]
+public class PentrisGameHandler:NTrisGameHandler
     {
     public PentrisGameHandler() : base(5) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class HextrisGameHandler : NTrisGameHandler
+    [HandlerTipText("Sextris - not as exciting as you might think. mino's have 6 blocks.")]
+    public class SextrisGameHandler : NTrisGameHandler
     {
-        public HextrisGameHandler() : base(6) { }
+        public SextrisGameHandler() : base(6) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class SeptrisGameHandler : NTrisGameHandler
+    [HandlerTipText("Heptatris - mino's have 7 blocks. There seems to be a pattern here.")]
+    public class HeptaTrisGameHandler : NTrisGameHandler
     {
-        public SeptrisGameHandler() : base(7) { }
+        public HeptaTrisGameHandler() : base(7) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Octris. mino's have 8 blocks. Yep, definitely seeing a pattern.")]
     public class OctrisGameHandler : NTrisGameHandler
     {
         public OctrisGameHandler() : base(8) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class NontrisGameHandler : NTrisGameHandler
+    [HandlerTipText("Enneatris. Mino's have 9 blocks.")]
+    public class EnneatrisGameHandler : NTrisGameHandler
     {
-        public NontrisGameHandler() : base(9) { }
+        public EnneatrisGameHandler() : base(9) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Dectris. Minos have 10 blocks. OK, this is starting to get silly")]
     public class DectrisGameHandler : NTrisGameHandler
     {
         public DectrisGameHandler() : base(10) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class UnoDectrisGameHandler : NTrisGameHandler
+    [HandlerTipText("HenDectris. Minos have 11 blocks.")]
+    public class HenDectrisGameHandler : NTrisGameHandler
     {
-        public UnoDectrisGameHandler() : base(11) { }
+        public HenDectrisGameHandler() : base(11) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class DuoDectrisGameHandler : NTrisGameHandler
+    [HandlerTipText("DoDectris. Minos have 12 blocks.")]
+    public class DoDectrisGameHandler : NTrisGameHandler
     {
-        public DuoDectrisGameHandler() : base(12) { }
-    }
-
-    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class TwoDuoDectrisGameHandler : NTrisGameHandler
-    {
-        public TwoDuoDectrisGameHandler() : base(32) { }
-    }
-    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    public class CentrisGameHandler : NTrisGameHandler
-    {
-        public CentrisGameHandler() : base(100) { }
+        public DoDectrisGameHandler() : base(12) { }
     }
 
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Tettaracontatris. Minos have 32 blocks. Who can forget this classic.")]
+    public class tettaracontatrisGameHandler : NTrisGameHandler
+    {
+        public tettaracontatrisGameHandler() : base(32) { }
+    }
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Alright well now you are just getting silly. This doesn't even work well. I can't handle it. It's too many.")]
+    public class HecatotrisGameHandler : NTrisGameHandler
+    {
+        public HecatotrisGameHandler() : base(100) { }
+    }
+
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Tritris. Minos have 3 blocks. ")]
     public class TriTrisGameHandler : NTrisGameHandler
     {
         public TriTrisGameHandler() : base(3) { }
