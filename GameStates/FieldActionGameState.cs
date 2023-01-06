@@ -299,7 +299,7 @@ namespace BASeTris.GameStates
         private readonly long ClearParticleTTL = 300;
         private void AddParticles_Row(IStateOwner pOwner,BCRect RowBounds,int Lines=1)
         {
-            String UseText = RowClearText?[Lines] ?? $"{Lines}LINE";
+            String UseText = RowClearText.ContainsKey(Lines)?(RowClearText?[Lines]) : $"{Lines}LINE";
             Func<BaseParticle, BCColor> TetrisColorFunc = BaseParticle.GetRainbowColorFunc(pOwner);
             Func<BaseParticle, BCColor> SingleLineColorFunc = (o) =>
             {
@@ -382,7 +382,7 @@ namespace BASeTris.GameStates
                 sourcebitmap = new Bitmap(ib._RotationImages[MathHelper.mod(ib.Rotation,ib._RotationImages.Length)]);
                 
             }
-            var ReductionFactor = 32 / (_BaseState.PlayField.ColCount + _BaseState.PlayField.RowCount);
+            var ReductionFactor = 10f / (_BaseState.PlayField.ColCount);
             var blockWidth = _BaseState.PlayField.GetBlockWidth((SKRect)pOwner.LastDrawBounds);
             var blockHeight = _BaseState.PlayField.GetBlockHeight((SKRect)pOwner.LastDrawBounds);
             var CoordPos = new BCPoint( BlockX,

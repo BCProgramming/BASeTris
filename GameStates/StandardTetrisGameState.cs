@@ -935,6 +935,7 @@ namespace BASeTris.GameStates
                 
                 var Original = StartCoordinates[index];
                 var Drop = EndCoordinates[index];
+                var distancedropped = Math.Abs(Drop.Item1.Y - Original.Item1.Y);
                 Bitmap ColorSource = null;
                 if(Original.Item2.Block is ImageBlock)
                 {
@@ -944,7 +945,7 @@ namespace BASeTris.GameStates
                 }
                 for (float y = Original.Item1.Y; y<Drop.Item1.Y-1;y++)
                 {
-                    GenerateDropParticles(new BCPoint(Original.Item1.X, y), 10, () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)),
+                    GenerateDropParticles(new BCPoint(Original.Item1.X, y), (int)(Math.Min(1,10*(distancedropped/20))) , () => new BCPoint(0f, (float)((rgen.NextDouble() * 0.2f) + 0.4f)),
                         (xget,yget)=> {
                             var xposget = xget * ColorSource.Width;
                             var yposget = yget * ColorSource.Height;

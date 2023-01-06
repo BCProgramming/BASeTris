@@ -20,7 +20,7 @@ namespace BASeTris.GameStates.GameHandlers
             {3,"Tri" },
             {4,"Te" },
             {5,"Pen" },
-            {6,"Sex" },
+            {6,"Hex" },
             {7,"Hep" },
             {8,"Oc" },
             {9,"Enne" },
@@ -96,7 +96,7 @@ public class PentrisGameHandler:NTrisGameHandler
     public PentrisGameHandler() : base(5) { }
     }
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    [HandlerTipText("Sextris - not as exciting as you might think. mino's have 6 blocks.")]
+    [HandlerTipText("Hextris - mino's have 6 blocks.")]
     public class SextrisGameHandler : NTrisGameHandler
     {
         public SextrisGameHandler() : base(6) { }

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <SettingsGroups>
   <SettingsGroup Name="Default">
-    <Data Music="0.7" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_a_theme_techno_A" SoundScheme="Default" Chooser="Default" />
+    <Data Music="0.7" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_2" SoundScheme="SNES" Chooser="Default" />
   </SettingsGroup>
   <SettingsGroup Name="Tetris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_nes_theme" SoundScheme="Default" Chooser="Default" />
@@ -10,7 +10,7 @@
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
   </SettingsGroup>
   <SettingsGroup Name="Pentris">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_theme_C" SoundScheme="Default" Chooser="Default" />
   </SettingsGroup>
   <SettingsGroup Name="Duodectris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
@@ -25,6 +25,12 @@
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
   </SettingsGroup>
   <SettingsGroup Name="Progressive Tetris">
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
+  </SettingsGroup>
+  <SettingsGroup Name="Dectris">
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
+  </SettingsGroup>
+  <SettingsGroup Name="Ennetris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" />
   </SettingsGroup>
 </SettingsGroups>

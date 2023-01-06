@@ -301,7 +301,7 @@ namespace BASeTris.GameStates.GameHandlers
                 Statistics.AddLineCount(Trigger.GetType(), rowsfound);
             }
 
-            if ((PreviousLineCount % 10) > (Statistics.LineCount % 10))
+            if ((PreviousLineCount / 10) < (Statistics.LineCount / 10))
             {
                 state.InvokePlayFieldLevelChanged(state, new TetrisField.LevelChangeEventArgs((int)Statistics.LineCount / 10));
                 Statistics.SetLevelTime(pOwner.GetElapsedTime());
@@ -315,9 +315,15 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
             }
-            else if (rowsfound == 4)
+            else if (rowsfound >= 4)
             {
                 Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.std.EffectVolume * 2);
+                if (rowsfound > 4)
+                {
+                    Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.std.EffectVolume * 2);
+                }
             }
 
 

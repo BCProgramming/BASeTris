@@ -61,7 +61,9 @@ namespace BASeTris
                 var attrib = (HandlerThemeAttribute)iteratetype.GetCustomAttribute(typeof(HandlerThemeAttribute));
                 if(attrib!=null)
                 {
-                    if(attrib.HandlerType.Contains(HandlerType))
+                    if(attrib.HandlerType.Any((t)=>t.IsAssignableFrom(HandlerType)))
+
+                    //if(attrib.HandlerType.Contains(HandlerType))
                     {
                         ConstructType.Add(iteratetype);
                     }

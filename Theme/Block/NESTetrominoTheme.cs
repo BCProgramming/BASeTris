@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme("NES Style",typeof(StandardTetrisHandler))]
+    [HandlerTheme("NES Style",typeof(StandardTetrisHandler),typeof(NTrisGameHandler))]
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
     {
         public override string Name { get { return "NES"; } }
@@ -45,6 +45,35 @@ namespace BASeTris.Theme.Block
         {
             int LevelNum = field.Level;
             int LevelIndex = MathHelper.mod(LevelNum, AllLevelColors.Length);
+            var ChosenLevelSet = LevelColorSets[LevelIndex];
+
+            int BlockCount = 0;
+            if (!(Element is Tetromino))
+            {
+                //get the index.
+                var cw = NNominoGenerator.GetNominoPoints(Element);
+                //long GetSpecialIndex = NNominoGenerator.GetIndex(cw);
+                string sHash = NNominoGenerator.StringRepresentation(cw);
+                if (!LookupColorSet.ContainsKey((LevelIndex,sHash)))
+                {
+                    var chosenresult = CreateRandomColorSet();
+                    LookupColorSet[(LevelIndex,sHash)] = chosenresult;
+                    var cw2 = NNominoGenerator.RotateCW(cw);
+                    var cw3 = NNominoGenerator.RotateCW(cw2);
+                    var cw4 = NNominoGenerator.RotateCW(cw3);
+                    LookupColorSet[(LevelIndex,NNominoGenerator.StringRepresentation(cw2))] = chosenresult;
+                    LookupColorSet[(LevelIndex, NNominoGenerator.StringRepresentation(cw3))] = chosenresult;
+                    LookupColorSet[(LevelIndex, NNominoGenerator.StringRepresentation(cw4))] = chosenresult;
+                }
+                ChosenLevelSet = LookupColorSet[(LevelIndex,sHash)];
+            }
+                
+                //select a random type
+
+
+            
+
+
             switch (PixelType)
             {
                 case BCT.Transparent:
@@ -52,13 +81,13 @@ namespace BASeTris.Theme.Block
                 case BCT.Glint:
                     return SKColors.White;
                 case BCT.Base_Dark:
-                    return LevelColorSets[LevelIndex][0];
+                    return ChosenLevelSet[0];
                 case BCT.Base_Light:
-                    return LevelColorSets[LevelIndex][1];
+                    return ChosenLevelSet[1];
                 case BCT.Black:
                     return SKColors.Black;
                 default:
-                    return LevelColorSets[LevelIndex][0];
+                    return ChosenLevelSet[0];
             }
 
 
@@ -79,7 +108,8 @@ namespace BASeTris.Theme.Block
         {
             return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
-
+        private Dictionary<string, NESBlockTypes> LookupBlockTypes = new Dictionary<string, NESBlockTypes>();
+        private Dictionary<(int,string), SKColor[]> LookupColorSet = new Dictionary<(int,string), SKColor[]>();
         public override BlockTypeReturnData  GetBlockType(Nomino group, NominoElement element, TetrisField field)
         {
             var bg = group;
@@ -92,8 +122,35 @@ namespace BASeTris.Theme.Block
             else if (bg is Tetromino)
                 return new BlockTypeReturnData(NESBlockTypes.Lighter);
             else
-                return new BlockTypeReturnData(TetrisGame.Choose(new NESBlockTypes[] { NESBlockTypes.Boxed, NESBlockTypes.Darker, NESBlockTypes.Lighter }));
+            {
+                int BlockCount = 0;
+                if (!(bg is Tetromino))
+                {
+                    //get the index.
+                    var cw = NNominoGenerator.GetNominoPoints(bg);
+                    //long GetSpecialIndex = NNominoGenerator.GetIndex(cw);
+                    string sHash = NNominoGenerator.StringRepresentation(cw);
+                    if (!LookupBlockTypes.ContainsKey(sHash))
+                    {
+                        var chosenresult = TetrisGame.Choose(new NESBlockTypes[] { NESBlockTypes.Boxed, NESBlockTypes.Darker, NESBlockTypes.Lighter });
+                        LookupBlockTypes[sHash] = chosenresult;
+                        var cw2 = NNominoGenerator.RotateCW(cw);
+                        var cw3 = NNominoGenerator.RotateCW(cw2);
+                        var cw4 = NNominoGenerator.RotateCW(cw3);
+                        LookupBlockTypes[NNominoGenerator.StringRepresentation(cw2)] = chosenresult;
+                        LookupBlockTypes[NNominoGenerator.StringRepresentation(cw3)] = chosenresult;
+                        LookupBlockTypes[NNominoGenerator.StringRepresentation(cw4)] = chosenresult;
+                    }
+                    return new BlockTypeReturnData(LookupBlockTypes[sHash]);
+                    //select a random type
 
+
+                }
+                else
+                {
+                    return new BlockTypeReturnData(TetrisGame.Choose(new NESBlockTypes[] { NESBlockTypes.Boxed, NESBlockTypes.Darker, NESBlockTypes.Lighter }));
+                }
+            }
 
 
         }
@@ -228,8 +285,30 @@ namespace BASeTris.Theme.Block
 
         public static SKColor[] Level9Colors = new SKColor[] { SKColors.OrangeRed, SKColors.Orange, SKColors.Black };
         //Level 0 style:
-
+        
         public static SKColor[] AllThemeColors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue, SKColors.Green, SKColors.GreenYellow, SKColors.Purple, SKColors.Magenta, SKColors.MediumVioletRed, SKColors.Aquamarine, SKColors.Red, SKColors.SlateGray, SKColors.Indigo, SKColors.DarkBlue, SKColors.Orange, SKColors.OrangeRed };
+
+        public static SKColor[] CreateHues(int Count)
+        {
+            double offset = 1d / (double)Count;
+
+            return (from c in Enumerable.Range(0, Count) select SKColor.FromHsl((float)(offset * c), .8f, 0.5f)).ToArray();
+
+
+        }
+        public static SKColor[] CreateRandomColorSet()
+        {
+
+            var SelectedColourSet = AllThemeColors;
+            if (TetrisGame.rgen.NextDouble() > 0.5d)
+            {
+                SelectedColourSet = SelectedColourSet.Concat(CreateHues(25)).ToArray();
+            }
+
+
+            return new SKColor[] { TetrisGame.Choose(AllThemeColors), TetrisGame.Choose(AllThemeColors), SKColors.Black };
+        }
+        
     }
 
 }

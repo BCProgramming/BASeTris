@@ -1,6 +1,7 @@
 ﻿using BASeTris.Blocks;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,6 +53,55 @@ namespace BASeTris
                 return $"NP:({X},{Y})";
             }
         }
+
+
+        private static readonly char[] BaseChars =
+         "LFR".ToCharArray();
+        private static readonly Dictionary<char, int> CharValues = BaseChars
+                   .Select((c, i) => new { Char = c, Index = i })
+                   .ToDictionary(c => c.Char, c => c.Index);
+
+        private static string IndexToDirectionString(long value, long index)
+        {
+            long targetBase = BaseChars.Length;
+            // Determine exact number of characters to use.
+            char[] buffer = new char[Math.Max(
+                       (int)Math.Ceiling(Math.Log(value + 1, targetBase)), 1)];
+
+            var i = buffer.Length;
+            do
+            {
+                buffer[--i] = BaseChars[value % targetBase];
+                value = value / targetBase;
+            }
+            while (value > 0);
+
+            return new string(buffer, i, buffer.Length - i);
+        }
+
+        private static long DirectionStringToIndex(string DirectionString)
+        {
+            char[] chrs = DirectionString.ToCharArray();
+            int m = chrs.Length - 1;
+            int n = BaseChars.Length, x;
+            long result = 0;
+            for (int i = 0; i < chrs.Length; i++)
+            {
+                x = CharValues[chrs[i]];
+                result += x * (long)Math.Pow(n, m--);
+            }
+            return result;
+        }
+        public static long GetIndex(List<NominoPoint> Input)
+        {
+            return DirectionStringToIndex(GetDirectionString(Input));
+            
+        }
+        //getIndex function. By getting the directionstring, we can basically treat it like a trinary number:
+        //Left is 0
+        //Forward is 1
+        //Right is 2
+
         //given a set of nomino points, retrieves a list of "Turtle" directions that create said nomino.
         //The purpose of this is to detect (some) duplicate nominoes.
         public static String GetDirectionString(List<NominoPoint> input)
@@ -147,9 +197,9 @@ namespace BASeTris
         {
             
             String[] linesplit = src.Split('\n');
-            for (int currrow = 0; currrow < linesplit.Length - 1; currrow++)
+            for (int currrow = 0; currrow < linesplit.Length; currrow++)
             {
-                for (int currcol = 0; currcol < linesplit[currrow].Length - 1; currcol++)
+                for (int currcol = 0; currcol < linesplit[currrow].Length; currcol++)
                 {
                     if (linesplit[currrow][currcol] != ' ')
                     {
@@ -187,6 +237,48 @@ namespace BASeTris
 
 
             return sb.ToString();
+        }
+        public static IEnumerable<NominoPoint> FromLetter(String src)
+        {
+            var useFont = new Font(TetrisGame.RetroFont, 4);
+            SizeF MeasuredText = new SizeF();
+            using (Bitmap b = new Bitmap(1, 1))
+            {
+                Graphics g = Graphics.FromImage(b);
+                MeasuredText = g.MeasureString(src, useFont);
+            }
+            using (Bitmap buildg = new Bitmap((int)(Math.Ceiling(MeasuredText.Width)), (int)(Math.Ceiling(MeasuredText.Height))))
+            {
+                using (Graphics g = Graphics.FromImage(buildg))
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                    g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+                    g.Clear(Color.Transparent);
+                    g.DrawString(src, useFont, Brushes.Black, new PointF(0, 0));
+                }
+
+                for (int x = 0; x < buildg.Width; x++)
+                {
+                    for (int y = 0; y < buildg.Height; y++)
+                    {
+                        if (buildg.GetPixel(x, y).A > 0)
+                        {
+                            NominoPoint np = new NominoPoint(x, y);
+                            yield return np;
+
+                        }
+                    }
+                }
+
+
+            }
+
+
+
+        }
+        public static Nomino NominoFromLetter(String src)
+        {
+            return CreateNomino(FromLetter(src).ToList());
         }
         public static IEnumerable<List<NominoPoint>> FilterRotations(IEnumerable<List<NominoPoint>> Input, Dictionary<String, List<NominoPoint>> LookupTable)
         {

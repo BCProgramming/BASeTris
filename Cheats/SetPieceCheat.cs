@@ -12,6 +12,7 @@ namespace BASeTris.Cheats
 {
     class SetPieceCheat : Cheat
     {
+      
         public override string DisplayName { get { return "SetPieceCheat"; } }
         public override string CheatName { get { return "setpiece"; } }
         public override bool CheatAction(IStateOwner pStateOwner, string[] CheatParameters)
@@ -21,7 +22,8 @@ namespace BASeTris.Cheats
                 String sPiece = CheatParameters[0];
 
                 Func<Nomino> buildNominoFunc = null;
-                switch(sPiece)
+                Func<Nomino>[] buildNominoFuncs = null;
+                switch (sPiece)
                 {
                     case "I":
                         buildNominoFunc = ()=>new Tetromino_I();
@@ -53,10 +55,36 @@ namespace BASeTris.Cheats
 
                         }
                         break;
-                    default:
                     
+                    default:
+                        if (sPiece.StartsWith("LETTER",StringComparison.OrdinalIgnoreCase))
+                        {
+                            String sSubstring = sPiece.Substring(6).Trim().ToUpper();
 
-                        return false;
+
+                            Func<Nomino>[] letterfuncs = (from c in sSubstring select new Func<Nomino>(() => NNominoGenerator.NominoFromLetter(c.ToString()))).ToArray();
+
+                            buildNominoFuncs = letterfuncs;
+
+
+                            
+
+
+                            
+                        }
+                        else if (sPiece.StartsWith("P", StringComparison.OrdinalIgnoreCase))
+                        {
+                            String sNominoText = String.Join(" ", CheatParameters).Substring(1);
+                            sNominoText = sNominoText.Replace("L", "\n");
+                            buildNominoFunc = () => NNominoGenerator.CreateNomino(NNominoGenerator.FromString(sNominoText).ToList());
+
+                        }
+                        else
+                        {
+
+                            return false;
+                        }
+                        break;
                 }
 
 
@@ -64,8 +92,14 @@ namespace BASeTris.Cheats
                 
                 if(pStateOwner.CurrentState is GameplayGameState mainstate)
                 {
-                    mainstate.SetChooser(new NESChooser(new Func<Nomino>[] { buildNominoFunc }));
-
+                    if (buildNominoFunc != null)
+                    {
+                        mainstate.SetChooser(new SingleFunctionChooser(buildNominoFunc));
+                    }
+                    else if(buildNominoFuncs !=null)
+                    {
+                        mainstate.SetChooser(new SequentialChooser(buildNominoFuncs));
+                    }
                     mainstate.NextBlocks.Clear();
                     mainstate.RefillBlockQueue(pStateOwner);
                     return true;

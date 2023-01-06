@@ -120,7 +120,7 @@ namespace BASeTris.GameStates.Menu
 
         private void SoundThemeOptionItem_OnChangeOption(object sender, OptionActivated<SoundOption> e)
         {
-            e.Owner.Settings.std.SoundScheme = e.Option.SoundKey;
+            _AlterSet.SoundScheme = e.Option.SoundKey;
         }
 
         private void MusicOptionItem_OnActivateOption(object sender, OptionActivated<SoundOption> e)
@@ -131,9 +131,9 @@ namespace BASeTris.GameStates.Menu
             }
             else
             {
-                TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, e.Owner.Settings.std.MusicVolume, true);
+                TetrisGame.Soundman.PlayMusic(e.Option.SoundKey, _AlterSet.MusicVolume, true);
             }
-            e.Owner.Settings.std.MusicOption = e.Option.SoundKey;
+            _AlterSet.MusicOption = e.Option.SoundKey;
         }
 
         private class SoundOption

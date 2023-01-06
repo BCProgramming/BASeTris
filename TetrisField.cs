@@ -395,7 +395,7 @@ namespace BASeTris
             foreach (var active in ActiveBlockGroups)
             {
                 if(active != bg && (AdditionalIgnores==null|| !AdditionalIgnores.Contains(active)))
-                {
+                { //can we alter this to also CanFit the other nomino in some way?
                     foreach(var check in active)
                     {
                         var pcheck = new Point(active.X + check.X, active.Y + check.Y);

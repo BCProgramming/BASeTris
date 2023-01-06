@@ -137,6 +137,7 @@
     <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="Blocks\LineSeriesBlock.cs" />
+    <Compile Include="Cheats\FillCheat.cs" />
     <Compile Include="Cheats\SetPieceCheat.cs" />
     <Compile Include="Choosers\ChooserCompatibilityAttribute.cs" />
     <Compile Include="Choosers\CompositeChooser.cs" />

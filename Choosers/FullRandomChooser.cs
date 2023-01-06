@@ -21,5 +21,21 @@ namespace BASeTris.Choosers
             return _Available[RandomIndex]();
         }
     }
-    
+    [ChooserCompatibility(typeof(StandardTetrisHandler))]
+    public class SequentialChooser : BlockGroupChooser
+    {
+        int currentindex = 0;
+        public SequentialChooser(Func<Nomino>[] SelectionFunctions) : base(SelectionFunctions)
+        {
+        }
+
+
+        internal override Nomino GetNext()
+        {
+            if (currentindex == _Available.Length) currentindex = 0;
+            
+            return _Available[currentindex++]();
+            
+        }
+    }
 }
