@@ -32,7 +32,7 @@ namespace BASeTris.Settings
         private String sLoadedSource = null;
         public String Chooser = "Default";
         public String MusicOption { get; set; } = "<RANDOM>";
-
+        public string Theme { get; set; } = "";
         public String SoundScheme { get; set; } = "Default";
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
@@ -49,7 +49,8 @@ namespace BASeTris.Settings
                 new XAttribute("SmoothRotate", SmoothRotate),
                 new XAttribute("MusicOption",MusicOption),
                 new XAttribute("SoundScheme",SoundScheme),
-                new XAttribute("Chooser",Chooser));
+                new XAttribute("Chooser",Chooser),
+                new XAttribute("Theme",Theme));
 
         }
         public StandardSettings()
@@ -108,6 +109,7 @@ namespace BASeTris.Settings
             MusicOption = Node.GetAttributeString("MusicOption", "<RANDOM>");
             SoundScheme = Node.GetAttributeString("SoundScheme", "Default");
             Chooser = Node.GetAttributeString("Chooser", "Default");
+            Theme = Node.GetAttributeString("Theme", "");
         }
     }
 }

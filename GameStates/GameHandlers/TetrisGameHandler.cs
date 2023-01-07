@@ -33,6 +33,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// ICustomizationHandler that handles the standard tetris game.
     /// </summary>
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Standard Tetris, Marathon Mode")]
     public class StandardTetrisHandler : IGameCustomizationHandler,IGameHandlerChooserInitializer
     {
         public bool ProgressiveMode = false;

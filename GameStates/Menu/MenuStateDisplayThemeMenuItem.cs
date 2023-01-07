@@ -103,7 +103,10 @@ namespace BASeTris.GameStates.Menu
             if (e.NewState is GameplayGameState newstate)
             {
                 //if it's a standard state, we set the Theme of the TetrisField, and un-assign this event.
-                newstate.PlayField.Theme = ActivatedOption.Option.GenerateThemeFunc();
+                var generated = ActivatedOption.Option.GenerateThemeFunc();
+                _Owner.Settings.GetSettings(_Owner.GetHandler().Name).Theme = generated.Name;
+                _Owner.Settings.Save();
+                newstate.PlayField.Theme = generated;
                 newstate.DoRefreshBackground = true;
                 _Owner.BeforeGameStateChange -= _Owner_BeforeGameStateChange;
             }

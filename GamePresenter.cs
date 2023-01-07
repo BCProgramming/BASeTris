@@ -86,7 +86,7 @@ namespace BASeTris
             
             
             
-            var standardstate = new GameplayGameState(new StandardTetrisHandler(),null,TetrisGame.Soundman,null);
+            var standardstate = new GameplayGameState(_Owner, new StandardTetrisHandler(),null,TetrisGame.Soundman,null);
             //_Owner.GameStartTime = DateTime.MinValue;
             Game = new TetrisGame(_Owner, standardstate);
             //standardstate.Chooser = new MeanChooser(standardstate,Tetromino.StandardTetrominoFunctions);

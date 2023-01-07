@@ -14,6 +14,8 @@ using BASeTris.Tetrominoes;
 using BASeTris.GameStates.GameHandlers;
 using SkiaSharp;
 using BASeTris.Theme.Block;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace BASeTris
 {
@@ -138,6 +140,34 @@ namespace BASeTris
         private String BuildCacheKey(String pKey, Size pSize, Color pColor)
         {
             return pKey + "(" + pSize.Width + "," + pSize.Height + ")[" + pColor.R + "," + pColor.G + "," + pColor.B + "]";
+        }
+        public static NominoTheme GetNewThemeInstanceByName(String sThemeName,Type HandlerType=null)
+        {
+            //given a Theme name, finds the Theme with that name and returns a new instance of that NominoTheme.
+            foreach (Type t in Program.DITypes[typeof(NominoTheme)].ManagedTypes)
+            {
+                ConstructorInfo ci = t.GetConstructor(new Type[] { });
+                if (ci != null)
+                {
+                    HandlerThemeAttribute hta = t.GetCustomAttribute(typeof(HandlerThemeAttribute)) as HandlerThemeAttribute;
+                    if (hta != null && HandlerType != null && !hta.HandlerType.Any((a) => a.IsAssignableFrom(HandlerType)))
+                    {
+                        Debug.Print("Skipping Theme " + t.GetType().Name + " as it does not specify as supporting Handler " + HandlerType.Name);
+                        continue;
+                    }
+                    
+                    else
+                    {
+                        NominoTheme buildResult = (NominoTheme)ci.Invoke(new object[] { });
+                        if (String.IsNullOrEmpty(sThemeName) || String.Equals(buildResult.Name, sThemeName, StringComparison.OrdinalIgnoreCase))
+                            return buildResult;
+                    }
+                    //MenuStateThemeSelection msst = new MenuStateThemeSelection(buildResult.Name, themeiter, () => buildResult);
+                }
+
+
+            }
+            return null; //no match.
         }
         public static Image[] GetImageRotations(Image Source)
         {
@@ -314,6 +344,10 @@ namespace BASeTris
 
             return Colors[(useIndex + Level) % Colors.Length];
         }
+
+        
+
+
 
         private static Random rg = new Random();
         private static Dictionary<Type, StandardColouredBlock.BlockStyle> UseStyles = null;

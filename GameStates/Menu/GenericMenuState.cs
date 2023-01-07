@@ -256,7 +256,7 @@ namespace BASeTris.GameStates.Menu
                     {
 
 
-                        pOwner.CurrentState = new GameplayGameState(usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
+                        pOwner.CurrentState = new GameplayGameState(pOwner,usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
 
                         igp.StartGame();
                     }

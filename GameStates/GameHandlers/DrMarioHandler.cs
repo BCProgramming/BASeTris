@@ -24,6 +24,7 @@ namespace BASeTris.GameStates.GameHandlers
 
     [GameScoringHandler(typeof(DrMarioAIScoringHandler),typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
+    [HandlerTipText("Brightly coloured pills to cure Fever or Chills")]
     public class DrMarioHandler : CascadingPopBlockGameHandler<DrMarioStatistics,DrMarioGameOptions>,IGameHandlerChooserInitializer
     {
         public override string GetName()

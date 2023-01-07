@@ -87,7 +87,7 @@ namespace BASeTris.GameStates
             PopulatePauseMenu(pOwner);
             pOwner.GameClosing += POwner_GameClosing;
             
-            PauseGamePlayerState = new GameplayGameState(pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman),null);
+            PauseGamePlayerState = new GameplayGameState(pOwner, pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman),null);
             (PauseGamePlayerState as GameplayGameState).Flags = GameplayGameState.GameplayStateFlags.Paused;
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new StandardNominoAI(this);

@@ -116,7 +116,7 @@ namespace BASeTris.GameStates
         }
         public MenuState MainMenuState = null; //if this gameplay was spawned by the menu, this should be the top-level menu state.
         public IAudioHandler Sounds = null;
-        public GameplayGameState(IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio,MenuState MainMenu)
+        public GameplayGameState( IStateOwner pOwner,IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio,MenuState MainMenu)
         {
 
             Sounds = pAudio;
@@ -127,9 +127,9 @@ namespace BASeTris.GameStates
             int Rows = Handler.GetFieldRowHeight();
             int HiddenRows = Handler.GetHiddenRowCount();
 
-            
+            var GetSettingsTheme = NominoTheme.GetNewThemeInstanceByName(pOwner.Settings.GetSettings(Handler.Name).Theme, Handler.GetType());
 
-            PlayField = new TetrisField(Handler.DefaultTheme, Handler,Rows,Columns,HiddenRows);
+            PlayField = new TetrisField(GetSettingsTheme, Handler,Rows,Columns,HiddenRows);
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
