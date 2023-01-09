@@ -7,7 +7,7 @@
 
 ;--------------------------------
 !include "x64IconHack.nsi"
-!define PROGPATH "..\bin\Release"
+!define PROGPATH "..\bin\Debug"
 !define PROGFILE "BASeTris"
 
 !tempfile INC_FILE
@@ -96,10 +96,10 @@ done:
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
   ; Put file there
-  File "${PROGPATH}\*.dll"
-  File "${PROGPATH}\*.exe"
-  File "${PROGPATH}\*.pdb"
-  File "${PROGPATH}\*.exe.config"
+  File /r "${PROGPATH}\*.dll"
+  File /r "${PROGPATH}\*.exe"
+  File /r "${PROGPATH}\*.pdb"
+  File /r "${PROGPATH}\*.exe.config"
   ; Assets folder
   SetOutPath "$INSTDIR\Assets"
   File "${PROGPATH}\..\..\Assets\*.*"
