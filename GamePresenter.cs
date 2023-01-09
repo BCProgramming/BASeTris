@@ -95,11 +95,27 @@ namespace BASeTris
                     return false;
             }
         }
+        public int GetKeyboardKeyFromName(String input)
+        {
+            OpenTK.Input.Key result;
+            if (Enum.TryParse<OpenTK.Input.Key>(input, out result))
+                return (int)result;
+
+            return 0;
+        }
+        public int GetGamepadButtonFromName(String input)
+        {
+            XInput.Wrapper.X.Gamepad.GamepadButtons  result;
+            if (Enum.TryParse<XInput.Wrapper.X.Gamepad.GamepadButtons>(input, out result))
+                return (int)result;
+
+            return 0;
+        }
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
             String[] sDataFolders = TetrisGame.GetSearchFolders();
             String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d) && IsDirectoryWritable(d)), "Settings.xml");
-            GameSettings = new SettingsManager(sSettingsFile,_Owner);
+            GameSettings = new SettingsManager(sSettingsFile,_Owner,GetKeyboardKeyFromName,GetGamepadButtonFromName);
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();
             if (GameLoopsRunning) return;

@@ -108,13 +108,7 @@ namespace BASeTris
             return Duplicator;
         }
 
-        /*public long LineCount
-        {
-            get { return GameStats.LineCount; }
-        }*/
-
-        //
-        //private TetrominoTheme _Theme = new StandardTetrominoTheme(StandardColouredBlock.BlockStyle.Style_Shine);
+      
         private NominoTheme _Theme = null;
 
 

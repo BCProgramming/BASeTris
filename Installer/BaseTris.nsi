@@ -102,8 +102,9 @@ done:
   File /r "${PROGPATH}\*.exe.config"
   ; Assets folder
   SetOutPath "$INSTDIR\Assets"
-  File "${PROGPATH}\..\..\Assets\*.*"
-  
+  File /s "${PROGPATH}\..\..\Assets\*.*"
+
+
   ;Sound files
   SetOutPath "$INSTDIR\Assets\Audio"
   File "${PROGPATH}\..\..\Assets\Audio\*.*"
@@ -116,7 +117,8 @@ done:
   SetOutPath "$INSTDIR\Assets\Lib\x64"
   File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x64\*.*"
 
-
+;create the appdata folder
+  CreateDirectory "$APPDATA\BASeTris"
 
 
   ; Write the installation path into the registry

@@ -108,7 +108,7 @@ namespace BASeTris
 
             }
             String strresult = sbreport.ToString();
-            System.IO.File.WriteAllText("T:\\NominoOut.txt", strresult);
+            //System.IO.File.WriteAllText("T:\\NominoOut.txt", strresult);
             
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
