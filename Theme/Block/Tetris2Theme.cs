@@ -10,7 +10,8 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme("Default Style", typeof(Tetris2Handler))]
+    [HandlerTheme("Default Style", typeof(Tetris2Handler), typeof(DrMarioHandler))]
+    
     public class Tetris2Theme : CustomPixelTheme<Tetris2Theme.BCT, Tetris2Theme.BlockTypes>
     {
 

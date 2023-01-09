@@ -11,7 +11,7 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme("SNES Style",typeof(DrMarioHandler))]
+    [HandlerTheme("Redux Style",typeof(DrMarioHandler))]
     public class DrMarioThemeEnhanced : DrMarioTheme
     {
         public override String Name { get { return "SNES Style"; } }

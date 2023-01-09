@@ -10,6 +10,7 @@ using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
+    [HandlerTheme("SNES Style", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     /// <summary>
     /// Theme which has tetrominoes be outlined rather than draw as distinct blocks.
     /// </summary>

@@ -23,7 +23,6 @@ using BASeTris.Settings;
 
 namespace BASeTris
 {
-    //TODO: change it so that Nomino's can accept the gamekey input. Will have to refactor what we have already...
     public class Nomino : IEnumerable<NominoElement>
     {
         public static Func<Nomino>[] NominoEnumToFuncList(IEnumerable<Nomino> input) //will be useful for generated Nominoes like Pentominoes and Hexominoes and such.

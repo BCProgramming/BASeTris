@@ -80,9 +80,10 @@ namespace BASeTris
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GlobalResources.OpenGLInterface = GRGlInterface.CreateNativeGlInterface();
+            //GlobalResources.OpenGLInterface = GRGlInterface.CreateNativeGlInterface();
+            GlobalResources.OpenGLInterface = GRGlInterface.Create();
             Debug.Assert(GlobalResources.OpenGLInterface.Validate());
-            this.context = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
+            this.context = GRContext.CreateGl(GlobalResources.OpenGLInterface); //GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
             Debug.Assert(this.context.Handle != IntPtr.Zero);
             this.renderTarget = CreateRenderTarget(this);
             CursorVisible = true;

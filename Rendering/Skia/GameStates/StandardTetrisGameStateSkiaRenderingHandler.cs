@@ -225,7 +225,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             MaxValueLength = statkvp.Value.Length;
                         }
                     }
-
+                    ///TODO: improve to allow any number of entries, as stuff like Pentris will add loads of entries here.
                     foreach(var statkvp in StatData)
                     //for (int statindex = 0; statindex < StatLabels.Length; statindex++)
                     {
@@ -324,7 +324,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                         for (int i = NextTetrominoes.Length - 1; i > -1; i--)
                         {
-
+                            var ThisNomino = QueueList[i];
                             var baseval = ((double)(DateTime.Now.Ticks + (250000 * i)) / 5000000);
                             //var AngleAdd = Math.Sin(baseval) * 10; //old approach.
                             var AngleAdd =(Math.Sin(baseval)*Math.Cos(baseval*2)) * 7; //new approach, tries to be a little bit different...
@@ -349,17 +349,26 @@ namespace BASeTris.Rendering.Skia.GameStates
                             Point Deviate = new Point((int)(Deviation * 20 * Factor), (int)(Deviation * 20 * Factor));
 
                             var AngleRotateLocation = DateTime.Now.Ticks / 5000000;
+                            double AngleMovePercent = Source.NextAngleOffset / AngleIncrementSize;
+                            Size DrawTetSize = new Size
+                           (
+                               (int)((float)(NextTetromino.Width * 1.5f) * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))),
+                               (int)((float)(NextTetromino.Height * 1.5f) * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))));
 
-                            Point DrawTetLocation = new Point((int)UseXPosition - (NextTetromino.Width / 2), (int)UseYPosition - NextTetromino.Height / 2);
+                            var SizeVal = Math.Max(ThisNomino.GroupExtents.Width, ThisNomino.GroupExtents.Height);
+                            if (SizeVal > 5)
+                            {
+                                float reduceFactor = 5 / (float)SizeVal;
+                                DrawTetSize = new Size((int)((float)DrawTetSize.Width * reduceFactor), (int)((float)DrawTetSize.Height * reduceFactor));
+
+                            }
+                            Point DrawTetLocation = new Point((int)UseXPosition - (DrawTetSize.Width / 2), (int)UseYPosition - DrawTetSize.Height / 2);
                             //Point DrawTetLocation = new Point(Deviate.X + (int)(NextDrawPosition.X + ((float)NextSize.Width / 2) - ((float)NextTetromino.Width / 2)),
                             //    Deviate.Y + (int)(NextDrawPosition.Y + ((float)NextSize.Height / 2) - ((float)NextTetromino.Height / 2)));
-                            double AngleMovePercent = Source.NextAngleOffset / AngleIncrementSize;
+                            
                             double NumAffect = Source.NextAngleOffset == 0 ? 0 : AngleIncrementSize / Source.NextAngleOffset;
-                            Size DrawTetSize = new Size
-                            (
-                                (int)((float)(NextTetromino.Width*1.5f) * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))),
-                                (int)((float)(NextTetromino.Height*1.5f) * (0.3 + (1 - ((float)(i) * 0.15f) - .15f * AngleMovePercent))));
-
+                           
+                            
 
                             //g.TranslateTransform(CenterPoint.X,CenterPoint.Y);
                             double DrawTetAngle = UseAngleCurrent;

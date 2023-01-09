@@ -116,7 +116,7 @@ namespace BASeTris.GameStates
         }
         public MenuState MainMenuState = null; //if this gameplay was spawned by the menu, this should be the top-level menu state.
         public IAudioHandler Sounds = null;
-        public GameplayGameState( IStateOwner pOwner,IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio,MenuState MainMenu)
+        public GameplayGameState(IStateOwner pOwner,IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio,MenuState MainMenu)
         {
 
             Sounds = pAudio;

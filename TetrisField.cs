@@ -126,7 +126,6 @@ namespace BASeTris
             }
             set
             {
-                _Theme = value;
                 SetFieldColors(_Handler);
                 OnThemeChangeEvent?.Invoke(this,new OnThemeChangeEventArgs());
             }
@@ -387,6 +386,7 @@ namespace BASeTris
         {
             Dictionary<Point, Nomino> GroupData = new Dictionary<Point, Nomino>();
             HashSet<Point> ActiveBlocks = new HashSet<Point>();
+            Point Diff = new Point(X - bg.X, Y - bg.Y);
             //this routine handles other Block Groups as well, allowing multiple to exist at once in the play field, and be moved.
             //eg you cannot rotate or move an Active Group such that it will interfere with another active Group.
             //One consideration here is that the order of the groups will matter, in the sense that if one is processed to move first then it can be blocked even if it would be able to move
@@ -395,12 +395,21 @@ namespace BASeTris
             foreach (var active in ActiveBlockGroups)
             {
                 if(active != bg && (AdditionalIgnores==null|| !AdditionalIgnores.Contains(active)))
-                { //can we alter this to also CanFit the other nomino in some way?
-                    foreach(var check in active)
+                {
+                    
+                    //can we alter this to also CanFit the other nomino in some way?
+                  //if this one can move the difference provided, then we will skip it. The assumption being that if it can move in that direction, then it will move in that direction and won't actually be blocking us.
+
+                    //buggy: this needs to be altered, we shouldn't be canfit-ing every single other Active Block Group. We should be only doing so if we decide that it would otherwise block is.
+
+                    /*if (CanFit(active, Diff.X, Diff.Y, false, 
+                        AdditionalIgnores==null?new[] { active }:AdditionalIgnores.Concat(new[] { active }).ToArray()).Result==CanFitResultConstants.CanFit) continue;*/
+                    foreach (var check in active)
                     {
+                        
                         var pcheck = new Point(active.X + check.X, active.Y + check.Y);
-                        ActiveBlocks.Add(pcheck);
-                        GroupData.Add(pcheck, active);
+                        if(!ActiveBlocks.Contains(pcheck)) ActiveBlocks.Add(pcheck);
+                        if(!GroupData.ContainsKey(pcheck)) GroupData.Add(pcheck, active);
 
                     }
                 }
@@ -410,8 +419,8 @@ namespace BASeTris
             bool ActiveTouched = false;
             foreach (var checkblock in bg)
             {
-                int CheckRow = Y + checkblock.Y;
-                int CheckCol = X + checkblock.X;
+                int CheckRow = Y +  checkblock.Y;
+                int CheckCol = X +  checkblock.X;
                 if (CheckRow < 0 || CheckCol < 0)
                 {
                     result = false;
@@ -425,7 +434,18 @@ namespace BASeTris
                 else
                 {
                     var grabpos = FieldContents[CheckRow][CheckCol];
-                    var touchesactive = !SkipActiveChecks && ActiveBlocks.Contains(new Point(CheckCol, CheckRow));
+                    bool touchesactive = false;
+                    if (!SkipActiveChecks && ActiveBlocks.Contains(new Point(CheckCol, CheckRow)))
+                    {
+                        if (CheckRow == RowCount-1)
+                        {
+                            ;
+                        }
+                        var grabNomino = GroupData[new Point(CheckCol, CheckRow)];
+                        if (CanFit(grabNomino,grabNomino.X + Diff.X,grabNomino.Y + Diff.Y,false,AdditionalIgnores).Result==CanFitResultConstants.CanFit) continue;
+                        //note: here we can CanFit to see if that other ActiveBlock can move in the direction we want to check.
+                        touchesactive = true;
+                    }
                     if(touchesactive)
                     {
                         ActiveTouched |= touchesactive;
