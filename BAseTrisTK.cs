@@ -42,7 +42,7 @@ namespace BASeTris
         }
         public AudioThemeManager AudioThemeMan { get { return _Present.AudioThemeMan; } set { _Present.AudioThemeMan = value; } }
         //helper routine
-        public static GRBackendRenderTarget CreateRenderTarget(GameWindow Window)
+        public GRBackendRenderTarget CreateRenderTarget(GameWindow Window)
         {
             GL.GetInteger(GetPName.FramebufferBinding, out int framebuffer);
             GL.GetInteger(GetPName.StencilBits, out int stencil);
@@ -52,8 +52,9 @@ namespace BASeTris
             int bufferHeight = 0;
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferWidth, out bufferWidth);
             GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferHeight, out bufferHeight);
-            
-            return new GRBackendRenderTarget(Window.ClientSize.Width, Window.ClientSize.Height, 3, stencil, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
+            samples = 1;
+            //todo: diagnose issues with Intel graphics
+            return new GRBackendRenderTarget(Window.ClientSize.Width, Window.ClientSize.Height, samples, stencil, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
            
         }
         public const int DEFAULT_GAME_WIDTH = 520;
