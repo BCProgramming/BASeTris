@@ -72,10 +72,33 @@ namespace BASeTris
             Handle_Manual
         }
         bool GameLoopsRunning = false;
+        public bool IsDirectoryWritable(string dirPath, bool throwIfFails = false)
+        {
+            try
+            {
+                using (FileStream fs = File.Create(
+                    Path.Combine(
+                        dirPath,
+                        Path.GetRandomFileName()
+                    ),
+                    1,
+                    FileOptions.DeleteOnClose)
+                )
+                { }
+                return true;
+            }
+            catch
+            {
+                if (throwIfFails)
+                    throw;
+                else
+                    return false;
+            }
+        }
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
             String[] sDataFolders = TetrisGame.GetSearchFolders();
-            String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d)), "Settings.xml");
+            String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d) && IsDirectoryWritable(d)), "Settings.xml");
             GameSettings = new SettingsManager(sSettingsFile,_Owner);
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();

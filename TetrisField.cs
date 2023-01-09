@@ -126,6 +126,7 @@ namespace BASeTris
             }
             set
             {
+                _Theme = value;
                 SetFieldColors(_Handler);
                 OnThemeChangeEvent?.Invoke(this,new OnThemeChangeEventArgs());
             }
