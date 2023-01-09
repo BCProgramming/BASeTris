@@ -207,9 +207,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                         
 
 
-                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
-                        HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
-                        g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                        //g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
+                        //HighScoreEligible.Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(TetrisGame.GetRainbowColor(Color.Lime, 0.1d));
+                        //g.DrawText(ScoreText, new SKPoint(5 + Bounds.Width / 2 - MeasuredScoreText.Width / 2, 5 + YPosition + measuremini.Height * 2), HighScoreEligible);
                     }
                 }
             }

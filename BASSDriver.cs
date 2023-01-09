@@ -288,8 +288,8 @@ namespace BASeTris.AssetManager
             //or, the application data folder \Lib\x86...
           
 
-            String[] x86DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x86")).ToArray();
-            String[] x64DLL = (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x64")).ToArray();
+            String[] x86DLL = TetrisGame.GetSearchFolders().Concat(from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x86")).ToArray();
+            String[] x64DLL = TetrisGame.GetSearchFolders().Concat(from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Lib\\x64")).ToArray();
 
             string pathuse = LoadProperDLL(x86DLL, x64DLL); //load the x64 or x86 version as needed
             
