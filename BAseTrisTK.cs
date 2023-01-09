@@ -75,6 +75,7 @@ namespace BASeTris
         {
             this.Location = new Point(140);
             this.ClientSize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
+            InitializeGraphics();
             //this.renderTarget = CreateRenderTarget(this);
         }
      
@@ -84,16 +85,25 @@ namespace BASeTris
             //GlobalResources.OpenGLInterface = GRGlInterface.CreateNativeGlInterface();
             GlobalResources.OpenGLInterface = GRGlInterface.Create();
             Debug.Assert(GlobalResources.OpenGLInterface.Validate());
-            this.context = GRContext.CreateGl(GlobalResources.OpenGLInterface); //GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
-            Debug.Assert(this.context.Handle != IntPtr.Zero);
-            this.renderTarget = CreateRenderTarget(this);
-            CursorVisible = true;
+            InitializeGraphics();
+            CursorVisible = false;
 
            
             Location = new Point(Location.X, 0);
             _Present = new GamePresenter(this);
             StartGame();
             CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this) ;
+        }
+        private void InitializeGraphics()
+        {
+            var oldcontext = this.context;
+            var oldtarget = this.renderTarget;
+            this.context = GRContext.CreateGl(GlobalResources.OpenGLInterface); //GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
+            Debug.Assert(this.context.Handle != IntPtr.Zero);
+            this.renderTarget = CreateRenderTarget(this);
+            if (oldcontext != null) oldcontext.Dispose();
+            if (oldtarget != null) oldtarget.Dispose();
+            CursorVisible = false;
         }
         public void StartGame()
         {
@@ -384,7 +394,7 @@ namespace BASeTris
 
    
         private double _ScaleFactor = 1;
-        public double ScaleFactor { get { return (float)this.ClientSize.Height / 950f; } }
+        public double ScaleFactor { get { return (float)(this.ClientSize.Height) / 950f; } }
         public void SetScale(double pScale)
         {
             _ScaleFactor = pScale;
