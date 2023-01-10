@@ -69,7 +69,7 @@ namespace BASeTris
             Bitmap buildimage = new Bitmap(1, pHeight);
             using (Graphics buildg = Graphics.FromImage(buildimage))
             {
-                using (LinearGradientBrush lgb = new LinearGradientBrush(new Rectangle(0, 0, 1, pHeight), pColor, MenuStateMenuItem.MixColor(pColor, Color.FromArgb(150, Color.Black)), LinearGradientMode.Vertical))
+                using (LinearGradientBrush lgb = new LinearGradientBrush(new Rectangle(0, 0, 1, pHeight), pColor, RenderHelpers.MixColor(pColor, Color.FromArgb(150, Color.Black)), LinearGradientMode.Vertical))
                 {
 
                     buildg.FillRectangle(lgb, new Rectangle(0, 0, 1, pHeight));

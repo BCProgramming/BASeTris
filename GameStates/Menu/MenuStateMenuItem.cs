@@ -66,25 +66,7 @@ namespace BASeTris.GameStates.Menu
         public virtual MenuEventResultConstants OnActivated() { return MenuEventResultConstants.Unhandled; }
 
         public virtual MenuEventResultConstants OnDeactivated() { return MenuEventResultConstants.Unhandled; }
-        public static Color MixColor(Color ColorA, Color ColorB, float percentage)
-        {
-            float[] ColorAValues = new float[] { (float)ColorA.A, (float)ColorA.R, (float)ColorA.G, (float)ColorA.B };
-            float[] ColorBValues = new float[] { (float)ColorB.A, (float)ColorB.R, (float)ColorB.G, (float)ColorB.B };
-            float[] ColorCValues = new float[4];
 
-
-            for (int i = 0; i <= 3; i++)
-            {
-                ColorCValues[i] = (ColorAValues[i] * percentage) + (ColorBValues[i] * (1 - percentage));
-            }
-
-
-            return Color.FromArgb((int)ColorCValues[0], (int)ColorCValues[1], (int)ColorCValues[2], (int)ColorCValues[3]);
-        }
-        public static Color MixColor(Color ColorA,Color ColorB)
-        {
-            return MixColor(ColorA, ColorB, 0.5f);
-        }
         public virtual void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
         {
             //no default implementation.

@@ -232,6 +232,7 @@ namespace BASeTris
         }
         public GameState.GameKeys? TranslateKey(X.Gamepad.GamepadButtons Button)
         {
+            
             if (ControllerKeyLookup.ContainsKey(Button))
                 return ControllerKeyLookup[Button];
             return null;

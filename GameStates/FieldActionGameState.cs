@@ -146,7 +146,8 @@ namespace BASeTris.GameStates
                     var elapsed = useNowTime - ClearActivity.StartClearTime;
                     foreach(var block in ClearActivity.Blocks)
                     {
-                        ClearActivity.ClearAction.ProcessBlock(pOwner,new BlockClearData(block,new BCPoint() { }),elapsed);
+                        if(block!=null)
+                            ClearActivity.ClearAction.ProcessBlock(pOwner,new BlockClearData(block,new BCPoint() { }),elapsed);
                     }
                 }
             }

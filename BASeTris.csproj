@@ -248,6 +248,7 @@
     <Compile Include="Rendering\Adapter\ProviderWrappers.cs" />
     <Compile Include="Rendering\GDIPlus\MenuItems\MenuStateMenuItemGDIRenderer.cs" />
     <Compile Include="Rendering\RenderElements\ElementRenderData.cs" />
+    <Compile Include="Rendering\RenderHelpers.cs" />
     <Compile Include="Rendering\RenderingProvider.cs" />
     <Compile Include="Rendering\Skia\Backgrounds\StandardImageBackgroundSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStateSkiaDrawParameters.cs" />

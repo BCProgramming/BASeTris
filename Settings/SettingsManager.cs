@@ -24,7 +24,7 @@ namespace BASeTris.Settings
         private GetGamepadKeyFromName GamepadKeyFunc = null;
         private Dictionary<GameState.GameKeys, int> KeyboardKeyCodeAssignments = new Dictionary<GameState.GameKeys, int>();
         private Dictionary<GameState.GameKeys, int> GamepadButtonCodeAssignments = new Dictionary<GameState.GameKeys, int>();
-        GameState.GameKeys k;
+        
         public SettingsManager()
         {
             //nothing...

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Rendering;
 using SkiaSharp;
 
 namespace BASeTris.Theme.Block
@@ -22,7 +23,18 @@ namespace BASeTris.Theme.Block
 
 
         static SKColor BlueColor = new SKColor(60, 188, 252);
-       
+
+        public static Dictionary<BCT, SKColor> CreateColorSet(SKColor SourceColor)
+        {
+            return new Dictionary<BCT, SKColor>()
+            {
+                { BCT.Transparent,SKColors.Transparent },
+                {BCT.Black,SKColors.Black },
+                {BCT.Primary,SourceColor },
+                {BCT.Accent,RenderHelpers.InvertColor(SourceColor) },
+                {BCT.Accent2,RenderHelpers.RotateHue(SourceColor,0.3f) }
+            };
+        }
 
         public static Dictionary<BCT, SKColor> YellowColourSet = new Dictionary<BCT, SKColor>()
         {
