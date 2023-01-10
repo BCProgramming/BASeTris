@@ -4,7 +4,7 @@
     <Data Music="0.7" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_2" SoundScheme="SNES" Chooser="Default" Theme="" />
   </SettingsGroup>
   <SettingsGroup Name="Tetris">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_nes_theme" SoundScheme="Default" Chooser="Default" Theme="SNES" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_nes_theme" SoundScheme="Default" Chooser="Default" Theme="Tetris 2 (8-bit)" />
   </SettingsGroup>
   <SettingsGroup Name="Dr.Mario">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="NES Style" />
@@ -25,7 +25,7 @@
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
   </SettingsGroup>
   <SettingsGroup Name="Progressive Tetris">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="NES" />
   </SettingsGroup>
   <SettingsGroup Name="Dectris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />

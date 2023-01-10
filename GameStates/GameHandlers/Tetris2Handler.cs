@@ -54,7 +54,7 @@ namespace BASeTris.GameStates.GameHandlers
 
 
         }
-        public override NominoTheme DefaultTheme => new Tetris2Theme();
+        public override NominoTheme DefaultTheme => new Tetris2Theme_Enhanced();
         public override string GetName()
         {
             return "Tetris 2";

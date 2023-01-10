@@ -196,6 +196,7 @@ namespace BASeTris.GameStates
             if(!SpawnedTextIndicator)
             {
                 SpawnedTextIndicator = true;
+                var getflag = (CharParticle.SpecialCharacterParticleFlags)TetrisGame.Choose<int>((int[])Enum.GetValues(typeof(CharParticle.SpecialCharacterParticleFlags)));
                 foreach (var rowClear in ClearRowInfo)
                 {
 
@@ -207,7 +208,7 @@ namespace BASeTris.GameStates
                         (float)(UseRowBound.Top * pOwner.ScaleFactor),
                         (float)(UseRowBound.Width * pOwner.ScaleFactor),
                         (float)(UseRowBound.Height * pOwner.ScaleFactor));*/
-                    AddParticles_Row(pOwner, useBound, ClearRowInfo.Count);
+                    AddParticles_Row(pOwner, useBound, ClearRowInfo.Count,getflag);
 
                 }
 
@@ -298,7 +299,7 @@ namespace BASeTris.GameStates
         
         const int ParticleCountPerBlock = 15;
         private readonly long ClearParticleTTL = 300;
-        private void AddParticles_Row(IStateOwner pOwner,BCRect RowBounds,int Lines=1)
+        private void AddParticles_Row(IStateOwner pOwner,BCRect RowBounds,int Lines=1, CharParticle.SpecialCharacterParticleFlags CharFlags = CharParticle.SpecialCharacterParticleFlags.Effect_Wave)
         {
             String UseText = RowClearText.ContainsKey(Lines)?(RowClearText?[Lines]) : $"{Lines}LINE";
             Func<BaseParticle, BCColor> TetrisColorFunc = BaseParticle.GetRainbowColorFunc(pOwner);
@@ -341,12 +342,13 @@ namespace BASeTris.GameStates
               char[] CharsToShow = UseText.ToCharArray();
 
             float XOffset = (int)((float)RowBounds.Width/2-((float)CharsToShow.Length/2)); //one character per block, ideally.
-
+            var generatedflags = CharFlags;
             List<CharParticle> MakeParticles = new List<CharParticle>();
             for (int x = 0; x < CharsToShow.Length; x++)
             {
                 int i = x % CharsToShow.Length;
                 CharParticle makeparticle = new CharParticle(new BCPoint(RowBounds.Left +XOffset+ x, RowBounds.Top + RowBounds.Height / 2), new BCPoint(0, -0.05f), Color.Red, CharsToShow[i].ToString());
+                makeparticle.Flags = generatedflags;
                 makeparticle.TTL = 1500;
                 //makeparticle.Decay = new BCPoint(0.5f, 0.5f);
                 MakeParticles.Add(makeparticle);

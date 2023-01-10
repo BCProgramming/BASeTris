@@ -61,11 +61,23 @@ namespace BASeTris.Rendering.Skia
             {
                 Text = Source.Text,
                 Position = CharPoint,
-                CharacterHandler = new DrawCharacterHandlerSkia(new VerticalWavePositionCharacterPositionCalculatorSkia() { Height = (float)(pOwner.ScaleFactor * 6) }),
+                
                 ForegroundPaint = Foreground,
                 ShadowPaint = Background
                 
             };
+            switch (Source.Flags)
+            {
+                case CharParticle.SpecialCharacterParticleFlags.Effect_Wave:
+                    skinfo.CharacterHandler = new DrawCharacterHandlerSkia(new VerticalWavePositionCharacterPositionCalculatorSkia() { Height = (float)(pOwner.ScaleFactor * 6) });
+                    break;
+                case CharParticle.SpecialCharacterParticleFlags.Effect_Swirl:
+                    skinfo.CharacterHandler = new DrawCharacterHandlerSkia(new RotatingPositionCharacterPositionCalculatorSkia  {   Radius= (float)(pOwner.ScaleFactor * 6) });
+                    break;
+                case CharParticle.SpecialCharacterParticleFlags.Effect_Jitter:
+                    skinfo.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+                    break;
+            }
             skinfo.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, TranslatedFontSize.Y);
             //pRenderTarget.DrawText(Source.Text, CharPoint.X,CharPoint.Y,TetrisGame.RetroFontSK,  skp);
             //pRenderTarget.DrawTextSK(Source.Text, CharPoint, TetrisGame.RetroFontSK, useColor, skp.TextSize,1);

@@ -126,6 +126,13 @@ namespace BASeTris.GameObjects
     }
     public class CharParticle : RotatableBaseParticle
     {
+        public enum SpecialCharacterParticleFlags
+        {
+            Effect_Wave,
+            Effect_Swirl,
+            Effect_Jitter
+        }
+        public SpecialCharacterParticleFlags Flags { get; set; } = SpecialCharacterParticleFlags.Effect_Swirl;
         public String Text = " ";
         public BCFont FontInfo = new BCFont("Pixel Emulator", 32, BCFont.BCFontStyle.Regular);
         System.Drawing.Font useFont = TetrisGame.GetRetroFont(1, 1, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);

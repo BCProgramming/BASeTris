@@ -10,6 +10,7 @@ namespace BASeTris.Rendering
 {
     public static class RenderHelpers
     {
+        
         public static Color MixColor(Color ColorA, Color ColorB, float percentage)
         {
             float[] ColorAValues = new float[] { (float)ColorA.A, (float)ColorA.R, (float)ColorA.G, (float)ColorA.B };
@@ -82,6 +83,20 @@ namespace BASeTris.Rendering
             currenthue = (currenthue + Amount) % 1.0f;
             return SKColor.FromHsl(currenthue, currentsat, currentlum);
 
+        }
+        public static SKColor MatchHue(SKColor Target, SKColor Source)
+        {
+            float TargetHue, TargetSat, TargetLum;
+            float SourceHue, SourceSat, SourceLum;
+            Target.ToHsl(out TargetHue, out TargetSat, out TargetLum);
+            Source.ToHsl(out SourceHue, out SourceSat, out SourceLum);
+            return SKColor.FromHsl(TargetHue, SourceSat, SourceLum);
+
+
+        }
+        public static SKColor RandomColor()
+        {
+            return new SKColor((byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256));
         }
 
     }

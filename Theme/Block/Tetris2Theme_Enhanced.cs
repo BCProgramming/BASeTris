@@ -11,9 +11,22 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme("Default Style", typeof(Tetris2Handler), typeof(DrMarioHandler))]
+    //this needs the Tetris2 Theme to be completed, we need the basic set of block types to be implemented as well.
     
-    public class Tetris2Theme : CustomPixelTheme<Tetris2Theme.BCT, Tetris2Theme.BlockTypes>
+    [HandlerTheme("Tetris 2 NES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    public class Tetris2Theme_Standard : Tetris2Theme_Enhanced
+
+    {
+        public override String Name => "Tetris 2 (8-bit)";
+        public Tetris2Theme_Standard()
+        {
+            base.UseEnhancedImages = false;
+        }
+    }
+
+    [HandlerTheme("Tetris 2 Redux", typeof(Tetris2Handler), typeof(DrMarioHandler),typeof(StandardTetrisHandler))]
+    
+    public class Tetris2Theme_Enhanced : CustomPixelTheme<Tetris2Theme_Enhanced.BCT, Tetris2Theme_Enhanced.BlockTypes>
     {
 
 
@@ -32,7 +45,18 @@ namespace BASeTris.Theme.Block
                 {BCT.Black,SKColors.Black },
                 {BCT.Primary,SourceColor },
                 {BCT.Accent,RenderHelpers.InvertColor(SourceColor) },
-                {BCT.Accent2,RenderHelpers.RotateHue(SourceColor,0.3f) }
+                {BCT.Accent2,RenderHelpers.RotateHue(SourceColor,0.3f) },
+                {BCT.Enhanced_1,RenderHelpers.MatchHue(SourceColor,new SKColor(205,205,0)) },
+            {BCT.Enhanced_2,RenderHelpers.MatchHue(SourceColor,new SKColor(157,157,0)) },
+            {BCT.Enhanced_3,RenderHelpers.MatchHue(SourceColor,new SKColor(116,116,0)) },
+            {BCT.Enhanced_4,RenderHelpers.MatchHue(SourceColor,new SKColor(249,249,3)) },
+            {BCT.Enhanced_5,RenderHelpers.MatchHue(SourceColor,new SKColor(67,67,1)) },
+            {BCT.Enhanced_6,RenderHelpers.MatchHue(SourceColor,new SKColor(255,255,18)) },
+            {BCT.Enhanced_7,RenderHelpers.MatchHue(SourceColor,new SKColor(255,255,45)) },
+            {BCT.Enhanced_8,RenderHelpers.MatchHue(SourceColor,new SKColor(255,255,75)) },
+            {BCT.Enhanced_9,RenderHelpers.MatchHue(SourceColor,new SKColor(255,255,103)) },
+            {BCT.Enhanced_10,RenderHelpers.MatchHue(SourceColor,new SKColor(88,88,88)) },
+            {BCT.Enhanced_11,RenderHelpers.MatchHue(SourceColor,new SKColor(1,1,1)) }
             };
         }
 
@@ -412,7 +436,9 @@ namespace BASeTris.Theme.Block
 
         public override SKPointI GetBlockSize(TetrisField field, BlockTypes BlockType)
         {
-            return new SKPointI(32, 32);
+            if (UseEnhancedImages)
+                return new SKPointI(32, 32);
+            else return new SKPointI(9, 9);
         }
 
         public override BlockTypeReturnData GetBlockType(Nomino group, NominoElement element, TetrisField field)
@@ -435,11 +461,11 @@ namespace BASeTris.Theme.Block
                     }
                     const int MaxInterval = 20000;
                     var modded = DateTime.Now.Ticks % MaxInterval;
-                    if(modded<MaxInterval*(1/5))
+                    if (modded < MaxInterval * (1 / 5))
                     {
-                        return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(Shiny_0[lsb.CombiningIndex],true);
+                        return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(Shiny_0[lsb.CombiningIndex], true);
                     }
-                    else if(modded < MaxInterval*(2/5))
+                    else if (modded < MaxInterval * (2 / 5))
                     {
                         return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(Shiny_25[lsm.CombiningIndex], true);
                     }
@@ -477,15 +503,25 @@ namespace BASeTris.Theme.Block
                      //else if (index == 1) return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(PillRight[lsb.CombiningIndex]);
                  }*/
             }
+            else
+            {
+                if (group is Tetrominoes.Tetromino_T || group is Tetrominoes.Tetromino_O || group is Tetrominoes.Tetromino_T)
+                {
+                    return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(BlockTypes.Fixed_Block_Gray);
+                }
+                
+            }
             return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(BlockTypes.Normal_Block_Gray);
 
         }
-
+        Dictionary<String, Dictionary<BCT, SKColor>> ExtraNominoColourLookup = new Dictionary<string, Dictionary<BCT, SKColor>>();
         public override Dictionary<BlockTypes, BCT[][]> GetBlockTypeDictionary()
         {
-            return BitmapIndex;
+            if (UseEnhancedImages)
+                return BitmapIndexEnhanced;
+            else return BitmapIndex;
         }
-        private const bool UseEnhancedImages = true;
+        protected bool UseEnhancedImages = true;
         public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockTypes BlockType, BCT PixelType)
         {
             if (IsYellowColor(BlockType))
@@ -498,10 +534,44 @@ namespace BASeTris.Theme.Block
                 return UseEnhancedImages ? EnhancedOrangeColourSet[PixelType] : OrangeColourSet[PixelType];
             else if (IsGreenColor(BlockType))
                 return UseEnhancedImages ? EnhancedGreenColourSet[PixelType] : GreenColourSet[PixelType];
-            else if (IsMagentaColor (BlockType))
+            else if (IsMagentaColor(BlockType))
                 return UseEnhancedImages ? EnhancedMagentaColourSet[PixelType] : MagentaColourSet[PixelType];
             else
+            {
+                //if none of the other tests pass, then we might be working with some normal tetris style thing.
+                SKColor SelectedColor = SKColors.Gray;
+                //cyan I, yellow O, purple T, green S, blue J, red Z and orange L
+                if (Element is Tetrominoes.Tetromino_Z) SelectedColor = SKColors.Red;
+                else if (Element is Tetrominoes.Tetromino_L) SelectedColor = SKColors.Orange;
+                else if (Element is Tetrominoes.Tetromino_J) SelectedColor = SKColors.Blue;
+                else if (Element is Tetrominoes.Tetromino_S) SelectedColor = SKColors.Green;
+                else if (Element is Tetrominoes.Tetromino_T) SelectedColor = SKColors.Purple;
+                else if (Element is Tetrominoes.Tetromino_O) SelectedColor = SKColors.Yellow;
+                else if (Element is Tetrominoes.Tetromino_I) SelectedColor = SKColors.Cyan;
+                else SelectedColor = RenderHelpers.RandomColor();
+
+                var points = NNominoGenerator.GetNominoPoints(Element);
+                String strval = NNominoGenerator.StringRepresentation(points);
+
+                if (!ExtraNominoColourLookup.ContainsKey(strval))
+                {
+                    String[] othersets = NNominoGenerator.GetOtherRotationStrings(points);
+                        
+                    var CreatedSet = CreateColorSet(SelectedColor);
+                    foreach (String addkey in new String[] { strval }.Concat(othersets))
+                    {
+                        ExtraNominoColourLookup[strval] = CreatedSet;
+                    }
+                }
+
+                return ExtraNominoColourLookup[strval][PixelType];
+
+
+                
+                
+
                 return UseEnhancedImages ? EnhancedGrayColourSet[PixelType] : GrayColourSet[PixelType];
+            }
             return SKColors.Magenta;
         }
 
@@ -518,7 +588,7 @@ namespace BASeTris.Theme.Block
             }
             else
             {
-                return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Rotatable;
+                return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Static;
                 //return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Rotatable;
             }
         }
@@ -602,7 +672,42 @@ namespace BASeTris.Theme.Block
             Shiny_Block_Magenta_100,
             Shiny_Block_Orange_100
         }
-        private static BCT[][] Normal_Block, Fixed_Block, Shiny_Block_25, Shiny_Block_50, Shiny_Block_75, Shiny_Block_100, Pop_Block;
+        public static BCT[][] Normal_Block = new BCT[][]
+        {
+            new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
+            new []{BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black}
+        };
+        public static BCT[][] Fixed_Block = new BCT[][]
+        {
+            new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
+            new []{BCT.Transparent, BCT.Accent2, BCT.Accent2, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Accent2, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Accent2, BCT.Primary, BCT.Black, BCT.Black, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Primary, BCT.Primary, BCT.Black, BCT.Black, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Black, BCT.Black, BCT.Black, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Primary, BCT.Black},
+            new []{BCT.Transparent, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black}
+        };
+
+        public static BCT[][] Pop_Block = Normal_Block;
+
+        public static BCT[][] Shiny_Block_25 = Normal_Block;
+
+        public static BCT[][] Shiny_Block_50 = Normal_Block;
+
+        public static BCT[][] Shiny_Block_75 = Normal_Block;
+
+        public static BCT[][] Shiny_Block_100 = Normal_Block;
+
+        private static BCT[][] Normal_Block_Enhanced, Fixed_Block_Enhanced, Shiny_Block_25_Enhanced, Shiny_Block_50_Enhanced, Shiny_Block_75_Enhanced, Shiny_Block_100_Enhanced, Pop_Block_Enhanced;
         private static readonly Dictionary<SKColor, BCT> bitmappixels = new Dictionary<SKColor, BCT>()
             {
             {SKColors.Transparent,BCT.Transparent },
@@ -632,13 +737,14 @@ namespace BASeTris.Theme.Block
             {new SKColor(1,1,1) ,BCT.Enhanced_11},
         };
         private static Dictionary<BlockTypes, BCT[][]> BitmapIndex;
+        private static Dictionary<BlockTypes, BCT[][]> BitmapIndexEnhanced;
        
 
         private static BCT ColorMapLookupFunc(SKColor Src)
         {
             if (bitmappixels_enhanced.ContainsKey(Src)) return bitmappixels_enhanced[Src]; else return BCT.Transparent;
         }
-        public Tetris2Theme()
+        public Tetris2Theme_Enhanced()
         {
             PrepareThemeData();
         }
@@ -648,14 +754,15 @@ namespace BASeTris.Theme.Block
             if (ThemeDataPrepared) return;
             //BCT[][] Normal_Block, Fixed_Block, Shiny_Block_25, Shiny_Block_50, Shiny_Block_75, Shiny_Block_100;
 
-            Normal_Block = GetBCTBitmap("tetris_2_normal_block");
-            Fixed_Block = GetBCTBitmap("tetris_2_fixed_block");
-            Shiny_Block_25 = GetBCTBitmap("tetris_2_shine_25");
-            Shiny_Block_50 = GetBCTBitmap("tetris_2_shine_50");
-            Shiny_Block_75 = GetBCTBitmap("tetris_2_shine_75");
-            Shiny_Block_100 = GetBCTBitmap("tetris_2_shine_100");
-            Pop_Block = GetBCTBitmap("tetris_2_pop");
-            
+            Normal_Block_Enhanced = GetBCTBitmap("tetris_2_normal_block");
+            Fixed_Block_Enhanced = GetBCTBitmap("tetris_2_fixed_block");
+            Shiny_Block_25_Enhanced = GetBCTBitmap("tetris_2_shine_25");
+            Shiny_Block_50_Enhanced = GetBCTBitmap("tetris_2_shine_50");
+            Shiny_Block_75_Enhanced = GetBCTBitmap("tetris_2_shine_75");
+            Shiny_Block_100_Enhanced = GetBCTBitmap("tetris_2_shine_100");
+            Pop_Block_Enhanced = GetBCTBitmap("tetris_2_pop");
+
+
 
             BitmapIndex = new Dictionary<BlockTypes, BCT[][]>()
         {
@@ -703,6 +810,57 @@ namespace BASeTris.Theme.Block
             {BlockTypes.Shiny_Block_Green_100,Shiny_Block_100},
             {BlockTypes.Shiny_Block_Magenta_100,Shiny_Block_100},
             {BlockTypes.Shiny_Block_Orange_100,Shiny_Block_100}
+
+
+        };
+
+
+            BitmapIndexEnhanced = new Dictionary<BlockTypes, BCT[][]>()
+        {
+            {BlockTypes.Normal_Block_Yellow,Normal_Block_Enhanced},
+            {BlockTypes.Normal_Block_Red,Normal_Block_Enhanced},
+            {BlockTypes.Normal_Block_Blue,Normal_Block_Enhanced},
+            {BlockTypes.Normal_Block_Green,Normal_Block_Enhanced},
+            {BlockTypes.Normal_Block_Magenta,Normal_Block_Enhanced},
+            {BlockTypes.Normal_Block_Orange,Normal_Block_Enhanced},
+            {BlockTypes.Normal_Block_Gray,Normal_Block_Enhanced},
+            {BlockTypes.Pop_Block_Yellow,Pop_Block_Enhanced},
+            {BlockTypes.Pop_Block_Red,Pop_Block_Enhanced},
+            {BlockTypes.Pop_Block_Blue,Pop_Block_Enhanced},
+            {BlockTypes.Pop_Block_Green,Pop_Block_Enhanced},
+            {BlockTypes.Pop_Block_Magenta,Pop_Block_Enhanced},
+            {BlockTypes.Pop_Block_Orange,Pop_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Yellow,Fixed_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Red,Fixed_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Blue,Fixed_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Green,Fixed_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Magenta,Fixed_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Orange,Fixed_Block_Enhanced},
+            {BlockTypes.Fixed_Block_Gray,Fixed_Block_Enhanced},
+            {BlockTypes.Shiny_Block_Yellow_25,Shiny_Block_25_Enhanced},
+            {BlockTypes.Shiny_Block_Red_25,Shiny_Block_25_Enhanced},
+            {BlockTypes.Shiny_Block_Blue_25,Shiny_Block_25_Enhanced},
+            {BlockTypes.Shiny_Block_Green_25,Shiny_Block_25_Enhanced},
+            {BlockTypes.Shiny_Block_Magenta_25,Shiny_Block_25_Enhanced},
+            {BlockTypes.Shiny_Block_Orange_25,Shiny_Block_25_Enhanced},
+            {BlockTypes.Shiny_Block_Yellow_50,Shiny_Block_50_Enhanced},
+            {BlockTypes.Shiny_Block_Red_50,Shiny_Block_50_Enhanced},
+            {BlockTypes.Shiny_Block_Blue_50,Shiny_Block_50_Enhanced},
+            {BlockTypes.Shiny_Block_Green_50,Shiny_Block_50_Enhanced},
+            {BlockTypes.Shiny_Block_Magenta_50,Shiny_Block_50_Enhanced},
+            {BlockTypes.Shiny_Block_Orange_50,Shiny_Block_50_Enhanced},
+            {BlockTypes.Shiny_Block_Yellow_75,Shiny_Block_75_Enhanced},
+            {BlockTypes.Shiny_Block_Red_75,Shiny_Block_75_Enhanced},
+            {BlockTypes.Shiny_Block_Blue_75,Shiny_Block_75_Enhanced},
+            {BlockTypes.Shiny_Block_Green_75,Shiny_Block_75_Enhanced},
+            {BlockTypes.Shiny_Block_Magenta_75,Shiny_Block_75_Enhanced},
+            {BlockTypes.Shiny_Block_Orange_75,Shiny_Block_75_Enhanced},
+            {BlockTypes.Shiny_Block_Yellow_100,Shiny_Block_100_Enhanced},
+            {BlockTypes.Shiny_Block_Red_100,Shiny_Block_100_Enhanced},
+            {BlockTypes.Shiny_Block_Blue_100,Shiny_Block_100_Enhanced},
+            {BlockTypes.Shiny_Block_Green_100,Shiny_Block_100_Enhanced},
+            {BlockTypes.Shiny_Block_Magenta_100,Shiny_Block_100_Enhanced},
+            {BlockTypes.Shiny_Block_Orange_100,Shiny_Block_100_Enhanced}
 
 
         };
