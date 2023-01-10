@@ -6,10 +6,12 @@ using BASeTris.Tetrominoes;
 using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using System.Linq;
+using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Theme.Block
 {
     [HandlerTheme("NES Style",typeof(StandardTetrisHandler),typeof(NTrisGameHandler))]
+    [ThemeDescription("From the Visuals of the NES Release.")]
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
     {
         public override string Name { get { return "NES"; } }

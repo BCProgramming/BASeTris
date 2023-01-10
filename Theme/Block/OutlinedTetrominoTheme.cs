@@ -6,11 +6,13 @@ using System.Linq;
 using BASeTris.AssetManager;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.GameStates.Menu;
 using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
-    [HandlerTheme("SNES Style", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [HandlerTheme("Outlined", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [ThemeDescription("WIP.")]
     /// <summary>
     /// Theme which has tetrominoes be outlined rather than draw as distinct blocks.
     /// </summary>

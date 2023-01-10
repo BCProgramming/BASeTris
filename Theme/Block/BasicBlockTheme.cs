@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
     [HandlerTheme("Simple Style",typeof(StandardTetrisHandler))]
+    [ThemeDescription("Basic Blocks. kind of based on BPS NES Tetris")]
     public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP,SimpleBlockTheme.BasicBlockTypes>
     {
         public bool AdjacentConnection = false;

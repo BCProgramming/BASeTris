@@ -36,7 +36,7 @@ namespace BASeTris
         }
         public void CheckState()
         {
-            if (Pad.Update())
+             if (Pad.Update())
             {
                 foreach (X.Gamepad.GamepadButtons iterate in Enum.GetValues(typeof(X.Gamepad.GamepadButtons)))
                 {

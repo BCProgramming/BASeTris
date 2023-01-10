@@ -9,10 +9,12 @@ using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using BASeTris.GameStates.GameHandlers;
 using SkiaSharp;
+using BASeTris.GameStates.Menu;
 
 namespace BASeTris
 {
     [HandlerTheme("Game Boy Style",typeof(StandardTetrisHandler))]
+    [ThemeDescription("The style from the Game Boy Game. Inexplicably upscaled.")]
     public class GameBoyTetrominoTheme : NominoTheme
     {
         public override String Name { get { return "Game Boy"; } }

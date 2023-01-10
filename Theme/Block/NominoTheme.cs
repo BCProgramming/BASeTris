@@ -16,6 +16,7 @@ using SkiaSharp;
 using BASeTris.Theme.Block;
 using System.Reflection;
 using System.Diagnostics;
+using BASeTris.GameStates.Menu;
 
 namespace BASeTris
 {
@@ -254,7 +255,7 @@ namespace BASeTris
         }
     }
     [HandlerTheme("Standard", typeof(StandardTetrisHandler))]
-
+    [ThemeDescription("A Good Default.")]
     public class StandardTetrominoTheme : NominoTheme
     {
         StandardColouredBlock.BlockStyle _Style;

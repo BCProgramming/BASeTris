@@ -345,9 +345,9 @@ namespace BASeTris.GameStates.GameHandlers
                 if (state.currenttempo == 1)
                 {
                     state.currenttempo = 68;
-                    if (GameOptions.MusicRestartsOnTempoChange)
+                    if (GameOptions.MusicRestartsOnTempoChange || String.Equals(pOwner.Settings.std.MusicOption, "tetris_nes_theme", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (GameOptions.MusicEnabled) Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.std.MusicVolume, true);
+                        if (GameOptions.MusicEnabled) Sounds.PlayMusic(pOwner.Settings.std.MusicOption, pOwner.Settings.std.MusicVolume, true);
                     }
 
                     var grabbed = Sounds.GetPlayingMusic_Active();
@@ -362,7 +362,7 @@ namespace BASeTris.GameStates.GameHandlers
                 if (state.currenttempo != 1)
                 {
                     state.currenttempo = 1;
-                    if (GameOptions.MusicRestartsOnTempoChange)
+                    if (GameOptions.MusicRestartsOnTempoChange || String.Equals(pOwner.Settings.std.MusicOption, "tetris_nes_theme", StringComparison.OrdinalIgnoreCase))
                         if (GameOptions.MusicEnabled)
                         {
                             if (pOwner.Settings.std.MusicOption == "<RANDOM>")

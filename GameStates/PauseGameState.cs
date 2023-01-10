@@ -106,8 +106,8 @@ namespace BASeTris.GameStates
 
         private void PopulatePauseMenu(IStateOwner pOwner)
         {
-            MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume" };
-            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" };
+            MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume",TipText = "Back to the game" };
+            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores",TipText="View high scores" };
             MenuItemActivated += (o, e) =>
             {
                 if(e.MenuElement==ResumeOption)
@@ -125,12 +125,12 @@ namespace BASeTris.GameStates
             ResumeOption.FontSize = FontSrc.Size;
             //ResumeOption.Font = TetrisGame.GetRetroFont(14, 1.0f);
 
-            var scaleitem = new MenuStateScaleMenuItem(pOwner);
+            var scaleitem = new MenuStateScaleMenuItem(pOwner) { TipText = "Change Scaling" };
             scaleitem.FontFace = FontSrc.FontFamily.Name;
             scaleitem.FontSize = FontSrc.Size;
             
 
-            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner,PausedState.GameHandler);
+            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, PausedState.GameHandler) { TipText = "Change Display Theme" };
             ThemeItem.FontFace = FontSrc.FontFamily.Name;
             ThemeItem.FontSize = FontSrc.Size;
 

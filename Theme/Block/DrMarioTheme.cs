@@ -6,12 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.GameStates.Menu;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
     [HandlerTheme("Redux Style",typeof(DrMarioHandler))]
+    [ThemeDescription("A more colorful/accented variation, loosely based on the SNES release.")]
     public class DrMarioThemeEnhanced : DrMarioTheme
     {
         public override String Name { get { return "SNES Style"; } }
@@ -26,6 +28,7 @@ namespace BASeTris.Theme.Block
 
 
     [HandlerTheme("NES Style",typeof(DrMarioHandler))]
+    [ThemeDescription("Dr.Mario Theme, from the 8-Bit Title")]
     //CascadingBlockTheme will need to specify the DrMario customization Handler as it's valid Theme once ready.
     //this one doesn't care about the game level- it has two block types- the pills, and the virii.
     //of those we've got 3 colors. We could add more, I suppose, but Dr. Mario has three so let's keep things a bit simpler.

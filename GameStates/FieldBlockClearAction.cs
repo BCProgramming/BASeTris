@@ -69,12 +69,17 @@ namespace BASeTris.GameStates
             {
                 useClear = 1 - ((double)Elapsed.Ticks / (double)ClearTime.Ticks);
             }
-            if(Target!=null && Target.Block!=null)
+            if (Target != null && Target.Block != null)
+            {
                 Target.Block.BeforeDraw = (tbdp) =>
                 {
                     tbdp.FillPercent = (float)useClear;
                 };
-
+            }
+            else
+            {
+                ;
+            }
             //throw new NotImplementedException();
         }
     }

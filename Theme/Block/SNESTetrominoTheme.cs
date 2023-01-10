@@ -9,11 +9,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.GameStates.Menu;
 
 namespace BASeTris
 {
     [HandlerTheme("SNES Style", typeof(StandardTetrisHandler),typeof(NTrisGameHandler))]
-    
+    [ThemeDescription("From 'Tetris & Dr.Mario' on the SNES")]
     public class SNESTetrominoTheme : NominoTheme
     {
         //This theme is based on the colour and appearance of the Tetris game in SNES Tetris and Dr.Mario.

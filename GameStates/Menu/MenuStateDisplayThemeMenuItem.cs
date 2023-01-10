@@ -36,7 +36,9 @@ namespace BASeTris.GameStates.Menu
                 if(ci!=null)
                 {
                     NominoTheme buildResult = (NominoTheme)ci.Invoke(new object[] { });
-                    MenuStateThemeSelection msst = new MenuStateThemeSelection(buildResult.Name, themeiter, () => buildResult);
+                    ThemeDescriptionAttribute descAttrib = themeiter.GetCustomAttribute(typeof(ThemeDescriptionAttribute)) as ThemeDescriptionAttribute;
+                    String useTip = descAttrib == null ? "" : descAttrib.Description;
+                    MenuStateThemeSelection msst = new MenuStateThemeSelection(buildResult.Name, themeiter, () => buildResult,useTip);
                     yield return msst;
                 }
             }
@@ -82,16 +84,26 @@ namespace BASeTris.GameStates.Menu
                 var closest = ThemeOptions[currentIndex];
                 this.Text = closest.Description;
             }
-           
+            
             OnChangeOption += ThemeActivate;
-
+            OnActivateOption += MenuStateDisplayThemeMenuItem_OnActivateOption;
         }
+
+        private void MenuStateDisplayThemeMenuItem_OnActivateOption(object sender, OptionActivated<MenuStateThemeSelection> e)
+        {
+            if (e.Option == null) return;
+            if (!String.IsNullOrEmpty(e.Option.TipText)) TipText = e.Option.TipText;
+        }
+
         private OptionActivated<MenuStateThemeSelection> ActivatedOption = null;
         public void ThemeActivate(Object sender, OptionActivated<MenuStateThemeSelection> e)
         {
             //Theme Activation can be handled by adding an event handler to the Game Owner
             //on the state change. If the state is StandardTetrisGameState, we set the theme and remove the handler.
             //otherwise, we ignore the event trigger and wait for it to cchange to a StandardTetrisGameState.
+            //TipText = "Change Display Theme";
+            if (!String.IsNullOrEmpty(e.Option.TipText)) 
+            (e.Owner.CurrentState as MenuState).FooterText = e.Option.TipText;
             ActivatedOption = e;
             _Owner.BeforeGameStateChange -= _Owner_BeforeGameStateChange;
             _Owner.BeforeGameStateChange += _Owner_BeforeGameStateChange;
@@ -119,10 +131,12 @@ namespace BASeTris.GameStates.Menu
         public String Description;
         public Type ThemeType;
         public Func<NominoTheme> GenerateThemeFunc = null;
-        public MenuStateThemeSelection(String pDescription,Type pThemeType, Func<NominoTheme> pThemeFunc)
+        public String TipText { get; set; }
+        public MenuStateThemeSelection(String pDescription,Type pThemeType, Func<NominoTheme> pThemeFunc,String pTipText)
         {
             Description = pDescription;
             ThemeType = pThemeType;
+            TipText = pTipText;
             GenerateThemeFunc = pThemeFunc;
         }
         public MenuStateThemeSelection()
@@ -135,5 +149,13 @@ namespace BASeTris.GameStates.Menu
             return Description;
         }
 
+    }
+    public class ThemeDescriptionAttribute : Attribute
+    {
+        public String Description {get;set;}
+        public ThemeDescriptionAttribute(String pDescription)
+        {
+            Description = pDescription;
+        }
     }
 }

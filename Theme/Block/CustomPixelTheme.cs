@@ -231,7 +231,13 @@ namespace BASeTris.Theme.Block
             {
 
                 SKBitmap buildbitmap = DrawMappedImageSkia(field, Element,Block, BlockTypeIndex);
-                CachedImageData[LevelIndex][BlockTypeIndex].Add(Element.GetType(), buildbitmap);
+                try
+                {
+                    CachedImageData[LevelIndex][BlockTypeIndex].Add(Element.GetType(), buildbitmap);
+                }
+                catch (Exception ne)
+                {
+                }
 
             }
 
