@@ -13,6 +13,11 @@ namespace BASeTris.GameStates
     /// </summary>
     public interface IDirectKeyboardInputState
     {
-        void KeyPressed(IStateOwner pOwner, Keys pKey);
+        void KeyPressed(IStateOwner pOwner, int pKey);
+    }
+
+    public interface IDirectGamepadInputState
+    {
+        void ButtonPressed(IStateOwner pOwner, int ButtonCode);
     }
 }

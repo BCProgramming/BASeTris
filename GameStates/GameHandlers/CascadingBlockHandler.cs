@@ -432,7 +432,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                                         Nomino resurrect = cb.Owner;
                                         resurrect.Controllable = false;
-                                        resurrect.FallSpeed = 250;
+                                        resurrect.FallSpeed = 150;
                                         resurrect.InitialY = resurrect.Y;
                                         resurrect.LastFall = pOwner.GetElapsedTime();
                                         resurrect.MoveSound = true;

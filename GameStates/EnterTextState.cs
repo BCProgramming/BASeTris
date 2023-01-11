@@ -130,15 +130,16 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
 
-        public void KeyPressed(IStateOwner pOwner, Keys pKey)
+        public void KeyPressed(IStateOwner pOwner, int pKey)
         {
+            var k = (Keys)pKey;
             if (!AllowTextEntry()) return;
-            if (pKey == Keys.Enter) HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
-            else if (pKey == Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
-            else if (pKey == Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
-            else if (pKey == Keys.Left) HandleGameKey(pOwner, GameKeys.GameKey_Left);
-            else if (pKey == Keys.Right) HandleGameKey(pOwner, GameKeys.GameKey_Right);
-            else if (pKey == Keys.Back)
+            if (k == Keys.Enter) HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
+            else if (k == Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
+            else if (k== Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
+            else if (k == Keys.Left) HandleGameKey(pOwner, GameKeys.GameKey_Left);
+            else if (k == Keys.Right) HandleGameKey(pOwner, GameKeys.GameKey_Right);
+            else if (k == Keys.Back)
             {
                 for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
                 {
@@ -149,7 +150,7 @@ namespace BASeTris.GameStates
                 if (CurrentPosition > 0)
                     CurrentPosition--;
             }
-            else if (pKey == Keys.Delete)
+            else if (k == Keys.Delete)
             {
                 for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
                 {

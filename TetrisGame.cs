@@ -369,7 +369,7 @@ namespace BASeTris
             }
         }
 
-        Dictionary<Keys, GameState.GameKeys> KeyMapping = new Dictionary<Keys, GameState.GameKeys>()
+        /*Dictionary<Keys, GameState.GameKeys> KeyMapping = new Dictionary<Keys, GameState.GameKeys>()
         {
             {Keys.Left, GameState.GameKeys.GameKey_Left},
             {Keys.Right, GameState.GameKeys.GameKey_Right},
@@ -404,30 +404,26 @@ namespace BASeTris
             {Key.F12,GameState.GameKeys.GameKey_Debug4 },
             {Key.Number5,GameState.GameKeys.GameKey_Debug5 }
         };
-
+        */
 
         public GameState.GameKeys? TranslateKey(Keys source)
         {
-            if (KeyMapping.ContainsKey(source))
-            {
-                return KeyMapping[source];
-            }
-
+            if (Settings.hasAssignedKeyboardKey((int)source))
+                return Settings.GetKeyboardKeyAssignment((int)source);
             return null;
         }
         public GameState.GameKeys? TranslateKey(Key source)
         {
-            if (KeyMappingTK.ContainsKey(source))
-            {
-                return KeyMappingTK[source];
-            }
+
+            if (Settings.hasAssignedKeyboardKey((int)source))
+                return Settings.GetKeyboardKeyAssignment((int)source);
             return null;
         }
 
         public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g, KeyInputSource pSource)
         {
             if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState) return; //do nothing if it supports that interface.
-
+            if (pSource == KeyInputSource.Input_HID && CurrentGameState is IDirectGamepadInputState) return;
             CurrentGameState.HandleGameKey(pOwner, g);
         }
 

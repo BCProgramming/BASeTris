@@ -61,6 +61,7 @@ namespace BASeTris.GameStates.Menu
                 new SoundOption("smb3_tetris","Tetris DS-SMB3"),
                 new SoundOption("tetrisds","Tetris DS"),
                 new SoundOption("kirbysand","Kirby Sand"),
+                new SoundOption("yogurtyard","Yogurt"),
                 new SoundOption("silius1","Silius"),
                 new SoundOption("journey3","Journey 3"),
                 new SoundOption("tetris_nes_theme","NES"),

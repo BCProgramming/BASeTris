@@ -18,6 +18,7 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+    [HandlerMenuCategory("Dr. Mario")]
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
     [HandlerTipText("Dr.Mario, but with 6 different viruses.")]
@@ -32,6 +33,7 @@ namespace BASeTris.GameStates.GameHandlers
             AllowedSpawns = CascadingPopBlockGameHandler<DrMarioStatistics, DrMarioGameOptions>.AllowedSpawnsFlags.Spawn_Full;
         }
     }
+    [HandlerMenuCategory("Dr. Mario")]
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
     [HandlerTipText("Dr.Mario, but with copyright-distinct viruses")]
@@ -46,7 +48,7 @@ namespace BASeTris.GameStates.GameHandlers
             AllowedSpawns = CascadingPopBlockGameHandler<DrMarioStatistics, DrMarioGameOptions>.AllowedSpawnsFlags.Spawn_Alternate;
         }
     }
-
+    [HandlerMenuCategory("Dr. Mario")]
     [GameScoringHandler(typeof(DrMarioAIScoringHandler),typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
     [HandlerTipText("Brightly coloured pills to cure Fever or Chills")]

@@ -218,7 +218,7 @@ namespace BASeTris
             if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
             {
                 var Casted = (IDirectKeyboardInputState)_Present.Game.CurrentState;
-                Casted.KeyPressed(this, (Keys)e.KeyChar);
+                Casted.KeyPressed(this, (int)e.KeyChar);
             }
             
         }

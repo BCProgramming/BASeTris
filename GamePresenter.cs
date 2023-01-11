@@ -28,7 +28,7 @@ namespace BASeTris
     /// </summary>
     public class GamePresenter
     {
-        Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys> ControllerKeyLookup = new Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys>()
+        /*Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys> ControllerKeyLookup = new Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys>()
         {
             {X.Gamepad.GamepadButtons.A, GameState.GameKeys.GameKey_RotateCW},
             {X.Gamepad.GamepadButtons.X, GameState.GameKeys.GameKey_RotateCCW},
@@ -38,7 +38,7 @@ namespace BASeTris
             {X.Gamepad.GamepadButtons.Dpad_Down, GameState.GameKeys.GameKey_Down},
             {X.Gamepad.GamepadButtons.Dpad_Up, GameState.GameKeys.GameKey_Drop},
             {X.Gamepad.GamepadButtons.Start, GameState.GameKeys.GameKey_Pause}
-        };
+        };*/
         public bool GameThreadPaused = false;
         public ControllerInputState CIS { get; set; } = null;
         private IStateOwner _Owner = null;
@@ -115,7 +115,7 @@ namespace BASeTris
         {
             String[] sDataFolders = TetrisGame.GetSearchFolders();
             String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d) && IsDirectoryWritable(d)), "Settings.xml");
-            GameSettings = new SettingsManager(sSettingsFile,_Owner,GetKeyboardKeyFromName,GetGamepadButtonFromName);
+            GameSettings = new SettingsManager(sSettingsFile,_Owner,GetKeyboardKeyFromName,GetGamepadButtonFromName,typeof(OpenTK.Input.Key),typeof(XInput.Wrapper.X.Gamepad.GamepadButtons));
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();
             if (GameLoopsRunning) return;
@@ -183,10 +183,90 @@ namespace BASeTris
                 Thread.Sleep(5);
             }
         }
+        private bool CheckButtonState(XInput.Wrapper.X.Gamepad.GamepadButtons button, bool flUpState)
+        {
+            switch (button)
+            {
+                case X.Gamepad.GamepadButtons.Dpad_Up:
+                    return flUpState ? X.Gamepad_1.Dpad_Up_up : X.Gamepad_1.Dpad_Up_down;
+                case X.Gamepad.GamepadButtons.Dpad_Down:
+                    return flUpState ? X.Gamepad_1.Dpad_Down_up : X.Gamepad_1.Dpad_Down_down;
+                case X.Gamepad.GamepadButtons.Dpad_Left:
+                    return flUpState ? X.Gamepad_1.Dpad_Left_up : X.Gamepad_1.Dpad_Left_down;
+                case X.Gamepad.GamepadButtons.Dpad_Right:
+                    return flUpState ? X.Gamepad_1.Dpad_Right_up : X.Gamepad_1.Dpad_Right_down;
+                case X.Gamepad.GamepadButtons.Start:
+                    return flUpState ? X.Gamepad_1.Start_up : X.Gamepad_1.Start_down;
+                case X.Gamepad.GamepadButtons.Back:
+                    return flUpState ? X.Gamepad_1.Back_up : X.Gamepad_1.Back_down;
+                    
+                case X.Gamepad.GamepadButtons.LeftStick:
+                    return flUpState ? X.Gamepad_1.LStick_down : X.Gamepad_1.LStick_up;
+                case X.Gamepad.GamepadButtons.RightStick:
+                    return flUpState ? X.Gamepad_1.RStick_down : X.Gamepad_1.RStick_up;
+                    
+                case X.Gamepad.GamepadButtons.LBumper:
+                    return flUpState ? X.Gamepad_1.LBumper_up : X.Gamepad_1.LBumper_up;
+                    
+                case X.Gamepad.GamepadButtons.RBumper:
+                    return flUpState ? X.Gamepad_1.RBumper_up : X.Gamepad_1.RBumper_up;
+                case X.Gamepad.GamepadButtons.A:
+                    return flUpState ? X.Gamepad_1.A_up : X.Gamepad_1.A_up;
+                case X.Gamepad.GamepadButtons.B:
+                    return flUpState ? X.Gamepad_1.B_up : X.Gamepad_1.B_up;
+                case X.Gamepad.GamepadButtons.X:
+                    return flUpState ? X.Gamepad_1.X_up : X.Gamepad_1.X_up;
+                case X.Gamepad.GamepadButtons.Y:
+                    return flUpState ? X.Gamepad_1.Y_up : X.Gamepad_1.Y_up;
+            }
+
+            return false;
+
+        }
+        private Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys> DefaultButtonMap = new Dictionary<X.Gamepad.GamepadButtons, GameState.GameKeys>()
+        {
+            {X.Gamepad.GamepadButtons.A,GameState.GameKeys.GameKey_RotateCW },
+            {X.Gamepad.GamepadButtons.X,GameState.GameKeys.GameKey_RotateCCW },
+            {X.Gamepad.GamepadButtons.Dpad_Left,GameState.GameKeys.GameKey_Left },
+            {X.Gamepad.GamepadButtons.Dpad_Right,GameState.GameKeys.GameKey_Right },
+            {X.Gamepad.GamepadButtons.Dpad_Down,GameState.GameKeys.GameKey_Down },
+            {X.Gamepad.GamepadButtons.Dpad_Up,GameState.GameKeys.GameKey_Drop },
+            {X.Gamepad.GamepadButtons.Start,GameState.GameKeys.GameKey_Pause },
+            {X.Gamepad.GamepadButtons.RBumper,GameState.GameKeys.GameKey_Hold }
+
+
+        };
+
+        private X.Gamepad.GamepadButtons? LookupKeyMap(GameState.GameKeys gkey)
+        {
+
+            foreach (var iterate in DefaultButtonMap)
+            {
+                if (iterate.Value == gkey) return iterate.Key;
+            }
+            return null;
+
+        }
+        
         private void CheckInputs()
         {
             if (X.Gamepad_1.Update())
             {
+                foreach (var iteratevalue in Enum.GetValues(typeof(GameState.GameKeys)))
+                {
+                    var gkey = (GameState.GameKeys)iteratevalue;
+                    var getbutton = LookupKeyMap(gkey);
+                    if (getbutton != null)
+                    {
+                        var gb = getbutton.Value;
+                        HandleKey(gkey, CheckButtonState(gb, false), CheckButtonState(gb, true), TetrisGame.KeyInputSource.Input_HID);
+
+                    }
+
+
+                }
+                
+                /*
                 HandleKey(GameState.GameKeys.GameKey_RotateCW, X.Gamepad_1.A_down, X.Gamepad_1.A_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_RotateCCW, X.Gamepad_1.X_down, X.Gamepad_1.X_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Left, X.Gamepad_1.Dpad_Left_down, X.Gamepad_1.Dpad_Left_up, TetrisGame.KeyInputSource.Input_HID);
@@ -194,7 +274,7 @@ namespace BASeTris
                 HandleKey(GameState.GameKeys.GameKey_Down, X.Gamepad_1.Dpad_Down_down, X.Gamepad_1.Dpad_Down_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up, TetrisGame.KeyInputSource.Input_HID);
                 HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up, TetrisGame.KeyInputSource.Input_HID);
+                HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up, TetrisGame.KeyInputSource.Input_HID);*/
             }
         }
         private void GamepadInputThread()
@@ -210,7 +290,6 @@ namespace BASeTris
             }
             catch(ThreadAbortException)
             {
-                
                 return;
             }
             
@@ -234,9 +313,12 @@ namespace BASeTris
         }
         public GameState.GameKeys? TranslateKey(X.Gamepad.GamepadButtons Button)
         {
-            
-            if (ControllerKeyLookup.ContainsKey(Button))
-                return ControllerKeyLookup[Button];
+            if (_GameSettings.HasAssignedGamepadButton((int)Button))
+            {
+                return _GameSettings.GetGamepadButtonAssignment((int)Button);
+            }
+           /* if (ControllerKeyLookup.ContainsKey(Button))
+                return ControllerKeyLookup[Button];*/
             return null;
         }
         public GamePresenter(IStateOwner pOwner):this(pOwner,pOwner as IGamePresenter)
@@ -271,7 +353,7 @@ namespace BASeTris
             if (!DownState) return;
             ActiveKeys.Add(key);
             GameKeyDown(key);
-            IgnoreController = false;
+            if(pSource==TetrisGame.KeyInputSource.Input_HID) IgnoreController = false;
             Game.HandleGameKey(_Owner, key, pSource);
         }
         private void CIS_ButtonPressed(Object sender, ControllerInputState.ControllerButtonEventArgs args)

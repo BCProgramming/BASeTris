@@ -47,7 +47,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         }
         SKImage StatisticsBackground = null;
         //redraws the StatisticsBackground SKImage.
-        public void GenerateStatisticsBackground(GameplayGameState Self)
+        public void GenerateStatisticsBackground(GameplayGameState Self,IStateOwner pOwner)
         {
             using (SKBitmap sourcebit = new SKBitmap(new SKImageInfo(1120, 2576, SKColorType.Rgba8888)))
             {
@@ -69,7 +69,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             ArbitraryGroup.AddBlock(new Point[] { Point.Empty }, GenerateColorBlock);
                             Self.PlayField.Theme.ApplyRandom(ArbitraryGroup,Self.GameHandler, Self.PlayField);
                             //this.PlayField.Theme.ApplyTheme(ArbitraryGroup, this.PlayField);
-                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, new SKRect(DrawBlockX, DrawBlockY, DrawBlockX + BlockSize.Width, DrawBlockY + BlockSize.Height), null, new SettingsManager());
+                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, new SKRect(DrawBlockX, DrawBlockY, DrawBlockX + BlockSize.Width, DrawBlockY + BlockSize.Height), null,   pOwner.Settings);
                             RenderingProvider.Static.DrawElement(null, tbd.g, GenerateColorBlock, tbd);
 
                         }
@@ -170,7 +170,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 if (StatisticsBackground == null || RedrawsNeeded || Source.f_RedrawStatusBitmap ||  LastStatisticsTheme!=Source.PlayField.Theme)
                 {
-                    GenerateStatisticsBackground(Source);
+                    GenerateStatisticsBackground(Source,POwner);
                 }
 
                 g.DrawImage(StatisticsBackground, Bounds);

@@ -491,12 +491,14 @@ namespace BASeTris
         }
         private void BASeTris_KeyPress(object sender, KeyPressEventArgs e)
         {
+            /*
             if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
             {
                 var Casted = (IDirectKeyboardInputState) _Present.Game.CurrentState;
-                Casted.KeyPressed(this, (Keys) e.KeyChar);
-            }
+                Casted.KeyPressed(this, (int) e.KeyChar);
+            }*/
         }
+        
 
         private void debugToolStripMenuItem_Click(object sender, EventArgs e)
         {
