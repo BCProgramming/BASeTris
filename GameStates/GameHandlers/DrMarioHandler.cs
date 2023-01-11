@@ -18,15 +18,44 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-    
-
-
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
+    [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
+    [HandlerTipText("Dr.Mario, but with 6 different viruses.")]
+    public class DrMarioSixViruses : DrMarioHandler
+    {
+        public override string GetName()
+        {
+            return "Dr.Mario (6 Viruses)";
+        }
+        public DrMarioSixViruses()
+        {
+            AllowedSpawns = CascadingPopBlockGameHandler<DrMarioStatistics, DrMarioGameOptions>.AllowedSpawnsFlags.Spawn_Full;
+        }
+    }
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
+    [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
+    [HandlerTipText("Dr.Mario, but with copyright-distinct viruses")]
+    public class DrMarioAltViruses : DrMarioHandler
+    {
+        public override string GetName()
+        {
+            return "Mr. Mario";
+        }
+        public DrMarioAltViruses()
+        {
+            AllowedSpawns = CascadingPopBlockGameHandler<DrMarioStatistics, DrMarioGameOptions>.AllowedSpawnsFlags.Spawn_Alternate;
+        }
+    }
 
     [GameScoringHandler(typeof(DrMarioAIScoringHandler),typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(DrMarioOptionsHandler))]
     [HandlerTipText("Brightly coloured pills to cure Fever or Chills")]
     public class DrMarioHandler : CascadingPopBlockGameHandler<DrMarioStatistics,DrMarioGameOptions>,IGameHandlerChooserInitializer
     {
+        public DrMarioHandler()
+        {
+            Level = 30;
+        }
         public override string GetName()
         {
             return "Dr.Mario";
@@ -58,7 +87,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public override IGameCustomizationHandler NewInstance()
         {
-            return new DrMarioHandler();
+            return new DrMarioHandler() { } ;
         }
         public override void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state)
         {

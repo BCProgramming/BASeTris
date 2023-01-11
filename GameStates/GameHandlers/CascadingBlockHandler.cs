@@ -622,7 +622,7 @@ namespace BASeTris.GameStates.GameHandlers
             Spawn_Magenta_Block = 1024,
             Spawn_Green_Block = 2048,
             Spawn_Standard = Spawn_Red_Primary | Spawn_Blue_Primary | Spawn_Yellow_Primary | Spawn_Red_Block | Spawn_Blue_Block | Spawn_Yellow_Block,
-            Spawn_Alternate = Spawn_Orange_Primary | Spawn_Magenta_Block | Spawn_Green_Block | Spawn_Orange_Block | Spawn_Magenta_Block | Spawn_Green_Block,
+            Spawn_Alternate = Spawn_Orange_Primary | Spawn_Magenta_Primary | Spawn_Green_Primary | Spawn_Magenta_Block | Spawn_Green_Block | Spawn_Orange_Block | Spawn_Magenta_Block | Spawn_Green_Block,
             Spawn_Full = Spawn_Standard | Spawn_Alternate
 
         }

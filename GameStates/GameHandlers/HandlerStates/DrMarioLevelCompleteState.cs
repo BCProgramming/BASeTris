@@ -28,9 +28,9 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
         private AssetManager.iActiveSoundObject CompletionMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
-            if(CompletionMusic==null)
-            //start the victory music... or whatever music we are told to I suppose.
-                CompletionMusic = TetrisGame.Soundman.PlayMusic(LevelCompleteMusic, 3.0f,false);
+            if (CompletionMusic == null)
+                //start the victory music... or whatever music we are told to I suppose.
+                CompletionMusic = OriginalState.Sounds.PlayMusic(LevelCompleteMusic, 3.0f, false);
 
         }
 

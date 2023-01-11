@@ -23,7 +23,9 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
         Dictionary<NominoBlock, Point> BLockLocationCache = new Dictionary<NominoBlock, Point>();
         Queue<Blocks.NominoBlock> AppearanceBlocks = null;
         uint LastAppearanceTick = 0;
-        uint AppearanceTimeDifference = 100; //aiming for 50ms here
+        uint AppearanceTimeDifference = 200; //aiming for 50ms here
+
+       
         public BlockAppearanceState(GameplayGameState startupState)
         {
             SortedList<Guid, Blocks.NominoBlock> appearanceshuffler = new SortedList<Guid, Blocks.NominoBlock>();
@@ -61,19 +63,22 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
             //if the timeout has elapsed, make another one visible.
             var currtick = TetrisGame.GetTickCount();
             var tickdiff = currtick - LastAppearanceTick;
+            var currhandler = (pOwner.GetHandler() as DrMarioHandler);
+            var usediff = currhandler==null?50:Math.Min(50, AppearanceTimeDifference - currhandler.Level);
             if(tickdiff > AppearanceTimeDifference)
             {
                 LastAppearanceTick = currtick;
                 if(AppearanceBlocks.Count == 0)
                 {
                     if (StandardState.NoTetrominoSpawn) StandardState.NoTetrominoSpawn = false;
-                    StandardState.PlayField.ClearActiveBlockGroups();
+                    //StandardState.PlayField.ClearActiveBlockGroups();
                     pOwner.CurrentState = StandardState;
                     
                     return;
                 }
                 var nextAppear = AppearanceBlocks.Dequeue();
                 nextAppear.Visible = true;
+                StandardState.Sounds.PlaySound("block_appear", false);
                 //doublefun: add particles!
                 var handleritem = pOwner.GetHandler();
                 var AngleDelta = (2 * Math.PI / virusappearanceparticlecount);
