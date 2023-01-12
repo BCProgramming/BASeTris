@@ -50,7 +50,7 @@ namespace BASeTris.Theme.Block
             var ChosenLevelSet = LevelColorSets[LevelIndex];
 
             int BlockCount = 0;
-            if (!(Element is Tetromino))
+            if (!(Element is Tetromino) && Element.Count() > 1)
             {
                 //get the index.
                 var cw = NNominoGenerator.GetNominoPoints(Element);

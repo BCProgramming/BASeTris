@@ -45,6 +45,43 @@ namespace BASeTris
             if(pOwner!=null) LastFall = pOwner.GetElapsedTime();
             Y = Value;
         }
+        public List<List<NominoElement>> GetContiguousSets()
+        {
+            //returns all contiguous "sets" in this nomino as separate groups- that is, each "group" or individual element separated by gaps and not "connected" will be individual sets.
+            //"adjacent" here means directly left, right, top, or bottom.
+
+            List<NominoElement> AllResults = new List<NominoElement>();
+            List<List<NominoElement>> ResultSet = new List<List<NominoElement>>();
+            //first get the contiguous set that the first item is part of.
+            List<NominoElement> FirstSet = GetContiguousToElement(BlockData.First(),null).ToList();
+            return null;
+
+        }
+        public IEnumerable<NominoElement> GetContiguousToElement(NominoElement ne,HashSet<NominoElement> IgnoreElements)
+        {
+            yield return ne;
+            if (IgnoreElements == null) IgnoreElements = new HashSet<NominoElement>() { ne };
+            int[] offsets = new int[] { -1, 1 };
+            foreach (int xoffset in offsets)
+            {
+                foreach (int yoffset in offsets)
+                {
+                    if (!(xoffset==0 ^ yoffset==0)) continue;
+                    var findblock = BlockData.FirstOrDefault((b) => b.X == ne.X + xoffset && b.Y == ne.Y + yoffset);
+                    if (findblock != null && !IgnoreElements.Contains(findblock))
+                    {
+                        foreach (var iterate in GetContiguousToElement(findblock, IgnoreElements))
+                        {
+                            yield return iterate;
+                        }
+                    }
+                }
+            }
+
+            
+
+
+        }
         private int XMin, XMax, YMin, YMax;
         private Rectangle _GroupExtents = Rectangle.Empty;
         public TimeSpan LastFall = TimeSpan.Zero;

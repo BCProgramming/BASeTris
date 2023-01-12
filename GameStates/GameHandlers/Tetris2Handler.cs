@@ -15,6 +15,7 @@ namespace BASeTris.GameStates.GameHandlers
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
     [HandlerTipText("Tetris 2 (using alt colors)")]
+    [HandlerMenuCategory("Tetris 2")]
     public class Tetris2_AltHandler : Tetris2Handler
     {
         public override string GetName()
@@ -29,6 +30,7 @@ namespace BASeTris.GameStates.GameHandlers
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
     [HandlerTipText("Tetris 2 (6 Colors)")]
+    [HandlerMenuCategory("Tetris 2")]
     public class Tetris2_SixHandler : Tetris2Handler
     {
         public override string GetName()
@@ -50,6 +52,7 @@ namespace BASeTris.GameStates.GameHandlers
     //3. Presumably we are going to want an appropriate Tetris2Theme.We may be able to re-use some of the internals of the line clear animations for the block clears though.
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
+    [HandlerMenuCategory("Tetris 2")]
     [HandlerTipText("Tetris 2")]
     public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>,IGameHandlerChooserInitializer
     {
