@@ -88,7 +88,7 @@ namespace BASeTris
             InitializeGraphics();
             CursorVisible = false;
 
-           
+            Icon = Properties.Resources.AppIcon;
             Location = new Point(Location.X, 0);
             _Present = new GamePresenter(this);
             StartGame();

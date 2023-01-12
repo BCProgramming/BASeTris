@@ -194,7 +194,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             BackgroundPaint = new SKPaint() { Color = SKColors.Transparent },
                             DrawFont = new Adapters.SKFontInfo(TetrisGame.RetroFontSK, (float)(24 * pOwner.ScaleFactor)),
                             ForegroundPaint = HighScoreEligible,
-                            ShadowPaint = new SKPaint(),
+                            ShadowPaint = ShadowPaint,
                             Position = new SKPoint(XPos, YPos + MeasuredScoreText.Height / 2),
                             ShadowOffset = new SKPoint(5f, 5f),
                         };

@@ -14,17 +14,19 @@ namespace BASeTris
     {
         public struct NominoPoint
         {
+            public NominoElement Source;
             public int  X;
             public int Y;
-            public NominoPoint(int pX, int pY)
+            public NominoPoint(int pX, int pY, NominoElement pSource = null)
             {
                 X = pX;
                 Y = pY;
+                Source = pSource;
                     
             }
-            public static NominoPoint Create(int pX, int pY)
+            public static NominoPoint Create(int pX, int pY,NominoElement pSource = null)
             {
-                return new NominoPoint(pX, pY);
+                return new NominoPoint(pX, pY,pSource);
             }
             public override int GetHashCode()
             {
@@ -38,7 +40,7 @@ namespace BASeTris
             }
             public bool Equals(NominoPoint np)
             {
-                return X == np.X && Y == np.Y;
+                return X == np.X && Y == np.Y && Source == np.Source;
             }
             public static bool operator ==(NominoPoint A, NominoPoint B)
             {
@@ -165,7 +167,7 @@ namespace BASeTris
                 if (iterate.X < MinX) MinX = iterate.X;
                 if (iterate.Y < MinY) MinY = iterate.Y;
             }
-            return (from n in input select new NominoPoint(n.X - MinX, n.Y - MinY)).ToList();
+            return (from n in input select new NominoPoint(n.X - MinX, n.Y - MinY,n.Source)).ToList();
         }
         private static bool IsEqual(List<NominoPoint> A, List<NominoPoint> B)
         {
@@ -189,13 +191,18 @@ namespace BASeTris
         {
 
             List<NominoPoint> BuildList = new List<NominoPoint>();
-            BuildList = (from p in input select new NominoPoint(p.Y, -p.X)).ToList();
+            BuildList = (from p in input select new NominoPoint(p.Y, -p.X,p.Source)).ToList();
             return ResetTranslation(BuildList);
 
         }
+        static System.Text.RegularExpressions.Regex ReplaceParens = new System.Text.RegularExpressions.Regex("\\(.*\\)", System.Text.RegularExpressions.RegexOptions.Multiline | System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
         public static IEnumerable<NominoPoint> FromString(String src)
         {
-            
+            //because of the change to allow additional data for each item, we need to strip out that extra info in parenthesis using regex.
+            if(src.IndexOf("(") > -1)
+                src = ReplaceParens.Replace(src, "");
+
+
             String[] linesplit = src.Split('\n');
             for (int currrow = 0; currrow < linesplit.Length; currrow++)
             {
@@ -227,8 +234,15 @@ namespace BASeTris
             {
                 for (int xcoord = MinX; xcoord <= MaxX; xcoord++)
                 {
-                    if (Points.Any((p) => (p.X == xcoord && p.Y == ycoord)))
+                    var getPoint = Points.FirstOrDefault((p) => (p.X == xcoord && p.Y == ycoord));
+                    if (getPoint != null)
+                    {
                         sb.Append("#");
+                        if (getPoint.Source != null && getPoint.Source.Block is LineSeriesBlock lsb)
+                        {
+                            sb.Append("(" + lsb.CombiningIndex + ")");
+                        }
+                    }
                     else
                         sb.Append(" ");
                 }
@@ -374,7 +388,7 @@ namespace BASeTris
             List<NominoPoint> result = new List<NominoPoint>();
             foreach (var iterate in src)
             {
-                NominoPoint np = new NominoPoint(iterate.X, iterate.Y);
+                NominoPoint np = new NominoPoint(iterate.X, iterate.Y,iterate);
                 result.Add(np);
             }
 

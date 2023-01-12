@@ -523,6 +523,12 @@ namespace BASeTris.Theme.Block
                 return BitmapIndexEnhanced;
             else return BitmapIndex;
         }
+        public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        {
+            var gotpoints = NNominoGenerator.GetNominoPoints(Group);
+            String sStringRep = NNominoGenerator.StringRepresentation(gotpoints);
+            return sStringRep;
+        }
         protected bool UseEnhancedImages = true;
         public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockTypes BlockType, BCT PixelType)
         {

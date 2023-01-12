@@ -294,7 +294,20 @@ namespace BASeTris
 
             return bg;
         }
-        
+        public (int, int) GetCenterPoint()
+        {
+            int SumX = 0, SumY = 0;
+            int count = 0;
+            foreach (var iterateimo in this)
+            {
+                SumX += iterateimo.X;
+                SumY += iterateimo.Y;
+                count++;
+            }
+
+            return ((int)((float)SumX / (float)count), (int)((float)SumY / (float)count));
+
+        }
         public static IEnumerable<NominoElement> GetNominoEntries(Point[] Source, Size AreaSize,Func<int,NominoBlock> BuildBlock = null)
         {
             if (BuildBlock == null) BuildBlock = (i) => new StandardColouredBlock();

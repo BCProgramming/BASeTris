@@ -150,6 +150,7 @@
     <Compile Include="FieldInitializers\DrMarioFieldInitializer.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
+    <Compile Include="GameStates\ControlSettingsViewState.cs" />
     <Compile Include="GameStates\DropWaitState.cs" />
     <Compile Include="GameStates\GameHandlers\CascadingBlockHandler.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />

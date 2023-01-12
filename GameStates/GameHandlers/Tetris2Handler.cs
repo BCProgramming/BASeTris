@@ -106,7 +106,8 @@ namespace BASeTris.GameStates.GameHandlers
             Tetromino_Y TetY = new Tetromino_Y((a) => new LineSeriesBlock());
             Tetromino_G TetG = new Tetromino_G((a) => new LineSeriesBlock());
             Tetromino_F TetF = new Tetromino_F((a) => new LineSeriesBlock());
-            return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ,TetY,TetG,TetF };
+            //Note: removed Y,G,F Tetrominoes because they require additional special handling to "split" when a piece gets set that is not implemented.
+            return new Nomino[] { TetI, TetJ, TetL, TetO, TetS, TetT, TetZ };
         }
 
         public override void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state)

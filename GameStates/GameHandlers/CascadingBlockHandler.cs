@@ -217,6 +217,7 @@ namespace BASeTris.GameStates.GameHandlers
             return Horizontal;
 
         }
+        
         public List<Nomino> ProcessBlockDroppage(GameplayGameState state, int Column, int Row, ref HashSet<Nomino> AdditionalSkipBlocks)
         {
             List<Nomino> CreateResult = new List<Nomino>();
@@ -236,21 +237,31 @@ namespace BASeTris.GameStates.GameHandlers
                         //resurrect this block and other blocks that are in the same nomino.
                         //since we remove busted blocks from the nomino, we can take the Duomino this
                         //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
-                        foreach (var iterate in cb.Owner)
-                        {
-                            var useX = iterate.X + cb.Owner.X;
-                            var useY = iterate.Y + cb.Owner.Y;
-                            state.PlayField.Contents[useY][useX] = null;
-                        }
 
-                        Nomino resurrect = cb.Owner;
-                        resurrect.Controllable = false;
-                        resurrect.FallSpeed = 250;
-                        resurrect.MoveSound = true;
-                        resurrect.PlaceSound = false;
-                        resurrect.NoGhost = true;
-                        AdditionalSkipBlocks.Add(resurrect);
-                        CreateResult.Add(resurrect);
+                        if (true && cb.Owner is Duomino.Duomino)
+                        {
+
+                            foreach (var iterate in cb.Owner)
+                            {
+                                var useX = iterate.X + cb.Owner.X;
+                                var useY = iterate.Y + cb.Owner.Y;
+                                state.PlayField.Contents[useY][useX] = null;
+                            }
+
+                            Nomino resurrect = cb.Owner;
+                            resurrect.Controllable = false;
+                            resurrect.FallSpeed = 250;
+                            resurrect.MoveSound = true;
+                            resurrect.PlaceSound = false;
+                            resurrect.NoGhost = true;
+                            AdditionalSkipBlocks.Add(resurrect);
+                            CreateResult.Add(resurrect);
+                        }
+                        else
+                        {
+                            //can't do the same thing with other types, unfortunately- if you pop a block in the middle you don't want
+                            //both sides to be part of the same nomino as they fall.
+                        }
 
                     }
                 }
@@ -420,7 +431,13 @@ namespace BASeTris.GameStates.GameHandlers
                                     }
                                     if (!isPopping && !cb.IsSupported(cb.Owner, state.PlayField) && !ResurrectNominos.Contains(cb.Owner) && !AddedBlockAlready.Contains(cb))
                                     {
-                                        //resurrect this block and other blocks that are in the same nomino.
+                                        //this needs to be updated to support resurrection of multiple Nominoes for each ConnectionIndex 
+                                        //Algorithm would create a new Nomino for each unique connection index, then add
+                                        //the Blocks that are still "alive" with that connection index to the new Nomino, and finally add the resurrected Nominoes to the list.
+                                        //It might be wise to somehow track that they were originally a different Nomino somehow...
+
+
+                                        //resurrect this block and other blocks that are in the same nomino. 
                                         //since we remove busted blocks from the nomino, we can take the Duomino this
                                         //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
                                         foreach (var iterate in cb.Owner)

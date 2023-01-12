@@ -22,14 +22,6 @@ namespace BASeTris.Blocks
             get { return false; }
         }
 
-        private int _GroupID = 0;
-
-        public int GroupID
-        {
-            get { return _GroupID; }
-            set { _GroupID = value; }
-        }
-
         private int _Rotation = 0;
 
         public bool IgnoreRotation { get; set; } = false;

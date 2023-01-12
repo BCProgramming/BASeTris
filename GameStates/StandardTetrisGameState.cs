@@ -1021,13 +1021,36 @@ namespace BASeTris.GameStates
                     {
 
 
+                        Dictionary<int, List<NominoElement>> ConnectionIndices = new Dictionary<int, List<NominoElement>>();
+                        foreach (var checkblock in activeItem)
+                        {
+                            if (checkblock.Block is CascadingBlock cb)
+                            {
+                                if (!ConnectionIndices.ContainsKey(cb.ConnectionIndex))
+                                {
+                                    ConnectionIndices.Add(cb.ConnectionIndex, new List<NominoElement>());
+                                }
+                                ConnectionIndices[cb.ConnectionIndex].Add(checkblock);
+                            }
+                        }
 
 
-                        PlayField.SetGroupToField(activeItem);
-                        GameStats.AddScore(25 - activeItem.Y);
-                        if (activeItem.PlaceSound)
-                            Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
-                        return GroupOperationResult.Operation_Success;
+                        
+
+                        //Another concern is that we should "re-center" the Nominoes we create here.
+                        if (true || ConnectionIndices.Count == 1)
+                        {
+                            PlayField.SetGroupToField(activeItem);
+                            GameStats.AddScore(25 - activeItem.Y);
+                            if (activeItem.PlaceSound)
+                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
+                            return GroupOperationResult.Operation_Success;
+                        }
+                        else
+                        {
+                            //special consideration needed for Blocks that have multiple connectionindices. Basically we would want to find all unsupported blocks in the nomino, and then create a new Nomino for each unique ConnectedIndex within them. 
+                            //we would leave the activeItem with only the remaining supported blocks.
+                        }
                     }
                 }
             }

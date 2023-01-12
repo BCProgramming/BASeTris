@@ -14,6 +14,7 @@ namespace BASeTris.Blocks
         public int ConnectionIndex {  get { return _ConnectionIndex; } set { _ConnectionIndex = value; } }
         //normally, all blocks connect to each other in a nomino, if one is supported, they all are.
         //ConnectionIndex can be used so that only blocks that have the same connectionIndex actually support each other.
+        //Should also be used to "split" nominoes that would separate into different pieces.
         
         public override char GetCharacterRepresentation()
         {
