@@ -43,10 +43,8 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return TetrisField.DEFAULT_COLCOUNT;
         }
-        public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
-        {
-            return null;
-        }
+        public abstract GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner);
+        
         public abstract Nomino[] GetNominos();
         public LineSeriesBlock.CombiningTypes[] GetValidBlockCombiningTypes()
         {
@@ -337,6 +335,8 @@ namespace BASeTris.GameStates.GameHandlers
 
                 //check the field again and change unsupported field blocks back into active groups.
 
+                //TODO: this seems to act weird with Tetris 2, sets the popping colour wrong sometimes. It seems to be using other colours from the tetromino's that the blocks
+                //belonged to.
                 HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
                 foreach (var iterate in CriticalMasses)
                 {

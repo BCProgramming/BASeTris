@@ -85,86 +85,88 @@ namespace BASeTris.Rendering.Skia.GameStates
                 var useStats = Source.GameOverInfo;
                 SKRect DesiredRect = new SKRect(Bounds.Width * 0.18f, 20, Bounds.Width * (1 - .18f), Bounds.Height - 20);
                 XPosition = DesiredRect.Left;
-                
-                for (int i = 0;i<Source.CurrentLinesDisplay; i++)
+                if (useStats != null)
                 {
-                    var currentLine = useStats.Statistics[i];
-
-                    SKPoint CellSize = new SKPoint(DesiredRect.Width/currentLine.ColumnData.Count(),DesiredRect.Height/useStats.Statistics.Count-1);
-
-                    
-                    YPosition = GameOverPos.Y + ((2 + i) * (measured.Height * 2.25f)) + measuremini.Height * 2;
-                    float MaxYSize = 0;
-                    for (int columnindex =0;columnindex<currentLine.ColumnData.Count;columnindex++)
+                    for (int i = 0; i < Source.CurrentLinesDisplay; i++)
                     {
-                        var currentcolumn = currentLine.ColumnData[columnindex];
-                        
-                        SKRect CellPosition = new SKRect(XPosition, YPosition, XPosition + CellSize.X, YPosition + CellSize.Y);
+                        var currentLine = useStats.Statistics[i];
 
-                        switch (currentcolumn.InfoType)
+                        SKPoint CellSize = new SKPoint(DesiredRect.Width / currentLine.ColumnData.Count(), DesiredRect.Height / useStats.Statistics.Count - 1);
+
+
+                        YPosition = GameOverPos.Y + ((2 + i) * (measured.Height * 2.25f)) + measuremini.Height * 2;
+                        float MaxYSize = 0;
+                        for (int columnindex = 0; columnindex < currentLine.ColumnData.Count; columnindex++)
                         {
-                            case GameOverStatisticColumnData.CellType.Image:
+                            var currentcolumn = currentLine.ColumnData[columnindex];
 
-                                SKPoint DrawPosition;
-                                SKImage useimage = currentcolumn.CellImage;
-                                var targetposition = GameOverStatisticColumnData.AlignRect(CellPosition, new SKPoint(useimage.Width, useimage.Height),
-                                    currentcolumn.ContentAlignmentHorizontal, currentcolumn.ContentAlignmentVertical);
-                                pRenderTarget.DrawImage(useimage, targetposition);
-                                if (useimage.Height > MaxYSize) MaxYSize = useimage.Height;
-                                break;
-                            case GameOverStatisticColumnData.CellType.Text:
+                            SKRect CellPosition = new SKRect(XPosition, YPosition, XPosition + CellSize.X, YPosition + CellSize.Y);
 
-                                //measure the text for this item.
-                                //TODO: custom font support?
-                                SKRect TextSize = new SKRect();
-                                GameOverEntryPaint.MeasureText(currentcolumn.CellText, ref TextSize);
-                                var targetpositiontext = GameOverStatisticColumnData.AlignRect(CellPosition, new SKPoint(TextSize.Width, TextSize.Height),
-                                    currentcolumn.ContentAlignmentHorizontal, currentcolumn.ContentAlignmentVertical);
-                                SKPoint TargetPos = new SKPoint(targetpositiontext.Left, targetpositiontext.Top - TextSize.Height); //add height because Skia paints from text baseline.
+                            switch (currentcolumn.InfoType)
+                            {
+                                case GameOverStatisticColumnData.CellType.Image:
 
-                                //paint the text shadow...
-                                GameOverEntryPaint.Color = SKColors.White;
-                                pRenderTarget.DrawText(currentcolumn.CellText, new SKPoint(TargetPos.X + 5, TargetPos.Y + 5), GameOverEntryPaint);
-                                GameOverEntryPaint.Color = SKColors.Black;
-                                pRenderTarget.DrawText(currentcolumn.CellText, TargetPos, GameOverEntryPaint);
-                                if (targetpositiontext.Height > MaxYSize) MaxYSize = targetpositiontext.Height;
+                                    SKPoint DrawPosition;
+                                    SKImage useimage = currentcolumn.CellImage;
+                                    var targetposition = GameOverStatisticColumnData.AlignRect(CellPosition, new SKPoint(useimage.Width, useimage.Height),
+                                        currentcolumn.ContentAlignmentHorizontal, currentcolumn.ContentAlignmentVertical);
+                                    pRenderTarget.DrawImage(useimage, targetposition);
+                                    if (useimage.Height > MaxYSize) MaxYSize = useimage.Height;
+                                    break;
+                                case GameOverStatisticColumnData.CellType.Text:
 
-                                break;
+                                    //measure the text for this item.
+                                    //TODO: custom font support?
+                                    SKRect TextSize = new SKRect();
+                                    GameOverEntryPaint.MeasureText(currentcolumn.CellText, ref TextSize);
+                                    var targetpositiontext = GameOverStatisticColumnData.AlignRect(CellPosition, new SKPoint(TextSize.Width, TextSize.Height),
+                                        currentcolumn.ContentAlignmentHorizontal, currentcolumn.ContentAlignmentVertical);
+                                    SKPoint TargetPos = new SKPoint(targetpositiontext.Left, targetpositiontext.Top - TextSize.Height); //add height because Skia paints from text baseline.
+
+                                    //paint the text shadow...
+                                    GameOverEntryPaint.Color = SKColors.White;
+                                    pRenderTarget.DrawText(currentcolumn.CellText, new SKPoint(TargetPos.X + 5, TargetPos.Y + 5), GameOverEntryPaint);
+                                    GameOverEntryPaint.Color = SKColors.Black;
+                                    pRenderTarget.DrawText(currentcolumn.CellText, TargetPos, GameOverEntryPaint);
+                                    if (targetpositiontext.Height > MaxYSize) MaxYSize = targetpositiontext.Height;
+
+                                    break;
+
+                            }
+
 
                         }
 
 
+                        /*
+                        Type[] TetTypes = new Type[] {typeof(Tetrominoes.Tetromino_I),
+                                typeof(Tetrominoes.Tetromino_I) ,
+                                typeof(Tetrominoes.Tetromino_O) ,
+                                typeof(Tetrominoes.Tetromino_T) ,
+                                typeof(Tetrominoes.Tetromino_J) ,
+                                typeof(Tetrominoes.Tetromino_L) ,
+                                typeof(Tetrominoes.Tetromino_S),
+                            typeof(Tetrominoes.Tetromino_Z)};
+                        XPosition = Bounds.Width * 0.25f;
+                        YPosition = GameOverPos.Y + ((2 + i) * (measured.Height*2.25f)) + measuremini.Height * 2;
+                        if(i==0)
+                        {
+                            SKRect measuredmini = new SKRect();
+                            GameOverEntryPaint.MeasureText("---Line Clears---", ref measuredmini);
+                            SKPoint ChosenPosition = new SKPoint(Bounds.Width / 2 - measuredmini.Width / 2, GameOverPos.Y + measured.Height * 2);
+                            //draw shadow...
+                            GameOverEntryPaint.Color = SKColors.White;
+                            g.DrawText("---Line Clears---", new SKPoint(ChosenPosition.X + 5, ChosenPosition.Y + 5), GameOverEntryPaint);
+                            GameOverEntryPaint.Color = SKColors.Black;
+                            g.DrawText("---Line Clears---", ChosenPosition, GameOverEntryPaint);
+                        }
+                        if (i >= 2)
+                        {
+                            DrawTetrominoStat(Source, TetTypes[i - 1], new SKPoint(XPosition, YPosition), g, Bounds, GameOverEntryPaint);
+                        }*/
+
+
                     }
-
-
-                    /*
-                    Type[] TetTypes = new Type[] {typeof(Tetrominoes.Tetromino_I),
-                            typeof(Tetrominoes.Tetromino_I) ,
-                            typeof(Tetrominoes.Tetromino_O) ,
-                            typeof(Tetrominoes.Tetromino_T) ,
-                            typeof(Tetrominoes.Tetromino_J) ,
-                            typeof(Tetrominoes.Tetromino_L) ,
-                            typeof(Tetrominoes.Tetromino_S),
-                        typeof(Tetrominoes.Tetromino_Z)};
-                    XPosition = Bounds.Width * 0.25f;
-                    YPosition = GameOverPos.Y + ((2 + i) * (measured.Height*2.25f)) + measuremini.Height * 2;
-                    if(i==0)
-                    {
-                        SKRect measuredmini = new SKRect();
-                        GameOverEntryPaint.MeasureText("---Line Clears---", ref measuredmini);
-                        SKPoint ChosenPosition = new SKPoint(Bounds.Width / 2 - measuredmini.Width / 2, GameOverPos.Y + measured.Height * 2);
-                        //draw shadow...
-                        GameOverEntryPaint.Color = SKColors.White;
-                        g.DrawText("---Line Clears---", new SKPoint(ChosenPosition.X + 5, ChosenPosition.Y + 5), GameOverEntryPaint);
-                        GameOverEntryPaint.Color = SKColors.Black;
-                        g.DrawText("---Line Clears---", ChosenPosition, GameOverEntryPaint);
-                    }
-                    if (i >= 2)
-                    {
-                        DrawTetrominoStat(Source, TetTypes[i - 1], new SKPoint(XPosition, YPosition), g, Bounds, GameOverEntryPaint);
-                    }*/
-
-
                 }
                 if (Source.NewScorePosition > -1)
                 {

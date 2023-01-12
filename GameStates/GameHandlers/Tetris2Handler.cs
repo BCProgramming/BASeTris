@@ -12,6 +12,35 @@ using BASeTris.Theme.Block;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
+    [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
+    [HandlerTipText("Tetris 2 (using alt colors)")]
+    public class Tetris2_AltHandler : Tetris2Handler
+    {
+        public override string GetName()
+        {
+            return "Tetris 2 (Alt)";
+        }
+        public Tetris2_AltHandler()
+        {
+            AllowedSpawns = AllowedSpawnsFlags.Spawn_Alternate;
+        }
+    }
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
+    [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
+    [HandlerTipText("Tetris 2 (6 Colors)")]
+    public class Tetris2_SixHandler : Tetris2Handler
+    {
+        public override string GetName()
+        {
+            return "Tetris 2 (Alt)";
+        }
+        public Tetris2_SixHandler()
+        {
+            AllowedSpawns = AllowedSpawnsFlags.Spawn_Full;
+        }
+    }
+
 
     //The Tetris 2 Handler is similar to the DrMarioHandler, however, it has some of it's own unique features.
     //1. Some of the tetrominoes have multiple sets. These tetrominoes are initially combined as one, but if one of the groups gets "set" (eg comes to rest on another block)
@@ -21,6 +50,7 @@ namespace BASeTris.GameStates.GameHandlers
     //3. Presumably we are going to want an appropriate Tetris2Theme.We may be able to re-use some of the internals of the line clear animations for the block clears though.
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
     [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
+    [HandlerTipText("Tetris 2")]
     public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>,IGameHandlerChooserInitializer
     {
         private BlockGroupChooser _Chooser = null;
@@ -59,7 +89,10 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return "Tetris 2";
         }
-
+        public override GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
+        {
+            return null;
+        }
         public override Nomino[] GetNominos()
         {
 

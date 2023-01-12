@@ -170,7 +170,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 if (StatisticsBackground == null || RedrawsNeeded || Source.f_RedrawStatusBitmap ||  LastStatisticsTheme!=Source.PlayField.Theme)
                 {
-                    GenerateStatisticsBackground(Source,POwner);
+                    GenerateStatisticsBackground(Source,pOwner);
                 }
 
                 g.DrawImage(StatisticsBackground, Bounds);

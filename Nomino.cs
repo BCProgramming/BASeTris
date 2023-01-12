@@ -191,7 +191,7 @@ namespace BASeTris
                     var Left = BlockSize.Width * (bge.X - _GroupExtents.X);
                     var Top = BlockSize.Height * (bge.Y - _GroupExtents.Y);
                     SKRect DrawPos = new SKRect(Left, Top, Left + BlockSize.Width, Top + BlockSize.Height);
-                    TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(DrawRep,DrawPos,this,new SettingsManager());
+                    TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(DrawRep,DrawPos,this,null);
                     RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                 }
             }

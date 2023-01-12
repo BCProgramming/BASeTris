@@ -248,6 +248,7 @@ namespace BASeTris.Settings
         }
         public SettingsManager(String pSourceFile,IStateOwner pOwner,GetKeyboardKeyFromName KeyFunction,GetGamepadKeyFromName GamepadFunction,Type pKeyEnumType,Type pGamepadEnumType)
         {
+            
             KeyboardKeyFunc = KeyFunction;
             GamepadKeyFunc = GamepadFunction;
             KeyEnumType = pKeyEnumType;
@@ -290,6 +291,7 @@ namespace BASeTris.Settings
                     
                 }
             }
+            MyCreator = new StackTrace();
         }
         /// <summary>
         /// Returns the current applicable settings. This is based on the handler of the current owner state.

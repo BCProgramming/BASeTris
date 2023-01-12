@@ -699,15 +699,29 @@ namespace BASeTris.Theme.Block
             new []{BCT.Transparent, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black, BCT.Black}
         };
 
-        public static BCT[][] Pop_Block = Normal_Block;
+        public static BCT[][] Pop_Block = new BCT[][]
+        {
+            new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Primary, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent},
+            new []{BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent, BCT.Transparent}
+        };
 
-        public static BCT[][] Shiny_Block_25 = Normal_Block;
 
-        public static BCT[][] Shiny_Block_50 = Normal_Block;
+        
 
-        public static BCT[][] Shiny_Block_75 = Normal_Block;
+        public static BCT[][] Shiny_Block_25 = Fixed_Block;
 
-        public static BCT[][] Shiny_Block_100 = Normal_Block;
+        public static BCT[][] Shiny_Block_50 = Fixed_Block;
+
+        public static BCT[][] Shiny_Block_75 = Fixed_Block;
+
+        public static BCT[][] Shiny_Block_100 = Fixed_Block;
 
         private static BCT[][] Normal_Block_Enhanced, Fixed_Block_Enhanced, Shiny_Block_25_Enhanced, Shiny_Block_50_Enhanced, Shiny_Block_75_Enhanced, Shiny_Block_100_Enhanced, Pop_Block_Enhanced;
         private static readonly Dictionary<SKColor, BCT> bitmappixels = new Dictionary<SKColor, BCT>()

@@ -39,7 +39,7 @@ namespace BASeTris.GameStates
             GameOverInfo = StatInfo;
             GameOveredState = paused;
             InitTime = DateTime.Now;
-            LineMaxIndex = StatInfo.Statistics.Count-1;
+            LineMaxIndex = StatInfo==null?0:StatInfo.Statistics.Count-1;
         }
 
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)

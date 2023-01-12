@@ -58,6 +58,10 @@ namespace BASeTris.GameStates.GameHandlers
         {
             Level = 30;
         }
+        public override GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
+        {
+            return null;
+        }
         public override string GetName()
         {
             return "Dr.Mario";
