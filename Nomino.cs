@@ -45,23 +45,46 @@ namespace BASeTris
             if(pOwner!=null) LastFall = pOwner.GetElapsedTime();
             Y = Value;
         }
+        /// <summary>
+        /// For Nomino's with non-adjacent parts, this returns a set for each Nomino "island".
+        /// </summary>
+        /// <returns></returns>
         public List<List<NominoElement>> GetContiguousSets()
         {
             //returns all contiguous "sets" in this nomino as separate groups- that is, each "group" or individual element separated by gaps and not "connected" will be individual sets.
             //"adjacent" here means directly left, right, top, or bottom.
 
-            List<NominoElement> AllResults = new List<NominoElement>();
+            
             List<List<NominoElement>> ResultSet = new List<List<NominoElement>>();
+            HashSet<NominoElement> AllResults = new HashSet<NominoElement>();
             //first get the contiguous set that the first item is part of.
             List<NominoElement> FirstSet = GetContiguousToElement(BlockData.First(),null).ToList();
-            return null;
+            ResultSet.Add(FirstSet);
+            foreach(var iterate in FirstSet)
+                AllResults.Add(iterate);
+
+            foreach (var iterate in BlockData)
+            {
+                if (AllResults.Contains(iterate)) continue;
+                List<NominoElement> NextSet = GetContiguousToElement(iterate, AllResults).ToList();
+                ResultSet.Add(NextSet);
+                foreach (var iterateadd in NextSet)
+                    if (!AllResults.Contains(iterateadd))
+                        AllResults.Add(iterateadd);
+            }
+            return ResultSet;
 
         }
+        //given a NominoElement that is within this Nomino, returns an enumeration of NominoElements that are adjacent and contiguous with it.
+        //For Most Nominoes, this is every Element.
         public IEnumerable<NominoElement> GetContiguousToElement(NominoElement ne,HashSet<NominoElement> IgnoreElements)
         {
+            if (!BlockData.Contains(ne)) yield break;
             yield return ne;
+
+            LineSeriesBlock PrimaryLSB = ne.Block as LineSeriesBlock;
             if (IgnoreElements == null) IgnoreElements = new HashSet<NominoElement>() { ne };
-            int[] offsets = new int[] { -1, 1 };
+            int[] offsets = new int[] { -1, 0, 1 };
             foreach (int xoffset in offsets)
             {
                 foreach (int yoffset in offsets)
@@ -70,6 +93,11 @@ namespace BASeTris
                     var findblock = BlockData.FirstOrDefault((b) => b.X == ne.X + xoffset && b.Y == ne.Y + yoffset);
                     if (findblock != null && !IgnoreElements.Contains(findblock))
                     {
+                        if (PrimaryLSB!=null && findblock.Block is LineSeriesBlock lsb && lsb.ConnectionIndex!=PrimaryLSB.ConnectionIndex)
+                        {
+                            continue; //skip as connectionindex doesn't match.
+                        }
+
                         foreach (var iterate in GetContiguousToElement(findblock, IgnoreElements))
                         {
                             yield return iterate;
@@ -77,10 +105,6 @@ namespace BASeTris
                     }
                 }
             }
-
-            
-
-
         }
         private int XMin, XMax, YMin, YMax;
         private Rectangle _GroupExtents = Rectangle.Empty;
@@ -419,7 +443,14 @@ namespace BASeTris
         {
             return (A % B + B) % B;
         }
-
+        public int BaseX()
+        {
+            return Positions[0].X;
+        }
+        public int BaseY()
+        {
+            return Positions[0].Y;
+        }
         public int X
         {
             get { return Positions[sMod(RotationModulo, Positions.Length)].X; }

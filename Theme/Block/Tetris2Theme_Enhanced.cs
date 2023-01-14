@@ -523,8 +523,17 @@ namespace BASeTris.Theme.Block
                 return BitmapIndexEnhanced;
             else return BitmapIndex;
         }
+
         public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
+            if (Group is Tetrominoes.Tetromino)
+            {
+                return base.GetNominoTypeKey(Group.GetType(), GameHandler, Field);
+
+            }
+
+
+
             var gotpoints = NNominoGenerator.GetNominoPoints(Group);
             String sStringRep = NNominoGenerator.StringRepresentation(gotpoints);
             return sStringRep;

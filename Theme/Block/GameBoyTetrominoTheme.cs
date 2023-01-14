@@ -17,6 +17,15 @@ namespace BASeTris
     [ThemeDescription("The style from the Game Boy Game. Inexplicably upscaled.")]
     public class GameBoyTetrominoTheme : NominoTheme
     {
+        public enum GameBoyBlockSelections
+        {
+            Standard,
+            Dark_Dotted,
+            Light_Dotted,
+            Lighter_Big_Dotted,
+            Solid_Beveled
+        }
+        
         public override String Name { get { return "Game Boy"; } }
         static Size ImageSize;
         static GameBoyTetrominoTheme() 
@@ -75,6 +84,7 @@ namespace BASeTris
             Color LevelColor = GetLevelColor(Level);
             return GetCached(I_Horizontal, "Horizontal", LevelColor);
         }
+        
         protected Image GetSolidSquare(int Level)
         {
             PrepareTheme();
@@ -164,7 +174,7 @@ namespace BASeTris
             var selected = TetrisGame.Choose(Types);
             selected(Group, Field, RandomLevel);
         }
-
+        private Dictionary<String, GameBoyBlockSelections> ChosenBlockSelections = new Dictionary<string, GameBoyBlockSelections>();
         public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareTheme();
@@ -198,6 +208,59 @@ namespace BASeTris
             else if(Group is Tetromino_T)
             {
                 Apply_T(Group as Tetromino_T, Field,CurrLevel);
+            }
+            else if(!(Group is Tetromino) && Group.Count() > 4)
+            {
+                var nPoints = NNominoGenerator.GetNominoPoints(Group);
+                GameBoyBlockSelections s;
+                String sStrRep = NNominoGenerator.StringRepresentation(nPoints);
+                if (!ChosenBlockSelections.ContainsKey(sStrRep))
+                {
+                    s = TetrisGame.Choose<GameBoyBlockSelections>((IEnumerable<GameBoyBlockSelections>)Enum.GetValues(typeof(GameBoyBlockSelections)));
+                    var nPoints2 = NNominoGenerator.RotateCW(nPoints);
+                    var nPoints3 = NNominoGenerator.RotateCW(nPoints2);
+                    var nPoints4 = NNominoGenerator.RotateCW(nPoints3);
+                    String strRep2 = NNominoGenerator.StringRepresentation(nPoints2);
+                    String strRep3 = NNominoGenerator.StringRepresentation(nPoints3);
+                    String strRep4 = NNominoGenerator.StringRepresentation(nPoints4);
+                    ChosenBlockSelections[sStrRep] = s;
+                    ChosenBlockSelections[strRep2] = s;
+                    ChosenBlockSelections[strRep3] = s;
+                    ChosenBlockSelections[strRep4] = s;
+
+                }
+
+                s = ChosenBlockSelections[sStrRep];
+                foreach (var blockcheck in Group)
+                {
+                    if (blockcheck.Block is StandardColouredBlock scb)
+                    {
+                        scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                        Image useImage = null;
+                        switch (s)
+                        {
+                            case GameBoyBlockSelections.Standard:
+                                useImage = GetSolidSquare(CurrLevel);
+                                break;
+                            case GameBoyBlockSelections.Dark_Dotted:
+                                useImage = GetDottedDark(CurrLevel);
+                                break;
+                            case GameBoyBlockSelections.Light_Dotted:
+                                useImage = GetDottedLight(CurrLevel);
+                                break;
+                            case GameBoyBlockSelections.Lighter_Big_Dotted:
+                                useImage = GetFatDotted(CurrLevel);
+                                break;
+                            case GameBoyBlockSelections.Solid_Beveled:
+                                useImage = GetInsetBevel(CurrLevel);
+                                break;
+                        }
+
+
+                        scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useImage)) };
+                        
+                    }
+                }
             }
             else
             {

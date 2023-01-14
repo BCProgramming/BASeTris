@@ -234,9 +234,10 @@ namespace BASeTris
             {
                 for (int xcoord = MinX; xcoord <= MaxX; xcoord++)
                 {
-                    var getPoint = Points.FirstOrDefault((p) => (p.X == xcoord && p.Y == ycoord));
-                    if (getPoint != null)
+                    var gotpoint =  Points.Any((p) => (p.X == xcoord && p.Y == ycoord));
+                    if (gotpoint)
                     {
+                        var getPoint = Points.First((p) => (p.X == xcoord && p.Y == ycoord));
                         sb.Append("#");
                         if (getPoint.Source != null && getPoint.Source.Block is LineSeriesBlock lsb)
                         {

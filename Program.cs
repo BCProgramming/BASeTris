@@ -13,8 +13,10 @@ using System.Windows.Forms;
 using BASeCamp.BASeScores;
 using BASeCamp.Logging;
 using BASeTris.AI;
+using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Tetrominoes;
 using OpenTK;
 using OpenTK.Input;
 using static BASeTris.NNominoGenerator;
@@ -84,15 +86,8 @@ namespace BASeTris
             return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5),2);
         }
 
-        
-
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        private static void MultiMinoTest()
         {
-            
             var firstresult = NNominoGenerator.GetPieces(6, null).ToList();
             var result = NNominoGenerator.FilterPieces(firstresult).ToList();
             StringBuilder sbreport = new StringBuilder();
@@ -109,7 +104,19 @@ namespace BASeTris
             }
             String strresult = sbreport.ToString();
             //System.IO.File.WriteAllText("T:\\NominoOut.txt", strresult);
-            
+        }
+
+
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+
+            Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
+
+            var testresult = MakeTester.GetContiguousSets();
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);

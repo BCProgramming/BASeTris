@@ -61,6 +61,11 @@ namespace BASeTris.Theme
             if (!NominoSKBitmaps.ContainsKey(sAddKey))
                 NominoSKBitmaps.Add(sAddKey, new List<SKBitmap>() { buildBitmap });
 
+            if (!NominoImages.ContainsKey(sAddKey))
+            {
+                Image useimage = SkiaSharp.Views.Desktop.Extensions.ToBitmap(buildBitmap);
+                NominoImages[sAddKey] = new List<Image>() { useimage };
+            }
 
             return buildBitmap;
         }
@@ -94,7 +99,7 @@ namespace BASeTris.Theme
                 else
                 {
                     var GetImage = GetTetrominoImage(Source);
-                    return GetTetrominoSKBitmap(Source);
+                    if(GetImage!=null) return GetTetrominoSKBitmap(Source);
                     
                 }
 
@@ -138,6 +143,7 @@ namespace BASeTris.Theme
         }
         public Image GetTetrominoImage(String TetrominoType)
         {
+            if (!HasTetrominoImages()) return null;
             return TetrisGame.Choose(NominoImages[TetrominoType]);
         }
         public bool HasTetrominoSKBitmaps() => NominoSKBitmaps != null;

@@ -293,7 +293,7 @@ namespace BASeTris.Theme.Block
                     }
                     else if(flagvalues == BlockFlags.CustomSelector)
                     {
-                        sbc._RotationImagesSK = ApplyFunc_Custom(Field, Group,iterate.Block, chosenType.BlockType);
+                        sbc._RotationImagesSK = ApplyFunc_Custom(Field, Group,iterate,iterate.Block, chosenType.BlockType);
                     }
                 }
             }
@@ -319,14 +319,14 @@ namespace BASeTris.Theme.Block
                     }
                     else if(Flags==BlockFlags.CustomSelector)
                     {
-                        sbc._RotationImagesSK = ApplyFunc_Custom(Field, Group, iterate.Block,chosenType);
+                        sbc._RotationImagesSK = ApplyFunc_Custom(Field, Group,iterate, iterate.Block,chosenType);
                     }
                     
                 }
             }
         }
        
-        protected virtual SKImage[] ApplyFunc_Custom(TetrisField field,Nomino Group,NominoBlock Target,BlockEnum chosentype)
+        protected virtual SKImage[] ApplyFunc_Custom(TetrisField field,Nomino Group,NominoElement element,NominoBlock Target,BlockEnum chosentype)
         {
             return null;
         }

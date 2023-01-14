@@ -736,7 +736,7 @@ namespace BASeTris.Theme.Block
 
 
         }
-        protected override SKImage[] ApplyFunc_Custom(TetrisField field, Nomino Group, NominoBlock Target,BlockTypes chosentype)
+        protected override SKImage[] ApplyFunc_Custom(TetrisField field, Nomino Group, NominoElement element, NominoBlock Target,BlockTypes chosentype)
         {
             //I think this messes up when applying to the field because it changes the blocktype being used based on the rotation, which gives a different sequence of blocks.
 
