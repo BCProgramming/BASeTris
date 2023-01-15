@@ -1,5 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <SettingsGroups>
+  <Controls>
+    <KeyboardKeys>
+      <Key GameKey="GameKey_Left" Binding="Left" />
+      <Key GameKey="GameKey_Right" Binding="Right" />
+      <Key GameKey="GameKey_Down" Binding="Down" />
+      <Key GameKey="GameKey_Drop" Binding="Up" />
+      <Key GameKey="GameKey_RotateCW" Binding="X" />
+      <Key GameKey="GameKey_RotateCCW" Binding="Z" />
+      <Key GameKey="GameKey_Pause" Binding="Pause" />
+      <Key GameKey="GameKey_Pause" Binding="P" />
+      <Key GameKey="GameKey_Hold" Binding="Space" />
+      <Key GameKey="GameKey_MenuActivate" Binding="Enter" />
+      <Key GameKey="GameKey_Debug1" Binding="F2" />
+      <Key GameKey="GameKey_Debug2" Binding="F7" />
+      <Key GameKey="GameKey_Debug3" Binding="F11" />
+      <Key GameKey="GameKey_Debug4" Binding="F12" />
+      <Key GameKey="GameKey_Debug5" Binding="Number5" />
+    </KeyboardKeys>
+    <GamepadButtons>
+      <Button GameKey="GameKey_RotateCW" Binding="A" />
+      <Button GameKey="GameKey_RotateCCW" Binding="X" />
+      <Button GameKey="GameKey_Hold" Binding="RBumper" />
+      <Button GameKey="GameKey_Left" Binding="Dpad_Left" />
+      <Button GameKey="GameKey_Right" Binding="Dpad_Right" />
+      <Button GameKey="GameKey_Down" Binding="Dpad_Down" />
+      <Button GameKey="GameKey_Drop" Binding="Dpad_Up" />
+      <Button GameKey="GameKey_Pause" Binding="Start" />
+    </GamepadButtons>
+  </Controls>
   <SettingsGroup Name="Default">
     <Data Music="0.7" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_2" SoundScheme="SNES" Chooser="Default" Theme="" />
   </SettingsGroup>
@@ -44,5 +73,11 @@
   </SettingsGroup>
   <SettingsGroup Name="Mr. Mario">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
+  </SettingsGroup>
+  <SettingsGroup Name="Tetris 2 (Alt)">
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
+  </SettingsGroup>
+  <SettingsGroup Name="Hextris">
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="Game Boy" />
   </SettingsGroup>
 </SettingsGroups>

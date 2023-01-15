@@ -40,6 +40,50 @@ namespace BASeTris
             Theme_Changed,
             FieldSet
         }
+        [Flags]
+        public enum AdjacentBlockFlags
+        {
+            None = 0,
+            Top = 1,
+            Right = 2,
+            Bottom = 4,
+            Left = 8,
+            TopRight = 16,
+            BottomRight=32,
+            BottomLeft=64,
+            TopLeft=128
+        }
+        static Dictionary<(int, int), AdjacentBlockFlags> AdjacentLookup = new Dictionary<(int, int), AdjacentBlockFlags>()
+            {
+                {(-1,0),AdjacentBlockFlags.Left },
+                {(1,0),AdjacentBlockFlags.Right },
+                {(0,1),AdjacentBlockFlags.Bottom },
+                {(0,-1),AdjacentBlockFlags.Top },
+
+
+            };
+        static Dictionary<(int, int), AdjacentBlockFlags> DiagonalLookup = new Dictionary<(int, int), AdjacentBlockFlags>()
+            {
+                {(1,-1),AdjacentBlockFlags.TopRight },
+                {(1,1),AdjacentBlockFlags.BottomRight },
+                {(-1,1),AdjacentBlockFlags.BottomLeft },
+                {(-1,-1),AdjacentBlockFlags.TopLeft }
+            };
+        public static AdjacentBlockFlags GetAdjacentBlockFlags(Nomino group, NominoElement element,bool IncludeDiagonals = false)
+        {
+            AdjacentBlockFlags bbt = AdjacentBlockFlags.None;
+
+            Dictionary<(int, int), AdjacentBlockFlags>[] DoCheck = IncludeDiagonals ? new[] { AdjacentLookup, DiagonalLookup } : new[] { AdjacentLookup };
+            foreach (var dict in DoCheck)
+            {
+                foreach (var kvp in dict)
+                {
+                    if (group.Any((b) => (b.BaseX(), b.BaseY()) == (element.BaseX() + kvp.Key.Item1, element.BaseY() + kvp.Key.Item2))) bbt |= kvp.Value;
+                }
+            }
+            return bbt;
+        }
+
         public virtual ThemeImageProvider ThemeProvider { get; set; }
         public abstract String Name { get; }
         public virtual bool IsAnimated(NominoBlock block)
@@ -50,6 +94,7 @@ namespace BASeTris
         {
             return GetNominoKey_Tetris(Group, GameHandler, Field);
         }
+        [Obsolete("Nomino handling is too involved to index the images only by Type.")]
         public virtual String GetNominoTypeKey(Type src, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
             return src.FullName;
@@ -68,6 +113,7 @@ namespace BASeTris
 
 
         }
+        
         public string GetNominoKey_LineSeries(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
         {
 

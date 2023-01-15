@@ -73,8 +73,10 @@ namespace BASeTris
         }
         private void UpdateSize()
         {
-            this.Location = new Point(140);
-            this.ClientSize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
+            //this.Location = new Point(140);
+            var makesize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
+            Debug.Print($"Scale Size: Factor:{ScaleFactor} - {makesize.ToString()}");
+            this.ClientSize = makesize;
             InitializeGraphics();
             //this.renderTarget = CreateRenderTarget(this);
         }
@@ -91,6 +93,7 @@ namespace BASeTris
             Icon = Properties.Resources.AppIcon;
             Location = new Point(Location.X, 0);
             _Present = new GamePresenter(this);
+            _ScaleFactor = ((float)(this.ClientSize.Height) / 950f);
             StartGame();
             CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this) ;
         }
@@ -392,9 +395,9 @@ namespace BASeTris
             _Present.Feedback(Strength, Length);
         }
 
-   
+        //return ((float)(this.ClientSize.Height) / 950f)*
         private double _ScaleFactor = 1;
-        public double ScaleFactor { get { return (float)(this.ClientSize.Height) / 950f; } }
+        public double ScaleFactor { get { return _ScaleFactor; } }
         public void SetScale(double pScale)
         {
             _ScaleFactor = pScale;

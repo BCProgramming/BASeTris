@@ -23,7 +23,8 @@ namespace BASeTris
             Dark_Dotted,
             Light_Dotted,
             Lighter_Big_Dotted,
-            Solid_Beveled
+            Solid_Beveled,
+            Mottled
         }
         
         public override String Name { get { return "Game Boy"; } }
@@ -35,11 +36,79 @@ namespace BASeTris
 
 
         }
+        private Image GetMottleImage(Nomino n, NominoElement element,int level)
+        {
+            var BlockFlags = NominoTheme.GetAdjacentBlockFlags(n, element, true);
+            return GetMottleImage(BlockFlags,level);
+        }
+        int mottle_generated = 0;
+        private Image GetMottleImage(AdjacentBlockFlags abf,int pLevel)
+        {
+            
+            if (!AdjacentMottles.ContainsKey(abf))
+            {
+                List<Image> Overlays = new List<Image>();
+                Bitmap BuildResult = new Bitmap(I_Fill);
+
+                Dictionary<AdjacentBlockFlags, Image> OverlayDict = new Dictionary<AdjacentBlockFlags, Image>()
+                {
+                    { AdjacentBlockFlags.Left , Line_Left },
+                    { AdjacentBlockFlags.Top , Line_Top },
+                    { AdjacentBlockFlags.Right , Line_Right },
+                    { AdjacentBlockFlags.Bottom , Line_Bottom },
+                    { AdjacentBlockFlags.TopLeft , Corner_Top_Left},
+                    { AdjacentBlockFlags.TopRight , Corner_Top_Right},
+                    { AdjacentBlockFlags.BottomRight , Corner_Bottom_Right},
+                    { AdjacentBlockFlags.BottomLeft , Corner_Bottom_Left},
+                };
+                foreach (var checkadjacents in OverlayDict)
+                {
+                    if (!abf.HasFlag(checkadjacents.Key))
+                    {
+                        Overlays.Add(checkadjacents.Value);
+                    }
+                }
+                using (Graphics g = Graphics.FromImage(BuildResult))
+                {
+                    foreach (var dooverlay in Overlays)
+                    {
+                        g.DrawImage(dooverlay,new Rectangle(0,0,BuildResult.Width,BuildResult.Height));
+                    }
+                }
+                AdjacentMottles[abf] = BuildResult;
+                mottle_generated++;
+                AdjacentMottles[abf].Save("D:\\Mottle_" + mottle_generated + " .png");
+
+            }
+            return GetCached(new Bitmap(AdjacentMottles[abf]),"Mottle_" + (int)abf,GetLevelColor(pLevel));
+
+
+        }
+        private Dictionary<AdjacentBlockFlags, Bitmap> AdjacentMottles = new Dictionary<AdjacentBlockFlags, Bitmap>();
+
         bool Prepared = false;
         private void PrepareTheme()
         {
             if (Prepared) return;
+            Line_Top = TetrisGame.Imageman.getLoadedImage("line_top", 0.25f);
+            Line_Left = new Bitmap(Line_Top);
+            Line_Bottom = new Bitmap(Line_Top);
+            Line_Right = new Bitmap(Line_Top);
+            Line_Right.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            Line_Left.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            Line_Bottom.RotateFlip(RotateFlipType.Rotate180FlipNone);
+            
 
+            Corner_Top_Left = TetrisGame.Imageman.getLoadedImage("mottle_corner", 0.25f);
+            Corner_Top_Right = new Bitmap(Corner_Top_Left);
+            Corner_Bottom_Right = new Bitmap(Corner_Top_Left);
+            Corner_Bottom_Left = new Bitmap(Corner_Top_Left);
+            Corner_Top_Right.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            Corner_Bottom_Right.RotateFlip(RotateFlipType.Rotate180FlipNone);
+            Corner_Bottom_Left.RotateFlip(RotateFlipType.Rotate270FlipNone);
+
+
+            I_Fill = TetrisGame.Imageman.getLoadedImage("mottle_fill", 0.25f);
             I_Right_Cap = TetrisGame.Imageman.getLoadedImage("mottle_right_cap", 0.25f);
             I_Left_Cap = TetrisGame.Imageman.getLoadedImage("FLIPX:mottle_right_cap", 0.25f);
             I_Horizontal = TetrisGame.Imageman.getLoadedImage("mottle_horizontal", 0.25f);
@@ -161,6 +230,15 @@ namespace BASeTris
         private static Image I_Right_Cap;
         private static Image I_Horizontal;
         private static Image I_Left_Cap;
+        private static Image I_Fill;
+        private static Image Line_Top;
+        private static Image Line_Right;
+        private static Image Line_Bottom;
+        private static Image Line_Left;
+        private static Image Corner_Top_Left;
+        private static Image Corner_Top_Right;
+        private static Image Corner_Bottom_Left;
+        private static Image Corner_Bottom_Right;
 
         public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
         {
@@ -255,9 +333,17 @@ namespace BASeTris
                                 useImage = GetInsetBevel(CurrLevel);
                                 break;
                         }
-
-
-                        scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useImage)) };
+                        if (s == GameBoyBlockSelections.Mottled)
+                        {
+                            Image useMottleImage = GetMottleImage(Group, blockcheck,CurrLevel);
+                            Image[] Rotations =  NominoTheme.GetImageRotations(useMottleImage);
+                            scb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useMottleImage))));
+                            scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                        }
+                        else
+                        {
+                            scb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(useImage)) };
+                        }
                         
                     }
                 }

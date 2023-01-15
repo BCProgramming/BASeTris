@@ -61,7 +61,7 @@ namespace BASeTris.Theme
             if (!NominoSKBitmaps.ContainsKey(sAddKey))
                 NominoSKBitmaps.Add(sAddKey, new List<SKBitmap>() { buildBitmap });
 
-            if (!NominoImages.ContainsKey(sAddKey))
+            if (NominoImages!=null && !NominoImages.ContainsKey(sAddKey))
             {
                 Image useimage = SkiaSharp.Views.Desktop.Extensions.ToBitmap(buildBitmap);
                 NominoImages[sAddKey] = new List<Image>() { useimage };

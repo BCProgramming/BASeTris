@@ -93,6 +93,7 @@ namespace BASeTris.Rendering.Skia
                     {
                         var current = parameters.g.TotalMatrix;
                         parameters.g.Concat(ref parameters.ApplyAttributes);
+                        DrawPosition.Inflate(0.25f, 0);
                         if(parameters.ColorFilter!=null)
                             parameters.g.DrawImage(useImage, DrawPosition, new SKPaint() { ColorFilter = parameters.ColorFilter });
                         else

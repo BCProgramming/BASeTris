@@ -249,9 +249,9 @@ namespace BASeTris
                 foreach(NominoElement bge in this)
                 {
                     //RectangleF DrawPos = new RectangleF(BlockSize.Width * (bge.X - _GroupExtents.X), BlockSize.Height * (bge.Y - _GroupExtents.Y), BlockSize.Width, BlockSize.Height);
-                    var Left = BlockSize.Width * (bge.X - _GroupExtents.X);
-                    var Top = BlockSize.Height * (bge.Y - _GroupExtents.Y);
-                    SKRect DrawPos = new SKRect(Left, Top, Left + BlockSize.Width, Top + BlockSize.Height);
+                    double Left = BlockSize.Width * (bge.X - _GroupExtents.X);
+                    double Top = BlockSize.Height * (bge.Y - _GroupExtents.Y);
+                    SKRect DrawPos = new SKRect((float)Left, (float)Top, (float)(Left + BlockSize.Width), (float)(Top + BlockSize.Height));
                     TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(DrawRep,DrawPos,this,null);
                     RenderingProvider.Static.DrawElement(null,tbd.g,bge.Block,tbd);
                 }

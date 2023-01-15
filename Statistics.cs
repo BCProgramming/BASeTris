@@ -172,8 +172,7 @@ namespace BASeTris
             set => PieceCounts[typeof(Tetromino_Z)] = value;
         }
 
-        
-
+      
         public int GetPieceCount(Type TetronimoType)
         {
             return PieceCounts[TetronimoType];
