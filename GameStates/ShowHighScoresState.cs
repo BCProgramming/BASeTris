@@ -32,7 +32,7 @@ namespace BASeTris.GameStates
         public String HeaderText = "HIGH SCORES";
         public List<IHighScoreEntry> hs = null;
         public int IncrementedDrawState = -1;
-
+        public event EventHandler<EventArgs> BeforeRevertState;
         //the increment Draw State goes from 0, where the screen hasn't had any additional foreground information drawn, to the size of the high score list + 2.
         //"The added two lines are HIGH SCORES and the header line, which are also drawn".
 
@@ -110,7 +110,11 @@ namespace BASeTris.GameStates
                 }
             }
 
-            else if (RevertState != null) pOwner.CurrentState = RevertState;
+            else if (RevertState != null)
+            {
+                BeforeRevertState?.Invoke(this, new EventArgs());
+                pOwner.CurrentState = RevertState;
+            }
         }
     }
 }

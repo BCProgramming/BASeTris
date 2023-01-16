@@ -1,0 +1,160 @@
+﻿using BASeCamp.Rendering;
+using BASeTris.GameStates;
+using SkiaSharp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BASeTris.Rendering.Skia.GameStates
+{
+
+    public class StarData
+    {
+        static SKColor[] PossibleColors = new SKColor[] { SKColors.White, SKColors.Yellow, SKColors.LightBlue,SKColors.Red,SKColors.Brown,SKColors.Beige };
+        public SKPaint StarPaint = new SKPaint() { Color = TetrisGame.Choose(PossibleColors) };
+        public float X { get; set; }
+        public float Y { get; set; }
+
+        public float SpeedFactor { get; set; } = 1f;
+        public StarData(float pX, float pY)
+        {
+            X = pX;
+            Y = pY;
+        }
+    }
+
+    [RenderingHandler(typeof(TextScrollState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class TextScrollStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, TextScrollState, GameStateSkiaDrawParameters> // StandardStateRenderingHandler<SKCanvas, PauseGameState, GameStateSkiaDrawParameters>
+    {
+        StarData[] Stars = null;
+        SKPaint Foreground = null;
+        SKPaint Shadow = null;
+        public TextScrollStateSkiaRenderingHandler()
+        {
+            
+        }
+        private void GenerateStars(float CenterX,float CenterY,SKRect Bounds)
+        {
+            float[] AvailableFactors = new float[] { 1f, 0.5f, 0.25f };
+            Stars = new StarData[240];
+            for (int i = 0; i < Stars.Length; i++)
+            {
+                float sx = (float)(CenterX + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Width);
+                float sy = (float)(CenterY + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Height);
+                
+                Stars[i] = new StarData(sx, sy);
+                Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors);
+            }
+        }
+    public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TextScrollState Source, GameStateSkiaDrawParameters Element)
+        {
+            float MiddleX = Element.Bounds.Width / 2 + Element.Bounds.Left;
+            float MiddleY = Element.Bounds.Height / 2 + Element.Bounds.Top;
+            if (Foreground == null)
+            {
+                Foreground = new SKPaint()
+                {
+                    Color = SKColors.LightBlue,
+                    TextSize = (float)(24 * pOwner.ScaleFactor),
+                    Typeface = TetrisGame.CreditFontSK   
+
+                };
+                Shadow = new SKPaint()
+                {
+                    Color = SKColors.Navy,
+                    TextSize = (float)(24 * pOwner.ScaleFactor),
+                    Typeface = TetrisGame.CreditFontSK   
+                };
+
+            }
+            if (Stars == null)
+            {
+                GenerateStars(MiddleX,MiddleY,Element.Bounds);
+            }
+            var g = pRenderTarget;
+            g.Clear(SKColors.Black);
+
+            //draw stars.
+
+            foreach (var stardraw in Stars)
+            {
+
+                var x = stardraw.X;
+                var y = stardraw.Y;
+                var r = (pOwner.ScaleFactor)* ( 0.001 * (Math.Sqrt(Math.Pow(x - MiddleX, 2) + Math.Pow(y - MiddleY, 2))));
+
+                g.DrawCircle(new SKPoint(x, y), (float)r, stardraw.StarPaint);
+
+                //update star position now.
+                stardraw.X = (float)(stardraw.X + ((stardraw.X - MiddleX) * 0.025)*stardraw.SpeedFactor);
+                stardraw.Y = (float)(stardraw.Y + ((stardraw.Y - MiddleY) * 0.025)*stardraw.SpeedFactor);
+
+
+                if (stardraw.X < Element.Bounds.Left - 50 || stardraw.X > Element.Bounds.Right + 50 ||
+                    stardraw.Y < Element.Bounds.Top - 50 || stardraw.Y > Element.Bounds.Bottom + 50)
+                {
+                    float sx = (float)(MiddleX+ (TetrisGame.rgen.NextDouble()-0.5) * Element.Bounds.Width);
+                    float sy = (float)(MiddleY + (TetrisGame.rgen.NextDouble()-0.5) * Element.Bounds.Height);
+                    stardraw.X = sx;
+                    stardraw.Y = sy;
+                }
+
+            }
+            
+
+            if (Source.CurrentItem != null)
+            {
+                if (Source.CurrentItem is TextScrollEntry tse)
+                {
+
+                    String[] sRenderText = tse.Text;
+                    SKRect[] RenderBounds = new SKRect[sRenderText.Length];
+
+                    for (int i = 0; i < RenderBounds.Length; i++)
+                    {
+                        Foreground.MeasureText(sRenderText[i], ref RenderBounds[i]);
+                    }
+
+                    float TotalHeight = RenderBounds.Sum((a) => a.Height);
+                    float MaxWidth = RenderBounds.Max((a) => a.Width);
+                    float MaxHeight = RenderBounds.Max((a) => a.Height);
+
+
+                    float CurrentY = Element.Bounds.Height / 2 - (TotalHeight);
+
+
+                    for (int i = 0; i < sRenderText.Length; i++)
+                    {
+                        String sRender = sRenderText[i];
+                        SKRect useBounds = RenderBounds[i];
+                        var usePosition = new SKPoint(MiddleX - useBounds.Width/2, CurrentY);
+                        pRenderTarget.DrawText(sRender, new SKPoint((float)(usePosition.X + 5 * pOwner.ScaleFactor), (float)(usePosition.Y + 5 * pOwner.ScaleFactor)), Shadow);
+                        pRenderTarget.DrawText(sRender, new SKPoint(usePosition.X , usePosition.Y ), Foreground);
+
+                        CurrentY += MaxHeight;
+
+
+                    }
+
+
+                    
+
+                    
+
+
+                }
+
+
+            }
+
+
+        }
+
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, TextScrollState Source, GameStateSkiaDrawParameters Element)
+        {
+            //throw new NotImplementedException();
+        }
+    }
+}

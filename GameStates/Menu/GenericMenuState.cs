@@ -63,7 +63,7 @@ namespace BASeTris.GameStates.Menu
     /// </summary>
     public class TitleMenuPopulator : IMenuPopulator
     {
-    
+        private int EnterExitScoreCount = 0;
         public void PopulateMenu(GenericMenuState Target,IStateOwner pOwner)
         {
             Target.StateHeader = "BASeTris";
@@ -86,7 +86,7 @@ namespace BASeTris.GameStates.Menu
                     ((BASeTris)pOwner).Close();
                 }
             };
-            
+
             /*NewGameItem.OnDeactivateOption += (o, eventarg) =>
              {
                  //start a new game.
@@ -116,17 +116,18 @@ namespace BASeTris.GameStates.Menu
             {
                 //nothing for when we change the option.
             };*/
-            
+            MenuStateTextMenuItem CreditsMenu = null;
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
             Target.MenuItemActivated += (o, e) =>
             {
-                if(e.MenuElement==NewGameItem)
+                if (e.MenuElement == NewGameItem)
                 {
                     GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target));
                     pOwner.CurrentState = gms;
                     Target.ActivatedItem = null;
                 }
-               
-                else if(e.MenuElement == OptionsItem)
+
+                else if (e.MenuElement == OptionsItem)
                 {
                     //Show the options menu
                     //var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
@@ -134,13 +135,31 @@ namespace BASeTris.GameStates.Menu
                     pOwner.CurrentState = OptionsMenu;
                     Target.ActivatedItem = null;
                 }
-                else if(e.MenuElement == HighScoresItem)
+                else if (e.MenuElement == HighScoresItem)
                 {
                     ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], Target, null);
                     pOwner.CurrentState = scorestate;
                     Target.ActivatedItem = null;
+                    EnterExitScoreCount++;
+                    if (EnterExitScoreCount == 5)
+                    {
+                        CreditsMenu = new MenuStateTextMenuItem() { Text = "Credits", TipText = "View Credits!" };
+                        CreditsMenu.FontFace = FontSrc.FontFamily.Name;
+                        CreditsMenu.FontSize = FontSrc.Size;
+                        Target.MenuElements.Add(CreditsMenu);
+                        scorestate.BeforeRevertState += (o, e) =>
+                          {
+                              TetrisGame.Soundman.PlaySound("level_up", false).Tempo = 2;
+                          };
+                    }
                 }
-                else if(e.MenuElement == ExitItem)
+                else if (e.MenuElement == CreditsMenu)
+                {
+                    TextScrollState tss = new TextScrollState(pOwner.CurrentState);
+                    pOwner.CurrentState = tss;
+                    Target.ActivatedItem = null;
+                }
+                else if (e.MenuElement == ExitItem)
                 {
                     //nothing, this needs confirmation so is handled separate.
                 }
@@ -150,7 +169,7 @@ namespace BASeTris.GameStates.Menu
 
 
 
-            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+            
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
             Target.HeaderTypeSize = (float)(28f*pOwner.ScaleFactor);
             foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,HighScoresItem,ExitItem})

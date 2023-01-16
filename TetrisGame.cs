@@ -57,6 +57,7 @@ namespace BASeTris
         public static FontFamily RetroFont;
         public static FontFamily LCDFont;
         public static SKTypeface RetroFontSK;
+        public static SKTypeface CreditFontSK;
         public static SKTypeface LCDFontSK;
         public static SKTypeface ArialFontSK;
         private static Image _TiledCache = null;
@@ -218,6 +219,7 @@ namespace BASeTris
             LCDFont = GetResourceFont("BASeTris.LCD.ttf");
             RetroFontSK = GetResourceFontSK("BASeTris.Pixel.ttf");
             LCDFontSK = GetResourceFontSK("BASeTris.LCD.ttf");
+            CreditFontSK = GetResourceFontSK("BASeTris.Enterprise.ttf");
             ArialFontSK = SKTypeface.FromFamilyName("Arial");
             //RetroFont = pfc.Families[0];
         }
