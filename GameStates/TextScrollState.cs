@@ -1,4 +1,5 @@
 ﻿using BASeTris.AssetManager;
+using BASeTris.Rendering.Adapters;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -117,9 +118,9 @@ namespace BASeTris.GameStates
             "",
             "Michael Burgwin",
             "Assistant Directors",
-            "",
-            "Michael Burgwin",
-            "-AND-",
+            "","",
+            "Michael Burgwin","",
+            "-AND-","",
             "Michael Burgwin"
         },
         new []{
@@ -311,7 +312,7 @@ namespace BASeTris.GameStates
             List<TextScrollEntry> scroller = new List<TextScrollEntry>();
             foreach (var iterate in CreditText)
             {
-                TextScrollEntry tse = new TextScrollEntry(iterate, offset + (offset * count)) { TickLifeTime = 2000 };
+                TextScrollEntry tse = new TextScrollEntry((from s in iterate select s.ToUpper()).ToArray(), offset + (offset * count)) { TickLifeTime = 2000 };
                 scroller.Add(tse);
                 count++;
             }
@@ -361,10 +362,35 @@ namespace BASeTris.GameStates
             }
 
         }
-
+        public BCPoint DirectionAdd = new BCPoint(0, 0);
+        public double WarpFactor = 1;
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             //throw new NotImplementedException();
+            if (g == GameKeys.GameKey_Drop)
+            {
+                DirectionAdd = new BCPoint(DirectionAdd.X, DirectionAdd.Y-3);
+            }
+            else if (g == GameKeys.GameKey_Left)
+            {
+                DirectionAdd = new BCPoint(DirectionAdd.X - 3, DirectionAdd.Y);
+            }
+            else if (g == GameKeys.GameKey_Right)
+            {
+                DirectionAdd = new BCPoint(DirectionAdd.X + 3, DirectionAdd.Y);
+            }
+            else if (g == GameKeys.GameKey_Down)
+            {
+                DirectionAdd = new BCPoint(DirectionAdd.X, DirectionAdd.Y + 3);
+            }
+            else if (g == GameKeys.GameKey_RotateCW)
+            {
+                WarpFactor = WarpFactor + 0.25f;
+            }
+            else if (g == GameKeys.GameKey_RotateCCW)
+            {
+                WarpFactor = Math.Max(0,WarpFactor - 0.25f);
+            }
         }
     }
 

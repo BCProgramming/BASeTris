@@ -12,6 +12,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
     public class StarData
     {
+        public float SizeMultiplier = 1.0f;
         static SKColor[] PossibleColors = new SKColor[] { SKColors.White, SKColors.Yellow, SKColors.LightBlue,SKColors.Red,SKColors.Brown,SKColors.Beige };
         public SKPaint StarPaint = new SKPaint() { Color = TetrisGame.Choose(PossibleColors) };
         public float X { get; set; }
@@ -37,8 +38,10 @@ namespace BASeTris.Rendering.Skia.GameStates
         }
         private void GenerateStars(float CenterX,float CenterY,SKRect Bounds)
         {
-            float[] AvailableFactors = new float[] { 1f, 0.5f, 0.25f };
-            Stars = new StarData[240];
+            float[] AvailableFactors = new float[] { 1f, 0.5f, 0.25f,1.1f,1.25f,0.1f };
+            float[] AvailableScales = new float[] { 0.25f, .5f, 0.75f, 1f, 1.25f, 1.5f, 2f, 3f, 5f };
+            float[] chooseweights = new float[] { 20, 30, 40, 100, 40, 30, 20, 10, 5 };
+            Stars = new StarData[265];
             for (int i = 0; i < Stars.Length; i++)
             {
                 float sx = (float)(CenterX + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Width);
@@ -46,6 +49,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 
                 Stars[i] = new StarData(sx, sy);
                 Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors);
+                Stars[i].SizeMultiplier = RandomHelper.Select(chooseweights, AvailableFactors);
             }
         }
     public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TextScrollState Source, GameStateSkiaDrawParameters Element)
@@ -88,8 +92,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                 g.DrawCircle(new SKPoint(x, y), (float)r, stardraw.StarPaint);
 
                 //update star position now.
-                stardraw.X = (float)(stardraw.X + ((stardraw.X - MiddleX) * 0.025)*stardraw.SpeedFactor);
-                stardraw.Y = (float)(stardraw.Y + ((stardraw.Y - MiddleY) * 0.025)*stardraw.SpeedFactor);
+                stardraw.X = (float)(stardraw.X + ((stardraw.X - MiddleX) * 0.025)*(stardraw.SpeedFactor * Source.WarpFactor) + Source.DirectionAdd.X);
+                stardraw.Y = (float)(stardraw.Y + ((stardraw.Y - MiddleY) * 0.025)*(stardraw.SpeedFactor*Source.WarpFactor) + Source.DirectionAdd.Y);
 
 
                 if (stardraw.X < Element.Bounds.Left - 50 || stardraw.X > Element.Bounds.Right + 50 ||
@@ -100,6 +104,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     stardraw.X = sx;
                     stardraw.Y = sy;
                 }
+                
 
             }
             
