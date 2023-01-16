@@ -276,7 +276,15 @@ namespace BASeTris.Rendering.Skia
                                 //tbd.OverrideBrush = GhostBrush;
                                 tbd.ColorFilter = SKColorMatrices.GetFader(0.5f);
                                 var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
-                                GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
+                                var originalclip = tbd.g.LocalClipBounds;
+
+                                
+                                using (new SKAutoCanvasRestore(tbd.g))
+                                {
+                                    tbd.g.ClipRect(tbd.region, SKClipOperation.Intersect);
+                                    GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
+                                }
+                                
                                 //iterateblock.Block.DrawBlock(tbd);
                             }
 

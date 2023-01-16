@@ -93,7 +93,7 @@ namespace BASeTris
             Icon = Properties.Resources.AppIcon;
             Location = new Point(Location.X, 0);
             _Present = new GamePresenter(this);
-            _ScaleFactor = ((float)(this.ClientSize.Height) / 950f);
+            _ScaleFactor = Math.Round(((float)(this.ClientSize.Height) / 950f),1);
             StartGame();
             CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this) ;
         }

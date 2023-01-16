@@ -83,6 +83,29 @@ namespace BASeTris
             }
             return bbt;
         }
+        private static Dictionary<AdjacentBlockFlags, AdjacentBlockFlags> RotateCWMapping = new Dictionary<AdjacentBlockFlags, AdjacentBlockFlags>()
+        {
+            {AdjacentBlockFlags.Top,AdjacentBlockFlags.Right },
+            {AdjacentBlockFlags.Right,AdjacentBlockFlags.Bottom },
+            {AdjacentBlockFlags.Bottom,AdjacentBlockFlags.Left },
+            {AdjacentBlockFlags.Left,AdjacentBlockFlags.Top},
+            {AdjacentBlockFlags.TopRight,AdjacentBlockFlags.BottomRight },
+            {AdjacentBlockFlags.BottomRight,AdjacentBlockFlags.BottomLeft },
+            {AdjacentBlockFlags.BottomLeft,AdjacentBlockFlags.TopRight }
+        };
+        public static AdjacentBlockFlags RotateAdjacentBlockFlags(AdjacentBlockFlags flags)
+        {
+            
+            AdjacentBlockFlags result = AdjacentBlockFlags.None;
+
+            foreach (var kvp in RotateCWMapping)
+            {
+                if (flags.HasFlag(kvp.Key)) result |= kvp.Value;
+            }
+
+            return result;
+
+        }
 
         public virtual ThemeImageProvider ThemeProvider { get; set; }
         public abstract String Name { get; }

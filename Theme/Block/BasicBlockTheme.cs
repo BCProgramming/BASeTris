@@ -38,11 +38,15 @@ namespace BASeTris.Theme.Block
         {
             Basic=0,
             BasicTop = 1,
-            BasicLeft = 2,
+            BasicRight = 2,
             BasicBottom = 4,
-            BasicRight = 8
+            BasicLeft = 8,
+            BasicTopRight = 16,
+            BasicBottomRight = 32,
+            BasicBottomLeft = 64,
+            BasicTopLeft = 128
         }
-
+        
         //Block with no other blocks adjacent to it.
         private static BBP[][] BasicBlock = new BBP[][]
 {
@@ -117,8 +121,56 @@ namespace BASeTris.Theme.Block
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade},
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade},
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade } };
+
+
+        private static BBP[][] TopRightShaded = new BBP[][]
+{
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent } };
+
+        private static BBP[][] TopLeftShaded = new BBP[][]
+{
+            new []{BBP.Glint, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent } };
+        private static BBP[][] BottomLeftShaded = new BBP[][]
+{
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Shade, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent } };
+        private static BBP[][] BottomRightShaded = new BBP[][]
+{
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
+            new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade } };
         public static BasicBlockTypes RotateBlockTypeCW(BasicBlockTypes pInput)
         {
+            
             BasicBlockTypes result = BasicBlockTypes.Basic;
             if (pInput.HasFlag(BasicBlockTypes.BasicTop)) result |= BasicBlockTypes.BasicRight;
             if (pInput.HasFlag(BasicBlockTypes.BasicRight)) result |= BasicBlockTypes.BasicBottom;
@@ -335,7 +387,7 @@ namespace BASeTris.Theme.Block
             {
                 //this will be our "correct" 
                 
-                var getBlockTypeResult = GetBlockType(Group, element, field);
+                var getBlockTypeResult =  GetBlockType(Group, element, field);
                 chosentype = getBlockTypeResult.BlockType;
                 //get the three added rotations for this Nomino.
                 var Rotated1 = RotateBlockTypeCW(chosentype);
