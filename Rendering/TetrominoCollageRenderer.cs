@@ -135,12 +135,16 @@ namespace BASeTris.Rendering
             Tetrominoes.Tetromino_L LBlock3 = new Tetrominoes.Tetromino_L() { X = 3, Y = 3 };
 
             //LBlock3.Rotate(true);
-            
-            Nomino[] AddBlocks = new Nomino[] { IBlock, IBlock2, TBlock1, TBlock2, TBlock3 ,SBlock,LBlock1,LBlock2,JBlock1,JBlock2,ZBlock1,LBlock3};
-            foreach (var blockadd in AddBlocks)
+            bool doRandomize = TetrisGame.rgen.NextDouble() > 0.5;
+            Nomino[][] AddBlocks = new Nomino[][]{ new Nomino[] { IBlock, IBlock2 } ,new Nomino[] { TBlock1, TBlock2, TBlock3 } , new Nomino[] { SBlock }, new Nomino[] { LBlock1, LBlock2 }, new Nomino[] { JBlock1, JBlock2 }, new Nomino[] { ZBlock1 }, new Nomino[] { LBlock3 } };
+            foreach (var groupadd in AddBlocks)
             {
-                _theme.ApplyTheme(blockadd, null, tcr._field, NominoTheme.ThemeApplicationReason.FieldSet);
-                tcr.AddNomino(blockadd);
+                foreach (var blockadd in groupadd)
+                {
+                    _theme.ApplyTheme(blockadd, null, tcr._field, NominoTheme.ThemeApplicationReason.FieldSet);
+                    tcr.AddNomino(blockadd);
+                }
+                if (doRandomize) (tcr.DummyHandler.Statistics as TetrisStatistics).SetLineCount(typeof(Tetrominoes.Tetromino_I), TetrisGame.rgen.Next(0, 21));
             }
 
             SKBitmap CreateBitmap = tcr.Render();
@@ -166,7 +170,7 @@ namespace BASeTris.Rendering
             _field.SetGroupToField(Source);
 
         }
-
+        public IGameCustomizationHandler DummyHandler { get; }
         public TetrominoCollageRenderer(int pColumnCount, int pRowCount, int pColumnWidth, int pRowHeight,int pLevel,NominoTheme _theme)
         {
             //Note: We can get away with no CustomizationHandler here, as we aren't going to actually be having the Field "do" anything other than use it as a render source.
@@ -174,7 +178,7 @@ namespace BASeTris.Rendering
             RowCount = pRowCount;
             ColumnWidth = pColumnWidth;
             RowHeight = pRowHeight;
-            IGameCustomizationHandler DummyHandler = new FakeRendererHandler(pRowCount, pColumnCount, pLevel);
+            DummyHandler = new FakeRendererHandler(pRowCount, pColumnCount, pLevel);
             _field = new TetrisField(_theme,DummyHandler, RowCount, ColumnCount);
         }
         public SKBitmap Render()

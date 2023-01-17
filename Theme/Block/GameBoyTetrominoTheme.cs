@@ -13,7 +13,7 @@ using BASeTris.GameStates.Menu;
 
 namespace BASeTris
 {
-    [HandlerTheme("Game Boy Style", typeof(StandardTetrisHandler))]
+    [HandlerTheme("Game Boy I Style", typeof(StandardTetrisHandler))]
     [ThemeDescription("The Game Boy I piece theme on all.")]
     public class GameBoyMottledTheme : GameBoyTetrominoTheme
     {
