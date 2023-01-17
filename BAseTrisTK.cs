@@ -227,10 +227,19 @@ namespace BASeTris
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
         {
             Debug.Print("Button released:" + e.Key);
-            var translated = _Present.TranslateKey(e.Key);
-            if (translated != null)
+            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
             {
-                _Present.GameKeyUp(translated.Value);
+                var Casted = (IDirectKeyboardInputState)_Present.Game.CurrentState;
+                Casted.KeyPressed(this, (int)e.Key);
+
+            }
+            else
+            {
+                var translated = _Present.TranslateKey(e.Key);
+                if (translated != null)
+                {
+                    _Present.GameKeyUp(translated.Value);
+                }
             }
         }
         protected override void OnKeyPress(OpenTK.KeyPressEventArgs e)

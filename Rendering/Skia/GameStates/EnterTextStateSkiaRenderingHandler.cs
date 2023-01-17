@@ -28,17 +28,16 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
             var Bounds = Element.Bounds;
             var g = pRenderTarget;
-            //if(Source.BG!=null)
-            //{
-            //    RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new SkiaBackgroundDrawData(Bounds));
-            //}
-            //if (Source.BG != null)
-            //    RenderingProvider.Static.DrawElement(pOwner, g, Source.BG, new BackgroundDrawers.SkiaBackgroundDrawData(Bounds));
-
-
-            using (SKPaint TitlePaintForeground = new SKPaint() { TextSize = (float)(48 * pOwner.ScaleFactor), Color = SKColors.White, Typeface = TetrisGame.RetroFontSK })
+            if(Source.BG!=null)
             {
-                using (SKPaint TitlePaintBackground = new SKPaint() { TextSize = (float)(48 * pOwner.ScaleFactor), Color = SKColors.Black, Typeface = TetrisGame.RetroFontSK })
+                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new SkiaBackgroundDrawData(Bounds));
+            }
+           
+            
+
+            using (SKPaint TitlePaintForeground = new SKPaint() { TextSize = (float)(24 * pOwner.ScaleFactor), Color = SKColors.White, Typeface = TetrisGame.RetroFontSK })
+            {
+                using (SKPaint TitlePaintBackground = new SKPaint() { TextSize = (float)(24 * pOwner.ScaleFactor), Color = SKColors.Black, Typeface = TetrisGame.RetroFontSK })
                 {
                     using (SKPaint EntryPaintForeground = new SKPaint() { TextSize = (float)(16 * pOwner.ScaleFactor), Color = SKColors.Black, Typeface = TetrisGame.RetroFontSK })
                     {
@@ -71,7 +70,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             {
                                 //draw this line centered at StartYPosition+Height*i...
 
-                                int useYPosition = (int)(StartYPosition + (MeasureBounds.Height + 5) * i);
+                                int useYPosition = (int)(StartYPosition + (MeasureBounds.Height + 5) * i*1.5);
                                 int useXPosition = Math.Max((int)(Bounds.Width / 2 - MeasureBounds.Width / 2), (int)(Bounds.Left + 15));
                                 g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), TitlePaintBackground);
                                 g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), TitlePaintForeground);

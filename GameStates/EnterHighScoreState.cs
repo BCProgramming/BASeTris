@@ -30,8 +30,8 @@ namespace BASeTris.GameStates
             GameStatistics = SourceStats;
             AchievedPosition = ScoreListing.IsEligible(GameStatistics.Score);
             ReversionState = pReversionState;
-
-            EntryPrompt = (" Congratulations, your score is\n at position " + AchievedPosition + " \n Enter your name.").Split('\n');
+            
+            EntryPrompt = (" Congratulations!\n your score is eligible for position " + AchievedPosition + "! \n Enter your name.").Split('\n');
         }
 
      

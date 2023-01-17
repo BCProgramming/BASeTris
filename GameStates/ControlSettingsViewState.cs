@@ -48,7 +48,9 @@ namespace BASeTris.GameStates
         {
             //throw new NotImplementedException();
         }
-
+        public void KeyUp(IStateOwner pOwner, int pKey)
+        {
+        }
         public GameState GetComposite()
         {
             return RevertState;

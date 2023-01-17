@@ -82,6 +82,7 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            return;
             if (!AllowTextEntry()) return;
             if (g == GameKeys.GameKey_Drop)
             {
@@ -97,44 +98,59 @@ namespace BASeTris.GameStates
             }
             else if (g == GameKeys.GameKey_Left)
             {
-                int currpos = CurrentPosition;
-                currpos--;
-                if (currpos < 0) currpos = NameEntered.Length - 1;
-                CurrentPosition = currpos;
+                MovePos(pOwner, -1);
+                
                 TetrisGame.Soundman.PlaySound(Char_Pos_Left, pOwner.Settings.std.EffectVolume);
                 //change current position -1 (wrapping to the end if needed)
+
             }
             else if (g == GameKeys.GameKey_Right)
             {
-                int currpos = CurrentPosition;
-                currpos++;
-                if (currpos > NameEntered.Length - 1) currpos = 0;
-                CurrentPosition = currpos;
+                MovePos(pOwner, 1);
                 TetrisGame.Soundman.PlaySound(Char_Pos_Right, pOwner.Settings.std.EffectVolume);
                 //change current position 1 (wrapping tp the start if needed)
             }
             else if (g == GameKeys.GameKey_RotateCW)
             {
-                String sEntry = NameEntered.ToString().Trim('_', ' ');
-                if (ValidateEntry(pOwner, sEntry))
-                {
-                    CommitEntry(pOwner, sEntry);
-                }
+                CommitScore(pOwner);
             }
 
             //throw new NotImplementedException();
         }
-
+        private void MovePos(IStateOwner pOwner,int MoveAmount)
+        {
+            int currpos = CurrentPosition;
+            currpos+=MoveAmount;
+            if (currpos > NameEntered.Length - 1) currpos = 0;
+            CurrentPosition = currpos;
+            
+        }
+        private void CommitScore(IStateOwner pOwner)
+        {
+            String sEntry = NameEntered.ToString().Trim('_', ' ');
+            if (ValidateEntry(pOwner, sEntry))
+            {
+                CommitEntry(pOwner, sEntry);
+            }
+        }
         public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
         {
             //throw new NotImplementedException();
         }
-
+        public void KeyUp(IStateOwner pOwner, int pKey)
+        {
+            if (pKey == (int)Keys.Enter)
+            {
+                CommitScore(pOwner);
+            }
+            
+        }
         public void KeyPressed(IStateOwner pOwner, int pKey)
         {
             var k = (Keys)pKey;
             if (!AllowTextEntry()) return;
-            if (k == Keys.Enter) HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
+
+            if (k == Keys.Enter) CommitScore(pOwner);
             else if (k == Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
             else if (k== Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
             else if (k == Keys.Left) HandleGameKey(pOwner, GameKeys.GameKey_Left);

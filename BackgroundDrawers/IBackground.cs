@@ -182,7 +182,7 @@ namespace BASeTris.BackgroundDrawers
             SKImage usebg = null;
             if (true || TetrisGame.rgen.NextDouble() > 0.5)
             {
-                NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(),()=>new StandardTetrominoTheme(),()=>new Tetris2Theme_Standard(),()=>new Tetris2Theme_Enhanced() })();
+                NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(),()=>new StandardTetrominoTheme(),()=>new Tetris2Theme_Standard(),()=>new Tetris2Theme_Enhanced() ,()=>new GameBoyMottledTheme()})();
                 SKBitmap skb = TetrominoCollageRenderer.GetBackgroundCollage(chosen);
 
                 Bitmap bmp = SkiaSharp.Views.Desktop.Extensions.ToBitmap(skb);

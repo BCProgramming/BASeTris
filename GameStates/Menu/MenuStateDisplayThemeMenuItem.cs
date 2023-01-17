@@ -26,10 +26,10 @@ namespace BASeTris.GameStates.Menu
 
         };*/
 
-        private IEnumerable<MenuStateThemeSelection> GetThemeSelectionsForHandler(IGameCustomizationHandler handler)
+        private IEnumerable<MenuStateThemeSelection> GetThemeSelectionsForHandler(Type HandlerType)
         {
 
-            var themetypes = Program.GetHandlerThemes(handler.GetType());
+            var themetypes = Program.GetHandlerThemes(HandlerType);
             foreach(var themeiter in themetypes)
             {
                 ConstructorInfo ci = themeiter.GetConstructor(new Type[] { });
@@ -42,11 +42,7 @@ namespace BASeTris.GameStates.Menu
                     yield return msst;
                 }
             }
-            if (handler is StandardTetrisHandler)
-            {
-                //NominoTheme testXMLTheme = new XMLDefinedTheme("T:\\simple_nes_theme.xml");
-                //MenuStateThemeSelection msstXML = new MenuStateThemeSelection(testXMLTheme.Name, typeof(XMLDefinedTheme), () => testXMLTheme);
-            }
+           
 
 
 
@@ -65,7 +61,7 @@ namespace BASeTris.GameStates.Menu
             {
                 currentthemetype = comp.GetComposite().PlayField.Theme.GetType();
             }
-            ThemeOptions = GetThemeSelectionsForHandler(handler).ToArray();
+            ThemeOptions = GetThemeSelectionsForHandler(handler.GetType()).ToArray();
             int currentIndex = 0;
             for (int i = 0; i < ThemeOptions.Length; i++)
             {

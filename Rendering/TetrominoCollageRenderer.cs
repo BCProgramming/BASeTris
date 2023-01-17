@@ -19,16 +19,17 @@ namespace BASeTris.Rendering
         public int ColumnWidth { get; set; }
         public int ColumnHeight { get; set; }
 
+        TetrisStatistics _Stats = null;
         public FakeRendererHandler(int pWidth, int pHeight, int pLevel)
         {
-            Statistics = new TetrisStatistics() {I_Piece_Count=pLevel*10 };
+            _Stats = new TetrisStatistics() {I_Line_Count=pLevel*10 };
             
         }
         public string Name => "Fake Collage Hander";
 
         public NominoTheme DefaultTheme => null;
 
-        public BaseStatistics Statistics { get; set; }
+        public BaseStatistics Statistics { get { return _Stats; }set { } }
 
         public GameOptions GameOptions => null;
 
@@ -174,7 +175,7 @@ namespace BASeTris.Rendering
             ColumnWidth = pColumnWidth;
             RowHeight = pRowHeight;
             IGameCustomizationHandler DummyHandler = new FakeRendererHandler(pRowCount, pColumnCount, pLevel);
-            _field = new TetrisField(_theme, null, RowCount, ColumnCount);
+            _field = new TetrisField(_theme,DummyHandler, RowCount, ColumnCount);
         }
         public SKBitmap Render()
         {

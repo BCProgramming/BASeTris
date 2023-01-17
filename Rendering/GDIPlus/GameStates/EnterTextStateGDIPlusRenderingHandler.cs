@@ -38,6 +38,7 @@ namespace BASeTris.Rendering.GDIPlus
                 int useXPosition = Math.Max((int)(Bounds.Width / 2 - MeasureBounds.Width / 2),(int)(Bounds.Left+15));
                 g.DrawString(Source.EntryPrompt[i], Source.useFont, Brushes.Black, new PointF(useXPosition + 5, useYPosition + 5));
                 g.DrawString(Source.EntryPrompt[i], Source.useFont, new SolidBrush(useLightRain), new PointF(useXPosition, useYPosition));
+
             }
 
             float nameEntryY = StartYPosition + (MeasureBounds.Height + 5) * (Source.EntryPrompt.Length + 1);
