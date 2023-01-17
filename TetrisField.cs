@@ -245,7 +245,7 @@ namespace BASeTris
         public IGameCustomizationHandler Handler {  get { return _Handler; } }
 
         public int Level {
-            get { return (Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0; } }
+            get { return (Handler == null ? 0 : (Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0); } }
 
         public int LineCount
         {

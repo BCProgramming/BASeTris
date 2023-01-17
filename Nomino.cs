@@ -38,7 +38,7 @@ namespace BASeTris
         public int InitialY { get; set; } = 0;
         public int X { get; set; }
         private int _Y = 0;
-        public int Y { get { return _Y; } private set{ _Y = value; } }
+        public int Y { get { return _Y; } set{ _Y = value; } }
         public bool NoGhost { get; set; } = false;
         public void SetY(IStateOwner pOwner,int Value)
         {

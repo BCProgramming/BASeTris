@@ -218,7 +218,7 @@ namespace BASeTris.Theme.Block
 
         protected SKBitmap GetMappedImageSkia(TetrisField field, Nomino Element, NominoElement Block,BlockEnum BlockTypeIndex)
         {
-            var LevelIndex = (field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
+            var LevelIndex = field.Handler==null?0:((field.Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0);
             if (!CachedImageData.ContainsKey(LevelIndex))
             {
                 CachedImageData.Add(LevelIndex, new Dictionary<BlockEnum, Dictionary<Type, SKBitmap>>());

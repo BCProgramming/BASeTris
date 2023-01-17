@@ -23,6 +23,7 @@ using OpenTK.Input;
 using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
+using System.IO;
 
 namespace BASeTris
 {
@@ -95,7 +96,23 @@ namespace BASeTris
             _Present = new GamePresenter(this);
             _ScaleFactor = Math.Round(((float)(this.ClientSize.Height) / 950f),1);
             StartGame();
-            CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this) ;
+
+            //should be initialized enough for test code....
+            /*
+            var testbitmap = TetrominoCollageRenderer.GetBackgroundCollage(new GameBoyTetrominoTheme());
+            
+            using (var data = testbitmap.Encode(SKEncodedImageFormat.Png, 80))
+            {
+                using (var writer = new FileStream("T:\\testout.png",FileMode.Create))
+                {
+                    data.SaveTo(writer);
+                }
+            }
+            */
+
+
+
+            CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this);
         }
         private void InitializeGraphics()
         {

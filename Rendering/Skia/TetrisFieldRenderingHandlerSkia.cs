@@ -82,7 +82,7 @@ namespace BASeTris.Rendering.Skia
                         {
                             
                             SKRect BlockBounds = new SKRect(XPos, YPos, XPos + BlockWidth, YPos + BlockHeight);
-                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState.Settings);
+                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState?.Settings);
                             RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);
                         }
                     }
