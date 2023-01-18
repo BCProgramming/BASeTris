@@ -89,7 +89,7 @@ namespace BASeTris
                 }
                 AdjacentMottles[abf] = BuildResult;
                 mottle_generated++;
-                AdjacentMottles[abf].Save("D:\\Mottle_" + mottle_generated + " .png");
+                
 
             }
             return GetCached(new Bitmap(AdjacentMottles[abf]),"Mottle_" + (int)abf,GetLevelColor(pLevel));
