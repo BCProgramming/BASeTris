@@ -28,7 +28,7 @@ namespace BASeTris.Cheats
                 switch (parsednumber)
                 {
                     case 0:
-                        ShowHighScoresState shs = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], pStateOwner.CurrentState, null);
+                        ShowHighScoresState shs = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"],   pStateOwner.CurrentState, null);
                         pStateOwner.CurrentState = shs;
                         return true;
                     default:

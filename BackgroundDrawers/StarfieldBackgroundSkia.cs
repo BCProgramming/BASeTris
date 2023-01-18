@@ -18,7 +18,7 @@ namespace BASeTris.BackgroundDrawers
         {
             float[] AvailableFactors = new float[] { 1f, 0.5f, 0.25f, 1.1f, 1.25f, 0.1f };
             float[] AvailableScales = new float[] { 1f, 1.25f, 1.5f, 2f, 3f, 5f };
-            float[] chooseweights = new float[] { 100, 40, 30, 20, 10, 5 };
+            float[] chooseweights = new float[] { 200, 40, 10, 1, 1, 1 };
             var Stars = new StarfieldStarData[Count];
             for (int i = 0; i < Stars.Length; i++)
             {

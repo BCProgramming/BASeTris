@@ -91,7 +91,15 @@ namespace BASeTris.Rendering.Skia.GameStates
             
             if(Source.IncrementedDrawState >=1)
             {
-              //maybe a line under the header.
+                //maybe a line under the header.
+                String sSubHeader = Source.GetDisplayingSet()??"";
+                SKRect MeasureSubHeader = new SKRect();
+                ListingFont.MeasureText(sSubHeader, ref MeasureSubHeader);
+                SKPoint DrawPosition = new SKPoint(MiddleX - MeasureSubHeader.Width / 2, CurrentY);
+                g.DrawText(sSubHeader, new SKPoint(DrawPosition.X + 2, DrawPosition.Y + 2), ListingFontShadow);
+                g.DrawText(sSubHeader, new SKPoint(DrawPosition.X, DrawPosition.Y), ListingFont);
+                CurrentY += (float)(MeasureSubHeader.Height * 1.1);
+
             }
 
             if(Source.IncrementedDrawState >= 2)
