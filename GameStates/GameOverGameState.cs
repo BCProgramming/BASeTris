@@ -152,7 +152,7 @@ namespace BASeTris.GameStates
                         }
                         else if (pOwner is BASeTrisTK)
                         {
-                            bg = StandardImageBackgroundSkia.GetStandardBackgroundDrawer();
+                            bg = StandardImageBackgroundSkia.GetMenuBackgroundDrawer();
                         }
                         //GenericMenuState TitleMenu = new GenericMenuState(bg, pOwner, new TitleMenuPopulator());
                         pOwner.CurrentState = new TitleMenuState(bg, pOwner);

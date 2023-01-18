@@ -59,26 +59,32 @@ namespace BASeTris.Rendering.Skia.GameStates
                             SKPaint useBackgroundPaint = new SKPaint() { TextSize = (float)(16 * pOwner.ScaleFactor), Color = useBackgroundColor, Typeface = TetrisGame.RetroFontSK };
                             int StartYPosition = (int)(Bounds.Height * .15f);
 
-                            SKRect MeasureBounds = default;
-                            TitlePaintForeground.MeasureText(Source.EntryPrompt[0], ref MeasureBounds);
+                            SKRect[] MeasureBounds = new SKRect[Source.EntryPrompt.Length];
 
 
+                            for (int b = 0; b < Source.EntryPrompt.Length; b++)
+                            {
+                                TitlePaintForeground.MeasureText(Source.EntryPrompt[b], ref MeasureBounds[b]);
+                            }
+
+                            var MaxHeight = MeasureBounds.Max((b) => b.Height);
+                            
 
                             float ShadowOffset = (float)(pOwner.ScaleFactor * 5);
 
                             for (int i = 0; i < Source.EntryPrompt.Length; i++)
                             {
                                 //draw this line centered at StartYPosition+Height*i...
-
-                                int useYPosition = (int)(StartYPosition + (MeasureBounds.Height + 5) * i*1.5);
-                                int useXPosition = Math.Max((int)(Bounds.Width / 2 - MeasureBounds.Width / 2), (int)(Bounds.Left + 15));
-                                g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), TitlePaintBackground);
-                                g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + MeasureBounds.Height / 2 + ShadowOffset), TitlePaintForeground);
+                                var usebounds = MeasureBounds[i];
+                                int useYPosition = (int)(StartYPosition + (usebounds.Height + 5) * i*1.5);
+                                int useXPosition = Math.Max((int)(Bounds.Width / 2 - usebounds.Width / 2), (int)(Bounds.Left + 15));
+                                g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + usebounds.Height / 2 + ShadowOffset), TitlePaintBackground);
+                                g.DrawText(Source.EntryPrompt[i], new SKPoint(useXPosition + ShadowOffset, useYPosition + usebounds.Height / 2 + ShadowOffset), TitlePaintForeground);
                                 //g.DrawString(Source.EntryPrompt[i], Source.useFont, Brushes.Black, new PointF(useXPosition + 5, useYPosition + 5));
                                 //g.DrawString(Source.EntryPrompt[i], Source.useFont, new SolidBrush(useLightRain), new PointF(useXPosition, useYPosition));
                             }
 
-                            float NameEntryY = StartYPosition + (MeasureBounds.Height + 5) * (Source.EntryPrompt.Length + 1);
+                            float NameEntryY = StartYPosition + (MaxHeight + 5) * (Source.EntryPrompt.Length + 1);
 
                             var AllCharacterBounds = Source.NameEntered.ToString().ToCharArray().Select((u) =>
                             {
@@ -88,7 +94,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             }).ToArray();
 
 
-                            float nameEntryY = StartYPosition + (MeasureBounds.Height + 5) * (Source.EntryPrompt.Length + 1);
+                            float nameEntryY = StartYPosition + (MaxHeight + 5) * (Source.EntryPrompt.Length + 1);
 
 
                             SKRect charMeasure = default;

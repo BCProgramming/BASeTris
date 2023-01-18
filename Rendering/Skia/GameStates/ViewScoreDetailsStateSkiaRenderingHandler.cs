@@ -178,19 +178,21 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             if (Source.ShowEntry is IHighScoreEntry<TetrisHighScoreData> hsd)
             {
-                TimeSpan[] ShowTimes = hsd.CustomData.LevelReachedTimes;
-                SKRect MeasuredRect = new SKRect();
-                MainScoreFont.MeasureText("##########", ref MeasuredRect);
-                var ElementHeight = (MeasuredRect.Height + 10);
-                for (int l=0;l<ShowTimes.Length;l++)
+                if (hsd.CustomData != null)
                 {
-                    String BuildLine = $"Level {l}:               " + ShowTimes[l].ToString("c");
-                    var YOffset =YStart + ElementHeight * (l + 5);
-                    SKPoint DrawPosition = new SKPoint(50, YOffset);
-                    g.DrawText(BuildLine, new SKPoint(DrawPosition.X + 2, DrawPosition.Y + 2), ShadowScoreFont);
-                    g.DrawText(BuildLine, DrawPosition, MainScoreFont);
+                    TimeSpan[] ShowTimes = hsd.CustomData.LevelReachedTimes;
+                    SKRect MeasuredRect = new SKRect();
+                    MainScoreFont.MeasureText("##########", ref MeasuredRect);
+                    var ElementHeight = (MeasuredRect.Height + 10);
+                    for (int l = 0; l < ShowTimes.Length; l++)
+                    {
+                        String BuildLine = $"Level {l}:               " + ShowTimes[l].ToString("c");
+                        var YOffset = YStart + ElementHeight * (l + 5);
+                        SKPoint DrawPosition = new SKPoint(50, YOffset);
+                        g.DrawText(BuildLine, new SKPoint(DrawPosition.X + 2, DrawPosition.Y + 2), ShadowScoreFont);
+                        g.DrawText(BuildLine, DrawPosition, MainScoreFont);
+                    }
                 }
-
 
             }
             else if(Source.ShowEntry is IHighScoreEntry<DrMarioHighScoreData> drhsd)

@@ -38,8 +38,16 @@ namespace BASeTris.GameStates
             Owner = pOwner;
             AvailableChars = PossibleChars;
             NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));
+            if (pOwner is BASeTris bt)
+            {
+                _BG = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
+            }
+            else if (pOwner is BASeTrisTK)
+            {
+                _BG = StandardImageBackgroundSkia.GetMenuBackgroundDrawer();
+            }
             //var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
-           
+
             //_BG = sib;
         }
 

@@ -23,7 +23,7 @@ namespace BASeTris.GameStates
         }
 
         public EnterHighScoreState(GameState pOriginalState, IStateOwner pStateOwner, GameState pReversionState,IHighScoreList ScoreList, Func<string, int, IHighScoreEntry> ScoreFunc, TetrisStatistics SourceStats)
-            : base(pStateOwner, 10)
+            : base(pStateOwner, 32)
         {
             ScoreListing = ScoreList;
             ScoreToEntryFunc = ScoreFunc; //function which takes the score and gives back an appropriate IHighScoreEntry implementation.
