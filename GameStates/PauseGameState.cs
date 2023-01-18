@@ -106,21 +106,18 @@ namespace BASeTris.GameStates
 
         private void PopulatePauseMenu(IStateOwner pOwner)
         {
+            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
             MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume",TipText = "Back to the game" };
-            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores",TipText="View high scores" };
+            var HighScoresItem = new MenuStateHighScoreItem(pOwner, this, FontSrc) { Text = "High Scores", TipText = "View high scores" };
+            //var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores",TipText="View high scores" };
             MenuItemActivated += (o, e) =>
             {
                 if(e.MenuElement==ResumeOption)
                     ResumeGame(pOwner);
-                else if(e.MenuElement==HighScoresItem)
-                {
-                    ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], this, null);
-                    pOwner.CurrentState = scorestate;
-                    ActivatedItem = null; //we need to reset this or the item will remain active.
-                }
+               
                 
             };
-            var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
+            
             ResumeOption.FontFace = FontSrc.FontFamily.Name;
             ResumeOption.FontSize = FontSrc.Size;
             //ResumeOption.Font = TetrisGame.GetRetroFont(14, 1.0f);

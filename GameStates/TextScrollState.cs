@@ -1,4 +1,5 @@
 ﻿using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
 using BASeTris.Rendering.Adapters;
 using System;
 using System.Collections.Generic;
@@ -305,8 +306,12 @@ namespace BASeTris.GameStates
         };
         public ScrollEntry CurrentItem = null;
         public GameState ReversionState { get; set; }
-        public TextScrollState(GameState pReversionState)
+
+        public IBackground BG;
+        public TextScrollState(GameState pReversionState,IBackground pBG = null)
         {
+            if (pBG == null) pBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule());
+            BG = pBG;
             int offset = 2000;
             int count = 0;
             List<TextScrollEntry> scroller = new List<TextScrollEntry>();
@@ -328,6 +333,7 @@ namespace BASeTris.GameStates
         iActiveSoundObject CreditSong = null;
         public override void GameProc(IStateOwner pOwner)
         {
+            if (BG != null) BG.FrameProc(pOwner);
             if (ElapsedWatcher == null)
             {
                 ElapsedWatcher = new Stopwatch();

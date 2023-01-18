@@ -111,8 +111,9 @@ namespace BASeTris
             */
 
 
-
-            CurrentState = new TitleMenuState(StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), this);
+            //var useBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule());
+            var useBG = StandardImageBackgroundSkia.GetMenuBackgroundDrawer();
+            CurrentState = new TitleMenuState(useBG, this);
         }
         private void InitializeGraphics()
         {

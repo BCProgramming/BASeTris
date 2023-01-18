@@ -72,7 +72,8 @@ namespace BASeTris.GameStates.Menu
             var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game",TipText="I feel the menu text is already sufficiently descriptive." };
             var OptionsItem = new MenuStateTextMenuItem() { Text = "Options",TipText="Adjust various options."};
             var scaleitem = new MenuStateScaleMenuItem(pOwner) { TipText = "Change Scaling" };
-            var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" ,TipText="View High scores"};
+            //var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" ,TipText="View High scores"};
+            
             var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
@@ -87,37 +88,13 @@ namespace BASeTris.GameStates.Menu
                 }
             };
 
-            /*NewGameItem.OnDeactivateOption += (o, eventarg) =>
-             {
-                 //start a new game.
-
-
-                 if (pOwner is IGamePresenter igp)
-                 {
-                     IGameCustomizationHandler Handler = (eventarg.Option.Handler);
-                     if (Handler != null)
-                     {
-                         //IGameCustomizationHandler Handler = DrMarioGame ? (IGameCustomizationHandler)new DrMarioHandler() : (IGameCustomizationHandler)new StandardTetrisHandler();
-                         pOwner.CurrentState = new GameplayGameState(Handler, null, TetrisGame.Soundman);
-
-                         igp.StartGame();
-                     }
-                     else
-                     {
-                         NewGameItem.Reset();
-                     }
-                 }
-             };
-            NewGameItem.OnActivateOption += (o, eventarg) =>
-            {
-                
-            };
-            NewGameItem.OnChangeOption += (o2, eventarg2) =>
-            {
-                //nothing for when we change the option.
-            };*/
+            
             MenuStateTextMenuItem CreditsMenu = null;
             var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+
+            var RealHighScoresItem = new MenuStateHighScoreItem(pOwner, Target, FontSrc) {Text="High Scores",TipText="Show High Scores" };
+
+
             Target.MenuItemActivated += (o, e) =>
             {
                 if (e.MenuElement == NewGameItem)
@@ -135,30 +112,7 @@ namespace BASeTris.GameStates.Menu
                     pOwner.CurrentState = OptionsMenu;
                     Target.ActivatedItem = null;
                 }
-                else if (e.MenuElement == HighScoresItem)
-                {
-                    ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], Target, null);
-                    pOwner.CurrentState = scorestate;
-                    Target.ActivatedItem = null;
-                    EnterExitScoreCount++;
-                    if (EnterExitScoreCount == 5)
-                    {
-                        CreditsMenu = new MenuStateTextMenuItem() { Text = "Credits", TipText = "View Credits!" };
-                        CreditsMenu.FontFace = FontSrc.FontFamily.Name;
-                        CreditsMenu.FontSize = FontSrc.Size;
-                        Target.MenuElements.Add(CreditsMenu);
-                        scorestate.BeforeRevertState += (o, e) =>
-                          {
-                              TetrisGame.Soundman.PlaySound("level_up", false).Tempo = 2;
-                          };
-                    }
-                }
-                else if (e.MenuElement == CreditsMenu)
-                {
-                    TextScrollState tss = new TextScrollState(pOwner.CurrentState);
-                    pOwner.CurrentState = tss;
-                    Target.ActivatedItem = null;
-                }
+                
                 else if (e.MenuElement == ExitItem)
                 {
                     //nothing, this needs confirmation so is handled separate.
@@ -172,7 +126,7 @@ namespace BASeTris.GameStates.Menu
             
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
             Target.HeaderTypeSize = (float)(28f*pOwner.ScaleFactor);
-            foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,HighScoresItem,ExitItem})
+            foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,RealHighScoresItem, ExitItem})
             {
                 iterate.FontFace = FontSrc.FontFamily.Name;
                 iterate.FontSize = FontSrc.Size;

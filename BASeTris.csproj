@@ -134,6 +134,7 @@
     <Compile Include="AssetManager\NullSoundDriver.cs" />
     <Compile Include="AssetManager\SoundInterfaces.cs" />
     <Compile Include="BackgroundDrawers\IBackground.cs" />
+    <Compile Include="BackgroundDrawers\StarfieldBackgroundSkia.cs" />
     <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="Blocks\LineSeriesBlock.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="GameStates\IMouseInputState.cs" />
     <Compile Include="GameStates\Menu\GenericMenuState.cs" />
     <Compile Include="GameStates\ICompositeState.cs" />
+    <Compile Include="GameStates\Menu\MenuStateHighScoreItem.cs" />
     <Compile Include="GameStates\Menu\MenuStateMusicMenuItem.cs" />
     <Compile Include="GameStates\Menu\MenuStateNewGameMenuItem.cs" />
     <Compile Include="GameStates\TemporaryPauseGameState.cs" />
