@@ -230,7 +230,7 @@ namespace BASeTris
             if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
             {
                 var Casted = (IDirectKeyboardInputState)_Present.Game.CurrentState;
-                Casted.KeyPressed(this, (int)e.Key);
+                Casted.KeyUp(this, (int)e.Key);
 
             }
             else
@@ -281,7 +281,35 @@ namespace BASeTris
                     ;
                 }
                 //int ParticleCount = CurrentGameState is GameplayGameState ? (CurrentGameState as GameplayGameState).Particles.Count : CurrentGameState is ICompositeState<GameplayGameState>?(CurrentGameState as ICompositeState<GameplayGameState>).GetComposite().Particles.Count :0;
-                Title = $"FPS: {1f / e.Time:0} State:{CurrentGameState.GetType().Name}";
+                Title = "BASeTris";
+                var handler = (this as IStateOwner).GetHandler();
+
+                
+
+                if (handler is not null)
+                {
+
+                    if (CurrentGameState is GameplayGameState)
+                    {
+                        Title += " - " + handler.Name;
+                    }
+                    else if (CurrentGameState is PauseGameState p)
+                    {
+                        Title += " - " + handler.Name + " (Paused)";
+                    }
+                    else if (CurrentGameState is TemporaryInputPauseGameState)
+                    {
+                        Title += " - " + handler.Name;
+                    }
+                    else if (CurrentGameState is ICompositeState<GameplayGameState> comp)
+                    {
+                        Title += " - " + handler.Name;
+                    }
+
+
+                    
+                }
+                //Title = $"FPS: {1f / e.Time:0} State:{CurrentGameState.GetType().Name}";
                 
                 Color4 backColor;
                 backColor.A = 1.0f;
@@ -348,16 +376,23 @@ namespace BASeTris
                                 SKRect FieldRect = new SKRect(0, 0, FieldWidth, ClientSize.Height);
                                 SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height);
                                 //canvas.Clear(SKColors.Blue);
-                                canvas.Save(); //save state before setting clip to field.
+                                //canvas.Save(); //save state before setting clip to field.
                                 _LastDrawBounds = FieldRect;
-                                canvas.ClipRect(FieldRect);
-                                staterender.Render(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(FieldRect));
-                                canvas.Restore();
+                                
+                                using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
+                                {
+                                    canvas.ClipRect(FieldRect);
+                                    staterender.Render(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(FieldRect));
+                                }
+                                //canvas.Restore();
                                 
                                 //now, call rendder to render the stats.
-                                canvas.ClipRect(StatsRect);
                                 
-                                staterender.RenderStats(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(StatsRect));
+                                using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
+                                {
+                                    canvas.ClipRect(StatsRect);
+                                    staterender.RenderStats(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(StatsRect));
+                                }
                                 //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
                                 
                                 //staterender.RenderStats(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height)));
@@ -376,7 +411,22 @@ namespace BASeTris
                             ;
                         }
                     }
+                    if (FPSPaint == null)
+                    {
+                        FPSPaint = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = (int)(12 * ScaleFactor), Color = SKColors.Black };
+                        FPSShadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize =(int)(12*ScaleFactor), Color = SKColors.White };
+                    }
+                    SKRect FPSBound = new SKRect();
+                    double Framerate = (1 / e.Time);
+                    String sFPS = String.Format("{0:0.0} FPS", Framerate);
+                    FPSPaint.MeasureText(sFPS, ref FPSBound);
+                    var FPSPosition = new SKPoint(ClientSize.Width - (FPSBound.Width ), ClientSize.Height - (FPSBound.Height/2 ));
+                    //FPSPosition = new SKPoint(50, 50);
                     
+                    
+                    
+                    canvas.DrawText(sFPS, FPSPosition, FPSShadow);
+                    canvas.DrawText(sFPS, new SKPoint(FPSPosition.X - 3, FPSPosition.Y - 3), FPSPaint);
                     //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
                     //canvas.Flush();
                 }
@@ -393,7 +443,8 @@ namespace BASeTris
                 
             }
         }
-
+        SKPaint FPSPaint = null;
+        SKPaint FPSShadow = null;
         public void SetDisplayMode(GameState.DisplayMode pMode)
         {
             CurrentDisplayMode = pMode;

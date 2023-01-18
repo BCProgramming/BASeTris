@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
+using OpenTK.Input;
 
 namespace BASeTris.GameStates
 {
@@ -37,9 +38,9 @@ namespace BASeTris.GameStates
             Owner = pOwner;
             AvailableChars = PossibleChars;
             NameEntered = new StringBuilder(new String(Enumerable.Repeat('_', EntryLength).ToArray()));
-            var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
+            //var sib = StandardImageBackgroundGDI.GetStandardBackgroundDrawer();
            
-            _BG = sib;
+            //_BG = sib;
         }
 
         public abstract bool ValidateEntry(IStateOwner pOwner, String sCurrentEntry);
@@ -100,14 +101,13 @@ namespace BASeTris.GameStates
             {
                 MovePos(pOwner, -1);
                 
-                TetrisGame.Soundman.PlaySound(Char_Pos_Left, pOwner.Settings.std.EffectVolume);
+                
                 //change current position -1 (wrapping to the end if needed)
 
             }
             else if (g == GameKeys.GameKey_Right)
             {
                 MovePos(pOwner, 1);
-                TetrisGame.Soundman.PlaySound(Char_Pos_Right, pOwner.Settings.std.EffectVolume);
                 //change current position 1 (wrapping tp the start if needed)
             }
             else if (g == GameKeys.GameKey_RotateCW)
@@ -123,7 +123,8 @@ namespace BASeTris.GameStates
             currpos+=MoveAmount;
             if (currpos > NameEntered.Length - 1) currpos = 0;
             CurrentPosition = currpos;
-            
+            TetrisGame.Soundman.PlaySound(MoveAmount<0?Char_Pos_Left:Char_Pos_Right, pOwner.Settings.std.EffectVolume);
+
         }
         private void CommitScore(IStateOwner pOwner)
         {
@@ -139,23 +140,13 @@ namespace BASeTris.GameStates
         }
         public void KeyUp(IStateOwner pOwner, int pKey)
         {
-            if (pKey == (int)Keys.Enter)
+
+            var k= (OpenTK.Input.Key)pKey;
+            if (pKey == (int)OpenTK.Input.Key.Enter)
             {
                 CommitScore(pOwner);
             }
-            
-        }
-        public void KeyPressed(IStateOwner pOwner, int pKey)
-        {
-            var k = (Keys)pKey;
-            if (!AllowTextEntry()) return;
-
-            if (k == Keys.Enter) CommitScore(pOwner);
-            else if (k == Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
-            else if (k== Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
-            else if (k == Keys.Left) HandleGameKey(pOwner, GameKeys.GameKey_Left);
-            else if (k == Keys.Right) HandleGameKey(pOwner, GameKeys.GameKey_Right);
-            else if (k == Keys.Back)
+            else if (k == Key.BackSpace)
             {
                 for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
                 {
@@ -166,7 +157,7 @@ namespace BASeTris.GameStates
                 if (CurrentPosition > 0)
                     CurrentPosition--;
             }
-            else if (k == Keys.Delete)
+            else if (k== OpenTK.Input.Key.Delete)
             {
                 for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
                 {
@@ -176,10 +167,25 @@ namespace BASeTris.GameStates
                 NameEntered[NameEntered.Length - 1] = '_';
             }
 
-            else if (AvailableChars.Contains(Char.ToUpper((char) pKey)))
+        }
+        public void KeyPressed(IStateOwner pOwner, int pKey)
+        {
+            
+            var k = (OpenTK.Input.Key)pKey;
+            if (!AllowTextEntry()) return;
+
+            if (k == Key.Enter) CommitScore(pOwner);
+            else if (k == Key.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
+            else if (k == Key.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
+            else if (k == Key.Left) MovePos(pOwner, -1);
+            else if (k == Key.Right) MovePos(pOwner, 1);
+           
+
+            else if (AvailableChars.Contains(Char.ToUpper((char)pKey)))
             {
-                NameEntered[CurrentPosition] = (char) pKey;
-                HandleGameKey(pOwner, GameKeys.GameKey_Right);
+                NameEntered[CurrentPosition] = (char)pKey;
+                MovePos(pOwner, 1);
+                //HandleGameKey(pOwner, GameKeys.GameKey_Right);
             }
         }
     }

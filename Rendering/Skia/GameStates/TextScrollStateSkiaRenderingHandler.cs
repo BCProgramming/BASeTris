@@ -48,7 +48,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 float sy = (float)(CenterY + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Height);
                 
                 Stars[i] = new StarData(sx, sy);
-                Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors);
+                Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors)/3;
                 Stars[i].SizeMultiplier = RandomHelper.Select(chooseweights, AvailableFactors);
             }
         }
