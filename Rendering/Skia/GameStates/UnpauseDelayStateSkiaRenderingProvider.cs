@@ -32,7 +32,8 @@ namespace BASeTris.Rendering.Skia.GameStates
     public class UnpauseDelayStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, UnpauseDelayGameState, GameStateSkiaDrawParameters>
     {
         private SKPaint SecondsPaint = null;
-
+        private SKPaint MSPaint = null;
+        private SKPaint MSPaintBG = null;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, UnpauseDelayGameState Source, GameStateSkiaDrawParameters Element)
         {
 
@@ -40,12 +41,13 @@ namespace BASeTris.Rendering.Skia.GameStates
             var Bounds = Element.Bounds;
             var usePaint = new SKPaint() { Color = SKColors.Yellow, StrokeWidth = 6};
             
+            
 
 
-            //RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source._ReturnState, Element);
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source._ReturnState, Element);
             
             //Draw Faded out overlay to darken things up.
-            //DrawFadeOverlay(g, Bounds);
+            DrawFadeOverlay(g, Bounds);
             //draw a centered Countdown
 
             if (Source.LastSecond != Source.timeremaining.Seconds)
@@ -67,6 +69,8 @@ namespace BASeTris.Rendering.Skia.GameStates
             if(SecondsPaint==null)
             {
                 SecondsPaint = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = useSize, Color = CurrentColor };
+                MSPaint = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = (float)(13*pOwner.ScaleFactor), Color = SKColors.Yellow };
+                MSPaintBG = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = MSPaint.TextSize, Color = SKColors.Navy };
             }
             SecondsPaint.TextSize = useSize;
             SKRect MeasureText = new SKRect();
@@ -76,17 +80,19 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             //g.DrawOval(SecondBound, new SKPaint() { Color = SKColors.Red, StrokeWidth = 1,Style=SKPaintStyle.Stroke });
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), true, new SKPaint() { StrokeWidth = 1f, StrokeCap=SKStrokeCap.Round,  Color = SKColors.Yellow, Style = SKPaintStyle.Stroke });
+            float StartAngle = 0;
+            float SweepAngle = (float)(360 * (1 - Millis));
+            //path.AddOval(SecondBound, SKPathDirection.CounterClockwise);
+            //path.AddArc(SecondBound, 0, SweepAngle);
+            double MinAngle = Math.PI / 180;
+            double XOffset = SecondBound.Left + SecondBound.Width / 2;
+            double YOffset = SecondBound.Top + SecondBound.Height / 2;
+            double CircleRadius = (SecondBound.Width / 2 * 5) * (1 - Millis);
+
             using (SKPath path = new SKPath() {    FillType = SKPathFillType.Winding, Convexity = SKPathConvexity.Concave })
             {
                 
-                float StartAngle = 0;
-                float SweepAngle = (float)(360 * (1 - Millis));
-                //path.AddOval(SecondBound, SKPathDirection.CounterClockwise);
-                //path.AddArc(SecondBound, 0, SweepAngle);
-                double MinAngle = Math.PI / 180;
-                double XOffset = SecondBound.Left + SecondBound.Width / 2;
-                double YOffset = SecondBound.Top + SecondBound.Height / 2;
-                double CircleRadius = (SecondBound.Width / 2 * 5) * (1 - Millis);
+
                 for (double drawAngle = StartAngle; drawAngle < SweepAngle; drawAngle += MinAngle)
                 {
                     double useAngle = drawAngle * (Math.PI / 180);
@@ -100,17 +106,54 @@ namespace BASeTris.Rendering.Skia.GameStates
                 //g.DrawArc(SecondBound, StartAngle, SweepAngle, false, usePaint);
                 path.AddArc(SecondBound, 0, SweepAngle);
                 path.Close();
-                //Something really fucked with SkiaSharp and/or OpenTK here, as lots of stuff seems to draw a sort of bounding box thing around what was drawn, and I don't know why.
+              
+            }
 
-                //g.DrawPath(path, usePaint) ;
+            //lets draw a little millisecond display, too!
+            double Angle = (Math.PI*2 * (1 - Millis));
+            double XPosition = Math.Sin(Angle) * CircleRadius / 2 + XOffset;
+            double YPosition = Math.Cos(Angle) * CircleRadius / 2 + YOffset;
+            String useMS = String.Format("{0:0}", Millis*1000);
+            var PosPaint = new SKPoint((float)XPosition, (float)YPosition);
+
+            if (false && LastPaintMSPositions.Any())
+            {
+                foreach (var q in LastPaintMSPositions)
+                {
+                    var UsePos = q.Item2;
+                    SKPaint skForeground = MSPaint.Clone();
+                    SKPaint skBackground = MSPaintBG.Clone();
+
+
+                    double CalcSize = skForeground.TextSize * 1-((Millis*1000 - q.Item1) / 200);
+                    double CalcAlpha = 1-Math.Min(Math.Abs((Millis*1000 - q.Item1) / 200), 1);
+                    skForeground.TextSize = skBackground.TextSize = (float)CalcSize;
+                    skForeground.Color = skForeground.Color.WithAlpha((byte)(CalcAlpha * 255));
+                    skBackground.Color = skBackground.Color.WithAlpha((byte)(CalcAlpha * 255));
+
+                    g.DrawText(useMS, new SKPoint((float)UsePos.X + (float)(2 * pOwner.ScaleFactor), (float)UsePos.Y + (float)(2 * pOwner.ScaleFactor)), skBackground);
+                    g.DrawText(useMS, UsePos, skForeground);
+
+                }
 
             }
+
+            if (false)
+            {
+                g.DrawText(useMS, new SKPoint((float)XPosition + (float)(2 * pOwner.ScaleFactor), (float)YPosition + (float)(2 * pOwner.ScaleFactor)), MSPaintBG);
+                g.DrawText(useMS, PosPaint, MSPaint);
+            }
+          
+
+            LastPaintMSPositions.Enqueue((Millis*1000,  PosPaint));
+            while ((Millis*1000)-LastPaintMSPositions.Peek().Item1 > 200)
+                LastPaintMSPositions.Dequeue();
             //this arc drawing doesn't work, for some reason.
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), false, new SKPaint() { StrokeWidth = 0.05f, Color = SKColors.Yellow, Style = SKPaintStyle.Stroke, IsStroke = true,StrokeCap = SKStrokeCap.Square,StrokeMiter = 0 });
             g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
             Source.lastMillis = Millis;
         }
-        
+        private Queue<(double,SKPoint)> LastPaintMSPositions = new Queue<(double,SKPoint)>();
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, UnpauseDelayGameState Source, GameStateSkiaDrawParameters Element)
         {
             RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source._ReturnState, Element);

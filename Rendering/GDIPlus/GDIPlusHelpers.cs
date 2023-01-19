@@ -37,6 +37,10 @@ namespace BASeTris.Rendering.GDIPlus
             {
                 baseimage = "block_pixeled_red";
             }
+            else if (DisplayStyle == StandardColouredBlock.BlockStyle.Style_Grain)
+            {
+                baseimage = "block_grain_red";
+            }
 
             Size TargetSize = new Size(100, 100);
             if (StandardColourBlocks == null)

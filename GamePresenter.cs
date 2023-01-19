@@ -248,35 +248,6 @@ namespace BASeTris
 
         }
         
-        private void CheckInputs()
-        {
-            if (X.Gamepad_1.Update())
-            {
-                foreach (var iteratevalue in Enum.GetValues(typeof(GameState.GameKeys)))
-                {
-                    var gkey = (GameState.GameKeys)iteratevalue;
-                    var getbutton = LookupKeyMap(gkey);
-                    if (getbutton != null)
-                    {
-                        var gb = getbutton.Value;
-                        HandleKey(gkey, CheckButtonState(gb, false), CheckButtonState(gb, true), TetrisGame.KeyInputSource.Input_HID);
-
-                    }
-
-
-                }
-                
-                /*
-                HandleKey(GameState.GameKeys.GameKey_RotateCW, X.Gamepad_1.A_down, X.Gamepad_1.A_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_RotateCCW, X.Gamepad_1.X_down, X.Gamepad_1.X_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Left, X.Gamepad_1.Dpad_Left_down, X.Gamepad_1.Dpad_Left_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Right, X.Gamepad_1.Dpad_Right_down, X.Gamepad_1.Dpad_Right_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Down, X.Gamepad_1.Dpad_Down_down, X.Gamepad_1.Dpad_Down_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Drop, X.Gamepad_1.Dpad_Up_down, X.Gamepad_1.Dpad_Up_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Pause, X.Gamepad_1.Start_down, X.Gamepad_1.Start_up, TetrisGame.KeyInputSource.Input_HID);
-                HandleKey(GameState.GameKeys.GameKey_Hold, X.Gamepad_1.RBumper_down, X.Gamepad_1.RBumper_up, TetrisGame.KeyInputSource.Input_HID);*/
-            }
-        }
         private void GamepadInputThread()
         {
             Thread.CurrentThread.IsBackground = true;
@@ -294,6 +265,7 @@ namespace BASeTris
             }
             
         }
+        
         public GameState.GameKeys? TranslateKey(Key source)
         {
             if(Game!=null)

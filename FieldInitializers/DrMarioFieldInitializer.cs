@@ -27,7 +27,8 @@ namespace BASeTris.FieldInitializers
         {
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
             //primary count is based on our level.
-            int numPrimaries = (int)((PlayLevel * 1.33f) + 4);
+            int numPrimaries = (int)((PlayLevel * 2f) + 4);
+            numPrimaries = Math.Max(66, numPrimaries);
             for (int i = 0; i < numPrimaries; i++)
             {
                 //choose a random primary type.

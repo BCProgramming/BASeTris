@@ -108,12 +108,8 @@ namespace BASeTris
                             }
                         }
                     }
-
-
-
                 }
             }
-
         }
 
     }

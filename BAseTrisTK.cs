@@ -313,10 +313,10 @@ namespace BASeTris
                 //Title = $"FPS: {1f / e.Time:0} State:{CurrentGameState.GetType().Name}";
                 
                 Color4 backColor;
-                backColor.A = 1.0f;
-                backColor.R = 0.1f;
-                backColor.G = 0.1f;
-                backColor.B = 0.3f;
+                backColor.A = 1f;//1.0f;
+                backColor.R = 0f;// 0.1f;
+                backColor.G = 0f;// 0.1f;
+                backColor.B = 0f; //0.3f;
                 GL.ClearColor(backColor);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
                 using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType))
@@ -329,22 +329,6 @@ namespace BASeTris
                     canvas.Flush();
                     //canvas.Clear(SKColors.Brown);
                     var info = this.renderTarget;
-                    
-                    //canvas.Clear(SKColors.Beige);
-                   /* 
-                    using (SKPaint paint = new SKPaint
-                    {
-                        Style = SKPaintStyle.StrokeAndFill,
-                        Color = SKColors.White,
-                        StrokeWidth = 1
-                    })
-                    {
-                        //canvas.DrawCircle(info.Width / 2, info.Height / 2, 100, paint);
-                        //canvas.DrawCircle(200, 200, 150, paint);
-                        canvas.DrawText("Greetings", new SKPoint(50, 50),paint);
-                    }
-                    */
-                    
                     
                     if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Full)
                     {

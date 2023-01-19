@@ -73,6 +73,7 @@ namespace BASeTris.Blocks
             Style_Mottled,
             Style_Pixeled,
             Style_Pixeled_Outline,
+            Style_Grain,
             Style_Custom,
                 Style_Custom_NoColorize
         }

@@ -257,6 +257,7 @@
     <Compile Include="Rendering\RenderHelpers.cs" />
     <Compile Include="Rendering\RenderingProvider.cs" />
     <Compile Include="Rendering\Skia\Backgrounds\StandardImageBackgroundSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\Backgrounds\StarfieldBackgroundRenderingHandlerSkia.cs" />
     <Compile Include="Rendering\Skia\GameStateSkiaDrawParameters.cs" />
     <Compile Include="Rendering\Skia\GameStates\EnterTextStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\FieldActionStateSkiaRenderingHandler.cs" />

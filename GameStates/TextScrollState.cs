@@ -79,9 +79,12 @@ namespace BASeTris.GameStates
         },
         new []{
 
-            "Music Person",
-            "",
+            "Music Takerizer",
+            "","",
             "Michael Burgwin",
+            "","","",
+            "Sound Kajiggerizer","","",
+            "Michael Burgwin"
         },
                        new []{
 
@@ -107,6 +110,8 @@ namespace BASeTris.GameStates
             "","",
             "Rice Making Assistant",
             "","",
+            "Michael Burgwin","","",
+            "Bread Maker","",
             "Michael Burgwin"
         },
         new []{
@@ -117,7 +122,7 @@ namespace BASeTris.GameStates
             "",
             "Executive Director",
             "",
-            "Michael Burgwin",
+            "Michael Burgwin","","",
             "Assistant Directors",
             "","",
             "Michael Burgwin","",
@@ -310,7 +315,7 @@ namespace BASeTris.GameStates
         public IBackground BG;
         public TextScrollState(GameState pReversionState,IBackground pBG = null)
         {
-            if (pBG == null) pBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule());
+            if (pBG == null) pBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule() { StarCount=300,WarpFactor=0.33f});
             BG = pBG;
             int offset = 2000;
             int count = 0;
@@ -342,7 +347,8 @@ namespace BASeTris.GameStates
             if (CreditSong == null)
             {
                 var playSong = TetrisGame.Soundman.GetSound("credit");
-                CreditSong = playSong.Play(false, 2.0f);
+                CreditSong = playSong.Play(false, 4.0f);
+                
 
             }
 
