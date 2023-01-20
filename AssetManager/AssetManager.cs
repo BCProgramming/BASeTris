@@ -1619,6 +1619,18 @@ namespace BASeTris.AssetManager
             return Result;
 
         }
+        public static SKBitmap ReduceImageSK(SKBitmap Input, SKSizeI TargetSize)
+        {
+            SKImageInfo skinfo = new SKImageInfo(TargetSize.Width,TargetSize.Height);
+            SKBitmap BuildImage = new SKBitmap(skinfo, SKBitmapAllocFlags.ZeroPixels);
+            using (SKCanvas useG = new SKCanvas(BuildImage))
+            {
+                useG.DrawImage(SKImage.FromBitmap(Input), new SKRect(0, 0, TargetSize.Width, TargetSize.Height), new SKPaint() { });
+
+
+            }
+            return BuildImage;
+        }
         //default "name to stream" implementation.
         public Stream DefaultNameToStream(String filename, FileMode OpenMode)
         {

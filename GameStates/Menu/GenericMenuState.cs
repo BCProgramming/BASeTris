@@ -63,7 +63,7 @@ namespace BASeTris.GameStates.Menu
     /// </summary>
     public class TitleMenuPopulator : IMenuPopulator
     {
-        private int EnterExitScoreCount = 0;
+
         public void PopulateMenu(GenericMenuState Target,IStateOwner pOwner)
         {
             Target.StateHeader = "BASeTris";

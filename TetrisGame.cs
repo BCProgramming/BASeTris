@@ -680,9 +680,8 @@ namespace BASeTris
 
 
         //SkiaSharp implementation of OutlineImage.
-        public static SKBitmap OutlineImageSK(SKBitmap Input)
+        public static SKBitmap OutlineImageSK(SKBitmap Input,int OutlineWidth=3)
         {
-            int OutlineWidth = 3;
             SKImageInfo skinfo = new SKImageInfo(Input.Width + (OutlineWidth * 2), Input.Height + (OutlineWidth * 2));
             SKBitmap BuildImage = new SKBitmap(skinfo, SKBitmapAllocFlags.ZeroPixels);
             using (SKCanvas useG = new SKCanvas(BuildImage))

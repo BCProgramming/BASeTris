@@ -168,8 +168,8 @@ namespace BASeTris.GameStates.Menu
         private void PopulateOptions(IStateOwner pOwner)
         {
             int DesiredFontPixelHeight = (int)(pOwner.GameArea.Height * (23d / 644d));
-            Font standardFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight, 1.0f);
-            Font ItemFont = TetrisGame.GetRetroFont(DesiredFontPixelHeight * .75f, 1.0);
+            Font standardFont = TetrisGame.GetRetroFont(12, pOwner.ScaleFactor);
+            Font ItemFont = TetrisGame.GetRetroFont(12, pOwner.ScaleFactor);
             MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
             StateHeader = "Option Set";
 
