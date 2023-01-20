@@ -27,7 +27,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         {
             float[] AvailableFactors = new float[] { 1f, 0.5f, 0.25f,1.1f,1.25f,0.1f };
             float[] AvailableScales = new float[] { 0.25f, .5f, 0.75f, 1f, 1.25f, 1.5f, 2f, 3f, 5f };
-            float[] chooseweights = new float[] { 20, 30, 40, 100, 40, 30, 20, 10, 5 };
+            float[] chooseweights = new float[] { 20, 30, 40, 100, 40, 30, 20, 1, 1 };
             Stars = new StarfieldStarData[265];
             for (int i = 0; i < Stars.Length; i++)
             {

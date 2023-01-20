@@ -1,4 +1,5 @@
 ﻿using BASeCamp.BASeScores;
+using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
@@ -88,21 +89,43 @@ namespace BASeTris.Rendering
             return null;
         }
     }
+
     /// <summary>
     /// This class is responsible for effectively taking an arrangement of Nominos and a theme and some additional control properties, and generating a Bitmap out of it.
     /// The aim/purpose of this is for visual flourishes or elements on stuff like the title screen. Eg it would have corner/borders constructed out of tetrominoes- at least, that is the idea.
     /// </summary>
     public class TetrominoCollageRenderer
     {
+        public static SKBitmap GetNominoBitmap(NominoTheme _theme)
+        {
+            //similar to "Collage", but we only want to use One Nomino, at random. (one of the tetrominoes, for the moment.)
+            int generatedlevel = TetrisGame.rgen.Next(0, 21);
+            //first, choose a random Tetromino Type.
+            var buildNominoFunc = TetrisGame.Choose(Tetrominoes.Tetromino.StandardTetrominoFunctions);
+            Nomino GenerateResult = buildNominoFunc();
+
+            //with the generated Nomino in hand, construct a CollageRenderer instance the size of this Nomino.
+            GenerateResult.X = 0;
+            GenerateResult.Y = 0;
+            GenerateResult.RecalcExtents();
+
+            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer( GenerateResult.GroupExtents.Right+1, GenerateResult.GroupExtents.Bottom+1, 500, 500, generatedlevel, _theme,SKColors.Transparent);
+            _theme.ApplyTheme(GenerateResult, null, tcr._field, NominoTheme.ThemeApplicationReason.NewNomino);
+            tcr.AddNomino(GenerateResult);
+
+            SKBitmap CreateBitmap = tcr.Render();
+            
+            return CreateBitmap;
+        }
         public static SKBitmap GetBackgroundCollage(NominoTheme _theme)
         {
             //this is a fun one. We've got a bitmap we use for backgrounds, Would be cool if we generated that "on the fly" using a theme, I think.
             //this collage has a number of Nomino blocks.
             int generatedlevel = TetrisGame.rgen.Next(0, 21);
-            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(6, 6, 500, 500, generatedlevel,_theme);
+            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(6, 6, 500, 500, generatedlevel,_theme,SKColors.Black);
 
             //two I Nominoes. I think 0,0 for each Nomino is their top-left corner. I really should know this, I wrote the thing but time is a cruel mistress. I'm into that shit though.
-
+            
             Tetrominoes.Tetromino_I  IBlock = new Tetrominoes.Tetromino_I() {X=-1,Y=-3};
             Tetrominoes.Tetromino_I  IBlock2 = new Tetrominoes.Tetromino_I() { X = -1, Y = 3 };
 
@@ -157,6 +180,7 @@ namespace BASeTris.Rendering
 
         }
 
+        private SKColor ClearColor = SKColors.Transparent;
         private TetrisField _field = null;
         public NominoTheme Theme { get { return _field.Theme; } set { _field.Theme = value; } }
         public int ColumnCount { get; set; }
@@ -171,9 +195,10 @@ namespace BASeTris.Rendering
 
         }
         public IGameCustomizationHandler DummyHandler { get; }
-        public TetrominoCollageRenderer(int pColumnCount, int pRowCount, int pColumnWidth, int pRowHeight,int pLevel,NominoTheme _theme)
+        public TetrominoCollageRenderer(int pColumnCount, int pRowCount, int pColumnWidth, int pRowHeight,int pLevel,NominoTheme _theme,SKColor pClearColor)
         {
             //Note: We can get away with no CustomizationHandler here, as we aren't going to actually be having the Field "do" anything other than use it as a render source.
+            ClearColor = pClearColor;
             ColumnCount = pColumnCount;
             RowCount = pRowCount;
             ColumnWidth = pColumnWidth;
@@ -189,7 +214,7 @@ namespace BASeTris.Rendering
 
             using (SKCanvas DrawRep = new SKCanvas(BuiltRepresentation))
             {
-                DrawRep.Clear(SKColors.Black);
+                DrawRep.Clear(ClearColor);
                 //var bg = _field.Theme.GetThemePlayFieldBackground(_field, _field.Handler);
                 //bg.
 

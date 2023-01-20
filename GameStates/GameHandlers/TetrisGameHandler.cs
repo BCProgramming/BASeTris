@@ -15,19 +15,7 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-
-    public class ProgressiveTetrisHandler : StandardTetrisHandler
-    {
-        public ProgressiveTetrisHandler()
-        {
-            ProgressiveMode = true;
-        }
-        public override string Name { get { return "Progressive Tetris"; } }
-        public override IHighScoreList<TetrisHighScoreData> GetHighScores()
-        {
-            return TetrisGame.ScoreMan["Progressive"];
-        }
-    }
+   
 
     /// <summary>
     /// ICustomizationHandler that handles the standard tetris game.
@@ -396,8 +384,6 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public NominoTheme DefaultTheme { 
 
-
-
             get { 
                 
                 
@@ -481,6 +467,20 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 Render(pOwner, pRenderTarget as SKCanvas, RenderSource as GameplayGameState, Element as GameStateSkiaDrawParameters);
             }
+        }
+    }
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Pentominoes and Hexominoes appear as you progress.")]
+    public class ProgressiveTetrisHandler : StandardTetrisHandler
+    {
+        public ProgressiveTetrisHandler()
+        {
+            ProgressiveMode = true;
+        }
+        public override string Name { get { return "Progressive Tetris"; } }
+        public override IHighScoreList<TetrisHighScoreData> GetHighScores()
+        {
+            return TetrisGame.ScoreMan["Progressive"];
         }
     }
 }

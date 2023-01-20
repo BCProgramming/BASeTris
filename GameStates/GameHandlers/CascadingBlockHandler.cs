@@ -658,7 +658,9 @@ namespace BASeTris.GameStates.GameHandlers
             //likely will need to have stats and stuff abstracted to each Handler.
             state.PlayField.Reset();
 
-            DrMarioFieldInitializer fieldinit = new DrMarioFieldInitializer(this, GetValidPrimaryCombiningTypes(), Level);
+            LineSeriesGameFieldInitializerParameters _InitParams = new LineSeriesGameFieldInitializerParameters(Level,GetValidPrimaryCombiningTypes());
+
+            LineSeriesGameFieldInitializer fieldinit = new LineSeriesGameFieldInitializer(this, _InitParams);
             fieldinit.Initialize(state.PlayField);
             PrimaryBlockCount = state.PlayField.AllContents().Count((y) => y != null);
             /*

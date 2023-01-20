@@ -98,8 +98,9 @@ namespace BASeTris
             StartGame();
 
             //should be initialized enough for test code....
-            /*
-            var testbitmap = TetrominoCollageRenderer.GetBackgroundCollage(new GameBoyTetrominoTheme());
+
+            //var testbitmap = TetrominoCollageRenderer.GetBackgroundCollage(new GameBoyTetrominoTheme());
+            var testbitmap = TetrominoCollageRenderer.GetNominoBitmap(new GameBoyTetrominoTheme());
             
             using (var data = testbitmap.Encode(SKEncodedImageFormat.Png, 80))
             {
@@ -108,7 +109,7 @@ namespace BASeTris
                     data.SaveTo(writer);
                 }
             }
-            */
+            
 
 
             //var useBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule());

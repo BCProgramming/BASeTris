@@ -10,16 +10,26 @@ using System.Threading.Tasks;
 
 namespace BASeTris.FieldInitializers
 {
-    public class DrMarioFieldInitializer : FieldInitializer
+    public class LineSeriesGameFieldInitializerParameters
     {
-        private LineSeriesBlock.CombiningTypes[] _InitTypes;
-        private int PlayLevel { get; set; }
+        public int GameLevel { get; set; }
+
+        public LineSeriesBlock.CombiningTypes[] CombiningTypes { get; set; }
+        public LineSeriesGameFieldInitializerParameters(int pGameLevel,LineSeriesBlock.CombiningTypes[] pCombineTypes)
+        {
+            CombiningTypes = pCombineTypes;
+            GameLevel = pGameLevel;
+        }
+    }
+    public class LineSeriesGameFieldInitializer : FieldInitializer
+    {
+        private LineSeriesGameFieldInitializerParameters _params;
+
         private IGameCustomizationHandler _Handler;
 
-        public DrMarioFieldInitializer(IGameCustomizationHandler pHandler,LineSeriesBlock.CombiningTypes[] pInitTypes,int pPlayLevel)
+        public LineSeriesGameFieldInitializer(IGameCustomizationHandler pHandler,LineSeriesGameFieldInitializerParameters parameters)
         {
-            _InitTypes = pInitTypes;
-            PlayLevel = pPlayLevel;
+              _params = parameters;
             _Handler = pHandler;
         }
 
@@ -27,12 +37,12 @@ namespace BASeTris.FieldInitializers
         {
             HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
             //primary count is based on our level.
-            int numPrimaries = (int)((PlayLevel * 2f) + 4);
+            int numPrimaries = (int)((_params.GameLevel * 2f) + 4);
             numPrimaries = Math.Max(66, numPrimaries);
             for (int i = 0; i < numPrimaries; i++)
             {
                 //choose a random primary type.
-                var chosentype = TetrisGame.Choose(_InitTypes);
+                var chosentype = TetrisGame.Choose(_params.CombiningTypes);
                 LineSeriesPrimaryBlock lsmb = new LineSeriesPrimaryBlock() { CombiningIndex = chosentype };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, lsmb);
