@@ -22,6 +22,15 @@ namespace BASeTris.GameStates.GameHandlers
          where STATT : BaseStatistics, new()
          where OPTT : GameOptions, new()
     {
+        [Flags]
+        public enum ClearOrientationConstants
+        {
+            None = 0,
+            Horizontal = 1,
+            Vertical = 2,
+            Diagonal = 4
+        }
+        public ClearOrientationConstants ClearOrientations = ClearOrientationConstants.Horizontal | ClearOrientationConstants.Vertical | ClearOrientationConstants.Diagonal;
         public String Name { get { return GetName(); } }
         public abstract String GetName();
 
@@ -139,6 +148,87 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return FoundPoints;
         }
+        private HashSet<Point> FindCriticalMassesDiagonal(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
+        {
+            Func<int,int,int> Subtract = (a, b) => a - b;
+            Func<int, int, int> Add = (a, b) => a + b;
+            HashSet<Point> FoundPoints = new HashSet<Point>();
+            foreach (var callfuncs in new (Func<int, int, int>, Func<int, int, int>)[] { (Subtract, Subtract),(Add,Subtract) })
+            {
+                var DoOffsetX = callfuncs.Item2;
+                var DoOffsetY = callfuncs.Item1;
+                
+                var OurPos = state.PlayField.Contents[StartPosition.Y][StartPosition.X] as LineSeriesBlock;
+                if (OurPos == null) return new HashSet<Point>();
+                else
+                {
+                    int FirstRow = StartPosition.Y;
+                    int FirstCol = StartPosition.X;
+                    int FirstOffset = -1;
+                    //first, look up and to the left and find the "last" matching item.
+
+                    for (int Offset = 1; FirstRow - Offset > 0 && FirstCol - Offset > 0; Offset++)
+                    {
+                        //int CheckRow = FirstRow - Offset;
+                        //int CheckCol = FirstCol - Offset;
+                        int CheckRow = DoOffsetY(FirstRow, Offset);
+                        int CheckCol = DoOffsetX(FirstCol, Offset);
+                        if (CheckCol < 0 || CheckCol > state.PlayField.ColCount - 1) break;
+                        if (CheckRow < 0 || CheckRow > state.PlayField.RowCount - 1) break;
+                        var CheckPos = state.PlayField.Contents[CheckRow][CheckCol] as LineSeriesBlock;
+                        if (CheckPos == null) break;
+                        if (CheckPos.CombiningIndex == OurPos.CombiningIndex)
+                            FirstOffset = Offset;
+                        else
+                            break;
+
+                    }
+
+                    //now, we do the same operation in "reverse" but starting from the offset we found.
+                    int DiagonalMass = 0;
+                    int MaxCriticalDiag = 4;
+                    List<Point> Diagonals = new List<Point>();
+                    Diagonals.Add(StartPosition);
+
+                    //starting from firstoffset, we will subtract until we find a non lineseriesblock or a mismatch or are outside the board.
+                    int CurrOffset = FirstOffset;
+                    while (true)
+                    {
+                        //retrieve current position.
+                        int CurrCol = DoOffsetX(FirstCol, CurrOffset);
+                        int CurrRow = DoOffsetY(FirstRow, CurrOffset);
+                        //if outside bounds of play field, we are finished.
+                        if (CurrCol < 0 || CurrCol > state.PlayField.ColCount - 1) break;
+                        if (CurrRow < 0 || CurrRow > state.PlayField.RowCount - 1) break;
+                        var checkPos = state.PlayField.Contents[CurrRow][CurrCol] as LineSeriesBlock;
+                        if (checkPos == null) break;
+                        if (checkPos.CombiningIndex == OurPos.CombiningIndex)
+                        {
+                            MaxCriticalDiag = Math.Max(MaxCriticalDiag, checkPos.CriticalMass);
+                            Diagonals.Add(new Point(CurrCol, CurrRow));
+                            DiagonalMass++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        CurrOffset--;
+
+                    }
+                    if (DiagonalMass >= MaxCriticalDiag)
+                    {
+                        foreach (var iterate in Diagonals)
+                        {
+                            if (!FoundPoints.Contains(iterate))
+                                FoundPoints.Add(iterate);
+                        }
+                    }
+
+                }
+              
+            }
+            return FoundPoints;
+        }
         private HashSet<Point> FindCriticalMassesVertical(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
         {
             HashSet<Point> FoundPoints = new HashSet<Point>();
@@ -207,13 +297,19 @@ namespace BASeTris.GameStates.GameHandlers
         /// <returns></returns>
         private HashSet<Point> FindCriticalMasses(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
         {
-
-            HashSet<Point> Horizontal = FindCriticalMassesHorizontal(state, pOwner, StartPosition);
-            HashSet<Point> Vertical = FindCriticalMassesVertical(state, pOwner, StartPosition);
+            bool useHorz = ClearOrientations.HasFlag(ClearOrientationConstants.Horizontal);
+            bool useVert = ClearOrientations.HasFlag(ClearOrientationConstants.Vertical);
+            bool useDiag = ClearOrientations.HasFlag(ClearOrientationConstants.Diagonal);
+            HashSet<Point> Horizontal = useHorz ? FindCriticalMassesHorizontal(state, pOwner, StartPosition) : new HashSet<Point>();
+            HashSet<Point> Vertical = useVert? FindCriticalMassesVertical(state, pOwner, StartPosition) : new HashSet<Point>();
+            HashSet<Point> Diagonal = useDiag? FindCriticalMassesDiagonal(state, pOwner, StartPosition) : new HashSet<Point>();
             foreach (Point verticalpoint in Vertical)
             {
                 if (!Horizontal.Contains(verticalpoint)) Horizontal.Add(verticalpoint);
             }
+            foreach (Point diagpoint in Diagonal)
+                if (!Horizontal.Contains(diagpoint)) Horizontal.Add(diagpoint);
+
             return Horizontal;
 
         }

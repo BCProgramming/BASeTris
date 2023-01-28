@@ -88,6 +88,8 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
                     if (BLockLocationCache.ContainsKey(nextAppear))
                     {
                         Point AppearLocation = BLockLocationCache[nextAppear];
+                        
+                        
                         var usecolors = dmh.GetCombiningColor(lsb.CombiningIndex);
                         for (int i = 0; i < virusappearanceparticlecount; i++)
                         {
@@ -103,7 +105,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
                             PointF PointSpeed = new PointF((float)(Math.Cos(Angle) * VelocityFactor),
                                 (float)(Math.Sin(Angle) * VelocityFactor));
 
-                            PointF ParticleLocation = new PointF(FirstPoint.X + AppearLocation.X,FirstPoint.Y +AppearLocation.Y);
+                            PointF ParticleLocation = new PointF(FirstPoint.X + AppearLocation.X + 0.5f, FirstPoint.Y + AppearLocation.Y + 0.5f-2) ;
 
                             BaseParticle bp = new BaseParticle(ParticleLocation,PointSpeed, TetrisGame.Choose(usecolors)) { TTL = 1000 };
                             

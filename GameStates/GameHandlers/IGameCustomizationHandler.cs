@@ -12,6 +12,12 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+    ///TODO Game types that will need new handlers:
+    ///1. Columns. Nominoes are three line series blocks. Further, the line series will check diagonals. I think the rotation behaviour
+    /// could dbe handled by the nomino itself through the rotation modulo, instead of having rotated positions it could just have the three rotation points be the three separate positions, rotating each piece through the nomino for each of those three states.
+    /// 
+    /// 2. Bombtris/Blasttris. Tetris with bomb blocks added to some nominoes, and lines don't clear- instead, lines will cause bombs on that line to explode, which create rectangular explosions that will chain to other bomb blocks. Then blocks that were left floating by the explosions fall.
+    /// 
     /// <summary>
     /// interface for game customization, for different Nomino-based games. (eg. Tetris being standard, but could be Tetris 2 or Dr Mario and stuff)
     /// </summary>

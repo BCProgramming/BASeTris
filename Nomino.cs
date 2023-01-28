@@ -192,6 +192,18 @@ namespace BASeTris
 
             _GroupExtents = new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
         }
+        public Rectangle GetBaseExtents()
+        {
+               foreach (var iterateentry in this)
+            {
+                if (iterateentry.X < XMin) XMin = iterateentry.X;
+                if (iterateentry.X > XMax) XMax = iterateentry.X;
+                if (iterateentry.Y < YMin) YMin = iterateentry.Y;
+                if (iterateentry.Y > YMax) YMax = iterateentry.Y;
+            }
+
+            return new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
+        }
 
         protected void SetBlockOwner()
         {

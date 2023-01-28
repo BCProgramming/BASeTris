@@ -6,6 +6,9 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using BASeCamp.Elementizer;
+using BASeTris.Blocks;
 using BASeTris.GameStates;
 
 namespace BASeTris.Replay
@@ -14,7 +17,7 @@ namespace BASeTris.Replay
     /// A 'stateful' replay records the state of the game board. This records board state paired with elapsed time when changes occur.
     /// Current suggestion: Create a state for the board when a block group is "solidified", and after rows are cleared.
     /// </summary>
-    public class StatefulReplay
+    public class StatefulReplay : IXmlPersistable
     {
         //Replay Data is indexed by Elapsed Time. Usually, there is only one
         //for a specific TimeSpan. However, we don't want to crash or have issues dealing with multiple recorded states on the same TimeSpan.
@@ -22,6 +25,17 @@ namespace BASeTris.Replay
 
         Dictionary<TimeSpan, List<StatefulReplayState>> ReplayData = new Dictionary<TimeSpan, List<StatefulReplayState>>();
 
+
+        public XElement GetXmlData(String pNodeName, Object data)
+        {
+            XElement createNode = new XElement(pNodeName);
+
+            return createNode;
+        }
+
+        public StatefulReplay(XElement src, Object data)
+        {
+        }
         public StatefulReplay()
         {
 
@@ -78,7 +92,7 @@ namespace BASeTris.Replay
             }
         }
 
-        public class StatefulReplayState
+        public class StatefulReplayState : IXmlPersistable
         {
 
             //represents a single state of a stateful replay.
@@ -88,6 +102,57 @@ namespace BASeTris.Replay
             public int Columns;
             public int MagicNumber = 0x4332231;
             public StatefulReplayStateBlockInformation[][] BoardState = null;
+
+            public StatefulReplayState(XElement Source, Object pData)
+            {
+                int NumRows = Source.GetAttributeInt("Rows");
+                int NumCols = Source.GetAttributeInt("Columns");
+                long NumTicks = Source.GetAttributeLong("Ticks");
+                ElapsedGameTime = TimeSpan.FromTicks(NumTicks);
+                Rows = NumRows;
+                Columns = NumCols;
+                BoardState = new StatefulReplayStateBlockInformation[Rows][];
+                var CellElements = Source.Elements("Cell").ToArray();
+                int ElementIndex = 0;
+                for (int r = 0; r < Rows; r++)
+                {
+                    BoardState[r] = new StatefulReplayStateBlockInformation[Columns];
+                    for (int c = 0; c < Columns; c++)
+                    {
+                        var CurrCell = CellElements[ElementIndex];
+                        
+                        BoardState[r][c] = new StatefulReplayStateBlockInformation(CurrCell, null);
+                    }
+                }
+
+            }
+            public XElement GetXmlData(String pNodeName, Object Context)
+            {
+                XElement BuildNode = new XElement(pNodeName);
+
+                //store the size of the Board as attributes.
+                int NumRows = BoardState.Length;
+                int NumColumns = BoardState[0].Length;
+                BuildNode.Add(new XAttribute("Rows", NumRows), new XAttribute("Columns", NumColumns),new XAttribute("Elapsed",ElapsedGameTime.Ticks));
+                for (int r = 0; r < BoardState.Length; r++)
+                {
+                    for (int c = 0; c < BoardState.Length; c++)
+                    {
+                        var currcell = BoardState[r][c];
+                        if (currcell.State == StatefulReplayStateBlockInformation.BlockInformation.Block_Empty) continue;
+                        XElement CellNode = new XElement("Cell", new XAttribute("Content", currcell.State.ToString()));
+                        if (currcell.BlockData != null)
+                        {
+                            XElement DataNode = currcell.BlockData.GetXmlData("BlockData", Context);
+                            CellNode.Add(DataNode);
+                        }
+                        BuildNode.Add(CellNode);
+                    }
+                }
+
+
+                return BuildNode;
+            }
             /// <summary>
             /// reads ReplayState from a Stream.
             /// The specified stream is left in the position after the replay data.
@@ -160,7 +225,7 @@ namespace BASeTris.Replay
                     BoardState[y] = new StatefulReplayStateBlockInformation[Field.ColCount];
                     for(int x=0;x<BoardState[y].Length;x++)
                     {
-                        BoardState[y][x] = new StatefulReplayStateBlockInformation(StatefulReplayStateBlockInformation.BlockInformation.Block_Empty);
+                        BoardState[y][x] = new StatefulReplayStateBlockInformation(StatefulReplayStateBlockInformation.BlockInformation.Block_Empty,null);
                     }
                 }
 
@@ -173,7 +238,7 @@ namespace BASeTris.Replay
                     {
                         int BlockX = iterateblock.X + XGroup;
                         int BlockY = iterateblock.Y + YGroup;
-                        BoardState[BlockY][BlockX] = new StatefulReplayStateBlockInformation(StatefulReplayStateBlockInformation.BlockInformation.Block_Active);
+                        BoardState[BlockY][BlockX] = new StatefulReplayStateBlockInformation(StatefulReplayStateBlockInformation.BlockInformation.Block_Active,iterateblock.GetType().FullName);
                     }
                 }
                 //step two: occupied block positions.
@@ -186,6 +251,11 @@ namespace BASeTris.Replay
                         if (thisBlock != null)
                         {
                             BoardState[CurrentRow][CurrentCol].State = StatefulReplayStateBlockInformation.BlockInformation.Block_Occupied;
+                            BoardState[CurrentRow][CurrentCol].BlockTypeName = thisBlock.GetType().FullName;
+                            if (thisBlock is LineSeriesBlock lsb)
+                            {
+                                BoardState[CurrentRow][CurrentCol].BlockData = new LineSeriesBlockSpecificInfo(thisBlock as LineSeriesBlock);
+                            }
                         }
                         else
                         {
@@ -198,7 +268,7 @@ namespace BASeTris.Replay
 
 
         }
-        public class StatefulReplayStateBlockInformation
+        public class StatefulReplayStateBlockInformation : IXmlPersistable
         {
             public enum BlockInformation
             {
@@ -207,9 +277,54 @@ namespace BASeTris.Replay
                 Block_Active
             }
             public BlockInformation State { get; set; }
-            public StatefulReplayStateBlockInformation(BlockInformation pState)
+
+            public String BlockTypeName { get; set; }
+            public BlockSpecificInfo BlockData { get; set; }
+            public StatefulReplayStateBlockInformation(BlockInformation pState,String pBlockTypeName)
             {
+                BlockTypeName = pBlockTypeName;
                 State = pState;
+            }
+            public StatefulReplayStateBlockInformation(XElement pNode, Object PersistenceData)
+            {
+                State = (BlockInformation)pNode.GetAttributeInt("State");
+                BlockTypeName = pNode.GetAttributeString("BlockTypeName", "");
+                if (BlockTypeName.Equals(typeof(LineSeriesBlock).GetType().FullName))
+                {
+                    var BlockItem = pNode.Element("BlockData");
+                    LineSeriesBlockSpecificInfo info = new LineSeriesBlockSpecificInfo(BlockItem, PersistenceData);
+                    BlockData = info;
+                }
+            }
+            public XElement GetXmlData(String pNodeName, object PersistenceData)
+            {
+                XElement BlockNode = BlockData.GetXmlData("BlockData", PersistenceData);
+                return new XElement(pNodeName, BlockNode, new XAttribute("BlockTypeName", BlockTypeName), new XAttribute("State", State));
+            }
+            
+        }
+        public abstract class BlockSpecificInfo : IXmlPersistable
+        {
+            public abstract XElement GetXmlData(string pNodeName, object PersistenceData);
+            
+        }
+        public class LineSeriesBlockSpecificInfo : BlockSpecificInfo
+        {
+            public int CombiningIndex { get; set; }
+            public LineSeriesBlockSpecificInfo(Blocks.LineSeriesBlock nb)
+            {
+                CombiningIndex = (int)nb.CombiningIndex;
+            }
+                
+            public override XElement GetXmlData(String pNodeName, object PersistenceData)
+            {
+                return new XElement("LineSeriesBlockData", new XAttribute("CombiningIndex", CombiningIndex));
+            }
+            public LineSeriesBlockSpecificInfo(XElement pNode, Object PersistenceData)
+            {
+
+                CombiningIndex = pNode.GetAttributeInt("CombiningIndex");
+
             }
         }
     }

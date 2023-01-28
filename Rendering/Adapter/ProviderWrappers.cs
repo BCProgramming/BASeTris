@@ -82,7 +82,14 @@ namespace BASeTris.Rendering.Adapters
         {
             return new BCPoint(first.X * other.X, first.Y * other.Y);
         }
-
+        public static bool operator ==(BCPoint first, BCPoint other)
+        {
+            return first.X == other.X && first.Y == other.Y;
+        }
+        public static bool operator !=(BCPoint first, BCPoint other)
+        {
+            return first.X != other.X || first.Y != other.Y;
+        }
     }
 
 

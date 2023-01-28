@@ -144,7 +144,12 @@ namespace BASeTris.Rendering.Skia
             
             if (SharePaint == null) SharePaint = new SKPaint() { IsAntialias =false, Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha), StrokeWidth = 1.2f };
             else SharePaint.Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, useAlpha);
-            pRenderTarget.DrawLine(PrevPosition, usePosition, SharePaint);
+            if (PrevPosition != usePosition)
+                pRenderTarget.DrawLine(PrevPosition, usePosition, SharePaint);
+            else
+            {
+                pRenderTarget.DrawCircle(usePosition, 3, SharePaint);
+            }
                 //pRenderTarget.DrawRect(new SKRect(usePosition.X, usePosition.Y, usePosition.X + 2, usePosition.Y + 2), skp);
             
         }
