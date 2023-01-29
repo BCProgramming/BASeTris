@@ -30,7 +30,7 @@ namespace BASeTris.GameStates.GameHandlers
             Vertical = 2,
             Diagonal = 4
         }
-        public ClearOrientationConstants ClearOrientations = ClearOrientationConstants.Horizontal | ClearOrientationConstants.Vertical | ClearOrientationConstants.Diagonal;
+        public ClearOrientationConstants ClearOrientations = ClearOrientationConstants.Horizontal | ClearOrientationConstants.Vertical;
         public String Name { get { return GetName(); } }
         public abstract String GetName();
 
