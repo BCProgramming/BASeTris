@@ -152,6 +152,7 @@
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
     <Compile Include="GameObjects\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
+    <Compile Include="GameStates\GameHandlers\ColumnsGameHandler.cs" />
     <Compile Include="GameStates\ControlSettingsViewState.cs" />
     <Compile Include="GameStates\DropWaitState.cs" />
     <Compile Include="GameStates\GameHandlers\CascadingBlockHandler.cs" />

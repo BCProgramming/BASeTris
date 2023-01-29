@@ -32,8 +32,7 @@ namespace BASeTris.Blocks
             {
                 
             }
-          
-
+            
 
             //search through our owner's Nominos...
             foreach (var iterate in Owner)

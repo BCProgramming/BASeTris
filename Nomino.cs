@@ -131,6 +131,12 @@ namespace BASeTris
 
         protected List<NominoElement> BlockData = new List<NominoElement>();
         private Dictionary<NominoBlock, NominoElement> _DataLookup = null;
+
+        public NominoElement ElementFromBlock(NominoBlock src)
+        {
+            if (_DataLookup.ContainsKey(src)) return _DataLookup[src];
+            return null;
+        }
         public IList<NominoElement> GetBlockData()
         {
             return BlockData.AsReadOnly();
@@ -303,6 +309,7 @@ namespace BASeTris
             if (bge.Y < YMin) YMin = bge.Y;
             if (bge.Y > YMax) YMax = bge.Y;
             _GroupExtents = new Rectangle(XMin, YMin, XMax - XMin, YMax - YMin);
+            
             BlockData.Add(bge);
         }
         public bool HasBlock(NominoBlock block)

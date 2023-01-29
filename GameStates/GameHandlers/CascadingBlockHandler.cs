@@ -34,7 +34,7 @@ namespace BASeTris.GameStates.GameHandlers
         public String Name { get { return GetName(); } }
         public abstract String GetName();
 
-
+        public bool LevelCompleteWhenMasterCountZero = true;
         public STATT Statistics { get; private set; } = new STATT();
         BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; } }
         public bool AllowFieldImageCache { get { return false; } }
@@ -43,12 +43,12 @@ namespace BASeTris.GameStates.GameHandlers
         public abstract BlockGroupChooser GetChooser(IStateOwner pOwner);
         public abstract void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state);
 
-        public int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT; }
+        public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT; }
         public int GetHiddenRowCount()
         {
             return 2;
         }
-        public int GetFieldColumnWidth()
+        public virtual int GetFieldColumnWidth()
         {
             return TetrisField.DEFAULT_COLCOUNT;
         }
@@ -153,7 +153,7 @@ namespace BASeTris.GameStates.GameHandlers
             Func<int,int,int> Subtract = (a, b) => a - b;
             Func<int, int, int> Add = (a, b) => a + b;
             HashSet<Point> FoundPoints = new HashSet<Point>();
-            foreach (var callfuncs in new (Func<int, int, int>, Func<int, int, int>)[] { (Subtract, Subtract),(Add,Subtract) })
+            foreach (var callfuncs in new (Func<int, int, int>, Func<int, int, int>)[] { (Subtract, Subtract),(Add,Subtract),(Subtract,Add),(Add,Add) })
             {
                 var DoOffsetX = callfuncs.Item2;
                 var DoOffsetY = callfuncs.Item1;
@@ -421,7 +421,7 @@ namespace BASeTris.GameStates.GameHandlers
             //if MasterCount is 0 then we completed this level.
             //if there are no primary blocks left, this level is now complete. We need a "Level complete" screen state with an overlay- we would switch to that state. It should
             //operate similar to the TemporaryInputPauseGameState in that we provide a routine to be called after the user opts to press a button to continue.
-            if (MasterCount == 0)
+            if (MasterCount == 0 && LevelCompleteWhenMasterCountZero)
             {
                 LevelCompleted = true;
             }
@@ -532,27 +532,55 @@ namespace BASeTris.GameStates.GameHandlers
                                         //the Blocks that are still "alive" with that connection index to the new Nomino, and finally add the resurrected Nominoes to the list.
                                         //It might be wise to somehow track that they were originally a different Nomino somehow...
 
-
-                                        //resurrect this block and other blocks that are in the same nomino. 
-                                        //since we remove busted blocks from the nomino, we can take the Duomino this
-                                        //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
-                                        foreach (var iterate in cb.Owner)
+                                        if (oldPopHandle)
                                         {
-                                            var useX = iterate.X + cb.Owner.X;
-                                            var useY = iterate.Y + cb.Owner.Y;
-                                            state.PlayField.Contents[useY][useX] = null;
-                                        }
+                                            //resurrect this block and other blocks that are in the same nomino. 
+                                            //since we remove busted blocks from the nomino, we can take the Duomino this
+                                            //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
+                                            foreach (var iterate in cb.Owner)
+                                            {
+                                                var useX = iterate.X + cb.Owner.X;
+                                                var useY = iterate.Y + cb.Owner.Y;
+                                                state.PlayField.Contents[useY][useX] = null;
+                                            }
 
-                                        Nomino resurrect = cb.Owner;
-                                        resurrect.Controllable = false;
-                                        resurrect.FallSpeed = 150;
-                                        resurrect.InitialY = resurrect.Y;
-                                        resurrect.LastFall = pOwner.GetElapsedTime();
-                                        resurrect.MoveSound = true;
-                                        resurrect.PlaceSound = false;
-                                        resurrect.NoGhost = true;
-                                        ResurrectNominos.Add(resurrect);
-                                        AddedBlockAlready.Add(cb);
+                                            Nomino resurrect = cb.Owner;
+                                            resurrect.Controllable = false;
+                                            resurrect.FallSpeed = 150;
+                                            resurrect.InitialY = resurrect.Y;
+                                            resurrect.LastFall = pOwner.GetElapsedTime();
+                                            resurrect.MoveSound = true;
+                                            resurrect.PlaceSound = false;
+                                            resurrect.NoGhost = true;
+                                            ResurrectNominos.Add(resurrect);
+                                            AddedBlockAlready.Add(cb);
+                                        }
+                                        else
+                                        {
+                                            var resurrectBlocks = cb.Owner.GetContiguousToElement(currentblock.Owner.ElementFromBlock(cb),null);
+                                            var OriginalX = cb.Owner.X;
+                                            var OriginalY = cb.Owner.Y;
+                                            Nomino resurrected = new Nomino(resurrectBlocks);
+                                            resurrected.X = cb.Owner.X;
+                                            resurrected.Y = cb.Owner.Y;
+                                            foreach (var iterate in resurrectBlocks)
+                                            {
+                                                iterate.Block.Owner = resurrected;
+                                            }
+                                            
+                                            resurrected.Controllable = false;
+                                            resurrected.FallSpeed = 150;
+                                            resurrected.InitialY = resurrected.Y;
+                                            resurrected.LastFall = pOwner.GetElapsedTime();
+                                            resurrected.MoveSound = true;
+                                            resurrected.PlaceSound = false;
+                                            resurrected.NoGhost = true;
+                                            ResurrectNominos.Add(resurrected);
+                                            state.PlayField.Contents[row][column] = null;
+                                            AddedBlockAlready.Add(cb);
+                                           
+
+                                        }
                                     }
                                     //state.PlayField.AddBlockGroup(resurrect);
                                 }
@@ -631,6 +659,7 @@ namespace BASeTris.GameStates.GameHandlers
             return new FieldChangeResult() { ScoreResult = 5 };
 
         }
+        const bool oldPopHandle = false;
         const int ParticlesPerPop = 400;
         static BCColor[] RedColors = new BCColor[] { SKColors.Red, SKColors.IndianRed, SKColors.OrangeRed, SKColors.DarkRed };
         static BCColor[] BlueColors = new BCColor[] { SKColors.Blue, SKColors.Navy, SKColors.SkyBlue, SKColors.LightBlue };
@@ -749,7 +778,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         GameOptions IGameCustomizationHandler.GameOptions => this.GameOptions;
 
-        public void PrepareField(GameplayGameState state, IStateOwner pOwner)
+        public virtual void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
             //likely will need to have stats and stuff abstracted to each Handler.
             state.PlayField.Reset();

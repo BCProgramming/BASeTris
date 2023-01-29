@@ -496,5 +496,32 @@ namespace BASeTris
             }
             
         }
+        
+        public static Nomino CreateColumnNomino(int size,Func<NominoBlock> generateblockfunc)
+        {
+            List<NominoElement> items = new List<NominoElement>();
+            var rotpoints = Enumerable.Range(0, size).Select((w) => new Point(0, w)).ToArray();
+            for (int y = 0; y < size; y++)
+            {
+                Point[] usepart = new Point[rotpoints.Length];
+                int startposition = y;
+                for (int i = 0; i < rotpoints.Length; i++)
+                {
+                    var currindex = ((startposition + i) % rotpoints.Length);
+                    usepart[i] = rotpoints[currindex];
+
+                }
+                NominoElement makeelement = new NominoElement(usepart, generateblockfunc());
+                
+                
+                items.Add(makeelement);
+
+            }
+            return new Nomino(items);
+
+        }
+
+
+
     }
 }

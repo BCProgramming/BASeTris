@@ -66,6 +66,13 @@ namespace BASeTris.GameStates
             return base.GetXmlData(pNodeName, PersistenceData);
         }
     }
+    public class ColumnsGameOptions : GameOptions
+    {
+        public override XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            return base.GetXmlData(pNodeName, PersistenceData);
+        }
+    }
     public class DrMarioGameOptions : GameOptions
     {
         public override XElement GetXmlData(string pNodeName, object PersistenceData)

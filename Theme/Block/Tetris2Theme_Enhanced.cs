@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris.Blocks;
+using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
@@ -14,7 +15,7 @@ namespace BASeTris.Theme.Block
 {
     //this needs the Tetris2 Theme to be completed, we need the basic set of block types to be implemented as well.
     
-    [HandlerTheme("Tetris 2 NES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    [HandlerTheme("Tetris 2 NES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler),typeof(ColumnsGameHandler))]
     [ThemeDescription("Tetris 2 from the NES")]
     public class Tetris2Theme_Standard : Tetris2Theme_Enhanced
 
