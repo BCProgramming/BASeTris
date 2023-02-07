@@ -212,7 +212,7 @@ namespace BASeTris.Rendering.Skia
                     {
                         g.Translate(doTranslate.X, -BlockHeight + doTranslate.Y);
                     }
-                    if (useAngle != 0 && pState.Settings.std.SmoothRotate)
+                    if (useAngle != 0 && pState.Settings.std.SmoothRotate && bg.AllowRotationAnimations)
                     {
                         int MaxXBlock = (from p in bg select p.X).Max();
                         int MaxYBlock = (from p in bg select p.Y).Max();

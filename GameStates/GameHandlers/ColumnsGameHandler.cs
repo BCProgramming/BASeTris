@@ -52,6 +52,7 @@ namespace BASeTris.GameStates
         private void ColumnsNominoTweaker(Nomino Source)
         {
             int conIndex = 0;
+            Source.AllowRotationAnimations = false;
             //tweak the nomino and set a random combining index.
             foreach (var iterate in Source)
             {

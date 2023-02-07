@@ -47,9 +47,16 @@ namespace BASeTris
         public GameFlags Flags { get { return _GameFlags; } set { _GameFlags = value; }}
         public Dictionary<int, HotLine> HotLines = new Dictionary<int, HotLine>();
         public event EventHandler<OnThemeChangeEventArgs> OnThemeChangeEvent;
-
+        public event EventHandler<OnNewLineRowScroll> OnNewLineScroll;
         Dictionary<int, Dictionary<Color, TextureBrush>> HotLineTextures = new Dictionary<int, Dictionary<Color, TextureBrush>>();
 
+        //used (or will be used...) by Tetris Attack mode.
+
+        /// <summary>
+        /// normally, we paint starting at row 2. This changes that offset. For example, -20 would result in the top rows painting
+        /// </summary>
+        public int RowOffsetPaint { get; set; }
+        public float PercentBlockOffsetPaint { get; set; }
 
         public TextureBrush GetHotLineTexture(int pHeight, Color pColor)
         {
@@ -474,7 +481,9 @@ namespace BASeTris
             duped.Rotate(ccw);
             duped.Clamp(RowCount, ColCount);
             //we need to pass in bg for the additional argument this time, since we duplicated to a new nomino it will incorrectly get blocked by the original by CanFit otherwise.
-            return CanFit(duped, bg.X, bg.Y,false,new Nomino[] { bg }).Result==CanFitResultConstants.CanFit;
+            var fitresult = CanFit(duped, bg.X, bg.Y, false, new Nomino[] { bg });
+            if (fitresult.Result == CanFitResultConstants.CantFit_Active) return bg.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip);
+            return fitresult.Result == CanFitResultConstants.CanFit;
         }
 
         public float GetBlockWidth(RectangleF ForBounds)
@@ -719,6 +728,15 @@ namespace BASeTris
     public class OnThemeChangeEventArgs :EventArgs
     {
 
+    }
+    //event fired when a "new" Row scrolls into view.
+    public class OnNewLineRowScroll : EventArgs
+    {
+        public int RowIndex { get; set; }
+        public OnNewLineRowScroll(int pRowIndex)
+        {
+            RowIndex = pRowIndex;
+        }
     }
     public class OnRemoveActiveBlockGroupEventArgs : EventArgs
     {

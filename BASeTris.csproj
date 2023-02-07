@@ -150,7 +150,12 @@
     <Compile Include="Duomino\Duomino.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
-    <Compile Include="GameObjects\Particle.cs" />
+    <Compile Include="GameStates\GameHandlers\TetrisAttackHandler.cs" />
+    <Compile Include="Particles\BitmapParticle.cs" />
+    <Compile Include="Particles\BlockInteractingParticle.cs" />
+    <Compile Include="Particles\CharParticle.cs" />
+    <Compile Include="Particles\LineParticle.cs" />
+    <Compile Include="Particles\Particle.cs" />
     <Compile Include="GamePresenter.cs" />
     <Compile Include="GameStates\GameHandlers\ColumnsGameHandler.cs" />
     <Compile Include="GameStates\ControlSettingsViewState.cs" />
@@ -228,6 +233,7 @@
     <Compile Include="GummyImage.cs" />
     <Compile Include="IStateOwner.cs" />
     <Compile Include="NominoDictionary.cs" />
+    <Compile Include="Particles\RotatableBaseParticle.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -512,7 +518,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GameObjects\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
     <PropertyGroup>

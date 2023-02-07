@@ -80,6 +80,9 @@ namespace BASeTris.GameStates
             return base.GetXmlData(pNodeName, PersistenceData);
         }
     }
+    public class TetrisAttackGameOptions : GameOptions
+    {
+    }
     public class Tetris2GameOptions :GameOptions
     {
         public override XElement GetXmlData(string pNodeName, object PersistenceData)

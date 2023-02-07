@@ -1571,12 +1571,12 @@ namespace BASeTris.AssetManager
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, SKBitmap> SkiaImages { get; set; } = new Dictionary<String, SKBitmap>(StringComparer.OrdinalIgnoreCase);
-        public SKBitmap GetSKBitmap(String man_key)
+        public SKBitmap GetSKBitmap(String man_key,float reductionfactor = 1)
         {
-            if (!SkiaImages.ContainsKey(man_key))
+            if (!SkiaImages.ContainsKey(man_key + reductionfactor.ToString()))
             {
-                Image findkey = this[man_key];
-                SkiaImages.Add(man_key,SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
+                Image findkey = this[man_key,reductionfactor];
+                SkiaImages.Add(man_key + reductionfactor.ToString(), SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
             }
             return SkiaImages[man_key];
                 

@@ -1,6 +1,6 @@
 ﻿using BASeCamp.Rendering;
-using BASeTris.GameObjects;
 using BASeTris.GameStates;
+using BASeTris.Particles;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.GDIPlus;
 using SkiaSharp;

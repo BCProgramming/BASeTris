@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
-using BASeTris.GameObjects;
 using BASeTris.GameStates;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
@@ -19,6 +18,7 @@ using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
+using BASeTris.Particles;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {

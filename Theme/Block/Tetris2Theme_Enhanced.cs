@@ -13,9 +13,21 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
+    [HandlerTheme("GemStones", typeof(ColumnsGameHandler))]
+    [ThemeDescription("Gemstones")]
+    public class GemStoneTheme : Tetris2Theme_Enhanced
+    {
+        public override String Name => "Gemstones";
+        public GemStoneTheme()
+        {
+            UseEnhancedImages = true;
+            useGemStones = true;
+        }
+    }
+
     //this needs the Tetris2 Theme to be completed, we need the basic set of block types to be implemented as well.
     
-    [HandlerTheme("Tetris 2 NES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler),typeof(ColumnsGameHandler))]
+    [HandlerTheme("Tetris 2 NES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
     [ThemeDescription("Tetris 2 from the NES")]
     public class Tetris2Theme_Standard : Tetris2Theme_Enhanced
 
@@ -427,9 +439,9 @@ namespace BASeTris.Theme.Block
         {
             return IsInSet(test, GreenNormalTypes, GreenFixedTypes, GreenShinyTypes,GreenPopTypes);
         }
-        private static BCT[][] GetBCTBitmap(String ImageKey)
+        private static BCT[][] GetBCTBitmap(String ImageKey,float ReductionFactor = 1)
         {
-            return GetBCTBitmap(ImageKey, ColorMapLookupFunc);
+            return GetBCTBitmap(ImageKey, ColorMapLookupFunc,ReductionFactor);
         }
 
         public override BlockFlags GetBlockFlags(Nomino Group, NominoElement element, TetrisField field)
@@ -439,6 +451,7 @@ namespace BASeTris.Theme.Block
 
         public override SKPointI GetBlockSize(TetrisField field, BlockTypes BlockType)
         {
+            if (useGemStones) return new SKPointI(Square_Gem[0].Length, Square_Gem.Length);
             if (UseEnhancedImages)
                 return new SKPointI(32, 32);
             else return new SKPointI(9, 9);
@@ -520,6 +533,7 @@ namespace BASeTris.Theme.Block
         Dictionary<String, Dictionary<BCT, SKColor>> ExtraNominoColourLookup = new Dictionary<string, Dictionary<BCT, SKColor>>();
         public override Dictionary<BlockTypes, BCT[][]> GetBlockTypeDictionary()
         {
+            if (useGemStones) return GemIndex;
             if (UseEnhancedImages)
                 return BitmapIndexEnhanced;
             else return BitmapIndex;
@@ -539,21 +553,22 @@ namespace BASeTris.Theme.Block
             String sStringRep = NNominoGenerator.StringRepresentation(gotpoints);
             return sStringRep;
         }
+        protected bool useGemStones = false;
         protected bool UseEnhancedImages = true;
         public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockTypes BlockType, BCT PixelType)
         {
             if (IsYellowColor(BlockType))
-                return UseEnhancedImages ? EnhancedYellowColourSet[PixelType] : YellowColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedYellowColourSet[PixelType] : YellowColourSet[PixelType];
             else if (IsRedColor(BlockType))
-                return UseEnhancedImages ? EnhancedRedColourSet[PixelType] : RedColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedRedColourSet[PixelType] : RedColourSet[PixelType];
             else if (IsBlueColor(BlockType))
-                return UseEnhancedImages ? EnhancedBlueColourSet[PixelType] : BlueColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedBlueColourSet[PixelType] : BlueColourSet[PixelType];
             else if (IsOrangeColor(BlockType))
-                return UseEnhancedImages ? EnhancedOrangeColourSet[PixelType] : OrangeColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedOrangeColourSet[PixelType] : OrangeColourSet[PixelType];
             else if (IsGreenColor(BlockType))
-                return UseEnhancedImages ? EnhancedGreenColourSet[PixelType] : GreenColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedGreenColourSet[PixelType] : GreenColourSet[PixelType];
             else if (IsMagentaColor(BlockType))
-                return UseEnhancedImages ? EnhancedMagentaColourSet[PixelType] : MagentaColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedMagentaColourSet[PixelType] : MagentaColourSet[PixelType];
             else
             {
                 //if none of the other tests pass, then we might be working with some normal tetris style thing.
@@ -588,7 +603,7 @@ namespace BASeTris.Theme.Block
                 
                 
 
-                return UseEnhancedImages ? EnhancedGrayColourSet[PixelType] : GrayColourSet[PixelType];
+                return useGemStones || UseEnhancedImages ? EnhancedGrayColourSet[PixelType] : GrayColourSet[PixelType];
             }
             return SKColors.Magenta;
         }
@@ -739,6 +754,11 @@ namespace BASeTris.Theme.Block
 
         public static BCT[][] Shiny_Block_100 = Fixed_Block;
 
+
+        private static BCT[][] Square_Gem, Triangle_Gem, Octagon_Gem;
+        private static BCT[][] Square_Gem_Exploded, Triangle_Gem_Exploded, Octagon_Gem_Exploded;
+        private static BCT[][] Transparent;
+
         private static BCT[][] Normal_Block_Enhanced, Fixed_Block_Enhanced, Shiny_Block_25_Enhanced, Shiny_Block_50_Enhanced, Shiny_Block_75_Enhanced, Shiny_Block_100_Enhanced, Pop_Block_Enhanced;
         private static readonly Dictionary<SKColor, BCT> bitmappixels = new Dictionary<SKColor, BCT>()
             {
@@ -770,8 +790,8 @@ namespace BASeTris.Theme.Block
         };
         private static Dictionary<BlockTypes, BCT[][]> BitmapIndex;
         private static Dictionary<BlockTypes, BCT[][]> BitmapIndexEnhanced;
-       
-
+        private static Dictionary<BlockTypes, BCT[][]> GemIndex;
+        
         private static BCT ColorMapLookupFunc(SKColor Src)
         {
             if (bitmappixels_enhanced.ContainsKey(Src)) return bitmappixels_enhanced[Src]; else return BCT.Transparent;
@@ -785,7 +805,13 @@ namespace BASeTris.Theme.Block
         {
             if (ThemeDataPrepared) return;
             //BCT[][] Normal_Block, Fixed_Block, Shiny_Block_25, Shiny_Block_50, Shiny_Block_75, Shiny_Block_100;
-
+            Square_Gem = GetBCTBitmap("gem_square");
+            Octagon_Gem = GetBCTBitmap("gem_octagon");
+            Triangle_Gem = GetBCTBitmap("gem_triangle");
+            Transparent = GetBCTBitmapFromFunction(64, 64, (x, y) => BCT.Transparent);
+            Square_Gem_Exploded = Transparent;
+            Triangle_Gem_Exploded = Transparent;
+            Octagon_Gem_Exploded = Transparent;
             Normal_Block_Enhanced = GetBCTBitmap("tetris_2_normal_block");
             Fixed_Block_Enhanced = GetBCTBitmap("tetris_2_fixed_block");
             Shiny_Block_25_Enhanced = GetBCTBitmap("tetris_2_shine_25");
@@ -893,6 +919,66 @@ namespace BASeTris.Theme.Block
             {BlockTypes.Shiny_Block_Green_100,Shiny_Block_100_Enhanced},
             {BlockTypes.Shiny_Block_Magenta_100,Shiny_Block_100_Enhanced},
             {BlockTypes.Shiny_Block_Orange_100,Shiny_Block_100_Enhanced}
+
+
+        };
+            BCT[][][] ChooseOptions = new BCT[][][] {
+                Square_Gem,Octagon_Gem,Triangle_Gem
+            };
+
+            var YellowType = TetrisGame.Choose(ChooseOptions);
+            var RedType = TetrisGame.Choose(ChooseOptions);
+            var BlueType = TetrisGame.Choose(ChooseOptions);
+            var GreenType = TetrisGame.Choose(ChooseOptions);
+            var MagentaType = TetrisGame.Choose(ChooseOptions);
+            var OrangeType = TetrisGame.Choose(ChooseOptions);
+            var GrayType = TetrisGame.Choose(ChooseOptions);
+            GemIndex = new Dictionary<BlockTypes, BCT[][]>()
+        {
+            {BlockTypes.Normal_Block_Yellow,YellowType},
+            {BlockTypes.Normal_Block_Red,RedType},
+            {BlockTypes.Normal_Block_Blue,BlueType},
+            {BlockTypes.Normal_Block_Green,GreenType},
+            {BlockTypes.Normal_Block_Magenta,MagentaType},
+            {BlockTypes.Normal_Block_Orange,OrangeType},
+            {BlockTypes.Normal_Block_Gray,GrayType},
+            {BlockTypes.Pop_Block_Yellow,Transparent},
+            {BlockTypes.Pop_Block_Red,Transparent},
+            {BlockTypes.Pop_Block_Blue,Transparent},
+            {BlockTypes.Pop_Block_Green,Transparent},
+            {BlockTypes.Pop_Block_Magenta,Transparent},
+            {BlockTypes.Pop_Block_Orange,Transparent},
+            {BlockTypes.Fixed_Block_Yellow,YellowType},
+            {BlockTypes.Fixed_Block_Red,RedType},
+            {BlockTypes.Fixed_Block_Blue,BlueType},
+            {BlockTypes.Fixed_Block_Green,GreenType},
+            {BlockTypes.Fixed_Block_Magenta,MagentaType},
+            {BlockTypes.Fixed_Block_Orange,OrangeType},
+            {BlockTypes.Fixed_Block_Gray,GrayType},
+            {BlockTypes.Shiny_Block_Yellow_25,YellowType},
+            {BlockTypes.Shiny_Block_Red_25,RedType},
+            {BlockTypes.Shiny_Block_Blue_25,BlueType},
+            {BlockTypes.Shiny_Block_Green_25,GreenType},
+            {BlockTypes.Shiny_Block_Magenta_25,MagentaType},
+            {BlockTypes.Shiny_Block_Orange_25,OrangeType},
+            {BlockTypes.Shiny_Block_Yellow_50,YellowType},
+            {BlockTypes.Shiny_Block_Red_50,RedType},
+            {BlockTypes.Shiny_Block_Blue_50,BlueType},
+            {BlockTypes.Shiny_Block_Green_50,GreenType},
+            {BlockTypes.Shiny_Block_Magenta_50,MagentaType},
+            {BlockTypes.Shiny_Block_Orange_50,OrangeType},
+            {BlockTypes.Shiny_Block_Yellow_75,YellowType},
+            {BlockTypes.Shiny_Block_Red_75,RedType},
+            {BlockTypes.Shiny_Block_Blue_75,BlueType},
+            {BlockTypes.Shiny_Block_Green_75,GreenType},
+            {BlockTypes.Shiny_Block_Magenta_75,MagentaType},
+            {BlockTypes.Shiny_Block_Orange_75,OrangeType},
+            {BlockTypes.Shiny_Block_Yellow_100,YellowType},
+            {BlockTypes.Shiny_Block_Red_100,RedType},
+            {BlockTypes.Shiny_Block_Blue_100,BlueType},
+            {BlockTypes.Shiny_Block_Green_100,GreenType},
+            {BlockTypes.Shiny_Block_Magenta_100,MagentaType},
+            {BlockTypes.Shiny_Block_Orange_100,OrangeType}
 
 
         };

@@ -9,7 +9,6 @@ using BASeTris.AI;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
-using BASeTris.GameObjects;
 using BASeTris.GameStates.GameHandlers.HandlerOptions;
 using BASeTris.GameStates.GameHandlers.HandlerStates;
 using BASeTris.Rendering.Adapters;

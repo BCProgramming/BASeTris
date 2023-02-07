@@ -25,12 +25,21 @@ namespace BASeTris
 {
     public class Nomino : IEnumerable<NominoElement>
     {
+        [Flags]
+        public enum NominoControlFlags
+        {
+            ControlFlags_Standard = 0,
+            ControlFlags_DropMove = 1, //the drop key will move the nomino up instead of dropping it.
+            ControlFlags_NoClip = 2 //doesn't care about "fitting" where other blocks are.
+        }
         public static Func<Nomino>[] NominoEnumToFuncList(IEnumerable<Nomino> input) //will be useful for generated Nominoes like Pentominoes and Hexominoes and such.
         {
             return (from p in input select (Func<Nomino>)(() => p)).ToArray();
         }
         public String SpecialName { get; set; }
 
+
+        public NominoControlFlags Flags { get; set; } = NominoControlFlags.ControlFlags_Standard;
         public bool Controllable { get; set; } = true;
         public bool PlaceSound { get; set; } = true;
         public bool MoveSound { get; set; } = false;
@@ -110,7 +119,7 @@ namespace BASeTris
         private Rectangle _GroupExtents = Rectangle.Empty;
         public TimeSpan LastFall = TimeSpan.Zero;
         public float HighestHeightValue = 0;
-        
+        public bool AllowRotationAnimations { get; set; } = true;
         public float GetHeightTranslation(IStateOwner pOwner,float BlockHeight)
         {
             if (!pOwner.CurrentState.GamePlayActive)

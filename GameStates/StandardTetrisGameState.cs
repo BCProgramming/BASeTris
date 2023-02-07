@@ -16,7 +16,6 @@ using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.DrawHelper;
 using BASeTris.FieldInitializers;
-using BASeTris.GameObjects;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
@@ -30,6 +29,7 @@ using Microsoft.SqlServer.Server;
 using SkiaSharp;
 using BASeTris.Settings;
 using BASeTris.Theme;
+using BASeTris.Particles;
 
 namespace BASeTris.GameStates
 {
@@ -728,6 +728,7 @@ namespace BASeTris.GameStates
             }
             else if (g == GameKeys.GameKey_Drop)
             {
+                
                 //drop all active groups.
                 Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
                 
@@ -735,39 +736,51 @@ namespace BASeTris.GameStates
 
                 if (FirstGroup != null)
                 {
+
                     //store the block positions for each block in the nomino.
-                    
+                    bool SomeDropped = false;
 
                     foreach (var activeitem in PlayField.BlockGroups)
                     {
                         if (!activeitem.Controllable) continue;
-                        List<Tuple<BCPoint,NominoElement>> StartBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
-                        List<Tuple<BCPoint, NominoElement>> EndBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
-                        foreach (var element in activeitem)
-                        {
-                            StartBlockPositions.Add(new Tuple<BCPoint, NominoElement>(new BCPoint(activeitem.X + element.X, activeitem.Y + element.Y),element));
-                        }
-                        int dropqty = 0;
-                        var ghosted = GetGhostDrop(pOwner,activeitem, out dropqty, 0);
-                        foreach (var element in ghosted)
-                        {
-                            EndBlockPositions.Add(new Tuple<BCPoint, NominoElement>(new BCPoint(ghosted.X + element.X, ghosted.Y + element.Y), element));
-                        }
-                        GenerateDropParticles(StartBlockPositions, EndBlockPositions);
-                        activeitem.X = ghosted.X;
-                        activeitem.SetY(pOwner, ghosted.Y);
-                        PlayField.SetGroupToField(activeitem);
-                        PlayField.RemoveBlockGroup(activeitem);
-                        if (GameStats is TetrisStatistics ts)
-                        {
-                            GameStats.AddScore((dropqty * (5 + (ts.LineCount / 10))));
-                        }
                         
+                        if (activeitem.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_DropMove))
+                        {
+                            //"drop" should be interpreted as moving up instead.
+                            HandleActiveMove(pOwner, 0, -1, activeitem);
+                        }
+                        else
+                        {
+                            SomeDropped = true;
+                            List<Tuple<BCPoint, NominoElement>> StartBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
+                            List<Tuple<BCPoint, NominoElement>> EndBlockPositions = new List<Tuple<BCPoint, NominoElement>>();
+                            foreach (var element in activeitem)
+                            {
+                                StartBlockPositions.Add(new Tuple<BCPoint, NominoElement>(new BCPoint(activeitem.X + element.X, activeitem.Y + element.Y), element));
+                            }
+                            int dropqty = 0;
+                            var ghosted = GetGhostDrop(pOwner, activeitem, out dropqty, 0);
+                            foreach (var element in ghosted)
+                            {
+                                EndBlockPositions.Add(new Tuple<BCPoint, NominoElement>(new BCPoint(ghosted.X + element.X, ghosted.Y + element.Y), element));
+                            }
+                            GenerateDropParticles(StartBlockPositions, EndBlockPositions);
+                            activeitem.X = ghosted.X;
+                            activeitem.SetY(pOwner, ghosted.Y);
+                            PlayField.SetGroupToField(activeitem);
+                            PlayField.RemoveBlockGroup(activeitem);
+                            if (GameStats is TetrisStatistics ts)
+                            {
+                                GameStats.AddScore((dropqty * (5 + (ts.LineCount / 10))));
+                            }
+                        }
                     }
-
-                    pOwner.Feedback(0.6f, 200);
-                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
-                    GameHandler.ProcessFieldChange(this, pOwner, FirstGroup);
+                    if (SomeDropped)
+                    {
+                        pOwner.Feedback(0.6f, 200);
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
+                        GameHandler.ProcessFieldChange(this, pOwner, FirstGroup);
+                    }
                     //ProcessFieldChangeWithScore(pOwner, FirstGroup);
                 }
             }
@@ -777,18 +790,7 @@ namespace BASeTris.GameStates
                 foreach (var ActiveItem in PlayField.BlockGroups)
                 {
                     if (!ActiveItem.Controllable) continue;
-                    if (PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y,false).Result== CanFitResults.CanFitResultConstants.CanFit)
-                    {
-                        lastHorizontalMove = DateTime.Now;
-                        ActiveItem.X += XMove;
-                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.std.EffectVolume);
-                        pOwner.Feedback(0.1f, 50);
-                    }
-                    else
-                    {
-                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockStopped.Key, pOwner.Settings.std.EffectVolume);
-                        pOwner.Feedback(0.4f,75);
-                    }
+                    HandleActiveMove(pOwner, XMove,0, ActiveItem);
                 }
             }
             else if (g == GameKeys.GameKey_Pause)
@@ -927,6 +929,44 @@ namespace BASeTris.GameStates
                 }
             }
         }
+
+        private void HandleActiveMove(IStateOwner pOwner, int XMove,int YMove, Nomino ActiveItem)
+        {
+            var FitResult = PlayField.CanFit(ActiveItem, ActiveItem.X + XMove, ActiveItem.Y + YMove, false);
+            if (FitResult.Result == CanFitResults.CanFitResultConstants.CanFit || ActiveItem.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip))
+            {
+                if (ActiveItem.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip)) //CanFit won't be true fhere, however we might be working with a NoClip Nomino. In that case we want to block going off the edges.
+                {
+
+                    if (ActiveItem.Any((b) => ActiveItem.X + b.X + XMove < 0 || ActiveItem.X + b.X + XMove > PlayField.ColCount || ActiveItem.Y + b.Y + YMove < 0 || ActiveItem.Y + b.Y + YMove > PlayField.RowCount))
+                    {
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockStopped.Key, pOwner.Settings.std.EffectVolume);
+                        pOwner.Feedback(0.4f, 75);
+                    }
+                    else
+                    {
+                        ActiveItem.Y += YMove;
+                        ActiveItem.X += XMove;
+                        Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.std.EffectVolume);
+                        pOwner.Feedback(0.1f, 75);
+                    }
+                }
+                else
+                {
+                    lastHorizontalMove = DateTime.Now;
+                    ActiveItem.X += XMove;
+                    ActiveItem.Y += YMove;
+                    Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.std.EffectVolume);
+                    pOwner.Feedback(0.1f, 50);
+                }
+            }
+            else
+            {
+                Sounds.PlaySound(pOwner.AudioThemeMan.BlockStopped.Key, pOwner.Settings.std.EffectVolume);
+                pOwner.Feedback(0.4f, 75);
+            }
+        }
+
         const int ParticlesPerBlock = 15;
         private void GenerateDropParticles(List<Tuple<BCPoint, NominoElement>> StartCoordinates,List<Tuple<BCPoint, NominoElement>> EndCoordinates)
         {
@@ -1006,6 +1046,16 @@ namespace BASeTris.GameStates
             }
             else if (fitresult.CantFit_Field)
             {
+
+                if (activeItem.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip))
+                {
+                    HandleActiveMove(pOwner, 0, 1, activeItem);
+                    lastHorizontalMove = DateTime.Now;
+                    //ignore!
+                    //return GroupOperationResult.Operation_Success;
+                }
+
+
                 if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.std.LockTime)
                 {
                     var elapsed = pOwner.GetElapsedTime();

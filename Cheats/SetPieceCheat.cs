@@ -62,7 +62,7 @@ namespace BASeTris.Cheats
                             String sSubstring = sPiece.Substring(6).Trim().ToUpper();
 
 
-                            Func<Nomino>[] letterfuncs = (from c in sSubstring select new Func<Nomino>(() => NNominoGenerator.NominoFromLetter(c.ToString()))).ToArray();
+                            Func<Nomino>[] letterfuncs = (from c in sSubstring select new Func<Nomino>(() => NNominoGenerator.NominoFromLetter(c.ToString()))).Reverse().ToArray();
 
                             buildNominoFuncs = letterfuncs;
 

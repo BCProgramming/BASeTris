@@ -63,9 +63,25 @@ namespace BASeTris.Theme.Block
 
         public abstract SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockEnum BlockType, PixelEnum PixelType);
 
-        public static PixelEnum[][] GetBCTBitmap(String ImageKey, Func<SKColor, PixelEnum> ColorMapFunc)
+        public static PixelEnum[][] GetBCTBitmapFromFunction(int Width, int Height, Func<int, int, PixelEnum> ColorFunc)
         {
-            SKImage sourceBitmap = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(ImageKey));
+
+            PixelEnum[][] BuildResult = new PixelEnum[Height][];
+            for (int y = 0; y < Height; y++)
+            {
+                BuildResult[y] = new PixelEnum[Width];
+                for (int x = 0; x < Width; x++)
+                {
+                    PixelEnum pe = ColorFunc(x, y);
+                    BuildResult[y][x] = pe;
+                }
+            }
+            return BuildResult;
+
+        }
+        public static PixelEnum[][] GetBCTBitmap(String ImageKey, Func<SKColor, PixelEnum> ColorMapFunc,float ReductionFactor = 1)
+        {
+            SKImage sourceBitmap = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(ImageKey,ReductionFactor));
             return GetPixelsFromSKImage(sourceBitmap, ColorMapFunc);
         }
         public static PixelEnum[][] GetPixelsFromSKImage(SKImage Source, Func<SKColor, PixelEnum> PixelMapRoutine)

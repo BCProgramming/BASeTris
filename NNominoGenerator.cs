@@ -253,9 +253,157 @@ namespace BASeTris
 
             return sb.ToString();
         }
+        Dictionary<char, int[][]> SimpleCharacters = new Dictionary<char, int[][]>()
+        {
+            {'A',
+                new int[][]{
+                    new int []{0,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'B',
+                new int[][]{
+                    new int []{0,1,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'C',
+                new int[][]{
+                    new int []{0,1,1 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                    new int []{0,1,1 },
+                } },
+                {'D',
+                new int[][]{
+                    new int []{1,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,1,0 },
+                } },
+                {'E',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,0,0 },
+                    new int []{1,1,0 },
+                    new int []{1,0,0 },
+                    new int []{1,1,1 },
+                } },
+                {'F',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,0,0 },
+                    new int []{1,1,0 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                } },
+                {'G',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'H',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'I',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{1,1,1 },
+                } },
+                {'J',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{1,0,0 },
+                } },
+                {'K',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'L',
+                new int[][]{
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                    new int []{1,1,1 },
+                } },
+                {'M',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'N',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,1,1 },
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'O',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,1,1 },
+                } },
+                {'T',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                } },
+                {'Y',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                    new int []{0,1,0 },
+                } },
+                {'R',
+                new int[][]{
+                    new int []{1,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+
+        };
         public static IEnumerable<NominoPoint> FromLetter(String src)
         {
-            var useFont = new Font(TetrisGame.RetroFont, 4);
+            var useFont = new Font("Small Fonts", 4);
             SizeF MeasuredText = new SizeF();
             using (Bitmap b = new Bitmap(1, 1))
             {
