@@ -404,7 +404,8 @@ namespace BASeTris
             //let's start off by creating a HashSet of Point structs listing the field positions of other active groups than the specified Nomino.
             foreach (var active in ActiveBlockGroups)
             {
-                if(active != bg && (AdditionalIgnores==null|| !AdditionalIgnores.Contains(active)))
+                if (active.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip)) continue;
+                if (active != bg && (AdditionalIgnores==null|| !AdditionalIgnores.Contains(active)))
                 {
                     
                     //can we alter this to also CanFit the other nomino in some way?

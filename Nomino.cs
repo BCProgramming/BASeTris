@@ -143,7 +143,7 @@ namespace BASeTris
 
         public NominoElement ElementFromBlock(NominoBlock src)
         {
-            if (_DataLookup.ContainsKey(src)) return _DataLookup[src];
+            if (BlockDataLookup.ContainsKey(src)) return _DataLookup[src];
             return null;
         }
         public IList<NominoElement> GetBlockData()
@@ -154,6 +154,7 @@ namespace BASeTris
         {
             return BlockData.IndexOf(findItem);
         }
+        public int Count { get { return BlockData.Count; } }
         public Dictionary<NominoBlock, NominoElement> BlockDataLookup
         {
             get

@@ -55,6 +55,7 @@ namespace BASeTris.GameStates.GameHandlers
     {
         public DrMarioHandler()
         {
+            oldPopHandle = true;
             Level = 0;
         }
         public override GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)

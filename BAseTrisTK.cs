@@ -269,9 +269,13 @@ namespace BASeTris
             FieldSize = WindowHeight * (332f / 641f);
             StatSize = WindowWidth - FieldSize;
         }
-       
+        public double FrameTime { get { if (CurrentFrameData == null) return 0; return CurrentFrameData.Time; } }
+        private FrameEventArgs LastFrameData = null;
+        private FrameEventArgs CurrentFrameData = null;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            LastFrameData = CurrentFrameData;
+            CurrentFrameData = e;
             if (!TetrisGame.Imageman.ImagePrepped) return;
             Debug.Print("RenderFrame");
             base.OnRenderFrame(e);

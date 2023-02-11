@@ -30,7 +30,7 @@ namespace BASeTris.Theme
 
 
         private Image Star_Image, Circle_Image, Diamond_Image, Heart_Image, Club_Image, Triangle_Image, Exclamation_Image;
-
+        private Image BlockSelect_Image;
         private void InitializeThemeData()
         {
             Star_Image = TetrisGame.Imageman["block_star",0.25f];
@@ -40,6 +40,7 @@ namespace BASeTris.Theme
             Club_Image = TetrisGame.Imageman["block_club", 0.25f];
             Triangle_Image = TetrisGame.Imageman["block_triangle", 0.25f];
             Exclamation_Image = TetrisGame.Imageman["block_exclamation", 0.25f];
+            BlockSelect_Image = TetrisGame.Imageman["block_select"];
             BaseRedImages = new Dictionary<TetrisAttackBlockTypes, Image>()
             {
                 {TetrisAttackBlockTypes.Star,Star_Image },
@@ -110,20 +111,40 @@ namespace BASeTris.Theme
 
         public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
-            foreach (var iterate in Group)
+            if (Reason == ThemeApplicationReason.NewNomino)
             {
-                if (iterate.Block is LineSeriesBlock lsb)
+                foreach (var iterate in Group)
                 {
-                    TetrisAttackBlockTypes chosenType = (TetrisAttackBlockTypes)lsb.CombiningIndex;
-                    var useColor = GetStandardColor(chosenType);
-                    lsb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    Bitmap useBitmap = new Bitmap(GetBlockImage(chosenType, useColor));
-                    lsb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(useBitmap) };
+                    if (iterate.Block is LineSeriesBlock lsb)
+                    {
+                        lsb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                        Bitmap useBitmap = new Bitmap(BlockSelect_Image);
+                        lsb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(useBitmap) };
+
+
+                    }
 
 
                 }
 
+            }
+            else
+            {
+                foreach (var iterate in Group)
+                {
+                    if (iterate.Block is LineSeriesBlock lsb)
+                    {
+                        TetrisAttackBlockTypes chosenType = (TetrisAttackBlockTypes)lsb.CombiningIndex;
+                        var useColor = GetStandardColor(chosenType);
+                        lsb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                        Bitmap useBitmap = new Bitmap(GetBlockImage(chosenType, useColor));
+                        lsb._RotationImagesSK = new SKImage[] { SkiaSharp.Views.Desktop.Extensions.ToSKImage(useBitmap) };
 
+
+                    }
+
+
+                }
             }
         }
 

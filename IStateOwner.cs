@@ -58,6 +58,7 @@ namespace BASeTris
 
         GamePresenter GetPresenter();
         Type GetCanvasType();
+        public double FrameTime { get; }
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

@@ -332,7 +332,7 @@ namespace BASeTris.GameStates.GameHandlers
                     {
                         isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
                     }
-                    if (!isPopping && !cb.IsSupported(cb.Owner, state.PlayField, new[] { cb }.ToList()) && !AdditionalSkipBlocks.Contains(cb.Owner))
+                    if (!isPopping && !cb.IsSupported(cb.Owner,Row,Column, state.PlayField, new[] { cb }.ToList()) && !AdditionalSkipBlocks.Contains(cb.Owner))
                     {
                         //we initialize the list of recursion blocks to the block we are testing, since it cannot support itself.
                         //resurrect this block and other blocks that are in the same nomino.
@@ -390,9 +390,11 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public int Level { get; set; } = 0;
         public int PrimaryBlockCount = 0;
-        public FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger)
+        protected bool IgnoreActiveGroupsForFieldChange = false;
+       
+        public virtual FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner,Nomino Trigger)
         {
-            if (state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult = 0 };
+            if (!IgnoreActiveGroupsForFieldChange && state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult = 0 };
             //here we would go through the field and handle where the blocks line up to more than the required critical mass. 
 
             //Nomino's have two blocks- usually. But, we should account for more. This handler may be expanded for the Tetris2 handler, (if we ever bother to make one)
@@ -510,95 +512,9 @@ namespace BASeTris.GameStates.GameHandlers
 
 
                     //next, go through the entire field.
-                    List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
-                    HashSet<Nomino> ResurrectNominos = new HashSet<Nomino>();
-                    HashSet<CascadingBlock> AddedBlockAlready = new HashSet<CascadingBlock>();
 
-                    //keep track of the blocks we've examined already.
-                    for (int row = 0; row < state.PlayField.RowCount; row++)
-                    {
-                        for (int column = 0; column < state.PlayField.ColCount; column++)
-                        {
-
-                            var currentblock = state.PlayField.Contents[row][column];
-                            bool isPopping = false;
-                            if (currentblock != null)
-                            {
-                                if (currentblock is CascadingBlock cb)
-                                {
-                                    if (currentblock is LineSeriesBlock lsb)
-                                    {
-                                        isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
-                                    }
-                                    if (!isPopping && !cb.IsSupported(cb.Owner, state.PlayField) && !ResurrectNominos.Contains(cb.Owner) && !AddedBlockAlready.Contains(cb))
-                                    {
-                                        //this needs to be updated to support resurrection of multiple Nominoes for each ConnectionIndex 
-                                        //Algorithm would create a new Nomino for each unique connection index, then add
-                                        //the Blocks that are still "alive" with that connection index to the new Nomino, and finally add the resurrected Nominoes to the list.
-                                        //It might be wise to somehow track that they were originally a different Nomino somehow...
-
-                                        if (oldPopHandle)
-                                        {
-                                            //resurrect this block and other blocks that are in the same nomino. 
-                                            //since we remove busted blocks from the nomino, we can take the Duomino this
-                                            //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
-                                            foreach (var iterate in cb.Owner)
-                                            {
-                                                var useX = iterate.X + cb.Owner.X;
-                                                var useY = iterate.Y + cb.Owner.Y;
-                                                state.PlayField.Contents[useY][useX] = null;
-                                            }
-
-                                            Nomino resurrect = cb.Owner;
-                                            resurrect.Controllable = false;
-                                            resurrect.FallSpeed = 150;
-                                            resurrect.InitialY = resurrect.Y;
-                                            resurrect.LastFall = pOwner.GetElapsedTime();
-                                            resurrect.MoveSound = true;
-                                            resurrect.PlaceSound = false;
-                                            resurrect.NoGhost = true;
-                                            ResurrectNominos.Add(resurrect);
-                                            AddedBlockAlready.Add(cb);
-                                        }
-                                        else
-                                        {
-                                            var resurrectBlocks = cb.Owner.GetContiguousToElement(currentblock.Owner.ElementFromBlock(cb),null);
-                                            var OriginalX = cb.Owner.X;
-                                            var OriginalY = cb.Owner.Y;
-                                            Nomino resurrected = new Nomino(resurrectBlocks);
-                                            resurrected.X = cb.Owner.X;
-                                            resurrected.Y = cb.Owner.Y;
-                                            foreach (var iterate in resurrectBlocks)
-                                            {
-                                                iterate.Block.Owner = resurrected;
-                                            }
-                                            
-                                            resurrected.Controllable = false;
-                                            resurrected.FallSpeed = 150;
-                                            resurrected.InitialY = resurrected.Y;
-                                            resurrected.LastFall = pOwner.GetElapsedTime();
-                                            resurrected.MoveSound = true;
-                                            resurrected.PlaceSound = false;
-                                            resurrected.NoGhost = true;
-                                            ResurrectNominos.Add(resurrected);
-                                            state.PlayField.Contents[row][column] = null;
-                                            AddedBlockAlready.Add(cb);
-                                           
-
-                                        }
-                                    }
-                                    //state.PlayField.AddBlockGroup(resurrect);
-                                }
-                            }
-
-                            //now recursively process for the block to our left, the block to our right, and the block above. But only if that block is not part of the same nomino as currentblock or currentblock is null.
-
-
-                        }
-
-                    }
-
-
+                    var ResurrectNominos = ResurrectLoose(state,pOwner);
+                    
 
                     if (ResurrectNominos.Any())
                     {
@@ -664,7 +580,125 @@ namespace BASeTris.GameStates.GameHandlers
             return new FieldChangeResult() { ScoreResult = 5 };
 
         }
-        const bool oldPopHandle = false;
+        protected virtual HashSet<Nomino> ResurrectLoose(GameplayGameState state,IStateOwner pOwner)
+        {
+            List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
+
+            HashSet<CascadingBlock> AddedBlockAlready = new HashSet<CascadingBlock>();
+            HashSet<Nomino> ResurrectNominos = new HashSet<Nomino>();
+            //keep track of the blocks we've examined already.
+            for (int row = 0; row < state.PlayField.RowCount; row++)
+            {
+                for (int column = 0; column < state.PlayField.ColCount; column++)
+                {
+
+                    var currentblock = state.PlayField.Contents[row][column];
+                    bool isPopping = false;
+                    if (currentblock != null)
+                    {
+                        if (currentblock is CascadingBlock cb)
+                        {
+                            if (currentblock is LineSeriesBlock lsb)
+                            {
+                                isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
+                            }
+                            bool BlockSupported;
+
+                            BlockSupported = cb.IsSupported(cb.Owner, row, column, state.PlayField);
+
+
+                            if (!isPopping && !BlockSupported && !ResurrectNominos.Contains(cb.Owner) && !AddedBlockAlready.Contains(cb))
+                            {
+                                //this needs to be updated to support resurrection of multiple Nominoes for each ConnectionIndex 
+                                //Algorithm would create a new Nomino for each unique connection index, then add
+                                //the Blocks that are still "alive" with that connection index to the new Nomino, and finally add the resurrected Nominoes to the list.
+                                //It might be wise to somehow track that they were originally a different Nomino somehow...
+
+                                if (oldPopHandle)
+                                {
+                                    //resurrect this block and other blocks that are in the same nomino. 
+                                    //since we remove busted blocks from the nomino, we can take the Duomino this
+                                    //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
+                                    if (cb.Owner == null)
+                                    {
+                                        //create a new owner.
+                                        var Dummino = new Nomino() { };
+                                        Dummino.AddBlock(new Point[] { new Point(0, 0) }, cb);
+                                        Dummino.X = column;
+                                        Dummino.Y = row;
+
+                                        cb.Owner = Dummino;
+
+                                    }
+                                    foreach (var iterate in cb.Owner)
+                                    {
+                                        var useX = iterate.X + cb.Owner.X;
+                                        var useY = iterate.Y + cb.Owner.Y;
+                                        state.PlayField.Contents[useY][useX] = null;
+                                    }
+
+                                    Nomino resurrect = cb.Owner;
+                                    resurrect.Controllable = false;
+                                    resurrect.FallSpeed = 100;
+                                    resurrect.InitialY = row;
+                                    resurrect.LastFall = pOwner.GetElapsedTime();
+                                    resurrect.MoveSound = true;
+                                    resurrect.PlaceSound = false;
+                                    resurrect.NoGhost = true;
+                                    ResurrectNominos.Add(resurrect);
+                                    AddedBlockAlready.Add(cb);
+                                }
+                                else
+                                {
+                                    if (cb.Owner == null)
+                                    {
+                                        //create a new owner.
+                                        var Dummino = new Nomino() { };
+                                        Dummino.AddBlock(new Point[] { new Point(0, 0) }, cb);
+                                        Dummino.X = column;
+                                        Dummino.Y = row;
+
+                                        cb.Owner = Dummino;
+
+                                    }
+                                    var resurrectBlocks = cb.Owner.GetContiguousToElement(currentblock.Owner.ElementFromBlock(cb), null);
+                                    var OriginalX = cb.Owner.X;
+                                    var OriginalY = cb.Owner.Y;
+                                    Nomino resurrected = new Nomino(resurrectBlocks);
+                                    resurrected.X = cb.Owner.X;
+                                    resurrected.Y = cb.Owner.Y;
+                                    foreach (var iterate in resurrectBlocks)
+                                    {
+                                        iterate.Block.Owner = resurrected;
+                                    }
+
+                                    resurrected.Controllable = false;
+                                    resurrected.FallSpeed = 100;
+                                    resurrected.InitialY = resurrected.Y;
+                                    resurrected.LastFall = pOwner.GetElapsedTime();
+                                    resurrected.MoveSound = true;
+                                    resurrected.PlaceSound = false;
+                                    resurrected.NoGhost = true;
+                                    ResurrectNominos.Add(resurrected);
+                                    state.PlayField.Contents[row][column] = null;
+                                    AddedBlockAlready.Add(cb);
+
+
+                                }
+                            }
+                            //state.PlayField.AddBlockGroup(resurrect);
+                        }
+                    }
+
+                    //now recursively process for the block to our left, the block to our right, and the block above. But only if that block is not part of the same nomino as currentblock or currentblock is null.
+
+
+                }
+
+            }
+            return ResurrectNominos;
+        }
+        protected bool oldPopHandle = false;
         const int ParticlesPerPop = 400;
         static BCColor[] RedColors = new BCColor[] { SKColors.Red, SKColors.IndianRed, SKColors.OrangeRed, SKColors.DarkRed };
         static BCColor[] BlueColors = new BCColor[] { SKColors.Blue, SKColors.Navy, SKColors.SkyBlue, SKColors.LightBlue };

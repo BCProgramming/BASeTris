@@ -21,7 +21,7 @@ namespace BASeTris.Blocks
             return 'C';
         }
         public virtual bool Fixed { get; set; } = false;
-        public bool IsSupported(Nomino Owner, TetrisField field, List<CascadingBlock> RecursionBlocks = null)
+        public bool IsSupported(Nomino Owner, int Row,int Column,TetrisField field, List<CascadingBlock> RecursionBlocks = null)
         {
             if (Fixed) return true;
             if (RecursionBlocks == null)
@@ -32,75 +32,87 @@ namespace BASeTris.Blocks
             {
                 
             }
-            
-
-            //search through our owner's Nominos...
-            foreach (var iterate in Owner)
+            if (Owner == null)
             {
-                if (RecursionBlocks.Contains(iterate.Block)) continue;
-                //find the field position of this block.
-                int PosX = iterate.X + Owner.X;
-                int PosY = iterate.Y + Owner.Y;
-                //grab the block at this position.
-                var fieldblock = field.Contents[PosY][PosX];
-                if (fieldblock == iterate.Block)
+                if (Row + 1 == field.RowCount - 1) return true; //block is at the bottom, so it is supported.
+                var BlockBelow = field.Contents[Row + 1][Column];
+                if (BlockBelow == null) return false;
+                if (BlockBelow is CascadingBlock cb)
                 {
-                    if(fieldblock is CascadingBlock cb2)
-                    {
-                        if (cb2.ConnectionIndex != this.ConnectionIndex) continue; //since the connection index is different, this block in our nomino cannot support us.
-                    }
-                    //ensure the block that is in the field is the one we reference.
-                    //we need to do this because a destroyed block will be removed from the field,
-                    //but it will not be removed from our owning nomino.
-                    //check if the block in question has another block beneath it or is touching the bottom.
-                    int CheckPosX = PosX;
-                    int CheckPosY = PosY + 1;
-                    if (CheckPosY > field.Contents.Length - 1)
-                    {
-                        return true; //this block is supported by the bottom of the stage/field.
-                    }
-                    else
-                    {
-                        //retrieve the block beneath this one.
-                        NominoBlock belowBlock = field.Contents[CheckPosY][CheckPosX];
-                        if (belowBlock != null)
-                        {
-                            //If the block below is part of the same nomino as the one we are checking, then we must disregard it as supporting this one. A Nomino cannot support itself!
-                            if (!Owner.HasBlock(belowBlock))
-                            {
-                                if (belowBlock is CascadingBlock cb && !RecursionBlocks.Contains(cb))
-                                {
-                                    if(belowBlock is LineSeriesBlock lsb)
-                                    {
-                                        if (lsb.Popping) return false; //popping LineSeriesBlocks are not considered solid (this might make more sense as a property of the block... IsSolid or something....)
-                                        
-                                    }
-                                    RecursionBlocks.Add(this);
-                                    if (cb.IsSupported(Owner, field, RecursionBlocks))
-                                    {
-                                        return true;
-                                    }
-                                }
-                                else if((belowBlock is CascadingBlock cbx && RecursionBlocks.Contains(cbx)))
-                                {
-                                    //if recursionblocks contains this, we just skip evaluating it.
-                                }
-                                else 
-                                {
-                                    //we consider other block types to be solid.
-                                    return true;
-
-                                }
-                            }
-
-                        }
-                    }
-
-
+                    RecursionBlocks.Add(this);
+                    return cb.IsSupported(cb.Owner, Row + 1, Column, field, RecursionBlocks);
                 }
                 else
                 {
-                    ;
+                    return true;
+                }
+            }
+            else {
+                //search through our owner's Nominos...
+                foreach (var iterate in Owner)
+                {
+                    if (RecursionBlocks.Contains(iterate.Block)) continue;
+                    //find the field position of this block.
+                    int PosX = iterate.X + Owner.X;
+                    int PosY = iterate.Y + Owner.Y;
+                    //grab the block at this position.
+                    var fieldblock = field.Contents[PosY][PosX];
+                    if (fieldblock == iterate.Block)
+                    {
+                        if (fieldblock is CascadingBlock cb2)
+                        {
+                            if (cb2.ConnectionIndex != this.ConnectionIndex) continue; //since the connection index is different, this block in our nomino cannot support us.
+                        }
+                        //ensure the block that is in the field is the one we reference.
+                        //we need to do this because a destroyed block will be removed from the field,
+                        //but it will not be removed from our owning nomino.
+                        //check if the block in question has another block beneath it or is touching the bottom.
+                        int CheckPosX = PosX;
+                        int CheckPosY = PosY + 1;
+                        if (CheckPosY > field.Contents.Length - 1)
+                        {
+                            return true; //this block is supported by the bottom of the stage/field.
+                        }
+                        else
+                        {
+                            //retrieve the block beneath this one.
+                            NominoBlock belowBlock = field.Contents[CheckPosY][CheckPosX];
+                            if (belowBlock != null)
+                            {
+                                //If the block below is part of the same nomino as the one we are checking, then we must disregard it as supporting this one. A Nomino cannot support itself!
+                                if (!Owner.HasBlock(belowBlock))
+                                {
+                                    if (belowBlock is CascadingBlock cb && !RecursionBlocks.Contains(cb))
+                                    {
+                                        if (belowBlock is LineSeriesBlock lsb)
+                                        {
+                                            if (lsb.Popping) return false; //popping LineSeriesBlocks are not considered solid (this might make more sense as a property of the block... IsSolid or something....)
+
+                                        }
+                                        RecursionBlocks.Add(this);
+                                        if (cb.IsSupported(Owner,CheckPosY,CheckPosX, field, RecursionBlocks))
+                                        {
+                                            return true;
+                                        }
+                                    }
+                                    else if ((belowBlock is CascadingBlock cbx && RecursionBlocks.Contains(cbx)))
+                                    {
+                                        //if recursionblocks contains this, we just skip evaluating it.
+                                    }
+                                    else
+                                    {
+                                        //we consider other block types to be solid.
+                                        return true;
+
+                                    }
+                                }
+
+                            }
+                        }
+
+
+                    }
+                   
                 }
             }
 
@@ -157,7 +169,8 @@ namespace BASeTris.Blocks
     
     public class LineSeriesPrimaryBlock : LineSeriesBlock
     {
-        public override bool Fixed { get { return true; }  set { } }
+        public bool _Fixed = true;
+        public override bool Fixed { get { return _Fixed; }  set { _Fixed = value; } }
         public LineSeriesPrimaryBlock()
         {
            

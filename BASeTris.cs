@@ -84,7 +84,7 @@ namespace BASeTris
             return _Present.Game.GetElapsedTime();
         }
 
-
+        public double FrameTime { get { return lastFrame.TotalSeconds; } }
         HashSet<Keys> PressedKeys = new HashSet<Keys>();
 
         public BASeTris()
@@ -194,12 +194,15 @@ namespace BASeTris
             _Present.StartGame();
             
         }
-
+        TimeSpan lastFrame = TimeSpan.MinValue;
         public void Present()
         {
+            
             Invoke
             ((MethodInvoker)(() =>
             {
+                Stopwatch FrameTimer = new Stopwatch();
+                FrameTimer.Start();
                 if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
                 {
                     if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
@@ -216,6 +219,9 @@ namespace BASeTris
                         picFullSize.Refresh();
                     }
                 }
+                FrameTimer.Stop();
+                lastFrame = FrameTimer.Elapsed;
+            
                
             }));
         }

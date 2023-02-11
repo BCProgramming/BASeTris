@@ -54,7 +54,10 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public TetrisAttackHandler()
         {
+            oldPopHandle = true;
+            IgnoreActiveGroupsForFieldChange = true;
             AllowedSpawns = AllowedSpawnsFlags.Spawn_Full;
+            LevelCompleteWhenMasterCountZero = true;
         }
         public override Nomino[] GetNominos()
         {
@@ -74,16 +77,32 @@ namespace BASeTris.GameStates.GameHandlers
 
         public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
-            //
+            for (int i = 0; i < 6; i++)
+                state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewColumn(state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
+
+            
         }
         private ExtendedCustomizationHandlerResult PositiveResult = new ExtendedCustomizationHandlerResult(true);
         public ExtendedCustomizationHandlerResult GameProc(GameplayGameState state, IStateOwner pOwner)
         {
+            //TODO: Fix this up, speed needs to be variable and additionally, we need to not move when the game is not actively being played. (We should verify that the gamestate is the GamePlayGameState).
+
             TimeSpan Elapsed = pOwner.GetElapsedTime();
             //for a first test we'll do every 5 seconds...
-            double PercentageMove = (Elapsed.TotalSeconds % 10) / 10;
-            state.PlayField.OffsetPaint = -(float)PercentageMove;
-            if (LastPercentage > PercentageMove)
+            double PercentageMove = 0;
+
+            if (state.PlayField.GetActiveBlockGroups().Count() > 1)
+            {
+            }
+
+            else if (pOwner is IGamePresenter gp)
+            {
+                PercentageMove = (1d / 240d) * ((1d / 60d) / gp.FrameTime);
+            }
+            PercentageMove = 0;
+            state.PlayField.OffsetPaint = state.PlayField.OffsetPaint - (float)PercentageMove;
+            if (state.PlayField.OffsetPaint < -1) state.PlayField.OffsetPaint = state.PlayField.OffsetPaint + 1;
+            if (LastPercentage < state.PlayField.OffsetPaint)
             {
                 //move all blocks in the playfield up one line, then generate a line of blocks at the bottom.
 
@@ -101,7 +120,7 @@ namespace BASeTris.GameStates.GameHandlers
                         state.PlayField.Contents[r][cc] = state.PlayField.Contents[r + 1][cc];
                     }
                 }
-                state.PlayField.Contents[state.PlayField.Contents.Length - 1] = GenerateNewColumn(state.PlayField, state.PlayField.ColCount).ToArray();
+                state.PlayField.Contents[state.PlayField.Contents.Length - 1] = GenerateNewColumn(state.PlayField, state.PlayField.Contents.Length - 1,state.PlayField.ColCount).ToArray();
                 //move all ActiveGroups -1...
                 foreach (var checkgroup in state.PlayField.GetActiveBlockGroups())
                 {
@@ -110,34 +129,71 @@ namespace BASeTris.GameStates.GameHandlers
 
             }
             state.PlayField.HasChanged = true;
-            LastPercentage = PercentageMove;
+            LastPercentage = state.PlayField.OffsetPaint;
             return PositiveResult;
         }
-        private IEnumerable<NominoBlock> GenerateNewColumn(TetrisField pf,int Count)
+        private IEnumerable<NominoBlock> GenerateNewColumn(TetrisField pf,int row,int Count)
         {
             for (int i = 0; i < Count; i++)
             {
-                var createBlock = new LineSeriesBlock() { CombiningIndex = TetrisGame.Choose(base.GetValidBlockCombiningTypes()) };
+                var createBlock = new LineSeriesPrimaryBlock() { Fixed=false, CombiningIndex = TetrisGame.Choose(base.GetValidBlockCombiningTypes()) };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, createBlock);
-
+                Dummino.Y = row;
+                Dummino.X = i;
                 pf.Theme.ApplyTheme(Dummino, this, pf, NominoTheme.ThemeApplicationReason.FieldSet);
-                
+                createBlock.Owner = Dummino;
                 yield return createBlock;
             }
         }
         public ExtendedCustomizationHandlerResult HandleGameKey(GameplayGameState state, IStateOwner pOwner, GameState.GameKeys g)
         {
-
-            if (g == GameState.GameKeys.GameKey_Drop)
+            
+            if (g == GameState.GameKeys.GameKey_RotateCW || g == GameState.GameKeys.GameKey_RotateCCW || g == GameState.GameKeys.GameKey_Hold)
             {
 
                 //Task: swap the positions of the blocks at the positions of the blocks of the active nomino, then call the state and tell it we changed the field and to process that change.
+                //return new ExtendedCustomizationHandlerResult(false);
+                foreach (var iterate in state.PlayField.GetActiveBlockGroups())
+                {
+                    if(iterate.Y > 0)
+                        if (iterate.Count == 2)
+                        {
+                            var FirstBlock = iterate.First();
+                            var LastBlock = iterate.Last();
+                            Point FirstPos = new Point(iterate.X + FirstBlock.X, iterate.Y + FirstBlock.Y);
+                            Point SecondPos = new Point(iterate.X + LastBlock.X, iterate.Y + LastBlock.Y);
+                            if (FirstPos.X > state.PlayField.ColCount - 1 || FirstPos.X < 0 ||
+                                FirstPos.Y > state.PlayField.RowCount - 1 || FirstPos.Y < 0 ||
+                                SecondPos.X > state.PlayField.ColCount - 1 || SecondPos.X < 0 ||
+                                SecondPos.Y > state.PlayField.RowCount - 1 || SecondPos.Y < 0)
+                                continue;
+                            (state.PlayField.Contents[SecondPos.Y-1][SecondPos.X], state.PlayField.Contents[FirstPos.Y-1][FirstPos.X]) =
+                                (state.PlayField.Contents[FirstPos.Y-1][FirstPos.X], state.PlayField.Contents[SecondPos.Y-1][SecondPos.X]);
+
+
+                            state.PlayField.HasChanged = true;
+                            NominoBlock FirstNBlock, SecondNBlock;
+                            TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key);
+                            
+
+
+                        
+                            base.ProcessFieldChange(state, pOwner, null);
+                            
+
+                        }
+
+
+
+                }
                 return new ExtendedCustomizationHandlerResult(false);
+
             }
 
             //throw new NotImplementedException();
             return PositiveResult;
         }
+        
     }
 }

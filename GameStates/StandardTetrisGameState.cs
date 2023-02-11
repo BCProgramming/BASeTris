@@ -686,6 +686,14 @@ namespace BASeTris.GameStates
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
 
+            if (GameHandler is IExtendedGameCustomizationHandler iextend)
+            {
+
+                var extendresult = iextend.HandleGameKey(this, pOwner, g);
+                if (!extendresult.ContinueDefault) return;
+            }
+
+
             if (HandleBlockGroupKey(pOwner, g)) return;
 
 
