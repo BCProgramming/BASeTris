@@ -20,13 +20,13 @@ namespace BASeTris.Rendering.Skia
         public int COLCOUNT;
         public int ROWCOUNT;
         public int VISIBLEROWS;
+        public int HIDDENBOTTOMROWS;
+        public int HIDDENTOPROWS;
+        public int HIDDENROWS { get { return HIDDENBOTTOMROWS + HIDDENTOPROWS; } }
         public SKRect Bounds;
         public SKRect LastFieldSave;
         public SKImage FieldBitmap;
-        public int HIDDENROWS
-        {
-            get { return ROWCOUNT - VISIBLEROWS; }
-        }
+        
     }
     [RenderingHandler(typeof(TetrisField), typeof(SKCanvas),typeof(TetrisFieldDrawSkiaParameters))]
     public class TetrisFieldRenderingHandlerSkia : StandardRenderingHandler<SkiaSharp.SKCanvas,TetrisField,TetrisFieldDrawSkiaParameters>
@@ -39,59 +39,66 @@ namespace BASeTris.Rendering.Skia
         {
             float BlockWidth = Bounds.Width / Element.COLCOUNT;
             float BlockHeight = Bounds.Height / (Element.VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
-            bool FoundAnimated = false;
-            for (int drawRow = Element.HIDDENROWS; drawRow < Element.ROWCOUNT; drawRow++)
+                bool FoundAnimated = false;
+            using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(g))
             {
-                float YPos = (drawRow - Element.HIDDENROWS) * BlockHeight;
-                var currRow = Source.Contents[drawRow];
+                g.Translate(0, Source.OffsetPaint * BlockHeight);
 
 
-                //also, is there a hotline here?
-                /*
-                if (Source.Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && Source.HotLines.ContainsKey(drawRow))
+                for (int drawRow = Element.HIDDENTOPROWS; drawRow < Element.ROWCOUNT; drawRow++)
                 {
-                    RectangleF RowBounds = new RectangleF(0, YPos, BlockWidth * Element.COLCOUNT, BlockHeight);
-                    Brush useFillBrush = null;
-                    var HotLine = Source.HotLines[drawRow];
-                    if (HotLine.LineBrush != null) useFillBrush = HotLine.LineBrush;
-                    else
+                    float YPos = (drawRow - Element.HIDDENTOPROWS) * BlockHeight;
+                    var currRow = Source.Contents[drawRow];
+
+
+                    //also, is there a hotline here?
+                    /*
+                    if (Source.Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && Source.HotLines.ContainsKey(drawRow))
                     {
-                        useFillBrush = GetHotLineTexture((int)RowBounds.Height + 1, HotLines[drawRow].Color);
-                    }
-                    if (useFillBrush is TextureBrush tb1)
-                    {
-                        tb1.TranslateTransform(0, YPos);
-                    }
-                    g.FillRectangle(useFillBrush, RowBounds);
-                    if (useFillBrush is TextureBrush tb2)
-                    {
-                        tb2.ResetTransform();
-                    }
-                }*/ //hotline drawing needs to be reworked for the rendering providers...
-                //for each Tetris Row...
-                for (int drawCol = 0; drawCol < Element.COLCOUNT; drawCol++)
-                {
-                    float XPos = drawCol * BlockWidth;
-                    var TetBlock = currRow[drawCol];
-                    bool isAnim = false;
-                    if (TetBlock != null)
-                    {
-                        if (TetBlock is LineSeriesBlock && !(TetBlock is LineSeriesPrimaryBlock)) ;
-                        isAnim = Source.Theme.IsAnimated(TetBlock);
-                        if (isAnim == animated)
+                        RectangleF RowBounds = new RectangleF(0, YPos, BlockWidth * Element.COLCOUNT, BlockHeight);
+                        Brush useFillBrush = null;
+                        var HotLine = Source.HotLines[drawRow];
+                        if (HotLine.LineBrush != null) useFillBrush = HotLine.LineBrush;
+                        else
                         {
-                            
-                            SKRect BlockBounds = new SKRect(XPos, YPos, XPos + BlockWidth, YPos + BlockHeight);
-                            TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState?.Settings);
-                            RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);
+                            useFillBrush = GetHotLineTexture((int)RowBounds.Height + 1, HotLines[drawRow].Color);
                         }
-                    }
-                    FoundAnimated |= isAnim;
-                }
+                        if (useFillBrush is TextureBrush tb1)
+                        {
+                            tb1.TranslateTransform(0, YPos);
+                        }
+                        g.FillRectangle(useFillBrush, RowBounds);
+                        if (useFillBrush is TextureBrush tb2)
+                        {
+                            tb2.ResetTransform();
+                        }
+                    }*/ //hotline drawing needs to be reworked for the rendering providers...
+                        //for each Tetris Row...
+                    for (int drawCol = 0; drawCol < Element.COLCOUNT; drawCol++)
+                    {
+                        float XPos = drawCol * BlockWidth;
+                        var TetBlock = currRow[drawCol];
+                        bool isAnim = false;
+                        if (TetBlock != null)
+                        {
+                            if (TetBlock is LineSeriesBlock && !(TetBlock is LineSeriesPrimaryBlock)) ;
+                            isAnim = Source.Theme.IsAnimated(TetBlock);
+                            if (isAnim == animated)
+                            {
 
+                                SKRect BlockBounds = new SKRect(XPos, YPos, XPos + BlockWidth, YPos + BlockHeight);
+                                TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState?.Settings);
+                                RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);
+                            }
+                        }
+                        FoundAnimated |= isAnim;
+                    }
+
+                }
             }
-            if (FoundAnimated) {; }
-            return FoundAnimated;
+                if (FoundAnimated) {; }
+                return FoundAnimated;
+            
         }
         private SKSurface FieldSurface = null;
         bool hadAnimated = false;
@@ -103,7 +110,9 @@ namespace BASeTris.Rendering.Skia
             //first how big is each block?
             float BlockWidth = Bounds.Width / parms.COLCOUNT;
             float BlockHeight = Bounds.Height / (parms.VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
-            lock (Source)
+
+            
+                lock (Source)
             {
                 if (parms.FieldBitmap == null || !parms.LastFieldSave.Equals(Bounds) || Source.HasChanged)
                 {
@@ -171,129 +180,141 @@ namespace BASeTris.Rendering.Skia
 
             var activegroups = Source.GetActiveBlockGroups();
             Debug.Print("Painting Active Groups:" + sw.Elapsed.ToString());
-            lock (activegroups)
-            {
-                foreach (Nomino bg in activegroups)
+                lock (activegroups)
                 {
-                    int BaseXPos = bg.X;
-                    int BaseYPos = bg.Y;
-                    const float RotationTime = 150;
-                    double useAngle = 0;
-                    TimeSpan tsRotate = DateTime.Now - bg.GetLastRotation();
-                    if (tsRotate.TotalMilliseconds > 0 && tsRotate.TotalMilliseconds < RotationTime)
+
+
+
+                    foreach (Nomino bg in activegroups)
                     {
-                        if (!bg.LastRotateCCW)
-                            useAngle = -90 + ((tsRotate.TotalMilliseconds / RotationTime) * 90);
-                        else
+
+                        using (SKAutoCanvasRestore restgroup = new SKAutoCanvasRestore(g))
                         {
-                            useAngle = 90 - ((tsRotate.TotalMilliseconds / RotationTime) * 90);
-                        }
-                    }
-
-                    var translation = bg.GetHeightTranslation(pState, BlockHeight);
-
-
-                    float BlockPercent = translation / BlockHeight;
-                    float CalcValue = BlockPercent + (float)bg.Y;
-
-                    if (CalcValue > bg.HighestHeightValue)
-                    {
-                        bg.HighestHeightValue = CalcValue;
-                    }
-                    else
-                    {
-                        translation = (bg.HighestHeightValue - (float)bg.Y) * BlockHeight;
-                    }
-
-                    PointF doTranslate = new PointF(0, translation);
-                    if (!pState.Settings.std.SmoothFall) doTranslate = new PointF(0, 0);
-                    //if (Settings.SmoothFall) g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y);
-                    if (pState.Settings.std.SmoothFall)
-                    {
-                        g.Translate(doTranslate.X, -BlockHeight + doTranslate.Y);
-                    }
-                    if (useAngle != 0 && pState.Settings.std.SmoothRotate && bg.AllowRotationAnimations)
-                    {
-                        int MaxXBlock = (from p in bg select p.X).Max();
-                        int MaxYBlock = (from p in bg select p.Y).Max();
-                        int MinXBlock = (from p in bg select p.X).Min();
-                        int MinYBlock = (from p in bg select p.Y).Min();
-                        int BlocksWidth = MaxXBlock - MinXBlock + 1;
-                        int BlocksHeight = MaxYBlock - MinYBlock + 1;
-
-                        PointF UsePosition = new PointF((bg.X + MinXBlock) * BlockWidth, (bg.Y - parms.HIDDENROWS + MinYBlock) * BlockHeight);
-
-
-                        SizeF tetronimosize = new Size((int)BlockWidth * (BlocksWidth), (int)BlockHeight * (BlocksHeight));
-
-                        PointF useCenter = new PointF(UsePosition.X + tetronimosize.Width / 2, UsePosition.Y + tetronimosize.Height / 2);
-
-                        g.RotateDegrees((float)useAngle,useCenter.X,useCenter.Y);
-
-                        //g.TranslateTransform(useCenter.X, useCenter.Y);
-                        //g.RotateTransform((float)useAngle);
-                        //g.TranslateTransform(-useCenter.X, -useCenter.Y);
-                    }
-
-
-
-
-                    foreach (NominoElement bge in bg)
-                    {
-                        int DrawX = BaseXPos + bge.X;
-                        int DrawY = BaseYPos + bge.Y - parms.HIDDENROWS;
-                        if (DrawX >= 0 && DrawY >= 0 && DrawX < parms.COLCOUNT && DrawY < parms.ROWCOUNT)
-                        {
-                            float DrawXPx = DrawX * BlockWidth;
-                            float DrawYPx = DrawY * BlockHeight;
-
-
-                            SKRect BlockBounds = new SKRect(DrawXPx, DrawYPx, DrawXPx+ BlockWidth, DrawYPx + BlockHeight);
-                            TetrisBlockDrawParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, bg, pState.Settings);
-                            RenderingProvider.Static.DrawElement(pState, g, bge.Block, tbd);
-                        }
-                    }
-                    g.ResetMatrix();
-
-                    if (!bg.NoGhost)
-                    {
-                        var GrabGhost = Source.GetGhostDrop(pState, bg, out int dl);
-                        if (GrabGhost != null)
-                        {
-                            foreach (var iterateblock in bg)
+                            g.Translate(0, Source.OffsetPaint * BlockHeight);
+                            int BaseXPos = bg.X;
+                            int BaseYPos = bg.Y;
+                            const float RotationTime = 150;
+                            double useAngle = 0;
+                            TimeSpan tsRotate = DateTime.Now - bg.GetLastRotation();
+                            if (tsRotate.TotalMilliseconds > 0 && tsRotate.TotalMilliseconds < RotationTime)
                             {
-
-                                float drawGhostX = BlockWidth * (GrabGhost.X + iterateblock.X);
-                                float drawGhostY = BlockHeight * (GrabGhost.Y + iterateblock.Y - 2);
-
-                                SKRect BlockBounds = new SKRect(drawGhostX, drawGhostY, drawGhostX + BlockWidth, drawGhostY + BlockHeight);
-
-                                TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, GrabGhost, pState.Settings);
-                                //ImageAttributes Shade = new ImageAttributes();
-                                //SKColorMatrices.GetFader
-                                //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
-                                //tbd.ApplyAttributes = Shade;
-                                //tbd.OverrideBrush = GhostBrush;
-                                tbd.ColorFilter = SKColorMatrices.GetFader(0.5f);
-                                var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
-                                var originalclip = tbd.g.LocalClipBounds;
-
-                                
-                                using (new SKAutoCanvasRestore(tbd.g))
+                                if (!bg.LastRotateCCW)
+                                    useAngle = -90 + ((tsRotate.TotalMilliseconds / RotationTime) * 90);
+                                else
                                 {
-                                    tbd.g.ClipRect(tbd.region, SKClipOperation.Intersect);
-                                    GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
+                                    useAngle = 90 - ((tsRotate.TotalMilliseconds / RotationTime) * 90);
                                 }
-                                
-                                //iterateblock.Block.DrawBlock(tbd);
+                            }
+
+                            var translation = bg.GetHeightTranslation(pState, BlockHeight);
+
+
+                            float BlockPercent = translation / BlockHeight;
+                            float CalcValue = BlockPercent + (float)bg.Y;
+
+                            if (CalcValue > bg.HighestHeightValue)
+                            {
+                                bg.HighestHeightValue = CalcValue;
+                            }
+                            else
+                            {
+                                translation = (bg.HighestHeightValue - (float)bg.Y) * BlockHeight;
+                            }
+
+                            PointF doTranslate = new PointF(0, translation);
+                            if (!pState.Settings.std.SmoothFall) doTranslate = new PointF(0, 0);
+                            //if (Settings.SmoothFall) g.TranslateTransform(doTranslate.X, -BlockHeight + doTranslate.Y);
+                            if (pState.Settings.std.SmoothFall)
+                            {
+                                g.Translate(doTranslate.X, -BlockHeight + doTranslate.Y);
+                            }
+                            if (useAngle != 0 && pState.Settings.std.SmoothRotate && bg.AllowRotationAnimations)
+                            {
+                                int MaxXBlock = (from p in bg select p.X).Max();
+                                int MaxYBlock = (from p in bg select p.Y).Max();
+                                int MinXBlock = (from p in bg select p.X).Min();
+                                int MinYBlock = (from p in bg select p.Y).Min();
+                                int BlocksWidth = MaxXBlock - MinXBlock + 1;
+                                int BlocksHeight = MaxYBlock - MinYBlock + 1;
+
+                                PointF UsePosition = new PointF((bg.X + MinXBlock) * BlockWidth, (bg.Y - parms.HIDDENROWS + MinYBlock) * BlockHeight);
+
+
+                                SizeF tetronimosize = new Size((int)BlockWidth * (BlocksWidth), (int)BlockHeight * (BlocksHeight));
+
+                                PointF useCenter = new PointF(UsePosition.X + tetronimosize.Width / 2, UsePosition.Y + tetronimosize.Height / 2);
+
+                                g.RotateDegrees((float)useAngle, useCenter.X, useCenter.Y);
+
+                                //g.TranslateTransform(useCenter.X, useCenter.Y);
+                                //g.RotateTransform((float)useAngle);
+                                //g.TranslateTransform(-useCenter.X, -useCenter.Y);
                             }
 
 
-                        }
-                    }
 
+
+                            foreach (NominoElement bge in bg)
+                            {
+                                int DrawX = BaseXPos + bge.X;
+                                int DrawY = BaseYPos + bge.Y - parms.HIDDENROWS;
+                                if (DrawX >= 0 && DrawY >= 0 && DrawX < parms.COLCOUNT && DrawY < parms.ROWCOUNT)
+                                {
+                                    float DrawXPx = DrawX * BlockWidth;
+                                    float DrawYPx = DrawY * BlockHeight;
+
+
+                                    SKRect BlockBounds = new SKRect(DrawXPx, DrawYPx, DrawXPx + BlockWidth, DrawYPx + BlockHeight);
+                                    TetrisBlockDrawParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, bg, pState.Settings);
+                                    RenderingProvider.Static.DrawElement(pState, g, bge.Block, tbd);
+                                }
+                            }
+                        }
+                        
+
+                        if (!bg.NoGhost)
+                        {
+                            var GrabGhost = Source.GetGhostDrop(pState, bg, out int dl);
+                            if (GrabGhost != null)
+                            {
+                            using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(g))
+                            {
+                                g.Translate(0, Source.OffsetPaint * BlockHeight);
+                                foreach (var iterateblock in bg)
+                                {
+
+                                    float drawGhostX = BlockWidth * (GrabGhost.X + iterateblock.X);
+                                    float drawGhostY = BlockHeight * (GrabGhost.Y + iterateblock.Y - 2);
+
+                                    SKRect BlockBounds = new SKRect(drawGhostX, drawGhostY, drawGhostX + BlockWidth, drawGhostY + BlockHeight);
+
+                                    TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, GrabGhost, pState.Settings);
+                                    //ImageAttributes Shade = new ImageAttributes();
+                                    //SKColorMatrices.GetFader
+                                    //Shade.SetColorMatrix(ColorMatrices.GetFader(0.5f));
+                                    //tbd.ApplyAttributes = Shade;
+                                    //tbd.OverrideBrush = GhostBrush;
+                                    tbd.ColorFilter = SKColorMatrices.GetFader(0.5f);
+                                    var GetHandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), iterateblock.Block.GetType(), typeof(TetrisBlockDrawSkiaParameters));
+                                    var originalclip = tbd.g.LocalClipBounds;
+
+
+                                    using (new SKAutoCanvasRestore(tbd.g))
+                                    {
+                                        tbd.g.ClipRect(tbd.region, SKClipOperation.Intersect);
+                                        GetHandler.Render(pState, tbd.g, iterateblock.Block, tbd);
+                                    }
+
+                                    //iterateblock.Block.DrawBlock(tbd);
+                                }
+                            }
+
+                            }
+                        }
+
+                    }
                 }
-            }
+            
             Debug.Print("Painting Active Groups Finished:" + sw.Elapsed.ToString());
         }
     }

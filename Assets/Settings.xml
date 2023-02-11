@@ -83,4 +83,7 @@
   <SettingsGroup Name="Columns">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
   </SettingsGroup>
+  <SettingsGroup Name="Tetris Attack">
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
+  </SettingsGroup>
 </SettingsGroups>

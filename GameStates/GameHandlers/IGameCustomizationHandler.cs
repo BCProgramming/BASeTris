@@ -38,12 +38,34 @@ namespace BASeTris.GameStates.GameHandlers
 
         IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>();
 
+        FieldCustomizationInfo GetFieldInfo();
         //IGameCustomizationStatAreaRenderer<TRenderTarget,TRenderSource,TDataElement,TOwnerType>
-        int GetFieldRowHeight();
-        int GetHiddenRowCount();
-        int GetFieldColumnWidth();
-    }
 
+    }
+    public class ExtendedCustomizationHandlerResult
+    {
+        public bool ContinueDefault { get; init; }
+        public ExtendedCustomizationHandlerResult(bool pDoDefault)
+        {
+            ContinueDefault = pDoDefault;
+        }
+    }
+    public interface IExtendedGameCustomizationHandler
+    {
+        ExtendedCustomizationHandlerResult GameProc(GameplayGameState state, IStateOwner pOwner);
+
+        //Obbsolete("Use Rendering Providers")]
+        /*public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
+        ExtendedCustomizationHandlerResult HandleGameKey(GameplayGameState state,IStateOwner pOwner, GameState.GameKeys g);
+    }
+    public class FieldCustomizationInfo
+    {
+        public int FieldRows { get; init; }
+        public int TopHiddenFieldRows { get; init; }
+        public int BottomHiddenFieldRows { get; init; }
+        public int FieldColumns { get; init; }
+        
+    }
     public class HandlerMenuCategoryAttribute : Attribute
     {
         public String Category { get; set; }

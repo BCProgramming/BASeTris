@@ -79,6 +79,9 @@ namespace BASeTris
             return stats;
         }
     }
+    public class TetrisAttackStatistics : BaseStatistics
+    {
+    }
     public class ColumnsStatistics : BaseStatistics
     {
         public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner, GameplayGameState Source)

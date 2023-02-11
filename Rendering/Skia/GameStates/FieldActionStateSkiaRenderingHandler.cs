@@ -49,7 +49,7 @@ namespace BASeTris.Rendering.Skia
                     NominoBlock[] RowData = iterate.Value;
                     for (int drawCol = 0; drawCol < RowData.Length; drawCol++)
                     {
-                        float YPos = (currentRow - Source.PlayField.HIDDENROWS) * BlockHeight;
+                        float YPos = (currentRow - Source.PlayField.HIDDENROWS_TOP) * BlockHeight;
                         float XPos = drawCol * BlockWidth;
                         var TetBlock = RowData[drawCol];
                         if (TetBlock != null)

@@ -38,27 +38,26 @@ namespace BASeTris.Rendering
         {
             throw new NotImplementedException();
         }
-
-        public int GetFieldColumnWidth()
+        public virtual FieldCustomizationInfo GetFieldInfo()
         {
-            return ColumnWidth;
+            return new FieldCustomizationInfo()
+            {
+                FieldRows = ColumnHeight,
+                BottomHiddenFieldRows = 0,
+                TopHiddenFieldRows = 0,
+                FieldColumns = ColumnWidth
+            };
         }
 
-        public int GetFieldRowHeight()
-        {
-            return ColumnHeight;
-        }
+
+      
 
         public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
         {
             return null;
         }
 
-        public int GetHiddenRowCount()
-        {
-            return 0;
-        }
-
+   
         public IHighScoreList<TetrisHighScoreData> GetHighScores()
         {
             return null;

@@ -34,7 +34,18 @@ namespace BASeTris.GameStates.GameHandlers
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
         BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
 
-        public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT+ (ProgressiveMode ? 5 : 0); }
+        public virtual FieldCustomizationInfo GetFieldInfo()
+        {
+            return new FieldCustomizationInfo()
+            {
+                FieldRows = TetrisField.DEFAULT_ROWCOUNT + (ProgressiveMode ? 5 : 0),
+                BottomHiddenFieldRows = 0,
+                TopHiddenFieldRows = 2,
+                FieldColumns = TetrisField.DEFAULT_COLCOUNT + (ProgressiveMode ? 4 : 0)
+            };
+        }
+
+        /*public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT+ (ProgressiveMode ? 5 : 0); }
         public virtual int GetHiddenRowCount()
         {
             return 2;
@@ -42,7 +53,7 @@ namespace BASeTris.GameStates.GameHandlers
         public virtual int GetFieldColumnWidth()
         {
             return TetrisField.DEFAULT_COLCOUNT+(ProgressiveMode?4:0);
-        }
+        }*/
         public GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
         {
 

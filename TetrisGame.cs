@@ -369,6 +369,7 @@ namespace BASeTris
             {
                 CurrentGameState.BG.FrameProc(GameOwner);
             }
+            
         }
 
         /*Dictionary<Keys, GameState.GameKeys> KeyMapping = new Dictionary<Keys, GameState.GameKeys>()

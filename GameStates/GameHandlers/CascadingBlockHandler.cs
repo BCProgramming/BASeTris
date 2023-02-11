@@ -43,15 +43,20 @@ namespace BASeTris.GameStates.GameHandlers
         public abstract BlockGroupChooser GetChooser(IStateOwner pOwner);
         public abstract void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state);
 
-        public virtual int GetFieldRowHeight() { return TetrisField.DEFAULT_ROWCOUNT; }
-        public int GetHiddenRowCount()
+        public virtual FieldCustomizationInfo GetFieldInfo()
         {
-            return 2;
+            return new FieldCustomizationInfo()
+            {
+                FieldRows = TetrisField.DEFAULT_ROWCOUNT,
+                BottomHiddenFieldRows = 0,
+                TopHiddenFieldRows = 2,
+                FieldColumns = TetrisField.DEFAULT_COLCOUNT
+            };
         }
-        public virtual int GetFieldColumnWidth()
-        {
-            return TetrisField.DEFAULT_COLCOUNT;
-        }
+
+
+       
+        
         public abstract GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner);
         
         public abstract Nomino[] GetNominos();

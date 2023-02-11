@@ -17,14 +17,18 @@ namespace BASeTris.GameStates
     [HandlerTipText("Columns (WIP)")]
     public class ColumnsGameHandler : CascadingPopBlockGameHandler<ColumnsStatistics, ColumnsGameOptions>, IGameHandlerChooserInitializer
     {
-        public override int GetFieldColumnWidth()
+        public override FieldCustomizationInfo GetFieldInfo()
         {
-            return 6;
+            return new FieldCustomizationInfo()
+            {
+                FieldColumns = 6,
+                FieldRows = 13,
+                BottomHiddenFieldRows = 0,
+                TopHiddenFieldRows = 2
+
+            };
         }
-        public override int GetFieldRowHeight()
-        {
-            return 13;
-        }
+        
         public ColumnsGameHandler()
         {
             Level = 0;

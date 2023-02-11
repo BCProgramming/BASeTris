@@ -317,6 +317,7 @@
     <Compile Include="Theme\Block\NominoTheme.cs" />
     <Compile Include="Theme\Block\ThemeImageProvider.cs" />
     <Compile Include="Theme\Block\XMLDefinedTheme.cs" />
+    <Compile Include="Theme\TetrisAttackTheme.cs" />
     <Compile Include="Theme\TetrominoImageManager.cs" />
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />

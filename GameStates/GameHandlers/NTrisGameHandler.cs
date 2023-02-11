@@ -68,19 +68,28 @@ namespace BASeTris.GameStates.GameHandlers
             var buildNomino = NNominoGenerator.CreateNomino(newpiece);
             return buildNomino;
         }
-        
-        public override int GetFieldColumnWidth()
+        public override FieldCustomizationInfo GetFieldInfo()
+        {
+            return new FieldCustomizationInfo()
+            {
+                FieldColumns = GetFieldColumnWidth(),
+                FieldRows = GetFieldRowHeight(),
+                TopHiddenFieldRows = 2,
+                BottomHiddenFieldRows = 0
+            };
+        }
+        private int GetFieldColumnWidth()
         {
             return 6 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 1.1));
         }
-        public override int GetFieldRowHeight()
+        private int GetFieldRowHeight()
         {
             var CurrWidth = GetFieldColumnWidth();
             int DesiredHeight = (22 / 10) * CurrWidth;
             return DesiredHeight;
             //return 18 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 2));
         }
-        public override int GetHiddenRowCount()
+        public int GetHiddenRowCount()
         {
             return 2;
             /*var currwidth = GetFieldColumnWidth();

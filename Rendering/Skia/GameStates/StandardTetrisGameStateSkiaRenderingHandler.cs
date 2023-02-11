@@ -111,6 +111,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                             Bounds = Element.Bounds,
                             COLCOUNT = PlayField.ColCount,
                             ROWCOUNT = PlayField.RowCount,
+                            HIDDENBOTTOMROWS = PlayField.HIDDENROWS_BOTTOM,
+                            HIDDENTOPROWS = PlayField.HIDDENROWS_TOP,
                             FieldBitmap = null,
                             LastFieldSave = SKRect.Empty,
                             VISIBLEROWS = PlayField.VisibleRows

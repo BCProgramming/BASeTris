@@ -123,13 +123,17 @@ namespace BASeTris.GameStates
             GameHandler = Handler;
             MainMenuState = MainMenu;
 
-            int Columns = Handler.GetFieldColumnWidth();
-            int Rows = Handler.GetFieldRowHeight();
-            int HiddenRows = Handler.GetHiddenRowCount();
+            var GetFieldData = Handler.GetFieldInfo();
+
+
+            int Columns = GetFieldData.FieldColumns;
+            int Rows = GetFieldData.FieldRows; 
+            int HiddenRows = GetFieldData.TopHiddenFieldRows;
 
             var GetSettingsTheme = NominoTheme.GetNewThemeInstanceByName(pOwner.Settings.GetSettings(Handler.Name).Theme, Handler.GetType());
 
-            PlayField = new TetrisField(GetSettingsTheme, Handler,Rows,Columns,HiddenRows);
+            PlayField = new TetrisField(GetSettingsTheme, Handler,Rows,Columns,HiddenRows,GetFieldData.BottomHiddenFieldRows);
+            PlayField.HIDDENROWS_BOTTOM = GetFieldData.BottomHiddenFieldRows;
             //PlayField.Settings = Settings;
             PlayField.OnThemeChangeEvent += PlayField_OnThemeChangeEvent;
             if (pFieldInitializer != null) pFieldInitializer.Initialize(PlayField);
@@ -426,7 +430,11 @@ namespace BASeTris.GameStates
             }
 
             //update particles.
-            
+            if (GameHandler is IExtendedGameCustomizationHandler iextend)
+            {
+                
+                iextend.GameProc(this, pOwner);
+            }
             FrameUpdate();
             
           
@@ -576,7 +584,7 @@ namespace BASeTris.GameStates
         {
             var Level = (GameHandler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
 
-            group.FallSpeed = Math.Max(1000 - (Level * 100), 50);
+            group.FallSpeed = GameHandler is TetrisAttackHandler?16777216: Math.Max(1000 - (Level * 100), 50);
         }
 
 

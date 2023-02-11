@@ -52,11 +52,10 @@ namespace BASeTris
 
         //used (or will be used...) by Tetris Attack mode.
 
-        /// <summary>
-        /// normally, we paint starting at row 2. This changes that offset. For example, -20 would result in the top rows painting
-        /// </summary>
-        public int RowOffsetPaint { get; set; }
-        public float PercentBlockOffsetPaint { get; set; }
+
+
+        public float OffsetPaint { get; set; } //offset paint, this is in "blocks" and should be  >=0 and <1.
+        
 
         public TextureBrush GetHotLineTexture(int pHeight, Color pColor)
         {
@@ -141,17 +140,23 @@ namespace BASeTris
        
         public const int DEFAULT_ROWCOUNT = 22; //22;
         public const int DEFAULT_COLCOUNT = 10;//10;
+        public const int DEFAULT_TOPHIDDENROWS = 2;
+        public const int DEFAULT_BOTTOMHIDDENROWS = 0;
         public const int DEFAULT_VISIBLEROWS = 20; //20;
-
+        private int _VisibleRows = DEFAULT_VISIBLEROWS;
+        private int _HiddenRowsTop = DEFAULT_TOPHIDDENROWS;
+        private int _HiddenRowsBottom = DEFAULT_BOTTOMHIDDENROWS;
         public int RowCount { get; set; } = DEFAULT_ROWCOUNT;
         public int ColCount { get; set; } = DEFAULT_COLCOUNT;
 
-        public int VisibleRows { get; set; } = DEFAULT_VISIBLEROWS;
-        public int HIDDENROWS
-        {
-            get { return RowCount - VisibleRows; }
-        }
+        public int VisibleRows { get { return _VisibleRows; } set { _VisibleRows = value; RecalcRows(); } }
+        public int HIDDENROWS_TOP { get { return _HiddenRowsTop; } set { _HiddenRowsTop = value; RecalcRows(); } } 
+        public int HIDDENROWS_BOTTOM { get { return _HiddenRowsBottom; } set { _HiddenRowsBottom = value;RecalcRows(); } } 
 
+        private void RecalcRows()
+        {
+            RowCount = _VisibleRows + HIDDENROWS_BOTTOM + HIDDENROWS_TOP;
+        }
         //const int ROWCOUNT = 44;
         //const int COLCOUNT = 20;
         Random rg = new Random();
@@ -259,13 +264,16 @@ namespace BASeTris
             get {  return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
         }
 
-        public TetrisField(NominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT,int pHiddenRowCount=2)
+        public TetrisField(NominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT,int pHiddenRowCount=2,int pHiddenRowCountBottom = 0)
         {
             _Theme = theme;
             _Handler = Handler;
+            _VisibleRows = pRowCount - pHiddenRowCountBottom - pHiddenRowCount;
             this.RowCount = pRowCount;
             this.ColCount = pColCount;
-            this.VisibleRows = RowCount - pHiddenRowCount;
+            HIDDENROWS_BOTTOM = pHiddenRowCountBottom;
+            HIDDENROWS_TOP = pHiddenRowCount;
+
             Reset();
         }
         public void Reset()
@@ -306,7 +314,7 @@ namespace BASeTris
         {
             lock (this)
             {
-                for (int drawRow = HIDDENROWS; drawRow < RowCount; drawRow++)
+                for (int drawRow = HIDDENROWS_TOP; drawRow < RowCount; drawRow++)
                 {
                     var currRow = FieldContents[drawRow];
                     //for each Tetris Row...
@@ -535,9 +543,9 @@ namespace BASeTris
                 g.DrawLine(LinePen, 0, YPos, Bounds.Width, YPos);
             }
 #endif
-            for (int drawRow = HIDDENROWS; drawRow < RowCount; drawRow++)
+            for (int drawRow = HIDDENROWS_TOP; drawRow < RowCount; drawRow++)
             {
-                float YPos = (drawRow - HIDDENROWS) * BlockHeight;
+                float YPos = (drawRow - HIDDENROWS_TOP) * BlockHeight;
                 var currRow = FieldContents[drawRow];
 
 
@@ -652,7 +660,7 @@ namespace BASeTris
                         int BlocksWidth = MaxXBlock - MinXBlock + 1;
                         int BlocksHeight = MaxYBlock - MinYBlock + 1;
 
-                        PointF UsePosition = new PointF((bg.X + MinXBlock) * BlockWidth, (bg.Y - HIDDENROWS + MinYBlock) * BlockHeight);
+                        PointF UsePosition = new PointF((bg.X + MinXBlock) * BlockWidth, (bg.Y - HIDDENROWS_TOP + MinYBlock) * BlockHeight);
 
 
                         SizeF tetronimosize = new Size((int) BlockWidth * (BlocksWidth), (int) BlockHeight * (BlocksHeight));
@@ -670,7 +678,7 @@ namespace BASeTris
                     foreach (NominoElement bge in bg)
                     {
                         int DrawX = BaseXPos + bge.X;
-                        int DrawY = BaseYPos + bge.Y - HIDDENROWS;
+                        int DrawY = BaseYPos + bge.Y - HIDDENROWS_TOP;
                         if (DrawX >= 0 && DrawY >= 0 && DrawX < ColCount && DrawY < RowCount)
                         {
                             float DrawXPx = DrawX * BlockWidth;
