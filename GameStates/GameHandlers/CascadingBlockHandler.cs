@@ -302,6 +302,8 @@ namespace BASeTris.GameStates.GameHandlers
         /// <returns></returns>
         private HashSet<Point> FindCriticalMasses(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
         {
+            //if we are below the visible area, than ignore this call, blocks that are hidden cannot participate in critical masses.
+            //if (StartPosition.Y > state.PlayField.ColCount - state.PlayField.HIDDENROWS_BOTTOM) return new HashSet<Point>(); 
             bool useHorz = ClearOrientations.HasFlag(ClearOrientationConstants.Horizontal);
             bool useVert = ClearOrientations.HasFlag(ClearOrientationConstants.Vertical);
             bool useDiag = ClearOrientations.HasFlag(ClearOrientationConstants.Diagonal);
@@ -391,7 +393,7 @@ namespace BASeTris.GameStates.GameHandlers
         public int Level { get; set; } = 0;
         public int PrimaryBlockCount = 0;
         protected bool IgnoreActiveGroupsForFieldChange = false;
-       
+        protected bool ProcessWithoutMasses = false;
         public virtual FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner,Nomino Trigger)
         {
             if (!IgnoreActiveGroupsForFieldChange && state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult = 0 };
@@ -433,7 +435,7 @@ namespace BASeTris.GameStates.GameHandlers
                 LevelCompleted = true;
             }
 
-            if (CriticalMasses != null && CriticalMasses.Any())
+            if ((CriticalMasses != null && CriticalMasses.Any()) || ProcessWithoutMasses)
             {
                 state.NoTetrominoSpawn = true;
 
@@ -448,47 +450,50 @@ namespace BASeTris.GameStates.GameHandlers
                 // Blocks that are part of a nomino will be resurrected with the other blocks that are part of that nomino.)
 
                 //check the field again and change unsupported field blocks back into active groups.
-
+                var originalstate = state;
                 //TODO: this seems to act weird with Tetris 2, sets the popping colour wrong sometimes. It seems to be using other colours from the tetromino's that the blocks
                 //belonged to.
-                HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
-                foreach (var iterate in CriticalMasses)
+                if (CriticalMasses != null)
                 {
-
-                    var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
-
-                    if (popItem is LineSeriesBlock lsb)
+                    HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
+                    foreach (var iterate in CriticalMasses)
                     {
-                        lsb.Popping = true;
-                        GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
-                        if (popItem.Owner != null)
-                            state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
-                        else
+
+                        var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
+
+                        if (popItem is LineSeriesBlock lsb)
                         {
-                            var Dummino = new Nomino() { };
-                            Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
-                            state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
+                            lsb.Popping = true;
+                            GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
+                            if (popItem.Owner != null)
+                                state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
+                            else
+                            {
+                                var Dummino = new Nomino() { };
+                                Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
+                                state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
+                            }
+
                         }
-
+                        if (popItem.Owner != null)
+                            popItem.Owner.RemoveBlock(popItem);
+                        state.PlayField.HasChanged = true;
                     }
-                    if (popItem.Owner != null)
-                        popItem.Owner.RemoveBlock(popItem);
-                    state.PlayField.HasChanged = true;
+
+                    state.Sounds.PlaySound(pOwner.AudioThemeMan.BlockPop.Key);
+
                 }
-                var originalstate = state;
-                state.Sounds.PlaySound(pOwner.AudioThemeMan.BlockPop.Key);
-
-
 
 
                 //need to determine a way to detect chains here, where we create an active block and then it results in another "pop".
 
 
 
-                TemporaryInputPauseGameState tpause = new TemporaryInputPauseGameState(state, 1000, (owner) =>
+                TemporaryInputPauseGameState tpause = new TemporaryInputPauseGameState(state, CriticalMasses==null?0:1000, (owner) =>
                 {
                     //first, remove the CriticalMasses altogether.
-                    foreach (var iterate in CriticalMasses)
+
+                    if (CriticalMasses != null) foreach (var iterate in CriticalMasses)
                     {
                         //clear out the cell at the appropriate position.
                         var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
@@ -523,9 +528,18 @@ namespace BASeTris.GameStates.GameHandlers
                         {
                             List<Point> AllPoints = (from b in addresurrected select new Point(b.X + addresurrected.X, b.Y + addresurrected.Y)).ToList();
 
+                            //verify that we removed it from the field...
+                            foreach (var checkfield in AllPoints)
+                            {
+                                //if (addresurrected.Any((d) => d.Block == state.PlayField.Contents[checkfield.Y][checkfield.X]))
+                                state.PlayField.Contents[checkfield.Y][checkfield.X] = null; //clear it out.
+                            }
+
+
                             if (!AllPoints.Any((w) => AddedPoints.Contains(w)))
                             {
                                 state.PlayField.AddBlockGroup(addresurrected);
+                                addresurrected.FallSpeed = 100;
                                 foreach (var point in AllPoints)
                                 {
                                     AddedPoints.Add(point);
@@ -614,7 +628,7 @@ namespace BASeTris.GameStates.GameHandlers
                                 //the Blocks that are still "alive" with that connection index to the new Nomino, and finally add the resurrected Nominoes to the list.
                                 //It might be wise to somehow track that they were originally a different Nomino somehow...
 
-                                if (oldPopHandle)
+                                if (SimplePopHandling)
                                 {
                                     //resurrect this block and other blocks that are in the same nomino. 
                                     //since we remove busted blocks from the nomino, we can take the Duomino this
@@ -698,7 +712,7 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return ResurrectNominos;
         }
-        protected bool oldPopHandle = false;
+        protected bool SimplePopHandling = false;
         const int ParticlesPerPop = 400;
         static BCColor[] RedColors = new BCColor[] { SKColors.Red, SKColors.IndianRed, SKColors.OrangeRed, SKColors.DarkRed };
         static BCColor[] BlueColors = new BCColor[] { SKColors.Blue, SKColors.Navy, SKColors.SkyBlue, SKColors.LightBlue };
@@ -827,36 +841,7 @@ namespace BASeTris.GameStates.GameHandlers
             LineSeriesGameFieldInitializer fieldinit = new LineSeriesGameFieldInitializer(this, _InitParams);
             fieldinit.Initialize(state.PlayField);
             PrimaryBlockCount = state.PlayField.AllContents().Count((y) => y != null);
-            /*
-            HashSet<SKPointI> usedPositions = new HashSet<SKPointI>();
-            //primary count is based on our level.
-            int numPrimaries = (int)((Level * 1.33f) + 4);
-            for(int i=0;i<numPrimaries;i++)
-            {
-                //choose a random primary type.
-                var chosentype = TetrisGame.Choose(GetValidPrimaryCombiningTypes());
-                LineSeriesPrimaryBlock lsmb = new LineSeriesPrimaryBlock() { CombiningIndex = chosentype };
-                var Dummino = new Nomino() { };
-                Dummino.AddBlock(new Point[] { new Point(0, 0) }, lsmb);
-                state.PlayField.Theme.ApplyTheme(Dummino,this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
-                lsmb.CriticalMass = 4; //TODO: should this be changed?
-                
-                int RandomXPos = TetrisGame.rgen.Next(state.PlayField.ColCount);
-                int RandomYPos = state.PlayField.RowCount - 1 -TetrisGame.rgen.Next(state.PlayField.RowCount / 2);
-                SKPointI randomPos = new SKPointI(RandomXPos, RandomYPos);
-                while(usedPositions.Contains(randomPos))
-                {
-                    int rndXPos = TetrisGame.rgen.Next(state.PlayField.ColCount);
-                    int rndYPos = state.PlayField.RowCount - 1 - TetrisGame.rgen.Next(state.PlayField.RowCount / 2);
-                     randomPos = new SKPointI(rndXPos, rndYPos);
-                }
-                state.PlayField.Contents[RandomYPos][RandomXPos] = lsmb;
-                PrimaryBlockCount++;
-
-
-
-            }
-            */
+            
             DrMarioVirusAppearanceState appearstate = new DrMarioVirusAppearanceState(state);
             pOwner.CurrentState = appearstate;
 

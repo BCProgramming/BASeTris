@@ -22,7 +22,7 @@ namespace BASeTris.Rendering.Skia
         public int VISIBLEROWS;
         public int HIDDENBOTTOMROWS;
         public int HIDDENTOPROWS;
-        public int HIDDENROWS { get { return HIDDENBOTTOMROWS + HIDDENTOPROWS; } }
+        public int HIDDENROWS { get { return HIDDENTOPROWS; } }
         public SKRect Bounds;
         public SKRect LastFieldSave;
         public SKImage FieldBitmap;

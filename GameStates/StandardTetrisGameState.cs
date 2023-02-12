@@ -574,6 +574,12 @@ namespace BASeTris.GameStates
                 //FallSpeed is 1000 -50 for each level. Well, for now.
             }
             SetLevelSpeed(nextget);
+            if (pOwner.GetHandler() is TetrisAttackHandler)
+            {
+                nextget.Y = 6;
+                nextget.NoGhost = true;
+                nextget.Flags = Nomino.NominoControlFlags.ControlFlags_NoClip | Nomino.NominoControlFlags.ControlFlags_DropMove;
+            }
             NextAngleOffset += Math.PI * 2 / 5;
             nextget.LastFall = pOwner.GetElapsedTime().Add(new TimeSpan(0,0,0,0,100));
             PlayField.AddBlockGroup(nextget);
