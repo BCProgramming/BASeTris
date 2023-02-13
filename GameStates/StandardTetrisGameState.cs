@@ -42,6 +42,7 @@ namespace BASeTris.GameStates
             Paused = 1
         }
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
+        public bool DrawNextQueue { get; set; } = true;
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
         public Nomino HoldBlock = null;
         public List<BaseParticle> TopParticles = new List<BaseParticle>();

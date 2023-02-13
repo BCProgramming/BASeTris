@@ -288,7 +288,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     Size NextSize = new Size((int)(200f * Factor), (int)(200f * Factor));
                     SKPoint CenterPoint = new SKPoint(NextDrawPosition.X + NextSize.Width / 2, NextDrawPosition.Y + NextSize.Height / 2);
                     
-                    if (Source.NextBlocks.Count > 0)
+                    if (Source.NextBlocks.Count > 0 && Source.DrawNextQueue)
                     {
                         var QueueList = Source.NextBlocks.ToArray();
                         SKBitmap[] NextTetrominoes = (from t in QueueList select Source.GetTetrominoSKBitmap(pOwner,t)).ToArray();

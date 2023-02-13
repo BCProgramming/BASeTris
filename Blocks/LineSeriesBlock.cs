@@ -34,7 +34,7 @@ namespace BASeTris.Blocks
             }
             if (Owner == null || Owner.Count==1)
             {
-                if (Row + 1 >= field.RowCount - 1-field.HIDDENROWS_BOTTOM) return true; //block is at the bottom, so it is supported.
+                if (Row + 1 >= field.RowCount) return true; //block is at the bottom, so it is supported.
                 var BlockBelow = field.Contents[Row + 1][Column];
                 if (BlockBelow == null) return false;
                 if (BlockBelow is CascadingBlock cb)

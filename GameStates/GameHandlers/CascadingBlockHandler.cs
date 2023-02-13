@@ -60,7 +60,7 @@ namespace BASeTris.GameStates.GameHandlers
         public abstract GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner);
         
         public abstract Nomino[] GetNominos();
-        public LineSeriesBlock.CombiningTypes[] GetValidBlockCombiningTypes()
+        public virtual LineSeriesBlock.CombiningTypes[] GetValidBlockCombiningTypes()
         {
             List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
             if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Block)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
@@ -73,7 +73,7 @@ namespace BASeTris.GameStates.GameHandlers
             return buildresult.ToArray();
         }
 
-        public LineSeriesBlock.CombiningTypes[] GetValidPrimaryCombiningTypes()
+        public virtual LineSeriesBlock.CombiningTypes[] GetValidPrimaryCombiningTypes()
         {
             List<LineSeriesBlock.CombiningTypes> buildresult = new List<LineSeriesBlock.CombiningTypes>();
             if (this.AllowedSpawns.HasFlag(AllowedSpawnsFlags.Spawn_Yellow_Primary)) buildresult.Add(LineSeriesBlock.CombiningTypes.Yellow);
@@ -390,6 +390,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             return CreateResult;
         }
+        public TimeSpan LastPopComplete = TimeSpan.MinValue;
         public int Level { get; set; } = 0;
         public int PrimaryBlockCount = 0;
         protected bool IgnoreActiveGroupsForFieldChange = false;

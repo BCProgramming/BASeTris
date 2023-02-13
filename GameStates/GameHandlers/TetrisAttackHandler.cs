@@ -44,7 +44,15 @@ namespace BASeTris.GameStates.GameHandlers
         //2. move active group to start closer to bottom.
         //3. Change Active group visuals- well, this would be more appropriate as part of an appropriate visual theme since we'll want that for Tetris Attack as well!.
         //4. Have the gamefield start with say 3 rows filled in.
-
+        [Flags]
+        public enum TetrisAttackExpandedCombiningTypes
+        {
+            None = 0,
+            Seventh = 1,
+            Eighth = 2,
+            Ninth = 4,
+            Tenth = 8
+        }
         public override FieldCustomizationInfo GetFieldInfo()
         {
             return new FieldCustomizationInfo()
@@ -103,21 +111,34 @@ namespace BASeTris.GameStates.GameHandlers
 
         public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
                 state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewColumn(state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
 
             
         }
+        TimeSpan onesecond = new TimeSpan(0, 0, 1);
+        bool MultiGroups = false;
         private ExtendedCustomizationHandlerResult PositiveResult = new ExtendedCustomizationHandlerResult(true);
         public ExtendedCustomizationHandlerResult GameProc(GameplayGameState state, IStateOwner pOwner)
         {
+            
+            state.DrawNextQueue = false;
             //TODO: Fix this up, speed needs to be variable and additionally, we need to not move when the game is not actively being played. (We should verify that the gamestate is the GamePlayGameState).
 
             TimeSpan Elapsed = pOwner.GetElapsedTime();
             //for a first test we'll do every 5 seconds...
             double PercentageMove = 0;
+            if (state.PlayField.GetActiveBlockGroups().Count() > 1)
+            {
+                MultiGroups = true;
+            }
+            else if(state.PlayField.GetActiveBlockGroups().Count() == 1 && MultiGroups))
+            {
+                MultiGroups = false;
+                LastPopComplete = pOwner.GetElapsedTime();
+            }
 
-            if (state.PlayField.GetActiveBlockGroups().Count() > 1 || !(pOwner.CurrentState is GameplayGameState) )
+            if (state.PlayField.GetActiveBlockGroups().Count() > 1 || !(pOwner.CurrentState is GameplayGameState) || pOwner.GetElapsedTime()-LastPopComplete < onesecond)
             {
             }
 
@@ -159,12 +180,18 @@ namespace BASeTris.GameStates.GameHandlers
                 {
                     checkgroup.Y--;
                 }
-                base.ProcessFieldChange(state, pOwner, null);
+                var changecall =  base.ProcessFieldChange(state, pOwner, null);
 
             }
             state.PlayField.HasChanged = true;
             LastPercentage = state.PlayField.OffsetPaint;
             return PositiveResult;
+        }
+        public override LineSeriesBlock.CombiningTypes[] GetValidBlockCombiningTypes()
+        {
+            var result = base.GetValidBlockCombiningTypes();
+
+            return result;
         }
         private IEnumerable<NominoBlock> GenerateNewColumn(TetrisField pf,int row,int Count)
         {
@@ -176,7 +203,7 @@ namespace BASeTris.GameStates.GameHandlers
             //Basically: the new line of blocks will create no "lines" of equal blocks.
             for (int i = 0; i < Count; i++)
             {
-                var combinecheck = base.GetValidBlockCombiningTypes().ToList();
+                var combinecheck = GetValidBlockCombiningTypes().ToList();
                 //remove the type of the block immediately above, and if this is not the first block, the last block we yielded.
                 var checkblocks = new[] { pf.Contents[row - 1][i],previouslyyielded };
                 foreach (var blockadjacent in checkblocks)
