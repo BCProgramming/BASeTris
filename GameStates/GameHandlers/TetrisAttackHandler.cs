@@ -10,9 +10,33 @@ using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-    [HandlerTipText("Tetris Attack, Marathon Mode (WIP!)")]
+    [HandlerTipText("Tetris Attack, 6 Types")]
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
-    
+    [HandlerMenuCategory("Tetris Attack")]
+    public class TetrisAttackExpandedHandler : TetrisAttackHandler
+    {
+        public override FieldCustomizationInfo GetFieldInfo()
+        {
+            return new FieldCustomizationInfo()
+            {
+                FieldRows =  20,
+                BottomHiddenFieldRows = 1,
+                TopHiddenFieldRows = 2,
+                FieldColumns = 10
+            };
+        }
+        public override string GetName()
+        {
+            return "Tetris Attack (Expanded)"; 
+        }
+        public TetrisAttackExpandedHandler()
+        {
+            AllowedSpawns = CascadingPopBlockGameHandler<TetrisAttackStatistics, TetrisAttackGameOptions>.AllowedSpawnsFlags.Spawn_Full;
+        }
+    }
+    [HandlerTipText("Tetris Attack, 5 Types")]
+    [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
+    [HandlerMenuCategory("Tetris Attack")]
     public class TetrisAttackHandler : CascadingPopBlockGameHandler<TetrisAttackStatistics, TetrisAttackGameOptions>, IGameHandlerChooserInitializer, IExtendedGameCustomizationHandler
     {
         //still needed:
@@ -52,11 +76,12 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return "Tetris Attack";
         }
+       
         public TetrisAttackHandler()
         {
             SimplePopHandling = true;
             IgnoreActiveGroupsForFieldChange = true;
-            AllowedSpawns = AllowedSpawnsFlags.Spawn_Full;
+            AllowedSpawns = CascadingPopBlockGameHandler<TetrisAttackStatistics, TetrisAttackGameOptions>.AllowedSpawnsFlags.Spawn_5;
             LevelCompleteWhenMasterCountZero = true;
             ProcessWithoutMasses = true;
         }
@@ -78,7 +103,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 2; i++)
                 state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewColumn(state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
 
             
@@ -98,11 +123,11 @@ namespace BASeTris.GameStates.GameHandlers
 
             else if (pOwner is IGamePresenter gp)
             {
-                PercentageMove = (1d / 1000d) * ((1d / 60d) / gp.FrameTime);
+                PercentageMove = (1d / 1500d) * ((1d / 60d) / gp.FrameTime);
             }
             //PercentageMove = 0;
             state.PlayField.OffsetPaint = state.PlayField.OffsetPaint - (float)PercentageMove;
-            if (state.PlayField.OffsetPaint < -1) state.PlayField.OffsetPaint = state.PlayField.OffsetPaint + 1;
+            if (state.PlayField.OffsetPaint <= -1) state.PlayField.OffsetPaint = state.PlayField.OffsetPaint + 1;
             if (LastPercentage < state.PlayField.OffsetPaint)
             {
                 //move all blocks in the playfield up one line, then generate a line of blocks at the bottom.
@@ -119,7 +144,8 @@ namespace BASeTris.GameStates.GameHandlers
                     for (int cc = 0; cc < state.PlayField.ColCount; cc++)
                     {
                         //state.PlayField.Contents[r][cc] = state.PlayField.Contents[r + 1][cc];
-                        state.PlayField.Contents[r][cc].Owner.Y--;
+                        if(state.PlayField.Contents[r][cc]!=null)
+                            state.PlayField.Contents[r][cc].Owner.Y--;
                     }
 
                     Array.Copy(state.PlayField.Contents[r + 1], state.PlayField.Contents[r], state.PlayField.ColCount);
@@ -133,6 +159,7 @@ namespace BASeTris.GameStates.GameHandlers
                 {
                     checkgroup.Y--;
                 }
+                base.ProcessFieldChange(state, pOwner, null);
 
             }
             state.PlayField.HasChanged = true;
@@ -141,16 +168,32 @@ namespace BASeTris.GameStates.GameHandlers
         }
         private IEnumerable<NominoBlock> GenerateNewColumn(TetrisField pf,int row,int Count)
         {
+            NominoBlock previouslyyielded = null;
+            //TODO: generated lines should not create matches at the time they generate.
+            //To accomplish this:
+            //No block can match the block already at the bottom of the field
+            //No block can match the block that was just generated.
+            //Basically: the new line of blocks will create no "lines" of equal blocks.
             for (int i = 0; i < Count; i++)
             {
-                var createBlock = new LineSeriesPrimaryBlock() { Fixed=false, CombiningIndex = TetrisGame.Choose(base.GetValidBlockCombiningTypes()) };
+                var combinecheck = base.GetValidBlockCombiningTypes().ToList();
+                //remove the type of the block immediately above, and if this is not the first block, the last block we yielded.
+                var checkblocks = new[] { pf.Contents[row - 1][i],previouslyyielded };
+                foreach (var blockadjacent in checkblocks)
+                {
+                    if (blockadjacent is LineSeriesBlock lsb)
+                    {
+                        combinecheck.Remove(lsb.CombiningIndex);
+                    }
+                }
+                var createBlock = new LineSeriesPrimaryBlock() { Fixed=false, CombiningIndex = TetrisGame.Choose(combinecheck) };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, createBlock);
                 Dummino.Y = row;
                 Dummino.X = i;
                 pf.Theme.ApplyTheme(Dummino, this, pf, NominoTheme.ThemeApplicationReason.FieldSet);
                 createBlock.Owner = Dummino;
-                yield return createBlock;
+                yield return (previouslyyielded = createBlock);
             }
         }
         public ExtendedCustomizationHandlerResult HandleGameKey(GameplayGameState state, IStateOwner pOwner, GameState.GameKeys g)
@@ -161,7 +204,8 @@ namespace BASeTris.GameStates.GameHandlers
             }
             if (g == GameState.GameKeys.GameKey_Hold)
             {
-                LastPercentage = 0;
+                LastPercentage = -1;
+                return new ExtendedCustomizationHandlerResult(false);
             }
             if (g == GameState.GameKeys.GameKey_RotateCW || g == GameState.GameKeys.GameKey_RotateCCW)
             {
@@ -190,18 +234,24 @@ namespace BASeTris.GameStates.GameHandlers
                             NominoBlock FirstNBlock, SecondNBlock;
                             TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key);
 
-                            var FirstOwner = state.PlayField.Contents[FirstPos.Y][FirstPos.X]?.Owner;
-                            var SecondOwner = state.PlayField.Contents[SecondPos.Y][SecondPos.X]?.Owner;
-                            if (FirstOwner != null)
+                            //swap the owners positions. as well.
+
+                            if (state.PlayField.Contents[FirstPos.Y][FirstPos.X]?.Owner != null)
                             {
-                                FirstOwner.X = FirstPos.X;
-                                FirstOwner.Y = FirstPos.Y;
+                                state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner.X = FirstPos.X;
+                                state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner.Y = FirstPos.Y;
                             }
-                            if (SecondOwner != null)
+
+                            if (state.PlayField.Contents[SecondPos.Y][SecondPos.X]?.Owner != null)
                             {
-                                SecondOwner.X = SecondPos.X;
-                                SecondOwner.Y = SecondPos.Y;
+                                state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner.X = FirstPos.X;
+                                state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner.Y = FirstPos.Y;
                             }
+
+                           // (state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner, state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner) =
+                           //     (state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner, state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner);
+
+                           
 
 
                             base.ProcessFieldChange(state, pOwner, null);

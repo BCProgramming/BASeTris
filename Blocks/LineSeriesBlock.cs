@@ -34,7 +34,7 @@ namespace BASeTris.Blocks
             }
             if (Owner == null || Owner.Count==1)
             {
-                if (Row + 1 >= field.RowCount - 1) return true; //block is at the bottom, so it is supported.
+                if (Row + 1 >= field.RowCount - 1-field.HIDDENROWS_BOTTOM) return true; //block is at the bottom, so it is supported.
                 var BlockBelow = field.Contents[Row + 1][Column];
                 if (BlockBelow == null) return false;
                 if (BlockBelow is CascadingBlock cb)
@@ -69,7 +69,7 @@ namespace BASeTris.Blocks
                         //check if the block in question has another block beneath it or is touching the bottom.
                         int CheckPosX = PosX;
                         int CheckPosY = PosY + 1;
-                        if (CheckPosY > field.Contents.Length - 1)
+                        if (CheckPosY > field.Contents.Length - field.HIDDENROWS_BOTTOM-1)
                         {
                             return true; //this block is supported by the bottom of the stage/field.
                         }

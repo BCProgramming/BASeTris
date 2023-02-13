@@ -187,6 +187,34 @@ namespace BASeTris
 
 
         }
+
+        public void VerifySingularBlocks()
+        {
+
+            for (int r = 0; r < RowCount; r++)
+            {
+                for (int c = 0; c < ColCount; c++)
+                {
+                    var checkblock = Contents[r][c];
+                    if (checkblock != null)
+                    {
+                        if (checkblock.Owner.Count == 1)
+                        {
+                            if (checkblock.Owner.X != c)
+                            {
+                                checkblock.Owner.X = c;
+                            }
+                            if (checkblock.Owner.Y != r)
+                            {
+                                checkblock.Owner.Y = r;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
         public Dictionary<NominoBlock,Point> FindBlockLocations(IList<NominoBlock> Target)
         {
             Dictionary<NominoBlock, Point> constructresult = new Dictionary<NominoBlock, Point>();
@@ -357,6 +385,7 @@ namespace BASeTris
 
                     foreach (var bg in groups)
                     {
+                        if (bg.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip)) continue;
                         Debug.Print("Setting Nomino to Field:" + bg.ToString());
                         foreach (var groupblock in bg)
                         {

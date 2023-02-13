@@ -588,12 +588,13 @@ namespace BASeTris.GameStates.GameHandlers
 
             //Note: for visual flair eventually we'll want to have a temporary state which does nothing but allow the blocks being destroyed to be indicated for perhaps 250ms, before advancing to the state where blocks
             //will fall
-
+            state.PlayField.VerifySingularBlocks();
 
 
             return new FieldChangeResult() { ScoreResult = 5 };
 
         }
+        
         protected virtual HashSet<Nomino> ResurrectLoose(GameplayGameState state,IStateOwner pOwner)
         {
             List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
@@ -818,7 +819,11 @@ namespace BASeTris.GameStates.GameHandlers
             Spawn_Green_Block = 2048,
             Spawn_Standard = Spawn_Red_Primary | Spawn_Blue_Primary | Spawn_Yellow_Primary | Spawn_Red_Block | Spawn_Blue_Block | Spawn_Yellow_Block,
             Spawn_Alternate = Spawn_Orange_Primary | Spawn_Magenta_Primary | Spawn_Green_Primary | Spawn_Magenta_Block | Spawn_Green_Block | Spawn_Orange_Block | Spawn_Magenta_Block | Spawn_Green_Block,
-            Spawn_Full = Spawn_Standard | Spawn_Alternate
+            Spawn_4 = Spawn_Standard | Spawn_Orange_Primary | Spawn_Orange_Block,
+            Spawn_5 = Spawn_4 | Spawn_Magenta_Primary | Spawn_Magenta_Block,
+            Spawn_Full = Spawn_Standard | Spawn_Alternate,
+
+
 
         }
 
