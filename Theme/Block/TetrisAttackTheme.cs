@@ -17,19 +17,10 @@ namespace BASeTris.Theme
     [ThemeDescription("Tetris Attack/Panel De Pon style blocks")]
     public class TetrisAttackTheme : NominoTheme
     {
-        public enum TetrisAttackBlockTypes
-        {
-            Star,
-            Circle,
-            Diamond,
-            Heart,
-            Club,
-            Triangle,
-            Exclamation
-        }
+       
 
 
-        private Image Star_Image, Circle_Image, Diamond_Image, Heart_Image, Club_Image, Triangle_Image, Exclamation_Image;
+        private Image Star_Image, Circle_Image, Diamond_Image, Heart_Image, Club_Image, Triangle_Image, Smiley_Image, Spade_Image,Speaker_Image,Exclamation_Image;
         private Image BlockSelect_Image;
         private void InitializeThemeData()
         {
@@ -39,42 +30,51 @@ namespace BASeTris.Theme
             Heart_Image = TetrisGame.Imageman["block_heart", 0.25f];
             Club_Image = TetrisGame.Imageman["block_club", 0.25f];
             Triangle_Image = TetrisGame.Imageman["block_triangle", 0.25f];
+            Smiley_Image = TetrisGame.Imageman["block_triangle", 0.25f];
+            Speaker_Image = TetrisGame.Imageman["block_speaker", 0.25f];
+            Spade_Image = TetrisGame.Imageman["block_spade", 0.25f];
             Exclamation_Image = TetrisGame.Imageman["block_exclamation", 0.25f];
             BlockSelect_Image = TetrisGame.Imageman["block_select"];
-            BaseRedImages = new Dictionary<TetrisAttackBlockTypes, Image>()
+            BaseRedImages = new Dictionary<TetrisAttackHandler.TetrisAttackBlockTypes, Image>()
             {
-                {TetrisAttackBlockTypes.Star,Star_Image },
-                {TetrisAttackBlockTypes.Circle,Circle_Image },
-                {TetrisAttackBlockTypes.Diamond,Diamond_Image },
-                {TetrisAttackBlockTypes.Heart,Heart_Image },
-                {TetrisAttackBlockTypes.Club,Club_Image },
-                {TetrisAttackBlockTypes.Triangle,Triangle_Image },
-                {TetrisAttackBlockTypes.Exclamation,Exclamation_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Star,Star_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Circle,Circle_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Diamond,Diamond_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Heart,Heart_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Club,Club_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Triangle,Triangle_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Smiley,Smiley_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Spade,Spade_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Speaker,Speaker_Image },
+                {TetrisAttackHandler.TetrisAttackBlockTypes.Exclamation,Exclamation_Image },
 
             };
 
         }
-        public Color GetStandardColor(TetrisAttackBlockTypes blocktype) => blocktype switch
+        public Color GetStandardColor(TetrisAttackHandler.TetrisAttackBlockTypes blocktype) => blocktype switch
         {
-            TetrisAttackBlockTypes.Star => Color.Yellow,
-            TetrisAttackBlockTypes.Circle => Color.Green,
-            TetrisAttackBlockTypes.Diamond => Color.Purple,
-            TetrisAttackBlockTypes.Heart => Color.Red,
-            TetrisAttackBlockTypes.Club => Color.Blue,
-            TetrisAttackBlockTypes.Triangle => Color.SkyBlue,
-            TetrisAttackBlockTypes.Exclamation => Color.LightSlateGray,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Star => Color.Yellow,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Circle => Color.Green,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Diamond => Color.Purple,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Heart => Color.Red,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Club => Color.Blue,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Triangle => Color.SkyBlue,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Spade => Color.DarkGray,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Smiley => Color.OliveDrab,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Speaker => Color.Silver,
+            TetrisAttackHandler.TetrisAttackBlockTypes.Exclamation => Color.LightSlateGray,
             _ => Color.LightSeaGreen
         };
         public TetrisAttackTheme()
         {
             InitializeThemeData();
         }
-        private Dictionary<TetrisAttackBlockTypes, Image> BaseRedImages = null;
-        private Dictionary<TetrisAttackBlockTypes, Dictionary<BCColor, Image>> BlockImageLookup = new Dictionary<TetrisAttackBlockTypes, Dictionary<BCColor, Image>>();
+        private Dictionary<TetrisAttackHandler.TetrisAttackBlockTypes, Image> BaseRedImages = null;
+        private Dictionary<TetrisAttackHandler.TetrisAttackBlockTypes, Dictionary<BCColor, Image>> BlockImageLookup = new Dictionary<TetrisAttackHandler.TetrisAttackBlockTypes, Dictionary<BCColor, Image>>();
         public override string Name => "Tetris Attack";
 
 
-        private Image GetBlockImage(TetrisAttackBlockTypes blocktype, BCColor color)
+        private Image GetBlockImage(TetrisAttackHandler.TetrisAttackBlockTypes blocktype, BCColor color)
         {
             if (!BlockImageLookup.ContainsKey(blocktype))
                 BlockImageLookup.Add(blocktype, new Dictionary<BCColor, Image>());
@@ -99,7 +99,7 @@ namespace BASeTris.Theme
             {
                 if (iterate.Block is StandardColouredBlock)
                 {
-                    var choosetype = TetrisGame.Choose<TetrisAttackBlockTypes>((IEnumerable<TetrisAttackBlockTypes>)Enum.GetValues(typeof(TetrisAttackBlockTypes)));
+                    var choosetype = TetrisGame.Choose<TetrisAttackHandler.TetrisAttackBlockTypes>((IEnumerable<TetrisAttackHandler.TetrisAttackBlockTypes>)Enum.GetValues(typeof(TetrisAttackHandler.TetrisAttackBlockTypes)));
                     var useColor = GetStandardColor(choosetype);
                     StandardColouredBlock sbc = iterate.Block as StandardColouredBlock;
                     sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
@@ -134,7 +134,7 @@ namespace BASeTris.Theme
                 {
                     if (iterate.Block is LineSeriesBlock lsb)
                     {
-                        TetrisAttackBlockTypes chosenType = (TetrisAttackBlockTypes)lsb.CombiningIndex;
+                        TetrisAttackHandler.TetrisAttackBlockTypes chosenType = (TetrisAttackHandler.TetrisAttackBlockTypes)lsb.CombiningIndex;
                         var useColor = GetStandardColor(chosenType);
                         lsb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                         Bitmap useBitmap = new Bitmap(GetBlockImage(chosenType, useColor));

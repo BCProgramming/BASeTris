@@ -60,9 +60,6 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+      
     }
 }

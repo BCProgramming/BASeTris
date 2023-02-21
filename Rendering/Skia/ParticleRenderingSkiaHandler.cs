@@ -165,7 +165,7 @@ namespace BASeTris.Rendering.Skia
             return useAlpha;
         }
         
-        protected BCPoint TranslatePosition(IStateOwner pOwner, SKCanvas pRenderTarget, BCPoint Position, GameStateSkiaDrawParameters Element)
+        public static BCPoint TranslatePosition(IStateOwner pOwner, SKCanvas pRenderTarget, BCPoint Position, GameStateSkiaDrawParameters Element)
         {
             BCPoint Result = Position;
             GameplayGameState foundstandard = null;
@@ -181,8 +181,8 @@ namespace BASeTris.Rendering.Skia
 
             if (foundstandard != null)
             {
-                Result.X = foundstandard.PlayField.GetBlockWidth(Element.Bounds) * Position.X;
-                Result.Y = foundstandard.PlayField.GetBlockHeight(Element.Bounds) * Position.Y;
+                Result.X = foundstandard.PlayField.GetBlockWidth(Element.Bounds) * (Position.X+Element.Offset.X);
+                Result.Y = foundstandard.PlayField.GetBlockHeight(Element.Bounds) * (Position.Y+Element.Offset.Y);
             }
             return Result;
         }
@@ -232,6 +232,7 @@ namespace BASeTris.Rendering.Skia
                 Debug.Print("Rendering Particle Set of " + Source.Count.ToString());
                 Debug.Print("Trace:" + new StackTrace().ToString());
             }
+            //var translated = BaseParticleRenderingSkiaHandler.TranslatePosition(pOwner, pRenderTarget, Element.Offset, Element);
             foreach (var iterate in Source)
             {
                 //retrieve rendering handler.

@@ -25,7 +25,7 @@ namespace BASeTris.GameStates.GameHandlers
     {
         String Name { get; }
         FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger);
-        IHighScoreList<TetrisHighScoreData> GetHighScores();
+        IHighScoreList GetHighScores();
         Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner);
         IGameCustomizationHandler NewInstance();
         NominoTheme DefaultTheme { get; }
@@ -180,6 +180,7 @@ namespace BASeTris.GameStates.GameHandlers
     {
         public int ScoreResult { get; set; }
         public IList<Action> AfterClearActions { get; set; }
+        public int BlocksAffected { get; set; }
     }
     public interface IGameCustomizationStatAreaRenderer<TRenderTarget,TRenderSource,TDataElement,TOwnerType> : BASeCamp.Rendering.Interfaces.IRenderingHandler<TRenderTarget,TRenderSource,TDataElement,TOwnerType>
          where TRenderSource : class

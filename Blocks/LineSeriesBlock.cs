@@ -157,6 +157,7 @@ namespace BASeTris.Blocks
         public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
         public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question. 
 
+        public int ComboTracker { get; set; }
         public List<AdditionalCombineInfo> AdditionalCombinations { get; private set; } = new List<AdditionalCombineInfo>();
 
         //while part of a Nomino, items that are part of different sets will remain joined as expected. However when the nomino comes to 'rest' the sets are separated and any set that 

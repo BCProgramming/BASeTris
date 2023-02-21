@@ -433,7 +433,7 @@ namespace BASeTris
         public void DrawProc(Graphics g, RectangleF Bounds)
         {
             RenderingProvider.Static.DrawElement(this, g, CurrentGameState, new BaseDrawParameters(Bounds));
-            CurrentGameState.DrawForegroundEffect(this, g, Bounds);
+            //CurrentGameState.DrawForegroundEffect(this, g, Bounds);
         }
 
 

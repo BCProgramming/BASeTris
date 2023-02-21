@@ -207,9 +207,9 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return _Chooser;
         }
-        public virtual IHighScoreList<TetrisHighScoreData> GetHighScores()
+        public virtual IHighScoreList GetHighScores() 
         {
-            return TetrisGame.ScoreMan["Standard"];
+            return (IHighScoreList)TetrisGame.ScoreMan["Standard"];
         }
 
         public IGameCustomizationHandler NewInstance()
@@ -489,7 +489,7 @@ namespace BASeTris.GameStates.GameHandlers
             ProgressiveMode = true;
         }
         public override string Name { get { return "Progressive Tetris"; } }
-        public override IHighScoreList<TetrisHighScoreData> GetHighScores()
+        public override IHighScoreList GetHighScores() 
         {
             return TetrisGame.ScoreMan["Progressive"];
         }

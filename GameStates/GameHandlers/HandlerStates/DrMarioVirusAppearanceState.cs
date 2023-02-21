@@ -52,10 +52,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
             LastAppearanceTick = TetrisGame.GetTickCount();
 
         }
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-           // throw new NotImplementedException();
-        }
+       
         public const int virusappearanceparticlecount = 100;
         public const double startradius = 0.25f;
         public override void GameProc(IStateOwner pOwner)

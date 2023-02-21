@@ -516,10 +516,7 @@ namespace BASeTris.GameStates
             
         
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            
-        }
+      
     }
 
     public class FieldBlockClearTask
@@ -664,9 +661,6 @@ namespace BASeTris.GameStates
             }
         }
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+       
     }
 }

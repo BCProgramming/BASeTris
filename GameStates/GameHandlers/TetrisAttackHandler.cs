@@ -31,8 +31,9 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public TetrisAttackExpandedHandler()
         {
-            AllowedSpawns = CascadingPopBlockGameHandler<TetrisAttackStatistics, TetrisAttackGameOptions>.AllowedSpawnsFlags.Spawn_Full;
+            AllowedTetrisAttackSpawns = new int[] { (int)TetrisAttackBlockTypes.Star, (int)TetrisAttackBlockTypes.Circle, (int)TetrisAttackBlockTypes.Diamond, (int)TetrisAttackBlockTypes.Heart, (int)TetrisAttackBlockTypes.Triangle, (int)TetrisAttackBlockTypes.Smiley,(int)TetrisAttackBlockTypes.Speaker,(int)TetrisAttackBlockTypes.Spade };
         }
+        
     }
     [HandlerTipText("Tetris Attack, 5 Types")]
     [GameScoringHandler(typeof(DrMarioAIScoringHandler), typeof(StoredBoardState.DrMarioScoringRuleData))]
@@ -44,15 +45,21 @@ namespace BASeTris.GameStates.GameHandlers
         //2. move active group to start closer to bottom.
         //3. Change Active group visuals- well, this would be more appropriate as part of an appropriate visual theme since we'll want that for Tetris Attack as well!.
         //4. Have the gamefield start with say 3 rows filled in.
-        [Flags]
-        public enum TetrisAttackExpandedCombiningTypes
+        //[Flags]
+        public enum TetrisAttackBlockTypes
         {
-            None = 0,
-            Seventh = 1,
-            Eighth = 2,
-            Ninth = 4,
-            Tenth = 8
+            Star,
+            Circle,
+            Diamond,
+            Heart,
+            Club,
+            Triangle,
+            Spade,
+            Smiley,
+            Speaker,
+            Exclamation
         }
+        protected int[] AllowedTetrisAttackSpawns = new int[] { (int)TetrisAttackBlockTypes.Star, (int)TetrisAttackBlockTypes.Circle, (int)TetrisAttackBlockTypes.Diamond, (int)TetrisAttackBlockTypes.Heart, (int)TetrisAttackBlockTypes.Triangle };
         public override FieldCustomizationInfo GetFieldInfo()
         {
             return new FieldCustomizationInfo()
@@ -92,6 +99,7 @@ namespace BASeTris.GameStates.GameHandlers
             AllowedSpawns = CascadingPopBlockGameHandler<TetrisAttackStatistics, TetrisAttackGameOptions>.AllowedSpawnsFlags.Spawn_5;
             LevelCompleteWhenMasterCountZero = true;
             ProcessWithoutMasses = true;
+            NoFallInputDelay = true;
         }
         public override Nomino[] GetNominos()
         {
@@ -132,7 +140,7 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 MultiGroups = true;
             }
-            else if(state.PlayField.GetActiveBlockGroups().Count() == 1 && MultiGroups))
+            else if(state.PlayField.GetActiveBlockGroups().Count() == 1 && MultiGroups)
             {
                 MultiGroups = false;
                 LastPopComplete = pOwner.GetElapsedTime();
@@ -144,7 +152,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             else if (pOwner is IGamePresenter gp)
             {
-                PercentageMove = (1d / 1500d) * ((1d / 60d) / gp.FrameTime);
+                PercentageMove = Math.Max(0.0009d,(1d / 1100d) * ((1d / 60d) / gp.FrameTime)*((double)(Math.Max(1d,(double)BlockPopCount)/10)));
             }
             //PercentageMove = 0;
             state.PlayField.OffsetPaint = state.PlayField.OffsetPaint - (float)PercentageMove;
@@ -154,7 +162,7 @@ namespace BASeTris.GameStates.GameHandlers
                 //move all blocks in the playfield up one line, then generate a line of blocks at the bottom.
 
                 //first, check current top visible row. If it has any blocks, Game Over...
-                var TopRow = state.PlayField.Contents[state.PlayField.HIDDENROWS_TOP];
+                var TopRow = state.PlayField.Contents[state.PlayField.HIDDENROWS_TOP+state.PlayField.HIDDENROWS_BOTTOM];
                 if ((TopRow.Any((a) => a != null)))
                 {
                     state.GameOvered = true;
@@ -181,17 +189,23 @@ namespace BASeTris.GameStates.GameHandlers
                     checkgroup.Y--;
                 }
                 var changecall =  base.ProcessFieldChange(state, pOwner, null);
-
+                BlockPopCount += changecall.BlocksAffected;
+               
             }
             state.PlayField.HasChanged = true;
             LastPercentage = state.PlayField.OffsetPaint;
             return PositiveResult;
         }
+        protected int BlockPopCount = 0;
         public override LineSeriesBlock.CombiningTypes[] GetValidBlockCombiningTypes()
         {
-            var result = base.GetValidBlockCombiningTypes();
+            return (from y in AllowedTetrisAttackSpawns select (LineSeriesBlock.CombiningTypes)y).ToArray();
 
-            return result;
+           
+        }
+        public override LineSeriesBlock.CombiningTypes[] GetValidPrimaryCombiningTypes()
+        {
+            return (from y in AllowedTetrisAttackSpawns select (LineSeriesBlock.CombiningTypes)y).ToArray();
         }
         private IEnumerable<NominoBlock> GenerateNewColumn(TetrisField pf,int row,int Count)
         {
@@ -231,7 +245,8 @@ namespace BASeTris.GameStates.GameHandlers
             }
             if (g == GameState.GameKeys.GameKey_Hold)
             {
-                LastPercentage = -1;
+                LastPercentage = state.PlayField.OffsetPaint -= 0.3f;
+                //LastPercentage = -1;
                 return new ExtendedCustomizationHandlerResult(false);
             }
             if (g == GameState.GameKeys.GameKey_RotateCW || g == GameState.GameKeys.GameKey_RotateCCW)
@@ -244,6 +259,7 @@ namespace BASeTris.GameStates.GameHandlers
                     if(iterate.Y > 0)
                         if (iterate.Count == 2)
                         {
+                            //swap the two block positions in the game field.
                             var FirstBlock = iterate.First();
                             var LastBlock = iterate.Last();
                             Point FirstPos = new Point(iterate.X + FirstBlock.X, iterate.Y + FirstBlock.Y);
@@ -275,10 +291,28 @@ namespace BASeTris.GameStates.GameHandlers
                                 state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner.Y = FirstPos.Y;
                             }
 
-                           // (state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner, state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner) =
-                           //     (state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner, state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner);
+                            //now, we also want to move other active groups in those positions. Let's look for active groups with one block that is in each of the two positions.
 
-                           
+                            var FirstGroups = (from f in state.PlayField.GetActiveBlockGroups() where f.Count == 1 && (f.X, f.Y) == (FirstPos.X, FirstPos.Y) select f);
+                            var SecondGroups = (from f in state.PlayField.GetActiveBlockGroups() where f.Count == 1 && (f.X, f.Y) == (SecondPos.X, SecondPos.Y) select f);
+
+                            //Task: All items in FirstGroup must be moved to SecondPos; all items in SecondGroup must be moved to FirstPos.
+                            foreach (var fgitem in FirstGroups)
+                            {
+                                fgitem.X = SecondPos.X;
+                                fgitem.Y = SecondPos.Y;
+                            }
+                            foreach (var sgitem in SecondGroups)
+                            {
+                                sgitem.X = FirstPos.X;
+                                sgitem.Y = FirstPos.Y;
+                            }
+
+
+                            // (state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner, state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner) =
+                            //     (state.PlayField.Contents[SecondPos.Y][SecondPos.X].Owner, state.PlayField.Contents[FirstPos.Y][FirstPos.X].Owner);
+
+
 
 
                             base.ProcessFieldChange(state, pOwner, null);

@@ -182,10 +182,7 @@ namespace BASeTris.GameStates.Menu
             
        
         }
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+      
 
         public void MouseDown(StateMouseButtons ButtonDown, BCPoint Position)
         {

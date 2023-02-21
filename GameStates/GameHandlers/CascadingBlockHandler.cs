@@ -15,6 +15,7 @@ using BASeTris.Particles;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
 using SkiaSharp;
+using static BASeTris.GameState;
 
 namespace BASeTris.GameStates.GameHandlers
 {
@@ -87,10 +88,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
 
 
-        public IHighScoreList<TetrisHighScoreData> GetHighScores()
-        {
-            return null;
-        }
+    
 
         public abstract IGameCustomizationHandler NewInstance();
 
@@ -390,13 +388,15 @@ namespace BASeTris.GameStates.GameHandlers
 
             return CreateResult;
         }
-        public TimeSpan LastPopComplete = TimeSpan.MinValue;
+        public TimeSpan LastPopComplete = TimeSpan.Zero;
         public int Level { get; set; } = 0;
         public int PrimaryBlockCount = 0;
         protected bool IgnoreActiveGroupsForFieldChange = false;
         protected bool ProcessWithoutMasses = false;
+        protected bool NoFallInputDelay = false;
         public virtual FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner,Nomino Trigger)
         {
+            FieldChangeResult fcr = new FieldChangeResult();
             if (!IgnoreActiveGroupsForFieldChange && state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult = 0 };
             //here we would go through the field and handle where the blocks line up to more than the required critical mass. 
 
@@ -454,16 +454,19 @@ namespace BASeTris.GameStates.GameHandlers
                 var originalstate = state;
                 //TODO: this seems to act weird with Tetris 2, sets the popping colour wrong sometimes. It seems to be using other colours from the tetromino's that the blocks
                 //belonged to.
+                int MaxCombo = 0;
                 if (CriticalMasses != null)
                 {
                     HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
+                    
                     foreach (var iterate in CriticalMasses)
                     {
-
+                        fcr.BlocksAffected++;
                         var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
 
                         if (popItem is LineSeriesBlock lsb)
                         {
+                            if (lsb.ComboTracker > MaxCombo) MaxCombo = lsb.ComboTracker;
                             lsb.Popping = true;
                             GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
                             if (popItem.Owner != null)
@@ -490,14 +493,19 @@ namespace BASeTris.GameStates.GameHandlers
 
 
 
-                TemporaryInputPauseGameState tpause = new TemporaryInputPauseGameState(state, CriticalMasses==null?0:1000, (owner) =>
+                TemporaryInputPauseGameState tpause = new TemporaryInputPauseGameState(state, (NoFallInputDelay || CriticalMasses==null)?0:1000, (owner) =>
                 {
                     //first, remove the CriticalMasses altogether.
 
                     if (CriticalMasses != null) foreach (var iterate in CriticalMasses)
                     {
+                            
                         //clear out the cell at the appropriate position.
                         var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
+                            if (popItem is LineSeriesBlock lsbb)
+                            {
+                                fcr.ScoreResult += (5 * Math.Min(1,lsbb.ComboTracker));
+                            }
                         state.PlayField.Contents[iterate.Y][iterate.X] = null;
                         //now apply the theme to the specified location
                         if (popItem.Owner != null)
@@ -518,8 +526,8 @@ namespace BASeTris.GameStates.GameHandlers
 
 
                     //next, go through the entire field.
-
-                    var ResurrectNominos = ResurrectLoose(state,pOwner);
+                    
+                    var ResurrectNominos = ResurrectLoose(state,pOwner,MaxCombo+1);
                     
 
                     if (ResurrectNominos.Any())
@@ -567,6 +575,7 @@ namespace BASeTris.GameStates.GameHandlers
                         owner.CurrentState = originalstate;
                     }
                 });
+                if (NoFallInputDelay) tpause.FilterFunction = TemporaryInputPauseGameState.CreateKeyFilter(GameKeys.GameKey_Down, GameKeys.GameKey_Drop, GameKeys.GameKey_Left, GameKeys.GameKey_Right, GameKeys.GameKey_RotateCW, GameKeys.GameKey_RotateCCW);
                 pOwner.CurrentState = tpause;
 
 
@@ -591,12 +600,12 @@ namespace BASeTris.GameStates.GameHandlers
             //will fall
             state.PlayField.VerifySingularBlocks();
 
-
-            return new FieldChangeResult() { ScoreResult = 5 };
+            fcr.ScoreResult = 5;
+            return fcr;
 
         }
         
-        protected virtual HashSet<Nomino> ResurrectLoose(GameplayGameState state,IStateOwner pOwner)
+        protected virtual HashSet<Nomino> ResurrectLoose(GameplayGameState state,IStateOwner pOwner,int Combo)
         {
             List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
 
@@ -648,6 +657,10 @@ namespace BASeTris.GameStates.GameHandlers
                                     }
                                     foreach (var iterate in cb.Owner)
                                     {
+                                        if (iterate.Block is LineSeriesBlock lsba)
+                                        {
+                                            lsba.ComboTracker = Combo;
+                                        }
                                         var useX = iterate.X + cb.Owner.X;
                                         var useY = iterate.Y + cb.Owner.Y;
                                         state.PlayField.Contents[useY][useX] = null;
@@ -862,6 +875,10 @@ namespace BASeTris.GameStates.GameHandlers
             return null;
         }
 
-
+        public virtual IHighScoreList GetHighScores()
+        {
+            return null;
+            //throw new NotImplementedException();
+        }
     }
 }

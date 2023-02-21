@@ -69,8 +69,6 @@ namespace BASeTris.GameStates
             }
         }
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-        }
+      
     }
 }

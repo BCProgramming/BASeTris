@@ -21,10 +21,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
             StateProcessionFunction = AdvanceToStateFunc;
             OriginalState = pState;
         }
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+       
         private AssetManager.iActiveSoundObject CompletionMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {

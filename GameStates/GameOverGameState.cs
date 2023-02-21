@@ -42,10 +42,7 @@ namespace BASeTris.GameStates
             LineMaxIndex = StatInfo==null?0:StatInfo.Statistics.Count-1;
         }
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+       
 
     
 

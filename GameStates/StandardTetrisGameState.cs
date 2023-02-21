@@ -98,7 +98,7 @@ namespace BASeTris.GameStates
         }
 
 
-        public virtual IHighScoreList<TetrisHighScoreData> GetLocalScores()
+        public virtual IHighScoreList GetLocalScores()
         {
             return GameHandler.GetHighScores();
         }
@@ -657,12 +657,6 @@ namespace BASeTris.GameStates
         }
 
      
-        [Obsolete]
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
-
         
 
         

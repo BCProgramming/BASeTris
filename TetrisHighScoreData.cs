@@ -20,7 +20,7 @@ namespace BASeTris
         }
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {
-            return null;
+            return new XElement("Dr. Mario");
             //throw new NotImplementedException();
         }
     }

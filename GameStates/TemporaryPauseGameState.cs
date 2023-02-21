@@ -13,16 +13,26 @@ namespace BASeTris.GameStates
         public GameplayGameState PausedState = null;
         private int PauseTicks = 0;
         Action<IStateOwner> ResumeFunc = null;
-        public TemporaryInputPauseGameState(GameplayGameState pState,int pPauseTicks,Action<IStateOwner> pResumeFunc)
+        public delegate bool TemporaryInputGameKeyFilterFunction(IStateOwner pOwner, GameKeys key);
+        public TemporaryInputGameKeyFilterFunction FilterFunction = DefaultFilter;
+        private static bool DefaultFilter(IStateOwner pOwner, GameKeys key)
         {
+            return false;
+        }
+        public static TemporaryInputGameKeyFilterFunction CreateKeyFilter(params GameKeys[] AllowedKeys)
+        {
+
+            return new TemporaryInputGameKeyFilterFunction((o,k)=> { return AllowedKeys.Contains(k); } );
+
+        }
+        public TemporaryInputPauseGameState(GameplayGameState pState,int pPauseTicks,Action<IStateOwner> pResumeFunc, TemporaryInputGameKeyFilterFunction KeyFilter = null)
+        {
+            FilterFunction = KeyFilter;
             PauseTicks = pPauseTicks;
             PausedState = pState;
             ResumeFunc = pResumeFunc;
         }
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            PausedState.DrawForegroundEffect(pOwner, g, Bounds);
-        }
+     
 
         uint FirstTick = 0;
         public void Resume(IStateOwner pOwner)
@@ -50,6 +60,8 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            if (FilterFunction(pOwner, g))
+                PausedState.HandleGameKey(pOwner, g);
             //since we are "paused"
         }
 

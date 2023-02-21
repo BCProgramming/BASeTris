@@ -26,10 +26,7 @@ namespace BASeTris.GameStates
             }
         }
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            OwnerState.DrawForegroundEffect(pOwner, g, Bounds);
-        }
+       
 
         public override void GameProc(IStateOwner pOwner)
         {

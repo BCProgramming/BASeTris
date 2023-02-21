@@ -58,7 +58,7 @@ namespace BASeTris.Rendering
         }
 
    
-        public IHighScoreList<TetrisHighScoreData> GetHighScores()
+        public IHighScoreList GetHighScores()
         {
             return null;
         }

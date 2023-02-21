@@ -53,9 +53,6 @@ namespace BASeTris.GameStates
             pOwner.CurrentState = new ShowHighScoresState(ScoreListing, ReversionState, new int[] {AchievedPosition});
         }
 
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+       
     }
 }

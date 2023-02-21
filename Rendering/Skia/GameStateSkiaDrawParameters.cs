@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using BASeTris.Rendering.Adapters;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace BASeTris.Rendering.Skia
 {
     public class GameStateSkiaDrawParameters
     {
+        public BCPoint Offset { get; set; }
         public SKRect Bounds;
         public Object TagData = null;
         public GameStateSkiaDrawParameters(SKRect pBounds)

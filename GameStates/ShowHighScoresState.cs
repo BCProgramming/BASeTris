@@ -94,13 +94,7 @@ namespace BASeTris.GameStates
 
         }
 
-        //This state Draws the High scores.
-        //Note that this state "takes over" the full display- it doesn't use an underlying Standard State to handle drawing aspects like the Status bar.
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
-
+      
      
 
     

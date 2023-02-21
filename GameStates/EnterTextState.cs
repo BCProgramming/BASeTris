@@ -142,10 +142,7 @@ namespace BASeTris.GameStates
                 CommitEntry(pOwner, sEntry);
             }
         }
-        public override void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds)
-        {
-            //throw new NotImplementedException();
-        }
+       
         public void KeyUp(IStateOwner pOwner, int pKey)
         {
 
