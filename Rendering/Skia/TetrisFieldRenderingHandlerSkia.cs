@@ -26,6 +26,14 @@ namespace BASeTris.Rendering.Skia
         public SKRect Bounds;
         public SKRect LastFieldSave;
         public SKImage FieldBitmap;
+        public TetrisFieldDrawSkiaParameters()
+        {
+        }
+        public TetrisFieldDrawSkiaParameters(TetrisFieldDrawSkiaParameters Src)
+        {
+            (COLCOUNT, ROWCOUNT, VISIBLEROWS, HIDDENBOTTOMROWS, HIDDENTOPROWS, Bounds, LastFieldSave, FieldBitmap) =
+                (Src.COLCOUNT, Src.ROWCOUNT, Src.VISIBLEROWS, Src.HIDDENBOTTOMROWS, Src.HIDDENTOPROWS, Src.Bounds, Src.LastFieldSave, Src.FieldBitmap);
+        }
         
     }
     [RenderingHandler(typeof(TetrisField), typeof(SKCanvas),typeof(TetrisFieldDrawSkiaParameters))]
@@ -51,29 +59,7 @@ namespace BASeTris.Rendering.Skia
                     var currRow = Source.Contents[drawRow];
 
 
-                    //also, is there a hotline here?
-                    /*
-                    if (Source.Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && Source.HotLines.ContainsKey(drawRow))
-                    {
-                        RectangleF RowBounds = new RectangleF(0, YPos, BlockWidth * Element.COLCOUNT, BlockHeight);
-                        Brush useFillBrush = null;
-                        var HotLine = Source.HotLines[drawRow];
-                        if (HotLine.LineBrush != null) useFillBrush = HotLine.LineBrush;
-                        else
-                        {
-                            useFillBrush = GetHotLineTexture((int)RowBounds.Height + 1, HotLines[drawRow].Color);
-                        }
-                        if (useFillBrush is TextureBrush tb1)
-                        {
-                            tb1.TranslateTransform(0, YPos);
-                        }
-                        g.FillRectangle(useFillBrush, RowBounds);
-                        if (useFillBrush is TextureBrush tb2)
-                        {
-                            tb2.ResetTransform();
-                        }
-                    }*/ //hotline drawing needs to be reworked for the rendering providers...
-                        //for each Tetris Row...
+            
                     for (int drawCol = 0; drawCol < Element.COLCOUNT; drawCol++)
                     {
                         float XPos = drawCol * BlockWidth;
@@ -85,7 +71,7 @@ namespace BASeTris.Rendering.Skia
                             isAnim = Source.Theme.IsAnimated(TetBlock);
                             if (isAnim == animated)
                             {
-
+                                
                                 SKRect BlockBounds = new SKRect(XPos, YPos, XPos + BlockWidth, YPos + BlockHeight);
                                 TetrisBlockDrawSkiaParameters tbd = new TetrisBlockDrawSkiaParameters(g, BlockBounds, null, pState?.Settings);
                                 RenderingProvider.Static.DrawElement(pState, tbd.g, TetBlock, tbd);
@@ -93,7 +79,21 @@ namespace BASeTris.Rendering.Skia
                         }
                         FoundAnimated |= isAnim;
                     }
+                    //handle HotLines. HotLines use their own rendering handler.
+                    if (Source.Flags.HasFlag(TetrisField.GameFlags.Flags_Hotline) && Source.HotLines.ContainsKey(drawRow))
+                    {
 
+                        SKRect RowBounds = new SKRect(0, YPos, BlockWidth * Element.COLCOUNT, YPos + BlockHeight);
+                        var HotLine = Source.HotLines[drawRow];
+                        if (HotLine != null)
+                        {
+                            TetrisFieldDrawSkiaParameters tfds = new TetrisFieldDrawSkiaParameters(Element);
+                            //set bounds to this row specifically.
+                            tfds.Bounds = new SKRect(0, YPos, BlockWidth * Element.COLCOUNT, YPos + BlockHeight);
+                            //use the Rendering Handler to draw the Hotline.
+                            RenderingProvider.Static.DrawElement(pState,g, HotLine, tfds);
+                        }
+                    }
                 }
             }
                 if (FoundAnimated) {; }

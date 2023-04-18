@@ -10,6 +10,7 @@ namespace BASeTris.AssetManager
     {
         bool Finished { get; }
         float Tempo { get; set; }
+        float Pitch { get; set; }
         void Stop();
         void Pause();
         void UnPause();
@@ -30,7 +31,7 @@ namespace BASeTris.AssetManager
     {
         iActiveSoundObject Play(bool playlooped);
 
-        iActiveSoundObject Play(bool playlooped, float volume);
+        iActiveSoundObject Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f);
         float getLength();
     }
 
@@ -61,11 +62,14 @@ namespace BASeTris.AssetManager
 
         iActiveSoundObject PlaySound(String key, float volume);
         iActiveSoundObject PlaySound(String key, bool playlooped, float volume);
+        iActiveSoundObject PlaySound(String key, AudioHandlerPlayDetails pDetails);
         iActiveSoundObject PlayMusic();
         iActiveSoundObject PlayMusic(String key, float volume, bool loop);
 
+        iActiveSoundObject PlayMusic(String key, AudioHandlerPlayDetails pDetails);
         iActiveSoundObject PlayMusic(String[] key, cNewSoundManager.MultiMusicPlayMode mplaymode);
         iActiveSoundObject PlayMusic(String[] key, cNewSoundManager.MultiMusicPlayMode mplaymode, out iSoundSourceObject[] ssources);
+
 
         void PauseMusic();
 
@@ -77,5 +81,21 @@ namespace BASeTris.AssetManager
         void StopMusic();
 
 
+    }
+    public class AudioHandlerPlayDetails
+    {
+        
+        public float Volume { get; set; } = 1f;
+        public bool Playlooped { get; set; } = false;
+        public float Pitch { get; set; } = 0f;
+        public float Tempo { get; set; } = 1f;
+        public AudioHandlerPlayDetails()
+        {
+        }
+        public AudioHandlerPlayDetails(float pVolume,bool pLooped,float pPitch = 0f, float pTempo = 1f)
+        {
+            Pitch = pPitch;
+            Tempo = pTempo;
+        }
     }
 }

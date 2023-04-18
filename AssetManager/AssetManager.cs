@@ -122,6 +122,14 @@ namespace BASeTris.AssetManager
         {
             return null;
         }
+        public iActiveSoundObject PlaySound(String key, AudioHandlerPlayDetails pDetails)
+        {
+            return null;
+        }
+        public iActiveSoundObject PlayMusic(String key, AudioHandlerPlayDetails pDetails)
+        {
+            return null;
+        }
         public void StopMusic()
         {
             ;
@@ -277,7 +285,7 @@ namespace BASeTris.AssetManager
             }
 
             private float _useTempo = -1;
-
+            private float _usePitch = int.MinValue;
             public iSoundSourceObject Source
             {
                 get { return this; }
@@ -298,6 +306,22 @@ namespace BASeTris.AssetManager
                         _useTempo = PlayingSound.Tempo;
 
                     return _useTempo;
+                }
+            }
+            public float Pitch
+            {
+                set
+                {
+                    _usePitch = value;
+                    if (PlayingSound != null) 
+                        PlayingSound.Pitch = _usePitch;
+                }
+                get
+                {
+                    if (PlayingSound != null && PlayingSound.Pitch != _usePitch)
+                        _usePitch = PlayingSound.Pitch;
+
+                    return _usePitch;
                 }
             }
 
@@ -447,6 +471,7 @@ namespace BASeTris.AssetManager
                         PlayingSource = playit;
                         PlayingSound = PlayingSource.Play(false);
                         if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
+                        if(_usePitch != int.MinValue) PlayingSound.Pitch = _usePitch;
                     }
                 }
             }
@@ -585,7 +610,7 @@ namespace BASeTris.AssetManager
 
             #region iSoundSourceObject Members
 
-            public iActiveSoundObject Play(bool playlooped, float volume)
+            public iActiveSoundObject Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f)
             {
                 //PlayLooped = pPlayLooped;
                 if (PlayingSound != null && PlayingSound.Paused)
@@ -594,8 +619,9 @@ namespace BASeTris.AssetManager
                 }
                 else
                 {
-                    PlayingSound = PlayingSource.Play(false, volume); //the looping argument is ignored...
-                    if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
+                    PlayingSound = PlayingSource.Play(false, volume,tempo,pitch); //the looping argument is ignored...
+                    //if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
+                    //if (_usePitch != int.MinValue) PlayingSound.Pitch = _usePitch;
                 }
 
                 return this;
@@ -958,6 +984,13 @@ namespace BASeTris.AssetManager
                 return grabbed.Play(playlooped,volume);
             
         }
+        public iActiveSoundObject PlaySound(String key, AudioHandlerPlayDetails pDetails)
+        {
+            iSoundSourceObject grabbed = GetSound(key);
+            return grabbed.Play(false, pDetails.Volume, pDetails.Tempo, pDetails.Pitch);
+
+
+        }
         //TODO: add PlaySound() that supports array if String[] for key.
         //will use QueuedSounds list.
         public iActiveSoundObject PlaySound(String key)
@@ -969,7 +1002,9 @@ namespace BASeTris.AssetManager
         public iActiveSoundObject PlaySound(String key, float volume)
         {
             iSoundSourceObject grabbed = GetSound(key);
-            return grabbed.Play(false,volume);
+            
+            var result = grabbed.Play(false,volume);
+            return result;
         }
 
         private MultiMusicPlayMode MultipleMusicPlayMode;
@@ -1274,8 +1309,11 @@ namespace BASeTris.AssetManager
             if (mPlayingMusic != null)
                 mPlayingMusic.setVolume(amount);
         }
-
         public iActiveSoundObject PlayMusic(String key, float volume, bool loop)
+        {
+            return PlayMusic(key, new AudioHandlerPlayDetails() { Volume = volume, Playlooped = loop });
+        }
+        public iActiveSoundObject PlayMusic(String key, AudioHandlerPlayDetails pDetails)
         {
             if (mPlayingMusicSource is QueuedSoundManager)
             {
@@ -1286,7 +1324,7 @@ namespace BASeTris.AssetManager
             iSoundSourceObject getsource = null;
             if (key.Contains("|"))
             {
-                getsource = new QueuedSoundManager(this, key.Split('|'), mDriver, loop);
+                getsource = new QueuedSoundManager(this, key.Split('|'), mDriver, pDetails.Playlooped);
             }
             else
             {
@@ -1308,7 +1346,7 @@ namespace BASeTris.AssetManager
             TempMusicData = new Dictionary<string, TemporaryMusicData>();
 
 
-            iActiveSoundObject soundobj = getsource.Play(loop, volume);
+            iActiveSoundObject soundobj = getsource.Play(pDetails.Playlooped, pDetails.Volume,pDetails.Tempo,pDetails.Pitch);
             mPlayingMusicSource = getsource;
             mPlayingMusic = soundobj;
             scurrentPlayingMusic = key;

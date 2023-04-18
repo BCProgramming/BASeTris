@@ -73,7 +73,7 @@ namespace BASeTris.AssetManager
             }
 
 
-            public iActiveSoundObject Play(bool playlooped, float volume)
+            public iActiveSoundObject Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f)
             {
                 return this;
             }
@@ -82,6 +82,7 @@ namespace BASeTris.AssetManager
             #region iActiveSoundObject implementation
             public float Progress { get { return 0; } }
             public float Tempo { get { return 1.0f; } set { } }
+            public float Pitch { get { return 1.0f; } set { } }
             public iSoundSourceObject Source
             {
                 get { return this; }

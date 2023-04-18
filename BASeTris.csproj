@@ -288,6 +288,7 @@
     <Compile Include="Rendering\Skia\SkiaExtensions.cs" />
     <Compile Include="Rendering\Skia\SkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\TetrisBlockSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\TetrisFieldHotLineSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\TetrisFieldRenderingHandlerSkia.cs" />
     <Compile Include="Rendering\Skia\TetrisImageBlockSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\TetrisStandardColouredBlockSkiaRenderingHandler.cs" />

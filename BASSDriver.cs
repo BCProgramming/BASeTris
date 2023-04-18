@@ -152,12 +152,15 @@ namespace BASeTris.AssetManager
             InvokeSoundStopped();
         }
 
-        public iActiveSoundObject Play(bool playlooped, float volume)
+        public iActiveSoundObject Play(bool playlooped, float volume,float tempo = 1f,float pitch = 0f)
         {
             ManagedBass.Bass.ChannelSetAttribute(ActiveStream,ManagedBass.ChannelAttribute.Volume , volume);
-
+            
             if (playlooped) ManagedBass.Bass.ChannelFlags(ActiveStream, ManagedBass.BassFlags.Loop, ManagedBass.BassFlags.Loop);
             ManagedBass.Bass.ChannelSetSync(ActiveStream, ManagedBass.SyncFlags.End |  ManagedBass.SyncFlags.Onetime, 0, soundstopproc, IntPtr.Zero);
+            ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Tempo, tempo);
+            ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Pitch, pitch);
+
             ManagedBass.Bass.ChannelPlay(ActiveStream, true);
 
             return this;
@@ -201,11 +204,27 @@ namespace BASeTris.AssetManager
             {
                 Debug.Print("Setting Tempo of Channel ID" + _soundStream + " (Tempo ID#" + _tempoStream + ")to " + value);
                 ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Tempo, value);
-                int CalculatedValue;
-                CalculatedValue = TetrisGame.ClampValue((int) (value * 128), 0, 255);
 
 
+                
                 // ManagedBass.Bass.ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, CalculatedValue);
+            }
+        }
+        public float Pitch
+        {
+            get
+            {
+                float result = 0;
+                ManagedBass.Bass.ChannelGetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Pitch, out result);
+                if (result == 0)
+                    ManagedBass.Bass.ChannelGetAttribute(ActiveStream, ManagedBass.ChannelAttribute.Pitch, out result);
+                return result;
+            }
+            set
+            {
+                Debug.Print("Setting Pitch of Channel ID " + _soundStream + " (Tempo ID#" + _tempoStream + ") to " + value);
+                ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Pitch, value);
+                
             }
         }
 

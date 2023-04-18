@@ -1,5 +1,6 @@
 ﻿using BASeCamp.BASeScores;
 using BASeTris.AI;
+using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia;
@@ -212,7 +213,7 @@ namespace BASeTris.GameStates.GameHandlers
             return (IHighScoreList)TetrisGame.ScoreMan["Standard"];
         }
 
-        public IGameCustomizationHandler NewInstance()
+        public virtual IGameCustomizationHandler NewInstance()
         {
             return new StandardTetrisHandler();
         }
@@ -310,22 +311,41 @@ namespace BASeTris.GameStates.GameHandlers
                 PlayField.SetFieldColors(this);
                 state.f_RedrawStatusBitmap = true;
             }
-
+            var pitchuse = HotLines.Any()?(float)(Math.Sin(HotLines.Sum((h) => h.Multiplier)) * 15):0; 
+            List<iActiveSoundObject> instanceSounds = new List<iActiveSoundObject>();
+            AudioHandlerPlayDetails deets =
+                new AudioHandlerPlayDetails() { Volume = pOwner.Settings.std.EffectVolume * 2, Pitch = pitchuse, Tempo = 1 };
             if (rowsfound > 0 && rowsfound < 4)
             {
-                Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
+
+                //instanceSounds.Add(Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2));
+                instanceSounds.Add(Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, deets));
             }
             else if (rowsfound >= 4)
             {
-                Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.std.EffectVolume * 2);
+                instanceSounds.Add(Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, deets));
                 if (rowsfound > 4)
                 {
-                    Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
-                    Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, pOwner.Settings.std.EffectVolume * 2);
-                    Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.std.EffectVolume * 2);
+                    instanceSounds.Add(Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, deets));
+                    instanceSounds.Add(Sounds.PlaySound(pOwner.AudioThemeMan.ClearLine.Key, deets));
+                    instanceSounds.Add(Sounds.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, deets));
                 }
             }
-
+            /*if (HotLines.Any())
+            {
+                foreach (var iterate in instanceSounds)
+                {
+                    iterate.Pitch = (float)(Math.Sin(HotLines.Sum((h) => h.Multiplier)) * 15);
+                    
+                }
+            }*/
+            else
+            {
+                foreach (var iterate in instanceSounds)
+                {
+                    iterate.Pitch = 0;
+                }
+            }
 
             int topmost = PlayField.RowCount;
             //find the topmost row with any blocks.
@@ -402,7 +422,7 @@ namespace BASeTris.GameStates.GameHandlers
                 return new SNESTetrominoTheme(); 
             } }
 
-        public void PrepareField(GameplayGameState state, IStateOwner pOwner)
+        public virtual void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
             //nothing needed here.
         }
@@ -488,10 +508,31 @@ namespace BASeTris.GameStates.GameHandlers
         {
             ProgressiveMode = true;
         }
+        public override IGameCustomizationHandler NewInstance()
+        {
+            return new ProgressiveTetrisHandler();
+        }
         public override string Name { get { return "Progressive Tetris"; } }
         public override IHighScoreList GetHighScores() 
         {
             return TetrisGame.ScoreMan["Progressive"];
+        }
+    }
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Clear rows on the hot lines for big points!")]
+    public class HotlineTetrisHandler : StandardTetrisHandler
+    {
+        public override string Name { get { return "Hot-line Tetris"; } }
+        public override IHighScoreList GetHighScores()
+        {
+            return TetrisGame.ScoreMan["HotLine"];
+
+        }
+        public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
+        {
+            base.PrepareField(state, pOwner);
+            state.PlayField.Flags |= TetrisField.GameFlags.Flags_Hotline;
+            state.PlayField.HotLines.Add(10, new HotLine(Color.Yellow, 4, 10));
         }
     }
 }

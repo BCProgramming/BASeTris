@@ -95,10 +95,13 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             if (!String.IsNullOrEmpty(Source.FooterText))
             {
-
+                String[] sFooterLines = Source.FooterText.Split('\n');
                 using (var skpFooterFore = new SKPaint(){ Color = SKColors.Black })
                 using (var skpFooterBack = new SKPaint() { Color = SKColors.Yellow })
                 {
+                    float totalHeight = 0;
+                    float UseY = Bounds.Height;
+
 
                     var useFooterFont = GetScaledFooterFont(pOwner, Source);
                     skpFooterFore.Typeface = skpFooterBack.Typeface = useFooterFont.TypeFace;
@@ -110,9 +113,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                         skpFooterFore.TextSize = skpFooterBack.TextSize = skpFooterFore.TextSize * .9f;
                         skpFooterFore.MeasureText(Source.FooterText ?? "", ref FooterSize);
                     }
-
+                    FooterSize = new SKRect(FooterSize.Left,FooterSize.Top,FooterSize.Right,FooterSize.Top+FooterSize.Height*sFooterLines.Length);
                     float UseX = 30f; // (Bounds.Width / 2) - (FooterSize.Width) ;
-                    float UseY = Bounds.Height-FooterSize.Height*1.1f;
+                    UseY = UseY-FooterSize.Height*1.1f;
                     DrawTextInformationSkia sktext = new DrawTextInformationSkia();
                     sktext.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia() { Height = 10 });
                     sktext.ShadowPaint = skpFooterBack;

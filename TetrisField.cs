@@ -187,7 +187,9 @@ namespace BASeTris
 
 
         }
-
+        /// <summary>
+        /// sweeps through all blocks/cells and if that cell contains a Block which has an owner and that owner has only a single Nomino, then set the coordinate of that Nomino to the location of the block in the cell.
+        /// </summary>
         public void VerifySingularBlocks()
         {
 
@@ -198,7 +200,7 @@ namespace BASeTris
                     var checkblock = Contents[r][c];
                     if (checkblock != null)
                     {
-                        if (checkblock.Owner.Count == 1)
+                        if (checkblock.Owner!=null && checkblock.Owner.Count == 1)
                         {
                             if (checkblock.Owner.X != c)
                             {

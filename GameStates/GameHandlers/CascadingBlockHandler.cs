@@ -610,6 +610,7 @@ namespace BASeTris.GameStates.GameHandlers
             List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
 
             HashSet<CascadingBlock> AddedBlockAlready = new HashSet<CascadingBlock>();
+            //working list of the Nominoes that will be added to the Game Field.
             HashSet<Nomino> ResurrectNominos = new HashSet<Nomino>();
             //keep track of the blocks we've examined already.
             for (int row = 0; row < state.PlayField.RowCount; row++)
@@ -690,6 +691,7 @@ namespace BASeTris.GameStates.GameHandlers
                                         cb.Owner = Dummino;
 
                                     }
+                                    
                                     var resurrectBlocks = cb.Owner.GetContiguousToElement(currentblock.Owner.ElementFromBlock(cb), null);
                                     var OriginalX = cb.Owner.X;
                                     var OriginalY = cb.Owner.Y;
@@ -698,6 +700,7 @@ namespace BASeTris.GameStates.GameHandlers
                                     resurrected.Y = cb.Owner.Y;
                                     foreach (var iterate in resurrectBlocks)
                                     {
+                                        
                                         iterate.Block.Owner = resurrected;
                                     }
 
