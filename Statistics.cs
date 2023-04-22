@@ -101,14 +101,73 @@ namespace BASeTris
     public class TetrisStatistics:BaseStatistics
     {
 
+        public class TetrisStatusRenderLine
+        {
+            public Object ElementSource { get; set; }
+            public int PieceCount { get; set; }
+            public int LineCount { get; set; }
 
 
+        }
+        private String GetExKey(String StrRep, Dictionary<String, int> SourceDictionary)
+        {
+            if (SourceDictionary.ContainsKey(StrRep)) return StrRep;
+            var nPoints = NNominoGenerator.FromString(StrRep).ToList();
+            String[] Rots = NNominoGenerator.GetOtherRotationStrings(nPoints);
+            String foundMatch = Rots.FirstOrDefault((r) => SourceDictionary.ContainsKey(r));
+            return foundMatch ?? StrRep;
 
+
+        }
+        
+        private String GetExKey(Nomino src, Dictionary<String, int> SourceDictionary)
+        {
+            var ppt = NNominoGenerator.GetNominoPoints(src);
+            String sPieceString = NNominoGenerator.StringRepresentation(ppt);
+            //are we in the piece text lookup?
+            if (SourceDictionary.ContainsKey(sPieceString))
+                return sPieceString;
+            else
+            {
+                String[] Rots = NNominoGenerator.GetOtherRotationStrings(src);
+                String foundMatch = Rots.FirstOrDefault((r) => SourceDictionary.ContainsKey(r));
+                if (foundMatch == null)
+                {
+                    return sPieceString;
+
+                }
+                else
+                {
+                    return foundMatch;
+                }
+
+
+            }
+        }
         public override Dictionary<string, string> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
         {
             var result = base.GetDisplayStatistics(pOwner, Source);
             int LineCount = Source.GameStats is TetrisStatistics ? (Source.GameStats as TetrisStatistics).LineCount : 0;
             result.Add("Lines", LineCount.ToString());
+            return result;
+        }
+        public List<TetrisStatusRenderLine> GetElementStats()
+        {
+            List<TetrisStatusRenderLine> result = new List<TetrisStatusRenderLine>();
+            foreach (var kvp in PieceCounts)
+            {
+                var LineCount = GetLineCount(kvp.Key);
+                result.Add(new TetrisStatusRenderLine() { ElementSource = kvp.Key, PieceCount = kvp.Value, LineCount = LineCount });
+
+            }
+            if (PieceCountsExtended.Any()) //note: can't have lines for a piece without having piece counts- realistically, that is.
+            {
+                foreach (var kvp in PieceCountsExtended)
+                {
+                    var LineCount = GetLineCount(kvp.Key);
+                    result.Add(new TetrisStatusRenderLine() { ElementSource = kvp.Key, PieceCount = kvp.Value, LineCount = LineCount });
+                }
+            }
             return result;
         }
 
@@ -119,7 +178,13 @@ namespace BASeTris
             {
                 BuildResult.Add(kvp.Key.Name, kvp.Value);
             }
-
+            if (PieceCountsExtended.Any())
+            {
+                foreach (var kvp in PieceCountsExtended)
+                {
+                    BuildResult.Add(kvp.Key, kvp.Value);
+                }
+            }
             return BuildResult;
         }
 
@@ -130,7 +195,13 @@ namespace BASeTris
             {
                 BuildResult.Add(kvp.Key.Name, kvp.Value);
             }
-
+            if (LineCountsExtended.Any())
+            {
+                foreach (var kvp in LineCountsExtended)
+                {
+                    BuildResult.Add(kvp.Key, kvp.Value);
+                }
+            }
             return BuildResult;
         }
 
@@ -186,8 +257,34 @@ namespace BASeTris
             get => PieceCounts[typeof(Tetromino_Z)];
             set => PieceCounts[typeof(Tetromino_Z)] = value;
         }
-
-      
+        public int GetPieceCount(String strRep)
+        {
+            String sKey = GetExKey(strRep, PieceCountsExtended);
+            return PieceCountsExtended.ContainsKey(sKey) ? PieceCountsExtended[sKey] : 0;
+        }
+        public int GetPieceCount(Nomino src)
+        {
+            String sKey = GetExKey(src, PieceCountsExtended);
+            return PieceCountsExtended.ContainsKey(sKey) ? PieceCountsExtended[sKey] : 0;
+        }
+        public void IncrementPieceCount(Nomino src)
+        {
+            SetPieceCount(src, GetPieceCount(src) + 1);
+        }
+        public void IncrementPieceCount(String strRep)
+        {
+            SetPieceCount(strRep, GetPieceCount(strRep) + 1);
+        }
+        public void SetPieceCount(String strRep, int pValue)
+        {
+            string sKey = GetExKey(strRep, PieceCountsExtended);
+            PieceCountsExtended[sKey] = pValue;
+        }
+        public void SetPieceCount(Nomino src, int pValue)
+        {
+            String sKey = GetExKey(src, PieceCountsExtended);
+            PieceCountsExtended[sKey] = pValue;
+        }
         public int GetPieceCount(Type TetronimoType)
         {
             return PieceCounts[TetronimoType];
@@ -197,6 +294,10 @@ namespace BASeTris
         {
             PieceCounts[TetronimoType] = pValue;
         }
+
+        private Dictionary<String, int> LineCountsExtended = new Dictionary<string, int>();
+        private Dictionary<String, int> PieceCountsExtended = new Dictionary<string, int>();
+        
 
         private Dictionary<Type, int> PieceCounts =
             new Dictionary<Type, int>()
@@ -210,6 +311,35 @@ namespace BASeTris
                 {typeof(Tetromino_Z), 0}
             };
 
+
+        public int GetLineCount(String strRep)
+        {
+            String sKey = GetExKey(strRep, LineCountsExtended);
+            return LineCountsExtended.ContainsKey(sKey) ? LineCountsExtended[sKey] : 0;
+        }
+        public int GetLineCount(Nomino src)
+        {
+            String sKey = GetExKey(src, LineCountsExtended);
+            return LineCountsExtended.ContainsKey(sKey)?LineCountsExtended[sKey]:0;
+        }
+        public void IncrementLineCount(String strRep, int amount)
+        {
+            SetPieceCount(strRep, GetPieceCount(strRep) + amount);
+        }
+        public void IncrementLineCount(Nomino src,int amount)
+        {
+            SetPieceCount(src, GetPieceCount(src) + amount);
+        }
+        public void SetLineCount(String strRep, int pValue)
+        {
+            String sKey = GetExKey(strRep, LineCountsExtended);
+            LineCountsExtended[sKey] = pValue;
+        }
+                public void SetLineCount(Nomino src, int pValue)
+        {
+            String sKey = GetExKey(src, LineCountsExtended);
+            LineCountsExtended[sKey] = pValue;
+        }
 
         public int GetLineCount(Type TetrominoType)
         {

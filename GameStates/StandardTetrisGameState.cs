@@ -556,6 +556,9 @@ namespace BASeTris.GameStates
             nextget.SetY(null,0);
             if (GameStats is TetrisStatistics ts)
             {
+
+                //ts.IncrementPieceCount(nextget);
+                
                 if (nextget is Tetromino_I)
                 {
                     ts.I_Piece_Count++;
@@ -572,6 +575,7 @@ namespace BASeTris.GameStates
                     ts.T_Piece_Count++;
                 else if (nextget is Tetromino_Z)
                     ts.Z_Piece_Count++;
+                
                 //FallSpeed is 1000 -50 for each level. Well, for now.
             }
             SetLevelSpeed(nextget);

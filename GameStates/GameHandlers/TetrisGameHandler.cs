@@ -433,13 +433,16 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 if (StatRenderer == null)
                     StatRenderer = new StandardTetrisSkiaStatAreaRenderer();
-                return (IGameCustomizationStatAreaRenderer < TRenderTarget, GameplayGameState, TDataElement, IStateOwner > )StatRenderer;
+                return (IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner>)StatRenderer;
             }
             return null;
         }
     }
+   
     public class StandardTetrisSkiaStatAreaRenderer : IGameCustomizationStatAreaRenderer<SKCanvas, GameplayGameState, GameStateSkiaDrawParameters, IStateOwner>
     {
+        const int MAXIMUM_TETROMINO_STATUS_ROWS = 12;
+        const int DEFAULT_TETRIS_TETROMINO_COUNT = 7;
         SKPaint BlackBrush = new SKPaint() { Color = SKColors.Black, Style = SKPaintStyle.StrokeAndFill };
         SKPaint WhiteBrush = new SKPaint() { Color = SKColors.White, Style = SKPaintStyle.StrokeAndFill };
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, GameplayGameState Source, GameStateSkiaDrawParameters Element)
@@ -447,44 +450,61 @@ namespace BASeTris.GameStates.GameHandlers
             var g = pRenderTarget;
             SKTypeface standardFont = TetrisGame.RetroFontSK;
             Type[] useTypes = new Type[] { typeof(Tetromino_I), typeof(Tetromino_O), typeof(Tetromino_J), typeof(Tetromino_T), typeof(Tetromino_L), typeof(Tetromino_S), typeof(Tetromino_Z) };
-            int[] PieceCounts = null;
+            Object[] useTetrominoSources = (from t in useTypes select t).ToArray();
+            List<TetrisStatistics.TetrisStatusRenderLine> RenderLines = new List<TetrisStatistics.TetrisStatusRenderLine>();
             var useStats = Source.GameStats;
             var Bounds = Element.Bounds;
             var Factor = Bounds.Height / 280.28d;
-            var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
-            float DesiredFontSize = (float)(DesiredFontPixelHeight * pOwner.ScaleFactor);
+
             if (useStats is TetrisStatistics ts)
             {
-                PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
+
+                RenderLines = ts.GetElementStats();
+
+
+                //PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
             }
             else
             {
-                PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+                //PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
             }
+            
+            var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
+            var SizeScale = (float)(DEFAULT_TETRIS_TETROMINO_COUNT / (float)Math.Min(RenderLines.Count, MAXIMUM_TETROMINO_STATUS_ROWS)); 
+            //the original design had sizing based on the main tetrominoes, however we won't shrink the scaling beyond that amount, instead, it should be "small enough" that we can instead create a second column.
+            float DesiredFontSize = SizeScale*((float)(DesiredFontPixelHeight * pOwner.ScaleFactor));
             float StartYPos = Bounds.Top; // + (int)(140 * Factor);
             float useXPos = Bounds.Left;// + (int)(30 * Factor);
+            
             //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
-            for (int i = 0; i < useTypes.Length; i++)
+            for(int i=0;i<RenderLines.Count;i++)
+            //for (int i = 0; i < useTetrominoSources.Length; i++)
             {
+                Object currentTet = RenderLines[i].ElementSource;
                 if (Source.GameHandler is StandardTetrisHandler)
                 {
+
+                    
+
                     BlackBrush.TextSize = DesiredFontSize;
                     WhiteBrush.TextSize = DesiredFontSize;
                     SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
-                    
-                    
-                    String StatText = "" + PieceCounts[i];
+
+
+                    String StatText = "" + RenderLines[i].PieceCount;  //PieceCounts[i];
                     SKRect StatTextSize = new SKRect();
                     BlackBrush.MeasureText(StatText, ref StatTextSize);
-                    SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor), BaseCoordinate.Y + StatTextSize.Height);
+                    SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor*SizeScale), BaseCoordinate.Y + StatTextSize.Height);
                     //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
-                    SKBitmap TetrominoImage = Source.GetTetrominoSKBitmap(useTypes[i]);
-                    PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - TetrominoImage.Height / 2));
-                    SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + TetrominoImage.Width * 1.5f, ImagePos.Y + TetrominoImage.Height * 1.5f);
+                    SKBitmap TetrominoImage =  currentTet is Type?Source.GetTetrominoSKBitmap((Type)currentTet):Source.GetTetrominoSKBitmap((String)currentTet);
+
+                    SKSize DesiredTetrominoSize = new SKSize(TetrominoImage.Width * SizeScale, TetrominoImage.Height * SizeScale);
+                    PointF ImagePos = new PointF(BaseCoordinate.X, BaseCoordinate.Y + (StatTextSize.Height / 2 - DesiredTetrominoSize.Height / 2));
+                    SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + DesiredTetrominoSize.Width * 1.5f, ImagePos.Y + DesiredTetrominoSize.Height * 1.5f);
 
                     g.DrawBitmap(TetrominoImage, DrawRect, null);
 
-                    g.DrawTextSK(StatText, new SKPoint(Bounds.Left + TextPos.X + 4, Bounds.Top + TextPos.Y + 4), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
+                    g.DrawTextSK(StatText, new SKPoint((float)(Bounds.Left + TextPos.X + 4* pOwner.ScaleFactor), (float)(Bounds.Top + TextPos.Y + 4* pOwner.ScaleFactor)), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
                     g.DrawTextSK(StatText, TextPos, standardFont, SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
                 }
                 //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
@@ -500,6 +520,9 @@ namespace BASeTris.GameStates.GameHandlers
             }
         }
     }
+
+    
+
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerTipText("Pentominoes and Hexominoes appear as you progress.")]
     public class ProgressiveTetrisHandler : StandardTetrisHandler

@@ -180,7 +180,7 @@ namespace BASeTris
 
                 _Presenter.Present();
 
-                Thread.Sleep(5);
+                Thread.Sleep(1);
             }
         }
         private bool CheckButtonState(XInput.Wrapper.X.Gamepad.GamepadButtons button, bool flUpState)
