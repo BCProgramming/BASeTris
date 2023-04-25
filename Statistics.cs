@@ -122,6 +122,11 @@ namespace BASeTris
         
         private String GetExKey(Nomino src, Dictionary<String, int> SourceDictionary)
         {
+            //first check for the type.
+            var checktype = src.GetType();
+            
+
+
             var ppt = NNominoGenerator.GetNominoPoints(src);
             String sPieceString = NNominoGenerator.StringRepresentation(ppt);
             //are we in the piece text lookup?
@@ -264,6 +269,7 @@ namespace BASeTris
         }
         public int GetPieceCount(Nomino src)
         {
+            if (src is Tetromino) return PieceCounts[src.GetType()];
             String sKey = GetExKey(src, PieceCountsExtended);
             return PieceCountsExtended.ContainsKey(sKey) ? PieceCountsExtended[sKey] : 0;
         }
@@ -282,6 +288,11 @@ namespace BASeTris
         }
         public void SetPieceCount(Nomino src, int pValue)
         {
+            if (src is Tetromino)
+            {
+                PieceCounts[src.GetType()] = pValue;
+                return;
+            }
             String sKey = GetExKey(src, PieceCountsExtended);
             PieceCountsExtended[sKey] = pValue;
         }

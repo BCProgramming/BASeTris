@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BASeTris.Theme
 {
@@ -47,6 +48,31 @@ namespace BASeTris.Theme
         {
             GameHandler = pHandler;
             PlayField = pField;
+        }
+        public SKBitmap AddTetrominoBitmapSK(IStateOwner pOwner, String pStringRep)
+        {
+            return AddTetrominoBitmapSK(pOwner, NNominoGenerator.FromString(pStringRep).ToList());
+        }
+        public SKBitmap AddTetrominoBitmapSK(IStateOwner pOwner, List<NNominoGenerator.NominoPoint> Points)
+        {
+            Nomino Constructed = NNominoGenerator.CreateNomino(Points);
+            return AddTetrominoBitmapSK(pOwner, Constructed);
+            /*
+            String sAddKey = PlayField.Theme.GetNominoKey(Constructed, GameHandler, PlayField);
+            float useSize = 18 * (float)pOwner.ScaleFactor;
+            SKSize useTetSize = new SKSize(useSize, useSize);
+            PlayField.Theme.ApplyTheme(Constructed, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
+
+            SKBitmap buildBitmap = TetrisGame.OutlineImageSK(Constructed.GetImageSK(useTetSize));
+            if (!NominoSKBitmaps.ContainsKey(sAddKey))
+                NominoSKBitmaps.Add(sAddKey, new List<SKBitmap>() { buildBitmap });
+
+            if (NominoImages != null && !NominoImages.ContainsKey(sAddKey))
+            {
+                Image useimage = SkiaSharp.Views.Desktop.Extensions.ToBitmap(buildBitmap);
+                NominoImages[sAddKey] = new List<Image>()
+            }*/
+
         }
         public SKBitmap AddTetrominoBitmapSK(IStateOwner pOwner, Nomino Source)
         {

@@ -192,6 +192,15 @@ namespace BASeTris.GameStates
                 return _ImageManager;
             }
         }
+        public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner, String pStringRep)
+        {
+            return GetTetrominoSKBitmap(pOwner, NNominoGenerator.CreateNomino(NNominoGenerator.FromString(pStringRep).ToList()));
+        }
+        public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner, List<NNominoGenerator.NominoPoint> Points)
+        {
+            Nomino genNom = NNominoGenerator.CreateNomino(Points);
+            return GetTetrominoSKBitmap(pOwner, genNom);
+        }
         public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner,Nomino nom)
         {
             return ImageManager.GetTetrominoSKBitmap(pOwner, nom);
@@ -443,6 +452,10 @@ namespace BASeTris.GameStates
             PlayField.AnimateFrame();
             HandleActiveGroups(pOwner);
 
+
+            var currmusic = Sounds.GetPlayingMusic_Active();
+            //if(currmusic!=null)
+            //    currmusic.Pitch = TetrisGame.rgen.Next(2) - 1;
             if (GameOvered)
             {
                 //For testing: write out the replay data as a sequence of little images.
@@ -557,8 +570,8 @@ namespace BASeTris.GameStates
             if (GameStats is TetrisStatistics ts)
             {
 
-                //ts.IncrementPieceCount(nextget);
-                
+                ts.IncrementPieceCount(nextget);
+                /*
                 if (nextget is Tetromino_I)
                 {
                     ts.I_Piece_Count++;
@@ -575,7 +588,7 @@ namespace BASeTris.GameStates
                     ts.T_Piece_Count++;
                 else if (nextget is Tetromino_Z)
                     ts.Z_Piece_Count++;
-                
+                */
                 //FallSpeed is 1000 -50 for each level. Well, for now.
             }
             SetLevelSpeed(nextget);
