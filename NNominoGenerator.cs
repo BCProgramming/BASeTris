@@ -195,6 +195,7 @@ namespace BASeTris
             return ResetTranslation(BuildList);
 
         }
+        
         static System.Text.RegularExpressions.Regex ReplaceParens = new System.Text.RegularExpressions.Regex("\\(.*\\)", System.Text.RegularExpressions.RegexOptions.Multiline | System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
         public static IEnumerable<NominoPoint> FromString(String src)
         {

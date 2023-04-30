@@ -156,15 +156,22 @@ namespace BASeTris
             result.Add("Lines", LineCount.ToString());
             return result;
         }
-        public List<TetrisStatusRenderLine> GetElementStats()
+        [Flags]
+        public enum ElementStatFlags
+        {
+            Flags_None = 0,
+            Flags_DefaultTetrominoes_Always = 1
+        }
+        public List<TetrisStatusRenderLine> GetElementStats(ElementStatFlags pFlags = ElementStatFlags.Flags_DefaultTetrominoes_Always)
         {
             List<TetrisStatusRenderLine> result = new List<TetrisStatusRenderLine>();
-            foreach (var kvp in PieceCounts)
-            {
-                var LineCount = GetLineCount(kvp.Key);
-                result.Add(new TetrisStatusRenderLine() { ElementSource = kvp.Key, PieceCount = kvp.Value, LineCount = LineCount });
+            if(pFlags.HasFlag(ElementStatFlags.Flags_DefaultTetrominoes_Always))
+                foreach (var kvp in PieceCounts)
+                {
+                    var LineCount = GetLineCount(kvp.Key);
+                    result.Add(new TetrisStatusRenderLine() { ElementSource = kvp.Key, PieceCount = kvp.Value, LineCount = LineCount });
 
-            }
+                }
             if (PieceCountsExtended.Any()) //note: can't have lines for a piece without having piece counts- realistically, that is.
             {
                 foreach (var kvp in PieceCountsExtended)

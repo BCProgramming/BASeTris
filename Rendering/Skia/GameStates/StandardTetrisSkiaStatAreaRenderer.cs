@@ -12,7 +12,8 @@ namespace BASeTris.Rendering.Skia.GameStates
 {
     public class StandardTetrisSkiaStatAreaRenderer : IGameCustomizationStatAreaRenderer<SKCanvas, GameplayGameState, GameStateSkiaDrawParameters, IStateOwner>
     {
-        const int MAXIMUM_TETROMINO_STATUS_ROWS = 12;
+        public bool AlwaysDrawDefaultTetrominoes { get; set; } = true;
+        const int MAXIMUM_TETROMINO_STATUS_ROWS = 48;
         const int DEFAULT_TETRIS_TETROMINO_COUNT = 7;
         SKPaint BlackBrush = new SKPaint() { Color = SKColors.Black, Style = SKPaintStyle.StrokeAndFill };
         SKPaint WhiteBrush = new SKPaint() { Color = SKColors.White, Style = SKPaintStyle.StrokeAndFill };
@@ -29,8 +30,8 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             if (useStats is TetrisStatistics ts)
             {
-
-                RenderLines = ts.GetElementStats();
+                
+                RenderLines = ts.GetElementStats(AlwaysDrawDefaultTetrominoes?TetrisStatistics.ElementStatFlags.Flags_DefaultTetrominoes_Always:TetrisStatistics.ElementStatFlags.Flags_None);
 
 
                 //PieceCounts = new int[] { ts.I_Piece_Count, ts.O_Piece_Count, ts.J_Piece_Count, ts.T_Piece_Count, ts.L_Piece_Count, ts.S_Piece_Count, ts.Z_Piece_Count };
@@ -46,7 +47,20 @@ namespace BASeTris.Rendering.Skia.GameStates
             float DesiredFontSize = SizeScale*((float)(DesiredFontPixelHeight * pOwner.ScaleFactor));
             float StartYPos = Bounds.Top; // + (int)(140 * Factor);
             float useXPos = Bounds.Left;// + (int)(30 * Factor);
-            
+            double currYPos = StartYPos;
+            //first we need to go through just to figure out the height we need to use for each item. Since we want the arrangement to be even.
+            /*
+            for (int i = 0; i < RenderLines.Count; i++)
+            {
+                Object currentTet = RenderLines[i].ElementSource;
+                SKBitmap TetrominoImage = currentTet is Type ? Source.GetTetrominoSKBitmap((Type)currentTet) : Source.GetTetrominoSKBitmap(pOwner, (String)currentTet);
+
+                SKSize DesiredTetrominoSize = new SKSize(TetrominoImage.Width * SizeScale, TetrominoImage.Height * SizeScale);
+                PointF ImagePos = new PointF(0, 0 + (StatTextSize.Height / 2 - DesiredTetrominoSize.Height / 2));
+                SKRect DrawRect = new SKRect(ImagePos.X, ImagePos.Y, ImagePos.X + DesiredTetrominoSize.Width * 1.5f, ImagePos.Y + DesiredTetrominoSize.Height * 1.5f);
+            }
+            */
+
             //ImageAttributes ShadowTet = TetrisGame.GetShadowAttributes();
             for(int i=0;i<RenderLines.Count;i++)
             //for (int i = 0; i < useTetrominoSources.Length; i++)
@@ -59,8 +73,8 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     BlackBrush.TextSize = DesiredFontSize;
                     WhiteBrush.TextSize = DesiredFontSize;
-                    SKPoint BaseCoordinate = new SKPoint(useXPos, StartYPos + (int)((float)i * (40d * Factor)));
-
+                    SKPoint BaseCoordinate = new SKPoint(useXPos, (float)currYPos);
+                    
 
                     String StatText = "" + RenderLines[i].PieceCount;  //PieceCounts[i];
                     SKRect StatTextSize = new SKRect();
@@ -77,6 +91,18 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     g.DrawTextSK(StatText, new SKPoint((float)(Bounds.Left + TextPos.X + 4* pOwner.ScaleFactor), (float)(Bounds.Top + TextPos.Y + 4* pOwner.ScaleFactor)), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
                     g.DrawTextSK(StatText, TextPos, standardFont, SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
+
+                    currYPos += 40d * Factor;// DrawRect.Height*1.1f;
+
+                    if (currYPos > Bounds.Bottom)
+                    {
+                        useXPos += TextPos.X + StatTextSize.Width + 5;
+                        currYPos = StartYPos;
+
+
+                    }
+
+
                 }
                 //g.DrawString(StatText, standardFont, Brushes.White, new PointF(TextPos.X + 4, TextPos.Y + 4));
                 //g.DrawString(StatText, standardFont, Brushes.Black, TextPos);

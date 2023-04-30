@@ -1,18 +1,21 @@
 ﻿using BASeTris.AI;
 using BASeTris.Choosers;
+using BASeTris.Rendering.Skia.GameStates;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BASeTris.GameStates.GameHandlers
 {
     [HandlerMenuCategory("Multitris")]
-    
+
     public abstract class NTrisGameHandler : StandardTetrisHandler
     {
-        
+
         protected int MaxAddedBlockCount = 0;
         Dictionary<int, String> PrefixText = new Dictionary<int, string>()
         {
@@ -57,7 +60,7 @@ namespace BASeTris.GameStates.GameHandlers
                 }
                 else
                 {
-                    
+
                 }
             }
             return _Chooser;
@@ -95,7 +98,23 @@ namespace BASeTris.GameStates.GameHandlers
             /*var currwidth = GetFieldColumnWidth();
             return ((22 / 10) * currwidth) - ((20 / 10) * currwidth);*/
         }
+        public override IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>()
+        {
+
+            if (typeof(TRenderTarget) == typeof(SKCanvas))
+            {
+                if (StatRenderer == null)
+                    StatRenderer = new StandardTetrisSkiaStatAreaRenderer() { AlwaysDrawDefaultTetrominoes = false };
+                return (IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner>)StatRenderer;
+            };
+            
         
+                return null;
+            
+
+        }
+
+
     }
 
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]

@@ -22,6 +22,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// ICustomizationHandler that handles the standard tetris game.
     /// </summary>
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerMenuCategory("Tetris")]
     [HandlerTipText("Standard Tetris, Marathon Mode")]
     public class StandardTetrisHandler : IGameCustomizationHandler,IGameHandlerChooserInitializer
     {
@@ -427,8 +428,8 @@ namespace BASeTris.GameStates.GameHandlers
         {
             //nothing needed here.
         }
-        private StandardTetrisSkiaStatAreaRenderer StatRenderer = null;
-        public IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>()
+        protected StandardTetrisSkiaStatAreaRenderer StatRenderer = null;
+        public virtual IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>()
         {
             if (typeof(TRenderTarget) == typeof(SKCanvas))
             {
@@ -443,6 +444,7 @@ namespace BASeTris.GameStates.GameHandlers
     
 
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerMenuCategory("Tetris")]
     [HandlerTipText("Pentominoes and Hexominoes appear as you progress.")]
     public class ProgressiveTetrisHandler : StandardTetrisHandler
     {
@@ -460,6 +462,29 @@ namespace BASeTris.GameStates.GameHandlers
             return TetrisGame.ScoreMan["Progressive"];
         }
     }
+
+    [HandlerMenuCategory("Tetris")]
+    [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
+    [HandlerTipText("Fall speed doesn't increase: but you can't rotate pieces!")]
+    public class CalmTetrisHandler : StandardTetrisHandler
+    {
+        public override string Name { get { return "Calm Tetris"; } }
+        public override IHighScoreList GetHighScores()
+        {
+            return TetrisGame.ScoreMan["Calm"];
+
+        }
+        public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
+        {
+            base.PrepareField(state, pOwner);
+            state.ForceSpeedLevel = 0;
+            state.AdditionalNewNominoAction = (Action<Nomino>)((b) => { b.SetRotation(TetrisGame.rgen.Next(5)); b.CanRotate = false;  });
+        }
+        
+    }
+
+
+    [HandlerMenuCategory("Tetris")]
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerTipText("Clear rows on the hot lines for big points!")]
     public class HotlineTetrisHandler : StandardTetrisHandler

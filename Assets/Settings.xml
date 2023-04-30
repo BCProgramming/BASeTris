@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <SettingsGroups>
   <Controls>
     <KeyboardKeys>
@@ -7,7 +7,9 @@
       <Key GameKey="GameKey_Down" Binding="Down" />
       <Key GameKey="GameKey_Drop" Binding="Up" />
       <Key GameKey="GameKey_RotateCW" Binding="X" />
+      <Key GameKey="GameKey_RotateCW" Binding="Enter" />
       <Key GameKey="GameKey_RotateCCW" Binding="Z" />
+      <Key GameKey="GameKey_RotateCCW" Binding="Escape" />
       <Key GameKey="GameKey_Pause" Binding="Pause" />
       <Key GameKey="GameKey_Pause" Binding="P" />
       <Key GameKey="GameKey_Hold" Binding="Space" />
@@ -91,5 +93,8 @@
   </SettingsGroup>
   <SettingsGroup Name="Hot-line Tetris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="SNES" />
+  </SettingsGroup>
+  <SettingsGroup Name="Calm Tetris">
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="NES" />
   </SettingsGroup>
 </SettingsGroups>

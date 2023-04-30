@@ -61,8 +61,8 @@ namespace BASeTris.Settings
         private Dictionary<int, GameState.GameKeys> KeyboardKeyCodeAssignments = new Dictionary<int, GameState.GameKeys>();
         private Dictionary<int, GameState.GameKeys> GamepadButtonCodeAssignments = new Dictionary<int, GameState.GameKeys>();
 
-        private Dictionary<GameState.GameKeys, int> KeyCodeKeyboardCodeAssignments = new Dictionary<GameState.GameKeys, int>();
-        private Dictionary<GameState.GameKeys, int> KeyCodeGamepadCodeAssignments = new Dictionary<GameState.GameKeys, int>();
+        private Dictionary<GameState.GameKeys, List<int>> KeyCodeKeyboardCodeAssignments = new Dictionary<GameState.GameKeys, List<int>>();
+        private Dictionary<GameState.GameKeys, List<int>> KeyCodeGamepadCodeAssignments = new Dictionary<GameState.GameKeys, List<int>>();
 
         private void SetupDefaultControls()
         {
@@ -104,22 +104,22 @@ namespace BASeTris.Settings
         }
         public void ClearKeyboardKeysForGameKey(GameState.GameKeys i)
         {
-            KeyboardKeyCodeAssignments.Remove(KeyCodeKeyboardCodeAssignments[i]);
+            //KeyCodeKeyboardCodeAssignments[i].Clear();
             KeyCodeKeyboardCodeAssignments.Remove(i);
 
         }
         public void ClearGamepadButtonsForGameKey(GameState.GameKeys i)
         {
-            GamepadButtonCodeAssignments.Remove(KeyCodeKeyboardCodeAssignments[i]);
-            KeyCodeKeyboardCodeAssignments.Remove(i);
+            //KeyCodeGamepadCodeAssignments[i].Clear();
+            KeyCodeGamepadCodeAssignments.Remove(i);
         }
-        public int? GetKeyBoardKeyFromGameKey(GameState.GameKeys i)
+        public List<int> GetKeyBoardKeyFromGameKey(GameState.GameKeys i)
         {
-            if(KeyCodeKeyboardCodeAssignments.ContainsKey(i))
+            if (KeyCodeKeyboardCodeAssignments.ContainsKey(i))
                 return KeyCodeKeyboardCodeAssignments[i];
             return null;
         }
-        public int? GetGamePadButtonFromGameKey(GameState.GameKeys i)
+        public List<int> GetGamePadButtonFromGameKey(GameState.GameKeys i)
         {
             if (KeyCodeGamepadCodeAssignments.ContainsKey(i))
                 return KeyCodeGamepadCodeAssignments[i];
@@ -140,7 +140,7 @@ namespace BASeTris.Settings
         {
             AssignMapping(KeyboardKeyCodeAssignments,KeyCodeKeyboardCodeAssignments, KeyCode, Value);
         }
-        private void AssignMapping(Dictionary<int, GameState.GameKeys> KeyMap,Dictionary<GameState.GameKeys,int> MapKey, int Code, GameState.GameKeys? Value)
+        private void AssignMapping(Dictionary<int, GameState.GameKeys> KeyMap,Dictionary<GameState.GameKeys,List<int>> MapKey, int Code, GameState.GameKeys? Value)
         {
             if (Value == null)
             {
@@ -153,7 +153,7 @@ namespace BASeTris.Settings
             else
             {
                 KeyMap[Code] = Value.Value;
-                MapKey[Value.Value] = Code;
+                MapKey[Value.Value].Add(Code);
 
             }
         }

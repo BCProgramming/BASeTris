@@ -40,6 +40,8 @@ namespace BASeTris
 
 
         public NominoControlFlags Flags { get; set; } = NominoControlFlags.ControlFlags_Standard;
+
+        public bool CanRotate { get; set; } = true;
         public bool Controllable { get; set; } = true;
         public bool PlaceSound { get; set; } = true;
         public bool MoveSound { get; set; } = false;
@@ -437,6 +439,15 @@ namespace BASeTris
 
         public bool LastRotateCCW = false;
 
+        public void SetRotation(int Value)
+        {
+            foreach (var iterateblock in BlockData)
+            {
+                iterateblock.RotationModulo = Value;
+            }
+
+
+        }
         public void Rotate(bool CCW)
         {
             foreach (var iterateblock in BlockData)

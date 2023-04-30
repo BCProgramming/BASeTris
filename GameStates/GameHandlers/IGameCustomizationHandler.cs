@@ -36,6 +36,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner);
 
+        
         IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner> GetStatAreaRenderer<TRenderTarget, TDataElement>();
 
         FieldCustomizationInfo GetFieldInfo();

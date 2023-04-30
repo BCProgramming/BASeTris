@@ -192,9 +192,16 @@ namespace BASeTris.GameStates
                 return _ImageManager;
             }
         }
+        private static Dictionary<String, Nomino> TetrominoStringLookup = new Dictionary<string, Nomino>();
         public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner, String pStringRep)
         {
-            return GetTetrominoSKBitmap(pOwner, NNominoGenerator.CreateNomino(NNominoGenerator.FromString(pStringRep).ToList()));
+
+            if (!TetrominoStringLookup.ContainsKey(pStringRep))
+            {
+                var litem = NNominoGenerator.CreateNomino(NNominoGenerator.FromString(pStringRep).ToList());
+                TetrominoStringLookup.Add(pStringRep, litem);
+            }
+            return GetTetrominoSKBitmap(pOwner, TetrominoStringLookup[pStringRep]);
         }
         public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner, List<NNominoGenerator.NominoPoint> Points)
         {
@@ -544,6 +551,8 @@ namespace BASeTris.GameStates
         }
         public bool SuspendFieldSet { get; set; } = false;
         public bool NoTetrominoSpawn { get; set; } = false;
+
+        public Action<Nomino> AdditionalNewNominoAction { get; set; } = null;
         protected virtual void SpawnNewTetromino(IStateOwner pOwner)
         {
             //TODO (Possibly)- could we animate the next nomino in about 250ms from the position it is in in the "next" circle group, to above the playfield? 
@@ -571,27 +580,10 @@ namespace BASeTris.GameStates
             {
 
                 ts.IncrementPieceCount(nextget);
-                /*
-                if (nextget is Tetromino_I)
-                {
-                    ts.I_Piece_Count++;
-                }
-                else if (nextget is Tetromino_J)
-                    ts.J_Piece_Count++;
-                else if (nextget is Tetromino_L)
-                    ts.L_Piece_Count++;
-                else if (nextget is Tetromino_O)
-                    ts.O_Piece_Count++;
-                else if (nextget is Tetromino_S)
-                    ts.S_Piece_Count++;
-                else if (nextget is Tetromino_T)
-                    ts.T_Piece_Count++;
-                else if (nextget is Tetromino_Z)
-                    ts.Z_Piece_Count++;
-                */
                 //FallSpeed is 1000 -50 for each level. Well, for now.
             }
             SetLevelSpeed(nextget);
+            if (AdditionalNewNominoAction != null) AdditionalNewNominoAction(nextget);
             if (pOwner.GetHandler() is TetrisAttackHandler)
             {
                 nextget.Y = 6;
@@ -603,11 +595,11 @@ namespace BASeTris.GameStates
             PlayField.AddBlockGroup(nextget);
             PlayField.Theme.ApplyTheme(nextget,GameHandler, PlayField, NominoTheme.ThemeApplicationReason.NewNomino);
         }
-
+        public int ForceSpeedLevel { get; set; } = -1;
         private void SetLevelSpeed(Nomino group)
         {
             var Level = (GameHandler.Statistics is TetrisStatistics ts) ? ts.Level : 0;
-
+            Level = ForceSpeedLevel >= 0 ? ForceSpeedLevel : Level;
             group.FallSpeed = GameHandler is TetrisAttackHandler?16777216: Math.Max(1000 - (Level * 100), 50);
         }
 
@@ -680,7 +672,7 @@ namespace BASeTris.GameStates
 
         private void PerformRotation(IStateOwner pOwner, Nomino grp, bool ccw)
         {
-            if (!grp.Controllable) return;
+            if (!grp.Controllable || !grp.CanRotate) return;
             grp.Rotate(ccw);
             Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupRotate.Key, pOwner.Settings.std.EffectVolume);
             pOwner.Feedback(0.3f, 100);

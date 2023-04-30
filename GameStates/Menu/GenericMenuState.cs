@@ -209,7 +209,7 @@ namespace BASeTris.GameStates.Menu
                 foreach(var iterate in FoundHandlerCategories)
                 {
                     MenuStateTextMenuItem buildcategoryitem = new MenuStateTextMenuItem { Text = iterate.Key + ">>",Tag = iterate.Key};
-                    buildcategoryitem.BackColor = Color.Yellow;
+                    buildcategoryitem.BackColor = Color.FromArgb(128,Color.Yellow);
                     AllItems.Add(buildcategoryitem);
                     CategoryItems.Add(buildcategoryitem);
                  }
