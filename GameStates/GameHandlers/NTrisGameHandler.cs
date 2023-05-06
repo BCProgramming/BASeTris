@@ -122,7 +122,7 @@ namespace BASeTris.GameStates.GameHandlers
 public class PentrisGameHandler:NTrisGameHandler
     {
     public PentrisGameHandler() : base(5) { }
-    }
+}
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerTipText("Hextris - mino's have 6 blocks.")]
     public class SextrisGameHandler : NTrisGameHandler

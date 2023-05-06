@@ -402,11 +402,17 @@ namespace BASeTris.Rendering.Skia.GameStates
                         }
                     }
 
-                    if (Source.HoldBlock != null)
+                    if (Source.HoldBlocks.Any())
                     {
-                        SKBitmap HoldTetromino = Source.GetTetrominoSKBitmap(pOwner,Source.HoldBlock);
-                        if(HoldTetromino!=null)
-                            g.DrawBitmap(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
+                        int holdoffsetcount = Source.HoldBlocks.Count()-1;
+                        foreach (var HoldBlock in Source.HoldBlocks)
+                        {
+                            SKBitmap HoldTetromino = Source.GetTetrominoSKBitmap(pOwner, HoldBlock);
+                            if (HoldTetromino != null)
+                                g.DrawBitmap(HoldTetromino, (float)(holdoffsetcount * 2 * pOwner.ScaleFactor + CenterPoint.X - HoldTetromino.Width / 2), (float)(holdoffsetcount * 2 * pOwner.ScaleFactor + CenterPoint.Y - HoldTetromino.Height / 2));
+
+                            holdoffsetcount--;
+                        }
                     }
                 }
             }

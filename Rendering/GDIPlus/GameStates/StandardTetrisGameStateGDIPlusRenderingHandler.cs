@@ -262,11 +262,16 @@ namespace BASeTris.Rendering.GDIPlus
                         }
                     }
                 
-                    if (Source.HoldBlock != null)
+                    if (Source.HoldBlocks.Any())
                     {
-                        var GetKey = Source.PlayField.Theme.GetNominoKey(Source.HoldBlock, Source.GameHandler, Source.PlayField);
-                        Image HoldTetromino = Source.GetTetrominoImage(pOwner, Source.HoldBlock);
-                        g.DrawImage(HoldTetromino, CenterPoint.X - HoldTetromino.Width / 2, CenterPoint.Y - HoldTetromino.Height / 2);
+                        int HoldCountOffset = Source.HoldBlocks.Count();
+                        foreach (var HoldBlock in Source.HoldBlocks.Reverse())
+                        {
+                            var GetKey = Source.PlayField.Theme.GetNominoKey(HoldBlock, Source.GameHandler, Source.PlayField);
+                            Image HoldTetromino = Source.GetTetrominoImage(pOwner, HoldBlock);
+                            g.DrawImage(HoldTetromino, (float)(HoldCountOffset*2*pOwner.ScaleFactor +  CenterPoint.X - HoldTetromino.Width / 2), (float)(HoldCountOffset * 2 * pOwner.ScaleFactor + CenterPoint.Y - HoldTetromino.Height / 2));
+                            HoldCountOffset--;
+                        }
                     }
                 }
             }

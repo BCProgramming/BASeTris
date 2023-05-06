@@ -10,7 +10,7 @@ using BASeTris.GameStates.Menu;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme("NES Style",typeof(StandardTetrisHandler),typeof(NTrisGameHandler))]
+    [HandlerTheme("NES Style", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     [ThemeDescription("From the Visuals of the NES Release.")]
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
     {
@@ -33,7 +33,7 @@ namespace BASeTris.Theme.Block
         }
         SKColor[][] LevelColorSets = new SKColor[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
 
-      
+
 
         public override SKPointI GetBlockSize(TetrisField field, NESBlockTypes BlockType)
         {
@@ -43,12 +43,17 @@ namespace BASeTris.Theme.Block
         {
             return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
-        public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block,NESBlockTypes BlockType, BCT PixelType)
+        public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, NESBlockTypes BlockType, BCT PixelType)
         {
-            int LevelNum = field.Level;
+            int LevelNum = field.Level % 256;
             int LevelIndex = MathHelper.mod(LevelNum, AllLevelColors.Length);
+            
             var ChosenLevelSet = LevelColorSets[LevelIndex];
-
+            if (LevelNum >= 138)
+            {
+                LevelIndex = LevelNum;
+                ChosenLevelSet = GlitchColourSets[LevelNum-138];
+            }
             int BlockCount = 0;
             if (!(Element is Tetromino) && Element.Count() > 1)
             {
@@ -56,24 +61,24 @@ namespace BASeTris.Theme.Block
                 var cw = NNominoGenerator.GetNominoPoints(Element);
                 //long GetSpecialIndex = NNominoGenerator.GetIndex(cw);
                 string sHash = NNominoGenerator.StringRepresentation(cw);
-                if (!LookupColorSet.ContainsKey((LevelIndex,sHash)))
+                if (!LookupColorSet.ContainsKey((LevelIndex, sHash)))
                 {
                     var chosenresult = CreateRandomColorSet();
-                    LookupColorSet[(LevelIndex,sHash)] = chosenresult;
+                    LookupColorSet[(LevelIndex, sHash)] = chosenresult;
                     var cw2 = NNominoGenerator.RotateCW(cw);
                     var cw3 = NNominoGenerator.RotateCW(cw2);
                     var cw4 = NNominoGenerator.RotateCW(cw3);
-                    LookupColorSet[(LevelIndex,NNominoGenerator.StringRepresentation(cw2))] = chosenresult;
+                    LookupColorSet[(LevelIndex, NNominoGenerator.StringRepresentation(cw2))] = chosenresult;
                     LookupColorSet[(LevelIndex, NNominoGenerator.StringRepresentation(cw3))] = chosenresult;
                     LookupColorSet[(LevelIndex, NNominoGenerator.StringRepresentation(cw4))] = chosenresult;
                 }
-                ChosenLevelSet = LookupColorSet[(LevelIndex,sHash)];
+                if(LevelNum<138 || Element.Count >4) ChosenLevelSet = LookupColorSet[(LevelIndex, sHash)];
             }
-                
-                //select a random type
+
+            //select a random type
 
 
-            
+
 
 
             switch (PixelType)
@@ -81,7 +86,10 @@ namespace BASeTris.Theme.Block
                 case BCT.Transparent:
                     return SKColors.Transparent;
                 case BCT.Glint:
-                    return SKColors.White;
+                    if (ChosenLevelSet.Length >= 4)
+                        return ChosenLevelSet[3];
+                    else
+                        return SKColors.White;
                 case BCT.Base_Dark:
                     return ChosenLevelSet[0];
                 case BCT.Base_Light:
@@ -111,8 +119,8 @@ namespace BASeTris.Theme.Block
             return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
         private Dictionary<string, NESBlockTypes> LookupBlockTypes = new Dictionary<string, NESBlockTypes>();
-        private Dictionary<(int,string), SKColor[]> LookupColorSet = new Dictionary<(int,string), SKColor[]>();
-        public override BlockTypeReturnData  GetBlockType(Nomino group, NominoElement element, TetrisField field)
+        private Dictionary<(int, string), SKColor[]> LookupColorSet = new Dictionary<(int, string), SKColor[]>();
+        public override BlockTypeReturnData GetBlockType(Nomino group, NominoElement element, TetrisField field)
         {
             var bg = group;
             if (bg is Tetromino_I || bg is Tetromino_T || bg is Tetromino_O)
@@ -176,7 +184,7 @@ namespace BASeTris.Theme.Block
             Lighter,
             Boxed
         }
-        
+
         public static BCT[][] DarkerBlock_Core = new BCT[][]
         {
             new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
@@ -275,19 +283,147 @@ namespace BASeTris.Theme.Block
                 Level9Colors
         };
 
-        public static SKColor[] Level0Colors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue,SKColors.Black };
-        public static SKColor[] Level1Colors = new SKColor[] { SKColors.Green, SKColors.GreenYellow, SKColors.Black };
-        public static SKColor[] Level2Colors = new SKColor[] { SKColors.Purple, SKColors.Magenta, SKColors.Black };
-        public static SKColor[] Level3Colors = new SKColor[] { SKColors.Blue, SKColors.GreenYellow, SKColors.Black };
-        public static SKColor[] Level4Colors = new SKColor[] { SKColors.MediumVioletRed, SKColors.Aquamarine, SKColors.Black };
-        public static SKColor[] Level5Colors = new SKColor[] { SKColors.Aquamarine, SKColors.DeepSkyBlue, SKColors.Black };
-        public static SKColor[] Level6Colors = new SKColor[] { SKColors.Red, SKColors.SlateGray, SKColors.Black };
-        public static SKColor[] Level7Colors = new SKColor[] { SKColors.Indigo, SKColors.Brown, SKColors.Black };
-        public static SKColor[] Level8Colors = new SKColor[] { SKColors.DarkBlue, SKColors.Red, SKColors.Black };
+        public static SKColor[] Level0Colors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue, SKColors.Black,SKColors.White };
+        public static SKColor[] Level1Colors = new SKColor[] { SKColors.Green, SKColors.GreenYellow, SKColors.Black,SKColors.White };
+        public static SKColor[] Level2Colors = new SKColor[] { SKColors.Purple, SKColors.Magenta, SKColors.Black,SKColors.White };
+        public static SKColor[] Level3Colors = new SKColor[] { SKColors.Blue, SKColors.GreenYellow, SKColors.Black,SKColors.White };
+        public static SKColor[] Level4Colors = new SKColor[] { SKColors.MediumVioletRed, SKColors.Aquamarine, SKColors.Black,SKColors.White };
+        public static SKColor[] Level5Colors = new SKColor[] { SKColors.Aquamarine, SKColors.DeepSkyBlue, SKColors.Black,SKColors.White };
+        public static SKColor[] Level6Colors = new SKColor[] { SKColors.Red, SKColors.SlateGray, SKColors.Black,SKColors.White };
+        public static SKColor[] Level7Colors = new SKColor[] { SKColors.Indigo, SKColors.Brown, SKColors.Black,SKColors.White };
+        public static SKColor[] Level8Colors = new SKColor[] { SKColors.DarkBlue, SKColors.Red, SKColors.Black,SKColors.White };
 
         public static SKColor[] Level9Colors = new SKColor[] { SKColors.OrangeRed, SKColors.Orange, SKColors.Black };
+
+        //Glitch colours start at "level 138" in the NES Game.
+        SKColor[][] GlitchColourSets = new SKColor[][]{
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFF87858)},
+    new SKColor[]{new SKColor(0xFFFCFCFC),new SKColor(0xFFD800CC),new SKColor(0xFF000000),new SKColor(0xFF007800)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFB8F818)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFFF87858)},
+    new SKColor[]{new SKColor(0xFFFCFCFC),new SKColor(0xFFD800CC),new SKColor(0xFF000000),new SKColor(0xFF007800)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFB8F818)},
+    new SKColor[]{new SKColor(0xFF007800),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFFF83800),new SKColor(0xFFFCFCFC),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFF878F8),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF000000),new SKColor(0xFFBCBCBC),new SKColor(0xFF000000),new SKColor(0xFF7C7C7C)},
+    new SKColor[]{new SKColor(0xFFFCE0A8),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFF878F8)},
+    new SKColor[]{new SKColor(0xFF58F898),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFF85898)},
+    new SKColor[]{new SKColor(0xFF004058),new SKColor(0xFFF87858),new SKColor(0xFF000000),new SKColor(0xFFA80020)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFAC7C00)},
+    new SKColor[]{new SKColor(0xFFF0D0B0),new SKColor(0xFFBCBCBC),new SKColor(0xFF000000),new SKColor(0xFFFCE0A8)},
+    new SKColor[]{new SKColor(0xFF008888),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFFF878F8)},
+    new SKColor[]{new SKColor(0xFF7C7C7C),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFFF878F8)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF0000FC)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF503000)},
+    new SKColor[]{new SKColor(0xFF000000),new SKColor(0xFFF87858),new SKColor(0xFF000000),new SKColor(0xFF7C7C7C)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFF00B800),new SKColor(0xFF000000),new SKColor(0xFFF83800)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFF004058),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFAC7C00),new SKColor(0xFF58F898),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF7C7C7C),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFBCBCBC),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFF007800)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFF6844FC),new SKColor(0xFF000000),new SKColor(0xFFF87858)},
+    new SKColor[]{new SKColor(0xFF000000),new SKColor(0xFF7C7C7C),new SKColor(0xFF000000),new SKColor(0xFFF8D8F8)},
+    new SKColor[]{new SKColor(0xFF006800),new SKColor(0xFF006800),new SKColor(0xFF000000),new SKColor(0xFF006800)},
+    new SKColor[]{new SKColor(0xFFF8D8F8),new SKColor(0xFF58D854),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFFF8F8F8),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFFAC7C00),new SKColor(0xFFE45C10),new SKColor(0xFF000000),new SKColor(0xFFF85898)},
+    new SKColor[]{new SKColor(0xFF881400),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF00A800)},
+    new SKColor[]{new SKColor(0xFF503000),new SKColor(0xFFFCFCFC),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFF000000),new SKColor(0xFF000000),new SKColor(0xFFF8D8F8)},
+    new SKColor[]{new SKColor(0xFF008888),new SKColor(0xFFBCBCBC),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFF0000BC),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFE45C10)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFF58F898),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFFAC7C00),new SKColor(0xFF881400),new SKColor(0xFF000000),new SKColor(0xFFB8F818)},
+    new SKColor[]{new SKColor(0xFF881400),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFFB8F818),new SKColor(0xFFF8D878),new SKColor(0xFF000000),new SKColor(0xFFA81000)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFF58D854),new SKColor(0xFF000000),new SKColor(0xFF004058)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFF000000),new SKColor(0xFF000000),new SKColor(0xFFF8D8F8)},
+    new SKColor[]{new SKColor(0xFF7C7C7C),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFF7C7C7C),new SKColor(0xFF000000),new SKColor(0xFF7C7C7C)},
+    new SKColor[]{new SKColor(0xFF0000BC),new SKColor(0xFF0000FC),new SKColor(0xFF000000),new SKColor(0xFF0000FC)},
+    new SKColor[]{new SKColor(0xFF940084),new SKColor(0xFF940084),new SKColor(0xFF000000),new SKColor(0xFF4428BC)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFFA80020)},
+    new SKColor[]{new SKColor(0xFF0058F8),new SKColor(0xFF3CBCFC),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFF00A800),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFD800CC),new SKColor(0xFFF878F8),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFF0058F8),new SKColor(0xFF58D854),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFE40058),new SKColor(0xFF58F898),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFF58F898),new SKColor(0xFF6888FC),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFF83800),new SKColor(0xFF7C7C7C),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFF6844FC),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFF0058F8),new SKColor(0xFFF83800),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFF83800),new SKColor(0xFFFCA044),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFF87858)},
+    new SKColor[]{new SKColor(0xFFFCFCFC),new SKColor(0xFFD800CC),new SKColor(0xFF000000),new SKColor(0xFF007800)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFB8F818)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFFF87858)},
+    new SKColor[]{new SKColor(0xFFFCFCFC),new SKColor(0xFFD800CC),new SKColor(0xFF000000),new SKColor(0xFF007800)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFB8F818)},
+    new SKColor[]{new SKColor(0xFF007800),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFFF83800),new SKColor(0xFFFCFCFC),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFF878F8),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF000000),new SKColor(0xFFBCBCBC),new SKColor(0xFF000000),new SKColor(0xFF7C7C7C)},
+    new SKColor[]{new SKColor(0xFFFCE0A8),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFF878F8)},
+    new SKColor[]{new SKColor(0xFF58F898),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFF85898)},
+    new SKColor[]{new SKColor(0xFF004058),new SKColor(0xFFF87858),new SKColor(0xFF000000),new SKColor(0xFFA80020)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFFAC7C00)},
+    new SKColor[]{new SKColor(0xFFF0D0B0),new SKColor(0xFFBCBCBC),new SKColor(0xFF000000),new SKColor(0xFFFCE0A8)},
+    new SKColor[]{new SKColor(0xFF008888),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFFF878F8)},
+    new SKColor[]{new SKColor(0xFF7C7C7C),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFFCFCFC)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFFF878F8)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF0000FC)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF503000)},
+    new SKColor[]{new SKColor(0xFF000000),new SKColor(0xFFF87858),new SKColor(0xFF000000),new SKColor(0xFF7C7C7C)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFF00B800),new SKColor(0xFF000000),new SKColor(0xFFF83800)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFFF85898),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFF004058),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFAC7C00),new SKColor(0xFF58F898),new SKColor(0xFF000000),new SKColor(0xFFF8F8F8)},
+    new SKColor[]{new SKColor(0xFF7C7C7C),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF000000)},
+    new SKColor[]{new SKColor(0xFFBCBCBC),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFF007800)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFF6844FC),new SKColor(0xFF000000),new SKColor(0xFFF87858)},
+    new SKColor[]{new SKColor(0xFF000000),new SKColor(0xFF7C7C7C),new SKColor(0xFF000000),new SKColor(0xFFF8D8F8)},
+    new SKColor[]{new SKColor(0xFF006800),new SKColor(0xFF006800),new SKColor(0xFF000000),new SKColor(0xFF006800)},
+    new SKColor[]{new SKColor(0xFFF8D8F8),new SKColor(0xFF58D854),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFFF8F8F8),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFFF87858),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFFAC7C00),new SKColor(0xFFE45C10),new SKColor(0xFF000000),new SKColor(0xFFF85898)},
+    new SKColor[]{new SKColor(0xFF881400),new SKColor(0xFFB8F818),new SKColor(0xFF000000),new SKColor(0xFF00A800)},
+    new SKColor[]{new SKColor(0xFF503000),new SKColor(0xFFFCFCFC),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFF000000),new SKColor(0xFF000000),new SKColor(0xFFF8D8F8)},
+    new SKColor[]{new SKColor(0xFF008888),new SKColor(0xFFBCBCBC),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFF0000BC),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFFE45C10)},
+    new SKColor[]{new SKColor(0xFFF85898),new SKColor(0xFF58F898),new SKColor(0xFF000000),new SKColor(0xFF881400)},
+    new SKColor[]{new SKColor(0xFFAC7C00),new SKColor(0xFF881400),new SKColor(0xFF000000),new SKColor(0xFFB8F818)},
+    new SKColor[]{new SKColor(0xFF881400),new SKColor(0xFF007800),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFFB8F818),new SKColor(0xFFF8D878),new SKColor(0xFF000000),new SKColor(0xFFA81000)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFF58D854),new SKColor(0xFF000000),new SKColor(0xFF004058)},
+    new SKColor[]{new SKColor(0xFF00B800),new SKColor(0xFF000000),new SKColor(0xFF000000),new SKColor(0xFFF8D8F8)},
+    new SKColor[]{new SKColor(0xFF7C7C7C),new SKColor(0xFFF8F8F8),new SKColor(0xFF000000),new SKColor(0xFF00B800)},
+    new SKColor[]{new SKColor(0xFF0000FC),new SKColor(0xFF7C7C7C),new SKColor(0xFF000000),new SKColor(0xFF7C7C7C)},
+    new SKColor[]{new SKColor(0xFF0000BC),new SKColor(0xFF0000FC),new SKColor(0xFF000000),new SKColor(0xFF0000FC)},
+    new SKColor[]{new SKColor(0xFF940084),new SKColor(0xFF940084),new SKColor(0xFF000000),new SKColor(0xFF4428BC)},
+    new SKColor[]{new SKColor(0xFFA80020),new SKColor(0xFFA80020),new SKColor(0xFF000000),new SKColor(0xFFA80020)}
+};
+
+
+
+        //level 138 starts glitch colors. because of how many there are I have separated them into individual arrays for each component, so it's easier for me to translate 
+
+
         //Level 0 style:
-        
+
         public static SKColor[] AllThemeColors = new SKColor[] { SKColors.Blue, SKColors.DeepSkyBlue, SKColors.Green, SKColors.GreenYellow, SKColors.Purple, SKColors.Magenta, SKColors.MediumVioletRed, SKColors.Aquamarine, SKColors.Red, SKColors.SlateGray, SKColors.Indigo, SKColors.DarkBlue, SKColors.Orange, SKColors.OrangeRed };
 
         public static SKColor[] CreateHues(int Count)

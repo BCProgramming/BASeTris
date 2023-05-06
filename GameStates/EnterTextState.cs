@@ -179,8 +179,8 @@ namespace BASeTris.GameStates
             var k = (OpenTK.Input.Key)pKey;
             if (!AllowTextEntry()) return;
 
-            if (k == Key.Enter) CommitScore(pOwner);
-            else if (k == Key.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
+            //if (k == Key.Enter) CommitScore(pOwner);
+            if (k == Key.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
             else if (k == Key.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
             else if (k == Key.Left) MovePos(pOwner, -1);
             else if (k == Key.Right) MovePos(pOwner, 1);

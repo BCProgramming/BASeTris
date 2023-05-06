@@ -4,6 +4,7 @@ using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Tetrominoes;
+using Microsoft.VisualBasic.Logging;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -186,7 +187,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     var ElementHeight = (MeasuredRect.Height + 10);
                     for (int l = 0; l < ShowTimes.Length; l++)
                     {
-                        String BuildLine = $"Level {l}:               " + ShowTimes[l].ToString("c");
+                        String BuildLine = $"Level {l}:" + new String(Enumerable.Repeat(' ',15-l.ToString().Length).ToArray()) + ShowTimes[l].ToString("c");
                         var YOffset = YStart + ElementHeight * (l + 5);
                         SKPoint DrawPosition = new SKPoint(50, YOffset);
                         g.DrawText(BuildLine, new SKPoint(DrawPosition.X + 2, DrawPosition.Y + 2), ShadowScoreFont);
