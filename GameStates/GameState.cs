@@ -51,7 +51,8 @@ namespace BASeTris
             GameKey_Debug3,
             GameKey_Debug4,
             GameKey_Debug5,
-            GameKey_Debug6
+            GameKey_Debug6,
+            GameKey_PopHold
         }
      
         public virtual DisplayMode SupportedDisplayMode { get; }

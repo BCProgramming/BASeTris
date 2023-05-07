@@ -12,6 +12,7 @@
       <Key GameKey="GameKey_Pause" Binding="Pause" />
       <Key GameKey="GameKey_Pause" Binding="P" />
       <Key GameKey="GameKey_Hold" Binding="Space" />
+      <Key GameKey="GameKey_PopHold" Binding="B" />
       <Key GameKey="GameKey_MenuActivate" Binding="Enter" />
       <Key GameKey="GameKey_Debug1" Binding="F2" />
       <Key GameKey="GameKey_Debug2" Binding="F7" />
@@ -23,6 +24,7 @@
       <Button GameKey="GameKey_RotateCW" Binding="A" />
       <Button GameKey="GameKey_RotateCCW" Binding="X" />
       <Button GameKey="GameKey_Hold" Binding="RBumper" />
+      <Button GameKey="GameKey_PopHold" Binding="LBumper" />
       <Button GameKey="GameKey_Left" Binding="Dpad_Left" />
       <Button GameKey="GameKey_Right" Binding="Dpad_Right" />
       <Button GameKey="GameKey_Down" Binding="Dpad_Down" />

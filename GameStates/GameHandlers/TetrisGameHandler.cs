@@ -465,7 +465,7 @@ namespace BASeTris.GameStates.GameHandlers
 
     [HandlerMenuCategory("Tetris")]
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
-    [HandlerTipText("Fall speed doesn't increase: but you can't rotate pieces!")]
+    [HandlerTipText("Fall speed doesn't increase, and more holds: but you can't rotate pieces!")]
     public class CalmTetrisHandler : StandardTetrisHandler
     {
         public override string Name { get { return "Calm Tetris"; } }
@@ -476,8 +476,10 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
+            
             base.PrepareField(state, pOwner);
             state.ForceSpeedLevel = 0;
+            state.MaxHoldStackSize = 10;
             state.AdditionalNewNominoAction = (Action<Nomino>)((b) => { b.SetRotation(TetrisGame.rgen.Next(5)); b.CanRotate = false;  });
         }
         

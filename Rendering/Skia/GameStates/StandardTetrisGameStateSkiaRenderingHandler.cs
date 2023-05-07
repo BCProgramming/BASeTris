@@ -405,12 +405,16 @@ namespace BASeTris.Rendering.Skia.GameStates
                     if (Source.HoldBlocks.Any())
                     {
                         int holdoffsetcount = Source.HoldBlocks.Count()-1;
-                        foreach (var HoldBlock in Source.HoldBlocks)
+                        double XOffset = 0;
+                        double YOffset = 0;
+                        foreach (var HoldBlock in Source.HoldBlocks.Reverse())
                         {
                             SKBitmap HoldTetromino = Source.GetTetrominoSKBitmap(pOwner, HoldBlock);
                             if (HoldTetromino != null)
-                                g.DrawBitmap(HoldTetromino, (float)(holdoffsetcount * 2 * pOwner.ScaleFactor + CenterPoint.X - HoldTetromino.Width / 2), (float)(holdoffsetcount * 2 * pOwner.ScaleFactor + CenterPoint.Y - HoldTetromino.Height / 2));
+                                g.DrawBitmap(HoldTetromino, (float)(XOffset+ CenterPoint.X - HoldTetromino.Width / 2), (float)(YOffset + CenterPoint.Y - HoldTetromino.Height / 2));
 
+                            XOffset += HoldTetromino.Width;
+                            YOffset += Math.Sqrt(HoldTetromino.Height);
                             holdoffsetcount--;
                         }
                     }

@@ -102,20 +102,20 @@ done:
   File /r "${PROGPATH}\*.exe.config"
   ; Assets folder
   SetOutPath "$INSTDIR\Assets"
-  File /s "${PROGPATH}\..\..\Assets\*.*"
+  File /r "${PROGPATH}\..\..\Assets\*.*"
 
 
   ;Sound files
-  SetOutPath "$INSTDIR\Assets\Audio"
-  File "${PROGPATH}\..\..\Assets\Audio\*.*"
+  ;SetOutPath "$INSTDIR\Assets\Audio"
+  ;File "${PROGPATH}\..\..\Assets\Audio\*.*"
 
 
   ;X86 lib files
-  SetOutPath "$INSTDIR\Assets\Lib\x86"
-  File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x86\*.*"
+  ;SetOutPath "$INSTDIR\Assets\Lib\x86"
+  ;File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x86\*.*"
   ;x64 lib files
-  SetOutPath "$INSTDIR\Assets\Lib\x64"
-  File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x64\*.*"
+  ;SetOutPath "$INSTDIR\Assets\Lib\x64"
+  ;File /nonfatal "${PROGPATH}\..\..\Assets\Lib\x64\*.*"
 
 ;create the appdata folder
   CreateDirectory "$APPDATA\BASeTris"

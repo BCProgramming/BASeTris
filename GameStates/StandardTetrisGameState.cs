@@ -44,7 +44,7 @@ namespace BASeTris.GameStates
         internal StandardTetrisGameStateDrawHelper _DrawHelper = new StandardTetrisGameStateDrawHelper();
         public bool DrawNextQueue { get; set; } = true;
         public Queue<Nomino> NextBlocks = new Queue<Nomino>();
-        public Stack<Nomino> HoldBlocks = new Stack<Nomino>();
+        public Queue<Nomino> HoldBlocks = new Queue<Nomino>();
         public int MaxHoldStackSize = 1;
         public List<BaseParticle> TopParticles = new List<BaseParticle>();
         public List<BaseParticle> Particles = new List<BaseParticle>();
@@ -795,6 +795,7 @@ namespace BASeTris.GameStates
                             activeitem.X = ghosted.X;
                             activeitem.SetY(pOwner, ghosted.Y);
                             PlayField.SetGroupToField(activeitem);
+                            DisallowHoldsUntilNextDrop = false;
                             PlayField.RemoveBlockGroup(activeitem);
                             if (GameStats is TetrisStatistics ts)
                             {
@@ -834,50 +835,52 @@ namespace BASeTris.GameStates
 
                 //pOwner.CurrentState = new PauseGameState(this);
             }
-            else if (g == GameKeys.GameKey_Hold)
+            else if (g == GameKeys.GameKey_Hold || g==GameKeys.GameKey_PopHold)
             {
-                if (HoldBlocks.Any() && !BlockHold)
-                {
-                    
-                    //if there is a holdblock, take it and put it into the gamefield and make the first active blockgroup the new holdblock,
-                    //then set BlockHold to block it from being used until the next Tetromino is spawned.
-                    Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
-                    if (FirstGroup != null)
-                    {
-                        var HoldBlock = HoldBlocks.Pop();
-                        if (FirstGroup.Controllable)
-                        {
-                            PlayField.RemoveBlockGroup(FirstGroup);
 
-                            PlayField.AddBlockGroup(HoldBlock);
-
-                            //We probably should set the speed appropriately here for the level. As is it will retain the speed from whe nthe hold block was
-                            //held.
-                            PlayField.Theme.ApplyTheme(HoldBlock, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
-                            HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
-                            HoldBlock.SetY(pOwner, 0);
-                            HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
-                            HoldBlocks.Push(FirstGroup);
-                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.std.EffectVolume);
-                            pOwner.Feedback(0.9f, 40);
-                            BlockHold = true;
-                        }
-                    }
-                }
-                else if (!HoldBlocks.Any())
+                if (MaxHoldStackSize > 1)
                 {
-                    Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
-                    if (FirstGroup != null)
+                    //custom implementation for larger stack sizes.
+                    //we need to figure out what that means.
+                    //in particular, if we are popping, what do we do with the tetromino that is currently in play? We can't swap it in to the hold stack, but we shouldn't just destroy it either.
+                    //Main idea I have it to inject it at the start of the Next Blocks Queue instead. Basically "push it back" onto that queue. The engine should be able to handle this- it won't ask for more until the current set is less than the next size, so it should slap it at the front.
+                    if (g == GameKeys.GameKey_Hold)
                     {
-                        if (FirstGroup.Controllable)
+                           if (DisallowHoldsUntilNextDrop && MaxHoldStackSize > HoldBlocks.Count)
                         {
-                            PlayField.RemoveBlockGroup(FirstGroup);
-                            HoldBlocks.Push(FirstGroup);
-                            BlockHold = true;
-                            Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.std.EffectVolume);
+                            DisallowHoldsUntilNextDrop = true;
+                            if (MaxHoldStackSize > HoldBlocks.Count)
+                            {
+                                //there is space: take the Group in play, and push it into the hold blocks stack. Allow the next tetromino to generate normally.
+                                PushHeldBlock(pOwner);
+
+                            }
+                            else
+                            {
+                                PopHeldBlock(pOwner);
+                                //there is NOT space, we Dequeue the next element and put it into play and enqueue the group in play onto the Queue.
+                            }
                         }
-                    }
+
+
+                    }/*
+                    else if (g == GameKeys.GameKey_PopHold)
+                    {
+                        PopHeldBlock(pOwner);
+                    }*/
+
                 }
+                else {
+
+
+                    if (HoldBlocks.Any() && !BlockHold)
+                    {
+                        PopHeldBlock(pOwner);
+                    }
+                    else if (!HoldBlocks.Any())
+                    {
+                        PushHeldBlock(pOwner);
+                    } }
             }
             else if (g == GameKeys.GameKey_Debug1)
             {
@@ -955,6 +958,55 @@ namespace BASeTris.GameStates
                         _Present.ai.AbortAI();
                         _Present.ai = null;
                     }
+                }
+            }
+        }
+
+        private void PushHeldBlock(IStateOwner pOwner)
+        {
+            Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+            if (FirstGroup != null)
+            {
+                if (FirstGroup.Controllable)
+                {
+                    PlayField.RemoveBlockGroup(FirstGroup);
+                    HoldBlocks.Enqueue(FirstGroup);
+                    BlockHold = true;
+                    Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.std.EffectVolume);
+                }
+            }
+        }
+
+        private void PopHeldBlock(IStateOwner pOwner)
+        {
+            //if there is a holdblock, take it and put it into the gamefield and make the first active blockgroup the new holdblock,
+            //then set BlockHold to block it from being used until the next Tetromino is spawned.
+            Nomino FirstGroup = PlayField.BlockGroups.FirstOrDefault();
+            if (FirstGroup != null)
+            {
+                Nomino HoldBlock = null;
+                if(HoldBlocks.Any())
+                    HoldBlock = HoldBlocks.Dequeue();
+
+                if (FirstGroup.Controllable)
+                {
+                    PlayField.RemoveBlockGroup(FirstGroup);
+
+                    if (HoldBlock != null)
+                    {
+                        PlayField.AddBlockGroup(HoldBlock);
+
+                        //We probably should set the speed appropriately here for the level. As is it will retain the speed from when the hold block was
+                        //held.
+                        PlayField.Theme.ApplyTheme(HoldBlock, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
+                        HoldBlock.X = (int)(((float)PlayField.ColCount / 2) - ((float)HoldBlock.GroupExtents.Width / 2));
+                        HoldBlock.SetY(pOwner, 0);
+                        HoldBlock.HighestHeightValue = 0; //reset the highest height as well, so the falling animation doesn't goof
+                    }
+                    HoldBlocks.Enqueue(FirstGroup);
+                    Sounds.PlaySound(pOwner.AudioThemeMan.Hold.Key, pOwner.Settings.std.EffectVolume);
+                    pOwner.Feedback(0.9f, 40);
+                    BlockHold = true;
                 }
             }
         }
@@ -1053,7 +1105,7 @@ namespace BASeTris.GameStates
                 }
             }
         }
-        
+        bool DisallowHoldsUntilNextDrop = false;
         bool BlockHold = false;
         public enum GroupOperationResult
         {
@@ -1121,6 +1173,7 @@ namespace BASeTris.GameStates
                         if (true || ConnectionIndices.Count == 1)
                         {
                             PlayField.SetGroupToField(activeItem);
+                            DisallowHoldsUntilNextDrop = false;
                             GameStats.AddScore(25 - activeItem.Y);
                             if (activeItem.PlaceSound)
                                 Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
