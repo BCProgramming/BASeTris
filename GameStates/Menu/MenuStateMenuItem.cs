@@ -48,7 +48,7 @@ namespace BASeTris.GameStates.Menu
             Handled
         }
         public abstract bool GetSelectable();
-        public abstract void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState);
+        //public abstract void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState);
         /// <summary>
         /// Method called when this menu item is selected.
         /// </summary>
@@ -139,11 +139,7 @@ namespace BASeTris.GameStates.Menu
        
         
         
-        public override void Draw(IStateOwner pOwner,Graphics Target, RectangleF Bounds, StateMenuItemState DrawState)
-        {
-
-
-        }
+       
     }
     
 

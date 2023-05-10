@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BASeTris.GameStates.Menu
@@ -73,7 +74,7 @@ namespace BASeTris.GameStates.Menu
             var OptionsItem = new MenuStateTextMenuItem() { Text = "Options",TipText="Adjust various options."};
             var scaleitem = new MenuStateScaleMenuItem(pOwner) { TipText = "Change Scaling" };
             //var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" ,TipText="View High scores"};
-            
+            var testslider = new MenuStateSliderOption(0, 100, 50) { Label = "Slider of Excitement" };
             var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
@@ -132,7 +133,7 @@ namespace BASeTris.GameStates.Menu
                 iterate.FontSize = FontSrc.Size;
                 Target.MenuElements.Add(iterate);
             }
-     
+            //Target.MenuElements.Add(testslider);
         }
     }
 

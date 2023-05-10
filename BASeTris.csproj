@@ -154,6 +154,7 @@
     <Compile Include="Duomino\Duomino.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
+    <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisSkiaStatAreaRenderer.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisAttackHandler.cs" />
     <Compile Include="Particles\BitmapParticle.cs" />

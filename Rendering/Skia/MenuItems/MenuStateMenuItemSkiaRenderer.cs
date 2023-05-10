@@ -3,6 +3,7 @@ using BASeTris.AssetManager;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
+using OpenTK.Platform.MacOS;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static BASeTris.GameStates.Menu.MenuStateTextMenuItem;
 
 namespace BASeTris.Rendering.Skia.MenuItems
@@ -24,7 +26,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
     {
         static Dictionary<String, SKImage> RenderedNominoElements = new Dictionary<String, SKImage>();
         
-
+        
       
         private SKImage GetSelectionNomino(MenuStateMenuItem item)
         {
@@ -96,7 +98,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
             }
         }
      
-        public void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
+        public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
             Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateMenuItem)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
 
@@ -119,7 +121,155 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
         }
     }
+    [RenderingHandler(typeof(MenuStateSliderOption), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData))]
+    public class MenuStateSliderOptionSkiaRenderer : MenuStateMenuItemSkiaRenderer, IRenderingHandler<SKCanvas, MenuStateSliderOption, MenuStateMenuItemSkiaDrawData> , ISizableMenuItemSkiaRenderingHandler
+    {
+        private static SKImage SliderImage = null;
+        private static SKImage SliderBG = null;
+        public MenuStateSliderOptionSkiaRenderer() : base()
+        {
+            
+        }
+        public SKPoint GetSize(IStateOwner pOwner, MenuStateSizedMenuItem item)
+        {
+            return new SKPoint((float)pOwner.ScaleFactor * 100, (float)pOwner.ScaleFactor * 20);
+        }
+        public override void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
+        {
+            Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateSliderOption)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
+        }
+        //Would be a good idea to redesign this to draw using tetromino elements. Long piece for a slider indicator for example. Maybe little tetrominoes for the border and detents?
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateSliderOption Source, MenuStateMenuItemSkiaDrawData Element)
+        {
+            if(SliderImage==null) SliderImage =  SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("slider_pointer"));
+            if (SliderBG == null) SliderBG = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("slider_bg"));
+            double ShadowOffset = 1 * pOwner.ScaleFactor;
+            SKColor ForeColor = SKColors.Magenta;
+            SKColor ShadowColor = SKColors.Magenta;
+            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Normal)
+            {
+                ForeColor = SKColors.Black;
+                ShadowColor = SKColors.White;
+            }
+            else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+            {
+                ForeColor = SKColors.White;
+                ShadowColor = SKColors.Black;
+                using (SKAutoCanvasRestore sk = new SKAutoCanvasRestore(pRenderTarget))
+                {
+                    pRenderTarget.ClipRect(Element.Bounds, SKClipOperation.Intersect, false);
+                    pRenderTarget.DrawColor(SKColors.OrangeRed, SKBlendMode.ColorBurn);
+                }
+            }
+            else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Unavailable)
+            {
+                ForeColor = SKColors.Gray;
+                ShadowColor = SKColors.DarkGray;
+            }
+            
+            SKPaint ForePaint = new SKPaint() { IsStroke = true, Color = ForeColor,  StrokeWidth = 3 };
+            SKPaint ShadowPaint = new SKPaint() { IsStroke = true,Color = ShadowColor,StrokeWidth=3 };
+            SKPaint ForeFill = new SKPaint() { Color = ForeColor, Style = SKPaintStyle.Fill,StrokeWidth=7 };
+            SKPaint ShadowFill = new SKPaint() { Color = ShadowColor,Style=SKPaintStyle.Fill, StrokeWidth = 7 };
 
+            double MiddleY = Element.Bounds.Top + Element.Bounds.Height / 2;
+            //step one
+            // var shadowoff = Element.Bounds;
+            // shadowoff.Offset((float)ShadowOffset, (float)ShadowOffset);
+            // pRenderTarget.DrawRect(shadowoff, ShadowPaint );
+            // pRenderTarget.DrawRect(Element.Bounds,ForePaint);
+            //pRenderTarget.DrawImage(SliderBG, Element.Bounds);
+
+            double FullRange = (Source.MaximumValue - Source.MinimumValue);
+            int detentCount = 0;
+            for (double detent = Source.MinimumValue; detent < Source.MaximumValue; detent += Source.SmallDetent)
+            {
+                //calculate our position for this detent.
+              
+                double XPosition = Element.Bounds.Left + Element.Bounds.Width * ((detent - Source.MinimumValue) / FullRange);
+
+                double detentSize = Math.Abs(detentCount % Source.LargeDetentCount) < 0.001 ? Element.Bounds.Height / 5 : Element.Bounds.Height / 10;
+                double Ypos = Element.Bounds.Top + Element.Bounds.Height / 2 - detentSize / 2;
+
+                DrawLine(pRenderTarget, new SKPoint((float)XPosition, (float)Ypos), new SKPoint((float)XPosition, (float)(Ypos+ (float)detentSize)), ForePaint, ShadowPaint, ShadowOffset);
+
+
+                detentCount++;
+            }
+            double SliderPosition = Element.Bounds.Left + Element.Bounds.Width * ((Source.Value - Source.MinimumValue) / FullRange);
+
+          
+
+            float SliderWidth = 10;
+            var shadoffset = new SKPoint((float)ShadowOffset, (float)ShadowOffset);
+            pRenderTarget.DrawImage(SliderImage, new SKRect((float)(SliderPosition - SliderWidth), Element.Bounds.Top, (float)(SliderPosition + SliderWidth), Element.Bounds.Top + Element.Bounds.Height / 2), null);
+
+            SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.Black };
+            SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.White };
+            DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = textforeground,  ShadowPaint = textshadow };
+            dtis.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, Element.Bounds.Height / 4);
+            dtis.Text = Source.Value.ToString("0.##");
+            dtis.Position = new SKPoint( (float)SliderPosition+SliderWidth,  Element.Bounds.Top+ Element.Bounds.Height * 0.15f);
+            if (Source.Activated)
+            {
+                (textforeground, textshadow) = (textshadow, textforeground);
+                dtis.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+            }
+            pRenderTarget.DrawTextSK(dtis);
+            DrawTextInformationSkia tTitle= new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+            SKRect bnd = new SKRect();
+            textforeground.MeasureText(dtis.Text, ref bnd);
+            tTitle.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, textforeground.TextSize);
+            tTitle.Text = Source.Label;
+
+            
+
+            tTitle.Position = new SKPoint((float)(Element.Bounds.Left+10*pOwner.ScaleFactor), Element.Bounds.Top + Element.Bounds.Height);
+            if (Source.Activated)
+            {
+                tTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+            }
+            pRenderTarget.DrawTextSK(tTitle);
+
+            base.Render(pOwner, pRenderTarget, Source, Element);
+
+
+            //pRenderTarget.DrawPoints(SKPointMode.Polygon, SliderShadow, ShadowFill);
+            //pRenderTarget.DrawPoints(SKPointMode.Polygon, SliderPoly, ForeFill);
+            //FillPoly(pRenderTarget, SliderShadow, ShadowFill);
+            //FillPoly(pRenderTarget, SliderPoly, ForeFill);
+
+
+
+
+
+        }
+        private void FillPoly(SKCanvas Target, SKPoint[] array, SKPaint fill)
+        {
+            using (SKPath skp = new SKPath() { FillType = SKPathFillType.Winding,  Convexity = SKPathConvexity.Concave })
+            {
+                skp.MoveTo(array.First());
+                for (var index = 1; index < array.Length; index++)
+                {
+                    skp.LineTo(array[index]);
+                }
+                skp.Close();
+                Target.DrawPath(skp, fill);
+            }
+
+
+
+        }
+        private void DrawLine(SKCanvas Target, SKPoint A, SKPoint B, SKPaint Fore, SKPaint Shadow, double ShadowOffset)
+        {
+            SKPoint offset = new SKPoint((float)ShadowOffset, (float)ShadowOffset);
+            Target.DrawLine(A + offset, B + offset, Shadow);
+            Target.DrawLine(A, B, Shadow);
+
+
+        }
+        
+    }
 
     [RenderingHandler(typeof(MenuStateTextMenuItem), typeof(SKCanvas), typeof(MenuStateMenuItemSkiaDrawData))]
     public class MenuStateTextMenuItemSkiaRenderer : MenuStateMenuItemSkiaRenderer ,IRenderingHandler<SKCanvas, MenuStateTextMenuItem, MenuStateMenuItemSkiaDrawData>, ISizableMenuItemSkiaRenderingHandler
@@ -212,11 +362,11 @@ namespace BASeTris.Rendering.Skia.MenuItems
             
 
             if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-                BackPaint = new SKPaint() { Color = SKColors.DarkBlue };
+                BackPaint = new SKPaint() { Color = SKColors.DarkGreen,BlendMode=SKBlendMode.HardLight };
             else
                 BackPaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.BackColor) };
             pRenderTarget.DrawRect(Element.Bounds, BackPaint);
-
+            
 
             SKPaint ForePaint = null;
             SKPaint ShadePaint = null;

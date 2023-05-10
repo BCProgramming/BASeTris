@@ -54,7 +54,10 @@ namespace BASeTris.Rendering.Skia.GameStates
             //we want to find the widest item.
             foreach (var searchitem in Source.MenuElements)
             {
-
+                if (searchitem is MenuStateSliderOption)
+                {
+                    ;
+                }
                 if (searchitem is MenuStateSizedMenuItem mss)
                 {
                     var sizehandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), searchitem.GetType(), typeof(MenuStateMenuItemSkiaDrawData));
@@ -75,9 +78,11 @@ namespace BASeTris.Rendering.Skia.GameStates
             CurrentY += (float)(pOwner.ScaleFactor * 5);
             for (int menuitemindex = 0; menuitemindex < Source.MenuElements.Count; menuitemindex++)
             {
+
                 try
                 {
                     var drawitem = Source.MenuElements[menuitemindex];
+                   
                     var XPos = (int)(Bounds.Width / 2 - ItemSize.X / 2) + Source.MainXOffset;
                     SKRect TargetBounds = new SKRect(XPos, (int)CurrentY, XPos + (int)(ItemSize.X), CurrentY + (int)(ItemSize.Y));
                     MenuStateMenuItem.StateMenuItemState useState = menuitemindex == Source.SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
