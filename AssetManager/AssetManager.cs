@@ -39,6 +39,38 @@ using static BASeTris.AssetManager.cNewSoundManager;
 
 namespace BASeTris.AssetManager
 {
+
+    public static class AssetHelper
+    {
+
+        public static IEnumerable<(String, StreamReader)> GetZipContents(String sZipPath, Predicate<String> FileNameFilterFunc)
+        {
+
+            ZipFile zf = ZipFile.Read(sZipPath);
+            foreach (ZipEntry ze in zf.Entries)
+            {
+                if (ze.IsDirectory)
+                {
+                    //skip directories
+                }
+                else 
+                {
+                    if (FileNameFilterFunc(ze.FileName))
+                    {
+                        //we could use a using block here, but that would require that the stream be dealt with before the caller retrieves the next result of the enumeration, which could
+                        //cause problems for things like parallelization. Instead, the caller will be responsible for closing any streams it gets back after it is done with them.
+                        StreamReader sr = new StreamReader(ze.InputStream);
+                        yield return (ze.FileName, sr);
+
+                    }
+                }
+
+            }
+        }
+
+
+    }
+
     /// <summary>
 
     #region Sound Manager
@@ -2092,44 +2124,7 @@ namespace BASeTris.AssetManager
             {
                 mcallback.ShowMessage("Loading compatible images in " + currpath);
                 DirectoryInfo currentdir = null;
-                if (ZipFile.IsZipFile(currpath))
-                {
-                    //if this is a zipfile, then we read the contents of the zipfile and get all the applicable entries that have image file extensions, and add them using AddImage...
-                    ZipFile readfile = new ZipFile(currpath);
-                    foreach (ZipEntry loopentry in
-                        (from x in readfile.Entries where x.FileName.StartsWith("Images", StringComparison.OrdinalIgnoreCase) select x))
-                    {
-                        if (isFileSupported(loopentry.FileName))
-                        {
-                            byte[] readbuffer = new byte[loopentry.CompressedSize];
-                            loopentry.InputStream.Read(readbuffer, 0, (int) loopentry.CompressedSize);
-                            //MemoryStream streamread = new MemoryStream(new StreamReader(loopentry.InputStream));
-                            MemoryStream streamread = new MemoryStream(readbuffer);
-                            String basenameonly = Path.GetFileNameWithoutExtension(loopentry.FileName).ToUpper();
-                            if (Path.GetExtension(loopentry.FileName).Equals(".gzi", StringComparison.OrdinalIgnoreCase))
-                            {
-                                MemoryStream resultstream = new MemoryStream();
-                                decodegzi(streamread, resultstream);
-                                streamread = resultstream;
-                            }
-
-                            if ((Path.GetExtension(loopentry.FileName).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
-                            {
-                                //icon file, so add to our icon list.
-                                Icon geticon = new Icon(streamread, 16, 16);
-                                loadedicons.Add(basenameonly, geticon);
-                                countaccum++;
-                            }
-                            else
-                            {
-                                if (AddImage(streamread, basenameonly))
-                                    countaccum++;
-                            }
-                        }
-                    }
-                }
-                else
-                {
+              
                     try
                     {
                         currentdir = new DirectoryInfo(currpath);
@@ -2162,6 +2157,42 @@ namespace BASeTris.AssetManager
                                     countaccum++;
                             }
                         }
+
+                        else if(loopfile.Extension.Equals(".zip",StringComparison.OrdinalIgnoreCase) && (ZipFile.IsZipFile(loopfile.FullName)))
+                        {
+                            //if this is a zipfile, then we read the contents of the zipfile and get all the applicable entries that have image file extensions, and add them using AddImage...
+                            ZipFile readfile = new ZipFile(loopfile.FullName);
+                            foreach (ZipEntry loopentry in readfile.Entries)
+                            {
+                                if (isFileSupported(loopentry.FileName))
+                                {
+                                    byte[] readbuffer = new byte[loopentry.UncompressedSize];
+
+                                    loopentry.OpenReader().Read(readbuffer, 0, (int)loopentry.UncompressedSize);
+                                    //MemoryStream streamread = new MemoryStream(new StreamReader(loopentry.InputStream));
+                                    MemoryStream streamread = new MemoryStream(readbuffer);
+                                    String basenameonly = Path.GetFileNameWithoutExtension(loopentry.FileName).ToUpper();
+                                    if (Path.GetExtension(loopentry.FileName).Equals(".gzi", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        MemoryStream resultstream = new MemoryStream();
+                                        decodegzi(streamread, resultstream);
+                                        streamread = resultstream;
+                                    }
+
+                                    if ((Path.GetExtension(loopentry.FileName).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        //icon file, so add to our icon list.
+                                        Icon geticon = new Icon(streamread, 16, 16);
+                                        loadedicons.Add(basenameonly, geticon);
+                                        countaccum++;
+                                    }
+                                    else
+                                    {
+                                        if (AddImage(streamread, basenameonly))
+                                            countaccum++;
+                                    }
+                                }
+                            }
                     }
                 }
             }
