@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BASeTris.GameStates
 {
@@ -24,9 +25,21 @@ namespace BASeTris.GameStates
             RevertState = pRevertState;
             SettingsType = pType;
         }
+        public bool AllowDirectGamepadInput()
+        {
+            return false;
+        }
+        public bool AllowDirectKeyboardInput()
+        {
+            return false;
+        }
         public void ButtonPressed(IStateOwner pOwner, int ButtonCode)
         {
-           //throw new NotImplementedException();
+            pOwner.EnqueueAction(() =>
+            {
+                pOwner.CurrentState = RevertState;
+            });
+            //throw new NotImplementedException();
         }
 
       
@@ -39,6 +52,10 @@ namespace BASeTris.GameStates
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             //throw new NotImplementedException();
+            pOwner.EnqueueAction(() =>
+            {
+                pOwner.CurrentState = RevertState;
+            });
         }
 
         public void KeyPressed(IStateOwner pOwner, int pKey)
@@ -47,7 +64,15 @@ namespace BASeTris.GameStates
         }
         public void KeyUp(IStateOwner pOwner, int pKey)
         {
+            if (pKey == (int)Keys.Escape)
+            {
+                pOwner.EnqueueAction(() =>
+                {
+                    pOwner.CurrentState = RevertState;
+                });
+            }
         }
+        public override DisplayMode SupportedDisplayMode => DisplayMode.Full;
         public GameState GetComposite()
         {
             return RevertState;

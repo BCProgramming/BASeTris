@@ -35,6 +35,7 @@ using System.Windows.Forms.Design;
 using Ionic.Zip;
 using Ionic.Zlib;
 using SkiaSharp;
+using XInput.Wrapper;
 using static BASeTris.AssetManager.cNewSoundManager;
 
 namespace BASeTris.AssetManager
@@ -43,6 +44,34 @@ namespace BASeTris.AssetManager
     public static class AssetHelper
     {
 
+        static Dictionary<X.Gamepad.GamepadButtons, String> XBoxAssetNameLookup = new Dictionary<X.Gamepad.GamepadButtons, string>()
+        {
+            {X.Gamepad.GamepadButtons.Y,"XboxSeriesX_Y" },
+            {X.Gamepad.GamepadButtons.X,"XboxSeriesX_X" },
+            {X.Gamepad.GamepadButtons.A,"XboxSeriesX_A" },
+            {X.Gamepad.GamepadButtons.B,"XboxSeriesX_B" },
+            {X.Gamepad.GamepadButtons.Back,"XboxSeriesX_Back" },
+            {X.Gamepad.GamepadButtons.Start,"XboxSeriesX_Menu" },
+            {X.Gamepad.GamepadButtons.RBumper,"XBoxSeriesX_RB" },
+            {X.Gamepad.GamepadButtons.LBumper,"XBoxSeriesX_LB" },
+            {X.Gamepad.GamepadButtons.Dpad_Up,"XBoxSeriesX_Dpad_Up" },
+            {X.Gamepad.GamepadButtons.Dpad_Down,"XBoxSeriesX_Dpad_Down" },
+            {X.Gamepad.GamepadButtons.Dpad_Right,"XBoxSeriesX_Dpad_Right" },
+            {X.Gamepad.GamepadButtons.Dpad_Left,"XBoxSeriesX_Dpad_Left" },
+            {X.Gamepad.GamepadButtons.LeftStick,"XBoxSeriesX_Left_Stick_Click" },
+            {X.Gamepad.GamepadButtons.RightStick,"XBoxSeriesX_Right_Stick_Click" }
+
+        };
+        public static String ImageKeyForXBoxControllerButton(X.Gamepad.GamepadButtons button)
+        {
+            if (XBoxAssetNameLookup.ContainsKey(button))
+            {
+                return XBoxAssetNameLookup[button];
+            }
+
+            return null;
+
+        }
         public static IEnumerable<(String, StreamReader)> GetZipContents(String sZipPath, Predicate<String> FileNameFilterFunc)
         {
 

@@ -75,6 +75,7 @@ namespace BASeTris.GameStates.Menu
             var scaleitem = new MenuStateScaleMenuItem(pOwner) { TipText = "Change Scaling" };
             //var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores" ,TipText="View High scores"};
             var testslider = new MenuStateSliderOption(0, 100, 50) { Label = "Slider of Excitement" };
+            var Controls = new MenuStateTextMenuItem() { Text = "Controls", TipText = "Display control settings." };
             var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
@@ -113,7 +114,13 @@ namespace BASeTris.GameStates.Menu
                     pOwner.CurrentState = OptionsMenu;
                     Target.ActivatedItem = null;
                 }
-                
+                else if (e.MenuElement == Controls)
+                {
+                    var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
+                    pOwner.CurrentState = ControlsState;
+                    Target.ActivatedItem = null;
+                }
+
                 else if (e.MenuElement == ExitItem)
                 {
                     //nothing, this needs confirmation so is handled separate.
@@ -127,7 +134,7 @@ namespace BASeTris.GameStates.Menu
             
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
             Target.HeaderTypeSize = (float)(28f*pOwner.ScaleFactor);
-            foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,RealHighScoresItem, ExitItem})
+            foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,Controls,RealHighScoresItem, ExitItem})
             {
                 iterate.FontFace = FontSrc.FontFamily.Name;
                 iterate.FontSize = FontSrc.Size;

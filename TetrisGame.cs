@@ -425,8 +425,8 @@ namespace BASeTris
 
         public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g, KeyInputSource pSource)
         {
-            if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState) return; //do nothing if it supports that interface.
-            if (pSource == KeyInputSource.Input_HID && CurrentGameState is IDirectGamepadInputState) return;
+            if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState && (CurrentGameState as IDirectKeyboardInputState).AllowDirectKeyboardInput()) return; //do nothing if it supports that interface.
+            if (pSource == KeyInputSource.Input_HID && CurrentGameState is IDirectGamepadInputState && (CurrentGameState as IDirectGamepadInputState).AllowDirectGamepadInput()) return;
             CurrentGameState.HandleGameKey(pOwner, g);
         }
 

@@ -31,7 +31,10 @@ namespace BASeTris.GameStates
         {
             get { return DisplayMode.Full; }
         }
-
+        public bool AllowDirectKeyboardInput()
+        {
+            return true;
+        }
         public EnterTextState(IStateOwner pOwner, int EntryLength, String PossibleChars = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
         {
             EntryLength = Math.Min(48, EntryLength);

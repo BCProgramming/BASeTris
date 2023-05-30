@@ -237,6 +237,10 @@ namespace BASeTris.Settings
                         int GetPadCode = GamepadKeyFunc(BindingAttribute.Value);
 
                         GamepadButtonCodeAssignments.Add(GetPadCode, gk);
+                        if (!KeyCodeGamepadCodeAssignments.ContainsKey(gk))
+                            KeyCodeGamepadCodeAssignments[gk] = new List<int>();
+
+                        KeyCodeGamepadCodeAssignments[gk].Add(GetPadCode);
                     }
                     catch (Exception ex2)
                     {

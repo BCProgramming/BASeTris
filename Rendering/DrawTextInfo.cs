@@ -1,4 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
+using OpenTK.Input;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,20 @@ namespace BASeTris.Rendering
         public SKPoint ShadowOffset = new SKPoint(5, 5);
         public SKFontInfo DrawFont;
         public DrawCharacterHandlerSkia CharacterHandler = new DrawCharacterHandlerSkia();
-
+        public DrawTextInformationSkia()
+        {
+        }
+        public DrawTextInformationSkia(DrawCharacterHandlerSkia CharHandler,SKPaint pShadowPaint,SKPaint pForegroundPaint,SKPaint pBackgroundPaint,String pText,float ScalePercent,SKTypeface typeface,float FontSize,SKPoint Pos)
+        {
+           CharacterHandler = CharHandler;
+            ShadowPaint = pShadowPaint;
+            ForegroundPaint = pForegroundPaint;
+            BackgroundPaint = pBackgroundPaint;
+            Text = pText ?? "";
+            ScalePercentage = ScalePercent;
+            DrawFont = new Adapters.SKFontInfo(typeface, 36);
+            Position = Pos;
+        }
     }
 
     public abstract class DrawCharacterHandler<PositionCalcType, CanvasType, InfoType, PosType, SizeType> where PositionCalcType : DrawCharacterPositionCalculator<CanvasType, PosType, SizeType, InfoType>, new()
