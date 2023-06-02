@@ -50,7 +50,7 @@ namespace BASeTris.GameStates
             ScoreListing.Submit(submitscore);
             TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.ClearTetris.Key, pOwner.Settings.std.EffectVolume);
             TetrisGame.Soundman.PlayMusic("high_score_list");
-            pOwner.CurrentState = new ShowHighScoresState(ScoreListing, ReversionState, new int[] {AchievedPosition});
+            pOwner.CurrentState = new ShowHighScoresState(ScoreListing, ReversionState, new int[] { AchievedPosition }) { CancelMusic = true };
         }
 
        

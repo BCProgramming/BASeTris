@@ -34,43 +34,241 @@ using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using Ionic.Zip;
 using Ionic.Zlib;
+using OpenTK.Input;
 using SkiaSharp;
 using XInput.Wrapper;
 using static BASeTris.AssetManager.cNewSoundManager;
 
 namespace BASeTris.AssetManager
 {
+    public class ControllerImageDataInformation
+    {
+        public String ControllerName { get; set; }
+        public Dictionary<X.Gamepad.GamepadButtons, String> ButtonImageKeys = null;
+        public String DiagramImageKey { get; private set; }
+        public String SimpleDiagramImageKey { get; private set; }
 
+        X.Gamepad.GamepadButtons[] XButtonOrder = new X.Gamepad.GamepadButtons[]
+
+            {
+                X.Gamepad.GamepadButtons.Y,
+X.Gamepad.GamepadButtons.X,
+X.Gamepad.GamepadButtons.A,
+X.Gamepad.GamepadButtons.B,
+X.Gamepad.GamepadButtons.Back,
+X.Gamepad.GamepadButtons.Start,
+X.Gamepad.GamepadButtons.RBumper,
+X.Gamepad.GamepadButtons.LBumper,
+X.Gamepad.GamepadButtons.Dpad_Up,
+X.Gamepad.GamepadButtons.Dpad_Down,
+X.Gamepad.GamepadButtons.Dpad_Right,
+X.Gamepad.GamepadButtons.Dpad_Left,
+X.Gamepad.GamepadButtons.LeftStick,
+X.Gamepad.GamepadButtons.RightStick
+            };
+        public ControllerImageDataInformation(String pName, String DiagramKey, String SimpleDiagramKey, params String[] OrderedButtonKeys)
+        {
+            this.ControllerName = pName;
+
+            this.DiagramImageKey = DiagramKey;
+            this.SimpleDiagramImageKey = SimpleDiagramImageKey;
+
+            ButtonImageKeys = new Dictionary<X.Gamepad.GamepadButtons, string>();
+            for (int buttonindex = 0; buttonindex < OrderedButtonKeys.Length; buttonindex++)
+            {
+                ButtonImageKeys.Add(XButtonOrder[buttonindex], OrderedButtonKeys[buttonindex]);
+
+
+            }
+
+        }
+        public ControllerImageDataInformation(String pName, String DiagramKey, String SimpleDiagramKey, Dictionary<X.Gamepad.GamepadButtons, String> ImageKeyLookup)
+        {
+
+            this.ControllerName = pName;
+            this.ButtonImageKeys = ImageKeyLookup;
+            this.DiagramImageKey = DiagramKey;
+            this.SimpleDiagramImageKey = SimpleDiagramImageKey;
+
+        }
+
+    }
     public static class AssetHelper
     {
+        static String[] Buttonset = new string[]{
+            "XboxSeriesX_Y",
+"XboxSeriesX_X",
+"XboxSeriesX_A",
+"XboxSeriesX_B",
+"XboxSeriesX_Windows",
+"XboxSeriesX_Menu",
+"XBoxSeriesX_RB",
+"XBoxSeriesX_LB",
+"XBoxSeriesX_Dpad_Up",
+"XBoxSeriesX_Dpad_Down",
+"XBoxSeriesX_Dpad_Right",
+"XBoxSeriesX_Dpad_Left",
+"XBoxSeriesX_Left_Stick_Click",
+"XBoxSeriesX_Right_Stick_Click"
+        };
 
-        static Dictionary<X.Gamepad.GamepadButtons, String> XBoxAssetNameLookup = new Dictionary<X.Gamepad.GamepadButtons, string>()
+        public static ControllerImageDataInformation XBoxSeriesXImageKeyData = new ControllerImageDataInformation("XBox Series X", "XboxSeriesX_Diagram", "XboxSeriesX_Diagram_Simple",
+           Buttonset);
+
+        public static ControllerImageDataInformation XBoxOneImageKeydata = new ControllerImageDataInformation("XBox One", "XBoxOne_Diagram", "XBoxOne_Diagram_Simple", (from b in Buttonset select b.Replace("XBoxSeriesX", "XBoxOne")).ToArray());
+
+        public static ControllerImageDataInformation XBox360ImageKeydata = new ControllerImageDataInformation("XBox 360", "xbox_360_diagram", null, (from b in Buttonset select b.Replace("XBoxSeriesX", "360")).ToArray());
+
+
+        public static Dictionary<String, ControllerImageDataInformation> ControllerImageData = new Dictionary<string, ControllerImageDataInformation>()
         {
-            {X.Gamepad.GamepadButtons.Y,"XboxSeriesX_Y" },
-            {X.Gamepad.GamepadButtons.X,"XboxSeriesX_X" },
-            {X.Gamepad.GamepadButtons.A,"XboxSeriesX_A" },
-            {X.Gamepad.GamepadButtons.B,"XboxSeriesX_B" },
-            {X.Gamepad.GamepadButtons.Back,"XboxSeriesX_Back" },
-            {X.Gamepad.GamepadButtons.Start,"XboxSeriesX_Menu" },
-            {X.Gamepad.GamepadButtons.RBumper,"XBoxSeriesX_RB" },
-            {X.Gamepad.GamepadButtons.LBumper,"XBoxSeriesX_LB" },
-            {X.Gamepad.GamepadButtons.Dpad_Up,"XBoxSeriesX_Dpad_Up" },
-            {X.Gamepad.GamepadButtons.Dpad_Down,"XBoxSeriesX_Dpad_Down" },
-            {X.Gamepad.GamepadButtons.Dpad_Right,"XBoxSeriesX_Dpad_Right" },
-            {X.Gamepad.GamepadButtons.Dpad_Left,"XBoxSeriesX_Dpad_Left" },
-            {X.Gamepad.GamepadButtons.LeftStick,"XBoxSeriesX_Left_Stick_Click" },
-            {X.Gamepad.GamepadButtons.RightStick,"XBoxSeriesX_Right_Stick_Click" }
+        {"XBox Series X",XBoxSeriesXImageKeyData },
+            {"XBox One", XBoxOneImageKeydata },
+            {"XBox 360",XBox360ImageKeydata }
+        };
+        private enum KeyboardKeyType
+        {
+            Normal,
+            Wide,
+            Tall,
+            Super_Wide
+        }
+        private static OpenTK.Input.Key[] SuperWide = new OpenTK.Input.Key[] { };
+        private static OpenTK.Input.Key[] Wide = new[] { OpenTK.Input.Key.ShiftLeft, OpenTK.Input.Key.ShiftRight, OpenTK.Input.Key.Enter };
+        private static OpenTK.Input.Key[] Tall = new[] { OpenTK.Input.Key.KeypadPlus, OpenTK.Input.Key.KeypadEnter };
+        private static KeyboardKeyType GetKeyboardKeyType(OpenTK.Input.Key k)
+        {
+            if (SuperWide.Contains(k)) return KeyboardKeyType.Super_Wide;
+            else if (Wide.Contains(k)) return KeyboardKeyType.Wide;
+            else if (Tall.Contains(k)) return KeyboardKeyType.Tall;
+            return KeyboardKeyType.Normal;
+
+        }
+        public static String[] AllControllerTypes = new string[] { "XBox Series X", "XBox One", "XBox 360" };
+
+        private static Dictionary<OpenTK.Input.Key, String> ImageKeyKeyPrefixes = new Dictionary<Key, string>()
+        {
+            { Key.AltLeft,"Alt_Key" },
+            { Key.AltRight,"Alt_Key" },
+            { Key.Down,"Arrow_Down" },
+            { Key.Up,"Arrow_Up" },
+            { Key.Left,"Arrow_Left" },
+            { Key.Right,"Arrow_Right" },
+            { Key.KeypadMultiply,"Asterisk" },
+            {Key.BracketLeft,"Bracket_Left" },
+            {Key.BracketRight,"Bracket_Right" },
+            {Key.CapsLock,"Caps_Lock" },
+            {Key.Escape,"Esc" }
+
 
         };
-        public static String ImageKeyForXBoxControllerButton(X.Gamepad.GamepadButtons button)
+
+
+        private static Dictionary<OpenTK.Input.Key, String> KeyboardKeyDisplaytext = new Dictionary<Key, string>()
         {
-            if (XBoxAssetNameLookup.ContainsKey(button))
+            
+            { Key.AltLeft,"Alt" },
+            { Key.AltRight,"Alt" },
+            { Key.Down,"↓" },
+            { Key.Up,"↑" },
+            { Key.Left,"←" },
+            { Key.Right,"→" },
+            { Key.KeypadMultiply,"*" },
+            {Key.BracketLeft,"[" },
+            {Key.BracketRight,"]" },
+            {Key.CapsLock,"Caps Lock" },
+            {Key.ShiftLeft,"Shift" },
+            {Key.ShiftRight,"Shift" },
+            {Key.ControlLeft,"Ctrl" },
+            {Key.ControlRight,"Ctrl" },
+            {Key.KeypadDivide,"/" },
+            {Key.Grave,"`" },
+            {Key.Escape,"Esc" }
+           
+        };
+
+        private static SKBitmap DrawKeyboardKey(OpenTK.Input.Key k)
+        {
+            String sDrawText = null;
+            if (KeyboardKeyDisplaytext.ContainsKey(k)) sDrawText = KeyboardKeyDisplaytext[k];
+            else sDrawText = Enum.GetName(typeof(Key), k);
+            var keytype = GetKeyboardKeyType(k);
+            String sBlankKey = "Blank_Black_" + keytype.ToString();
+            //retrieve the key blank SKBitmap.
+            SKBitmap BlankKey = TetrisGame.Imageman.GetSKBitmap(sBlankKey);
+            SKPaint DrawKeyPaint = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial"),TextSize=BlankKey.Height*.66f, Color = SKColors.White };
+            SKBitmap GenerateKeyBitmap = new SKBitmap(BlankKey.Width, BlankKey.Height);
+            using (SKCanvas skc = new SKCanvas(GenerateKeyBitmap))
             {
-                return XBoxAssetNameLookup[button];
+                
+                
+                //draw the blank
+                skc.DrawBitmap(BlankKey, new SKPoint(0, 0));
+                SKRect sbound = new SKRect();
+                DrawKeyPaint.MeasureText(sDrawText, ref sbound);
+                while (sbound.Width > BlankKey.Width*.5f || sbound.Height > BlankKey.Height*.5f)
+                {
+                    DrawKeyPaint.TextSize -= 2;
+                    DrawKeyPaint.MeasureText(sDrawText, ref sbound);
+                }
+
+                skc.DrawText(sDrawText, BlankKey.Width / 2 - sbound.Width / 2, BlankKey.Height / 2 + sbound.Height / 2, DrawKeyPaint);
+
+                //now draw the key.
+
+            }
+            return GenerateKeyBitmap;
+
+
+
+        }
+        public static SKBitmap GetSKBitmapForKeyboardKey(OpenTK.Input.Key k)
+        {
+            if (k == OpenTK.Input.Key.Escape)
+            {
+                ;
+            }
+            String sGenKey = ImageKeyForKeyboardKey(k);
+            if (!TetrisGame.Imageman.HasSKBitmap(sGenKey))
+            {
+                //we need to generate a keyboard key.
+                SKBitmap GeneratedKey = DrawKeyboardKey(k);
+                TetrisGame.Imageman.AddImage(sGenKey, SkiaSharp.Views.Desktop.Extensions.ToBitmap(GeneratedKey));
+
+            }
+
+            return TetrisGame.Imageman.GetSKBitmap(sGenKey);
+
+
+        }
+        public static String ImageKeyForKeyboardKey(OpenTK.Input.Key k)
+        {
+            String sPrefix = null;
+            if (ImageKeyKeyPrefixes.ContainsKey(k))
+                sPrefix = ImageKeyKeyPrefixes[k];
+            else
+            {
+                sPrefix = Enum.GetName(typeof(OpenTK.Input.Key), k);
+            }
+
+            String sFindKey = sPrefix + "_Key_Dark";
+
+            return sFindKey;
+        }
+
+public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button, ControllerImageDataInformation Source)
+        {
+            if (Source.ButtonImageKeys.ContainsKey(button))
+            {
+                return Source.ButtonImageKeys[button];
             }
 
             return null;
+        }
 
+        public static String ImageKeyForXBoxControllerButton(X.Gamepad.GamepadButtons button)
+        {
+            return ImageKeyForControllerButton(button, XBoxSeriesXImageKeyData);
         }
         public static IEnumerable<(String, StreamReader)> GetZipContents(String sZipPath, Predicate<String> FileNameFilterFunc)
         {
@@ -1670,14 +1868,25 @@ namespace BASeTris.AssetManager
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, SKBitmap> SkiaImages { get; set; } = new Dictionary<String, SKBitmap>(StringComparer.OrdinalIgnoreCase);
+        public bool HasSKBitmap(String man_key)
+        {
+            return SkiaImages != null && (SkiaImages.ContainsKey(man_key) || loadedimages.ContainsKey(man_key));
+
+
+        }
         public SKBitmap GetSKBitmap(String man_key,float reductionfactor = 1)
         {
-            if (!SkiaImages.ContainsKey(man_key + reductionfactor.ToString()))
+            String sFindKey = man_key + (reductionfactor==1?"":reductionfactor.ToString());
+
+            if (!SkiaImages.ContainsKey(sFindKey))
             {
-                Image findkey = this[man_key,reductionfactor];
-                SkiaImages.Add(man_key + reductionfactor.ToString(), SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
+                Image findkey = this[man_key, reductionfactor];
+                SkiaImages.Add(sFindKey, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
             }
-            return SkiaImages[man_key];
+            return SkiaImages[sFindKey];
+           
+
+            //return SkiaImages[man_key];
                 
 
             

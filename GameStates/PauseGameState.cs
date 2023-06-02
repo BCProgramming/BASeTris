@@ -109,12 +109,20 @@ namespace BASeTris.GameStates
             var FontSrc = TetrisGame.GetRetroFont(14, 1.0f);
             MenuStateTextMenuItem ResumeOption = new MenuStateTextMenuItem() { Text = "Resume",TipText = "Back to the game" };
             var HighScoresItem = new MenuStateHighScoreItem(pOwner, this, FontSrc) { Text = "High Scores", TipText = "View high scores" };
+            var ControlsOption = new MenuStateTextMenuItem() { Text = "Controls", TipText = "Display control settings." };
             //var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores",TipText="View high scores" };
             MenuItemActivated += (o, e) =>
             {
-                if(e.MenuElement==ResumeOption)
+                if (e.MenuElement == ResumeOption)
                     ResumeGame(pOwner);
-               
+                else if (e.MenuElement == ControlsOption)
+                {
+                    
+                        var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
+                        pOwner.CurrentState = ControlsState;
+                        ActivatedItem = null;
+                    
+                }
                 
             };
             
@@ -134,6 +142,11 @@ namespace BASeTris.GameStates
 
             HighScoresItem.FontFace = FontSrc.FontFamily.Name;
             HighScoresItem.FontSize = FontSrc.Size;
+
+            ControlsOption.FontFace = FontSrc.FontFamily.Name;
+            ControlsOption.FontSize = FontSrc.Size;
+            
+
 
 
             var ExitItem = new ConfirmedTextMenuItem() {Text="Quit"};
@@ -156,6 +169,7 @@ namespace BASeTris.GameStates
             MenuElements.Add(ResumeOption);
             MenuElements.Add(scaleitem);
             MenuElements.Add(ThemeItem);
+            MenuElements.Add(ControlsOption);
             MenuElements.Add(HighScoresItem);
             MenuElements.Add(ExitItem);
         }

@@ -215,8 +215,15 @@ namespace BASeTris.Settings
                     {
                         //Alright, Gamekey parsed. let's grab the attribute name, and try to parse that using the callback.
                         int GetKeyCode = KeyboardKeyFunc(BindingAttribute.Value);
+                        
                         //add it to the dictionary.
+                        
                         KeyboardKeyCodeAssignments.Add(GetKeyCode, gk);
+                        if (!KeyCodeKeyboardCodeAssignments.ContainsKey(gk))
+                        {
+                            KeyCodeKeyboardCodeAssignments[gk] = new List<int>();
+                        }
+                        KeyCodeKeyboardCodeAssignments[gk].Add(GetKeyCode);
                     }
                     catch (Exception ex1)
                     {

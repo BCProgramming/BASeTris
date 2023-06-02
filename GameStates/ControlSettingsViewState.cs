@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.AssetManager;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace BASeTris.GameStates
             Keyboard,
             Gamepad
         }
+        public int ControllerDisplayIndex = 0;
         public ControllerSettingType SettingsType { get; set; }
         public GameState RevertState { get; set; }
         public Settings.SettingsManager Settings {get;set;} = null;
@@ -52,10 +54,17 @@ namespace BASeTris.GameStates
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
             //throw new NotImplementedException();
-            pOwner.EnqueueAction(() =>
+            if (g == GameKeys.GameKey_Right)
             {
-                pOwner.CurrentState = RevertState;
-            });
+                ControllerDisplayIndex = (ControllerDisplayIndex + 1) % AssetHelper.AllControllerTypes.Length;
+            }
+            else
+            {
+                pOwner.EnqueueAction(() =>
+                {
+                    pOwner.CurrentState = RevertState;
+                });
+            }
         }
 
         public void KeyPressed(IStateOwner pOwner, int pKey)

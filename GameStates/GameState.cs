@@ -54,7 +54,30 @@ namespace BASeTris
             GameKey_Debug6,
             GameKey_PopHold
         }
-     
+        private static Dictionary<GameKeys, String> FriendlyNames = new Dictionary<GameKeys, string>()
+        {
+            { GameKeys.GameKey_Null,"NULL"},
+{GameKeys.GameKey_RotateCW,"Rotate Clockwise"},
+{GameKeys.GameKey_RotateCCW,"Rotate Counter-clockwise"},
+{ GameKeys.GameKey_Drop,"Drop"},
+{ GameKeys.GameKey_Left,"Move Left"},
+{ GameKeys.GameKey_Right,"Move Right"},
+{ GameKeys.GameKey_Down,"Move Down"},
+{ GameKeys.GameKey_Pause,"Pause Game"},
+{ GameKeys.GameKey_Hold,"Hold Piece"},
+{ GameKeys.GameKey_MenuActivate,"Menu Activation(?)"},
+{ GameKeys.GameKey_Debug1,"DEBUG1"},
+{ GameKeys.GameKey_Debug2,"DEBUG1"},
+{ GameKeys.GameKey_Debug3,"DEBUG1"},
+{ GameKeys.GameKey_Debug4,"DEBUG1"},
+{ GameKeys.GameKey_Debug5,"DEBUG1"},
+{ GameKeys.GameKey_Debug6,"DEBUG1"},
+{ GameKeys.GameKey_PopHold,"Pop Hold Stack"}
+        };
+        public static String GetGameKeyFriendlyName(GameKeys src)
+        {
+            return FriendlyNames[src];
+        }
         public virtual DisplayMode SupportedDisplayMode { get; }
         /*[Obsolete("Use Rendering Providers")]
         public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/

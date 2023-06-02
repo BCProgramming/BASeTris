@@ -20,7 +20,7 @@ namespace BASeTris.GameStates
 
     public class ShowHighScoresState : GameState
     {
-        
+        public bool CancelMusic = false;
         public GameState RevertState = null; 
         public int[] HighlightedScorePositions = new int[] { };
         private int[] InitialHightedPositions = null;
@@ -154,6 +154,7 @@ namespace BASeTris.GameStates
 
             else if (RevertState != null)
             {
+                if (CancelMusic) TetrisGame.Soundman.StopMusic();
                 BeforeRevertState?.Invoke(this, new EventArgs());
                 pOwner.CurrentState = RevertState;
             }

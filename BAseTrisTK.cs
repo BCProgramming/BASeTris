@@ -24,6 +24,8 @@ using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
 using System.IO;
+using System.Reflection;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace BASeTris
 {
@@ -167,6 +169,7 @@ namespace BASeTris
         }
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
+
             _Present.IgnoreController = true;
             if (e.Key == Key.G)
             {
@@ -229,9 +232,9 @@ namespace BASeTris
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
         {
             Debug.Print("Button released:" + e.Key);
-            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
+            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
             {
-                var Casted = (IDirectKeyboardInputState)_Present.Game.CurrentState;
+
                 Casted.KeyUp(this, (int)e.Key);
 
             }
@@ -246,9 +249,8 @@ namespace BASeTris
         }
         protected override void OnKeyPress(OpenTK.KeyPressEventArgs e)
         {
-            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState)
+            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
             {
-                var Casted = (IDirectKeyboardInputState)_Present.Game.CurrentState;
                 Casted.KeyPressed(this, (int)e.KeyChar);
             }
             
@@ -408,13 +410,24 @@ namespace BASeTris
                     }
                     SKRect FPSBound = new SKRect();
                     double Framerate = (1 / e.Time);
+                    String sVersion;
                     String sFPS = String.Format("{0:0.0} FPS", Framerate);
                     FPSPaint.MeasureText(sFPS, ref FPSBound);
                     var FPSPosition = new SKPoint(ClientSize.Width - (FPSBound.Width ), ClientSize.Height - (FPSBound.Height/2 ));
                     //FPSPosition = new SKPoint(50, 50);
-                    
-                    
-                    
+
+                    var asm = typeof(AssemblyInfo).Assembly;
+                    var attrs = asm.GetCustomAttributes<AssemblyMetadataAttribute>();
+                    String sDisplayVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
+                    String sHash = attrs.FirstOrDefault(a => a.Key == "GitHash")?.Value;
+
+                    if (sHash != null)
+                    {
+                        sDisplayVersion += " - " + sHash;
+                        
+                    }
+                    canvas.DrawText(sDisplayVersion, new SKPoint(12, FPSPosition.Y), FPSShadow);
+                    canvas.DrawText(sDisplayVersion, new SKPoint(9, FPSPosition.Y - 3), FPSPaint);
                     canvas.DrawText(sFPS, FPSPosition, FPSShadow);
                     canvas.DrawText(sFPS, new SKPoint(FPSPosition.X - 3, FPSPosition.Y - 3), FPSPaint);
                     //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
