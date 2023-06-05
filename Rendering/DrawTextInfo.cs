@@ -4,9 +4,11 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BASeTris.Rendering
 {
@@ -177,6 +179,8 @@ namespace BASeTris.Rendering
         }
     }
 
+    
+
 
     public abstract class DrawCharacterPositionCalculator<CanvasType, PosType, SizeType, InfoType>
     {
@@ -200,6 +204,7 @@ namespace BASeTris.Rendering
         }
 
     }
+
     public class DrawCharacterPositionCalculatorSkia: DrawCharacterPositionCalculator<SKCanvas, SKPoint, SKPoint, DrawTextInformationSkia>
     {
         public override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)

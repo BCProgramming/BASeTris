@@ -24,7 +24,10 @@ namespace BASeTris.BackgroundDrawers
         public SKColorFilter theFilter = null;
         public SKPaint BackgroundBrush = null;
         public SKImageFilter PrimaryFilter = null;
+        public IVectorMutator VelocityMutator { get; set; } = new CompositeVectorMutator(new RandomVectorMutator(0));  //= new RandomVectorMutator(2000);
+        //public Func<SKPoint,SKPoint> ChangeVelocityFunction = null;
 
+        
         public void ResetState(SKRect DrawBounds)
         {
             if (_BackgroundImage == null) return;
@@ -117,11 +120,13 @@ namespace BASeTris.BackgroundDrawers
             {
                 
                 dd.CurrOrigin = new SKPoint((dd.CurrOrigin.X + dd.Movement.X) % dd._BackgroundImage.Width, (dd.CurrOrigin.Y + dd.Movement.Y) % dd._BackgroundImage.Height);
+                if (dd.CurrOrigin.X == float.NaN) dd.CurrOrigin = new SKPoint(0, dd.CurrOrigin.Y);
+                if (dd.CurrOrigin.Y == float.NaN) dd.CurrOrigin = new SKPoint(dd.CurrOrigin.X, 0);
             }
 
             if (dd.AngleSpeed > 0) dd.CurrAngle += dd.AngleSpeed;
             dd.BackgroundBrush.ImageFilter = SKImageFilter.CreateOffset(dd.CurrOrigin.X,dd.CurrOrigin.Y,dd.PrimaryFilter);
-            
+            if (dd.VelocityMutator != null) dd.Movement = dd.VelocityMutator.Mutate(dd.Movement);
             //might need to do something weird for tiling.
         }
     }
