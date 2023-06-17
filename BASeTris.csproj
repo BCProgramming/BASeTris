@@ -138,6 +138,7 @@
     <Compile Include="BackgroundDrawers\StandardImageBackgroundGDI.cs" />
     <Compile Include="BackgroundDrawers\StandardImageBackgroundSkia.cs" />
     <Compile Include="BackgroundDrawers\StarfieldBackgroundSkia.cs" />
+    <Compile Include="BackgroundDrawers\VectorMutator.cs" />
     <Compile Include="BASeTrisTK.cs" />
     <Compile Include="BASSDriver.cs" />
     <Compile Include="Blocks\LineSeriesBlock.cs" />
@@ -154,8 +155,10 @@
     <Compile Include="Duomino\Duomino.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
+    <Compile Include="GameStates\DesignBackgroundState.cs" />
     <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
     <Compile Include="Rendering\Skia\GameStates\ControlSettingsViewStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\DesignBackgroundStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisSkiaStatAreaRenderer.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisAttackHandler.cs" />
     <Compile Include="Particles\BitmapParticle.cs" />
@@ -299,6 +302,7 @@
     <Compile Include="Rendering\StandardRenderingProvider.cs" />
     <Compile Include="Rendering\TetrominoCollageRenderer.cs" />
     <Compile Include="Replay\StatefulReplay.cs" />
+    <Compile Include="Settings\CustomBackgroundData.cs" />
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Settings\StandardSettings.cs" />
     <Compile Include="Statistics.cs" />

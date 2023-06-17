@@ -18,6 +18,13 @@ namespace BASeTris.Rendering.Skia.Backgrounds
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, StandardImageBackgroundSkia Source, BackgroundDrawData Element)
         {
 
+            if (Source.Data.UnderLayer != null)
+            {
+                //draw "underlayer" first
+                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.Data.UnderLayer, Element);
+            }
+
+
             var sbb = Element as SkiaBackgroundDrawData;
             if (sbb != null)
             {

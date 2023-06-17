@@ -138,6 +138,19 @@ namespace BASeTris
             float realSize = (g.DpiY / 72) * emSize;
             return realSize;
         }
+        public static T Successor<T>(T[] Elements, T Element)
+        {
+            int foundindex = Array.IndexOf(Elements, Element);
+            if (foundindex == -1) throw new ArgumentException("Provided Array does not contain element.");
+            return Elements[(foundindex + 1) % Elements.Length];
+        }
+        public static T Predecessor<T>(T[] Elements, T Element)
+        {
+            int foundindex = Array.IndexOf(Elements, Element);
+            if (foundindex == -1) throw new ArgumentException("Provided Array does not contain element.");
+            if (foundindex == 0) return Elements[Elements.Length];
+            return Elements[foundindex - 1];
+        }
         public static IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese)
         {
             if (rgen == null) rgen = new Random();

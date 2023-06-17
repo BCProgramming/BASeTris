@@ -8,11 +8,22 @@ using System.Threading.Tasks;
 using BASeTris;
 using BASeTris.BackgroundDrawers;
 using BASeTris.Rendering.Adapters;
+using SkiaSharp;
 
 namespace BASeTris.GameStates.Menu
 {
     public class MenuState : GameState,IMouseInputState
     {
+        public class MenuStateFadedParentStateInformation
+        {
+            public MenuStateFadedParentStateInformation(GameState pFadedParent, bool pRunGameProc)
+            {
+                FadedParentState = pFadedParent;
+                RunGameProc = pRunGameProc;
+            }
+            public GameState FadedParentState { get; set; } = null;
+            public bool RunGameProc { get; set; } = false;
+        }
         //The "Menu" state presents a Menu. Well, I mean, obviously.
 
         //Draws a stack of "menu" Items
@@ -20,7 +31,7 @@ namespace BASeTris.GameStates.Menu
         //One item can be selected at a time. Moving up and down moves the selection.
         //Pressing Enter will "Activate" the item. This will trigger it's action. For most items this will perform some action which will change to another state, for example.
 
-        
+        public MenuStateFadedParentStateInformation FadedBGFadeState = null;
 
         public event EventHandler<MenuStateMenuItemActivatedEventArgs> MenuItemActivated;
         public event EventHandler<MenuStateMenuItemSelectedEventArgs> MenuItemSelected;
@@ -66,7 +77,11 @@ namespace BASeTris.GameStates.Menu
         int OffsetAnimationSpeed = 3;
         public override void GameProc(IStateOwner pOwner)
         {
-            if(!OffsetUsed)
+            if (FadedBGFadeState != null && FadedBGFadeState.FadedParentState != null)
+            {
+                FadedBGFadeState.FadedParentState.GameProc(pOwner);
+            }
+            if (!OffsetUsed)
             {
                 MainXOffset = -pOwner.GameArea.Width / 2;
                 OffsetUsed = true;

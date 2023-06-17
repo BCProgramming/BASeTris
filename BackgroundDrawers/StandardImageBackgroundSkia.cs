@@ -9,6 +9,7 @@ namespace BASeTris.BackgroundDrawers
 {
     public class StandardImageBackgroundDrawSkiaCapsule : BackgroundDrawData
     {
+        public StandardImageBackgroundSkia UnderLayer { get; set; } = null;
 
         public SKImage _BackgroundImage = null;
         public SKImage BackgroundImage
@@ -24,7 +25,7 @@ namespace BASeTris.BackgroundDrawers
         public SKColorFilter theFilter = null;
         public SKPaint BackgroundBrush = null;
         public SKImageFilter PrimaryFilter = null;
-        public IVectorMutator VelocityMutator { get; set; } = new CompositeVectorMutator(new RandomVectorMutator(0));  //= new RandomVectorMutator(2000);
+        public IVectorMutator VelocityMutator { get; set; } = new CompositeVectorMutator(new RandomVectorMutator(0)) {AdvanceType = CompositeVectorMutator.MutatorAdvancementType.Random };  //= new RandomVectorMutator(2000);
         //public Func<SKPoint,SKPoint> ChangeVelocityFunction = null;
 
         
@@ -108,8 +109,12 @@ namespace BASeTris.BackgroundDrawers
         }
         public override void FrameProc(IStateOwner pOwner)
         {
+            
             StandardImageBackgroundDrawSkiaCapsule dd = Data;
             if (dd == null) return;
+
+            if (dd.UnderLayer != null) dd.UnderLayer.FrameProc(pOwner);
+
             if (dd.BackgroundBrush == null)
             {
                 dd.ResetState(new SKRect(0, 0, pOwner.GameArea.Width, pOwner.GameArea.Height));

@@ -137,8 +137,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                             var retrievedimage = TetrisGame.Imageman.GetSKBitmap(getkey);
                             if (retrievedimage != null)
                             {
-                                pRenderTarget.DrawBitmap(retrievedimage, CurrentX, CurrentY);
-                                MaxHeight = Math.Max(retrievedimage.Height, MaxHeight);
+                                pRenderTarget.DrawBitmap(retrievedimage, new SKRect(CurrentX, CurrentY, CurrentX + retrievedimage.Width * .66f, CurrentY + retrievedimage.Height * .66f));
+                                MaxHeight = Math.Min(retrievedimage.Height, MaxHeight);
                                 CurrentX += retrievedimage.Width + 10;
 
                             }
@@ -152,7 +152,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     foreach (var key in kvp.Value.Item2)
                     {
                         SKBitmap keybitmap = AssetHelper.GetSKBitmapForKeyboardKey((Key)key);
-                        pRenderTarget.DrawBitmap(keybitmap, CurrentX, CurrentY);
+                        pRenderTarget.DrawBitmap(keybitmap, new SKRect(CurrentX, CurrentY,CurrentX+keybitmap.Width*.66f,CurrentY+keybitmap.Height*.66f));
                         CurrentX += keybitmap.Width;
                         MaxHeight = Math.Max(keybitmap.Height, MaxHeight);
 
@@ -170,13 +170,13 @@ namespace BASeTris.Rendering.Skia.GameStates
                 sktext.BackgroundPaint = new SKPaint() { Color = SKColors.Transparent };
                 sktext.Text =    sKey ?? "";
                 sktext.ScalePercentage = 1;
-                sktext.DrawFont = new Adapters.SKFontInfo(TetrisGame.RetroFontSK, 36);
+                sktext.DrawFont = new Adapters.SKFontInfo(TetrisGame.RetroFontSK, 26);
                 sktext.Position = new SKPoint(CurrentX+50, CurrentY+MaxHeight/2+boundrect.Height);
                 
                 pRenderTarget.DrawTextSK(sktext);
 
                 CurrentX = StartX;
-                CurrentY += MaxHeight;
+                CurrentY += MaxHeight*.75f;
 
             }
 

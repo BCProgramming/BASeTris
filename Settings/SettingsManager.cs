@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -17,6 +18,7 @@ namespace BASeTris.Settings
         String pLoadedFile = null;
         public Dictionary<String, StandardSettings> AllSettings = new Dictionary<string, StandardSettings>(StringComparer.OrdinalIgnoreCase);
         private IStateOwner _Owner = null;
+        
         private Dictionary<String, GameState.GameKeys> DefaultButtonControls = new Dictionary<String, GameState.GameKeys>()
         {
             {"A", GameState.GameKeys.GameKey_RotateCW},
@@ -26,7 +28,12 @@ namespace BASeTris.Settings
             {"Dpad_Right", GameState.GameKeys.GameKey_Right},
             {"Dpad_Down", GameState.GameKeys.GameKey_Down},
             {"Dpad_Up", GameState.GameKeys.GameKey_Drop},
-            {"Start", GameState.GameKeys.GameKey_Pause}
+            {"Start", GameState.GameKeys.GameKey_Pause},
+            {"Y",GameState.GameKeys.GameKey_DesignerNextNomino },
+            {"B",GameState.GameKeys.GameKey_DesignerPrevNomino },
+            {"RightStick",GameState.GameKeys.GameKey_DesignerChangeNomino },
+            {"LeftStick",GameState.GameKeys.Gamekey_DesignerDeleteNomino },
+            
         };
         Dictionary<String, GameState.GameKeys> DefaultKeyControls = new Dictionary<String, GameState.GameKeys>()
         {
@@ -44,8 +51,13 @@ namespace BASeTris.Settings
             {"F7", GameState.GameKeys.GameKey_Debug2},
             {"F11",GameState.GameKeys.GameKey_Debug3},
             {"F12",GameState.GameKeys.GameKey_Debug4 },
-            {"Number5",GameState.GameKeys.GameKey_Debug5 }
+            {"Number5",GameState.GameKeys.GameKey_Debug5 },
+            {"PageUp",GameState.GameKeys.GameKey_DesignerNextNomino },
+            {"PageDown",GameState.GameKeys.GameKey_DesignerPrevNomino },
+            {"Tab",GameState.GameKeys.GameKey_DesignerChangeNomino },
+            {"Delete",GameState.GameKeys.Gamekey_DesignerDeleteNomino }
         };
+
         //since the enumerations that are used by the appropriate code shouldn't be used here, we have these delegate functions passed in as callbacks that convert a string into the int value for the enum in question.
         //eg. the XInput GamepadButtons or whatever. Then we can store that int indexed by the Gamepad keys, which is an enum we CAN access
         public delegate int GetKeyboardKeyFromName(String input);
@@ -215,9 +227,9 @@ namespace BASeTris.Settings
                     {
                         //Alright, Gamekey parsed. let's grab the attribute name, and try to parse that using the callback.
                         int GetKeyCode = KeyboardKeyFunc(BindingAttribute.Value);
-                        
+
                         //add it to the dictionary.
-                        
+
                         KeyboardKeyCodeAssignments.Add(GetKeyCode, gk);
                         if (!KeyCodeKeyboardCodeAssignments.ContainsKey(gk))
                         {
@@ -228,6 +240,10 @@ namespace BASeTris.Settings
                     catch (Exception ex1)
                     {
                     }
+                }
+                else
+                {
+                    ;
                 }
             }
 

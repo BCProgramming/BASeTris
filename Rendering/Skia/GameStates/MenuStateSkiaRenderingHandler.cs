@@ -7,6 +7,7 @@ using BASeTris.Rendering.Skia.MenuItems;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,7 +44,14 @@ namespace BASeTris.Rendering.Skia.GameStates
             //throw new NotImplementedException();
             SKCanvas g = pRenderTarget;
             var Bounds = Element.Bounds;
-            if (Source.BG != null)
+
+            if (Source.FadedBGFadeState != null && Source.FadedBGFadeState.FadedParentState!=null)
+            {
+                RenderingProvider.Static.DrawElement(pOwner, g, Source.FadedBGFadeState.FadedParentState, Element);
+                g.DrawRect(Bounds, new SKPaint() { Color = new SKColor(128, 128, 128, 128) });
+            }
+
+            else if (Source.BG != null)
             {
                 RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new SkiaBackgroundDrawData(Bounds));
             }

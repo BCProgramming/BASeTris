@@ -1,16 +1,21 @@
 ﻿using BASeCamp.BASeScores;
+using BASeCamp.Elementizer;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.Skia;
+using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace BASeTris.Rendering
 {
@@ -116,49 +121,134 @@ namespace BASeTris.Rendering
             
             return CreateBitmap;
         }
+        public static IEnumerable<Nomino> LoadTetrominoCollageFromXMLString(String sString,out XElement TetrominoCollage)
+        {
+            var xdoc = XDocFromString(sString);
+            TetrominoCollage = xdoc.Root;
+            return LoadTetrominoCollageFromXML(xdoc.Root);
+        }
+        private static XDocument XDocFromString(String sSource)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                StreamWriter sw = new StreamWriter(ms);
+                sw.Write(sSource);
+                sw.Flush();
+                ms.Seek(0, SeekOrigin.Begin);
+                XDocument xdoc = XDocument.Load(ms);
+                return xdoc;
+            }
+        }
+        public static IEnumerable<Nomino> LoadTetrominoCollageFromXML(String sFileName,out XElement TetrominoCollage)
+        {
+            XDocument xdoc = XDocument.Load(sFileName);
+            TetrominoCollage = xdoc.Root;
+            return LoadTetrominoCollageFromXML(xdoc.Root);
+
+        }
+        private static readonly Dictionary<String, Type> TetrominoTypeLookup = new Dictionary<string, Type>()
+        {
+            {"I",typeof(Tetromino_I) },
+            {"L",typeof(Tetromino_L) },
+            {"J",typeof(Tetromino_J) },
+            {"Z",typeof(Tetromino_Z) },
+            {"S",typeof(Tetromino_S) },
+            {"T",typeof(Tetromino_T) },
+            {"O",typeof(Tetromino_O) },
+
+        };
+        public static IEnumerable<Nomino> LoadTetrominoCollageFromXML(XElement TetCollageNode)
+        {
+            
+            
+            foreach (XElement TetrominoElements in TetCollageNode.Elements("Tetromino"))
+            {
+
+                //<Tetromino Type=[I,L,J,Z,S,T,O] Rotation=[0,1,2,3] X=XPosition Y=YPosition>
+
+                String sTetrominoType = TetrominoElements.GetAttributeString("Type");
+                int sRotation = TetrominoElements.GetAttributeInt("Rotation", 0);
+                int XPos = TetrominoElements.GetAttributeInt("X", 0);
+                int YPos = TetrominoElements.GetAttributeInt("Y", 0);
+
+                if (TetrominoTypeLookup.ContainsKey(sTetrominoType))
+                {
+                    Type useTetrominoType = TetrominoTypeLookup[sTetrominoType];
+
+
+                    Nomino Generated = (Nomino)Activator.CreateInstance(useTetrominoType,new Object[] { null });
+                    Generated.X = XPos;
+                    Generated.Y = YPos;
+                    for (int i = 0; i < sRotation; i++)
+                    {
+                        Generated.Rotate(false);
+                    }
+                    yield return Generated;
+                }
+
+
+            }
+
+
+
+        }
+        private static Nomino[][] GroupNominos(IEnumerable<Nomino> FlatSource)
+        {
+            Dictionary<Type, List<Nomino>> Groups = new Dictionary<Type, List<Nomino>>();
+            foreach (var iterate in FlatSource)
+            {
+                if (!Groups.ContainsKey(iterate.GetType())) Groups.Add(iterate.GetType(), new List<Nomino>());
+                Groups[iterate.GetType()].Add(iterate);
+            }
+
+            return Groups.Values.Select((s) => s.ToArray()).ToArray();
+
+        }
+        private static readonly String DefaultBackgroundCollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+
+<TetrominoCollage Rows=""6"" Columns=""6"">
+<Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""-3"" />
+<Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""3"" />
+<Tetromino Type=""T"" Rotation=""3"" X=""2"" Y=""1"" />
+<Tetromino Type=""T"" Rotation=""1"" X=""3"" Y=""-1"" />
+<Tetromino Type=""T"" Rotation=""1"" X=""3"" Y=""5"" />
+<Tetromino Type=""L"" Rotation=""1"" X=""-1"" Y=""0"" />
+<Tetromino Type=""L"" Rotation=""1"" X=""1"" Y=""3"" />
+<Tetromino Type=""S"" Rotation=""0"" X=""1"" Y=""0"" />
+<Tetromino Type=""J"" Rotation=""3"" X=""-1"" Y=""3"" />
+<Tetromino Type=""J"" Rotation=""3"" X=""5"" Y=""3"" />
+<Tetromino Type=""Z"" Rotation=""1"" X=""3"" Y=""1"" />
+<Tetromino Type=""L"" Rotation=""0"" X=""3"" Y=""3"" />
+</TetrominoCollage>";
         public static SKBitmap GetBackgroundCollage(NominoTheme _theme)
         {
-            //this is a fun one. We've got a bitmap we use for backgrounds, Would be cool if we generated that "on the fly" using a theme, I think.
-            //this collage has a number of Nomino blocks.
+            XElement RootNode;
+            Nomino[][] AddBlocks = GroupNominos(LoadTetrominoCollageFromXMLString(DefaultBackgroundCollageXML, out RootNode));
+            int Cols = RootNode.GetAttributeInt("Columns", 6);
+            int Rows = RootNode.GetAttributeInt("Rows", 6);
+
+            return GetBackgroundCollage(_theme, (Nomino[][])AddBlocks,Rows, Cols);
+        }
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme, Nomino[] Contents,int RowCount,int ColumnCount)
+        {
+            var Grouped = GroupNominos(Contents);
+            return GetBackgroundCollage(_theme, Grouped, RowCount, ColumnCount);
+        }
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,Nomino[][] Contents,int RowCount,int ColumnCount)
+        {
+
+         
+            XElement RootNode = null;
+            Nomino[][] AddBlocks = Contents;
+
             int generatedlevel = TetrisGame.rgen.Next(0, 21);
-            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(6, 6, 500, 500, generatedlevel,_theme,SKColors.Black);
+            int Cols = ColumnCount;
+            int Rows = RowCount;
+            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(Cols, Rows, 500, 500, generatedlevel, _theme, SKColors.Black);
 
-            //two I Nominoes. I think 0,0 for each Nomino is their top-left corner. I really should know this, I wrote the thing but time is a cruel mistress. I'm into that shit though.
-            
-            Tetrominoes.Tetromino_I  IBlock = new Tetrominoes.Tetromino_I() {X=-1,Y=-3};
-            Tetrominoes.Tetromino_I  IBlock2 = new Tetrominoes.Tetromino_I() { X = -1, Y = 3 };
-
-            //both are up and down, so rotate the I blocks.
-            IBlock.Rotate(false);
-            IBlock2.Rotate(false);
-            Tetrominoes.Tetromino_T TBlock1 = new Tetrominoes.Tetromino_T() {X=2,Y=1 };
-            TBlock1.Rotate(false);
-            TBlock1.Rotate(false);
-            TBlock1.Rotate(false);
-            Tetrominoes.Tetromino_T TBlock2 = new Tetrominoes.Tetromino_T() {X=3,Y=-1 };
-            TBlock2.Rotate(false);
-            Tetrominoes.Tetromino_T TBlock3 = new Tetrominoes.Tetromino_T() { X = 3, Y = 5 };
-            TBlock3.Rotate(false);
-
-            Tetrominoes.Tetromino_L LBlock1 = new Tetrominoes.Tetromino_L() { X = -1, Y = 0 };
-            Tetrominoes.Tetromino_L LBlock2 = new Tetrominoes.Tetromino_L() { X = 1, Y = 3 };
-            LBlock1.Rotate(false);
-            LBlock2.Rotate(false);
-            Tetrominoes.Tetromino_S SBlock = new Tetrominoes.Tetromino_S() { X = 1, Y = 0 };
-
-            Tetrominoes.Tetromino_J JBlock1 = new Tetrominoes.Tetromino_J() { X = -1, Y = 3 };
-            Tetrominoes.Tetromino_J JBlock2 = new Tetrominoes.Tetromino_J() { X = 5, Y = 3 };
-            JBlock1.Rotate(true);
-            JBlock2.Rotate(true);
-
-            Tetrominoes.Tetromino_Z ZBlock1 = new Tetrominoes.Tetromino_Z() { X = 3, Y = 1 };
-            ZBlock1.Rotate(false);
-
-            Tetrominoes.Tetromino_L LBlock3 = new Tetrominoes.Tetromino_L() { X = 3, Y = 3 };
-
-            //LBlock3.Rotate(true);
+            //Nomino[][] AddBlocks = new Nomino[][] { new Nomino[] { IBlock, IBlock2 }, new Nomino[] { TBlock1, TBlock2, TBlock3 }, new Nomino[] { SBlock }, new Nomino[] { LBlock1, LBlock2 }, new Nomino[] { JBlock1, JBlock2 }, new Nomino[] { ZBlock1 }, new Nomino[] { LBlock3 } };
             bool doRandomize = TetrisGame.rgen.NextDouble() > 0.5;
-            Nomino[][] AddBlocks = new Nomino[][]{ new Nomino[] { IBlock, IBlock2 } ,new Nomino[] { TBlock1, TBlock2, TBlock3 } , new Nomino[] { SBlock }, new Nomino[] { LBlock1, LBlock2 }, new Nomino[] { JBlock1, JBlock2 }, new Nomino[] { ZBlock1 }, new Nomino[] { LBlock3 } };
+
             foreach (var groupadd in AddBlocks)
             {
                 foreach (var blockadd in groupadd)
@@ -180,6 +270,7 @@ namespace BASeTris.Rendering
         }
 
         private SKColor ClearColor = SKColors.Transparent;
+        public TetrisField Field { get { return _field; } }
         private TetrisField _field = null;
         public NominoTheme Theme { get { return _field.Theme; } set { _field.Theme = value; } }
         public int ColumnCount { get; set; }

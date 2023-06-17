@@ -52,7 +52,11 @@ namespace BASeTris
             GameKey_Debug4,
             GameKey_Debug5,
             GameKey_Debug6,
-            GameKey_PopHold
+            GameKey_PopHold,
+            GameKey_DesignerNextNomino,
+            GameKey_DesignerPrevNomino,
+            GameKey_DesignerChangeNomino,
+            Gamekey_DesignerDeleteNomino
         }
         private static Dictionary<GameKeys, String> FriendlyNames = new Dictionary<GameKeys, string>()
         {
@@ -72,7 +76,11 @@ namespace BASeTris
 { GameKeys.GameKey_Debug4,"DEBUG1"},
 { GameKeys.GameKey_Debug5,"DEBUG1"},
 { GameKeys.GameKey_Debug6,"DEBUG1"},
-{ GameKeys.GameKey_PopHold,"Pop Hold Stack"}
+{ GameKeys.GameKey_PopHold,"Pop Hold Stack"},
+            { GameKeys.GameKey_DesignerChangeNomino,"Change Nomino (BG Design)"},
+            { GameKeys.GameKey_DesignerNextNomino,"Next Nomino (BG Design)"},
+            { GameKeys.GameKey_DesignerPrevNomino,"Previous Nomino (BG Design)"},
+            { GameKeys.Gamekey_DesignerDeleteNomino,"Delete Nomino (BG Design)"}
         };
         public static String GetGameKeyFriendlyName(GameKeys src)
         {

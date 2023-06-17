@@ -183,8 +183,10 @@ X.Gamepad.GamepadButtons.RightStick
             {Key.ControlRight,"Ctrl" },
             {Key.KeypadDivide,"/" },
             {Key.Grave,"`" },
-            {Key.Escape,"Esc" }
-           
+            {Key.Escape,"Esc" },
+            {Key.PageUp,"PgUp" },
+            {Key.PageDown,"PgDn" }
+
         };
 
         private static SKBitmap DrawKeyboardKey(OpenTK.Input.Key k)

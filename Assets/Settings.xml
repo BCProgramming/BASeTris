@@ -19,6 +19,9 @@
       <Key GameKey="GameKey_Debug3" Binding="F11" />
       <Key GameKey="GameKey_Debug4" Binding="F12" />
       <Key GameKey="GameKey_Debug5" Binding="Number5" />
+      <Key GameKey="GameKey_DesignerNextNomino" Binding="PageUp" />
+      <Key GameKey="GameKey_DesignerPrevNomino" Binding="PageDown" />
+      <Key GameKey="GameKey_DesignerChangeNomino" Binding="Tab" />
     </KeyboardKeys>
     <GamepadButtons>
       <Button GameKey="GameKey_RotateCW" Binding="A" />
@@ -30,6 +33,9 @@
       <Button GameKey="GameKey_Down" Binding="Dpad_Down" />
       <Button GameKey="GameKey_Drop" Binding="Dpad_Up" />
       <Button GameKey="GameKey_Pause" Binding="Start" />
+      <Button GameKey="GameKey_DesignerNextNomino" Binding="Y" />
+      <Button GameKey="GameKey_DesignerPrevNomino" Binding="B" />
+      <Button GameKey="GameKey_DesignerChangeNomino" Binding="RightStick" />
     </GamepadButtons>
   </Controls>
   <SettingsGroup Name="Default">

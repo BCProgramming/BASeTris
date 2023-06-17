@@ -12,6 +12,7 @@ namespace BASeTris.GameStates.Menu
 {
     public class MenuStateDisplayThemeMenuItem : MenuStateMultiOption<MenuStateThemeSelection>
     {
+        public Action<MenuStateThemeSelection> SimpleSelectionFunction = null; //if set, overrides the behaviour to try changing themes on the handler and gamestates, instead just notifying the function when a theme is chosen.
         private IStateOwner _Owner = null;
 
 
@@ -48,20 +49,24 @@ namespace BASeTris.GameStates.Menu
 
         }
         private IGameCustomizationHandler _Handler;
-        public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, IGameCustomizationHandler handler) : base(null)
+        public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, Type CustomizationType,Type InitialThemeType = null) : base(null)
         {
             _Owner = pOwner;
-            Type currentthemetype = null;
+            Type currentthemetype = InitialThemeType;
 
-            if (_Owner.CurrentState is GameplayGameState gs)
+
+            if (currentthemetype == null)
             {
-                currentthemetype = gs.PlayField.Theme.GetType();
+                if (_Owner.CurrentState is GameplayGameState gs)
+                {
+                    currentthemetype = gs.PlayField.Theme.GetType();
+                }
+                else if (_Owner.CurrentState is ICompositeState<GameplayGameState> comp)
+                {
+                    currentthemetype = comp.GetComposite().PlayField.Theme.GetType();
+                }
             }
-            else if (_Owner.CurrentState is ICompositeState<GameplayGameState> comp)
-            {
-                currentthemetype = comp.GetComposite().PlayField.Theme.GetType();
-            }
-            ThemeOptions = GetThemeSelectionsForHandler(handler.GetType()).ToArray();
+            ThemeOptions = GetThemeSelectionsForHandler(CustomizationType).ToArray();
             int currentIndex = 0;
             for (int i = 0; i < ThemeOptions.Length; i++)
             {
@@ -101,8 +106,16 @@ namespace BASeTris.GameStates.Menu
             if (!String.IsNullOrEmpty(e.Option.TipText)) 
             (e.Owner.CurrentState as MenuState).FooterText = e.Option.TipText;
             ActivatedOption = e;
-            _Owner.BeforeGameStateChange -= _Owner_BeforeGameStateChange;
-            _Owner.BeforeGameStateChange += _Owner_BeforeGameStateChange;
+            if (SimpleSelectionFunction != null)
+            {
+                SimpleSelectionFunction(e.Option);
+
+            }
+            else
+            {
+                _Owner.BeforeGameStateChange -= _Owner_BeforeGameStateChange;
+                _Owner.BeforeGameStateChange += _Owner_BeforeGameStateChange;
+            }
 
         }
 
