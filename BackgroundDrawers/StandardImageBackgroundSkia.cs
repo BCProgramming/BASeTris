@@ -4,6 +4,7 @@ using BASeTris.AssetManager;
 using BASeTris.Rendering;
 using SkiaSharp;
 using BASeTris.Theme.Block;
+using System.Threading.Tasks;
 
 namespace BASeTris.BackgroundDrawers
 {
@@ -80,31 +81,36 @@ namespace BASeTris.BackgroundDrawers
         public static StandardImageBackgroundSkia GetMenuBackgroundDrawer()
         {
             var _Background = new StandardImageBackgroundSkia();
-            var useImage = TetrisGame.Imageman["block_arrangement"];
-            SKImage usebg = null;
-            if (true || TetrisGame.rgen.NextDouble() > 0.5)
+
+
+            Task.Run(() =>
             {
-                NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(),()=>new StandardTetrominoTheme(),()=>new Tetris2Theme_Standard(),()=>new Tetris2Theme_Enhanced() ,()=>new GameBoyMottledTheme()})();
-                SKBitmap skb = TetrominoCollageRenderer.GetBackgroundCollage(chosen);
+                var useImage = TetrisGame.Imageman["block_arrangement"];
+                SKImage usebg = null;
+                if (true || TetrisGame.rgen.NextDouble() > 0.5)
+                {
+                    NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(), () => new StandardTetrominoTheme(), () => new Tetris2Theme_Standard(), () => new Tetris2Theme_Enhanced(), () => new GameBoyMottledTheme() })();
+                    SKBitmap skb = TetrominoCollageRenderer.GetBackgroundCollage(chosen);
 
-                Bitmap bmp = SkiaSharp.Views.Desktop.Extensions.ToBitmap(skb);
+                    Bitmap bmp = SkiaSharp.Views.Desktop.Extensions.ToBitmap(skb);
 
-                bmp = new Bitmap(ImageManager.ReduceImage(bmp, new Size(bmp.Width / 8, bmp.Width / 8)));
+                    bmp = new Bitmap(ImageManager.ReduceImage(bmp, new Size(bmp.Width / 8, bmp.Width / 8)));
 
-                usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
-
-
-            }
-            else
-            {
-                Bitmap bmp = new Bitmap(ImageManager.ReduceImage(useImage, new Size(useImage.Width / 8, useImage.Height / 8)));
+                    usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
 
 
-                usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
-            }
-            
-            _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(5, 5) };
-            _Background.Data.theFilter = SKColorMatrices.GetFader(0.5f);
+                }
+                else
+                {
+                    Bitmap bmp = new Bitmap(ImageManager.ReduceImage(useImage, new Size(useImage.Width / 8, useImage.Height / 8)));
+
+
+                    usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
+                }
+
+                _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(5, 5) };
+                _Background.Data.theFilter = SKColorMatrices.GetFader(0.5f);
+            });
             return _Background;
         }
         public override void FrameProc(IStateOwner pOwner)

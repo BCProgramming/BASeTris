@@ -204,7 +204,7 @@ namespace BASeTris.Rendering
             return Groups.Values.Select((s) => s.ToArray()).ToArray();
 
         }
-        private static readonly String DefaultBackgroundCollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        private static readonly String[] DefaultBackgroundCollageXML = new string[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
 
 <TetrominoCollage Rows=""6"" Columns=""6"">
 <Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""-3"" />
@@ -219,11 +219,34 @@ namespace BASeTris.Rendering
 <Tetromino Type=""J"" Rotation=""3"" X=""5"" Y=""3"" />
 <Tetromino Type=""Z"" Rotation=""1"" X=""3"" Y=""1"" />
 <Tetromino Type=""L"" Rotation=""0"" X=""3"" Y=""3"" />
-</TetrominoCollage>";
+</TetrominoCollage>",
+        @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <TetrominoCollage Rows=""8"" Columns=""8"">
+    <Tetromino Type=""J"" Rotation=""3"" X=""2"" Y=""4"" />
+    <Tetromino Type=""I"" Rotation=""4"" X=""-2"" Y=""3"" />
+    <Tetromino Type=""T"" Rotation=""5"" X=""4"" Y=""2"" />
+    <Tetromino Type=""J"" Rotation=""2"" X=""5"" Y=""-1"" />
+    <Tetromino Type=""I"" Rotation=""0"" X=""2"" Y=""0"" />
+    <Tetromino Type=""S"" Rotation=""5"" X=""5"" Y=""1"" />
+    <Tetromino Type=""O"" Rotation=""2"" X=""6"" Y=""6"" />
+    <Tetromino Type=""I"" Rotation=""2"" X=""6"" Y=""2"" />
+    <Tetromino Type=""T"" Rotation=""8"" X=""0"" Y=""6"" />
+    <Tetromino Type=""T"" Rotation=""0"" X=""2"" Y=""-1"" />
+    <Tetromino Type=""T"" Rotation=""4"" X=""2"" Y=""7"" />
+    <Tetromino Type=""L"" Rotation=""5"" X=""3"" Y=""5"" />
+    <Tetromino Type=""L"" Rotation=""6"" X=""5"" Y=""4"" />
+    <Tetromino Type=""L"" Rotation=""2"" X=""0"" Y=""4"" />
+    <Tetromino Type=""T"" Rotation=""3"" X=""3"" Y=""2"" />
+    <Tetromino Type=""J"" Rotation=""1"" X=""1"" Y=""2"" />
+    <Tetromino Type=""L"" Rotation=""1"" X=""-1"" Y=""1"" />
+    <Tetromino Type=""L"" Rotation=""3"" X=""0"" Y=""0"" />
+  </TetrominoCollage>"
+
+        };
         public static SKBitmap GetBackgroundCollage(NominoTheme _theme)
         {
             XElement RootNode;
-            Nomino[][] AddBlocks = GroupNominos(LoadTetrominoCollageFromXMLString(DefaultBackgroundCollageXML, out RootNode));
+            Nomino[][] AddBlocks = GroupNominos(LoadTetrominoCollageFromXMLString(TetrisGame.Choose(DefaultBackgroundCollageXML), out RootNode));
             int Cols = RootNode.GetAttributeInt("Columns", 6);
             int Rows = RootNode.GetAttributeInt("Rows", 6);
 

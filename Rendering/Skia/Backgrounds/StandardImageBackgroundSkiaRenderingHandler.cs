@@ -17,7 +17,7 @@ namespace BASeTris.Rendering.Skia.Backgrounds
         SKRect lastBounds = SKRect.Empty;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, StandardImageBackgroundSkia Source, BackgroundDrawData Element)
         {
-
+            if (Source.Data == null) return;
             if (Source.Data.UnderLayer != null)
             {
                 //draw "underlayer" first

@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,18 @@ namespace BASeTris.GameStates
 {
     public class BackgroundDesignLayer: IXmlPersistable
     {
+        public struct LayerRandomizationParameters
+        {
+            public int MinSize = 6;
+            public int MaxSize = 24;
+            
+
+            public LayerRandomizationParameters()
+            {
+            }
+
+
+        }
         private int _DesignColumns = 6;
         private int _DesignRows = 6;
         public SKColor GridColor { get; set; } = SKColors.Yellow;
@@ -36,7 +49,61 @@ namespace BASeTris.GameStates
 
             Collage = new TetrominoCollageRenderer(DesignRows, DesignColumns, 500, 500, 0, DisplayedDesignerTheme, SKColors.Transparent);
         }
-        
+        public void RandomizeLayer(int MinimumSize, int MaximumSize)
+        {
+            int chosensize = TetrisGame.rgen.Next((MaximumSize - MinimumSize)) + MinimumSize;
+            _DesignColumns = _DesignRows = chosensize;
+            DesignNominoes = new List<Nomino>();
+            RecreateFakeHandler();
+
+            HashSet<Point> UsedPositions = new HashSet<Point>();
+
+
+            bool AddingBlocks = true;
+            int NoneAddedSequence = 0;
+            while (AddingBlocks)
+            {
+                //choose a random Tetromino.
+
+                Type choosetype = TetrisGame.Choose(DesignBackgroundState.TetrominoTypes);
+                Nomino ConstructNext = (Nomino)Activator.CreateInstance(choosetype, new Object[] { null });
+                ConstructNext.SetRotation(TetrisGame.rgen.Next(4));
+                ConstructNext.X = TetrisGame.rgen.Next(_DesignColumns);
+                ConstructNext.Y = TetrisGame.rgen.Next(_DesignRows);
+                if (ConstructNext.Any((ne) => UsedPositions.Contains(new Point(ne.X+ConstructNext.X, ne.Y+ConstructNext.Y))))
+                {
+                    NoneAddedSequence++;
+                    if (NoneAddedSequence > 64) AddingBlocks = false;
+                    continue;
+                }
+
+
+                foreach (var elem in ConstructNext)
+                {
+                    UsedPositions.Add(new Point(elem.X+ConstructNext.X, elem.Y + ConstructNext.Y));    
+                }
+                DesignNominoes.Add(ConstructNext);
+
+
+
+
+            }
+
+            foreach (var iterate in DesignNominoes)
+            {
+                DisplayedDesignerTheme.ApplyTheme(iterate, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
+            }
+
+
+
+
+
+
+
+
+
+        }
+
         public BackgroundDesignLayer(XElement SourceNode, Object pPersistenceData)
         {
             //we can use TetrominoCollageRenderer.LoadTetrominoCollageFromXML() to help with this.
@@ -188,6 +255,7 @@ namespace BASeTris.GameStates
             MenuStateTextMenuItem SaveDesign = new MenuStateTextMenuItem() { Text = "Save Design", TipText = "Save Current Design" };
             MenuStateTextMenuItem TestDesign = new MenuStateTextMenuItem() { Text = "Test Design", TipText = "Test Design" };
             MenuStateTextMenuItem LoadDesign = new MenuStateTextMenuItem() { Text = "Load Design", TipText = "Load Design" };
+            MenuStateTextMenuItem RandomizeItem = new MenuStateTextMenuItem() { Text = "Randomize", TipText = "Randomize this Layer's arrangement" };
             MenuStateTextMenuItem NextLayer = new MenuStateTextMenuItem() { Text = "Next Layer", TipText = "Edit the next layer. Creates a new layer if needed." };
             MenuStateTextMenuItem PrevLayer = new MenuStateTextMenuItem() { Text = "Previous Layer", TipText = "Edit the previous layer" };
             MenuStateDisplayThemeMenuItem ChangeThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, typeof(StandardTetrisHandler),CurrentLayer.DisplayedDesignerTheme.GetType());
@@ -214,7 +282,7 @@ namespace BASeTris.GameStates
             
 
             
-            foreach (var designeritem in new MenuStateMenuItem[] { ReturnMenuItem, AddNominoItem,TestDesign, ChangeThemeItem,SaveDesign,LoadDesign, ExitMenuItem })
+            foreach (var designeritem in new MenuStateMenuItem[] { ReturnMenuItem, AddNominoItem,TestDesign, ChangeThemeItem,SaveDesign,LoadDesign,NextLayer,PrevLayer,RandomizeItem, ExitMenuItem })
             {
                 if (designeritem is MenuStateTextMenuItem mstmi)
                 {
@@ -308,7 +376,12 @@ namespace BASeTris.GameStates
                     }
                     DesignOptionsMenuState.ActivatedItem = null;
                 }
-
+                else if (e.MenuElement == RandomizeItem)
+                {
+                    CurrentLayer.RandomizeLayer(6, 32);
+                    IsDirty = true;
+                    DesignOptionsMenuState.ActivatedItem = null;
+                }
 
                 else if (e.MenuElement == NextLayer)
                 {
@@ -317,7 +390,7 @@ namespace BASeTris.GameStates
                         //need to add a layer.
                         var NewLayers = new BackgroundDesignLayer[Layers.Length + 1];
                         Array.Copy(Layers, NewLayers, Layers.Length);
-                        NewLayers[NewLayers.Length] = new BackgroundDesignLayer(6, 6, new SNESTetrominoTheme());
+                        NewLayers[NewLayers.Length-1] = new BackgroundDesignLayer(6, 6, new SNESTetrominoTheme());
                         Layers = NewLayers;
 
                     }
@@ -377,7 +450,7 @@ namespace BASeTris.GameStates
             }
             
         }
-        Type[] TetrominoTypes = new Type[] { typeof(Tetrominoes.Tetromino_I), typeof(Tetrominoes.Tetromino_L), typeof(Tetrominoes.Tetromino_J), typeof(Tetrominoes.Tetromino_S), typeof(Tetrominoes.Tetromino_Z), typeof(Tetrominoes.Tetromino_O), typeof(Tetrominoes.Tetromino_T) };
+        public static Type[] TetrominoTypes = new Type[] { typeof(Tetrominoes.Tetromino_I), typeof(Tetrominoes.Tetromino_L), typeof(Tetrominoes.Tetromino_J), typeof(Tetrominoes.Tetromino_S), typeof(Tetrominoes.Tetromino_Z), typeof(Tetrominoes.Tetromino_O), typeof(Tetrominoes.Tetromino_T) };
 
         
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
@@ -397,7 +470,7 @@ namespace BASeTris.GameStates
                 case GameKeys.GameKey_RotateCW:
                     if (IsSelectionValid())
                     {
-                        TetrisGame.Soundman.PlaySound("block_rotate");
+                        TetrisGame.Soundman.PlaySound("block_rotate", new AudioHandlerPlayDetails() { Pitch = 5 });
                         SelectedNomino.Rotate(false);
                         IsDirty = true;
                     }
@@ -405,7 +478,7 @@ namespace BASeTris.GameStates
                 case GameKeys.GameKey_RotateCCW:
                     if (IsSelectionValid())
                     {
-                        TetrisGame.Soundman.PlaySound("block_rotate");
+                        TetrisGame.Soundman.PlaySound("block_rotate",new AudioHandlerPlayDetails() { Pitch = 750 });
                         SelectedNomino.Rotate(true);
                         IsDirty = true;
                     }
@@ -483,6 +556,8 @@ namespace BASeTris.GameStates
                     var Current = SelectedNomino;
                     var FindNext = TetrisGame.Successor(TetrominoTypes, Current.GetType());
                     Nomino ConstructNext = (Nomino)Activator.CreateInstance(FindNext,new Object[] { null });
+                    ConstructNext.X = Current.X;
+                    ConstructNext.Y = Current.Y;
                     ApplyTheme(ConstructNext);
                     if (ConstructNext != null)
                     {
