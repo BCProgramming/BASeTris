@@ -64,6 +64,17 @@ namespace BASeTris.Settings
             if (!Directory.Exists(sPath)) Directory.CreateDirectory(sPath);
             doc.Save(sFindFile);
         }
+        public static DateTime? GetCustomBackgroundTouched(int i)
+        {
+            String sFindFile = Path.Combine(sCustomBackgroundFolder, i.ToString() + ".dat");
+
+            if (File.Exists(sFindFile)) return File.GetLastWriteTime(sFindFile);
+
+            return null;
+
+
+
+        }
 
     }
 }

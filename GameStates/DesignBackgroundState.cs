@@ -13,6 +13,7 @@ using System.Deployment.Application;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -322,7 +323,7 @@ namespace BASeTris.GameStates
 
                     StandardImageBackgroundSkia CurrBuild = null;
 
-                    foreach (var layer in this.Layers.Reverse())
+                    foreach (var layer in this.Layers)
                     {
                         //create the Render background for this layer.
                         var layerbitmap = layer.GetLayerBitmap();
@@ -361,24 +362,32 @@ namespace BASeTris.GameStates
                 }
                 else if (e.MenuElement == SaveDesign)
                 {
-                    CustomBackgroundData.SaveCustomBackground(this, 1);
+                    //present a menu of the 10 "save slots"
+                    //we could use names but... the text input state is sorta bad right now.
+                    //we'll maybe revisit this later.
+                    var submenu = GetSaveSlotSelectionState(pOwner, DesignOptionsMenuState, (y) => { CustomBackgroundData.SaveCustomBackground(this, y); });
+                    pOwner.CurrentState = submenu;
+                    
                     DesignOptionsMenuState.ActivatedItem = null;
                 }
                 else if (e.MenuElement == LoadDesign)
                 {
+                    var submenu = GetSaveSlotSelectionState(pOwner, DesignOptionsMenuState, (y) => {
+                        var LoadTry = CustomBackgroundData.LoadCustomBackground(y);
+                        if (LoadTry != null)
+                        {
+                            LayerIndex = 0;
+                            this.Layers = LoadTry.Layers;
+                            IsDirty = true;
+                        }
 
-                    var LoadTry = CustomBackgroundData.LoadCustomBackground(1);
-                    if (LoadTry != null)
-                    {
-                        LayerIndex = 0;
-                        this.Layers = LoadTry.Layers;
-                        IsDirty = true;
-                    }
+                    });
+                    pOwner.CurrentState = submenu;
                     DesignOptionsMenuState.ActivatedItem = null;
                 }
                 else if (e.MenuElement == RandomizeItem)
                 {
-                    CurrentLayer.RandomizeLayer(6, 32);
+                    CurrentLayer.RandomizeLayer(4, 16);
                     IsDirty = true;
                     DesignOptionsMenuState.ActivatedItem = null;
                 }
@@ -421,6 +430,63 @@ namespace BASeTris.GameStates
                 DisplayedDesignerTheme.ApplyTheme(iterate,Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
             }
             IsDirty = true;
+        }
+        private MenuState GetSaveSlotSelectionState(IStateOwner pOwner,GameState Parent,Action<int> LoadSlotAction)
+        {
+            var ResultState = new MenuState(_BG);
+            
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+
+            MenuStateTextMenuItem ReturnMenuItem = new MenuStateTextMenuItem() { Text = "Cancel", TipText = "Cancel Save and return to previous menu" };
+            ResultState.MenuElements.Add(ReturnMenuItem);
+            for (int i = 1; i < 11; i++)
+            {
+                DateTime? Touched = CustomBackgroundData.GetCustomBackgroundTouched(i);
+                String sDescription = "Empty Save Slot.";
+                String sText = "Slot " + i;
+                if (Touched != null)
+                {
+                    DesignBackgroundState Loaded = CustomBackgroundData.LoadCustomBackground(i);
+                    sDescription = String.Join(",", from l in Loaded.Layers select "(" + l.DesignNominoes.Count.ToString() + ")");
+                    sText = Touched.Value.ToShortDateString() + " - " + Touched.Value.ToShortTimeString();
+                }
+                MenuStateTextMenuItem SlotItem  = new MenuStateTextMenuItem() { Text = sText, TipText = sDescription,Tag = i };
+                ResultState.MenuElements.Add(SlotItem);
+            }
+
+            ResultState.MenuItemSelected += (a, b) =>
+            {
+                if (b.MenuElement == ReturnMenuItem)
+                {
+                    pOwner.CurrentState = DesignOptionsMenuState;
+                }
+
+                else
+                {
+                    LoadSlotAction((int)(b.MenuElement.Tag));
+
+                }
+
+                DesignOptionsMenuState.ActivatedItem = null;
+            };
+
+            ResultState.BG = _BG;
+            ResultState.StateHeader = "Choose Slot";
+            ResultState.HeaderTypeface = FontSrc.FontFamily.Name;
+            ResultState.HeaderTypeSize *= 1.5f;
+            foreach (var styleitem in ResultState.MenuElements)
+            {
+                if (styleitem is MenuStateTextMenuItem mstmi)
+                {
+                    mstmi.FontFace = FontSrc.FontFamily.Name;
+                    mstmi.FontSize = FontSrc.Size;
+                    mstmi.BackColor = new SKColor(128, 128, 128, 128);
+                    //DesignOptionsMenuState.MenuElements.Add(mstmi);
+                }
+            }
+            ResultState.FadedBGFadeState = new MenuState.MenuStateFadedParentStateInformation(Parent, true);
+            return ResultState;
+            
         }
         private void ApplyTheme(Nomino EditNomino)
         {
@@ -554,14 +620,17 @@ namespace BASeTris.GameStates
                 case GameKeys.GameKey_DesignerChangeNomino:
                     //swap out the current nomino with a new one of the successor Tetromino type.
                     var Current = SelectedNomino;
-                    var FindNext = TetrisGame.Successor(TetrominoTypes, Current.GetType());
+
+                    var FindNext = Current==null?typeof(Tetromino_I): TetrisGame.Successor(TetrominoTypes, Current.GetType());
                     Nomino ConstructNext = (Nomino)Activator.CreateInstance(FindNext,new Object[] { null });
-                    ConstructNext.X = Current.X;
-                    ConstructNext.Y = Current.Y;
+                    ConstructNext.X = Current==null?0:Current.X;
+                    ConstructNext.Y = Current == null ? 0 : Current.Y;
                     ApplyTheme(ConstructNext);
                     if (ConstructNext != null)
                     {
-                        DesignNominoes[SelectedIndex] = ConstructNext;
+                        if (DesignNominoes.Count == 0) DesignNominoes.Add(ConstructNext);
+                        else
+                           DesignNominoes[SelectedIndex] = ConstructNext;
                     }
 
                     break;

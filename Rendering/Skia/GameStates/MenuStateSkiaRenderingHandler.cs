@@ -47,8 +47,9 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             if (Source.FadedBGFadeState != null && Source.FadedBGFadeState.FadedParentState!=null)
             {
+                
                 RenderingProvider.Static.DrawElement(pOwner, g, Source.FadedBGFadeState.FadedParentState, Element);
-                g.DrawRect(Bounds, new SKPaint() { Color = new SKColor(128, 128, 128, 128) });
+                g.DrawRect(Bounds, new SKPaint() { Color = new SKColor(255, 255, 255, 128) });
             }
 
             else if (Source.BG != null)

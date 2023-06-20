@@ -29,7 +29,9 @@ namespace BASeTris.Rendering.Skia
             var drawparameters = Element;
             if (drawparameters is TetrisBlockDrawSkiaParameters)
             {
+                
                 var parameters = (TetrisBlockDrawSkiaParameters)drawparameters;
+                
                 base.Render(pOwner, pRenderTarget, Source, Element);
                 if (Source._RotationImages == null) NoImage();
                 SKImage useImage = null;
@@ -93,7 +95,7 @@ namespace BASeTris.Rendering.Skia
                     {
                         var current = parameters.g.TotalMatrix;
                         parameters.g.Concat(ref parameters.ApplyAttributes);
-                        DrawPosition.Inflate(0.25f, 0);
+                        DrawPosition.Inflate(0.5f, 0.5f);
                         if(parameters.ColorFilter!=null)
                             parameters.g.DrawImage(useImage, DrawPosition, new SKPaint() { ColorFilter = parameters.ColorFilter });
                         else
