@@ -18,7 +18,7 @@ namespace BASeTris.BackgroundDrawers
             get { return _BackgroundImage; }
 
         }
-
+        public double Scale { get; set; } = 1f;
         public SKPoint CurrOrigin { get; set; } = SKPoint.Empty;
         public float CurrAngle { get; set; } = 0;
         public float AngleSpeed { get; set; } = 0;
@@ -37,7 +37,7 @@ namespace BASeTris.BackgroundDrawers
             if (theFilter != null)
             {
                 SKImageFilter si = SKImageFilter.CreateColorFilter(theFilter);
-                Rectangle AttribRect = new Rectangle(0, 0, _BackgroundImage.Width, _BackgroundImage.Height);
+                Rectangle AttribRect = new Rectangle(0, 0, (int)((float)_BackgroundImage.Width), (int)((float)_BackgroundImage.Height));
                 PreTileFilter = SKImageFilter.CreateBlendMode(SKBlendMode.DstIn, SKImageFilter.CreateImage(_BackgroundImage), si);
                 //BackgroundBrush = new SKPaint
                 //{

@@ -27,7 +27,7 @@ namespace BASeTris.GameStates.Menu
 
         };*/
 
-        private IEnumerable<MenuStateThemeSelection> GetThemeSelectionsForHandler(Type HandlerType)
+        public static IEnumerable<MenuStateThemeSelection> GetThemeSelectionsForHandler(Type HandlerType)
         {
 
             var themetypes = Program.GetHandlerThemes(HandlerType);
@@ -48,7 +48,7 @@ namespace BASeTris.GameStates.Menu
 
 
         }
-        private IGameCustomizationHandler _Handler;
+        private IBlockGameCustomizationHandler _Handler;
         public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, Type CustomizationType,Type InitialThemeType = null) : base(null)
         {
             _Owner = pOwner;
@@ -140,6 +140,7 @@ namespace BASeTris.GameStates.Menu
         public String Description;
         public Type ThemeType;
         public Func<NominoTheme> GenerateThemeFunc = null;
+        
         public String TipText { get; set; }
         public MenuStateThemeSelection(String pDescription,Type pThemeType, Func<NominoTheme> pThemeFunc,String pTipText)
         {

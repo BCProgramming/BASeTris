@@ -118,7 +118,7 @@ namespace BASeTris.GameStates
         }
         public MenuState MainMenuState = null; //if this gameplay was spawned by the menu, this should be the top-level menu state.
         public IAudioHandler Sounds = null;
-        public GameplayGameState(IStateOwner pOwner,IGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio,MenuState MainMenu)
+        public GameplayGameState(IStateOwner pOwner,IBlockGameCustomizationHandler Handler, FieldInitializer pFieldInitializer, IAudioHandler pAudio,MenuState MainMenu)
         {
 
             Sounds = pAudio;
@@ -490,7 +490,7 @@ namespace BASeTris.GameStates
 
         private int LastScoreCalc = 0;
         private int LastScoreLines = 0;
-        public IGameCustomizationHandler GameHandler { get; set; } = new StandardTetrisHandler();
+        public IBlockGameCustomizationHandler GameHandler { get; set; } = new StandardTetrisHandler();
         /*public virtual void ProcessFieldChangeWithScore(IStateOwner pOwner, Nomino Trigger)
         {
             

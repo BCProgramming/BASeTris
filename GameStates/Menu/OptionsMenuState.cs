@@ -177,20 +177,20 @@ namespace BASeTris.GameStates.Menu
             HeaderTypeface = TetrisGame.GetRetroFont(12, 1.0f).FontFamily.Name;
             HeaderTypeSize = DesiredFontPixelHeight * .75f;
             //get the handlers....
-            var allHandlers = Program.DITypes[typeof(IGameCustomizationHandler)];
-            Dictionary<String, List<IGameCustomizationHandler>> AllHandlerCategories = new Dictionary<string, List<IGameCustomizationHandler>>();
+            var allHandlers = Program.DITypes[typeof(IBlockGameCustomizationHandler)];
+            Dictionary<String, List<IBlockGameCustomizationHandler>> AllHandlerCategories = new Dictionary<string, List<IBlockGameCustomizationHandler>>();
             Dictionary<MenuStateTextMenuItem, String> CategoryItems = new Dictionary<MenuStateTextMenuItem, string>();
             foreach (var iterate in allHandlers.GetManagedTypes())
             {
                 var HandlerAttrib = iterate.GetCustomAttributes(typeof(HandlerMenuCategoryAttribute),true).FirstOrDefault() as HandlerMenuCategoryAttribute;
                 String getCategory = HandlerAttrib == null ? "" : HandlerAttrib.Category;
                 if (!AllHandlerCategories.ContainsKey(getCategory))
-                    AllHandlerCategories.Add(getCategory, new List<IGameCustomizationHandler>());
+                    AllHandlerCategories.Add(getCategory, new List<IBlockGameCustomizationHandler>());
 
                 ConstructorInfo ci = iterate.GetConstructor(new Type[] { });
                 if (ci != null)
                 {
-                    IGameCustomizationHandler handler = (IGameCustomizationHandler)ci.Invoke(new object[] { });
+                    IBlockGameCustomizationHandler handler = (IBlockGameCustomizationHandler)ci.Invoke(new object[] { });
                     AllHandlerCategories[getCategory].Add(handler);
                     //MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name, TipText="Change Settings for " + handler.Name };
                     //HandlerLookup.Add(builditem, handler);

@@ -285,7 +285,7 @@ namespace BASeTris.Theme.Block
 
         }
 
-        public sealed override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        public sealed override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
 
             foreach (var iterate in Group)
@@ -315,7 +315,7 @@ namespace BASeTris.Theme.Block
             }
 
         }
-        public sealed override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
+        public sealed override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field)
         {
             foreach (var iterate in Group)
             {
@@ -348,7 +348,7 @@ namespace BASeTris.Theme.Block
         }
         protected abstract BlockFlags GetBlockFlags(NominoElement testvalue);
         Bitmap DarkImage;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             if (DarkImage == null)
             {

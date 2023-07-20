@@ -283,8 +283,8 @@ namespace BASeTris
             }
 
         }
-        private IGameCustomizationHandler _Handler = null;
-        public IGameCustomizationHandler Handler {  get { return _Handler; } }
+        private IBlockGameCustomizationHandler _Handler = null;
+        public IBlockGameCustomizationHandler Handler {  get { return _Handler; } }
 
         public int Level {
             get { return (Handler == null ? 0 : (Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0); } }
@@ -294,7 +294,7 @@ namespace BASeTris
             get {  return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
         }
 
-        public TetrisField(NominoTheme theme, IGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT,int pHiddenRowCount=2,int pHiddenRowCountBottom = 0)
+        public TetrisField(NominoTheme theme, IBlockGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT,int pHiddenRowCount=2,int pHiddenRowCountBottom = 0)
         {
             _Theme = theme;
             _Handler = Handler;
@@ -728,7 +728,7 @@ namespace BASeTris
             }
         }
 
-        public void SetFieldColors(IGameCustomizationHandler handler)
+        public void SetFieldColors(IBlockGameCustomizationHandler handler)
         {
             lock (this)
             { 

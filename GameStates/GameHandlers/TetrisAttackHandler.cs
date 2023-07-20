@@ -111,7 +111,7 @@ namespace BASeTris.GameStates.GameHandlers
             //throw new NotImplementedException();
         }
         
-        public override IGameCustomizationHandler NewInstance()
+        public override IBlockGameCustomizationHandler NewInstance()
         {
             return new TetrisAttackHandler();
         }

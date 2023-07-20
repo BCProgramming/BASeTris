@@ -92,7 +92,7 @@ namespace BASeTris.Theme
             return BlockImageLookup[blocktype][color];
         }
 
-        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
             //Choose a random Type, then use the standard colour for it, then apply it.
             foreach (var iterate in Group)
@@ -109,7 +109,7 @@ namespace BASeTris.Theme
             }
         }
 
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             if (Reason == ThemeApplicationReason.NewNomino)
             {
@@ -149,7 +149,7 @@ namespace BASeTris.Theme
         }
 
         Bitmap DarkImage;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             if (DarkImage == null)
             {

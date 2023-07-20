@@ -113,16 +113,16 @@ namespace BASeTris
         {
             return false;
         }
-        public virtual String GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public virtual String GetNominoKey(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
             return GetNominoKey_Tetris(Group, GameHandler, Field);
         }
         [Obsolete("Nomino handling is too involved to index the images only by Type.")]
-        public virtual String GetNominoTypeKey(Type src, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public virtual String GetNominoTypeKey(Type src, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
             return src.FullName;
         }
-        public String GetNominoKey_Tetris(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public String GetNominoKey_Tetris(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
             if (Group is Tetromino)
             {
@@ -137,7 +137,7 @@ namespace BASeTris
 
         }
         
-        public string GetNominoKey_LineSeries(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public string GetNominoKey_LineSeries(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
 
             //Dr Mario theme keys are based on the "Duomino" arrangement. We take the first type, and the second type and create a key for it.
@@ -175,9 +175,9 @@ namespace BASeTris
             //return base.GetNominoKey(Group, GameHandler, Field);
         }
 
-        public abstract void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
-        public abstract void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field);
-        public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler);
+        public abstract void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
+        public abstract void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field);
+        public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler);
 
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
 
@@ -337,7 +337,7 @@ namespace BASeTris
         }
 
         
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background",0.5f],Color.Transparent);
         }
@@ -350,13 +350,13 @@ namespace BASeTris
             _Style = pBlockStyle;
         }
 
-        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field)
         {
             int useLevel = TetrisGame.rgen.Next(50);
             ApplyColorSet(Group,useLevel);
         }
 
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field, ThemeApplicationReason Reason)
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field, ThemeApplicationReason Reason)
         {
             var LineCount = GameHandler==null?0:((GameHandler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0);
             int CurrLevel = Field == null ? 0 : (int) (LineCount / 10);

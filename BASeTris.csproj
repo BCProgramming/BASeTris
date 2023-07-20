@@ -156,7 +156,9 @@
     <Compile Include="EnumHelper.cs" />
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
     <Compile Include="GameStates\DesignBackgroundState.cs" />
+    <Compile Include="GameStates\GameHandlers\ReverseTetrisHandler.cs" />
     <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
+    <Compile Include="GameStates\ThemeSelectionMenuState.cs" />
     <Compile Include="Rendering\Skia\GameStates\ControlSettingsViewStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\DesignBackgroundStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisSkiaStatAreaRenderer.cs" />
@@ -175,7 +177,7 @@
     <Compile Include="GameStates\GameHandlers\HandlerOptions\HandlerOptionsMenuPopulator.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioLevelCompleteState.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioVirusAppearanceState.cs" />
-    <Compile Include="GameStates\GameHandlers\IGameCustomizationHandler.cs" />
+    <Compile Include="GameStates\GameHandlers\IBlockGameCustomizationHandler.cs" />
     <Compile Include="GameStates\GameHandlers\NTrisGameHandler.cs" />
     <Compile Include="GameStates\GameHandlers\Tetris2Handler.cs" />
     <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />
@@ -299,6 +301,7 @@
     <Compile Include="Rendering\Skia\TetrisFieldRenderingHandlerSkia.cs" />
     <Compile Include="Rendering\Skia\TetrisImageBlockSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\TetrisStandardColouredBlockSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\ThemeSelectionStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\StandardRenderingProvider.cs" />
     <Compile Include="Rendering\TetrominoCollageRenderer.cs" />
     <Compile Include="Replay\StatefulReplay.cs" />

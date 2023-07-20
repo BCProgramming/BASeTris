@@ -539,7 +539,7 @@ namespace BASeTris.Theme.Block
             else return BitmapIndex;
         }
 
-        public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public override string GetNominoKey(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
             if (Group is Tetrominoes.Tetromino)
             {
@@ -632,7 +632,7 @@ namespace BASeTris.Theme.Block
         
         }
 
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent);
         }

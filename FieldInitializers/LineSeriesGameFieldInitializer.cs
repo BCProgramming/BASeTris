@@ -25,9 +25,9 @@ namespace BASeTris.FieldInitializers
     {
         private LineSeriesGameFieldInitializerParameters _params;
 
-        private IGameCustomizationHandler _Handler;
+        private IBlockGameCustomizationHandler _Handler;
 
-        public LineSeriesGameFieldInitializer(IGameCustomizationHandler pHandler,LineSeriesGameFieldInitializerParameters parameters)
+        public LineSeriesGameFieldInitializer(IBlockGameCustomizationHandler pHandler,LineSeriesGameFieldInitializerParameters parameters)
         {
               _params = parameters;
             _Handler = pHandler;

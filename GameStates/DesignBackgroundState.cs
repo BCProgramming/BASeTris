@@ -38,6 +38,7 @@ namespace BASeTris.GameStates
         }
         private int _DesignColumns = 6;
         private int _DesignRows = 6;
+        public double Scale { get; set; } = 1.0d;
         public SKColor GridColor { get; set; } = SKColors.Yellow;
         public int SelectedIndex { get; set; }
         public List<Nomino> DesignNominoes { get; set; } = new List<Nomino>();
@@ -110,6 +111,7 @@ namespace BASeTris.GameStates
             //we can use TetrominoCollageRenderer.LoadTetrominoCollageFromXML() to help with this.
             _DesignRows = SourceNode.GetAttributeInt("Rows",6);
             _DesignColumns = SourceNode.GetAttributeInt("Columns", 6);
+            Scale = SourceNode.GetAttributeDouble("Scale", 1d);
             String sThemeName = SourceNode.GetAttributeString("Theme", "");
             if (!String.IsNullOrEmpty(sThemeName))
             {
@@ -165,7 +167,7 @@ namespace BASeTris.GameStates
                 String sRotation = checkMino.GetBlockData().First().RotationModulo.ToString();
                 String sX = checkMino.X.ToString();
                 String sY = checkMino.Y.ToString();
-                XElement TetrominoElement = new XElement("Tetromino", new XAttribute("Type", sType), new XAttribute("Rotation", sRotation), new XAttribute("X", sX), new XAttribute("Y", sY));
+                XElement TetrominoElement = new XElement("Tetromino", new XAttribute("Scale",Scale),  new XAttribute("Type", sType), new XAttribute("Rotation", sRotation), new XAttribute("X", sX), new XAttribute("Y", sY));
                 CreateNode.Add(TetrominoElement);
             }
             
@@ -259,6 +261,11 @@ namespace BASeTris.GameStates
             MenuStateTextMenuItem RandomizeItem = new MenuStateTextMenuItem() { Text = "Randomize", TipText = "Randomize this Layer's arrangement" };
             MenuStateTextMenuItem NextLayer = new MenuStateTextMenuItem() { Text = "Next Layer", TipText = "Edit the next layer. Creates a new layer if needed." };
             MenuStateTextMenuItem PrevLayer = new MenuStateTextMenuItem() { Text = "Previous Layer", TipText = "Edit the previous layer" };
+            MenuStateSliderOption ScaleOption = new MenuStateSliderOption(0, 10, 1) { ChangeSize = 0.25f, Label = "Scale", LargeDetentCount = 5, SmallDetent = 0.1 };
+            ScaleOption.ValueChanged += (ob, ea) =>
+            {
+                CurrentLayer.Scale = ea.Value;
+            };
             MenuStateDisplayThemeMenuItem ChangeThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, typeof(StandardTetrisHandler),CurrentLayer.DisplayedDesignerTheme.GetType());
             ChangeThemeItem.SimpleSelectionFunction = (nt) =>
             {
@@ -283,13 +290,17 @@ namespace BASeTris.GameStates
             
 
             
-            foreach (var designeritem in new MenuStateMenuItem[] { ReturnMenuItem, AddNominoItem,TestDesign, ChangeThemeItem,SaveDesign,LoadDesign,NextLayer,PrevLayer,RandomizeItem, ExitMenuItem })
+            foreach (var designeritem in new MenuStateMenuItem[] { ReturnMenuItem, AddNominoItem,TestDesign, ChangeThemeItem,SaveDesign,LoadDesign,NextLayer,PrevLayer, ScaleOption,RandomizeItem, ExitMenuItem })
             {
                 if (designeritem is MenuStateTextMenuItem mstmi)
                 {
                     mstmi.FontFace = FontSrc.FontFamily.Name;
                     mstmi.FontSize = FontSrc.Size;
                     DesignOptionsMenuState.MenuElements.Add(mstmi);
+                }
+                else
+                {
+                    DesignOptionsMenuState.MenuElements.Add(designeritem);
                 }
             }
             DesignOptionsMenuState.FadedBGFadeState = new MenuState.MenuStateFadedParentStateInformation(this,false);
@@ -327,7 +338,7 @@ namespace BASeTris.GameStates
                     {
                         //create the Render background for this layer.
                         var layerbitmap = layer.GetLayerBitmap();
-                        var layercapsule = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = SKImage.FromBitmap(layerbitmap), Movement = new SKPoint(5, 5) };
+                        var layercapsule = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = SKImage.FromBitmap(layerbitmap), Movement = new SKPoint(5, 5),Scale = layer.Scale };
                         var BuildLayerbg = new StandardImageBackgroundSkia() { Data = layercapsule };
                         //if currbuild is null, this is the first layer.
                         if (CurrBuild == null) CurrBuild = BuildLayerbg;
@@ -384,6 +395,7 @@ namespace BASeTris.GameStates
                     });
                     pOwner.CurrentState = submenu;
                     DesignOptionsMenuState.ActivatedItem = null;
+                    ScaleOption.Value = CurrentLayer.Scale;
                 }
                 else if (e.MenuElement == RandomizeItem)
                 {
@@ -405,12 +417,14 @@ namespace BASeTris.GameStates
                     }
                     LayerIndex++;
                     DesignOptionsMenuState.ActivatedItem = null;
+                    ScaleOption.Value = CurrentLayer.Scale;
 
                 }
                 else if (e.MenuElement == PrevLayer)
                 {
                     if (LayerIndex == 0) LayerIndex = Layers.Length - 1; else LayerIndex--;
                     DesignOptionsMenuState.ActivatedItem = null;
+                    ScaleOption.Value = CurrentLayer.Scale;
                 }
 
             };

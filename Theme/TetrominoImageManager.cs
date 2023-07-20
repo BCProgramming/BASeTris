@@ -13,7 +13,7 @@ namespace BASeTris.Theme
     public class TetrominoImageManager
     {
 
-        private IGameCustomizationHandler GameHandler = null;
+        private IBlockGameCustomizationHandler GameHandler = null;
         private  TetrisField PlayField = null;
         public Dictionary<String, List<SKBitmap>> NominoSKBitmaps = null;
         public Dictionary<String, List<Image>> NominoImages { set; get; } = null;
@@ -44,7 +44,7 @@ namespace BASeTris.Theme
 
         }
 
-        public TetrominoImageManager(IGameCustomizationHandler pHandler, TetrisField pField)
+        public TetrominoImageManager(IBlockGameCustomizationHandler pHandler, TetrisField pField)
         {
             GameHandler = pHandler;
             PlayField = pField;

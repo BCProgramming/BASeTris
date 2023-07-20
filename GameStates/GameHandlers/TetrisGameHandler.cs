@@ -24,7 +24,7 @@ namespace BASeTris.GameStates.GameHandlers
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerMenuCategory("Tetris")]
     [HandlerTipText("Standard Tetris, Marathon Mode")]
-    public class StandardTetrisHandler : IGameCustomizationHandler,IGameHandlerChooserInitializer
+    public class StandardTetrisHandler : IBlockGameCustomizationHandler,IGameHandlerChooserInitializer
     {
         public bool ProgressiveMode = false;
         public virtual String Name { get { return "Tetris"; } }
@@ -34,7 +34,7 @@ namespace BASeTris.GameStates.GameHandlers
         private Choosers.BlockGroupChooser _Chooser;
         public bool AllowFieldImageCache { get { return true; } }
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
-        BaseStatistics IGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
+        BaseStatistics IBlockGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
 
         public virtual FieldCustomizationInfo GetFieldInfo()
         {
@@ -116,7 +116,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
 
         public TetrisGameOptions GameOptions { get;  } = new TetrisGameOptions();
-        GameOptions IGameCustomizationHandler.GameOptions => this.GameOptions;
+        GameOptions IBlockGameCustomizationHandler.GameOptions => this.GameOptions;
       
         public Nomino[] GetNominos()
         {
@@ -214,7 +214,7 @@ namespace BASeTris.GameStates.GameHandlers
             return (IHighScoreList)TetrisGame.ScoreMan["Standard"];
         }
 
-        public virtual IGameCustomizationHandler NewInstance()
+        public virtual IBlockGameCustomizationHandler NewInstance()
         {
             return new StandardTetrisHandler();
         }
@@ -452,7 +452,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             ProgressiveMode = true;
         }
-        public override IGameCustomizationHandler NewInstance()
+        public override IBlockGameCustomizationHandler NewInstance()
         {
             return new ProgressiveTetrisHandler();
         }

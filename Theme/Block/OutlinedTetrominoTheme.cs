@@ -112,7 +112,7 @@ namespace BASeTris
 
         }
 
-        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler Handler,TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler Handler,TetrisField Field)
         {
             int LevelUse = TetrisGame.rgen.Next(10);
 
@@ -120,7 +120,7 @@ namespace BASeTris
 
         }
 
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler handler,TetrisField Field, ThemeApplicationReason Reason)
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler handler,TetrisField Field, ThemeApplicationReason Reason)
         {
             var LineCount = handler==null?0:(handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;
             int CurrLevel = Field == null ? 0 : (int)(LineCount / 10);
@@ -260,7 +260,7 @@ namespace BASeTris
         }
 
         PlayFieldBackgroundInfo ColoredBG = null;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field,IGameCustomizationHandler Handler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field,IBlockGameCustomizationHandler Handler)
         {
             if (ColoredBG == null) ColoredBG = GetColoredBackground(Color.AntiqueWhite, null);
 

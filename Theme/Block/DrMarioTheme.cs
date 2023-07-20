@@ -44,7 +44,7 @@ namespace BASeTris.Theme.Block
         public bool UseEnhancedImages = true;
         public static bool AllowAdvancedRotations = true;
         public override String Name { get { return "NES Style"; } }
-        public override string GetNominoKey(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field)
+        public override string GetNominoKey(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
 
             //Dr Mario theme keys are based on the "Duomino" arrangement. We take the first type, and the second type and create a key for it.
@@ -978,7 +978,7 @@ namespace BASeTris.Theme.Block
             }
             
         }
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_3", 0.5f], Color.Transparent);
         }

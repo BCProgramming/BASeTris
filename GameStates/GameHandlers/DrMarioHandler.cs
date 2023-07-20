@@ -91,7 +91,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return new Nomino[] { new Duomino.Duomino() };
         }
-        public override IGameCustomizationHandler NewInstance()
+        public override IBlockGameCustomizationHandler NewInstance()
         {
             return new DrMarioHandler() { } ;
         }

@@ -39,7 +39,7 @@ namespace BASeTris
         }
 
         public static System.Reflection.BASeCamp.MultiTypeManager DITypes = null;
-        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IGameCustomizationHandler),typeof(BlockGroupChooser) };
+        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IBlockGameCustomizationHandler),typeof(BlockGroupChooser) };
 
         public enum StartMode
         {
@@ -77,7 +77,7 @@ namespace BASeTris
         }
         public static IEnumerable<Type> GetGameHandlers()
         {
-            return DITypes[typeof(IGameCustomizationHandler)].ManagedTypes;
+            return DITypes[typeof(IBlockGameCustomizationHandler)].ManagedTypes;
         }
         const double Phi = 1.618033988749895;
         const double phi = -1 /Phi;
@@ -113,10 +113,10 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
+           
+            //Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
 
-            Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
-
-            var testresult = MakeTester.GetContiguousSets();
+            //var testresult = MakeTester.GetContiguousSets();
             /* foreach(var iterate in NominoBuilder.BuildNominoes(5))
              {
                  var buildstring = NominoBuilder.NominoToString(iterate);

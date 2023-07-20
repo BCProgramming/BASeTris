@@ -19,7 +19,7 @@ namespace BASeTris.Theme.Block
         private StandardNESThemeImageProvider _ThemeProvider;
         public override ThemeImageProvider ThemeProvider { get => _ThemeProvider; set => _ThemeProvider = (StandardNESThemeImageProvider)value; }
         Bitmap DarkImage;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             if (DarkImage == null)
             {

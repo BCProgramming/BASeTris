@@ -77,6 +77,7 @@ namespace BASeTris.GameStates.Menu
             var testslider = new MenuStateSliderOption(0, 100, 50) { Label = "Slider of Excitement" };
             var Controls = new MenuStateTextMenuItem() { Text = "Controls", TipText = "Display control settings." };
             var BGDesign = new MenuStateTextMenuItem() { Text = "Design", TipText = "Background Designer. Why does this exist?" };
+            var CrappyThemeTestthing = new MenuStateTextMenuItem() { Text = "Theme shit", TipText = "Crappy item for testing new theme menu. ignore me" };
             var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
@@ -131,7 +132,14 @@ namespace BASeTris.GameStates.Menu
                 {
                     //nothing, this needs confirmation so is handled separate.
                 }
-            
+                else if (e.MenuElement == CrappyThemeTestthing)
+                {
+                    ThemeSelectionMenuState themestate = new ThemeSelectionMenuState(pOwner, pOwner.CurrentState.BG, pOwner.CurrentState, typeof(StandardTetrisHandler), typeof(SNESTetrominoTheme), (nt) => { });
+                    pOwner.CurrentState = themestate;
+                    Target.ActivatedItem = null;
+                }
+
+
 
             };
 
@@ -172,7 +180,7 @@ namespace BASeTris.GameStates.Menu
             //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
             List<MenuStateMenuItem> AllItems = new List<MenuStateMenuItem>();
             List<MenuStateMenuItem> CategoryItems = new List<MenuStateMenuItem>();
-            Dictionary<MenuStateMenuItem, IGameCustomizationHandler> HandlerLookup = new Dictionary<MenuStateMenuItem, IGameCustomizationHandler>();
+            Dictionary<MenuStateMenuItem, IBlockGameCustomizationHandler> HandlerLookup = new Dictionary<MenuStateMenuItem, IBlockGameCustomizationHandler>();
             var BackItem = new MenuStateTextMenuItem() { Text = "Back to Main" };
             foreach(var iterate in Program.GetGameHandlers())
             {
@@ -212,7 +220,7 @@ namespace BASeTris.GameStates.Menu
                 ConstructorInfo ci = iterate.GetConstructor(new Type[] { });
                 if(ci!=null)
                 {
-                    IGameCustomizationHandler handler = (IGameCustomizationHandler)ci.Invoke(new object[] { });
+                    IBlockGameCustomizationHandler handler = (IBlockGameCustomizationHandler)ci.Invoke(new object[] { });
                     MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name,TipText = (FindTipAttribute?.TipText)??"" };
                     HandlerLookup.Add(builditem, handler);
                     AllItems.Add(builditem);
@@ -238,7 +246,7 @@ namespace BASeTris.GameStates.Menu
             {
                 if (HandlerLookup.ContainsKey(e.MenuElement))
                 {
-                    IGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
+                    IBlockGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
                     if (pOwner is IGamePresenter igp)
                     {
 
@@ -348,6 +356,8 @@ namespace BASeTris.GameStates.Menu
 
         }
     }
+
+    
 
 
 

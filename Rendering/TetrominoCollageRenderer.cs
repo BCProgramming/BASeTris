@@ -20,7 +20,7 @@ using System.Xml.Linq;
 namespace BASeTris.Rendering
 {
 
-    public class FakeRendererHandler : IGameCustomizationHandler
+    public class FakeRendererHandler : IBlockGameCustomizationHandler
     {
         public int ColumnWidth { get; set; }
         public int ColumnHeight { get; set; }
@@ -78,7 +78,7 @@ namespace BASeTris.Rendering
             return null;
         }
 
-        public IGameCustomizationHandler NewInstance()
+        public IBlockGameCustomizationHandler NewInstance()
         {
             return null;
         }
@@ -163,6 +163,7 @@ namespace BASeTris.Rendering
             
             foreach (XElement TetrominoElements in TetCollageNode.Elements("Tetromino"))
             {
+                
 
                 //<Tetromino Type=[I,L,J,Z,S,T,O] Rotation=[0,1,2,3] X=XPosition Y=YPosition>
 
@@ -243,21 +244,21 @@ namespace BASeTris.Rendering
   </TetrominoCollage>"
 
         };
-        public static SKBitmap GetBackgroundCollage(NominoTheme _theme)
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,int BlockSize = 500)
         {
             XElement RootNode;
             Nomino[][] AddBlocks = GroupNominos(LoadTetrominoCollageFromXMLString(TetrisGame.Choose(DefaultBackgroundCollageXML), out RootNode));
             int Cols = RootNode.GetAttributeInt("Columns", 6);
             int Rows = RootNode.GetAttributeInt("Rows", 6);
 
-            return GetBackgroundCollage(_theme, (Nomino[][])AddBlocks,Rows, Cols);
+            return GetBackgroundCollage(_theme, (Nomino[][])AddBlocks,Rows, Cols,BlockSize);
         }
         public static SKBitmap GetBackgroundCollage(NominoTheme _theme, Nomino[] Contents,int RowCount,int ColumnCount)
         {
             var Grouped = GroupNominos(Contents);
             return GetBackgroundCollage(_theme, Grouped, RowCount, ColumnCount);
         }
-        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,Nomino[][] Contents,int RowCount,int ColumnCount)
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,Nomino[][] Contents,int RowCount,int ColumnCount,int BlockSize = 100)
         {
 
          
@@ -267,7 +268,7 @@ namespace BASeTris.Rendering
             int generatedlevel = TetrisGame.rgen.Next(0, 21);
             int Cols = ColumnCount;
             int Rows = RowCount;
-            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(Cols, Rows, 500, 500, generatedlevel, _theme, SKColors.Black);
+            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(Cols, Rows, BlockSize, BlockSize, generatedlevel, _theme, SKColors.Black);
 
             //Nomino[][] AddBlocks = new Nomino[][] { new Nomino[] { IBlock, IBlock2 }, new Nomino[] { TBlock1, TBlock2, TBlock3 }, new Nomino[] { SBlock }, new Nomino[] { LBlock1, LBlock2 }, new Nomino[] { JBlock1, JBlock2 }, new Nomino[] { ZBlock1 }, new Nomino[] { LBlock3 } };
             bool doRandomize = TetrisGame.rgen.NextDouble() > 0.5;
@@ -307,7 +308,7 @@ namespace BASeTris.Rendering
             _field.SetGroupToField(Source);
 
         }
-        public IGameCustomizationHandler DummyHandler { get; }
+        public IBlockGameCustomizationHandler DummyHandler { get; }
         public TetrominoCollageRenderer(int pColumnCount, int pRowCount, int pColumnWidth, int pRowHeight,int pLevel,NominoTheme _theme,SKColor pClearColor)
         {
             //Note: We can get away with no CustomizationHandler here, as we aren't going to actually be having the Field "do" anything other than use it as a render source.

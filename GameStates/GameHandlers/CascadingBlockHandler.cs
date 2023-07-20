@@ -19,7 +19,7 @@ using static BASeTris.GameState;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-    public abstract class CascadingPopBlockGameHandler<STATT, OPTT> : IGameCustomizationHandler
+    public abstract class CascadingPopBlockGameHandler<STATT, OPTT> : IBlockGameCustomizationHandler
          where STATT : BaseStatistics, new()
          where OPTT : GameOptions, new()
     {
@@ -37,7 +37,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         public bool LevelCompleteWhenMasterCountZero = true;
         public STATT Statistics { get; private set; } = new STATT();
-        BaseStatistics IGameCustomizationHandler.Statistics { get { return this.Statistics; } }
+        BaseStatistics IBlockGameCustomizationHandler.Statistics { get { return this.Statistics; } }
         public bool AllowFieldImageCache { get { return false; } }
         public OPTT GameOptions { get; } = new OPTT() { AllowWallKicks = false };
 
@@ -90,7 +90,7 @@ namespace BASeTris.GameStates.GameHandlers
 
     
 
-        public abstract IGameCustomizationHandler NewInstance();
+        public abstract IBlockGameCustomizationHandler NewInstance();
 
         //finds critical mass excesses starting from the given position.
         //this basically only finds one specific "critical mass"
@@ -851,7 +851,7 @@ namespace BASeTris.GameStates.GameHandlers
 
 
 
-        GameOptions IGameCustomizationHandler.GameOptions => this.GameOptions;
+        GameOptions IBlockGameCustomizationHandler.GameOptions => this.GameOptions;
 
         public virtual void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {

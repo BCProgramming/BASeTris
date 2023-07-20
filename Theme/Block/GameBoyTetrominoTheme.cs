@@ -133,7 +133,7 @@ namespace BASeTris
             Prepared = true;
         }
         private Bitmap LightImage = null;
-        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IGameCustomizationHandler GameHandler)
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             
             if (LightImage == null)
@@ -252,7 +252,7 @@ namespace BASeTris
         private static Image Corner_Bottom_Left;
         private static Image Corner_Bottom_Right;
 
-        public override void ApplyRandom(Nomino Group, IGameCustomizationHandler GameHandler,TetrisField Field)
+        public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field)
         {
             PrepareTheme();
             int RandomLevel = TetrisGame.rgen.Next(25);
@@ -265,7 +265,7 @@ namespace BASeTris
             selected(Group, Field, RandomLevel);
         }
         private Dictionary<String, GameBoyBlockSelections> ChosenBlockSelections = new Dictionary<string, GameBoyBlockSelections>();
-        public override void ApplyTheme(Nomino Group, IGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareTheme();
             var LineCount = GameHandler==null?0:(GameHandler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0;

@@ -21,13 +21,13 @@ namespace BASeTris.GameStates.GameHandlers
     /// <summary>
     /// interface for game customization, for different Nomino-based games. (eg. Tetris being standard, but could be Tetris 2 or Dr Mario and stuff)
     /// </summary>
-    public interface IGameCustomizationHandler
+    public interface IBlockGameCustomizationHandler
     {
         String Name { get; }
         FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger);
         IHighScoreList GetHighScores();
         Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner);
-        IGameCustomizationHandler NewInstance();
+        IBlockGameCustomizationHandler NewInstance();
         NominoTheme DefaultTheme { get; }
         void PrepareField(GameplayGameState state, IStateOwner pOwner); //prepare field for a new game. (or level or whatever- basically depends on the type of game)
         BaseStatistics Statistics { get; }
@@ -247,7 +247,7 @@ namespace BASeTris.GameStates.GameHandlers
 
     public static class HandlerHelperExtensions
     {
-        private static Dictionary<IStateOwner,IGameCustomizationHandler> LastHandlers = new Dictionary<IStateOwner, IGameCustomizationHandler>();
+        private static Dictionary<IStateOwner,IBlockGameCustomizationHandler> LastHandlers = new Dictionary<IStateOwner, IBlockGameCustomizationHandler>();
         /// <summary>
         /// Helper extension on IStateOwner. This attempts to get the IGameCustomizationHandler that is currently  "active" for the handler.
         /// The customization handler is a part of the GameplayGameState, so this relies on either the current state being the gameplay game state, a Composite state of the gameplay gamestate. If neither of those
@@ -255,9 +255,9 @@ namespace BASeTris.GameStates.GameHandlers
         /// </summary>
         /// <param name="pOwner"></param>
         /// <returns></returns>
-        public static IGameCustomizationHandler GetHandler(this IStateOwner pOwner)
+        public static IBlockGameCustomizationHandler GetHandler(this IStateOwner pOwner)
         {
-            IGameCustomizationHandler result = null;
+            IBlockGameCustomizationHandler result = null;
             if(pOwner.CurrentState is GameplayGameState ggs)
             {
                 result = ggs.GameHandler;

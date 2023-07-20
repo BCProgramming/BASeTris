@@ -30,7 +30,7 @@ namespace BASeTris.GameStates.Menu
                 var findconstruct = iterate.GetConstructor(new Type[] { });
                 if (findconstruct != null)
                 {
-                    IGameCustomizationHandler newhandler = (IGameCustomizationHandler)findconstruct.Invoke(new object[] { });
+                    IBlockGameCustomizationHandler newhandler = (IBlockGameCustomizationHandler)findconstruct.Invoke(new object[] { });
                     MenuItemNewGameSelection newoption = new MenuItemNewGameSelection(newhandler);
                     Options.Add(newoption);
                 }
@@ -53,9 +53,9 @@ namespace BASeTris.GameStates.Menu
 
     public class MenuItemNewGameSelection
     {
-        IGameCustomizationHandler _Handler;
-        public IGameCustomizationHandler Handler { get { return _Handler; } }
-        public MenuItemNewGameSelection(IGameCustomizationHandler handler)
+        IBlockGameCustomizationHandler _Handler;
+        public IBlockGameCustomizationHandler Handler { get { return _Handler; } }
+        public MenuItemNewGameSelection(IBlockGameCustomizationHandler handler)
         {
             _Handler = handler;
         }

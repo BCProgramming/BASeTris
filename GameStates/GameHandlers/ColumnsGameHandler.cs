@@ -76,7 +76,7 @@ namespace BASeTris.GameStates
                 savedNominoes = new Nomino[] { CreateColumnNomino() };
             return savedNominoes;
         }
-        public override IGameCustomizationHandler NewInstance()
+        public override IBlockGameCustomizationHandler NewInstance()
         {
             return new ColumnsGameHandler() { };
         }

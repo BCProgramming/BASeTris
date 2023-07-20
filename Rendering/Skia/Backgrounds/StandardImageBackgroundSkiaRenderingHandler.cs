@@ -34,7 +34,11 @@ namespace BASeTris.Rendering.Skia.Backgrounds
                     Capsule.ResetState(sbb.Bounds);
                 }
                 lastBounds = sbb.Bounds;
-                pRenderTarget.DrawRect(sbb.Bounds,Capsule.BackgroundBrush);
+                using (SKAutoCanvasRestore sr = new SKAutoCanvasRestore(pRenderTarget, true))
+                {
+                    pRenderTarget.Scale((float)Source.Data.Scale);
+                    pRenderTarget.DrawRect(sbb.Bounds, Capsule.BackgroundBrush);
+                }
             }
 
         }
