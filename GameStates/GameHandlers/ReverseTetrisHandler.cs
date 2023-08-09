@@ -14,6 +14,7 @@ namespace BASeTris.GameStates.GameHandlers
     //-Next queue can be used for display of the generated tetrominoes. 
     //"active" Nomino does not rotate or fall. Instead, player is able to move it freely throughout the field, and use CW or CCW to indicate the position to try to place/clear.
     //scoring is more or less static, just gives a point for each cleared block.
+    /*
     internal class ReverseTetrisHandler : IBlockGameCustomizationHandler
     {
         public string Name => throw new NotImplementedException();
@@ -68,5 +69,5 @@ namespace BASeTris.GameStates.GameHandlers
         {
             throw new NotImplementedException();
         }
-    }
+    }*/
 }

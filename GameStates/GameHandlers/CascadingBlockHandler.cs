@@ -14,6 +14,7 @@ using BASeTris.GameStates.GameHandlers.HandlerStates;
 using BASeTris.Particles;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
+using OpenTK.Graphics.ES20;
 using SkiaSharp;
 using static BASeTris.GameState;
 
@@ -526,9 +527,19 @@ namespace BASeTris.GameStates.GameHandlers
 
 
                     //next, go through the entire field.
-                    
-                    var ResurrectNominos = ResurrectLoose(state,pOwner,MaxCombo+1);
-                    
+
+                    HashSet<Nomino> ResurrectNominos = null;
+                    if (SimplePopHandling)
+                    {
+                        ResurrectNominos = ResurrectLoose(state, pOwner, MaxCombo + 1);
+                        
+                    }
+                    else
+                    {
+                        
+                        ResurrectNominos = ResurrectLoose_Ex(state, pOwner, MaxCombo + 1);
+                        
+                    }
 
                     if (ResurrectNominos.Any())
                     {
@@ -604,7 +615,137 @@ namespace BASeTris.GameStates.GameHandlers
             return fcr;
 
         }
-        
+        private HashSet<Nomino> ResurrectLoose_Ex(GameplayGameState state, IStateOwner pOwner, int Combo)
+        {
+            //new version of resurrectLoose.
+
+            //1. Iterate through all cells
+            //2. if the block in the cell is not supported, create a new Nomino
+            //3. To the new nomino, add the block in the cell. Check adjacent cells recursively to find blocks that are part of the same nomino and have the same group index. 
+            //  3.(a). The new nomino's position should be the "center" of the square of the size that is the largest of the x or y width of the resurrected nominoes.
+            //  3.(b). And the added blocks that are 'resurrected' will of course need appropriate offsets such that when the Nomino is added to the active groups all those blocks "spawn" in the same position as the blocks to which they were based in the field.
+            //4. empty out the cells that have been resurrected as part of the new nomino.
+            HashSet<NominoBlock> CheckedBlocks = new HashSet<NominoBlock>();
+            HashSet<Nomino> ResurrectNominoes = new HashSet<Nomino>();
+
+            for (int row = 0; row < state.PlayField.RowCount; row++)
+            {
+                for (int column = 0; column < state.PlayField.ColCount; column++)
+                {
+                    var currentblock = state.PlayField.Contents[row][column];
+                    bool IsPopping = false;
+                    if (currentblock != null)
+                    {
+                        if (currentblock is CascadingBlock cb)
+                        {
+                            if (CheckedBlocks.Contains(currentblock)) continue; //already processed.
+                            CheckedBlocks.Add(currentblock);
+                            if (currentblock is LineSeriesBlock lsb) IsPopping = lsb.Popping;
+                            var BlockSupported = cb.IsSupported(cb.Owner, row, column, state.PlayField);
+                            if (!IsPopping && !BlockSupported)
+                            {
+                                //we want to resurrect this nomino. Or, to be more precise, we want to resurrect all blocks adjacent to this one that were part of the same nomino and have the same group index.
+                                var FindElements = GetAdjacent(row, column, state, pOwner, (nb) =>
+                                {
+                                    if (nb is CascadingBlock cbb)
+                                    {
+                                        return cbb.Owner == cb.Owner && cbb.ConnectionIndex == cb.ConnectionIndex;
+                                    }
+
+                                    return false;
+                                });
+
+
+                                //create a new Nomino out of currentblock and the blocks in FindElements.
+                                List<AdjacentResultInfo> NewNominoContents = FindElements.Concat(new[] { new AdjacentResultInfo(cb, row, column) }).ToList();
+                                //add the blocks in the results to the list of blocks we've already processed, so we don't try recreating Nominoes multiple times.
+                                foreach (var addcheck in NewNominoContents)
+                                {
+                                    if (!CheckedBlocks.Contains(addcheck.block))
+                                        CheckedBlocks.Add(addcheck.block);
+
+                                }
+                                //We need to find the extents of These Nominos, so we need the minimum and maximum X and Y values.
+                                int MinX = int.MaxValue, MinY = int.MaxValue, MaxX = int.MinValue, MaxY = int.MinValue;
+                                foreach (var findextent in NewNominoContents)
+                                {
+                                    if (findextent.Column < MinX) MinX = findextent.Column;
+                                    if (findextent.Column > MaxX) MaxX = findextent.Column;
+                                    if (findextent.Row < MinY) MinY = findextent.Row;
+                                    if (findextent.Row > MaxY) MaxY = findextent.Row;
+
+                                }
+                                //determine width and height to be used. This is used to evaluate the "center point" of the newly constructed nomino.
+                                int NominoWidth = MaxX - MinX;
+                                int NominoHeight = MaxY - MinY;
+                                //round up to the next multiple of 2, so the center point is an integer.
+                                NominoWidth += NominoWidth % 2;
+                                NominoHeight += NominoHeight % 2;
+
+                                int CenterPointX = MinX + NominoWidth / 2;
+                                int CenterPointY = MinY + NominoHeight / 2;
+                                //construct the new Nomino.
+                                var newElements = from b in NewNominoContents select new NominoElement(new Point(b.Column - CenterPointX, b.Row - CenterPointY), new Size(NominoWidth, NominoHeight), b.block);
+                                //Now, we can go through the NewNominoContents
+                                Nomino BuildResult = new Nomino(newElements);
+                                BuildResult.X = CenterPointX;
+                                BuildResult.Y = CenterPointY;
+                                ResurrectNominoes.Add(BuildResult);
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            
+
+            
+
+            return ResurrectNominoes;
+        }
+        private class AdjacentResultInfo
+        {
+            public NominoBlock block { get; set; }
+            public int Column { get; set; }
+            public int Row { get; set; }
+            public AdjacentResultInfo(NominoBlock pBlock, int pRow, int pCol)
+            {
+                block = pBlock;
+                Column = pCol;
+                Row = pRow;
+            }
+        }
+        //retrieve all blocks adjacent to the one provided, and adjacent to that one, and so on, that pass the test function.
+
+        private IEnumerable<AdjacentResultInfo> GetAdjacent(int Row,int Column,GameplayGameState state, IStateOwner pOwner, Predicate<NominoBlock> TestFunction,HashSet<Point> RecurseList= null)
+        {
+            if (RecurseList == null) RecurseList = new HashSet<Point>();
+            if (RecurseList.Contains(new Point(Column, Row))) yield break;
+            RecurseList.Add(new Point(Column, Row));
+            Point[] checkoffsets = new Point[]{
+                new(){X=-1,Y=0 },
+                new(){X=1,Y=0 },
+                new(){X=0,Y=1 },
+                new(){X=0,Y=-1 }
+            };
+            foreach (var pt in checkoffsets)
+            {
+                int CheckRow = Row + pt.Y;
+                int CheckColumn = Column + pt.X;
+                if (CheckRow < 0 || CheckColumn < 0 || CheckRow > state.PlayField.RowCount - 1 || CheckColumn > state.PlayField.ColCount - 1) continue;
+                if (RecurseList.Contains(new Point(CheckColumn, CheckRow))) continue;
+                NominoBlock nb = state.PlayField.Contents[CheckRow][CheckColumn];
+                if (nb != null && TestFunction(nb))
+                {
+                    yield return new AdjacentResultInfo(nb,CheckRow,CheckColumn);
+                    foreach (var iterate in GetAdjacent(CheckRow, CheckColumn, state, pOwner, TestFunction, RecurseList))
+                    {
+                        yield return iterate;
+                    }
+                }
+            }
+        }
         protected virtual HashSet<Nomino> ResurrectLoose(GameplayGameState state,IStateOwner pOwner,int Combo)
         {
             List<NominoBlock> CheckedBlocks = new List<NominoBlock>();
