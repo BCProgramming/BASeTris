@@ -38,16 +38,16 @@ namespace BASeTris.Tetrominoes
         internal static Func<Nomino>[] Tetris2TetrominoFunctions =
            new Func<Nomino>[]
            {
-                () => new Tetromino_Z((a)=>new LineSeriesBlock()),
-                () => new Tetromino_I((a)=>new LineSeriesBlock()),
-                () => new Tetromino_J((a)=>new LineSeriesBlock()),
-                () => new Tetromino_L((a)=>new LineSeriesBlock()),
-                () => new Tetromino_O((a)=>new LineSeriesBlock()),
-                () => new Tetromino_S((a)=>new LineSeriesBlock()),
-                () => new Tetromino_T((a)=>new LineSeriesBlock()),
-                () => new Tetromino_Y((a)=>new LineSeriesBlock()),
-                () => new Tetromino_G((a)=>new LineSeriesBlock()),
-                () => new Tetromino_F((a)=>new LineSeriesBlock())
+                () => new Tetromino_Z((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_I((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_J((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_L((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_O((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_S((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_T((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_Y((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_G((a)=>new LineSeriesBlock(){CriticalMass = 3 }),
+                () => new Tetromino_F((a)=>new LineSeriesBlock(){CriticalMass = 3 })
 
            };
         

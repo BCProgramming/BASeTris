@@ -129,7 +129,7 @@ namespace BASeTris.GameStates.GameHandlers
             //likely will need to have stats and stuff abstracted to each Handler.
             state.PlayField.Reset();
 
-            LineSeriesGameFieldInitializerParameters _InitParams = new LineSeriesGameFieldInitializerParameters(Level, GetValidPrimaryCombiningTypes()) { DoShinyBlocks = true };
+            LineSeriesGameFieldInitializerParameters _InitParams = new LineSeriesGameFieldInitializerParameters(Level, GetValidPrimaryCombiningTypes()) { DoShinyBlocks = true,GetCriticalMassFunc = (a)=>3 };
 
             LineSeriesGameFieldInitializer fieldinit = new LineSeriesGameFieldInitializer(this, _InitParams);
             fieldinit.Initialize(state.PlayField);
