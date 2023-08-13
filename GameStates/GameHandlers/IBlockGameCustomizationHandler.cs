@@ -45,6 +45,7 @@ namespace BASeTris.GameStates.GameHandlers
     }
     public class ExtendedCustomizationHandlerResult
     {
+        public static ExtendedCustomizationHandlerResult Default = new ExtendedCustomizationHandlerResult(true);
         public bool ContinueDefault { get; init; }
         public ExtendedCustomizationHandlerResult(bool pDoDefault)
         {

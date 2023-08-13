@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BASeCamp.BASeScores;
@@ -20,7 +21,7 @@ using static BASeTris.GameState;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-    public abstract class CascadingPopBlockGameHandler<STATT, OPTT> : IBlockGameCustomizationHandler
+    public abstract class CascadingPopBlockGameHandler<STATT, OPTT> : IBlockGameCustomizationHandler, IExtendedGameCustomizationHandler
          where STATT : BaseStatistics, new()
          where OPTT : GameOptions, new()
     {
@@ -456,6 +457,7 @@ namespace BASeTris.GameStates.GameHandlers
                 //TODO: this seems to act weird with Tetris 2, sets the popping colour wrong sometimes. It seems to be using other colours from the tetromino's that the blocks
                 //belonged to.
                 int MaxCombo = 0;
+                HashSet<Point> ShinyPopped = new HashSet<Point>();
                 if (CriticalMasses != null)
                 {
                     HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
@@ -467,17 +469,33 @@ namespace BASeTris.GameStates.GameHandlers
 
                         if (popItem is LineSeriesBlock lsb)
                         {
-                            if (lsb.ComboTracker > MaxCombo) MaxCombo = lsb.ComboTracker;
-                            lsb.Popping = true;
-                            GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
-                            if (popItem.Owner != null)
-                                state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
-                            else
+                            MaxCombo = ProcessPopBlock(state, pOwner,ref MaxCombo, iterate, popItem, lsb);
+
+                        }
+                        if (popItem is LineSeriesPrimaryShinyBlock lsbp)
+                        {
+                            TetrisGame.Soundman.PlaySound("tetris_2_shiny_clear");
+                            //go through all cells.
+                            for (int r = 0; r < state.PlayField.Contents.Length; r++)
                             {
-                                var Dummino = new Nomino() { };
-                                Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
-                                state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
+                                var row = state.PlayField.Contents[r];
+                                for (int c = 0; c<row.Length; c++)
+                                {
+                                    var cell = row[c];     
+                                
+                                    if (cell is LineSeriesPrimaryBlock lsb2 && !lsb2.Popping)
+                                    {
+                                        if (lsb2.CombiningIndex == lsbp.CombiningIndex)
+                                        {
+                                            ProcessPopBlock(state, pOwner, ref MaxCombo, new Point(c, r), lsb2, lsb2);
+                                            ShinyPopped.Add(new Point(c, r));
+                                            
+                                        }
+                                    }
+                                }
+                             
                             }
+
 
                         }
                         if (popItem.Owner != null)
@@ -498,11 +516,12 @@ namespace BASeTris.GameStates.GameHandlers
                 {
                     //first, remove the CriticalMasses altogether.
 
-                    if (CriticalMasses != null) foreach (var iterate in CriticalMasses)
+                    if (CriticalMasses != null) foreach (var iterate in CriticalMasses.Concat(ShinyPopped))
                     {
                             
                         //clear out the cell at the appropriate position.
                         var popItem = state.PlayField.Contents[iterate.Y][iterate.X];
+                            if (popItem == null) continue;
                             if (popItem is LineSeriesBlock lsbb)
                             {
                                 fcr.ScoreResult += (5 * Math.Min(1,lsbb.ComboTracker));
@@ -615,6 +634,24 @@ namespace BASeTris.GameStates.GameHandlers
             return fcr;
 
         }
+
+        private int ProcessPopBlock(GameplayGameState state, IStateOwner pOwner, ref int MaxCombo, Point iterate, NominoBlock popItem, LineSeriesBlock lsb)
+        {
+            if (lsb.ComboTracker > MaxCombo) MaxCombo = lsb.ComboTracker;
+            lsb.Popping = true;
+            GeneratePopParticles(pOwner, state, new SKPointI(iterate.X, iterate.Y));
+            if (popItem.Owner != null)
+                state.PlayField.Theme.ApplyTheme(popItem.Owner, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
+            else
+            {
+                var Dummino = new Nomino() { };
+                Dummino.AddBlock(new Point[] { new Point(0, 0) }, popItem);
+                state.PlayField.Theme.ApplyTheme(Dummino, this, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
+            }
+
+            return MaxCombo;
+        }
+
         private HashSet<Nomino> ResurrectLoose_Ex(GameplayGameState state, IStateOwner pOwner, int Combo)
         {
             //new version of resurrectLoose.
@@ -882,32 +919,24 @@ namespace BASeTris.GameStates.GameHandlers
         static BCPoint[] CardinalOptions = new BCPoint[] { new BCPoint(1, 0), new BCPoint(0, 1) };
         const float MAX_SPEED = 0.25f;
         const float MIN_SPEED = 0.35f;
+        private Dictionary<LineSeriesBlock.CombiningTypes, BCColor[]> CombiningColorMap = new Dictionary<LineSeriesBlock.CombiningTypes, BCColor[]>()
+        {
+            {LineSeriesBlock.CombiningTypes.Red,RedColors },
+            {LineSeriesBlock.CombiningTypes.Green,GreenColors },
+            {LineSeriesBlock.CombiningTypes.Blue,BlueColors },
+            {LineSeriesBlock.CombiningTypes.Yellow,YellowColors },
+            {LineSeriesBlock.CombiningTypes.Orange,OrangeColors },
+            {LineSeriesBlock.CombiningTypes.Magenta,MagentaColors }
+            
+
+
+        };
         //GeneratePopParticles(pOwner, state, iterate);
         public BCColor[] GetCombiningColor(LineSeriesBlock.CombiningTypes ptype)
         {
-            switch (ptype)
-            {
-                case LineSeriesBlock.CombiningTypes.Red:
-                    return RedColors;
-
-                case LineSeriesBlock.CombiningTypes.Blue:
-                    return BlueColors;
-
-                case LineSeriesBlock.CombiningTypes.Yellow:
-                    return YellowColors;
-
-                case LineSeriesBlock.CombiningTypes.Orange:
-                    return OrangeColors;
-
-                case LineSeriesBlock.CombiningTypes.Magenta:
-                    return MagentaColors;
-
-                case LineSeriesBlock.CombiningTypes.Green:
-                    return GreenColors;
-
-                default:
-                    return RedColors;
-            }
+            if (CombiningColorMap.ContainsKey(ptype)) return CombiningColorMap[ptype];
+            return RedColors;
+            
         }
         private void GeneratePopParticles(IStateOwner pOwner, GameplayGameState gstate, SKPointI pt)
         {
@@ -1022,6 +1051,79 @@ namespace BASeTris.GameStates.GameHandlers
         public virtual IHighScoreList GetHighScores()
         {
             return null;
+            //throw new NotImplementedException();
+        }
+        private IEnumerable<Particles.BaseParticle> AddParticles(IStateOwner pOwner,int Column, int Row, LineSeriesPrimaryBlock block,int ParticleCountBase = 10)
+        {
+            var sUseColors = GetCombiningColor(block.CombiningIndex);
+
+            for (int i = 0; i < ParticleCountBase; i++)
+            {
+                float XPosition = (float)Column + (float)TetrisGame.rgen.NextDouble();
+                float YPosition = (float)Row + (float)TetrisGame.rgen.NextDouble();
+
+                var UseVelocity = new BCPoint(((float)TetrisGame.rgen.NextDouble() - 0.5f) / 80f, ((float)TetrisGame.rgen.NextDouble() - 0.5f) / 80f);
+                var UsePosition = new BCPoint(XPosition, YPosition);
+                ShapeParticle sp = new ShapeParticle(UsePosition, UseVelocity, sUseColors); //sUseColors
+                sp.Decay = new BCPoint(1, 1);
+                sp.Size = 1;
+                sp.TTL = 500;
+                yield return sp;
+            }
+            
+
+
+
+        }
+        int FrameCount = -1;
+        public ExtendedCustomizationHandlerResult GameProc(GameplayGameState state, IStateOwner pOwner)
+        {
+
+
+
+            List<Func<IEnumerable<BaseParticle>>> Primaries = new List<Func<IEnumerable<BaseParticle>>>();
+            FrameCount++;
+            if (FrameCount > 50) FrameCount = 0;
+            
+            if (FrameCount >0) return ExtendedCustomizationHandlerResult.Default;
+            
+            
+
+            //find all Primary Shiny Blocks.
+            for (int r = 0; r < state.PlayField.Contents.Length; r++)
+            {
+                var Row = state.PlayField.Contents[r];
+                for (int c = 0; c < Row.Length; c++)
+                {
+                    var Cell = Row[c];
+                        if (Cell is LineSeriesPrimaryShinyBlock lspb)
+                        {
+                        var closecol = c;
+                        var closerow = r;
+                        Primaries.Add(() => AddParticles(pOwner,closecol, closerow - state.PlayField.HIDDENROWS_TOP, lspb));
+                        }
+
+                } 
+            }
+
+            //now, add particles!
+            lock (state.TopParticles)
+            {
+                foreach (var particlefunc in Primaries)
+                {
+                    var addparticles = particlefunc();
+                    state.TopParticles.AddRange(addparticles);
+                }
+            }
+
+
+            return ExtendedCustomizationHandlerResult.Default;
+            //throw new NotImplementedException();
+        }
+
+        public ExtendedCustomizationHandlerResult HandleGameKey(GameplayGameState state, IStateOwner pOwner, GameKeys g)
+        {
+            return ExtendedCustomizationHandlerResult.Default;
             //throw new NotImplementedException();
         }
     }

@@ -72,7 +72,7 @@
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="NES" />
   </SettingsGroup>
   <SettingsGroup Name="Tetris 2">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="kirbysand" SoundScheme="Default" Chooser="Default" Theme="" />
   </SettingsGroup>
   <SettingsGroup Name="Dodectris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="Game Boy" />
@@ -84,7 +84,7 @@
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="DrMarioFever_Rock" SoundScheme="Default" Chooser="Default" Theme="" />
   </SettingsGroup>
   <SettingsGroup Name="Tetris 2 (Alt)">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="Tetris 2" />
   </SettingsGroup>
   <SettingsGroup Name="Hextris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="Game Boy" />

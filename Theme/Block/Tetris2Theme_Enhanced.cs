@@ -409,7 +409,10 @@ namespace BASeTris.Theme.Block
         public static BlockTypes[] MagentaShinyTypes = new BlockTypes[] { BlockTypes.Shiny_Block_Magenta_25, BlockTypes.Shiny_Block_Magenta_50, BlockTypes.Shiny_Block_Magenta_75, BlockTypes.Shiny_Block_Magenta_100 };
         public static BlockTypes[] GreenShinyTypes = new BlockTypes[] { BlockTypes.Shiny_Block_Green_25, BlockTypes.Shiny_Block_Green_50, BlockTypes.Shiny_Block_Green_75, BlockTypes.Shiny_Block_Green_100 };
 
-
+        public static bool IsShinyType(BlockTypes test)
+        {
+            return IsInSet(test, RedShinyTypes, YellowShinyTypes, BlueShinyTypes, OrangeShinyTypes, MagentaShinyTypes, GreenShinyTypes);
+        }
         public static bool IsInSet(BlockTypes test,params BlockTypes[][] typescheck)
         {
             return typescheck.Any((a) => a.Contains(test));
@@ -617,7 +620,8 @@ namespace BASeTris.Theme.Block
         {
             if (testvalue.Block is LineSeriesPrimaryShinyBlock)
             {
-                return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.CustomSelector;
+                return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Static;
+                
             }
             else
             {
@@ -625,8 +629,13 @@ namespace BASeTris.Theme.Block
                 //return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Rotatable;
             }
         }
-        
-            public override bool IsAnimated(NominoBlock block)
+        protected override SKImage[] ApplyFunc_Custom(TetrisField field, Nomino Group, NominoElement element, NominoBlock Target, BlockTypes chosentype)
+        {
+            return null;
+            //return base.ApplyFunc_Custom(field, Group, element, Target, chosentype);
+        }
+
+        public override bool IsAnimated(NominoBlock block)
         {
             return (block is LineSeriesPrimaryShinyBlock);
         

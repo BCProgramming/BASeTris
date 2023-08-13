@@ -103,6 +103,35 @@ namespace BASeTris.Rendering.Skia
         }
     }
 
+    [RenderingHandler(typeof(ShapeParticle), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class ShapeParticleRenderingSkiaHandler : BaseParticleRenderingSkiaHandler
+    {
+        Dictionary<SKColor, SKPaint> PaintCache = new Dictionary<SKColor, SKPaint>();
+        public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, ShapeParticle Source, GameStateSkiaDrawParameters Element)
+        {
+            var Position = TranslatePosition(pOwner, pRenderTarget, Source.Position, Element);
+
+            var Alphause = TranslateAlpha(Source);
+            var grabColor = new BCColor(Source.Color.R,Source.Color.G,Source.Color.B,Alphause);
+
+            SKPaint skp = null;
+            if (!PaintCache.TryGetValue(grabColor, out skp))
+            {
+                var buildskp = new SKPaint() { Color = new SKColor(grabColor.R, grabColor.G, grabColor.B, Alphause), StrokeWidth = 2, Style = SKPaintStyle.StrokeAndFill };
+                PaintCache.Add(grabColor, buildskp);
+            }
+                //pRenderTarget.DrawLine(SKPoint.Empty, Position, skp);
+                pRenderTarget.DrawRect(new SKRect(Position.X - Source.Size, Position.Y - Source.Size, Position.X + Source.Size, Position.Y + Source.Size), PaintCache[grabColor]);
+            
+        }
+
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, BaseParticle Source, GameStateSkiaDrawParameters Element)
+        {
+            Render(pOwner, pRenderTarget, (ShapeParticle)Source, Element);
+        }
+
+    }
+
     [RenderingHandler(typeof(LineParticle), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class LineParticleRenderingSkiaHandler : BaseParticleRenderingSkiaHandler //StandardRenderingHandler<SKCanvas, LineParticle, GameStateSkiaDrawParameters>
     {
@@ -115,7 +144,8 @@ namespace BASeTris.Rendering.Skia
             SKPaint skp = null;
             if (!PaintCache.TryGetValue(Source, out skp))
             {
-                skp = new SKPaint() { Color = new SKColor(Source.Color.R, Source.Color.G, Source.Color.B, Alphause), StrokeWidth = 2 };
+                var grabColor = Source.Color;
+                skp = new SKPaint() { Color = new SKColor(grabColor.R, grabColor.G, grabColor.B, Alphause), StrokeWidth = 2 };
                 PaintCache.Add(Source, skp);
             }
             pRenderTarget.DrawLine(PointA, PointB, skp);
@@ -157,7 +187,6 @@ namespace BASeTris.Rendering.Skia
         protected byte TranslateAlpha(BaseParticle Source)
         {
             byte useAlpha = 255;
-
             var PercentAlpha = 1 - ((float)Source.Age / (float)Source.TTL);
             //clamp
             PercentAlpha = PercentAlpha > 1 ? 1 : PercentAlpha < 0 ? 0 : PercentAlpha;

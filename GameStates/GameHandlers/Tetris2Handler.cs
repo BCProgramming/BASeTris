@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using BASeTris.AI;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
+using BASeTris.FieldInitializers;
 using BASeTris.GameStates.GameHandlers.HandlerOptions;
+using BASeTris.GameStates.GameHandlers.HandlerStates;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Block;
 
@@ -122,7 +124,22 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return new Tetris2Handler();
         }
+        public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
+        {
+            //likely will need to have stats and stuff abstracted to each Handler.
+            state.PlayField.Reset();
 
+            LineSeriesGameFieldInitializerParameters _InitParams = new LineSeriesGameFieldInitializerParameters(Level, GetValidPrimaryCombiningTypes()) { DoShinyBlocks = true };
+
+            LineSeriesGameFieldInitializer fieldinit = new LineSeriesGameFieldInitializer(this, _InitParams);
+            fieldinit.Initialize(state.PlayField);
+            PrimaryBlockCount = state.PlayField.AllContents().Count((y) => y != null);
+
+            DrMarioVirusAppearanceState appearstate = new DrMarioVirusAppearanceState(state);
+            pOwner.CurrentState = appearstate;
+
+
+        }
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
             if (DesiredChooserType == typeof(BagChooser))
