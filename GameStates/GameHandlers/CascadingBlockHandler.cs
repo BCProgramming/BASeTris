@@ -120,7 +120,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                 //starting from FirstCol we will work through and find all matching combining indices....
                 int HorizontalMass = 1; //start at one since we know we have one block.
-                int MaxCriticalHorz = 4;
+                int MaxCriticalHorz = 1;
                 List<Point> Horizontals = new List<Point>();
                 Horizontals.Add(StartPosition);
                 for (int X = FirstCol; X < state.PlayField.ColCount; X++)
@@ -191,7 +191,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                     //now, we do the same operation in "reverse" but starting from the offset we found.
                     int DiagonalMass = 0;
-                    int MaxCriticalDiag = 4;
+                    int MaxCriticalDiag = 1;
                     List<Point> Diagonals = new List<Point>();
                     Diagonals.Add(StartPosition);
 
@@ -259,7 +259,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                 //starting from FirstCol we will work through and find all matching combining indices....
                 int VerticalMass = 0; //start at one since we know we have one block.
-                int MaxCriticalVert = 4;
+                int MaxCriticalVert = 1;
                 List<Point> Verticals = new List<Point>();
                 Verticals.Add(StartPosition);
                 for (int Y = FirstRow; Y < state.PlayField.RowCount; Y++)

@@ -795,9 +795,11 @@ namespace BASeTris.GameStates
                             GenerateDropParticles(StartBlockPositions, EndBlockPositions);
                             activeitem.X = ghosted.X;
                             activeitem.SetY(pOwner, ghosted.Y);
-                            PlayField.SetGroupToField(activeitem);
+                            
+                            HandleGroupOperation(pOwner, activeitem,GroupOperationFlags.ForceDrop);
+                            //PlayField.SetGroupToField(activeitem);
                             DisallowHoldsUntilNextDrop = false;
-                            PlayField.RemoveBlockGroup(activeitem);
+                            //PlayField.RemoveBlockGroup(activeitem);
                             if (GameStats is TetrisStatistics ts)
                             {
                                 GameStats.AddScore((dropqty * (5 + (ts.LineCount / 10))));
@@ -1113,8 +1115,13 @@ namespace BASeTris.GameStates
             Operation_Success,
             Operation_Error
         }
-        
-        private GroupOperationResult HandleGroupOperation(IStateOwner pOwner,Nomino activeItem)
+        [Flags]
+        public enum GroupOperationFlags
+        {
+            None,
+            ForceDrop = 1
+        }
+        private GroupOperationResult HandleGroupOperation(IStateOwner pOwner,Nomino activeItem,GroupOperationFlags _flags = GroupOperationFlags.None)
         {
 
             if (activeItem.HandleBlockOperation(pOwner)) return GroupOperationResult.Operation_Success;
@@ -1140,7 +1147,7 @@ namespace BASeTris.GameStates
                 }
 
 
-                if (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.std.LockTime)
+                if (_flags.HasFlag(GroupOperationFlags.ForceDrop)  || (GameOptions.MoveResetsSetTimer && (DateTime.Now - lastHorizontalMove).TotalMilliseconds > pOwner.Settings.std.LockTime))
                 {
                     var elapsed = pOwner.GetElapsedTime();
                     //any and all blockgroups in the field that are set not to allow input must have not moved in the last 750ms before we allow any groups to set.
@@ -1148,7 +1155,7 @@ namespace BASeTris.GameStates
                     var allgroups = PlayField.GetActiveBlockGroups();
                     var Applicable = allgroups.All((f) =>
                     {
-                        return !f.Controllable || (elapsed - f.LastFall).TotalMilliseconds > 750;
+                        return _flags.HasFlag(GroupOperationFlags.ForceDrop) || (!f.Controllable || (elapsed - f.LastFall).TotalMilliseconds > 750);
                     });
                     Applicable = true;
                     if (Applicable)
@@ -1237,16 +1244,18 @@ namespace BASeTris.GameStates
                                 foreach (var addblock in CreateSet)
                                 {
 
-                                    NominoElement ne = new NominoElement(new Point(addblock.X + CenterX, addblock.Y + CenterY), new Size(NewWidth, NewHeight), addblock.Block);
+                                    NominoElement ne = new NominoElement(new Point(addblock.X -MinX, addblock.Y - MinY), new Size(NewWidth, NewHeight), addblock.Block);
                                     NewElements.Add(ne);
 
                                 }
                                 int XOffset = NewElements.First().X - CreateSet.First().X;
                                 int YOffset = NewElements.First().Y - CreateSet.First().Y;
                                 Nomino Flotsam = new Nomino(NewElements);
-                                Flotsam.X = activeItem.X + XOffset;
-                                Flotsam.Y = activeItem.Y + YOffset;
-                                PlayField.BlockGroups.Add(Flotsam);
+                                Flotsam.X = activeItem.X - XOffset;
+                                Flotsam.Y = activeItem.Y - YOffset;
+                                Flotsam.FallSpeed = activeItem.FallSpeed;
+                                Flotsam.LastFall = pOwner.GetElapsedTime();
+                                PlayField.AddBlockGroup(Flotsam);
                                 //connectionindex won't matter anymore- we could make it zero or leave it be or whatever we want here.
                                 
                             }
