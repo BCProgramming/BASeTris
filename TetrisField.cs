@@ -509,7 +509,7 @@ namespace BASeTris
             }
             else
             {
-                return new CanFitResults(CanFitResultConstants.CantFit_Field);
+                return new CanFitResults(CanFitResultConstants.CantFit_Field) { FieldFitTouches = new List<NominoElement>(Contacts)  };
             }
             
         }
@@ -788,6 +788,7 @@ namespace BASeTris
     }
     public class CanFitResults
     {
+        public List<NominoElement> FieldFitTouches = new List<NominoElement>();
         public enum CanFitResultConstants
         {
             /// <summary>

@@ -92,10 +92,12 @@ namespace BASeTris.Tetrominoes
         public Tetromino_Y(Func<int, NominoBlock> BuildBlock = null)
         {
             base.BlockData = GetNominoEntries(new Point[] { TetrominoData.Tetromino_Y_1[0], TetrominoData.Tetromino_Y_2[0], TetrominoData.Tetromino_Y_3[0], TetrominoData.Tetromino_Y_4[0] }, new Size(2, 2),BuildBlock).ToList();
-            var FirstBlock = this.BlockData[0].Block as LineSeriesBlock;
-            var ThirdBlock = this.BlockData[2].Block as LineSeriesBlock;
-            FirstBlock.ConnectionIndex = 1;
-            ThirdBlock.ConnectionIndex = 2;
+            var FirstBlock = this.BlockData[2].Block as LineSeriesBlock;
+            var ThirdBlock = this.BlockData[3].Block as LineSeriesBlock;
+            if(FirstBlock!=null)
+                FirstBlock.ConnectionIndex = 1;
+            if(ThirdBlock!=null)
+                ThirdBlock.ConnectionIndex = 2;
             this.SpecialName = "Y Tetromino";
             base.SetBlockOwner();
             RecalcExtents();
@@ -109,6 +111,8 @@ namespace BASeTris.Tetrominoes
         {
             base.BlockData = GetNominoEntries(new Point[] { TetrominoData.Tetromino_G_1[0], TetrominoData.Tetromino_G_2[0], TetrominoData.Tetromino_G_3[0], TetrominoData.Tetromino_G_4[0] }, new Size(3, 3),BuildBlock).ToList();
             this.SpecialName = "G Tetromino";
+            if (this.BlockData[3].Block is LineSeriesBlock lsbc)
+                lsbc.ConnectionIndex = 1;
             base.SetBlockOwner();
             RecalcExtents();
         }
@@ -120,7 +124,8 @@ namespace BASeTris.Tetrominoes
         {
             base.BlockData = GetNominoEntries(new Point[] { TetrominoData.Tetromino_F_1[0], TetrominoData.Tetromino_F_2[0], TetrominoData.Tetromino_F_3[0], TetrominoData.Tetromino_F_4[0] }, new Size(3, 3),BuildBlock).ToList();
             this.SpecialName = "F Tetromino";
-            (this.BlockData[3].Block as LineSeriesBlock).ConnectionIndex = 1;
+            if (this.BlockData[3].Block is LineSeriesBlock lsbc)
+                lsbc.ConnectionIndex = 1;
             base.SetBlockOwner();
             RecalcExtents();
         }

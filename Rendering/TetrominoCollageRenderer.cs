@@ -205,22 +205,8 @@ namespace BASeTris.Rendering
             return Groups.Values.Select((s) => s.ToArray()).ToArray();
 
         }
-        private static readonly String[] DefaultBackgroundCollageXML = new string[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
 
-<TetrominoCollage Rows=""6"" Columns=""6"">
-<Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""-3"" />
-<Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""3"" />
-<Tetromino Type=""T"" Rotation=""3"" X=""2"" Y=""1"" />
-<Tetromino Type=""T"" Rotation=""1"" X=""3"" Y=""-1"" />
-<Tetromino Type=""T"" Rotation=""1"" X=""3"" Y=""5"" />
-<Tetromino Type=""L"" Rotation=""1"" X=""-1"" Y=""0"" />
-<Tetromino Type=""L"" Rotation=""1"" X=""1"" Y=""3"" />
-<Tetromino Type=""S"" Rotation=""0"" X=""1"" Y=""0"" />
-<Tetromino Type=""J"" Rotation=""3"" X=""-1"" Y=""3"" />
-<Tetromino Type=""J"" Rotation=""3"" X=""5"" Y=""3"" />
-<Tetromino Type=""Z"" Rotation=""1"" X=""3"" Y=""1"" />
-<Tetromino Type=""L"" Rotation=""0"" X=""3"" Y=""3"" />
-</TetrominoCollage>",
+        private static readonly String BackgroundCollageXML2 =
         @"<?xml version=""1.0"" encoding=""utf-8""?>
   <TetrominoCollage Rows=""8"" Columns=""8"">
     <Tetromino Type=""J"" Rotation=""3"" X=""2"" Y=""4"" />
@@ -241,7 +227,24 @@ namespace BASeTris.Rendering
     <Tetromino Type=""J"" Rotation=""1"" X=""1"" Y=""2"" />
     <Tetromino Type=""L"" Rotation=""1"" X=""-1"" Y=""1"" />
     <Tetromino Type=""L"" Rotation=""3"" X=""0"" Y=""0"" />
-  </TetrominoCollage>"
+  </TetrominoCollage>";
+
+        private static readonly String[] DefaultBackgroundCollageXML = new string[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
+
+<TetrominoCollage Rows=""6"" Columns=""6"">
+<Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""-3"" />
+<Tetromino Type=""I"" Rotation=""1"" X=""-1"" Y=""3"" />
+<Tetromino Type=""T"" Rotation=""3"" X=""2"" Y=""1"" />
+<Tetromino Type=""T"" Rotation=""1"" X=""3"" Y=""-1"" />
+<Tetromino Type=""T"" Rotation=""1"" X=""3"" Y=""5"" />
+<Tetromino Type=""L"" Rotation=""1"" X=""-1"" Y=""0"" />
+<Tetromino Type=""L"" Rotation=""1"" X=""1"" Y=""3"" />
+<Tetromino Type=""S"" Rotation=""0"" X=""1"" Y=""0"" />
+<Tetromino Type=""J"" Rotation=""3"" X=""-1"" Y=""3"" />
+<Tetromino Type=""J"" Rotation=""3"" X=""5"" Y=""3"" />
+<Tetromino Type=""Z"" Rotation=""1"" X=""3"" Y=""1"" />
+<Tetromino Type=""L"" Rotation=""0"" X=""3"" Y=""3"" />
+</TetrominoCollage>"
 
         };
         public static SKBitmap GetBackgroundCollage(NominoTheme _theme,int BlockSize = 500)

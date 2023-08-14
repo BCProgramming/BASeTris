@@ -338,7 +338,13 @@ namespace BASeTris
             BlockData.Remove(FindEntry(tb));
             //_DataLookup = null;
         }
-
+        public void RemoveElements(IEnumerable<NominoElement> elements)
+        {
+            foreach (var removeelement in elements)
+            {
+                BlockData.Remove(removeelement);
+            }
+        }
         public NominoElement FindEntry(NominoBlock findBlock)
         {
             return BlockDataLookup[findBlock];

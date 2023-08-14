@@ -30,6 +30,7 @@ using SkiaSharp;
 using BASeTris.Settings;
 using BASeTris.Theme;
 using BASeTris.Particles;
+using System.Security.Cryptography;
 
 namespace BASeTris.GameStates
 {
@@ -1128,6 +1129,7 @@ namespace BASeTris.GameStates
             }
             else if (fitresult.CantFit_Field)
             {
+                
 
                 if (activeItem.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip))
                 {
@@ -1170,7 +1172,7 @@ namespace BASeTris.GameStates
                         
 
                         //Another concern is that we should "re-center" the Nominoes we create here.
-                        if (true || ConnectionIndices.Count == 1)
+                        if (ConnectionIndices.Count == 1)
                         {
                             PlayField.SetGroupToField(activeItem);
                             DisallowHoldsUntilNextDrop = false;
@@ -1183,6 +1185,79 @@ namespace BASeTris.GameStates
                         {
                             //special consideration needed for Blocks that have multiple connectionindices. Basically we would want to find all unsupported blocks in the nomino, and then create a new Nomino for each unique ConnectedIndex within them. 
                             //we would leave the activeItem with only the remaining supported blocks.
+                            //we can start with the fitresult.FieldFitTouches, as those should be the Elements of the Nomino that "triggered" the block being set to the field. 
+
+                            HashSet<int> CommittedIndices = new HashSet<int>();
+                            foreach (var iterateelement in fitresult.FieldFitTouches)
+                            {
+                                if (iterateelement.Block is LineSeriesBlock lsb)
+                                {
+                                    if (!CommittedIndices.Contains(lsb.ConnectionIndex))
+                                        CommittedIndices.Add(lsb.ConnectionIndex);
+                                }
+                            }
+
+                            Dictionary<int, List<NominoElement>> ExcludedElements = new Dictionary<int, List<NominoElement>>();
+                            List<NominoElement> RemovedElements = new List<NominoElement>();
+                            
+                            
+                            //3. Add them to the game
+                            
+                            foreach (var ne in activeItem)
+                            {
+                                if (ne.Block is LineSeriesBlock lsb)
+                                {
+                                    if (CommittedIndices.Contains(lsb.ConnectionIndex)) continue;
+                                    if (!ExcludedElements.ContainsKey(lsb.ConnectionIndex))
+                                    {
+                                        ExcludedElements.Add(lsb.ConnectionIndex, new List<NominoElement>());
+                                        
+                                    }
+                                    RemovedElements.Add(ne);
+                                    ExcludedElements[lsb.ConnectionIndex].Add(ne);
+                                    
+                                }
+                            }
+                            //1: Remove any element from the activeItem Nomino which is not a committed connection index.
+                            activeItem.RemoveElements(RemovedElements);
+                            //2. Resurrect those blocks as a new Nomino, one for each connectionIndex.
+
+                            foreach (var CreateSet in ExcludedElements.Values)
+                            {
+                                List<NominoElement> NewElements = new List<NominoElement>();
+                                int MinX, MinY, MaxX, MaxY;
+                                GetRange(CreateSet, out MinX, out MinY, out MaxX, out MaxY);
+                                int NewWidth = MaxX - MinX;
+                                int NewHeight = MaxY - MinY;
+                                NewWidth += NewWidth % 2;
+                                NewHeight += NewHeight % 2;
+                                int CenterX = NewWidth / 2;
+                                int CenterY = NewHeight / 2;
+                                
+                                foreach (var addblock in CreateSet)
+                                {
+
+                                    NominoElement ne = new NominoElement(new Point(addblock.X + CenterX, addblock.Y + CenterY), new Size(NewWidth, NewHeight), addblock.Block);
+                                    NewElements.Add(ne);
+
+                                }
+                                int XOffset = NewElements.First().X - CreateSet.First().X;
+                                int YOffset = NewElements.First().Y - CreateSet.First().Y;
+                                Nomino Flotsam = new Nomino(NewElements);
+                                Flotsam.X = activeItem.X + XOffset;
+                                Flotsam.Y = activeItem.Y + YOffset;
+                                PlayField.BlockGroups.Add(Flotsam);
+                                //connectionindex won't matter anymore- we could make it zero or leave it be or whatever we want here.
+                                
+                            }
+
+                            //4. Set the original Nomino, with those elements now removed, to the field.
+                            PlayField.SetGroupToField(activeItem);
+                            DisallowHoldsUntilNextDrop = true; //don't want to allow holds of the goofy weird partial nominoes. (Do we? hmm)
+                            GameStats.AddScore(25 - activeItem.Y);
+                            if (activeItem.PlaceSound)
+                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupPlace.Key, pOwner.Settings.std.EffectVolume);
+                            return GroupOperationResult.Operation_Success;
                         }
                     }
                 }
@@ -1190,6 +1265,19 @@ namespace BASeTris.GameStates
             
 
             return GroupOperationResult.Operation_Error;
+        }
+        private void GetRange(IEnumerable<NominoElement> elements, out int MinX, out int MinY, out int MaxX, out int MaxY)
+        {
+            MinY = MinX = int.MaxValue;
+            MaxY = MaxX = int.MinValue;
+            foreach (var iterate in elements)
+            {
+                if (iterate.X < MinX) MinX = iterate.X;
+                if (iterate.X > MaxX) MaxX = iterate.X;
+                if (iterate.Y < MinY) MinY = iterate.Y;
+                if (iterate.Y > MaxY) MaxY = iterate.Y;
+            }
+            
         }
     }
 }

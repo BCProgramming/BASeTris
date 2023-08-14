@@ -741,6 +741,10 @@ namespace BASeTris.GameStates.GameHandlers
 
             return ResurrectNominoes;
         }
+
+
+
+
         private class AdjacentResultInfo
         {
             public NominoBlock block { get; set; }
