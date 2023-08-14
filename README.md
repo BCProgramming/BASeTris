@@ -1,5 +1,7 @@
 # BASeTris
 
+![BASeTris Title Screen](https://github.com/BCProgramming/BASeTris/blob/master/screenshot/basetris_title.png?raw=true)
+
 A Tetris Engine/Clone built in C#.
 
 Contains Handlers for Tetris, Dr. Mario, Tetris Attack, Columns, and a number of variants.
