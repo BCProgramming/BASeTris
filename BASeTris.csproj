@@ -328,6 +328,7 @@
     <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />
     <Compile Include="Theme\Block\NESTetrominoTheme.cs" />
     <Compile Include="Theme\Block\OutlinedTetrominoTheme.cs" />
+    <Compile Include="Theme\Block\SNESTetris2Theme.cs" />
     <Compile Include="Theme\Block\SNESTetrominoTheme.cs" />
     <Compile Include="Theme\Block\Tetris2Theme_Enhanced.cs" />
     <Compile Include="Theme\Block\NominoTheme.cs" />

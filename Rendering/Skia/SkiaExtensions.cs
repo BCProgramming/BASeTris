@@ -36,7 +36,7 @@ namespace BASeTris.Rendering.Skia
                 {
                     using (StreamWriter sw = new StreamWriter(new FileStream(sFileName, FileMode.Create)))
                     {
-                        sw.Write(data);
+                        sw.BaseStream.Write(data, 0, data.Length);
                     }
                 }
             }

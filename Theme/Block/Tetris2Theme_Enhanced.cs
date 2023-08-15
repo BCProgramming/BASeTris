@@ -9,6 +9,7 @@ using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
+using BASeTris.Rendering.Skia;
 using SkiaSharp;
 
 namespace BASeTris.Theme.Block
@@ -39,8 +40,8 @@ namespace BASeTris.Theme.Block
         }
     }
 
-    [HandlerTheme("Tetris 2 Redux", typeof(Tetris2Handler), typeof(DrMarioHandler),typeof(StandardTetrisHandler))]
-    [ThemeDescription("A redesigned variant of Tetris 2 Blocks")]
+    //[HandlerTheme("Tetris 2 Redux", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    //[ThemeDescription("A redesigned variant of Tetris 2 Blocks")]
     public class Tetris2Theme_Enhanced : CustomPixelTheme<Tetris2Theme_Enhanced.BCT, Tetris2Theme_Enhanced.BlockTypes>
     {
 
@@ -80,8 +81,8 @@ namespace BASeTris.Theme.Block
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
             {BCT.Primary,SKColors.Yellow },
-            {BCT.Accent,BlueColor  },
-            {BCT.Accent2,SKColors.Red }
+            {BCT.Accent,SKColors.LightYellow  },
+            {BCT.Accent2,SKColors.DarkGoldenrod }
 
         };
 
@@ -112,11 +113,11 @@ namespace BASeTris.Theme.Block
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
             {BCT.Primary,SKColors.Red },
-            {BCT.Accent,SKColors.Yellow },
-            {BCT.Accent2,BlueColor  }
+            {BCT.Accent,SKColors.DarkRed },
+            {BCT.Accent2,SKColors.Pink  }
 
         };
-      
+
         public static Dictionary<BCT, SKColor> EnhancedRedColourSet = new Dictionary<BCT, SKColor>()
             {
             {BCT.Transparent,SKColors.Transparent },
@@ -143,8 +144,8 @@ namespace BASeTris.Theme.Block
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
             {BCT.Primary,BlueColor  },
-            {BCT.Accent,SKColors.Yellow },
-            {BCT.Accent2,SKColors.Red }
+            {BCT.Accent,SKColors.DarkBlue },
+            {BCT.Accent2,SKColors.LightBlue }
 
         };
         public static Dictionary<BCT, SKColor> EnhancedBlueColourSet = new Dictionary<BCT, SKColor>()
@@ -173,8 +174,8 @@ namespace BASeTris.Theme.Block
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
             {BCT.Primary,SKColors.Green  },
-            {BCT.Accent,SKColors.GreenYellow },
-            {BCT.Accent2,SKColors.DarkMagenta }
+            {BCT.Accent,SKColors.DarkGreen },
+            {BCT.Accent2,SKColors.LightGreen }
 
         };
 
@@ -183,8 +184,8 @@ namespace BASeTris.Theme.Block
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
             {BCT.Primary,SKColors.Green  },
-            {BCT.Accent,SKColors.GreenYellow },
-            {BCT.Accent2,SKColors.DarkMagenta },
+            {BCT.Accent,SKColors.DarkGreen },
+            {BCT.Accent2,SKColors.LightGreen },
             {BCT.Enhanced_1,new SKColor(0,205,0) },
             {BCT.Enhanced_2,new SKColor(0,205,0) },
             {BCT.Enhanced_3,new SKColor(0,116,0) },
@@ -204,8 +205,8 @@ namespace BASeTris.Theme.Block
             {BCT.Transparent,SKColors.Transparent },
             {BCT.Black,SKColors.Black },
             {BCT.Primary,SKColors.Orange  },
-            {BCT.Accent,SKColors.PaleGoldenrod },
-            {BCT.Accent2,SKColors.LightBlue }
+            {BCT.Accent,SKColors.PeachPuff },
+            {BCT.Accent2,SKColors.DarkOrange }
 
         };
 
@@ -236,7 +237,7 @@ namespace BASeTris.Theme.Block
             {BCT.Black,SKColors.Black },
             {BCT.Primary,SKColors.Magenta  },
             {BCT.Accent,SKColors.Pink },
-            {BCT.Accent2,SKColors.Orchid },
+            {BCT.Accent2,SKColors.Indigo },
 
 
         };
@@ -400,7 +401,7 @@ namespace BASeTris.Theme.Block
         public static BlockTypes[] BluePopTypes = new BlockTypes[] { BlockTypes.Pop_Block_Blue };
         public static BlockTypes[] OrangePopTypes = new BlockTypes[] { BlockTypes.Pop_Block_Orange };
         public static BlockTypes[] MagentaPopTypes = new BlockTypes[] { BlockTypes.Pop_Block_Magenta };
-        public static BlockTypes[] GreenPopTypes = new BlockTypes[] { BlockTypes.Pop_Block_Green};
+        public static BlockTypes[] GreenPopTypes = new BlockTypes[] { BlockTypes.Pop_Block_Green };
 
         public static BlockTypes[] RedShinyTypes = new BlockTypes[] { BlockTypes.Shiny_Block_Red_25, BlockTypes.Shiny_Block_Red_50, BlockTypes.Shiny_Block_Red_75, BlockTypes.Shiny_Block_Red_100 };
         public static BlockTypes[] YellowShinyTypes = new BlockTypes[] { BlockTypes.Shiny_Block_Yellow_25, BlockTypes.Shiny_Block_Yellow_50, BlockTypes.Shiny_Block_Yellow_75, BlockTypes.Shiny_Block_Yellow_100 };
@@ -413,38 +414,38 @@ namespace BASeTris.Theme.Block
         {
             return IsInSet(test, RedShinyTypes, YellowShinyTypes, BlueShinyTypes, OrangeShinyTypes, MagentaShinyTypes, GreenShinyTypes);
         }
-        public static bool IsInSet(BlockTypes test,params BlockTypes[][] typescheck)
+        public static bool IsInSet(BlockTypes test, params BlockTypes[][] typescheck)
         {
             return typescheck.Any((a) => a.Contains(test));
-            
+
         }
         public static bool IsRedColor(BlockTypes test)
         {
-            return IsInSet(test, RedNormalTypes, RedFixedTypes, RedShinyTypes,RedPopTypes);
+            return IsInSet(test, RedNormalTypes, RedFixedTypes, RedShinyTypes, RedPopTypes);
         }
         public static bool IsYellowColor(BlockTypes test)
         {
-            return IsInSet(test, YellowNormalTypes, YellowFixedTypes, YellowShinyTypes,YellowPopTypes);
+            return IsInSet(test, YellowNormalTypes, YellowFixedTypes, YellowShinyTypes, YellowPopTypes);
         }
         public static bool IsBlueColor(BlockTypes test)
         {
-            return IsInSet(test, BlueNormalTypes, BlueFixedTypes, BlueShinyTypes,BluePopTypes);
+            return IsInSet(test, BlueNormalTypes, BlueFixedTypes, BlueShinyTypes, BluePopTypes);
         }
         public static bool IsOrangeColor(BlockTypes test)
         {
-            return IsInSet(test, OrangeNormalTypes, OrangeFixedTypes, OrangeShinyTypes,GreenPopTypes);
+            return IsInSet(test, OrangeNormalTypes, OrangeFixedTypes, OrangeShinyTypes, GreenPopTypes);
         }
         public static bool IsMagentaColor(BlockTypes test)
         {
-            return IsInSet(test, MagentaNormalTypes, MagentaFixedTypes, MagentaShinyTypes,MagentaPopTypes);
+            return IsInSet(test, MagentaNormalTypes, MagentaFixedTypes, MagentaShinyTypes, MagentaPopTypes);
         }
         public static bool IsGreenColor(BlockTypes test)
         {
-            return IsInSet(test, GreenNormalTypes, GreenFixedTypes, GreenShinyTypes,GreenPopTypes);
+            return IsInSet(test, GreenNormalTypes, GreenFixedTypes, GreenShinyTypes, GreenPopTypes);
         }
-        private static BCT[][] GetBCTBitmap(String ImageKey,float ReductionFactor = 1)
+        private static BCT[][] GetBCTBitmap(String ImageKey, float ReductionFactor = 1)
         {
-            return GetBCTBitmap(ImageKey, ColorMapLookupFunc,ReductionFactor);
+            return GetBCTBitmap(ImageKey, ColorMapLookupFunc, ReductionFactor);
         }
 
         public override BlockFlags GetBlockFlags(Nomino Group, NominoElement element, TetrisField field)
@@ -528,7 +529,7 @@ namespace BASeTris.Theme.Block
                 {
                     return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(BlockTypes.Fixed_Block_Gray);
                 }
-                
+
             }
             return new CustomPixelTheme<BCT, BlockTypes>.BlockTypeReturnData(BlockTypes.Normal_Block_Gray);
 
@@ -556,8 +557,19 @@ namespace BASeTris.Theme.Block
             String sStringRep = NNominoGenerator.StringRepresentation(gotpoints);
             return sStringRep;
         }
-        protected bool useGemStones = false;
-        protected bool UseEnhancedImages = true;
+        public enum ThemeOptions
+        {
+            Standard,
+            GemStones,
+            SNES,
+            Enhanced
+        }
+        protected ThemeOptions ThemeOption = ThemeOptions.Enhanced;
+
+        protected bool useGemStones { get { return ThemeOption == ThemeOptions.GemStones; } set { ThemeOption = ThemeOptions.GemStones; } }
+
+        protected bool UseEnhancedImages { get { return ThemeOption == ThemeOptions.Enhanced; } set { ThemeOption = ThemeOptions.Enhanced; } }
+        
         public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, BlockTypes BlockType, BCT PixelType)
         {
             if (IsYellowColor(BlockType))
@@ -592,7 +604,7 @@ namespace BASeTris.Theme.Block
                 if (!ExtraNominoColourLookup.ContainsKey(strval))
                 {
                     String[] othersets = NNominoGenerator.GetOtherRotationStrings(points);
-                        
+
                     var CreatedSet = CreateColorSet(SelectedColor);
                     foreach (String addkey in new String[] { strval }.Concat(othersets))
                     {
@@ -603,8 +615,8 @@ namespace BASeTris.Theme.Block
                 return ExtraNominoColourLookup[strval][PixelType];
 
 
-                
-                
+
+
 
                 return useGemStones || UseEnhancedImages ? EnhancedGrayColourSet[PixelType] : GrayColourSet[PixelType];
             }
@@ -621,7 +633,7 @@ namespace BASeTris.Theme.Block
             if (testvalue.Block is LineSeriesPrimaryShinyBlock)
             {
                 return CustomPixelTheme<BCT, BlockTypes>.BlockFlags.Static;
-                
+
             }
             else
             {
@@ -638,7 +650,7 @@ namespace BASeTris.Theme.Block
         public override bool IsAnimated(NominoBlock block)
         {
             return (block is LineSeriesPrimaryShinyBlock);
-        
+
         }
 
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
@@ -714,6 +726,9 @@ namespace BASeTris.Theme.Block
             Shiny_Block_Magenta_100,
             Shiny_Block_Orange_100
         }
+
+       
+
         public static BCT[][] Normal_Block = new BCT[][]
         {
             new []{BCT.Transparent, BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent,BCT.Transparent},
@@ -809,6 +824,10 @@ namespace BASeTris.Theme.Block
         {
             PrepareThemeData();
         }
+
+
+
+
         private static bool ThemeDataPrepared = false;
         private static void PrepareThemeData()
         {
