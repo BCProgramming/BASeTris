@@ -96,10 +96,11 @@ namespace BASeTris.GameStates.GameHandlers
 
         //finds critical mass excesses starting from the given position.
         //this basically only finds one specific "critical mass"
-        private HashSet<Point> FindCriticalMassesHorizontal(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
+        private HashSet<Point> FindCriticalMassesHorizontal(GameplayGameState state, IStateOwner pOwner, Point StartPosition,out int MaxMass)
         {
             HashSet<Point> FoundPoints = new HashSet<Point>();
             var OurPos = state.PlayField.Contents[StartPosition.Y][StartPosition.X] as LineSeriesBlock;
+            MaxMass = 0;
             if (OurPos == null) return new HashSet<Point>();
             else
             {
@@ -139,7 +140,7 @@ namespace BASeTris.GameStates.GameHandlers
                         break;
                     }
                 }
-
+                if (HorizontalMass > MaxMass) MaxMass = HorizontalMass;
                 if (HorizontalMass > MaxCriticalHorz)
                 {
                     foreach (var iterate in Horizontals)
@@ -151,13 +152,15 @@ namespace BASeTris.GameStates.GameHandlers
                     }
                 }
             }
+            
             return FoundPoints;
         }
-        private HashSet<Point> FindCriticalMassesDiagonal(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
+        private HashSet<Point> FindCriticalMassesDiagonal(GameplayGameState state, IStateOwner pOwner, Point StartPosition, out int MaxMass)
         {
             Func<int,int,int> Subtract = (a, b) => a - b;
             Func<int, int, int> Add = (a, b) => a + b;
             HashSet<Point> FoundPoints = new HashSet<Point>();
+            MaxMass = 0;
             foreach (var callfuncs in new (Func<int, int, int>, Func<int, int, int>)[] { (Subtract, Subtract),(Add,Subtract),(Subtract,Add),(Add,Add) })
             {
                 var DoOffsetX = callfuncs.Item2;
@@ -165,6 +168,7 @@ namespace BASeTris.GameStates.GameHandlers
                 
                 var OurPos = state.PlayField.Contents[StartPosition.Y][StartPosition.X] as LineSeriesBlock;
                 if (OurPos == null) return new HashSet<Point>();
+
                 else
                 {
                     int FirstRow = StartPosition.Y;
@@ -220,6 +224,7 @@ namespace BASeTris.GameStates.GameHandlers
                         CurrOffset--;
 
                     }
+                    if (DiagonalMass > MaxMass) MaxMass = DiagonalMass;
                     if (DiagonalMass >= MaxCriticalDiag)
                     {
                         foreach (var iterate in Diagonals)
@@ -234,9 +239,10 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return FoundPoints;
         }
-        private HashSet<Point> FindCriticalMassesVertical(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
+        private HashSet<Point> FindCriticalMassesVertical(GameplayGameState state, IStateOwner pOwner, Point StartPosition,out int MaxMass)
         {
             HashSet<Point> FoundPoints = new HashSet<Point>();
+            MaxMass = 0;
             var OurPos = state.PlayField.Contents[StartPosition.Y][StartPosition.X] as LineSeriesBlock;
             if (OurPos == null) return new HashSet<Point>();
             else
@@ -278,7 +284,7 @@ namespace BASeTris.GameStates.GameHandlers
                         break;
                     }
                 }
-
+                if (VerticalMass > MaxMass) MaxMass = VerticalMass;
                 if (VerticalMass >= MaxCriticalVert)
                 {
                     foreach (var iterate in Verticals)
@@ -300,16 +306,19 @@ namespace BASeTris.GameStates.GameHandlers
         /// <param name="pOwner"></param>
         /// <param name="StartPosition"></param>
         /// <returns></returns>
-        private HashSet<Point> FindCriticalMasses(GameplayGameState state, IStateOwner pOwner, Point StartPosition)
+        private HashSet<Point> FindCriticalMasses(GameplayGameState state, IStateOwner pOwner, Point StartPosition,out int MaxMass)
         {
             //if we are below the visible area, than ignore this call, blocks that are hidden cannot participate in critical masses.
             //if (StartPosition.Y > state.PlayField.ColCount - state.PlayField.HIDDENROWS_BOTTOM) return new HashSet<Point>(); 
             bool useHorz = ClearOrientations.HasFlag(ClearOrientationConstants.Horizontal);
             bool useVert = ClearOrientations.HasFlag(ClearOrientationConstants.Vertical);
             bool useDiag = ClearOrientations.HasFlag(ClearOrientationConstants.Diagonal);
-            HashSet<Point> Horizontal = useHorz ? FindCriticalMassesHorizontal(state, pOwner, StartPosition) : new HashSet<Point>();
-            HashSet<Point> Vertical = useVert? FindCriticalMassesVertical(state, pOwner, StartPosition) : new HashSet<Point>();
-            HashSet<Point> Diagonal = useDiag? FindCriticalMassesDiagonal(state, pOwner, StartPosition) : new HashSet<Point>();
+            int MaxMassHorizontal = 0, MaxMassVertical = 0, MaxMassDiagonal = 0;
+            HashSet<Point> Horizontal = useHorz ? FindCriticalMassesHorizontal(state, pOwner, StartPosition,out MaxMassHorizontal) : new HashSet<Point>();
+            HashSet<Point> Vertical = useVert? FindCriticalMassesVertical(state, pOwner, StartPosition,out MaxMassVertical) : new HashSet<Point>();
+            HashSet<Point> Diagonal = useDiag? FindCriticalMassesDiagonal(state, pOwner, StartPosition,out MaxMassDiagonal) : new HashSet<Point>();
+
+            MaxMass = Math.Max(MaxMassDiagonal, Math.Max(MaxMassHorizontal, MaxMassVertical));
             foreach (Point verticalpoint in Vertical)
             {
                 if (!Horizontal.Contains(verticalpoint)) Horizontal.Add(verticalpoint);
@@ -391,6 +400,7 @@ namespace BASeTris.GameStates.GameHandlers
             return CreateResult;
         }
         public TimeSpan LastPopComplete = TimeSpan.Zero;
+        public int CriticalMassToPopAllOfSameColor = 4;
         public int Level { get; set; } = 0;
         public int PrimaryBlockCount = 0;
         protected bool IgnoreActiveGroupsForFieldChange = false;
@@ -401,7 +411,7 @@ namespace BASeTris.GameStates.GameHandlers
             FieldChangeResult fcr = new FieldChangeResult();
             if (!IgnoreActiveGroupsForFieldChange && state.PlayField.GetActiveBlockGroups().Count() > 0) return new FieldChangeResult() { ScoreResult = 0 };
             //here we would go through the field and handle where the blocks line up to more than the required critical mass. 
-
+            Dictionary<LineSeriesBlock.CombiningTypes, int> MaxMassesByType = new Dictionary<LineSeriesBlock.CombiningTypes, int>();
             //Nomino's have two blocks- usually. But, we should account for more. This handler may be expanded for the Tetris2 handler, (if we ever bother to make one)
             //in any case we want to check all the positions of the trigger nomino and check for critical masses.
             int MasterCount = 0;
@@ -416,9 +426,17 @@ namespace BASeTris.GameStates.GameHandlers
                     {
                         MasterCount++;
                     }
-                    if (state.PlayField.Contents[y][x] is LineSeriesBlock)
+                    if (state.PlayField.Contents[y][x] is LineSeriesBlock lsb)
                     {
-                        var foundmasses = FindCriticalMasses(state, pOwner, new Point(x, y));
+                        int GetMaximum = 0;
+                        var foundmasses = FindCriticalMasses(state, pOwner, new Point(x, y),out GetMaximum);
+                        if (!MaxMassesByType.ContainsKey(lsb.CombiningIndex))
+                            MaxMassesByType.Add(lsb.CombiningIndex, GetMaximum);
+                        else
+                        {
+                            if (MaxMassesByType[lsb.CombiningIndex] < GetMaximum)
+                                MaxMassesByType[lsb.CombiningIndex] = GetMaximum;
+                        }
                         foreach (var iterate in foundmasses)
                         {
                             if (CriticalMasses == null) CriticalMasses = new HashSet<Point>(foundmasses);
@@ -454,12 +472,39 @@ namespace BASeTris.GameStates.GameHandlers
 
                 //check the field again and change unsupported field blocks back into active groups.
                 var originalstate = state;
-                //TODO: this seems to act weird with Tetris 2, sets the popping colour wrong sometimes. It seems to be using other colours from the tetromino's that the blocks
-                //belonged to.
+               
                 int MaxCombo = 0;
                 HashSet<Point> ShinyPopped = new HashSet<Point>();
                 if (CriticalMasses != null)
                 {
+                    var PopRegulars = new HashSet<LineSeriesBlock.CombiningTypes>(MaxMassesByType.Where((d) => d.Value > CriticalMassToPopAllOfSameColor).Select((k)=>k.Key));
+                    if (PopRegulars.Any())
+                    {
+                        for (int r = 0; r < state.PlayField.Contents.Length; r++)
+                        {
+                            var row = state.PlayField.Contents[r];
+                            for (int c = 0; c < row.Length; c++)
+                            {
+                                var cell = row[c];
+                                if (cell is LineSeriesBlock lsba && !lsba.Popping && !CriticalMasses.Contains(new Point(r,c)))
+                                {
+                                    if (!(cell is LineSeriesPrimaryBlock))
+                                    {
+                                        if (PopRegulars.Contains(lsba.CombiningIndex))
+                                        {
+                                            ProcessPopBlock(state, pOwner, ref MaxCombo, new Point(c, r), lsba, lsba);
+                                            fcr.ScoreResult += 5;
+                                            ShinyPopped.Add(new Point(c, r));
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+
+
                     HashSet<Nomino> MassNominoes = new HashSet<Nomino>();
                     
                     foreach (var iterate in CriticalMasses)
@@ -481,16 +526,29 @@ namespace BASeTris.GameStates.GameHandlers
                                 var row = state.PlayField.Contents[r];
                                 for (int c = 0; c<row.Length; c++)
                                 {
-                                    var cell = row[c];     
-                                
+                                    var cell = row[c];
+
+
+
                                     if (cell is LineSeriesPrimaryBlock lsb2 && !lsb2.Popping)
                                     {
                                         if (lsb2.CombiningIndex == lsbp.CombiningIndex)
                                         {
                                             ProcessPopBlock(state, pOwner, ref MaxCombo, new Point(c, r), lsb2, lsb2);
                                             ShinyPopped.Add(new Point(c, r));
-                                            
+                                            fcr.ScoreResult += 10;
+
                                         }
+                                    }
+                                    else if (cell is LineSeriesBlock lsba && !lsba.Popping)
+                                    {
+                                        if (PopRegulars.Contains(lsba.CombiningIndex))
+                                        {
+                                            ProcessPopBlock(state, pOwner, ref MaxCombo, new Point(c, r), lsba, lsba);
+                                            fcr.ScoreResult += 5;
+                                            ShinyPopped.Add(new Point(c, r));
+                                        }
+                                            
                                     }
                                 }
                              

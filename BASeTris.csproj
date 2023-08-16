@@ -323,6 +323,7 @@
     <Compile Include="Theme\Audio\AudioThemeManager.cs" />
     <Compile Include="Theme\Block\BasicBlockTheme.cs" />
     <Compile Include="Theme\Block\ConnectedCustomPixelTheme.cs" />
+    <Compile Include="Theme\Block\CardinalConnectionSet.cs" />
     <Compile Include="Theme\Block\CustomPixelTheme.cs" />
     <Compile Include="Theme\Block\DrMarioTheme.cs" />
     <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />

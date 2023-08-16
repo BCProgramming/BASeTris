@@ -433,7 +433,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
                 }
                 else
                 {
-                    if (FieldState[Row][Col] != null) throw new ArgumentException("Invalid state...");
+                    //if (FieldState[Row][Col] != null) throw new ArgumentException("Invalid state...");
                     FieldState[Row][Col] = iterate.Block;
                 }
             }
