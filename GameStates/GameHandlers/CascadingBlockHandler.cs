@@ -635,6 +635,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                             if (!AllPoints.Any((w) => AddedPoints.Contains(w)))
                             {
+                                state.PlayField.Theme.ApplyTheme(addresurrected, state.GameHandler, state.PlayField, NominoTheme.ThemeApplicationReason.NewNomino);
                                 state.PlayField.AddBlockGroup(addresurrected);
                                 addresurrected.FallSpeed = 100;
                                 foreach (var point in AllPoints)
@@ -779,8 +780,13 @@ namespace BASeTris.GameStates.GameHandlers
 
                                 int CenterPointX = MinX + NominoWidth / 2;
                                 int CenterPointY = MinY + NominoHeight / 2;
+                                List<NominoElement> newElements = new List<NominoElement>();
+                                foreach (var useresult in NewNominoContents)
+                                {
+                                    useresult.block.Rotation = 0;
+                                    newElements.Add(new NominoElement(new Point(useresult.Column - CenterPointX, useresult.Row - CenterPointY), new Size(NominoWidth, NominoHeight), useresult.block));
+                                }
                                 //construct the new Nomino.
-                                var newElements = from b in NewNominoContents select new NominoElement(new Point(b.Column - CenterPointX, b.Row - CenterPointY), new Size(NominoWidth, NominoHeight), b.block);
                                 //Now, we can go through the NewNominoContents
                                 Nomino BuildResult = new Nomino(newElements);
                                 BuildResult.X = CenterPointX;
@@ -1112,6 +1118,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         public virtual IHighScoreList GetHighScores()
         {
+            return (IHighScoreList)TetrisGame.ScoreMan[this.Name];
             return null;
             //throw new NotImplementedException();
         }

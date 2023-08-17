@@ -44,6 +44,80 @@ namespace BASeTris.Theme.Block
             {ConnectedStyles.South | ConnectedStyles.West | ConnectedStyles.East,"SWE" },
             {ConnectedStyles.South | ConnectedStyles.North | ConnectedStyles.West | ConnectedStyles.East,"NSWE" }
         };
+
+        public static Dictionary<String,ConnectedStyles> StyleLookup = new Dictionary<String,ConnectedStyles>()
+        {
+            {"",ConnectedStyles.None},
+            {"M",ConnectedStyles.North},
+            {"W",ConnectedStyles.West },
+            {"E",ConnectedStyles.East},
+            {"S",ConnectedStyles.South },
+            {"EW",ConnectedStyles.West | ConnectedStyles.East },
+            {"NS",ConnectedStyles.North| ConnectedStyles.South},
+            {"NE",ConnectedStyles.North | ConnectedStyles.East },
+            {"NW",ConnectedStyles.North | ConnectedStyles.West},
+            {"SW",ConnectedStyles.South | ConnectedStyles.West },
+            {"SE",ConnectedStyles.South | ConnectedStyles.East },
+            {"NSW",ConnectedStyles.North | ConnectedStyles.South  | ConnectedStyles.West },
+            {"NSE",ConnectedStyles.North | ConnectedStyles.South  | ConnectedStyles.East},
+            {"NWE",ConnectedStyles.North | ConnectedStyles.West | ConnectedStyles.East},
+            {"SWE",ConnectedStyles.South | ConnectedStyles.West | ConnectedStyles.East},
+            {"NSWE",ConnectedStyles.South | ConnectedStyles.North | ConnectedStyles.West | ConnectedStyles.East }
+        };
+
+
+        private static Dictionary<ConnectedStyles, ConnectedStyles> RotationStyleLookup = new Dictionary<ConnectedStyles, ConnectedStyles>()
+        {
+            {ConnectedStyles.None,ConnectedStyles.None },
+            {ConnectedStyles.North,ConnectedStyles.East },
+            {ConnectedStyles.East,ConnectedStyles.South },
+            {ConnectedStyles.South,ConnectedStyles.West },
+            {ConnectedStyles.West,ConnectedStyles.North }
+        };
+        public static ConnectedStyles RotateStyle(ConnectedStyles Src)
+        {
+
+            ConnectedStyles Result = ConnectedStyles.None;
+            foreach (ConnectedStyles checkenum in (ConnectedStyles[])Enum.GetValues(typeof(ConnectedStyles)))
+            {
+
+                if (RotationStyleLookup.ContainsKey(checkenum) && Src.HasFlag(checkenum))
+                    Result |= RotationStyleLookup[checkenum];
+
+            }
+
+            return Result;
+
+        }
+        /*private static Dictionary<String, String[]> RotationSuffixLookup = new Dictionary<string, string[]>()
+        {
+            {"", new[]{"","","" } },
+            {"N", new[]{"E","S","W" } },
+            {"E", new[]{"S","W","N" } },
+            {"W", new[]{"N","E","S" } },
+            {"S", new[]{"W","N","E" } },
+            {"EW", new[]{"NS","EW","NS" } },
+            {"NS", new[]{"EW","NS","EW" } },
+            {"NE", new[]{"SE","SW","NW" } },
+            {"SE", new[]{"SW","NW","NE" } },
+            {"SW", new[]{"NW","NE","SE" } },
+            {"NW", new[]{"NE","SE","SW" } },
+            {"NSWE", new[]{"NSWE","NSWE","NSWE" } },
+            {"NSW", new[]{"NWE","NSE","SWE" } },
+            {"NWE", new[]{"NSE","SWE","NSW" } },
+            {"NSE", new[]{"SWE","NSW","NWE" } },
+            {"SWE", new[]{"NSW","NWE","NSE" } }
+
+
+        };*/
+        public static ConnectedStyles[] GetRotations(ConnectedStyles value)
+        {
+            ConnectedStyles Rotate1 = RotateStyle(value);
+            ConnectedStyles Rotate2 = RotateStyle(Rotate1);
+            ConnectedStyles Rotate3 = RotateStyle(Rotate2);
+            return new ConnectedStyles[] { Rotate1, Rotate2, Rotate3 };
+
+        }
         public static String GetSuffix(ConnectedStyles value)
         {
             if (SuffixLookup.ContainsKey(value)) return SuffixLookup[value]; return null;
@@ -100,6 +174,7 @@ namespace BASeTris.Theme.Block
             }
 
         }
+       
         public Element this[ConnectedStyles index]
         {
             get

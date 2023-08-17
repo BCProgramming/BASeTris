@@ -31,6 +31,7 @@ using BASeTris.Settings;
 using BASeTris.Theme;
 using BASeTris.Particles;
 using System.Security.Cryptography;
+using static System.Windows.Forms.AxHost;
 
 namespace BASeTris.GameStates
 {
@@ -1255,6 +1256,7 @@ namespace BASeTris.GameStates
                                 Flotsam.Y = activeItem.Y - YOffset;
                                 Flotsam.FallSpeed = activeItem.FallSpeed;
                                 Flotsam.LastFall = pOwner.GetElapsedTime();
+                                PlayField.Theme.ApplyTheme(Flotsam, pOwner.GetHandler(), PlayField, NominoTheme.ThemeApplicationReason.NewNomino);
                                 PlayField.AddBlockGroup(Flotsam);
                                 //connectionindex won't matter anymore- we could make it zero or leave it be or whatever we want here.
                                 

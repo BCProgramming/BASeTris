@@ -74,11 +74,16 @@ namespace BASeTris.Theme.Block
                 }
             }
         }
-
+        //before I go and forget, I'll tag in a comment here that this seems to have glitches related to the new resurrection code, that creates new nominoes, as we are seeing old behaviour where the connections don't quite reflect what the nomino in question should look like.
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareThemeData();
-            Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.X, ne.Y));
+            if (Reason == ThemeApplicationReason.FieldSet)
+            {
+                
+                ;
+            }
+            Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             foreach (var iterate in Group)
             {
                 Dictionary<LineSeriesBlock.CombiningTypes, SKImage> Sourcedict = null;
@@ -125,23 +130,12 @@ namespace BASeTris.Theme.Block
                         //determine the flags by checking the Nomino.
                         CardinalConnectionSet.ConnectedStyles cs = CardinalConnectionSet.ConnectedStyles.None;
                         //check above
-                        Point North = new Point(iterate.X, iterate.Y-1);
-                        Point South = new Point(iterate.X, iterate.Y + 1);
-                        Point West = new Point(iterate.X - 1, iterate.Y);
-                        Point East = new Point(iterate.X + 1, iterate.Y);
+                        Point North = new Point(iterate.BaseX(), iterate.BaseY()-1);
+                        Point South = new Point(iterate.BaseX(), iterate.BaseY() + 1);
+                        Point West = new Point(iterate.BaseX() - 1, iterate.BaseY());
+                        Point East = new Point(iterate.BaseX() + 1, iterate.BaseY());
 
                         Point[] DirectionPoints = new Point[] { North, South, West, East };
-
-                        if (iterate.Block.Rotation == 1)
-                            DirectionPoints = new Point[] { East, North, South, West };
-                        else if (iterate.Block.Rotation == 2)
-                            DirectionPoints = new Point[] { West, East, North, South };
-                        else if (iterate.Block.Rotation == 3)
-                            DirectionPoints = new Point[] { East, North, South, West };
-
-
-
-                        (Point, CardinalConnectionSet.ConnectedStyles) value;
                         List<(Point, CardinalConnectionSet.ConnectedStyles)> Setuplist = new List<(Point, CardinalConnectionSet.ConnectedStyles)>()
                         {
                             (DirectionPoints[0],CardinalConnectionSet.ConnectedStyles.North),
@@ -160,10 +154,12 @@ namespace BASeTris.Theme.Block
                                 }
                             }
                         }
+                        CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
 
-
+                        var useRotationImages = from c in useConnectionStyles select NormalConnectedBlocks[chosenType][c];
                         var useImage = NormalConnectedBlocks[chosenType][cs];
-                        ibb._RotationImagesSK =   GetImageRotations(SKBitmap.FromImage(useImage));
+                        ibb._RotationImagesSK = useRotationImages.ToArray();//GetImageRotations(SKBitmap.FromImage(useImage));
+                        //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
 
 
                     }
@@ -178,7 +174,7 @@ namespace BASeTris.Theme.Block
             }
         }
         private bool VisuallyConnectOnlySameCombiningType = false;
-        private bool UseConnectedImages = false;
+        private bool UseConnectedImages = true;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_3", 0.5f], Color.Transparent);
