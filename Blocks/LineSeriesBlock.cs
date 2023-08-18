@@ -1,5 +1,6 @@
 ﻿using BASeTris.Blocks;
 using BASeTris.Theme.Block;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -147,6 +148,22 @@ namespace BASeTris.Blocks
             Green,
             Orange,
             Magenta
+        }
+        public static SKColor GetCombiningTypeColor(CombiningTypes src)
+        {
+            return src switch
+            {
+                CombiningTypes.Red => SKColors.Red,
+                CombiningTypes.Yellow => SKColors.Yellow,
+                CombiningTypes.Blue => SKColors.Blue,
+                CombiningTypes.Green => SKColors.Green,
+                CombiningTypes.Magenta => SKColors.Magenta,
+                CombiningTypes.Orange => SKColors.Orange,
+                _ => new SKColor((byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255))
+            }; 
+            
+
+
         }
         public override char GetCharacterRepresentation()
         {

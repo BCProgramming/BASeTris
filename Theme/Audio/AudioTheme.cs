@@ -15,6 +15,7 @@ namespace BASeTris.Theme.Audio
         public AudioThemeElement BlockFalling { get; set; }
         public AudioThemeElement ScoreChime { get; set; }
         public AudioThemeElement BlockPop { get; set; }
+        public AudioThemeElement BlockGroupStick {get;set;}
         public AudioThemeElement BlockGroupMove { get; set; }
         public AudioThemeElement BlockGroupPlace { get; set; }
         public AudioThemeElement BlockGroupRotate { get; set; }
@@ -38,11 +39,12 @@ namespace BASeTris.Theme.Audio
             BackgroundMusic = new AudioThemeElement(new[]
                 { ATS("tetris_theme_A","Theme A" ), ATS("tetris_a_theme_techno"),ATS("tetris_theme_B"),ATS("tetris_theme_C"),
                     ATS("TetrisDS"),ATS("smb3_tetris"),ATS("kirbysand"),ATS("silius1"),ATS("journey3"),ATS("tetris_gb_theme"),ATS("tetris_nes_theme"),ATS("drMarioChill"),ATS("DrMarioFever") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+            BlockGroupStick = new AudioThemeElement(new[] { ATS("block_stick") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupMove = new AudioThemeElement(new[] { ATS("block_move_2"), ATS("block_move"), ATS("block_move_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-            BlockGroupPlace = new AudioThemeElement(new[] { ATS("block_place_3"), ATS("block_place_2"), ATS("block_place") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
-            BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate_3"), ATS("block_rotate_2"), ATS("block_rotate"), ATS("block_rotate_4") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+            BlockGroupPlace = new AudioThemeElement(new[] { ATS("block_place_4"),ATS("block_place_3"), ATS("block_place_2"), ATS("block_place") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+            BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate_3"), ATS("block_rotate_2"), ATS("block_rotate"), ATS("block_rotate_4"), ATS("block_rotate_6") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockStopped = new AudioThemeElement(new[] { ATS("block_stop") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-            ClearLine = new AudioThemeElement(new[] { ATS("line_clear_3"), ATS("line_clear"), ATS("line_clear_2") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+            ClearLine = new AudioThemeElement(new[] { ATS("line_clear_3"), ATS("line_clear"), ATS("line_clear_2"), ATS("line_clear_6") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
             ClearTetris = new AudioThemeElement(new[] { ATS("line_tetris"), ATS("line_tetris_2") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
             GameOver = new AudioThemeElement("tetris_game_over", "Game Over"),
             GameOverShade = new AudioThemeElement("shade_move", "Game Over Blinds"),
@@ -62,6 +64,7 @@ namespace BASeTris.Theme.Audio
             Name = "NES",
             BackgroundMusic = new AudioThemeElement(new[]
                 { ATS("tetris_nes_theme") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
+            BlockGroupStick = new AudioThemeElement(new[] { ATS("block_stick_1") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupMove = new AudioThemeElement(new[] { ATS("block_move") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupPlace = new AudioThemeElement(new[] { ATS("block_place") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),

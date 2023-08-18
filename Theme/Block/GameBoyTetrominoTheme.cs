@@ -433,7 +433,7 @@ namespace BASeTris
                 {
                     BlockData.Add(null);
                 }
-                BlockData = TetrisGame.Shuffle(BlockData).ToList();
+                BlockData = RandomHelpers.Static.Shuffle(BlockData).ToList();
             }
             var LeftSide = BlockData[0];
             var LeftMiddle = BlockData[1];

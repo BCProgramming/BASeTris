@@ -621,7 +621,7 @@ namespace BASeTris
 
                 List<NominoPoint> MoveList = new List<NominoPoint>() { LeftMove, ForwardMove, RightwardMove };
                 int[] ArrayOrder = new int[] { 0, 1, 2 };
-                if (GenerationFlags.HasFlag(NominoPieceGenerationFlags.Flag_Randomize)) ArrayOrder = TetrisGame.Shuffle(ArrayOrder).ToArray();
+                if (GenerationFlags.HasFlag(NominoPieceGenerationFlags.Flag_Randomize)) ArrayOrder = RandomHelpers.Static.Shuffle(ArrayOrder).ToArray();
                 foreach (int index in ArrayOrder)
                 {
                     

@@ -406,7 +406,11 @@ namespace BASeTris.GameStates
                         else
                         {
                             AnyMoved = true;
-
+                            //if it can't move down one more
+                            if (iterate.PlaceSound && PlayField.CanFit(iterate, iterate.X, iterate.Y + 1, true, null).CantFit_Field)
+                            {
+                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockFalling?.Key);
+                            }
                             if (iterate.MoveSound && !SuspendFieldSet)
                             {
                                 //Make a movement sound as we fall.

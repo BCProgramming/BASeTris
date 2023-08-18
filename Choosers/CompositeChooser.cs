@@ -22,7 +22,7 @@ namespace BASeTris.Choosers
 
             float[] BuildWeights = (from i in Choosers select WeightFunction(i)).ToArray();
 
-            var resultvalue = RandomHelper.Select(Choosers, BuildWeights);
+            var resultvalue = RandomHelpers.Static.Select(Choosers, BuildWeights);
             return resultvalue.GetNext();
             
 

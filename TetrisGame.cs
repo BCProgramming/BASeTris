@@ -151,18 +151,7 @@ namespace BASeTris
             if (foundindex == 0) return Elements[Elements.Length];
             return Elements[foundindex - 1];
         }
-        public static IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese)
-        {
-            if (rgen == null) rgen = new Random();
-            var sl = new SortedList<float, T>();
-            foreach (T iterate in Shufflethese)
-            {
-                sl.Add((float)rgen.NextDouble(), iterate);
-            }
-            Random rg = new Random();
 
-            return sl.Select(iterator => iterator.Value);
-        }
         public static Font GetRetroFont(float desiredSize, double ScaleFactor, FontStyle desiredStyle = FontStyle.Regular, GraphicsUnit GUnit = GraphicsUnit.Point)
         {
             return new Font(RetroFont, (float)(desiredSize * ScaleFactor), desiredStyle, GUnit);

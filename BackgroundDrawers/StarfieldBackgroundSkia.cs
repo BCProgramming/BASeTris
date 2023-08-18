@@ -27,7 +27,7 @@ namespace BASeTris.BackgroundDrawers
 
                 Stars[i] = new StarfieldStarData(sx, sy);
                 Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors) / 3;
-                Stars[i].SizeMultiplier = RandomHelper.Select(AvailableScales,chooseweights);
+                Stars[i].SizeMultiplier = RandomHelpers.Static.Select(AvailableScales,chooseweights);
             }
             return Stars;
         }

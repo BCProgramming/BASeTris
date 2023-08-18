@@ -1256,6 +1256,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         //will use QueuedSounds list.
         public iActiveSoundObject PlaySound(String key)
         {
+            if (key == null) return null;
             iSoundSourceObject grabbed = GetSound(key);
             return grabbed.Play(false);
         }

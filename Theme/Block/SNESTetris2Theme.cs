@@ -2,6 +2,7 @@
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.Skia;
+using BASeTris.Tetrominoes;
 using OpenTK.Graphics.OpenGL;
 using SkiaSharp;
 using System;
@@ -14,17 +15,88 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Theme.Block
 {
-    [HandlerTheme("Tetris 2 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler))]
-    [ThemeDescription("Tetris 2 Theme from the SNES")]
-    public class SNESTetris2Theme : NominoTheme
+
+    public class CachedImageData
     {
-        public enum BlockTypes
+        public enum BlockTypeConstants
         {
             Normal,
             Fixed,
-            Pop,
-            Shiny
+            Shiny,
+            Pop
         }
+
+        public Dictionary<SKColor, CardinalImageSet> NormalConnectedBlocks_Color = new Dictionary<SKColor, CardinalImageSet>();
+        public Dictionary<SKColor, SKImage> NormalBlocks_Color = new Dictionary<SKColor, SKImage>();
+        public Dictionary<SKColor, SKImage> FixedBlocks_Color = new Dictionary<SKColor, SKImage>();
+        public Dictionary<SKColor, SKImage> ShinyBlocks_Color = new Dictionary<SKColor, SKImage>();
+        public Dictionary<SKColor, SKImage> PopBlocks_Color = new Dictionary<SKColor, SKImage>();
+
+
+        public CardinalImageSet GetConnectedBlocks(SKColor src)
+        {
+            if (!NormalConnectedBlocks_Color.ContainsKey(src))
+            {
+                //red must be added first!
+                var redSet = NormalConnectedBlocks_Color[SKColors.Red];
+                CardinalImageSet newSet = new CardinalImageSet(redSet, src);
+                NormalConnectedBlocks_Color[src] = newSet;
+            }
+            return NormalConnectedBlocks_Color[src];
+        }
+        public SKImage GetNormalBlock(SKColor src)
+        {
+            return GetBlockFromDictionary(NormalBlocks_Color, src);
+        }
+        public SKImage GetFixedBlock(SKColor src)
+        {
+            return GetBlockFromDictionary(FixedBlocks_Color, src);
+        }
+        public SKImage GetShinyBlock(SKColor src)
+        {
+            return GetBlockFromDictionary(ShinyBlocks_Color, src);
+        }
+        public SKImage GetPopBlock(SKColor src)
+        {
+            return GetBlockFromDictionary(PopBlocks_Color, src);
+        }
+        private SKImage GetBlockFromDictionary(Dictionary<SKColor,SKImage> Input, SKColor src)
+        {
+            if (!Input.ContainsKey(src))
+            {
+                var redImage = Input[SKColors.Red];
+                var recolored = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(redImage, src);
+                Input.Add(src, recolored);
+            }
+            return Input[src];
+        }
+        public SKImage GetBlock(BlockTypeConstants btc, SKColor color)
+        {
+            return GetBlockFromDictionary(GetDictionaryForType(btc), color);
+        }
+        public Dictionary<SKColor, SKImage> GetDictionaryForType(BlockTypeConstants bt)
+        {
+            return bt switch
+            {
+                BlockTypeConstants.Normal => NormalBlocks_Color,
+                BlockTypeConstants.Pop => PopBlocks_Color,
+                BlockTypeConstants.Fixed => FixedBlocks_Color,
+                BlockTypeConstants.Shiny => ShinyBlocks_Color,
+                _ => null
+            };
+        }
+        //public Dictionary<LineSeriesBlock.CombiningTypes, CardinalImageSet> NormalConnectedBlocks_Combining = null;
+        //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> NormalBlocks_Combine = null;
+        //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> FixedBlocks_Combine = null;
+        //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> ShinyBlocks_Combine = null;
+        //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> PopBlocks_Combine = null;
+    }
+
+    [HandlerTheme("Tetris 2 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler),typeof(StandardTetrisHandler))]
+    [ThemeDescription("Tetris 2 Theme from the SNES")]
+    public class SNESTetris2Theme : NominoTheme
+    {
+
         
  
 
@@ -46,23 +118,27 @@ namespace BASeTris.Theme.Block
         static CardinalImageSet SNES_Orange_Normal = null;
         static SKImage SNES_Orange_Fixed = null;
         static SKImage SNES_Orange_Pop = null;
-        static Dictionary<LineSeriesBlock.CombiningTypes, CardinalImageSet> NormalConnectedBlocks = null;
-        static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> NormalBlocks = null;
-        static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> FixedBlocks = null;
-        static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> ShinyBlocks = null;
-        static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> PopBlocks = null;
+        static CachedImageData ImageCache = new CachedImageData();
+        //static Dictionary<LineSeriesBlock.CombiningTypes, CardinalImageSet> NormalConnectedBlocks = null;
+        //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> NormalBlocks = null;
+        //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> FixedBlocks = null;
+        //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> ShinyBlocks = null;
+        //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> PopBlocks = null;
         static bool ThemeDataPrepared = false;
 
         public override string Name => "Tetris 2 SNES";
 
+        
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
             PrepareThemeData();
-            var Sourcedict = TetrisGame.Choose(new[] { NormalBlocks, FixedBlocks });
+            var drawtype = RandomHelpers.Static.Select(new[] { CachedImageData.BlockTypeConstants.Fixed, CachedImageData.BlockTypeConstants.Normal, CachedImageData.BlockTypeConstants.Pop }, new float[] { 20, 60, 5 });
+            
             foreach (var iterate in Group)
             {
-                var chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));
-
+                var chosenColor = new SKColor((byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255));
+               
+                
                 if (iterate.Block is ImageBlock ibb)
                 {
                     if (ibb is StandardColouredBlock sbc)
@@ -70,11 +146,11 @@ namespace BASeTris.Theme.Block
                         sbc.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     }
                     
-                    ibb._RotationImagesSK = new SKImage[] { Sourcedict[chosenType] };
+                    ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock(drawtype,chosenColor) };
                 }
             }
         }
-        //before I go and forget, I'll tag in a comment here that this seems to have glitches related to the new resurrection code, that creates new nominoes, as we are seeing old behaviour where the connections don't quite reflect what the nomino in question should look like.
+        
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareThemeData();
@@ -83,40 +159,60 @@ namespace BASeTris.Theme.Block
                 
                 ;
             }
+
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             foreach (var iterate in Group)
             {
-                Dictionary<LineSeriesBlock.CombiningTypes, SKImage> Sourcedict = null;
-                LineSeriesBlock.CombiningTypes chosenType;
+                CachedImageData.BlockTypeConstants blocktype = CachedImageData.BlockTypeConstants.Normal;
+                //Dictionary<SKColor, SKImage> Sourcedict = null;
+                LineSeriesBlock.CombiningTypes? chosenType = null;
+                SKColor useColor = SKColors.Red;
                 if (iterate.Block is LineSeriesBlock lsb)
                 {
                     chosenType = lsb.CombiningIndex;
+                    
                     if (lsb.Popping)
                     {
-                        Sourcedict = PopBlocks;
+                        blocktype = CachedImageData.BlockTypeConstants.Pop;
+                        //Sourcedict = ImageCache.PopBlocks_Color;
                     }
                     else
                     {
-                        Sourcedict = NormalBlocks;
+                        blocktype = CachedImageData.BlockTypeConstants.Normal;
 
                         if (lsb is LineSeriesPrimaryBlock lsbp)
                         {
 
                             if (lsbp is LineSeriesPrimaryShinyBlock)
                             {
-                                Sourcedict = ShinyBlocks;
+                                blocktype = CachedImageData.BlockTypeConstants.Shiny;
+                                
                             }
                             else
                             {
-                                Sourcedict = FixedBlocks;
+                                blocktype = CachedImageData.BlockTypeConstants.Fixed;
                             }
                         }
                     }
                 }
                 else {
-                    chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));
-                }
+                    //I,O,T,S,Z,J,L
+                    //{Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
+                    //chosen color based on the type.
+                    if (Group is Tetromino_I) useColor = SKColors.Cyan;
+                    else if (Group is Tetromino_O) useColor = SKColors.Yellow;
+                    else if (Group is Tetromino_T) useColor = SKColors.Purple;
+                    else if (Group is Tetromino_S) useColor = SKColors.Green;
+                    else if (Group is Tetromino_Z) useColor = SKColors.Red;
+                    else if (Group is Tetromino_J) useColor = SKColors.Blue;
+                    else if (Group is Tetromino_L) useColor = SKColors.OrangeRed;
+                    else useColor = SKColors.Gray;
 
+
+
+                    //chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));
+                }
+                if(chosenType!=null) useColor = LineSeriesBlock.GetCombiningTypeColor(chosenType.Value);
                 if (iterate.Block is ImageBlock ibb)
                 {
                     if (iterate.Block is StandardColouredBlock scb)
@@ -124,7 +220,7 @@ namespace BASeTris.Theme.Block
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     }
 
-                    if (Sourcedict == NormalBlocks && UseConnectedImages)
+                    if (blocktype == CachedImageData.BlockTypeConstants.Normal  && UseConnectedImages)
                     {
 
                         //determine the flags by checking the Nomino.
@@ -148,7 +244,11 @@ namespace BASeTris.Theme.Block
                         {
                             if (GroupElements.ContainsKey(Checkconnected.Item1))
                             {
-                                if (!VisuallyConnectOnlySameCombiningType ||( GroupElements[Checkconnected.Item1].Block is LineSeriesBlock lsbg && iterate.Block is LineSeriesBlock lsbb))
+                                if (!VisuallyConnectOnlySameCombiningType || (GroupElements[Checkconnected.Item1].Block is LineSeriesBlock lsbg && iterate.Block is LineSeriesBlock lsbb))
+                                {
+                                    cs |= Checkconnected.Item2;
+                                }
+                                else
                                 {
                                     cs |= Checkconnected.Item2;
                                 }
@@ -156,8 +256,8 @@ namespace BASeTris.Theme.Block
                         }
                         CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
 
-                        var useRotationImages = from c in useConnectionStyles select NormalConnectedBlocks[chosenType][c];
-                        var useImage = NormalConnectedBlocks[chosenType][cs];
+                        var useRotationImages = from c in useConnectionStyles select ImageCache.GetConnectedBlocks(useColor)[c];
+                        var useImage = ImageCache.GetConnectedBlocks(useColor)[cs];
                         ibb._RotationImagesSK = useRotationImages.ToArray();//GetImageRotations(SKBitmap.FromImage(useImage));
                         //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
 
@@ -165,7 +265,7 @@ namespace BASeTris.Theme.Block
                     }
                     else
                     {
-                        ibb._RotationImagesSK = new SKImage[] { Sourcedict[chosenType] };
+                        ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock(blocktype,useColor) };
                     }
                     
                 }
@@ -188,6 +288,7 @@ namespace BASeTris.Theme.Block
             SNES_Red_Normal = new CardinalImageSet();
             SNES_Red_Normal[CardinalConnectionSet.ConnectedStyles.None] = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_normal_snes"));
 
+            
             var AllArrangements = EnumHelper.GetAllEnums<CardinalConnectionSet.ConnectedStyles>();
             String NormalBlockPrefix = "tetris_2_normal_block_connected";
             foreach (var checkflags in AllArrangements)
@@ -211,11 +312,15 @@ namespace BASeTris.Theme.Block
 
                 }
             }
-
+            ImageCache.NormalConnectedBlocks_Color.Add(SKColors.Red,SNES_Red_Normal);
 
             //SNES_Red_Normal = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_normal_snes"));
             SNES_Red_Fixed = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_fixed_snes"));
             SNES_Red_Pop = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_pop_snes"));
+
+            
+
+
             SNES_Yellow_Normal =  new CardinalImageSet(SNES_Red_Normal,SKColors.Yellow);
             SNES_Yellow_Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(SNES_Red_Fixed, SKColors.Yellow);
             SNES_Yellow_Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(SNES_Red_Pop, SKColors.Yellow);
@@ -232,46 +337,46 @@ namespace BASeTris.Theme.Block
             SNES_Orange_Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(SNES_Red_Fixed, SKColors.Orange);
             SNES_Orange_Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(SNES_Red_Pop, SKColors.Orange);
 
-            NormalConnectedBlocks = new Dictionary<LineSeriesBlock.CombiningTypes, CardinalImageSet>()
+            ImageCache.NormalConnectedBlocks_Color = new Dictionary<SKColor, CardinalImageSet>()
             {
-                {LineSeriesBlock.CombiningTypes.Red,SNES_Red_Normal },
-                {LineSeriesBlock.CombiningTypes.Yellow,SNES_Yellow_Normal },
-                {LineSeriesBlock.CombiningTypes.Blue,SNES_Blue_Normal},
-                {LineSeriesBlock.CombiningTypes.Green,SNES_Green_Normal },
-                {LineSeriesBlock.CombiningTypes.Magenta,SNES_Magenta_Normal },
-                {LineSeriesBlock.CombiningTypes.Orange,SNES_Orange_Normal },
+                {SKColors.Red,SNES_Red_Normal },
+                {SKColors.Yellow,SNES_Yellow_Normal },
+                {SKColors.Blue,SNES_Blue_Normal},
+                {SKColors.Green,SNES_Green_Normal },
+                {SKColors.Magenta,SNES_Magenta_Normal },
+                {SKColors.Orange,SNES_Orange_Normal },
             };
-            NormalBlocks = new Dictionary<LineSeriesBlock.CombiningTypes, SKImage>()
+            ImageCache.NormalBlocks_Color = new Dictionary<SKColor, SKImage>()
             {
-                {LineSeriesBlock.CombiningTypes.Red,SNES_Red_Normal[0] },
-                {LineSeriesBlock.CombiningTypes.Yellow,SNES_Yellow_Normal[0] },
-                {LineSeriesBlock.CombiningTypes.Blue,SNES_Blue_Normal[0] },
-                {LineSeriesBlock.CombiningTypes.Green,SNES_Green_Normal[0] },
-                {LineSeriesBlock.CombiningTypes.Magenta,SNES_Magenta_Normal[0] },
-                {LineSeriesBlock.CombiningTypes.Orange,SNES_Orange_Normal[0] },
+                {SKColors.Red,SNES_Red_Normal[0] },
+                {SKColors.Yellow,SNES_Yellow_Normal[0] },
+                {SKColors.Blue,SNES_Blue_Normal[0] },
+                {SKColors.Green,SNES_Green_Normal[0] },
+                {SKColors.Magenta,SNES_Magenta_Normal[0] },
+                {SKColors.Orange,SNES_Orange_Normal[0] },
             };
-            FixedBlocks = new Dictionary<LineSeriesBlock.CombiningTypes, SKImage>()
+            ImageCache.FixedBlocks_Color = new Dictionary<SKColor, SKImage>()
             {
-                {LineSeriesBlock.CombiningTypes.Red,SNES_Red_Fixed },
-                {LineSeriesBlock.CombiningTypes.Yellow,SNES_Yellow_Fixed },
-                {LineSeriesBlock.CombiningTypes.Blue,SNES_Blue_Fixed },
-                {LineSeriesBlock.CombiningTypes.Green,SNES_Green_Fixed },
-                {LineSeriesBlock.CombiningTypes.Magenta,SNES_Magenta_Fixed },
-                {LineSeriesBlock.CombiningTypes.Orange,SNES_Orange_Fixed },
-            };
-
-            PopBlocks = new Dictionary<LineSeriesBlock.CombiningTypes, SKImage>()
-            {
-                {LineSeriesBlock.CombiningTypes.Red,SNES_Red_Pop },
-                {LineSeriesBlock.CombiningTypes.Yellow,SNES_Yellow_Pop },
-                {LineSeriesBlock.CombiningTypes.Blue,SNES_Blue_Pop },
-                {LineSeriesBlock.CombiningTypes.Green,SNES_Green_Pop },
-                {LineSeriesBlock.CombiningTypes.Magenta,SNES_Magenta_Pop },
-                {LineSeriesBlock.CombiningTypes.Orange,SNES_Orange_Pop },
+                {SKColors.Red,SNES_Red_Fixed },
+                {SKColors.Yellow,SNES_Yellow_Fixed },
+                {SKColors.Blue,SNES_Blue_Fixed },
+                {SKColors.Green,SNES_Green_Fixed },
+                {SKColors.Magenta,SNES_Magenta_Fixed },
+                {SKColors.Orange,SNES_Orange_Fixed },
             };
 
+            ImageCache.PopBlocks_Color = new Dictionary<SKColor, SKImage>()
+            {
+                {SKColors.Red,SNES_Red_Pop },
+                {SKColors.Yellow,SNES_Yellow_Pop },
+                {SKColors.Blue,SNES_Blue_Pop },
+                {SKColors.Green,SNES_Green_Pop },
+                {SKColors.Magenta,SNES_Magenta_Pop },
+                {SKColors.Orange,SNES_Orange_Pop },
+            };
 
-            ShinyBlocks = FixedBlocks;
+
+            ImageCache.ShinyBlocks_Color = ImageCache.FixedBlocks_Color;
 
         }
 
