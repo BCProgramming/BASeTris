@@ -274,12 +274,12 @@ namespace BASeTris
         public double FrameTime { get { if (CurrentFrameData == null) return 0; return CurrentFrameData.Time; } }
         private FrameEventArgs LastFrameData = null;
         private FrameEventArgs CurrentFrameData = null;
+        private IBlockGameCustomizationHandler HandlerTitleSet = null;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             LastFrameData = CurrentFrameData;
             CurrentFrameData = e;
             if (!TetrisGame.Imageman.ImagePrepped) return;
-            Debug.Print("RenderFrame");
             base.OnRenderFrame(e);
             try
             {
@@ -294,9 +294,9 @@ namespace BASeTris
 
                 
 
-                if (handler is not null)
+                if (handler!=null && handler!=HandlerTitleSet)
                 {
-
+                    HandlerTitleSet = handler;
                     if (CurrentGameState is GameplayGameState)
                     {
                         Title += " - " + handler.Name;
@@ -385,12 +385,6 @@ namespace BASeTris
                                     canvas.ClipRect(StatsRect);
                                     staterender.RenderStats(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(StatsRect));
                                 }
-                                //TODO: this needs to be optimized; drawing both the stats and the main window is still slower than the GDI+ implementation which is able to separate the drawing.
-                                
-                                //staterender.RenderStats(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height)));
-                                //staterender.Render(this, skTetrisField, _Present.Game.CurrentState,
-                                //    new GameStateSkiaDrawParameters(new SKRect(0, 0, skTetrisFieldBmp.Width, e.Info.Height)));
-                                //staterender.RenderStats(this,skStats,_Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, skStatsBmp.Width, e.Info.Height)));
 
                             }
                             else

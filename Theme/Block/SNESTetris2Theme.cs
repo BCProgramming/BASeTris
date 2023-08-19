@@ -277,7 +277,7 @@ namespace BASeTris.Theme.Block
         private bool UseConnectedImages = true;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_3", 0.5f], Color.Transparent);
+            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_4", 0.5f], Color.Transparent);
         }
 
         private void PrepareThemeData()

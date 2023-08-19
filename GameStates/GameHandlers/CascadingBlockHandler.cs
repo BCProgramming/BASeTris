@@ -519,7 +519,7 @@ namespace BASeTris.GameStates.GameHandlers
                         }
                         if (popItem is LineSeriesPrimaryShinyBlock lsbp)
                         {
-                            TetrisGame.Soundman.PlaySound("tetris_2_shiny_clear");
+                            TetrisGame.Soundman.PlaySound("shiny_clear_tetris_2");
                             //go through all cells.
                             for (int r = 0; r < state.PlayField.Contents.Length; r++)
                             {

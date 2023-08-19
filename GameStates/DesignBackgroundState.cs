@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -261,11 +262,8 @@ namespace BASeTris.GameStates
             MenuStateTextMenuItem RandomizeItem = new MenuStateTextMenuItem() { Text = "Randomize", TipText = "Randomize this Layer's arrangement" };
             MenuStateTextMenuItem NextLayer = new MenuStateTextMenuItem() { Text = "Next Layer", TipText = "Edit the next layer. Creates a new layer if needed." };
             MenuStateTextMenuItem PrevLayer = new MenuStateTextMenuItem() { Text = "Previous Layer", TipText = "Edit the previous layer" };
-            MenuStateSliderOption ScaleOption = new MenuStateSliderOption(0, 10, 1) { ChangeSize = 0.25f, Label = "Scale", LargeDetentCount = 5, SmallDetent = 0.1 };
-            ScaleOption.ValueChanged += (ob, ea) =>
-            {
-                CurrentLayer.Scale = ea.Value;
-            };
+            MenuStateTextMenuItem LayerOptions = new MenuStateTextMenuItem() { Text = "Layer Options", TipText = "Edit Layer Properties" };
+            
             MenuStateDisplayThemeMenuItem ChangeThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, typeof(StandardTetrisHandler),CurrentLayer.DisplayedDesignerTheme.GetType());
             ChangeThemeItem.SimpleSelectionFunction = (nt) =>
             {
@@ -290,7 +288,7 @@ namespace BASeTris.GameStates
             
 
             
-            foreach (var designeritem in new MenuStateMenuItem[] { ReturnMenuItem, AddNominoItem,TestDesign, ChangeThemeItem,SaveDesign,LoadDesign,NextLayer,PrevLayer, ScaleOption,RandomizeItem, ExitMenuItem })
+            foreach (var designeritem in new MenuStateMenuItem[] { ReturnMenuItem, AddNominoItem,TestDesign, ChangeThemeItem,SaveDesign,LoadDesign,NextLayer,PrevLayer, LayerOptions,RandomizeItem, ExitMenuItem })
             {
                 if (designeritem is MenuStateTextMenuItem mstmi)
                 {
@@ -334,11 +332,11 @@ namespace BASeTris.GameStates
 
                     StandardImageBackgroundSkia CurrBuild = null;
 
-                    foreach (var layer in this.Layers)
+                    foreach (var layer in this.Layers.Reverse())
                     {
                         //create the Render background for this layer.
                         var layerbitmap = layer.GetLayerBitmap();
-                        var layercapsule = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = SKImage.FromBitmap(layerbitmap), Movement = new SKPoint(5, 5),Scale = layer.Scale };
+                        var layercapsule = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = SKImage.FromBitmap(layerbitmap), Movement = new SKPoint(5, 5), Scale = layer.Scale };
                         var BuildLayerbg = new StandardImageBackgroundSkia() { Data = layercapsule };
                         //if currbuild is null, this is the first layer.
                         if (CurrBuild == null) CurrBuild = BuildLayerbg;
@@ -378,12 +376,13 @@ namespace BASeTris.GameStates
                     //we'll maybe revisit this later.
                     var submenu = GetSaveSlotSelectionState(pOwner, DesignOptionsMenuState, (y) => { CustomBackgroundData.SaveCustomBackground(this, y); });
                     pOwner.CurrentState = submenu;
-                    
+
                     DesignOptionsMenuState.ActivatedItem = null;
                 }
                 else if (e.MenuElement == LoadDesign)
                 {
-                    var submenu = GetSaveSlotSelectionState(pOwner, DesignOptionsMenuState, (y) => {
+                    var submenu = GetSaveSlotSelectionState(pOwner, DesignOptionsMenuState, (y) =>
+                    {
                         var LoadTry = CustomBackgroundData.LoadCustomBackground(y);
                         if (LoadTry != null)
                         {
@@ -395,7 +394,14 @@ namespace BASeTris.GameStates
                     });
                     pOwner.CurrentState = submenu;
                     DesignOptionsMenuState.ActivatedItem = null;
-                    ScaleOption.Value = CurrentLayer.Scale;
+
+                }
+                else if (e.MenuElement == LayerOptions)
+                {
+                    var submenu = GetSizeEditState(pOwner, DesignOptionsMenuState);
+                    pOwner.CurrentState = submenu;
+                    DesignOptionsMenuState.ActivatedItem = null;
+
                 }
                 else if (e.MenuElement == RandomizeItem)
                 {
@@ -411,20 +417,17 @@ namespace BASeTris.GameStates
                         //need to add a layer.
                         var NewLayers = new BackgroundDesignLayer[Layers.Length + 1];
                         Array.Copy(Layers, NewLayers, Layers.Length);
-                        NewLayers[NewLayers.Length-1] = new BackgroundDesignLayer(6, 6, new SNESTetrominoTheme());
+                        NewLayers[NewLayers.Length - 1] = new BackgroundDesignLayer(6, 6, new SNESTetrominoTheme());
                         Layers = NewLayers;
 
                     }
                     LayerIndex++;
                     DesignOptionsMenuState.ActivatedItem = null;
-                    ScaleOption.Value = CurrentLayer.Scale;
-
                 }
                 else if (e.MenuElement == PrevLayer)
                 {
                     if (LayerIndex == 0) LayerIndex = Layers.Length - 1; else LayerIndex--;
                     DesignOptionsMenuState.ActivatedItem = null;
-                    ScaleOption.Value = CurrentLayer.Scale;
                 }
 
             };
@@ -445,12 +448,70 @@ namespace BASeTris.GameStates
             }
             IsDirty = true;
         }
+        private MenuState PrepareSubstate(IStateOwner pOwner, GameState Parent,String pTitle, params MenuStateMenuItem[] Items)
+        {
+            var ResultState = new MenuState(_BG);
+
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+
+            MenuStateTextMenuItem ReturnMenuItem = new MenuStateTextMenuItem() { Text = "Cancel", TipText = "Cancel and return to previous menu" };
+
+            ResultState.MenuElements.Add(ReturnMenuItem);
+            ResultState.MenuElements.AddRange(Items);
+            ResultState.BG = _BG;
+            ResultState.StateHeader = pTitle;
+            ResultState.HeaderTypeface = FontSrc.FontFamily.Name;
+            ResultState.HeaderTypeSize *= 1.5f;
+
+            ResultState.MenuItemActivated += (o, e) =>
+            {
+                if (e.MenuElement == ReturnMenuItem)
+                {
+                    pOwner.CurrentState = Parent;
+                    ResultState.ActivatedItem = null;
+                }
+            };
+            foreach (var styleitem in ResultState.MenuElements)
+            {
+                if (styleitem is MenuStateTextMenuItem mstmi)
+                {
+                    mstmi.FontFace = FontSrc.FontFamily.Name;
+                    mstmi.FontSize = FontSrc.Size;
+                    mstmi.BackColor = new SKColor(128, 128, 128, 128);
+                    //DesignOptionsMenuState.MenuElements.Add(mstmi);
+                }
+            }
+            ResultState.FadedBGFadeState = new MenuState.MenuStateFadedParentStateInformation(Parent, true);
+            return ResultState;
+        }
+
+        private MenuState GetSizeEditState(IStateOwner pOwner, GameState Parent)
+        {
+            MenuStateSliderOption ColumnsOption = new MenuStateSliderOption(1, 64, CurrentLayer.DesignColumns) { SmallDetent = 1, LargeDetentCount = 4,Label = "Columns" };
+            MenuStateSliderOption RowsOption = new MenuStateSliderOption(1, 64, CurrentLayer.DesignRows) { SmallDetent = 1, LargeDetentCount = 4,Label = "Rows" };
+            MenuStateSliderOption ScaleOption = new MenuStateSliderOption(0, 10, CurrentLayer.Scale) { ChangeSize = 0.25f, Label = "Scale", LargeDetentCount = 5, SmallDetent = 0.1 };
+            ScaleOption.ValueChanged += (ob, ea) =>
+            {
+                CurrentLayer.Scale = ea.Value;
+            };
+            ColumnsOption.ValueChanged += (csender, cargs) => CurrentLayer.DesignColumns = (int)cargs.Value;
+            RowsOption.ValueChanged += (rsender, rargs) => CurrentLayer.DesignRows = (int)rargs.Value;
+
+
+            return PrepareSubstate(pOwner, Parent, "Layer Options",ColumnsOption, RowsOption,ScaleOption);
+        }
+
+        private void ColumnsOption_ValueChanged(object sender, MenuStateSliderOption.SliderValueChangeEventArgs e)
+        {
+            CurrentLayer.DesignColumns = (int)e.Value;
+        }
+
         private MenuState GetSaveSlotSelectionState(IStateOwner pOwner,GameState Parent,Action<int> LoadSlotAction)
         {
             var ResultState = new MenuState(_BG);
             
             var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
-
+            MenuStateTextMenuItem BitmapFileItem = new MenuStateTextMenuItem() { Text = "Bitmap File", TipText = "Export design to a bitmap file." };
             MenuStateTextMenuItem ReturnMenuItem = new MenuStateTextMenuItem() { Text = "Cancel", TipText = "Cancel Save and return to previous menu" };
             ResultState.MenuElements.Add(ReturnMenuItem);
             for (int i = 1; i < 11; i++)
@@ -467,14 +528,31 @@ namespace BASeTris.GameStates
                 MenuStateTextMenuItem SlotItem  = new MenuStateTextMenuItem() { Text = sText, TipText = sDescription,Tag = i };
                 ResultState.MenuElements.Add(SlotItem);
             }
-
-            ResultState.MenuItemSelected += (a, b) =>
+            ResultState.MenuElements.Add(BitmapFileItem);
+            ResultState.MenuItemActivated += (a, b) =>
             {
                 if (b.MenuElement == ReturnMenuItem)
                 {
                     pOwner.CurrentState = DesignOptionsMenuState;
                 }
+                else if (b.MenuElement == BitmapFileItem)
+                {
+                    using (var getbitmap = CurrentLayer.GetLayerBitmap())
+                    {
+                        String sTargetFile = Path.Combine(TetrisGame.AppDataFolder, "LayerExport", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss-ffffff") + ".png");
+                        String sDirectory = Path.GetDirectoryName(sTargetFile);
+                        if (!Directory.Exists(sDirectory)) Directory.CreateDirectory(sDirectory);
+                        using (var data = getbitmap.Encode(SKEncodedImageFormat.Png, 80))
+                        {
+                            using (var writer = new FileStream(sTargetFile, FileMode.Create))
+                            {
+                                data.SaveTo(writer);
+                            }
+                        }
+                    }
 
+                    pOwner.CurrentState = DesignOptionsMenuState;
+                }
                 else
                 {
                     LoadSlotAction((int)(b.MenuElement.Tag));
