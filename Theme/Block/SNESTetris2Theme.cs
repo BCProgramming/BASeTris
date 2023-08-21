@@ -92,41 +92,73 @@ namespace BASeTris.Theme.Block
         //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> PopBlocks_Combine = null;
     }
 
-    [HandlerTheme("Tetris 2 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler),typeof(StandardTetrisHandler))]
-    [ThemeDescription("Tetris 2 Theme from the SNES")]
-    public class SNESTetris2Theme : NominoTheme
+
+    [HandlerTheme("Tetris 2SNES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    [ThemeDescription("Tetris 2 Theme from the NES")]
+
+    public class NESTetris2Theme : ConnectedImageLineSeriesBlockTheme
     {
+        public override string Name => "Tetris 2 NES";
+        protected override string GetImageKeyBase()
+        {
+            return "tetris_2_NES";
+        }
+        Bitmap DarkImage;
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
+        {
+            if (DarkImage == null)
+            {
+                DarkImage = new Bitmap(250, 500);
+                using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                {
+                    drawdark.Clear(Color.FromArgb(10, 10, 10));
+                }
+            }
+            return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+        }
+    }
 
-        
- 
 
-        static CardinalImageSet SNES_Red_Normal = null;
-        static SKImage SNES_Red_Fixed = null;
-        static SKImage SNES_Red_Pop = null;
-        static CardinalImageSet SNES_Yellow_Normal = null;
-        static SKImage SNES_Yellow_Fixed = null;
-        static SKImage SNES_Yellow_Pop = null;
-        static CardinalImageSet SNES_Blue_Normal = null;
-        static SKImage SNES_Blue_Fixed = null;
-        static SKImage SNES_Blue_Pop = null;
-        static CardinalImageSet SNES_Green_Normal = null;
-        static SKImage SNES_Green_Fixed = null;
-        static SKImage SNES_Green_Pop = null;
-        static CardinalImageSet SNES_Magenta_Normal = null;
-        static SKImage SNES_Magenta_Fixed = null;
-        static SKImage SNES_Magenta_Pop = null;
-        static CardinalImageSet SNES_Orange_Normal = null;
-        static SKImage SNES_Orange_Fixed = null;
-        static SKImage SNES_Orange_Pop = null;
-        static CachedImageData ImageCache = new CachedImageData();
+    [HandlerTheme("Tetris 2 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    [ThemeDescription("Tetris 2 Theme from the SNES")]
+
+    public class SNESTetris2Theme : ConnectedImageLineSeriesBlockTheme
+    {
+        public override string Name => "Tetris 2 SNES";
+        protected override string GetImageKeyBase()
+        {
+            return "tetris_2";
+        }
+    }
+    public abstract class ConnectedImageLineSeriesBlockTheme: NominoTheme
+    {
+        CardinalImageSet SNES_Red_Normal = null;
+        SKImage SNES_Red_Fixed = null;
+        SKImage SNES_Red_Pop = null;
+        CardinalImageSet SNES_Yellow_Normal = null;
+        SKImage SNES_Yellow_Fixed = null;
+        SKImage SNES_Yellow_Pop = null;
+        CardinalImageSet SNES_Blue_Normal = null;
+        SKImage SNES_Blue_Fixed = null;
+        SKImage SNES_Blue_Pop = null;
+        CardinalImageSet SNES_Green_Normal = null;
+        SKImage SNES_Green_Fixed = null;
+        SKImage SNES_Green_Pop = null;
+        CardinalImageSet SNES_Magenta_Normal = null;
+        SKImage SNES_Magenta_Fixed = null;
+        SKImage SNES_Magenta_Pop = null;
+        CardinalImageSet SNES_Orange_Normal = null;
+        SKImage SNES_Orange_Fixed = null;
+        SKImage SNES_Orange_Pop = null;
+        CachedImageData ImageCache = new CachedImageData();
         //static Dictionary<LineSeriesBlock.CombiningTypes, CardinalImageSet> NormalConnectedBlocks = null;
         //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> NormalBlocks = null;
         //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> FixedBlocks = null;
         //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> ShinyBlocks = null;
         //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> PopBlocks = null;
-        static bool ThemeDataPrepared = false;
+        bool ThemeDataPrepared = false;
 
-        public override string Name => "Tetris 2 SNES";
+        public override string Name => "ConnectedBlockTheme";
 
         
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
@@ -150,6 +182,7 @@ namespace BASeTris.Theme.Block
                 }
             }
         }
+
         
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
@@ -279,6 +312,7 @@ namespace BASeTris.Theme.Block
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_4", 0.5f], Color.Transparent);
         }
+        protected abstract String GetImageKeyBase();
 
         private void PrepareThemeData()
         {
@@ -286,23 +320,27 @@ namespace BASeTris.Theme.Block
             ThemeDataPrepared = true;
             //  TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(getimage, Input);
             SNES_Red_Normal = new CardinalImageSet();
-            SNES_Red_Normal[CardinalConnectionSet.ConnectedStyles.None] = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_normal_snes"));
+            SNES_Red_Normal[CardinalConnectionSet.ConnectedStyles.None] = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase()+ "_normal"));
 
             
             var AllArrangements = EnumHelper.GetAllEnums<CardinalConnectionSet.ConnectedStyles>();
-            String NormalBlockPrefix = "tetris_2_normal_block_connected";
+            String NormalBlockPrefix =  GetImageKeyBase() + "_normal_block_connected";
             foreach (var checkflags in AllArrangements)
             {
                 String useSuffix = CardinalConnectionSet.GetSuffix(checkflags);
                 if (useSuffix != null)
                 {
-                    String sFindImage = NormalBlockPrefix + (useSuffix.Length>0?"_":" ") + useSuffix;
+                    String sFindImage = NormalBlockPrefix + (useSuffix.Length>0?"_":"") + useSuffix;
                     try
                     {
                         if (TetrisGame.Imageman.HasSKBitmap(sFindImage))
-                            {
+                        {
                             var getimage = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(sFindImage));
                             SNES_Red_Normal[checkflags] = getimage;
+                        }
+                        else
+                        {
+                            ;
                         }
                     }
                     finally
@@ -315,8 +353,8 @@ namespace BASeTris.Theme.Block
             ImageCache.NormalConnectedBlocks_Color.Add(SKColors.Red,SNES_Red_Normal);
 
             //SNES_Red_Normal = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_normal_snes"));
-            SNES_Red_Fixed = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_fixed_snes"));
-            SNES_Red_Pop = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_pop_snes"));
+            SNES_Red_Fixed = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed"));
+            SNES_Red_Pop = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap( GetImageKeyBase() + "_pop"));
 
             
 

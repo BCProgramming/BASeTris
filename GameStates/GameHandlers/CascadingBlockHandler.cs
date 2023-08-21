@@ -519,7 +519,7 @@ namespace BASeTris.GameStates.GameHandlers
                         }
                         if (popItem is LineSeriesPrimaryShinyBlock lsbp)
                         {
-                            TetrisGame.Soundman.PlaySound("shiny_clear_tetris_2");
+                            var FoundShinyPop = false;
                             //go through all cells.
                             for (int r = 0; r < state.PlayField.Contents.Length; r++)
                             {
@@ -537,6 +537,7 @@ namespace BASeTris.GameStates.GameHandlers
                                             ProcessPopBlock(state, pOwner, ref MaxCombo, new Point(c, r), lsb2, lsb2);
                                             ShinyPopped.Add(new Point(c, r));
                                             fcr.ScoreResult += 10;
+                                            FoundShinyPop = true;
 
                                         }
                                     }
@@ -554,7 +555,8 @@ namespace BASeTris.GameStates.GameHandlers
                              
                             }
 
-
+                            if(FoundShinyPop)
+                                TetrisGame.Soundman.PlaySound("shiny_clear_tetris_2");
                         }
                         if (popItem.Owner != null)
                             popItem.Owner.RemoveBlock(popItem);

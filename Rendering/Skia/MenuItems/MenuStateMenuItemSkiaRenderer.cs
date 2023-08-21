@@ -36,7 +36,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
             if (!RenderedNominoElements.ContainsKey(sKey))
             {
-                NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(), () => new StandardTetrominoTheme(), () => new Tetris2Theme_Standard(), () => new Tetris2Theme_Enhanced(), () => new GameBoyMottledTheme() })();
+                NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(), () => new StandardTetrominoTheme(), () => new NESTetris2Theme(), () => new SNESTetris2Theme(), () => new GameBoyMottledTheme() })();
                 var SelectionNomino = TetrominoCollageRenderer.GetNominoBitmap(chosen);
                 SelectionNomino = ImageManager.ReduceImageSK(SelectionNomino, new SKSizeI((int)(SelectionNomino.Width / 10), (int)(SelectionNomino.Height / 10)));
                 SelectionNomino = TetrisGame.OutlineImageSK(SelectionNomino,10);
