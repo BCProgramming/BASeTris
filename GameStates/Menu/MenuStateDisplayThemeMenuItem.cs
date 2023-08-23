@@ -51,6 +51,7 @@ namespace BASeTris.GameStates.Menu
         private IBlockGameCustomizationHandler _Handler;
         public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, Type CustomizationType,Type InitialThemeType = null) : base(null)
         {
+            SubMenuSelection = true;
             _Owner = pOwner;
             Type currentthemetype = InitialThemeType;
 
@@ -67,7 +68,7 @@ namespace BASeTris.GameStates.Menu
                 }
             }
             ThemeOptions = GetThemeSelectionsForHandler(CustomizationType).ToArray();
-            int currentIndex = 0;
+            int currentIndex = -1;
             for (int i = 0; i < ThemeOptions.Length; i++)
             {
                 if (ThemeOptions[i].ThemeType == currentthemetype)
@@ -79,7 +80,7 @@ namespace BASeTris.GameStates.Menu
 
 
             base.OptionManager = new MultiOptionManagerList<MenuStateThemeSelection>(ThemeOptions,currentIndex);
-            if (currentIndex == 0) this.Text = "Unknown";
+            if (currentIndex == -1) this.Text = "Unknown";
             else
             {
                 var closest = ThemeOptions[currentIndex];

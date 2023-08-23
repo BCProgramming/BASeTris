@@ -107,6 +107,7 @@ namespace BASeTris.AI
             if (_Owner.CurrentState is GameplayGameState)
             {
                 GameplayGameState stdState = _Owner.CurrentState as GameplayGameState;
+                if (stdState == null) return;
                 //next, we only want to do stuff if there is one active blockgroup...
                 if (stdState.PlayField.GetActiveBlockGroups().Count == 1)
                 {

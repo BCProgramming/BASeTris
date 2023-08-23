@@ -239,6 +239,9 @@ namespace BASeTris.GameStates
         private MenuState DesignOptionsMenuState = null;
         private TetrominoCollageRenderer Collage { get { return CurrentLayer.Collage; } set { CurrentLayer.Collage = value; } }
         //private NominoTheme DisplayedDesignerTheme = new SNESTetrominoTheme();
+
+      
+
         public DesignBackgroundState(IStateOwner pOwner,GameState pRevert,IBackground usebg = null)
         {
             DesignOptionsMenuState  = new MenuState(_BG);

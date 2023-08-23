@@ -76,6 +76,10 @@ namespace BASeTris.Rendering
         {
             _Extensions = new List<PositionCalcType>() { calc };
         }
+        public void ClearPositionCalculators()
+        {
+            _Extensions = new List<PositionCalcType>() { new PositionCalcType() };
+        }
         public abstract void DrawCharacter(CanvasType g, char character, InfoType DrawData, PosType Position, SizeType CharacterSize, int CharacterNumber, int TotalCharacters, int Pass);
     }
     public class DrawCharacterHandlerGDI : DrawCharacterHandler<DrawCharacterPositionCalculatorGDI, Graphics, DrawTextInformationGDI, PointF, SizeF>
@@ -165,6 +169,7 @@ namespace BASeTris.Rendering
                 AddedOffset.X -= ((NewWidth - CharacterSize.X)) / 2;
                 AddedOffset.Y -= ((NewHeight - CharacterSize.Y)) / 2;
             }
+            DrawBrush.Typeface = UseFont.TypeFace;
 
             g.DrawText(character.ToString(), DrawPosition, DrawBrush);
 

@@ -31,7 +31,7 @@ namespace BASeTris.GameStates.Menu
             }
         }
 
-        public override MenuEventResultConstants OnActivated()
+        public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
         {
             IsActivated = true;
             return MenuEventResultConstants.Handled;
@@ -44,14 +44,14 @@ namespace BASeTris.GameStates.Menu
             set { base.Text = value; }
         }
 
-        public override MenuEventResultConstants OnDeactivated()
+        public override MenuEventResultConstants OnDeactivated(IStateOwner pOwner)
         {
             
             
             IsActivated = false;
             if(Confirmation)
             {
-                OnOptionConfirmed?.Invoke(this,new MenuStateMenuItemActivatedEventArgs(this));
+                OnOptionConfirmed?.Invoke(this,new MenuStateMenuItemActivatedEventArgs(this,pOwner));
                 Confirmation = false;
             }
             return MenuEventResultConstants.Handled;

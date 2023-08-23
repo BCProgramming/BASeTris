@@ -401,13 +401,35 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
             pRenderTarget.DrawTextSK(useStyle);
 
+            //draw an arrow if necessary.
+            if (Source.MenuFlags.HasFlag(AdditionalMenuFlags.MenuFlags_ShowSubmenuArrow))
+            {
+                //this is really broken, but it makes no sense why it would be. tiny fucking arrows and stupid fucking math bullshit. I fucking copied the Y location from above!
+                /*
+                useStyle.CharacterHandler.ClearPositionCalculators();
+                var MeasuredArrow = TetrisGame.MeasureSKText(SKTypeface.FromFamilyName("Marlett"), (float)(32f* pOwner.ScaleFactor), "8");
+                useStyle.Position = new SKPoint(Element.Bounds.Right - MeasuredArrow.Width, (float)(Element.Bounds.Top + (Math.Abs(Element.Bounds.Height))));
+                useStyle.Text = "8";
+                useStyle.ScalePercentage = 2;
+                useStyle.DrawFont = new SKFontInfo(SKTypeface.FromFamilyName("Marlett"), (float)(32f*pOwner.ScaleFactor));
+                pRenderTarget.DrawTextSK(useStyle);
+                //useStyle.Position = new SKPoint(50, 50);
+                //pRenderTarget.DrawTextSK(useStyle);
+
+                */
+
+
+
+
+            }
+
 
             //            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y, 5f, 5f, central);
 
             //Cheating...
             // Source.Draw(pOwner,pRenderTarget,Element.Bounds,Element.DrawState);
         }
-
+        const char MarlettRightArrow = '8';
         public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
             Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateTextMenuItem)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);

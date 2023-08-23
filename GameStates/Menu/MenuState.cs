@@ -38,6 +38,43 @@ namespace BASeTris.GameStates.Menu
         public event EventHandler<MenuStateMenuItemSelectedEventArgs> MenuItemDeselected;
 
 
+        public static MenuState CreateMenu(IStateOwner pOwner,String pHeaderText, GameState ReversionState, IBackground usebg,String sCancelText, params MenuStateMenuItem[] Items)
+        {
+            MenuState ResultState = new MenuState(usebg ?? ReversionState.BG);
+            
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+            ResultState.StateHeader = "BG Design Menu";
+            ResultState.HeaderTypeface = FontSrc.FontFamily.Name;
+            ResultState.HeaderTypeSize = (float)(28f * pOwner.ScaleFactor);
+           
+            ConfirmedTextMenuItem ReturnItem = new ConfirmedTextMenuItem() { Text = sCancelText??"", TipText = "Exit Designer" };
+            ReturnItem.OnOptionConfirmed += (o, e) =>
+            {
+                if (ReversionState != null)
+                {
+                    TetrisGame.Soundman.StopMusic();
+                    pOwner.CurrentState = ReversionState;
+                    ResultState.ActivatedItem = null;
+                }
+            };
+            foreach (var designeritem in sCancelText==null?Items:Items.Prepend(ReturnItem))
+            {
+                if (designeritem is MenuStateTextMenuItem mstmi)
+                {
+                    mstmi.FontFace = FontSrc.FontFamily.Name;
+                    mstmi.FontSize = FontSrc.Size;
+                    ResultState.MenuElements.Add(mstmi);
+                }
+                else
+                {
+                    ResultState.MenuElements.Add(designeritem);
+                }
+            }
+
+            return ResultState;
+        }
+
+
         public String StateHeader { get; set; }
 
         public String FooterText { get; set; } = "";
@@ -154,7 +191,7 @@ namespace BASeTris.GameStates.Menu
                 if (ActivatedItem != null)
                 {
                     TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
-                    ActivatedItem.OnDeactivated();
+                    ActivatedItem.OnDeactivated(pOwner);
                     ActivatedItem = null;
                 }
                 else
@@ -164,9 +201,10 @@ namespace BASeTris.GameStates.Menu
                     var currentitem = MenuElements[SelectedIndex];
                     TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
                     ActivatedItem = currentitem;
-                    MenuItemActivated?.Invoke(this, new MenuStateMenuItemActivatedEventArgs(currentitem));
-
-                    currentitem.OnActivated();
+                    var args = new MenuStateMenuItemActivatedEventArgs(currentitem, pOwner);
+                    MenuItemActivated?.Invoke(this, args);
+                    if (!args.CancelActivation) 
+                        currentitem.OnActivated(pOwner);
                 }
                 triggered = true;
             }
@@ -177,10 +215,10 @@ namespace BASeTris.GameStates.Menu
                 
                 var previousitem = MenuElements[OriginalIndex];
                 var currentitem = MenuElements[SelectedIndex];
-                MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previousitem));
-                MenuItemSelected?.Invoke(this,new MenuStateMenuItemSelectedEventArgs(currentitem));
-                previousitem.OnDeselected();
-                currentitem.OnSelected();
+                MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previousitem,pOwner));
+                MenuItemSelected?.Invoke(this,new MenuStateMenuItemSelectedEventArgs(currentitem,pOwner));
+                previousitem.OnDeselected(pOwner);
+                currentitem.OnSelected(pOwner);
                 FooterText = currentitem.TipText ?? "";
             }
 
@@ -216,23 +254,26 @@ namespace BASeTris.GameStates.Menu
     }
     public class MenuStateEventArgs : EventArgs
     {
+        public IStateOwner Owner;
         public MenuStateMenuItem MenuElement;
-        public MenuStateEventArgs(MenuStateMenuItem _Element)
+        public MenuStateEventArgs(MenuStateMenuItem _Element,IStateOwner pOwner)
         {
             MenuElement = _Element;
+            Owner = pOwner;
         }
     }
     
     public class MenuStateMenuItemActivatedEventArgs : MenuStateEventArgs
     {
-        public MenuStateMenuItemActivatedEventArgs(MenuStateMenuItem _Element):base(_Element)
+        public bool CancelActivation = false;
+        public MenuStateMenuItemActivatedEventArgs(MenuStateMenuItem _Element,IStateOwner pOwner):base(_Element,pOwner)
         {
 
         }
     }
     public class MenuStateMenuItemSelectedEventArgs : MenuStateEventArgs
     {
-        public MenuStateMenuItemSelectedEventArgs(MenuStateMenuItem _Element) : base(_Element)
+        public MenuStateMenuItemSelectedEventArgs(MenuStateMenuItem _Element,IStateOwner pOwner) : base(_Element,pOwner)
         {
 
         }

@@ -34,12 +34,12 @@ namespace BASeTris.GameStates.Menu
             MaximumValue = pMaximum;
             Value = pValue;
         }
-        public override MenuEventResultConstants OnActivated()
+        public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
         {
             Activated = true;
             return MenuEventResultConstants.Handled; 
         }
-        public override MenuEventResultConstants OnDeactivated()
+        public override MenuEventResultConstants OnDeactivated(IStateOwner pOwner)
         {
             Activated = false;
             return MenuEventResultConstants.Handled;

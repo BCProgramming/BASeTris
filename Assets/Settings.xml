@@ -42,7 +42,7 @@
     <Data Music="0.7" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="SNES" Chooser="Default" Theme="" />
   </SettingsGroup>
   <SettingsGroup Name="Tetris">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_nes_theme" SoundScheme="Default" Chooser="Default" Theme="Tetris 2 SNES" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_nes_theme" SoundScheme="Default" Chooser="Default" Theme="NES" />
   </SettingsGroup>
   <SettingsGroup Name="Dr.Mario">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="DrMarioFever" SoundScheme="Default" Chooser="Default" Theme="NES Style" />
@@ -72,7 +72,7 @@
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="NES" />
   </SettingsGroup>
   <SettingsGroup Name="Tetris 2">
-    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_2" SoundScheme="Default" Chooser="Default" Theme="Tetris 2 SNES" />
+    <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="tetris_2" SoundScheme="Default" Chooser="Default" Theme="Tetris 2 NES" />
   </SettingsGroup>
   <SettingsGroup Name="Dodectris">
     <Data Music="1" Effects="1" DisplayFactor="1.6" DASStartDelay="450" DASRate="100" LockTime="666" SmoothFall="false" SmoothRotate="true" MusicOption="&lt;RANDOM&gt;" SoundScheme="Default" Chooser="Default" Theme="Game Boy" />

@@ -63,10 +63,12 @@ namespace BASeTris
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs
     {
+        public IStateOwner Owner;
         public GameState PreviousState;
         public GameState NewState;
-        public BeforeGameStateChangeEventArgs(GameState pPrevious, GameState pNew)
+        public BeforeGameStateChangeEventArgs(IStateOwner pOwner,GameState pPrevious, GameState pNew)
         {
+            Owner = pOwner;
             PreviousState = pPrevious;
             NewState = pNew;
             Cancel = false;

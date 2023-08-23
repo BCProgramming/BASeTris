@@ -76,6 +76,10 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return _Chooser;
         }
+        public Tetris2Handler()
+        {
+            
+        }
         private void Tetris2NominoTweaker(Nomino Source)
         {
             //tweak the nomino and set a random combining index.

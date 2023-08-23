@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,8 +25,9 @@ namespace BASeTris.GameStates.Menu
     /// <summary>
     /// A text Menu item that can be activated to select/change between a set of options.
     /// </summary>
-    public class MenuStateMultiOption<T> : MenuStateMultiOption
+    public class MenuStateMultiOption<T> : MenuStateMultiOption where T:class
     {
+        public bool SubMenuSelection { get; set; } = false;
         public IMultiOptionManager<T> OptionManager { get { return OptionManagerBase as IMultiOptionManager<T>; } set { OptionManagerBase = value; } }
         public event EventHandler<OptionActivated<T>> OnChangeOption;
         public event EventHandler<OptionActivated<T>> OnDeactivateOption;
@@ -35,36 +37,65 @@ namespace BASeTris.GameStates.Menu
         {
         }
 
-        public override MenuEventResultConstants OnSelected()
+        public override MenuEventResultConstants OnSelected(IStateOwner pOwner)
         {
             _Selected = true;
-            return base.OnSelected();
+            return base.OnSelected(pOwner);
         }
 
-        public override MenuEventResultConstants OnDeselected()
+        public override MenuEventResultConstants OnDeselected(IStateOwner pOwner)
         {
             _Selected = false;
-            return base.OnDeselected();
+            return base.OnDeselected(pOwner);
         }
 
-        public override MenuEventResultConstants OnActivated()
+        public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
         {
-            OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption, LastOwner));
-            _Activated = true;
+            if (SubMenuSelection)
+            {
+                //'LastOwner' should be an IStateOwner. we can use that. Maybe.
+
+                //create a list of the text items for our options, and plop the tag into it as well.
+                MenuStateTextMenuItem[] ThemeItems = (from t in OptionManager.GetAllOptions() select new MenuStateTextMenuItem() { Text = OptionManager.GetText(t),TipText=OptionManager.GetTipText(t), Tag = (Object)t }).ToArray();
+
+                MenuState OptionSubMenu = MenuState.CreateMenu(pOwner,"Choose Theme", pOwner.CurrentState, null,"Cancel", ThemeItems);
+
+                OptionSubMenu.MenuItemActivated += (a, b) =>
+                {
+                    T TagItem = (b.MenuElement.Tag as T);
+                    OnChangeOption?.Invoke(this, new OptionActivated<T>(TagItem, pOwner));
+
+                };
+                OptionSubMenu.MenuItemSelected += (a, b) =>
+                {
+                    T TagItem = (b.MenuElement.Tag as T);
+                    if (TagItem != null)
+                    {
+                        OptionSubMenu.FooterText = OptionManager.GetTipText(TagItem);
+                    }
+                };
+                pOwner.CurrentState = OptionSubMenu;
+
+
+            }
+            else
+            {
+                OnActivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption, pOwner));
+                _Activated = true;
+            }
             return MenuEventResultConstants.Handled;
         }
-        public override MenuEventResultConstants OnDeactivated()
+        public override MenuEventResultConstants OnDeactivated(IStateOwner pOwner)
         {
-            OnDeactivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption, LastOwner));
+            OnDeactivateOption?.Invoke(this, new OptionActivated<T>(CurrentOption, pOwner));
             _Activated = false;
             return MenuEventResultConstants.Handled;
         }
-
-        private IStateOwner LastOwner = null;
+        
         public override void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
         {
-            LastOwner = pStateOwner;
-            if (_Activated)
+            
+            if (_Activated && !SubMenuSelection)
             {
                 if (pKey == GameState.GameKeys.GameKey_Left)
                 {
@@ -111,17 +142,28 @@ namespace BASeTris.GameStates.Menu
 
         void SetCurrentIndex(int Index);
         String GetText(T Item);
+
+        String GetTipText(T Item);
+
+        T[] GetAllOptions();
     }
     public abstract class AbstractMultiOptionManager<T> : IMultiOptionManager<T>
     {
         public abstract string GetText(T Item);
+        public abstract string GetTipText(T Item);
 
         public string GetTextBase(object Item)
         {
             return GetText((T)Item);
         }
+        public String GetTipTextBase(object Item)
+        {
+            return GetTipTextBase((T)Item);
+        }
 
         public abstract T MoveNext();
+
+        public abstract T[] GetAllOptions();
         public object MoveNextBase()
         {
             return MoveNext();
@@ -158,6 +200,7 @@ namespace BASeTris.GameStates.Menu
     {
         private int SelectedIndex;
         private T[] Options;
+        public Func<T, String> GetItemTipTextFunc { get; set; }
         public override void SetCurrentIndex(int pIndex)
         {
             SelectedIndex = pIndex;
@@ -171,7 +214,15 @@ namespace BASeTris.GameStates.Menu
         {
             return Value.ToString();
         }
-
+        public override string GetTipText(T Item)
+        {
+            if (GetItemTipTextFunc == null) return null;
+            return GetItemTipTextFunc(Item);
+        }
+        public override T[] GetAllOptions()
+        {
+            return Options;
+        }
         public override T PeekPrevious()
         {
             var TestIndex = SelectedIndex - 1;

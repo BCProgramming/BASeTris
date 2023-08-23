@@ -332,7 +332,7 @@ namespace BASeTris
                 var newvalue = value;
                 var oldvalue = CurrentGameState;
                 if (newvalue == oldvalue) return; //it's already the same so no need for any change here.
-                BeforeGameStateChangeEventArgs eventargs = new BeforeGameStateChangeEventArgs(oldvalue, newvalue);
+                BeforeGameStateChangeEventArgs eventargs = new BeforeGameStateChangeEventArgs(GameOwner,oldvalue, newvalue);
                 BeforeGameStateChange?.Invoke(this, eventargs);
                 if (eventargs.Cancel) return;
 

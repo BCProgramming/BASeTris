@@ -19,7 +19,7 @@ namespace BASeTris.GameStates.Menu
             _State = ParentMenu;
             FontSrc = pFontSrc;
         }
-        public override MenuEventResultConstants OnActivated()
+        public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
         {
             ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], _State, null);
             _Owner.CurrentState = scorestate;

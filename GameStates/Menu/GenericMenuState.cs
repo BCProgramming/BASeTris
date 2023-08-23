@@ -231,6 +231,7 @@ namespace BASeTris.GameStates.Menu
                 foreach(var iterate in FoundHandlerCategories)
                 {
                     MenuStateTextMenuItem buildcategoryitem = new MenuStateTextMenuItem { Text = iterate.Key + ">>",Tag = iterate.Key};
+                    buildcategoryitem.MenuFlags = MenuStateTextMenuItem.AdditionalMenuFlags.MenuFlags_ShowSubmenuArrow;
                     buildcategoryitem.BackColor = Color.FromArgb(128,Color.Yellow);
                     AllItems.Add(buildcategoryitem);
                     CategoryItems.Add(buildcategoryitem);

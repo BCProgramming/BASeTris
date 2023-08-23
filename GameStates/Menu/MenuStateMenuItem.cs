@@ -53,19 +53,19 @@ namespace BASeTris.GameStates.Menu
         /// Method called when this menu item is selected.
         /// </summary>
         /// <returns></returns>
-        public virtual MenuEventResultConstants OnSelected() { return MenuEventResultConstants.Unhandled; }
+        public virtual MenuEventResultConstants OnSelected(IStateOwner pOwner) { return MenuEventResultConstants.Unhandled; }
         /// <summary>
         /// Method called when the menu item is deselected. (This is called After OnSelected)
         /// </summary>
         /// <returns></returns>
-        public virtual MenuEventResultConstants OnDeselected() { return MenuEventResultConstants.Unhandled; }
+        public virtual MenuEventResultConstants OnDeselected(IStateOwner pOwner) { return MenuEventResultConstants.Unhandled; }
         /// <summary>
         /// Called when the Menu Item is activated (with CW).
         /// </summary>
         /// <returns></returns>
-        public virtual MenuEventResultConstants OnActivated() { return MenuEventResultConstants.Unhandled; }
+        public virtual MenuEventResultConstants OnActivated(IStateOwner pOwner) { return MenuEventResultConstants.Unhandled; }
 
-        public virtual MenuEventResultConstants OnDeactivated() { return MenuEventResultConstants.Unhandled; }
+        public virtual MenuEventResultConstants OnDeactivated(IStateOwner pOwner) { return MenuEventResultConstants.Unhandled; }
 
         public virtual void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
         {
@@ -99,6 +99,11 @@ namespace BASeTris.GameStates.Menu
     public class MenuStateTextMenuItem: MenuStateSizedMenuItem
     {
 
+        public enum AdditionalMenuFlags
+        {
+            MenuFlags_None = 0,
+            MenuFlags_ShowSubmenuArrow = 1
+        }
         public enum MenuHorizontalAlignment
         {
             Left,
@@ -109,8 +114,8 @@ namespace BASeTris.GameStates.Menu
         public virtual String Text { get; set; }
         public String FontFace { get; set; }
         public float FontSize { get; set; }
-        
-        
+
+        public AdditionalMenuFlags MenuFlags { get; set; } = AdditionalMenuFlags.MenuFlags_None;
         private BCColor _ForeColor;
         private BCColor _BackColor = Color.Transparent;
         public BCColor ForeColor { get{ return _ForeColor; } set{ _ForeColor = value; } }

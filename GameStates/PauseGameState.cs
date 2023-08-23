@@ -10,6 +10,7 @@ using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.Choosers;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
@@ -133,9 +134,10 @@ namespace BASeTris.GameStates
             var scaleitem = new MenuStateScaleMenuItem(pOwner) { TipText = "Change Scaling" };
             scaleitem.FontFace = FontSrc.FontFamily.Name;
             scaleitem.FontSize = FontSrc.Size;
-            
 
-            var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, PausedState.GameHandler.GetType()) { TipText = "Change Display Theme" };
+            var ThemeItem = new MenuStateTextMenuItem() { Text = PausedState.PlayField.Theme.Name };
+            
+            //var ThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, PausedState.GameHandler.GetType()) { TipText = "Change Display Theme" };
             ThemeItem.FontFace = FontSrc.FontFamily.Name;
             ThemeItem.FontSize = FontSrc.Size;
 
@@ -145,13 +147,40 @@ namespace BASeTris.GameStates
 
             ControlsOption.FontFace = FontSrc.FontFamily.Name;
             ControlsOption.FontSize = FontSrc.Size;
-            
 
+            this.MenuItemActivated += (o, a) =>
+            {
+                if (a.MenuElement == ThemeItem)
+                {
+                    a.CancelActivation = true;
+                    NominoTheme FoundCurrent = null;
+                    if (a.Owner.CurrentState is GameplayGameState gpgs)
+                        FoundCurrent = gpgs.PlayField.Theme;
+                    else if (a.Owner.CurrentState is ICompositeState<GameplayGameState> ics)
+                    {
+                        FoundCurrent = ics.GetComposite().PlayField.Theme;
+                    }
+                    ThemeSelectionMenuState ms = new ThemeSelectionMenuState(a.Owner, StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), a.Owner.CurrentState, a.Owner.GetHandler().GetType(), FoundCurrent==null?null:FoundCurrent.GetType(), (nt) =>
+                    {
+                        ChangeThemeOption = nt;
+                        a.Owner.BeforeGameStateChange -= Owner_BeforeGameStateChange;
+                        a.Owner.BeforeGameStateChange += Owner_BeforeGameStateChange;
+                        a.Owner.CurrentState = this;
+                        this.ActivatedItem = null;
+                    });
+                    
+                    a.Owner.CurrentState = ms;
+                    this.ActivatedItem = null;
+
+
+                }
+            };
 
 
             var ExitItem = new ConfirmedTextMenuItem() {Text="Quit"};
             ExitItem.FontFace = FontSrc.FontFamily.Name;
             ExitItem.FontSize = FontSrc.Size;
+            
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
                 
@@ -173,12 +202,25 @@ namespace BASeTris.GameStates
             MenuElements.Add(HighScoresItem);
             MenuElements.Add(ExitItem);
         }
+        NominoTheme ChangeThemeOption = null;
+        private void Owner_BeforeGameStateChange(object sender, BeforeGameStateChangeEventArgs e)
+        {
+            
+            {
+                if (e.NewState is GameplayGameState newstate)
+                {
+                    //if it's a standard state, we set the Theme of the TetrisField, and un-assign this event.
+                    var generated = ChangeThemeOption;
+                    e.Owner.Settings.GetSettings(e.Owner.GetHandler().Name).Theme = generated.Name;
+                    e.Owner.Settings.Save();
+                    newstate.PlayField.Theme = generated;
+                    newstate.DoRefreshBackground = true;
 
-       
-
+                    e.Owner.BeforeGameStateChange -= Owner_BeforeGameStateChange;
+                }
+            }
+        }
         
-
-     
 
         public override void GameProc(IStateOwner pOwner)
         {
