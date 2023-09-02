@@ -105,6 +105,23 @@ namespace BASeTris.GameStates.Menu
                 ThemeArray,startIndex);
             MenuStateMultiOption<SoundOption> MusicOptionItem = new MenuStateMultiOption<SoundOption>(SoundOptions);
             MenuStateMultiOption<SoundOption> SoundThemeOptionItem = new MenuStateMultiOption<SoundOption>(SoundThemeOptions);
+
+            MenuStateSliderOption MusicVolumeItem = new MenuStateSliderOption(0, 2, _AlterSet.MusicVolume) {Label = "Music Volume", ChangeSize=0.05,LargeDetentCount = 10,SmallDetent=0.1,TipText = "Change Music Volume" } ;
+            MenuStateSliderOption SoundVolumeItem = new MenuStateSliderOption(0, 2, _AlterSet.EffectVolume) { Label="Sound Volume", ChangeSize = 0.05, LargeDetentCount = 10, SmallDetent = 0.1,TipText = "Change Sound Volume" };
+            MusicVolumeItem.ValueChanged += (senderM,eM)=>
+            {
+                _AlterSet.MusicVolume = (float)eM.Value;
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key  , _AlterSet.MusicVolume);
+
+
+            };
+            SoundVolumeItem.ValueChanged += (senderS, eS) =>
+            {
+                _AlterSet.EffectVolume = (float)eS.Value;
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, _AlterSet.effectVolume);
+            };
+            SoundVolumeItem.ValueChanged += SoundVolumeItem_ValueChanged;
+            TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.std.EffectVolume);
             MusicOptionItem.Text = "Music";
             SoundThemeOptionItem.Text = "Sound Theme";
             MusicOptionItem.OnChangeOption += MusicOptionItem_OnActivateOption;
@@ -114,9 +131,22 @@ namespace BASeTris.GameStates.Menu
             MenuElements.Add(ReturnItem);
             MenuElements.Add(SoundLabel);
             MenuElements.Add(MusicOptionItem);
-
             MenuElements.Add(SoundThemeOptionItem);
+            MenuElements.Add(MusicVolumeItem);
+            MenuElements.Add(SoundVolumeItem);
 
+        }
+
+        private void SoundVolumeItem_ValueChanged(object sender, MenuStateSliderOption.SliderValueChangeEventArgs e)
+        {
+            
+           
+
+        }
+
+        private void MusicVolumeItem_ValueChanged(object sender, MenuStateSliderOption.SliderValueChangeEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void SoundThemeOptionItem_OnChangeOption(object sender, OptionActivated<SoundOption> e)

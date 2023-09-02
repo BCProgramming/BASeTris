@@ -48,6 +48,7 @@ namespace BASeTris.Theme.Audio
         //ScoreChime
         //BlockPop
         public AudioThemeSelection BlockFalling => GetThemeProperty(nameof(this.BlockFalling));
+        public AudioThemeSelection BlockGroupStick => GetThemeProperty(nameof(this.BlockGroupStick));
         public AudioThemeSelection ScoreChime => GetThemeProperty(nameof(this.ScoreChime));
         public AudioThemeSelection BlockPop => GetThemeProperty(nameof(this.BlockPop));
         public AudioThemeSelection BlockGroupMove => GetThemeProperty(nameof(this.BlockGroupMove));

@@ -38,16 +38,20 @@ namespace BASeTris.GameStates.Menu
         public event EventHandler<MenuStateMenuItemSelectedEventArgs> MenuItemDeselected;
 
 
-        public static MenuState CreateMenu(IStateOwner pOwner,String pHeaderText, GameState ReversionState, IBackground usebg,String sCancelText, params MenuStateMenuItem[] Items)
+        public static MenuState CreateMenu(IStateOwner pOwner,String pHeaderText, GameState ReversionState, IBackground usebg,String sCancelText, int PerPageItems = int.MaxValue,params MenuStateMenuItem[] Items)
         {
             MenuState ResultState = new MenuState(usebg ?? ReversionState.BG);
             
             var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
-            ResultState.StateHeader = "BG Design Menu";
+            ResultState.StateHeader = pHeaderText;
             ResultState.HeaderTypeface = FontSrc.FontFamily.Name;
             ResultState.HeaderTypeSize = (float)(28f * pOwner.ScaleFactor);
-           
-            ConfirmedTextMenuItem ReturnItem = new ConfirmedTextMenuItem() { Text = sCancelText??"", TipText = "Exit Designer" };
+
+
+
+
+
+            ConfirmedTextMenuItem ReturnItem = new ConfirmedTextMenuItem() { Text = sCancelText??"", TipText = "Return" };
             ReturnItem.OnOptionConfirmed += (o, e) =>
             {
                 if (ReversionState != null)
@@ -57,6 +61,37 @@ namespace BASeTris.GameStates.Menu
                     ResultState.ActivatedItem = null;
                 }
             };
+            IEnumerable<MenuStateMenuItem> ThisPageItems;
+            if (PerPageItems < Items.Length)
+            {
+                //we neext to paginate, create a new Menuitem...
+                
+                MenuStateTextMenuItem NextPageItem = new MenuStateTextMenuItem() { Text = "Next Page>>", TipText = "Switch to the next page" };
+                ResultState.MenuItemActivated += (o, e) =>
+                {
+                    if (e.MenuElement == NextPageItem)
+                    {
+                        MenuState NextPageList = CreateMenu(pOwner, pHeaderText, ResultState, ResultState.BG, "Previous Page", PerPageItems, Items.Skip(PerPageItems).ToArray());
+                        NextPageList.MenuItemActivated = ResultState.MenuItemActivated;
+                        NextPageList.MenuItemDeselected = ResultState.MenuItemDeselected;
+                        NextPageList.MenuItemSelected = ResultState.MenuItemSelected;
+                        pOwner.CurrentState = NextPageList;
+                        ResultState.ActivatedItem = null;
+                        e.CancelActivation = true;
+
+                    }
+                };
+
+
+
+
+            }
+            else
+            {
+                ThisPageItems = Items.Prepend(ReturnItem);
+            }
+
+
             foreach (var designeritem in sCancelText==null?Items:Items.Prepend(ReturnItem))
             {
                 if (designeritem is MenuStateTextMenuItem mstmi)

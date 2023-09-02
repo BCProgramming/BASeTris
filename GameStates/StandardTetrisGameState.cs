@@ -409,7 +409,7 @@ namespace BASeTris.GameStates
                             //if it can't move down one more
                             if (iterate.PlaceSound && PlayField.CanFit(iterate, iterate.X, iterate.Y + 1, true, null).CantFit_Field)
                             {
-                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockFalling?.Key);
+                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupStick?.Key);
                             }
                             if (iterate.MoveSound && !SuspendFieldSet)
                             {

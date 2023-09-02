@@ -248,13 +248,38 @@ namespace BASeTris.GameStates.Menu
                 if (HandlerLookup.ContainsKey(e.MenuElement))
                 {
                     IBlockGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
-                    if (pOwner is IGamePresenter igp)
+
+                    var StartGameFunc = () =>
                     {
+                        if (pOwner is IGamePresenter igp)
+                        {
 
 
-                        pOwner.CurrentState = new GameplayGameState(pOwner,usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
+                            pOwner.CurrentState = new GameplayGameState(pOwner, usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
 
-                        igp.StartGame();
+                            igp.StartGame();
+                        }
+                    };
+                    GamePreparerAttribute gpa = GamePreparerAttribute.HasPreparerAttribute(usehandler.GetType());
+                    if (usehandler is IPreparableGame ipg && gpa != null)
+                    {
+                        //we want to create a submenu for the options; the starting function should call the initialization function on usehandler and then call StartGameFunc.
+                        GamePreparerOptions InitializeOption = (GamePreparerOptions)Activator.CreateInstance(gpa.PreparerOptionsType, new[] { usehandler.GetType() });
+
+                        var createstate = GamePreparerOptions.ConstructPreparationState(pOwner, usehandler.Name, Target, StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), "Return", InitializeOption, (gpo) =>
+                        {
+                            ipg.SetPrepData(InitializeOption);
+                            StartGameFunc();
+                        });
+                        Target.ActivatedItem = null;
+
+                        pOwner.CurrentState = createstate;
+
+
+                    }
+                    else
+                    {
+                        StartGameFunc();
                     }
                 }
                 else if (CategoryItems.Contains(e.MenuElement))

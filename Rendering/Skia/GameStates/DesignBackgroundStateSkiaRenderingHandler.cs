@@ -48,9 +48,22 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 if (layerindex > Source.LayerIndex) continue; //don't paint layers above the current layer.
                 var Layer = Source.Layers[layerindex];
+                float AbsoluteWidth = Bounds.Width / 2;
                 
-                SKRect EditArea = new SKRect(Bounds.Width / 4, Bounds.Height / 4, Bounds.Width - Bounds.Width / 4, Bounds.Height - Bounds.Height / 4);
-                SKSize NominoBlockSize = new SKSize((float)(EditArea.Width / (float)(Layer.DesignColumns)), (float)(EditArea.Height / (float)(Layer.DesignRows)));
+
+                //SKRect EditArea = new SKRect(Bounds.Width / 4, Bounds.Height / 4, Bounds.Width/2-AbsoluteWidth/2, Bounds.Height - Bounds.Height / 4);
+
+                float Ratio = (float)Layer.DesignRows / (float)Layer.DesignColumns;
+                var AbsoluteHeight = ((float)AbsoluteWidth * Ratio);
+                if (AbsoluteHeight > Bounds.Height)
+                {
+                    AbsoluteHeight = Bounds.Height;
+                    AbsoluteWidth = Bounds.Height / Ratio;
+                }
+                var TopValue = Bounds.Height / 2 - AbsoluteHeight / 2;
+                var LeftValue = Bounds.Width / 2 - AbsoluteWidth / 2;
+                var EditArea = new SKRect(LeftValue, TopValue, LeftValue + AbsoluteWidth, TopValue +AbsoluteHeight);
+                SKSize NominoBlockSize = new SKSize((float)(EditArea.Width / (float)(Layer.DesignColumns)),  (float)(EditArea.Height / (float)(Layer.DesignRows)));
                 var duplicated = Layer.DesignNominoes;
                 var useSelected = Layer.SelectedIndex;
 

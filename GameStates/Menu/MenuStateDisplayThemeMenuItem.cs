@@ -51,7 +51,7 @@ namespace BASeTris.GameStates.Menu
         private IBlockGameCustomizationHandler _Handler;
         public MenuStateDisplayThemeMenuItem(IStateOwner pOwner, Type CustomizationType,Type InitialThemeType = null) : base(null)
         {
-            SubMenuSelection = true;
+            SubMenuSelection = false;
             _Owner = pOwner;
             Type currentthemetype = InitialThemeType;
 

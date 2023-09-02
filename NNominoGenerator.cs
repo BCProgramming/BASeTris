@@ -639,11 +639,8 @@ namespace BASeTris
                             yield return DirectionLists[index];
                         }
                     }
-
                 }
-
             }
-            
         }
         
         public static Nomino CreateColumnNomino(int size,Func<NominoBlock> generateblockfunc)

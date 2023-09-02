@@ -58,12 +58,13 @@ namespace BASeTris.GameStates.Menu
                 //create a list of the text items for our options, and plop the tag into it as well.
                 MenuStateTextMenuItem[] ThemeItems = (from t in OptionManager.GetAllOptions() select new MenuStateTextMenuItem() { Text = OptionManager.GetText(t),TipText=OptionManager.GetTipText(t), Tag = (Object)t }).ToArray();
 
-                MenuState OptionSubMenu = MenuState.CreateMenu(pOwner,"Choose Theme", pOwner.CurrentState, null,"Cancel", ThemeItems);
+                MenuState OptionSubMenu = MenuState.CreateMenu(pOwner,"Choose Theme", pOwner.CurrentState, null,"Cancel",int.MaxValue, ThemeItems);
 
                 OptionSubMenu.MenuItemActivated += (a, b) =>
                 {
                     T TagItem = (b.MenuElement.Tag as T);
-                    OnChangeOption?.Invoke(this, new OptionActivated<T>(TagItem, pOwner));
+                    if(TagItem!=null)
+                        OnChangeOption?.Invoke(this, new OptionActivated<T>(TagItem, pOwner));
 
                 };
                 OptionSubMenu.MenuItemSelected += (a, b) =>

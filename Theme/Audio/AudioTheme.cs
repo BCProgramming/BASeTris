@@ -39,7 +39,7 @@ namespace BASeTris.Theme.Audio
             BackgroundMusic = new AudioThemeElement(new[]
                 { ATS("tetris_theme_A","Theme A" ), ATS("tetris_a_theme_techno"),ATS("tetris_theme_B"),ATS("tetris_theme_C"),
                     ATS("TetrisDS"),ATS("smb3_tetris"),ATS("kirbysand"),ATS("silius1"),ATS("journey3"),ATS("tetris_gb_theme"),ATS("tetris_nes_theme"),ATS("drMarioChill"),ATS("DrMarioFever") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-            BlockGroupStick = new AudioThemeElement(new[] { ATS("block_stick") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+            BlockGroupStick = new AudioThemeElement(new AudioThemeSelection[] { }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupMove = new AudioThemeElement(new[] { ATS("block_move_2"), ATS("block_move"), ATS("block_move_3") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupPlace = new AudioThemeElement(new[] { ATS("block_place_4"),ATS("block_place_3"), ATS("block_place_2"), ATS("block_place") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate_3"), ATS("block_rotate_2"), ATS("block_rotate"), ATS("block_rotate_4"), ATS("block_rotate_6") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
@@ -64,7 +64,7 @@ namespace BASeTris.Theme.Audio
             Name = "NES",
             BackgroundMusic = new AudioThemeElement(new[]
                 { ATS("tetris_nes_theme") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Randomized),
-            BlockGroupStick = new AudioThemeElement(new[] { ATS("block_stick_1") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
+            BlockGroupStick = new AudioThemeElement(new AudioThemeSelection[] { }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupMove = new AudioThemeElement(new[] { ATS("block_move") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupPlace = new AudioThemeElement(new[] { ATS("block_place") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),
             BlockGroupRotate = new AudioThemeElement(new[] { ATS("block_rotate") }, AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static),

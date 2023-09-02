@@ -266,7 +266,14 @@ namespace BASeTris.GameStates
             MenuStateTextMenuItem NextLayer = new MenuStateTextMenuItem() { Text = "Next Layer", TipText = "Edit the next layer. Creates a new layer if needed." };
             MenuStateTextMenuItem PrevLayer = new MenuStateTextMenuItem() { Text = "Previous Layer", TipText = "Edit the previous layer" };
             MenuStateTextMenuItem LayerOptions = new MenuStateTextMenuItem() { Text = "Layer Options", TipText = "Edit Layer Properties" };
-            
+            MenuStateSliderOption MusicVolume = new MenuStateSliderOption(0,3,1) { Label = "Music Volume", TipText = "Change the volume of the incredible design music." ,ChangeSize = 0.1};
+
+            MusicVolume.ValueChanged += (oa, ob) =>
+            {
+                if (DesignMusic != null)
+                    DesignMusic.setVolume((float)ob.Value);
+            };
+
             MenuStateDisplayThemeMenuItem ChangeThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, typeof(StandardTetrisHandler),CurrentLayer.DisplayedDesignerTheme.GetType());
             ChangeThemeItem.SimpleSelectionFunction = (nt) =>
             {
@@ -276,6 +283,7 @@ namespace BASeTris.GameStates
                 {
                     CurrentLayer.DisplayedDesignerTheme.ApplyTheme(iterate, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
                 }
+                
             };
             ConfirmedTextMenuItem ExitMenuItem = new ConfirmedTextMenuItem() {Text="Exit",TipText= "Exit Designer" };
             ExitMenuItem.OnOptionConfirmed += (o, e) =>
@@ -589,11 +597,12 @@ namespace BASeTris.GameStates
             DisplayedDesignerTheme.ApplyTheme(EditNomino, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
         }
         private bool _defaultBG = true;
+        iActiveSoundObject DesignMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
             if (!flInitialized)
             {
-                TetrisGame.Soundman.PlayMusic("Design");
+                DesignMusic = TetrisGame.Soundman.PlayMusic("Design");
                 flInitialized = true;
             }
             if (_BG == null)

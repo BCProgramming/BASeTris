@@ -2,13 +2,16 @@
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
+using BASeTris.Settings;
 using Microsoft.VisualBasic.ApplicationServices;
 using OpenTK.Input;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -88,22 +91,8 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             pRenderTarget.DrawTextSK(sktitle);
 
-
-            Dictionary<GameState.GameKeys, (List<int>, List<int>)> keybuttonlookup = new Dictionary<GameState.GameKeys, (List<int>, List<int>)>();
-
-            //Dictionary<GameState.GameKeys, List<int>> KeyForKeyLookup = new Dictionary<GameState.GameKeys, List<int>>();
-
             GameState.GameKeys[] retrievekeys = (GameState.GameKeys[])Enum.GetValues(typeof(GameState.GameKeys)); //  new GameState.GameKeys[] { GameState.GameKeys.GameKey_RotateCW, GameState.GameKeys.GameKey_RotateCCW, GameState.GameKeys.GameKey_Drop, GameState.GameKeys.GameKey_Hold };
-
-            foreach (var iterate in retrievekeys)
-            {
-                var gotentries = pOwner.Settings.GetGamePadButtonFromGameKey(iterate);
-                
-
-                var gotkeyboardentries = pOwner.Settings.GetKeyBoardKeyFromGameKey(iterate);
-                keybuttonlookup.Add(iterate, (gotentries,gotkeyboardentries));
-
-            }
+            Dictionary<GameState.GameKeys, (List<int>, List<int>)> keybuttonlookup = GetKeyLookup(retrievekeys, pOwner.Settings);
             float ButtonStartX = (float)(270 * pOwner.ScaleFactor);
             float StartY = (float)(350 * pOwner.ScaleFactor);
             float StartX = (float)(250 * pOwner.ScaleFactor);
@@ -121,12 +110,6 @@ namespace BASeTris.Rendering.Skia.GameStates
                     sKey = sKey.Substring(8);
                 if (kvp.Value.Item1 != null)
                 {
-
-                   
-
-
-                    
-                    
                     foreach (var button in kvp.Value.Item1)
                     {
                         //now, get the image key...
@@ -155,10 +138,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                         pRenderTarget.DrawBitmap(keybitmap, new SKRect(CurrentX, CurrentY,CurrentX+keybitmap.Width*.66f,CurrentY+keybitmap.Height*.66f));
                         CurrentX += keybitmap.Width;
                         MaxHeight = Math.Max(keybitmap.Height, MaxHeight);
-
-
                     }
-
                 }
                 CurrentX = (float)(pOwner.ScaleFactor * 600f);
                 SKRect boundrect = new SKRect();
@@ -182,10 +162,22 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
 
-
+            
 
         }
+        public static Dictionary<GameState.GameKeys, (List<int>, List<int>)> GetKeyLookup(GameState.GameKeys[] keys,SettingsManager settingsSource)
+        {
+            Dictionary<GameState.GameKeys, (List<int>, List<int>)> result = new Dictionary<GameState.GameKeys, (List<int>, List<int>)>();
+            foreach (var iterate in keys)
+            {
+                var gotentries = settingsSource.GetGamePadButtonFromGameKey(iterate);
+                var gotkeyboardentries = settingsSource.GetKeyBoardKeyFromGameKey(iterate);
+                result.Add(iterate, (gotentries, gotkeyboardentries));
 
+            }
+            return result;
+
+        }
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, ControlSettingsViewState Source, GameStateSkiaDrawParameters Element)
         {
             throw new NotImplementedException();

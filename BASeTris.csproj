@@ -157,6 +157,7 @@
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
     <Compile Include="GameStates\DesignBackgroundState.cs" />
     <Compile Include="GameStates\GameHandlers\GameHandlerOptionsAttribute.cs" />
+    <Compile Include="GameStates\GameHandlers\GamePreparer.cs" />
     <Compile Include="GameStates\GameHandlers\ReverseTetrisHandler.cs" />
     <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
     <Compile Include="GameStates\ThemeSelectionMenuState.cs" />

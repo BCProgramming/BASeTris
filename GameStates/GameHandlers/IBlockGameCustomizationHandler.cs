@@ -12,6 +12,10 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.GameHandlers
 {
+
+    
+
+
     ///TODO Game types that will need new handlers:
     ///1. Columns. Nominoes are three line series blocks. Further, the line series will check diagonals. I think the rotation behaviour
     /// could dbe handled by the nomino itself through the rotation modulo, instead of having rotated positions it could just have the three rotation points be the three separate positions, rotating each piece through the nomino for each of those three states.

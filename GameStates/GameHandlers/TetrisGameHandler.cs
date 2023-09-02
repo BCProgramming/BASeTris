@@ -24,7 +24,8 @@ namespace BASeTris.GameStates.GameHandlers
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerMenuCategory("Tetris")]
     [HandlerTipText("Standard Tetris, Marathon Mode")]
-    public class StandardTetrisHandler : IBlockGameCustomizationHandler,IGameHandlerChooserInitializer
+    [GamePreparer(typeof(StandardTetrisPreparer))]
+    public class StandardTetrisHandler : IBlockGameCustomizationHandler,IGameHandlerChooserInitializer,IPreparableGame
     {
         public bool ProgressiveMode = false;
         public virtual String Name { get { return "Tetris"; } }
@@ -438,6 +439,15 @@ namespace BASeTris.GameStates.GameHandlers
                 return (IGameCustomizationStatAreaRenderer<TRenderTarget, GameplayGameState, TDataElement, IStateOwner>)StatRenderer;
             }
             return null;
+        }
+
+        public void SetPrepData(GamePreparerOptions gpo)
+        {
+            if (gpo is StandardTetrisPreparer stp)
+            {
+                Statistics.AddLineCount(typeof(Nomino), (int)(stp.StartingLevel * 10));
+            }
+            //throw new NotImplementedException();
         }
     }
 
