@@ -118,7 +118,7 @@ namespace BASeTris.GameStates.Menu
             SoundVolumeItem.ValueChanged += (senderS, eS) =>
             {
                 _AlterSet.EffectVolume = (float)eS.Value;
-                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, _AlterSet.effectVolume);
+                TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.GameOverShade.Key, _AlterSet.EffectVolume);
             };
             SoundVolumeItem.ValueChanged += SoundVolumeItem_ValueChanged;
             TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.std.EffectVolume);
@@ -134,7 +134,7 @@ namespace BASeTris.GameStates.Menu
             MenuElements.Add(SoundThemeOptionItem);
             MenuElements.Add(MusicVolumeItem);
             MenuElements.Add(SoundVolumeItem);
-
+            
         }
 
         private void SoundVolumeItem_ValueChanged(object sender, MenuStateSliderOption.SliderValueChangeEventArgs e)
