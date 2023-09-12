@@ -7,6 +7,7 @@ using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using System.Linq;
 using BASeTris.GameStates.Menu;
+using System;
 
 namespace BASeTris.Theme.Block
 {
@@ -136,7 +137,12 @@ namespace BASeTris.Theme.Block
                 int BlockCount = 0;
                 if (!(bg is Tetromino))
                 {
-                    //get the index.
+
+
+                    var result = NNominoGenerator.GetNominoData(LookupBlockTypes, bg, () => TetrisGame.Choose(new NESBlockTypes[] { NESBlockTypes.Boxed, NESBlockTypes.Darker, NESBlockTypes.Lighter }));
+                    return new BlockTypeReturnData(result);
+                    
+                    /*//get the index.
                     var cw = NNominoGenerator.GetNominoPoints(bg);
                     //long GetSpecialIndex = NNominoGenerator.GetIndex(cw);
                     string sHash = NNominoGenerator.StringRepresentation(cw);
@@ -153,7 +159,7 @@ namespace BASeTris.Theme.Block
                     }
                     return new BlockTypeReturnData(LookupBlockTypes[sHash]);
                     //select a random type
-
+                    */
 
                 }
                 else
@@ -164,7 +170,7 @@ namespace BASeTris.Theme.Block
 
 
         }
-
+        
         public override NESBlockTypes[] PossibleBlockTypes()
         {
             return new NESBlockTypes[] { NESBlockTypes.Darker, NESBlockTypes.Lighter, NESBlockTypes.Boxed };

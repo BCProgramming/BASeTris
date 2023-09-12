@@ -11,12 +11,12 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
     
     //State which is used to display the "level complete" indication when a level completes in Dr.Mario.
     //
-    public class DrMarioLevelCompleteState : GameState, ICompositeState<GameplayGameState>
+    public class PrimaryBlockLevelCompleteState : GameState, ICompositeState<GameplayGameState>
     {
         public String LevelCompleteMusic { get; set; } = "drm_complete";
         private GameplayGameState OriginalState = null;
         Func<GameState> StateProcessionFunction = null;
-        public DrMarioLevelCompleteState(GameplayGameState pState,Func<GameState> AdvanceToStateFunc)
+        public PrimaryBlockLevelCompleteState(GameplayGameState pState,Func<GameState> AdvanceToStateFunc)
         {
             StateProcessionFunction = AdvanceToStateFunc;
             OriginalState = pState;
@@ -42,7 +42,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
             {
                 //proceed with procession function.
                 var NextState = StateProcessionFunction();
-                if (NextState == null) throw new NullReferenceException("DrMarioLevelCompleteState: StateProcessionFunction returned null.");
+                if (NextState == null) throw new NullReferenceException("PrimaryBlockLevelCompleteState: StateProcessionFunction returned null.");
                 if(NextState is GameplayGameState ggst)
                 {
                     ggst.FirstRun = false;

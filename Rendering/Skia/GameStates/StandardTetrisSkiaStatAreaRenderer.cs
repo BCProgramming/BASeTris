@@ -42,7 +42,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
             
             var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
-            var SizeScale = (float)(DEFAULT_TETRIS_TETROMINO_COUNT / (float)Math.Min(RenderLines.Count, MAXIMUM_TETROMINO_STATUS_ROWS)); 
+            var SizeScale = (float)(DEFAULT_TETRIS_TETROMINO_COUNT / (float)Math.Min(Math.Max(DEFAULT_TETRIS_TETROMINO_COUNT, RenderLines.Count), MAXIMUM_TETROMINO_STATUS_ROWS)); 
             //the original design had sizing based on the main tetrominoes, however we won't shrink the scaling beyond that amount, instead, it should be "small enough" that we can instead create a second column.
             float DesiredFontSize = SizeScale*((float)(DesiredFontPixelHeight * pOwner.ScaleFactor));
             float StartYPos = Bounds.Top; // + (int)(140 * Factor);

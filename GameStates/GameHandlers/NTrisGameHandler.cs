@@ -11,9 +11,9 @@ using System.Windows.Forms;
 
 namespace BASeTris.GameStates.GameHandlers
 {
-    [HandlerMenuCategory("Multitris")]
-
-    public abstract class NTrisGameHandler : StandardTetrisHandler
+    [GamePreparer(typeof(NTrisGamePreparer))]
+    [HandlerTipText("Standard Tetris, Customizable Nomino sizes.")]
+    public class NTrisGameHandler : StandardTetrisHandler,IPreparableGame
     {
 
         protected int MaxAddedBlockCount = 0;
@@ -33,19 +33,37 @@ namespace BASeTris.GameStates.GameHandlers
             {13,"Decatria" },
             {14,"Decatettara" }
         };
-        private int BlockCount = 4;
+        //private int BlockCount = 4;
         public override string Name
         {
             get
             {
-                if (PrefixText.ContainsKey(BlockCount)) return PrefixText[BlockCount] + "tris";
-                else return BlockCount.ToString() + "-tris";
+                if (_NTrisPreparer == null) return "N-Tris";
+                if (_NTrisPreparer.MinimumNominoSize == _NTrisPreparer.MaximumNominoSize)
+                {
+                    if (PrefixText.ContainsKey(_NTrisPreparer.MinimumNominoSize)) return PrefixText[_NTrisPreparer.MinimumNominoSize] + "tris";
+                    else return _NTrisPreparer.MinimumNominoSize.ToString() + "-tris";
+                }
+                else
+                {
+                    return $"{_NTrisPreparer.MinimumNominoSize}-{_NTrisPreparer.MaximumNominoSize}";
+                }
 
             }
         }
-        public NTrisGameHandler(int pBlockCount)
+        public override void SetPrepData(GamePreparerOptions gpo)
         {
-            BlockCount = pBlockCount;
+            base.SetPrepData(gpo);
+            _NTrisPreparer = gpo as NTrisGamePreparer;
+        }
+        private NTrisGamePreparer _NTrisPreparer = null;
+        public NTrisGameHandler()
+        {
+        }
+        private NTrisGameHandler(int pBlockCount)
+        {
+            _NTrisPreparer = new NTrisGamePreparer(typeof(NTrisGameHandler)) { MaximumNominoSize = pBlockCount, MinimumNominoSize = pBlockCount };
+            
         }
         private Choosers.BlockGroupChooser _Chooser = null;
         private IStateOwner _Owner = null;
@@ -67,7 +85,8 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public Nomino NTrisChooserFunction()
         {
-            var newpiece = NNominoGenerator.GetPiece(BlockCount);
+            int chooseSize = TetrisGame.rgen.Next(_NTrisPreparer.MinimumNominoSize, _NTrisPreparer.MaximumNominoSize + 1);
+            var newpiece = NNominoGenerator.GetPiece(chooseSize);
             var buildNomino = NNominoGenerator.CreateNomino(newpiece);
             return buildNomino;
         }
@@ -83,13 +102,18 @@ namespace BASeTris.GameStates.GameHandlers
         }
         private int GetFieldColumnWidth()
         {
-            return 6 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 1.1));
+            return (int)_NTrisPreparer.ColumnCount;
+            //return 6 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 1.1));
         }
         private int GetFieldRowHeight()
         {
-            var CurrWidth = GetFieldColumnWidth();
+            return (int)_NTrisPreparer.RowCount;
+            
+            /*
+             * var CurrWidth = GetFieldColumnWidth();
             int DesiredHeight = (22 / 10) * CurrWidth;
             return DesiredHeight;
+            */
             //return 18 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 2));
         }
         public int GetHiddenRowCount()
@@ -117,6 +141,7 @@ namespace BASeTris.GameStates.GameHandlers
 
     }
 
+    /*
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler), typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerTipText("Pentris - mino's have 5 blocks instead of 4.")]
 public class PentrisGameHandler:NTrisGameHandler
@@ -185,5 +210,5 @@ public class PentrisGameHandler:NTrisGameHandler
     {
         public TriTrisGameHandler() : base(3) { }
     }
-
+    */
 }

@@ -266,7 +266,7 @@ namespace BASeTris.GameStates.Menu
                         //we want to create a submenu for the options; the starting function should call the initialization function on usehandler and then call StartGameFunc.
                         GamePreparerOptions InitializeOption = (GamePreparerOptions)Activator.CreateInstance(gpa.PreparerOptionsType, new[] { usehandler.GetType() });
 
-                        var createstate = GamePreparerOptions.ConstructPreparationState(pOwner, usehandler.Name, Target, StandardImageBackgroundSkia.GetMenuBackgroundDrawer(), "Return", InitializeOption, (gpo) =>
+                        var createstate = GamePreparerOptions.ConstructPreparationState(pOwner, usehandler.Name, Target, Target.BG, "Return", InitializeOption, (gpo) =>
                         {
                             ipg.SetPrepData(InitializeOption);
                             StartGameFunc();

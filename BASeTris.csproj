@@ -155,6 +155,7 @@
     <Compile Include="Duomino\Duomino.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
+    <Compile Include="GameplayRecord.cs" />
     <Compile Include="GameStates\DesignBackgroundState.cs" />
     <Compile Include="GameStates\GameHandlers\GameHandlerOptionsAttribute.cs" />
     <Compile Include="GameStates\GameHandlers\GamePreparer.cs" />
@@ -179,7 +180,7 @@
     <Compile Include="GameStates\GameHandlers\CascadingBlockHandler.cs" />
     <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerOptions\HandlerOptionsMenuPopulator.cs" />
-    <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioLevelCompleteState.cs" />
+    <Compile Include="GameStates\GameHandlers\HandlerStates\PrimaryBlockLevelCompleteState.cs" />
     <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioVirusAppearanceState.cs" />
     <Compile Include="GameStates\GameHandlers\IBlockGameCustomizationHandler.cs" />
     <Compile Include="GameStates\GameHandlers\NTrisGameHandler.cs" />

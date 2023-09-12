@@ -46,14 +46,42 @@ namespace BASeTris.GameStates.GameHandlers
         public abstract BlockGroupChooser GetChooser(IStateOwner pOwner);
         public abstract void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state);
 
+        public CascadingBlockPreparer PrepInstance { get; set; }
+        protected CascadingPopBlockGameHandler(CascadingBlockPreparer cbp)
+        {
+            PrepInstance = cbp;
+            Level = (int)cbp.StartingLevel;
+            switch ((int)cbp.TypeCount)
+            {
+                case 2:
+                    AllowedSpawns = AllowedSpawnsFlags.Spawn_Red | AllowedSpawnsFlags.Spawn_Yellow;
+
+                    break;
+                case 3:
+                    AllowedSpawns = AllowedSpawnsFlags.Spawn_Standard;
+                    break;
+                case 4:
+                    AllowedSpawns = AllowedSpawnsFlags.Spawn_Standard | AllowedSpawnsFlags.Spawn_Orange;
+                    break;
+                case 5:
+                    AllowedSpawns = AllowedSpawnsFlags.Spawn_Standard | AllowedSpawnsFlags.Spawn_Orange | AllowedSpawnsFlags.Spawn_Magenta;
+                    break;
+                case 6:
+                    AllowedSpawns = AllowedSpawnsFlags.Spawn_Full;
+                    break;
+            }
+        }
+        protected CascadingPopBlockGameHandler()
+        {
+        }
         public virtual FieldCustomizationInfo GetFieldInfo()
         {
             return new FieldCustomizationInfo()
             {
-                FieldRows = TetrisField.DEFAULT_ROWCOUNT,
+                FieldRows = PrepInstance!=null?(int)PrepInstance.RowCount : TetrisField.DEFAULT_ROWCOUNT,
                 BottomHiddenFieldRows = 0,
                 TopHiddenFieldRows = 2,
-                FieldColumns = TetrisField.DEFAULT_COLCOUNT
+                FieldColumns = PrepInstance!=null?(int)PrepInstance.ColumnCount:TetrisField.DEFAULT_COLCOUNT
             };
         }
 
@@ -676,7 +704,7 @@ namespace BASeTris.GameStates.GameHandlers
             if (LevelCompleted)
             {
                 LevelCompleted = false;
-                var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
+                var completionState = new PrimaryBlockLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
                 pOwner.CurrentState = completionState;
             }
 
@@ -1079,7 +1107,13 @@ namespace BASeTris.GameStates.GameHandlers
             Spawn_4 = Spawn_Standard | Spawn_Orange_Primary | Spawn_Orange_Block,
             Spawn_5 = Spawn_4 | Spawn_Magenta_Primary | Spawn_Magenta_Block,
             Spawn_Full = Spawn_Standard | Spawn_Alternate,
-
+            Spawn_Red = Spawn_Red_Primary | Spawn_Red_Block,
+            Spawn_Blue = Spawn_Blue_Primary | Spawn_Blue_Block,
+            Spawn_Yellow = Spawn_Yellow_Primary | Spawn_Yellow_Block,
+            Spawn_Orange = Spawn_Orange_Primary | Spawn_Orange_Block,
+            Spawn_Magenta = Spawn_Magenta_Primary | Spawn_Magenta_Block,
+            Spawn_Green = Spawn_Green_Primary | Spawn_Green_Block
+                
 
 
         }

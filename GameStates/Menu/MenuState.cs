@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using BASeTris;
@@ -37,6 +38,7 @@ namespace BASeTris.GameStates.Menu
         public event EventHandler<MenuStateMenuItemSelectedEventArgs> MenuItemSelected;
         public event EventHandler<MenuStateMenuItemSelectedEventArgs> MenuItemDeselected;
 
+        public String BackgroundMusicKey = null;
 
         public static MenuState CreateMenu(IStateOwner pOwner,String pHeaderText, GameState ReversionState, IBackground usebg,String sCancelText, int PerPageItems = int.MaxValue,params MenuStateMenuItem[] Items)
         {
@@ -51,8 +53,21 @@ namespace BASeTris.GameStates.Menu
 
 
 
-            ConfirmedTextMenuItem ReturnItem = new ConfirmedTextMenuItem() { Text = sCancelText??"", TipText = "Return" };
-            ReturnItem.OnOptionConfirmed += (o, e) =>
+            //ConfirmedTextMenuItem ReturnItem = new ConfirmedTextMenuItem() { Text = sCancelText??"", TipText = "Return" };
+            MenuStateTextMenuItem ReturnItem = new MenuStateTextMenuItem() { Text = sCancelText ?? "Cancel", TipText = "Return" };
+            ResultState.MenuItemActivated += (o1, e1) =>
+            {
+                if (e1.MenuElement == ReturnItem)
+                {
+                    if (ReversionState != null)
+                    {
+                        TetrisGame.Soundman.StopMusic();
+                        pOwner.CurrentState = ReversionState;
+                        ResultState.ActivatedItem = null;
+                    }
+                }
+            };
+            /*ReturnItem.OnOptionConfirmed += (o, e) =>
             {
                 if (ReversionState != null)
                 {
@@ -60,15 +75,17 @@ namespace BASeTris.GameStates.Menu
                     pOwner.CurrentState = ReversionState;
                     ResultState.ActivatedItem = null;
                 }
-            };
+            };*/
             IEnumerable<MenuStateMenuItem> ThisPageItems;
             if (PerPageItems < Items.Length)
             {
-                //we neext to paginate, create a new Menuitem...
+                //we need to paginate, create a new Menuitem...
                 
                 MenuStateTextMenuItem NextPageItem = new MenuStateTextMenuItem() { Text = "Next Page>>", TipText = "Switch to the next page" };
                 ResultState.MenuItemActivated += (o, e) =>
                 {
+                   
+
                     if (e.MenuElement == NextPageItem)
                     {
                         MenuState NextPageList = CreateMenu(pOwner, pHeaderText, ResultState, ResultState.BG, "Previous Page", PerPageItems, Items.Skip(PerPageItems).ToArray());
@@ -149,6 +166,25 @@ namespace BASeTris.GameStates.Menu
         int OffsetAnimationSpeed = 3;
         public override void GameProc(IStateOwner pOwner)
         {
+            if (!String.IsNullOrEmpty(BackgroundMusicKey))
+            {
+                var currentmusic = TetrisGame.Soundman.GetPlayingMusic();
+                if (BackgroundMusicKey != TetrisGame.Soundman.scurrentPlayingMusic)
+                {
+                    TetrisGame.Soundman.PlayMusic(BackgroundMusicKey,0.5f,true );
+                }
+
+                pOwner.EnqueueAction(() =>
+                {
+                    if (pOwner.CurrentState != this && TetrisGame.Soundman.GetPlayingMusic() != null && TetrisGame.Soundman.scurrentPlayingMusic == BackgroundMusicKey)
+                    {
+                        TetrisGame.Soundman.StopMusic();
+                    }
+
+                });
+            }
+
+
             if (FadedBGFadeState != null && FadedBGFadeState.FadedParentState != null)
             {
                 FadedBGFadeState.FadedParentState.GameProc(pOwner);
@@ -161,7 +197,7 @@ namespace BASeTris.GameStates.Menu
             if (MainXOffset < 0) MainXOffset += OffsetAnimationSpeed;
             OffsetAnimationSpeed += 3;
             //throw new NotImplementedException();
-            
+           
         }
         
        

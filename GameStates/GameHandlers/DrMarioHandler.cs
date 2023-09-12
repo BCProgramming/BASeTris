@@ -53,7 +53,12 @@ namespace BASeTris.GameStates.GameHandlers
     [HandlerTipText("Brightly coloured pills to cure Fever or Chills")]
     public class DrMarioHandler : CascadingPopBlockGameHandler<DrMarioStatistics,DrMarioGameOptions>,IGameHandlerChooserInitializer
     {
-        public DrMarioHandler()
+
+        public DrMarioHandler(DrMarioBlockPreparer input) : base(input)
+        {
+           
+        }
+        protected DrMarioHandler()
         {
             SimplePopHandling = true;
             Level = 0;
@@ -98,7 +103,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public override void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state)
         {
-            var completionState = new DrMarioLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
+            var completionState = new PrimaryBlockLevelCompleteState(state, () => SetupNextLevel(state, pOwner));
             pOwner.CurrentState = completionState;
         }
 

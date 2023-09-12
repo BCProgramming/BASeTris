@@ -9,6 +9,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// </summary>
     [GameScoringHandler(typeof(StandardTetrisAIScoringHandler),typeof(StoredBoardState.TetrisScoringRuleData))]
     [HandlerMenuCategory("Tetris")]
-    [HandlerTipText("Standard Tetris, Marathon Mode")]
+    [HandlerTipText("Standard Tetris")]
     [GamePreparer(typeof(StandardTetrisPreparer))]
     public class StandardTetrisHandler : IBlockGameCustomizationHandler,IGameHandlerChooserInitializer,IPreparableGame
     {
@@ -41,10 +42,10 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return new FieldCustomizationInfo()
             {
-                FieldRows = TetrisField.DEFAULT_ROWCOUNT + (ProgressiveMode ? 5 : 0),
+                FieldRows = (PrepInstance==null?TetrisField.DEFAULT_ROWCOUNT:(int)PrepInstance.RowCount) + (ProgressiveMode ? 5 : 0),
                 BottomHiddenFieldRows = 0,
                 TopHiddenFieldRows = 2,
-                FieldColumns = TetrisField.DEFAULT_COLCOUNT + (ProgressiveMode ? 4 : 0)
+                FieldColumns = (PrepInstance == null ? TetrisField.DEFAULT_COLCOUNT : (int)PrepInstance.ColumnCount) + (ProgressiveMode ? 4 : 0)
             };
         }
 
@@ -167,12 +168,20 @@ namespace BASeTris.GameStates.GameHandlers
             //TODO: proper per-handler configs should include the chooser class to use.
             if (_Chooser == null || CurrentChooserValue != pOwner.Settings.std.Chooser)
             {
-                CurrentChooserValue = pOwner.Settings.std.Chooser;
-                Type createType = BlockGroupChooser.ChooserTypeFromString(CurrentChooserValue);
-                if (createType == null)
+                Type createType = null;
+                if ((PrepInstance != null) && PrepInstance.Chooser != null)
+                {
+                    createType = PrepInstance.Chooser;
+                }
+                else
                 {
                     CurrentChooserValue = pOwner.Settings.std.Chooser;
-                    createType = typeof(BagChooser);
+                    createType = BlockGroupChooser.ChooserTypeFromString(CurrentChooserValue);
+                    if (createType == null)
+                    {
+                        CurrentChooserValue = pOwner.Settings.std.Chooser;
+                        createType = typeof(BagChooser);
+                    }
                 }
                 _Chooser = CreateSupportedChooser(createType);
             }
@@ -440,11 +449,12 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return null;
         }
-
-        public void SetPrepData(GamePreparerOptions gpo)
+        public StandardTetrisPreparer PrepInstance { get; set; } = null;
+        public virtual void SetPrepData(GamePreparerOptions gpo)
         {
             if (gpo is StandardTetrisPreparer stp)
             {
+                PrepInstance = stp;
                 Statistics.AddLineCount(typeof(Nomino), (int)(stp.StartingLevel * 10));
             }
             //throw new NotImplementedException();

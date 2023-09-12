@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia.GameStates.HandlerStates
 {
-    [RenderingHandler(typeof(DrMarioLevelCompleteState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class DrMarioLevelCompleteStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, DrMarioLevelCompleteState, GameStateSkiaDrawParameters>
+    [RenderingHandler(typeof(PrimaryBlockLevelCompleteState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class DrMarioLevelCompleteStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, PrimaryBlockLevelCompleteState, GameStateSkiaDrawParameters>
     {
         SKBitmap CompleteBox = null;
         SKPaint CompletionTextPaint = null;
         SKPaint CompletionTextPaintShadow = null;
         private bool Initialized = false;
         String[][] CompletionLines = new string[][] { new string[]{ "LEVEL COMPLETE", "TRY NEXT" }, new string[]{ "LEVEL COMPLETE", "-TRY NEXT-" } };
-        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, DrMarioLevelCompleteState Source, GameStateSkiaDrawParameters Element)
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, PrimaryBlockLevelCompleteState Source, GameStateSkiaDrawParameters Element)
         {
             if(!Initialized)
             {
@@ -60,7 +60,7 @@ namespace BASeTris.Rendering.Skia.GameStates.HandlerStates
         {
             g.DrawRect(Bounds, fadeBrush);
         }
-        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, DrMarioLevelCompleteState Source, GameStateSkiaDrawParameters Element)
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, PrimaryBlockLevelCompleteState Source, GameStateSkiaDrawParameters Element)
         {
             RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source.GetComposite(), Element);
         }

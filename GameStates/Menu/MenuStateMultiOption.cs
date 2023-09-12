@@ -202,6 +202,7 @@ namespace BASeTris.GameStates.Menu
         private int SelectedIndex;
         private T[] Options;
         public Func<T, String> GetItemTipTextFunc { get; set; }
+        public Func<T, String> GetItemText { get; set; }
         public override void SetCurrentIndex(int pIndex)
         {
             SelectedIndex = pIndex;
@@ -213,6 +214,7 @@ namespace BASeTris.GameStates.Menu
         }
         public override string GetText(T Value)
         {
+            if (GetItemText != null) return GetItemText(Value);
             return Value.ToString();
         }
         public override string GetTipText(T Item)

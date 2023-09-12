@@ -668,6 +668,25 @@ namespace BASeTris
         }
 
 
+        public static T GetNominoData<T>(Dictionary<string, T> Source, Nomino Group, Func<T> ChooseValueFunc)
+        {
+            var cw = GetNominoPoints(Group);
+            String sHash = StringRepresentation(cw);
+            if (!Source.ContainsKey(sHash))
+            {
+                T chosenresult = ChooseValueFunc();
+                var cw2 = RotateCW(cw);
+                var cw3 = RotateCW(cw2);
+                var cw4 = RotateCW(cw3);
+                Source[StringRepresentation(cw2)] = chosenresult;
+                Source[StringRepresentation(cw3)] = chosenresult;
+                Source[StringRepresentation(cw4)] = chosenresult;
+            }
+            return Source[sHash];
+
+        }
+
+
 
     }
 }

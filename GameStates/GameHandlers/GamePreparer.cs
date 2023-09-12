@@ -1,4 +1,5 @@
 ﻿using BASeTris.BackgroundDrawers;
+using BASeTris.Choosers;
 using BASeTris.GameStates.Menu;
 using System;
 using System.Collections.Generic;
@@ -48,11 +49,25 @@ namespace BASeTris.GameStates.GameHandlers
     /// </summary>
     public class GamePreparerOptionSetPropertyAttribute : GamePreparerPropertyAttribute
     {
-        public String[] Options { get; private set; }
+        public String[] Options { get; protected set; }
         public GamePreparerOptionSetPropertyAttribute(String pLabel,String[] ValidOptions):base(pLabel)
         {
             Options = ValidOptions;
         }
+        protected GamePreparerOptionSetPropertyAttribute(String pLabel):base(pLabel)
+        {
+        }
+    }
+    //implies ICustomPropertyPreparer implementation on the containing class.
+    public class GamePreparerCustomItemAttribute : GamePreparerPropertyAttribute
+    {
+        public GamePreparerCustomItemAttribute(String pLabel) : base(pLabel)
+        {
+        }
+    }
+    public interface ICustomPropertyPreparer
+    {
+        MenuStateMenuItem CreateItem(PropertyInfo Target, GamePreparerOptions Element);
 
     }
     public class GamePreparerNumericPropertyAttribute : GamePreparerPropertyAttribute
@@ -67,9 +82,32 @@ namespace BASeTris.GameStates.GameHandlers
             ChangeSize = pChangeSize;
         }
     }
+    
+
+    /// <summary>
+    /// A Game Preparer is a class that holds information used to start a game; primarily, options. Consider Dr.Mario: before you start a game, it has the option screen for speed, starting level, and music. That is the sort of thing we are going for with these.
+    /// Additionally, instead of requiring a bunch of custom work to create unique game states for each one, we instead have this setup where there is a data class that tags it's properties and those get utilized by a generic routine that can handle any instance.
+    /// Another aspect is that some settings could be "unfair" and should be separate high score lists. This is facilitated by allowing classes to return a string for a high score key suffix. (the "default" settings should give back an empty string)
+    /// </summary>
     public abstract class GamePreparerOptions
     {
+        protected Dictionary<PropertyInfo, MenuStateMenuItem> MenuPropertyValues = new Dictionary<PropertyInfo, MenuStateMenuItem>();
+        protected Dictionary<String, PropertyInfo> PropertiesbyName = new Dictionary<string, PropertyInfo>();
+        protected MenuStateMenuItem GetMenuFromPropertyName(String sName)
+        {
 
+            if (PropertiesbyName.ContainsKey(sName))
+            {
+                if (MenuPropertyValues.ContainsKey(PropertiesbyName[sName]))
+                    {
+                    return MenuPropertyValues[PropertiesbyName[sName]];
+                }
+            }
+            return null;
+        }
+        public virtual String BackgroundMusic { get; }
+        public abstract String HighScoreCategorySuffix();
+        
         public GamePreparerOptions(Type CustomizationHandlerType)
         {
         }
@@ -101,9 +139,9 @@ namespace BASeTris.GameStates.GameHandlers
 
             MenuStateTextMenuItem StartGameItem = new MenuStateTextMenuItem() { Text = "Start Game" };
 
-            BuildItems.Add(StartGameItem);
+            BuildItems.Insert(0,StartGameItem);
             MenuState ConstructState = MenuState.CreateMenu(pOwner, pHeader, ReversionState, bg, sCancelText,int.MaxValue,BuildItems.ToArray());
-
+            ConstructState.BackgroundMusicKey = OptionsData.BackgroundMusic;
             ConstructState.MenuItemActivated += (o, e) =>
             {
                 if (e.MenuElement == StartGameItem)
@@ -116,17 +154,19 @@ namespace BASeTris.GameStates.GameHandlers
 
         private static MenuStateMenuItem ConstructItem(GamePreparerOptions preparer, PropertyInfo prop, GamePreparerPropertyAttribute src,Object CurrentValue)
         {
+            MenuStateMenuItem ResultValue = null;
+            preparer.PropertiesbyName.Add(prop.Name, prop);
             if (src is GamePreparerOptionSetPropertyAttribute gpos)
             {
                 int StartIndex = Array.FindIndex(gpos.Options, (a) => String.Equals(CurrentValue.ToString(), a, StringComparison.OrdinalIgnoreCase));
                 MultiOptionManagerList<String> ManagerList = new MultiOptionManagerList<string>(gpos.Options, StartIndex);
-                MenuStateMultiOption<String> SelectMenu = new MenuStateMultiOption<String>(ManagerList) { } ;
+                MenuStateMultiOption<String> SelectMenu = new MenuStateMultiOption<String>(ManagerList) { };
                 SelectMenu.OnChangeOption += (o, e) =>
                 {
                     prop.SetValue(preparer, e.Option);
                 };
-                
-                return SelectMenu;
+
+                ResultValue = SelectMenu;
 
             }
             else if (src is GamePreparerNumericPropertyAttribute gnum)
@@ -135,37 +175,171 @@ namespace BASeTris.GameStates.GameHandlers
                 MenuStateSliderOption slider = new MenuStateSliderOption(gnum.MinimumValue, gnum.MaximumValue, Convert.ToDouble(CurrentValue)) { Label = gnum.Label, ChangeSize = gnum.ChangeSize };
                 slider.ValueChanged += (o2, e2) =>
                 {
-                    prop.SetValue(preparer, e2.Value);
+                    prop.SetValue(preparer, Convert.ChangeType(e2.Value, prop.PropertyType));
                 };
-                return slider;
+                ResultValue = slider;
 
             }
+            else if (src is GamePreparerCustomItemAttribute gpci)
+            {
+                if (preparer is ICustomPropertyPreparer icpp)
+                {
+                    var CreateItem = icpp.CreateItem(prop, preparer);
+                    if (CreateItem is MenuStateTextMenuItem mt && mt.Text == null) mt.Text = src.Label;
+                    ResultValue = CreateItem;
+                }
+            }
 
-            return null;
+            preparer.MenuPropertyValues.Add(prop, ResultValue);
+            return ResultValue;
 
         }
 
 
     }
 
-    public class StupidTestOptions : GamePreparerOptions
+  
+    public class StandardTetrisPreparer : GamePreparerOptions,ICustomPropertyPreparer
     {
-        [GamePreparerNumericProperty("Level", 0, 50, 1)]
-        public double SomeSlider { get; set; }
-        public StupidTestOptions(Type Initializer) : base(Initializer)
-        {
-        }
-        
-    }
-    public class StandardTetrisPreparer : GamePreparerOptions
-    {
-        [GamePreparerNumericProperty("Level", 0, 50, 1)]
+        public override string BackgroundMusic => "drm_config";
+
+
+        [GamePreparerNumericProperty("Level", 0, 500, 1)]
         public double StartingLevel { get; set; }
         public StandardTetrisPreparer(Type Initializer) : base(Initializer)
         {
         }
+        protected virtual bool IsDefault()
+        {
+            return StartingLevel == 0 && RowCount == TetrisField.DEFAULT_ROWCOUNT && ColumnCount == TetrisField.DEFAULT_COLCOUNT;
+        }
+        public override string HighScoreCategorySuffix()
+        {
+            if (IsDefault()) return "";
+            return $" S{StartingLevel} {RowCount}x{ColumnCount}";
+        }
+        [GamePreparerNumericProperty("Columns", 5, 100, 1)]
+
+        public double ColumnCount { get; set; } = TetrisField.DEFAULT_COLCOUNT;
+        [GamePreparerNumericProperty("Rows", 15, 100, 1)]
+        public double RowCount { get; set; } = TetrisField.DEFAULT_ROWCOUNT;
+
+        static IEnumerable<Object> GetChoosers()
+        {
+            yield break;
+        }
+
+        public MenuStateMenuItem CreateItem(PropertyInfo Target, GamePreparerOptions Element)
+        {
+            var OptionList = new MultiOptionManagerList<Type>(new Type[] { typeof(BagChooser), typeof(NESChooser), typeof(GameBoyChooser) },0);
+            var createresult =
+                new MenuStateMultiOption<Type>(OptionList);
+
+            OptionList.GetItemText = (y) =>
+            {
+                return y.Name;
+            };
+
+            createresult.OnChangeOption += (obj, arg) =>
+            {
+                (Element as StandardTetrisPreparer).Chooser = arg.Option;
+            };
+            return createresult;
+
+        }
+
+        [GamePreparerCustomItem("Chooser")]
+        public Type Chooser { get; set; }
+
+    }
+    public class NTrisGamePreparer : StandardTetrisPreparer
+    {
+        private int _MinimumNominoSize = 4;
+        [GamePreparerNumericProperty("Minimum Nomino Size", 3, 100, 1)]
+        public int MinimumNominoSize { get { return _MinimumNominoSize; } set { _MinimumNominoSize = value;
+
+                var maxmenu = GetMenuFromPropertyName("MaximumNominoSize") as MenuStateSliderOption;
+                if (maxmenu != null)
+                {
+                    if (maxmenu.Value < _MinimumNominoSize) maxmenu.Value = _MinimumNominoSize;
+                }
+
+            
+            } }
+
+        private int _MaximumNominoSize = 4;
+        [GamePreparerNumericProperty("Maximum Nomino Size", 3, 100, 1)]
+        public int MaximumNominoSize { get { return _MinimumNominoSize; } set 
+            { 
+                _MinimumNominoSize = value;
+                var minmenu = GetMenuFromPropertyName("MinimumNominoSize") as MenuStateSliderOption;
+                if (minmenu != null)
+                {
+                    if (minmenu.Value > _MaximumNominoSize) minmenu.Value = _MaximumNominoSize;
+                }
+                var rowmenu = GetMenuFromPropertyName("Rows") as MenuStateSliderOption;
+                var colmenu = GetMenuFromPropertyName("Columns") as MenuStateSliderOption;
+
+                if (rowmenu != null) rowmenu.Value = Math.Max(rowmenu.Value,GetFieldRowHeight(value));
+                if (colmenu != null) colmenu.Value = Math.Max(colmenu.Value,GetFieldColumnWidth(value));
+            } }
+
+        private int GetFieldColumnWidth(int MaxBlockCount)
+        {
+            return 6 + MaxBlockCount + (int)((Math.Max(0, MaxBlockCount - 4) * 1.1));
+        }
+        private int GetFieldRowHeight(int MaxBlockCount)
+        {
+            var CurrWidth = GetFieldColumnWidth(MaxBlockCount);
+            int DesiredHeight = (22 / 10) * CurrWidth;
+            return DesiredHeight;
+            //return 18 + BlockCount + (int)((Math.Max(0, BlockCount - 4) * 2));
+        }
+        public override string HighScoreCategorySuffix()
+        {
+            return base.HighScoreCategorySuffix() + "-" + MinimumNominoSize + "-" + MaximumNominoSize;
+        }
+
+        public NTrisGamePreparer(Type Initializer) : base(Initializer)
+        {
+        }
+    }
+    public class CascadingBlockPreparer : GamePreparerOptions
+    {
+        [GamePreparerNumericProperty("Types Count", 2, 6, 1)]
+        public double TypeCount { get; set; } = 3;
 
 
+
+        [GamePreparerNumericProperty("Level", 0, 50, 1)]
+        public double StartingLevel { get; set; }
+
+
+        [GamePreparerOptionSetProperty("Speed", new String[] { "Low", "Med", "Hi" })]
+        public String Speed { get; set; } = "Low";
+
+        public CascadingBlockPreparer(Type Initializer) : base(Initializer)
+        {
+        }
+
+        [GamePreparerNumericProperty("Columns", 5, 100, 1)]
+
+        public double ColumnCount { get; set; } = TetrisField.DEFAULT_COLCOUNT;
+        [GamePreparerNumericProperty("Rows", 15, 100, 1)]
+        public double RowCount { get; set; } = TetrisField.DEFAULT_ROWCOUNT;
+
+
+        public override string HighScoreCategorySuffix()
+        {
+            return $"{TypeCount}-{StartingLevel}-{Speed}-{RowCount}-{ColumnCount}";
+        }
+    }
+
+    public class DrMarioBlockPreparer : CascadingBlockPreparer
+    {
+        public DrMarioBlockPreparer(Type Initializer) : base(Initializer)
+        {
+        }
     }
     
 }

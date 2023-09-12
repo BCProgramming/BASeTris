@@ -94,6 +94,8 @@ namespace BASeTris.AssetManager
         }
         public AudioHandlerPlayDetails(float pVolume,bool pLooped,float pPitch = 0f, float pTempo = 1f)
         {
+            Volume = pVolume;
+            Playlooped = pLooped;
             Pitch = pPitch;
             Tempo = pTempo;
         }
