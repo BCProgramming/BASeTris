@@ -27,7 +27,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return "Dr.Mario (6 Viruses)";
         }
-        public DrMarioSixViruses()
+        public DrMarioSixViruses():base()
         {
             AllowedSpawns = CascadingPopBlockGameHandler<DrMarioStatistics, DrMarioGameOptions>.AllowedSpawnsFlags.Spawn_Full;
         }
@@ -56,7 +56,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         public DrMarioHandler(DrMarioBlockPreparer input) : base(input)
         {
-           
+            SimplePopHandling = true;
         }
         protected DrMarioHandler()
         {

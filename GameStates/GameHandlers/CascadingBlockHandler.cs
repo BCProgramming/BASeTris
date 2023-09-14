@@ -636,7 +636,7 @@ namespace BASeTris.GameStates.GameHandlers
                     //next, go through the entire field.
 
                     HashSet<Nomino> ResurrectNominos = null;
-                    if (SimplePopHandling)
+                    if (SimplePopHandling && false)
                     {
                         ResurrectNominos = ResurrectLoose(state, pOwner, MaxCombo + 1);
                         
@@ -665,7 +665,7 @@ namespace BASeTris.GameStates.GameHandlers
 
                             if (!AllPoints.Any((w) => AddedPoints.Contains(w)))
                             {
-                                state.PlayField.Theme.ApplyTheme(addresurrected, state.GameHandler, state.PlayField, NominoTheme.ThemeApplicationReason.NewNomino);
+                                state.PlayField.Theme.ApplyTheme(addresurrected, state.GameHandler, state.PlayField, NominoTheme.ThemeApplicationReason.Normal);
                                 state.PlayField.AddBlockGroup(addresurrected);
                                 addresurrected.FallSpeed = 100;
                                 foreach (var point in AllPoints)
@@ -775,7 +775,15 @@ namespace BASeTris.GameStates.GameHandlers
                                 {
                                     if (nb is CascadingBlock cbb)
                                     {
-                                        return cbb.Owner == cb.Owner && cbb.ConnectionIndex == cb.ConnectionIndex;
+                                        bool Result = false;
+                                        if (cbb is LineSeriesBlock lsb)
+                                        {
+                                            return !lsb.Popping && (cbb.Owner == cb.Owner && cbb.ConnectionIndex == cb.ConnectionIndex);
+                                        }
+                                        else
+                                        {
+                                            return (cbb.Owner == cb.Owner && cbb.ConnectionIndex == cb.ConnectionIndex);
+                                        }
                                     }
 
                                     return false;
@@ -916,8 +924,7 @@ namespace BASeTris.GameStates.GameHandlers
                                 //the Blocks that are still "alive" with that connection index to the new Nomino, and finally add the resurrected Nominoes to the list.
                                 //It might be wise to somehow track that they were originally a different Nomino somehow...
 
-                                if (SimplePopHandling)
-                                {
+                              
                                     //resurrect this block and other blocks that are in the same nomino. 
                                     //since we remove busted blocks from the nomino, we can take the Duomino this
                                     //block belongs to and add it back to the Active Groups, then remove all the blocks that are in the nomino from the field.
@@ -953,46 +960,7 @@ namespace BASeTris.GameStates.GameHandlers
                                     resurrect.NoGhost = true;
                                     ResurrectNominos.Add(resurrect);
                                     AddedBlockAlready.Add(cb);
-                                }
-                                else
-                                {
-                                    if (cb.Owner == null)
-                                    {
-                                        //create a new owner.
-                                        var Dummino = new Nomino() { };
-                                        Dummino.AddBlock(new Point[] { new Point(0, 0) }, cb);
-                                        Dummino.X = column;
-                                        Dummino.Y = row;
-
-                                        cb.Owner = Dummino;
-
-                                    }
-                                    
-                                    var resurrectBlocks = cb.Owner.GetContiguousToElement(currentblock.Owner.ElementFromBlock(cb), null);
-                                    var OriginalX = cb.Owner.X;
-                                    var OriginalY = cb.Owner.Y;
-                                    Nomino resurrected = new Nomino(resurrectBlocks);
-                                    resurrected.X = cb.Owner.X;
-                                    resurrected.Y = cb.Owner.Y;
-                                    foreach (var iterate in resurrectBlocks)
-                                    {
-                                        
-                                        iterate.Block.Owner = resurrected;
-                                    }
-
-                                    resurrected.Controllable = false;
-                                    resurrected.FallSpeed = 100;
-                                    resurrected.InitialY = resurrected.Y;
-                                    resurrected.LastFall = pOwner.GetElapsedTime();
-                                    resurrected.MoveSound = true;
-                                    resurrected.PlaceSound = false;
-                                    resurrected.NoGhost = true;
-                                    ResurrectNominos.Add(resurrected);
-                                    state.PlayField.Contents[row][column] = null;
-                                    AddedBlockAlready.Add(cb);
-
-
-                                }
+                              
                             }
                             //state.PlayField.AddBlockGroup(resurrect);
                         }
