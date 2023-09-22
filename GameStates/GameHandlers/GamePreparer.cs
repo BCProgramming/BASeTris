@@ -91,6 +91,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// </summary>
     public abstract class GamePreparerOptions
     {
+        protected Type HandlerType { get; set; }
         protected Dictionary<PropertyInfo, MenuStateMenuItem> MenuPropertyValues = new Dictionary<PropertyInfo, MenuStateMenuItem>();
         protected Dictionary<String, PropertyInfo> PropertiesbyName = new Dictionary<string, PropertyInfo>();
         protected MenuStateMenuItem GetMenuFromPropertyName(String sName)
@@ -110,6 +111,20 @@ namespace BASeTris.GameStates.GameHandlers
         
         public GamePreparerOptions(Type CustomizationHandlerType)
         {
+            HandlerType = CustomizationHandlerType;
+        }
+        private static IEnumerable<(PropertyInfo, GamePreparerPropertyAttribute)> GetPreparerProperties(Type PreparerType)
+        {
+            var SourceProperties = PreparerType.GetProperties();
+            foreach (var checkproperty in SourceProperties)
+            {
+                if (checkproperty.CanRead && checkproperty.CanWrite)
+                {
+                    var grabattribute = (GamePreparerPropertyAttribute)checkproperty.GetCustomAttributes(typeof(GamePreparerPropertyAttribute), true).FirstOrDefault();
+                    if (grabattribute != null) yield return (checkproperty, grabattribute);
+                }
+            }
+
         }
         public static MenuState ConstructPreparationState(IStateOwner pOwner,String pHeader,GameState ReversionState,IBackground bg,String sCancelText, GamePreparerOptions OptionsData,Action<GamePreparerOptions> ProceedFunc)
         {
@@ -119,22 +134,14 @@ namespace BASeTris.GameStates.GameHandlers
             //we are not responsible for adding any additional menu items, such as elements to return to the previous menu, or to proceed. Those should be dealt with by the caller. 
 
             List<MenuStateMenuItem> BuildItems = new List<MenuStateMenuItem>();
-            var SourceProperties = OptionsData.GetType().GetProperties();
+           
 
-            foreach (var iterateprop in SourceProperties)
+
+            foreach (var reviewprop in GetPreparerProperties(OptionsData.GetType()))
             {
-                Object CurrentPropertyValue = null;
-                if (iterateprop.CanRead)
-                {
-                    CurrentPropertyValue = iterateprop.GetValue(OptionsData);
-                }
-                var grabattribute = (GamePreparerPropertyAttribute)iterateprop.GetCustomAttributes(typeof(GamePreparerPropertyAttribute), true).FirstOrDefault();
-                if (grabattribute!=null)
-                {
-                    MenuStateMenuItem mitem = ConstructItem(OptionsData,iterateprop,grabattribute,CurrentPropertyValue);
-                    BuildItems.Add(mitem);
-                }
-
+                Object CurrentPropertyValue = reviewprop.Item1.GetValue(OptionsData);
+                MenuStateMenuItem mitem = ConstructItem(OptionsData, reviewprop.Item1, reviewprop.Item2, CurrentPropertyValue);
+                BuildItems.Add(mitem);
             }
 
             MenuStateTextMenuItem StartGameItem = new MenuStateTextMenuItem() { Text = "Start Game" };

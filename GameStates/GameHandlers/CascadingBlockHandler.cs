@@ -674,6 +674,7 @@ namespace BASeTris.GameStates.GameHandlers
                                 }
                             }
                         }
+                        //additionally: we actually need to go through and apply the theme to all the blocks on the field, too.
                     }
 
 
@@ -824,9 +825,15 @@ namespace BASeTris.GameStates.GameHandlers
                                     useresult.block.Rotation = 0;
                                     newElements.Add(new NominoElement(new Point(useresult.Column - CenterPointX, useresult.Row - CenterPointY), new Size(NominoWidth, NominoHeight), useresult.block));
                                 }
+                                foreach (var removeoriginal in NewNominoContents)
+                                {
+                                    removeoriginal.block.Owner.RemoveBlock(removeoriginal.block);
+                                    
+                                }
                                 //construct the new Nomino.
                                 //Now, we can go through the NewNominoContents
                                 Nomino BuildResult = new Nomino(newElements);
+                                foreach (var iterate in BuildResult) iterate.Block.Owner = BuildResult;
                                 BuildResult.X = CenterPointX;
                                 BuildResult.Y = CenterPointY;
                                 ResurrectNominoes.Add(BuildResult);

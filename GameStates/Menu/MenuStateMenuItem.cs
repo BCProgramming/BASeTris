@@ -22,10 +22,12 @@ namespace BASeTris.GameStates.Menu
 
     public class MenuStateMenuItemSkiaDrawData
     {
+        public int Index { get; set; }
         public SkiaSharp.SKRect Bounds = SkiaSharp.SKRect.Empty;
         public MenuStateMenuItem.StateMenuItemState DrawState = MenuStateMenuItem.StateMenuItemState.State_Normal;
-        public MenuStateMenuItemSkiaDrawData(SkiaSharp.SKRect pBounds, MenuStateMenuItem.StateMenuItemState pDrawState)
+        public MenuStateMenuItemSkiaDrawData(SkiaSharp.SKRect pBounds, MenuStateMenuItem.StateMenuItemState pDrawState,int pIndex)
         {
+            Index = pIndex;
             Bounds = pBounds;
             DrawState = pDrawState;
         }
@@ -34,6 +36,8 @@ namespace BASeTris.GameStates.Menu
     //TODO: implement RenderingProvider framework for MenuStateMenuItem and subclasses, replacing the Draw() abstract routine.
     public abstract class MenuStateMenuItem
     {
+        public double TransitionPercentage { get; set; } = 1;
+        public BCRect LastBounds { get; set; }
         public String TipText { get; set; } = "";
         public Object Tag { get; set; }
         public enum StateMenuItemState

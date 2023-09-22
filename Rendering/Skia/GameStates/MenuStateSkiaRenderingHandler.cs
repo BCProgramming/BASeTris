@@ -7,6 +7,7 @@ using BASeTris.Rendering.Skia.MenuItems;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,10 @@ namespace BASeTris.Rendering.Skia.GameStates
         
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TSourceType Source, GameStateSkiaDrawParameters Element)
         {
+
+
+            Source.Rendered = true;
+
             //draw the header text,
             //then draw each menu item.
             //throw new NotImplementedException();
@@ -95,7 +100,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     var XPos = (int)(Bounds.Width / 2 - ItemSize.X / 2) + Source.MainXOffset;
                     SKRect TargetBounds = new SKRect(XPos, (int)CurrentY, XPos + (int)(ItemSize.X), CurrentY + (int)(ItemSize.Y));
                     MenuStateMenuItem.StateMenuItemState useState = menuitemindex == Source.SelectedIndex ? MenuStateMenuItem.StateMenuItemState.State_Selected : MenuStateMenuItem.StateMenuItemState.State_Normal;
-                    RenderingProvider.Static.DrawElement(pOwner, g, drawitem, new MenuStateMenuItemSkiaDrawData(TargetBounds, useState));
+                    RenderingProvider.Static.DrawElement(pOwner, g, drawitem, new MenuStateMenuItemSkiaDrawData(TargetBounds, useState,menuitemindex));
                 }
                 catch (Exception exp)
                 {

@@ -169,16 +169,17 @@ namespace BASeTris.Rendering.Skia
 
         private SKImage ResizeImage(SKImage Source, Size newSize)
         {
-            
-            SKBitmap result = new SKBitmap(newSize.Width, newSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            
-            using (SKCanvas bgr = new SKCanvas(result))
+
+            using (SKBitmap result = new SKBitmap(newSize.Width, newSize.Height, SKColorType.Rgba8888, SKAlphaType.Premul))
             {
-                bgr.DrawImage(Source, new SKRect(0, 0, newSize.Width, newSize.Height));
-                
+
+                using (SKCanvas bgr = new SKCanvas(result))
+                {
+                    bgr.DrawImage(Source, new SKRect(0, 0, newSize.Width, newSize.Height));
+
+                }
+                return SKImage.FromBitmap(result);
             }
-            return SKImage.FromBitmap(result);
-            
         }
 
 

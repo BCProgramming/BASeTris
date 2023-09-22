@@ -152,6 +152,7 @@ namespace BASeTris.GameStates
             {
                 if (a.MenuElement == ThemeItem)
                 {
+
                     a.CancelActivation = true;
                     NominoTheme FoundCurrent = null;
                     if (a.Owner.CurrentState is GameplayGameState gpgs)
@@ -167,11 +168,15 @@ namespace BASeTris.GameStates
                         a.Owner.BeforeGameStateChange += Owner_BeforeGameStateChange;
                         a.Owner.CurrentState = this;
                         this.ActivatedItem = null;
+                        if (a.MenuElement is MenuStateTextMenuItem mstmi)
+                        {
+                            mstmi.Text = ChangeThemeOption.Name;
+                        }
                     });
                     
                     a.Owner.CurrentState = ms;
                     this.ActivatedItem = null;
-
+                    
 
                 }
             };

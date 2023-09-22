@@ -176,6 +176,11 @@ namespace BASeTris.Rendering.Adapters
         public float Right { get { return Main.Right; } set { Main.Right = value; } }
         public float Bottom { get { return Main.Bottom; } set { Main.Bottom = value; } }
         public float Height { get { return Main.Height; } set { Main.Bottom = Main.Top + value; } }
+
+        public bool Contains(BCPoint pt)
+        {
+            return pt.X >= this.Left && pt.X <= this.Right && pt.Y >= this.Top && pt.Y < this.Bottom;
+        }
         public static implicit operator SKRect(BCRect src)
         {
             return src.Main;
@@ -196,6 +201,7 @@ namespace BASeTris.Rendering.Adapters
         {
             return new BCRect(src);
         }
+        
     }
 
 

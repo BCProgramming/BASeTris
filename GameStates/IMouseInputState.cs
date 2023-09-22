@@ -22,9 +22,9 @@ namespace BASeTris.GameStates
 
 
 
-        void MouseDown(StateMouseButtons ButtonDown, BCPoint Position);
-        void MouseUp(StateMouseButtons ButtonUp, BCPoint Position);
-        void MouseMove(BCPoint Position);
+        void MouseDown(IStateOwner pOwner,StateMouseButtons ButtonDown, BCPoint Position);
+        void MouseUp(IStateOwner pOwner,StateMouseButtons ButtonUp, BCPoint Position);
+        void MouseMove(IStateOwner pOwner,BCPoint Position);
     }
     public class MouseInputStateHelper
     {
@@ -56,9 +56,9 @@ namespace BASeTris.GameStates
                     return StateMouseButtons.RButton;
                 case MouseButton.Middle:
                     return StateMouseButtons.MButton;
-                case MouseButton.Button4:
+                case MouseButton.Button1:
                     return StateMouseButtons.xButton1;
-                case MouseButton.Button5:
+                case MouseButton.Button2:
                     return StateMouseButtons.xButton2;
             }
             return StateMouseButtons.LButton;

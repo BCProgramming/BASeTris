@@ -45,57 +45,85 @@ namespace BASeTris.Rendering.Skia.MenuItems
             return RenderedNominoElements[sKey];
             
         }
+        public delegate void TransitionFunctionDelegate(SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element);
+        public TransitionFunctionDelegate TransitionFunction { get; set; } = StaggeredTranslationTransitionFunction;
+        public static void StaggeredTranslationTransitionFunction(SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
+        {
+            if (Element.Index % 2 == 0)
+            {
+                pRenderTarget.Translate((float)((-Element.Bounds.Width / 2) + ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
+            }
+            else
+            {
+                pRenderTarget.Translate((float)((Element.Bounds.Width / 2) - ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
+                //   pRenderTarget.Translate((float)((Element.Bounds.Right+Element.Bounds.Width / 2) - ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
+            }
+
+
+        }
+        public void MenuTransitioner(Action CallRoutine,Action<SKCanvas,MenuStateMenuItem,MenuStateMenuItemSkiaDrawData> TransitionAction, SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
+        {
+            using (SKAutoCanvasRestore skc = new SKAutoCanvasRestore(pRenderTarget, true))
+            {
+                TransitionAction(pRenderTarget,Source,Element);
+                CallRoutine();
+            }
+        }
+
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
         {
 
-            var SelectionNomino = GetSelectionNomino(Source);
 
-            //draw a selection thingie
-            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-            {
-                SKPoint Origin = new SKPoint(Element.Bounds.Left - Element.Bounds.Height, Element.Bounds.Top);
-                SKPoint Origin2 = new SKPoint(Element.Bounds.Right, Element.Bounds.Top);
-                float HeightFactor = (float)SelectionNomino.Width / (float)SelectionNomino.Height;
-                SKRect useRect = new SKRect(Origin.X,Origin.Y,Origin.X+ Element.Bounds.Height, Origin.Y+ (Element.Bounds.Height/HeightFactor));
-                SKRect useRect2 = new SKRect(Origin2.X, Origin2.Y, Origin2.X + Element.Bounds.Height, Origin2.Y + (Element.Bounds.Height / HeightFactor));
-                int InflationAmount = 20;
-                useRect.Inflate(new SKSize(InflationAmount, InflationAmount / HeightFactor));
-                useRect2.Inflate(new SKSize(InflationAmount, InflationAmount / HeightFactor));
-                SKPoint CenterPosition = new SKPoint(useRect.Left + useRect.Width / 2, useRect.Top + useRect.Height / 2);
-                SKPoint CenterPosition2 = new SKPoint(useRect2.Left + useRect2.Width / 2, useRect2.Top+ useRect2.Height / 2);
-                
-                //SKRect useRect = Element.Bounds;
-                //pRenderTarget.DrawRect(useRect, new SKPaint() { Color = SKColors.Red });
+          
 
-                using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(pRenderTarget,true))
+                var SelectionNomino = GetSelectionNomino(Source);
+                Source.LastBounds = Element.Bounds;
+                //draw a selection thingie
+                if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
                 {
-                    
-                    //pRenderTarget.Translate(new SKPoint(-CenterPosition.X, -CenterPosition.Y));
-                    pRenderTarget.RotateDegrees(360 * ((float)DateTime.Now.Millisecond/ 1000), CenterPosition.X,CenterPosition.Y);
-                    
-                    //pRenderTarget.Translate(CenterPosition);
-                    pRenderTarget.DrawImage(SelectionNomino, useRect);
-                    
+                    SKPoint Origin = new SKPoint(Element.Bounds.Left - Element.Bounds.Height, Element.Bounds.Top);
+                    SKPoint Origin2 = new SKPoint(Element.Bounds.Right, Element.Bounds.Top);
+                    float HeightFactor = (float)SelectionNomino.Width / (float)SelectionNomino.Height;
+                    SKRect useRect = new SKRect(Origin.X, Origin.Y, Origin.X + Element.Bounds.Height, Origin.Y + (Element.Bounds.Height / HeightFactor));
+                    SKRect useRect2 = new SKRect(Origin2.X, Origin2.Y, Origin2.X + Element.Bounds.Height, Origin2.Y + (Element.Bounds.Height / HeightFactor));
+                    int InflationAmount = 20;
+                    useRect.Inflate(new SKSize(InflationAmount, InflationAmount / HeightFactor));
+                    useRect2.Inflate(new SKSize(InflationAmount, InflationAmount / HeightFactor));
+                    SKPoint CenterPosition = new SKPoint(useRect.Left + useRect.Width / 2, useRect.Top + useRect.Height / 2);
+                    SKPoint CenterPosition2 = new SKPoint(useRect2.Left + useRect2.Width / 2, useRect2.Top + useRect2.Height / 2);
+
+                    //SKRect useRect = Element.Bounds;
+                    //pRenderTarget.DrawRect(useRect, new SKPaint() { Color = SKColors.Red });
+
+                    using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(pRenderTarget, true))
+                    {
+
+                        //pRenderTarget.Translate(new SKPoint(-CenterPosition.X, -CenterPosition.Y));
+                        pRenderTarget.RotateDegrees(360 * ((float)DateTime.Now.Millisecond / 1000), CenterPosition.X, CenterPosition.Y);
+
+                        //pRenderTarget.Translate(CenterPosition);
+                        pRenderTarget.DrawImage(SelectionNomino, useRect);
+
+                    }
+
+                    using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(pRenderTarget, true))
+                    {
+
+                        //pRenderTarget.Translate(new SKPoint(-CenterPosition.X, -CenterPosition.Y));
+                        pRenderTarget.RotateDegrees(360 * (1 - ((float)DateTime.Now.Millisecond / 1000)), CenterPosition2.X, CenterPosition2.Y);
+
+                        //pRenderTarget.Translate(CenterPosition);
+                        pRenderTarget.DrawImage(SelectionNomino, useRect2);
+
+                    }
+
+
+                    //pRenderTarget.DrawImage(SelectionNomino,new SKRect(0,0,50,50),new SKPaint() { } );
+                    //pRenderTarget.DrawImage(SelectionNomino, new SKRect(50, 50, 100, 100), new SKPaint() { });
+                    //pRenderTarget.DrawImage(SelectionNomino, new SKRect(200, 200, 200, 200), new SKPaint() { });
+                    //pRenderTarget.DrawImage(SelectionNomino, new SKPoint(0, 0));
+                    // pRenderTarget.DrawCircle(new SKPoint(Element.Bounds.Left - 40, Element.Bounds.Top + Element.Bounds.Height / 2), 40, new SKPaint() { Color = SKColors.Black });
                 }
-
-                using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(pRenderTarget, true))
-                {
-
-                    //pRenderTarget.Translate(new SKPoint(-CenterPosition.X, -CenterPosition.Y));
-                    pRenderTarget.RotateDegrees(360 * (1-((float)DateTime.Now.Millisecond / 1000)), CenterPosition2.X, CenterPosition2.Y);
-
-                    //pRenderTarget.Translate(CenterPosition);
-                    pRenderTarget.DrawImage(SelectionNomino, useRect2);
-
-                }
-
-
-                //pRenderTarget.DrawImage(SelectionNomino,new SKRect(0,0,50,50),new SKPaint() { } );
-                //pRenderTarget.DrawImage(SelectionNomino, new SKRect(50, 50, 100, 100), new SKPaint() { });
-                //pRenderTarget.DrawImage(SelectionNomino, new SKRect(200, 200, 200, 200), new SKPaint() { });
-                //pRenderTarget.DrawImage(SelectionNomino, new SKPoint(0, 0));
-                // pRenderTarget.DrawCircle(new SKPoint(Element.Bounds.Left - 40, Element.Bounds.Top + Element.Bounds.Height / 2), 40, new SKPaint() { Color = SKColors.Black });
-            }
         }
      
         public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
@@ -352,77 +380,89 @@ namespace BASeTris.Rendering.Skia.MenuItems
         private static SKPaint TransparentPaint = new SKPaint() { Color = SKColors.Transparent };
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateTextMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
         {
-            base.Render(pOwner, pRenderTarget, Source, Element);
-            var useFont = GetScaledFont(pOwner,Source.FontSize);
-            var MeasureText = TetrisGame.MeasureSKText(useFont.TypeFace, useFont.FontSize, Source.Text);
-            
 
-            SKPoint DrawPosition = GetDrawPosition(Element.Bounds,  MeasureText, Source.TextAlignment);
-            SKPaint BackPaint = null;
-            
-
-            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-                BackPaint = new SKPaint() { Color = SKColors.DarkGreen,BlendMode=SKBlendMode.HardLight };
-            else
-                BackPaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.BackColor) };
-            pRenderTarget.DrawRect(Element.Bounds, BackPaint);
-            
-
-            SKPaint ForePaint = null;
-            SKPaint ShadePaint = null;
-            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-                ForePaint = new SKPaint() { Color = SKColors.Aqua };
-            else
-                ForePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ForeColor),TextAlign=SKTextAlign.Center};
-
-            ShadePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor), TextAlign = SKTextAlign.Center };
-
-
-            ForePaint.Typeface = useFont.TypeFace;
-            ForePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
-            ShadePaint.Typeface = useFont.TypeFace;
-            ShadePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor); 
-
-            var useStyle = new DrawTextInformationSkia()
+            MenuTransitioner(() =>
             {
-                Text = Source.Text,
-                BackgroundPaint = new SKPaint() { Color = SKColors.Transparent },
-                DrawFont = useFont,
-                ForegroundPaint = ForePaint,
-                ShadowPaint = ShadePaint,
-                Position = new SKPoint(DrawPosition.X,DrawPosition.Y+MeasureText.Height/2),
-                ShadowOffset = new SKPoint(5f, 5f),
-            };
 
-            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-            {
-                useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia());
-            }
 
-            pRenderTarget.DrawTextSK(useStyle);
 
-            //draw an arrow if necessary.
-            if (Source.MenuFlags.HasFlag(AdditionalMenuFlags.MenuFlags_ShowSubmenuArrow))
-            {
-                //this is really broken, but it makes no sense why it would be. tiny fucking arrows and stupid fucking math bullshit. I fucking copied the Y location from above!
-                /*
-                useStyle.CharacterHandler.ClearPositionCalculators();
-                var MeasuredArrow = TetrisGame.MeasureSKText(SKTypeface.FromFamilyName("Marlett"), (float)(32f* pOwner.ScaleFactor), "8");
-                useStyle.Position = new SKPoint(Element.Bounds.Right - MeasuredArrow.Width, (float)(Element.Bounds.Top + (Math.Abs(Element.Bounds.Height))));
-                useStyle.Text = "8";
-                useStyle.ScalePercentage = 2;
-                useStyle.DrawFont = new SKFontInfo(SKTypeface.FromFamilyName("Marlett"), (float)(32f*pOwner.ScaleFactor));
+
+
+
+                base.Render(pOwner, pRenderTarget, Source, Element);
+                var useFont = GetScaledFont(pOwner, Source.FontSize);
+                var MeasureText = TetrisGame.MeasureSKText(useFont.TypeFace, useFont.FontSize, Source.Text);
+
+
+                SKPoint DrawPosition = GetDrawPosition(Element.Bounds, MeasureText, Source.TextAlignment);
+                SKPaint BackPaint = null;
+
+
+                if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+                    BackPaint = new SKPaint() { Color = SKColors.DarkGreen, BlendMode = SKBlendMode.HardLight };
+                else
+                    BackPaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.BackColor) };
+                pRenderTarget.DrawRect(Element.Bounds, BackPaint);
+
+
+                SKPaint ForePaint = null;
+                SKPaint ShadePaint = null;
+                if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+                    ForePaint = new SKPaint() { Color = SKColors.Aqua };
+                else
+                    ForePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ForeColor), TextAlign = SKTextAlign.Center };
+
+                ShadePaint = new SKPaint() { Color = SkiaSharp.Views.Desktop.Extensions.ToSKColor(Source.ShadowColor), TextAlign = SKTextAlign.Center };
+
+
+                ForePaint.Typeface = useFont.TypeFace;
+                ForePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
+                ShadePaint.Typeface = useFont.TypeFace;
+                ShadePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
+
+                var useStyle = new DrawTextInformationSkia()
+                {
+                    Text = Source.Text,
+                    BackgroundPaint = new SKPaint() { Color = SKColors.Transparent },
+                    DrawFont = useFont,
+                    ForegroundPaint = ForePaint,
+                    ShadowPaint = ShadePaint,
+                    Position = new SKPoint(DrawPosition.X, DrawPosition.Y + MeasureText.Height / 2),
+                    ShadowOffset = new SKPoint(5f, 5f),
+                };
+
+                if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+                {
+                    useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia());
+                }
+
                 pRenderTarget.DrawTextSK(useStyle);
-                //useStyle.Position = new SKPoint(50, 50);
-                //pRenderTarget.DrawTextSK(useStyle);
 
-                */
+                //draw an arrow if necessary.
+                if (Source.MenuFlags.HasFlag(AdditionalMenuFlags.MenuFlags_ShowSubmenuArrow))
+                {
+                    //this is really broken, but it makes no sense why it would be. tiny fucking arrows and stupid fucking math bullshit. I fucking copied the Y location from above!
+                    /*
+                    useStyle.CharacterHandler.ClearPositionCalculators();
+                    var MeasuredArrow = TetrisGame.MeasureSKText(SKTypeface.FromFamilyName("Marlett"), (float)(32f* pOwner.ScaleFactor), "8");
+                    useStyle.Position = new SKPoint(Element.Bounds.Right - MeasuredArrow.Width, (float)(Element.Bounds.Top + (Math.Abs(Element.Bounds.Height))));
+                    useStyle.Text = "8";
+                    useStyle.ScalePercentage = 2;
+                    useStyle.DrawFont = new SKFontInfo(SKTypeface.FromFamilyName("Marlett"), (float)(32f*pOwner.ScaleFactor));
+                    pRenderTarget.DrawTextSK(useStyle);
+                    //useStyle.Position = new SKPoint(50, 50);
+                    //pRenderTarget.DrawTextSK(useStyle);
+
+                    */
 
 
 
 
-            }
-
+                }
+            }, StaggeredTranslationTransitionFunction, pRenderTarget, Source, Element);
+            
+            
+            
 
             //            TetrisGame.DrawText(Target, useFont, Text, ForeBrush, ShadowBrush, DrawPosition.X, DrawPosition.Y, 5f, 5f, central);
 

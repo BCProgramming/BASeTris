@@ -678,6 +678,7 @@ namespace BASeTris
                 var cw2 = RotateCW(cw);
                 var cw3 = RotateCW(cw2);
                 var cw4 = RotateCW(cw3);
+                Source[sHash] = chosenresult;
                 Source[StringRepresentation(cw2)] = chosenresult;
                 Source[StringRepresentation(cw3)] = chosenresult;
                 Source[StringRepresentation(cw4)] = chosenresult;

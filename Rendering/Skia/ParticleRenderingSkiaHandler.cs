@@ -258,8 +258,8 @@ namespace BASeTris.Rendering.Skia
         {
             if (Source.Count > 0)
             {
-                Debug.Print("Rendering Particle Set of " + Source.Count.ToString());
-                Debug.Print("Trace:" + new StackTrace().ToString());
+                //Debug.Print("Rendering Particle Set of " + Source.Count.ToString());
+                //Debug.Print("Trace:" + new StackTrace().ToString());
             }
             //var translated = BaseParticleRenderingSkiaHandler.TranslatePosition(pOwner, pRenderTarget, Element.Offset, Element);
             foreach (var iterate in Source)
@@ -270,15 +270,10 @@ namespace BASeTris.Rendering.Skia
                
 
             }
-            if(Source.Count > 0)
+            if(pOwner.CurrentState.GameProcSuspended)
             {
                 ;
             }
-            
-                if(pOwner.CurrentState.GameProcSuspended)
-                {
-                    ;
-                }
             
             UpdateParticles(pOwner,Source);
             

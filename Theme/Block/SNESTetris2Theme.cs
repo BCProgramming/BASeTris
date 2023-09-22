@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -119,7 +120,7 @@ namespace BASeTris.Theme.Block
     }
 
 
-    [HandlerTheme("Tetris 2 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    [HandlerTheme("Tetris 2 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     [ThemeDescription("Tetris 2 Theme from the SNES")]
 
     public class SNESTetris2Theme : ConnectedImageLineSeriesBlockTheme
@@ -183,7 +184,7 @@ namespace BASeTris.Theme.Block
             }
         }
 
-        
+        Dictionary<String, SKColor> ChosenNominoColours = new Dictionary<string, SKColor>();
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareThemeData();
@@ -192,7 +193,7 @@ namespace BASeTris.Theme.Block
                 
                 ;
             }
-
+            
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             foreach (var iterate in Group)
             {
@@ -239,7 +240,10 @@ namespace BASeTris.Theme.Block
                     else if (Group is Tetromino_Z) useColor = SKColors.Red;
                     else if (Group is Tetromino_J) useColor = SKColors.Blue;
                     else if (Group is Tetromino_L) useColor = SKColors.OrangeRed;
-                    else useColor = SKColors.Gray;
+                    else {
+                        useColor = NNominoGenerator.GetNominoData<SKColor>(ChosenNominoColours, Group, () => RandomColor());
+                    }
+                    //else useColor = SKColors.Gray;
 
 
 
@@ -305,6 +309,10 @@ namespace BASeTris.Theme.Block
 
 
             }
+        }
+        private SKColor RandomColor()
+        {
+            return new SKColor((byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256));
         }
         private bool VisuallyConnectOnlySameCombiningType = false;
         private bool UseConnectedImages = true;

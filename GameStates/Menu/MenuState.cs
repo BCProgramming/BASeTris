@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -162,10 +164,14 @@ namespace BASeTris.GameStates.Menu
         {
             
         }
+        public double AppearanceTransitionPercentage = 0;
+        public Stopwatch AppearanceTransitionStopWatch = null;
+        public static readonly long AppearanceTransitionLength = 400;
+        public bool Rendered { get; set; } = false;
         
-        int OffsetAnimationSpeed = 3;
         public override void GameProc(IStateOwner pOwner)
         {
+
             if (!String.IsNullOrEmpty(BackgroundMusicKey))
             {
                 var currentmusic = TetrisGame.Soundman.GetPlayingMusic();
@@ -189,15 +195,36 @@ namespace BASeTris.GameStates.Menu
             {
                 FadedBGFadeState.FadedParentState.GameProc(pOwner);
             }
-            if (!OffsetUsed)
+            if (AppearanceTransitionStopWatch == null && Rendered )
+            {
+                AppearanceTransitionStopWatch = new Stopwatch();
+                AppearanceTransitionStopWatch.Start();
+            }
+            if (AppearanceTransitionStopWatch != null)
+            {
+                if (AppearanceTransitionStopWatch.IsRunning && AppearanceTransitionStopWatch.ElapsedMilliseconds > MenuState.AppearanceTransitionLength)
+                {
+                    AppearanceTransitionStopWatch.Stop();
+
+                }
+                AppearanceTransitionPercentage =  (double)MenuState.AppearanceTransitionLength / (double)AppearanceTransitionStopWatch.ElapsedMilliseconds;
+                lock (MenuElements)
+                {
+                    foreach (var iterate in MenuElements)
+                    {
+                        iterate.TransitionPercentage = AppearanceTransitionPercentage;
+                    }
+                }
+            }
+            /*if (!OffsetUsed)
             {
                 MainXOffset = -pOwner.GameArea.Width / 2;
                 OffsetUsed = true;
             }
             if (MainXOffset < 0) MainXOffset += OffsetAnimationSpeed;
-            OffsetAnimationSpeed += 3;
+            OffsetAnimationSpeed += 3;*/
             //throw new NotImplementedException();
-           
+
         }
         
        
@@ -306,20 +333,86 @@ namespace BASeTris.GameStates.Menu
             
        
         }
-      
 
-        public void MouseDown(StateMouseButtons ButtonDown, BCPoint Position)
+        MenuStateMenuItem MouseDownedItem = null;
+        HashSet<StateMouseButtons> PressedButtons = new HashSet<StateMouseButtons>();
+        public void MouseDown(IStateOwner pOwner,StateMouseButtons ButtonDown, BCPoint Position)
         {
+            PressedButtons.Add(ButtonDown);
+            //throw new NotImplementedException();
+            var selecteditem = MenuElements[SelectedIndex];
+            if (selecteditem.LastBounds.Contains(Position))
+            {
+                if (ButtonDown == StateMouseButtons.LButton)
+                {
+                    MouseDownedItem = selecteditem;
+                }
+            }
+        }
+
+        public void MouseUp(IStateOwner pOwner,StateMouseButtons ButtonUp, BCPoint Position)
+        {
+            try
+            {
+                if (MouseDownedItem != null)
+                {
+                    if (ButtonUp == StateMouseButtons.LButton)
+                    {
+                        if (MouseDownedItem.LastBounds.Contains(Position))
+                        {
+                            HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
+                        }
+                    }
+                    else if (ButtonUp == StateMouseButtons.xButton1)
+                    {
+                        if (MouseDownedItem.LastBounds.Contains(Position))
+                        {
+                            HandleGameKey(pOwner, GameKeys.GameKey_Left);
+                        }
+                    }
+                    else if (ButtonUp == StateMouseButtons.xButton2)
+                    {
+                        if (MouseDownedItem.LastBounds.Contains(Position))
+                        {
+                            HandleGameKey(pOwner, GameKeys.GameKey_Right);
+                        }
+                    }
+
+                }
+            }
+            finally
+            {
+                PressedButtons.Remove(ButtonUp);
+            }
             //throw new NotImplementedException();
         }
 
-        public void MouseUp(StateMouseButtons ButtonUp, BCPoint Position)
+        public void MouseMove(IStateOwner pOwner,BCPoint Position)
         {
-            //throw new NotImplementedException();
-        }
+            if (this.ActivatedItem == null)
+            {
+                for (int i = 0; i < MenuElements.Count; i++)
+                {
+                    var checkitem = MenuElements[i];
+                    if (checkitem.LastBounds.Contains(Position))
+                    {
+                        if (SelectedIndex != i)
+                        {
+                            var previouslyselecteditem = MenuElements[SelectedIndex];
+                            MenuItemDeselected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(previouslyselecteditem, pOwner));
+                            MenuItemSelected?.Invoke(this, new MenuStateMenuItemSelectedEventArgs(checkitem, pOwner));
+                            previouslyselecteditem.OnDeselected(pOwner);
+                            SelectedIndex = i;
+                            checkitem.OnSelected(pOwner);
+                            TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemSelected.Key, pOwner.Settings.std.EffectVolume);
 
-        public void MouseMove(BCPoint Position)
-        {
+                        }
+
+
+                        SelectedIndex = i;
+                    }
+                }
+            }
             LastMouseMovement = Position;
         }
     }

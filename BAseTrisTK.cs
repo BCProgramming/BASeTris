@@ -212,21 +212,21 @@ namespace BASeTris
         {
             if(_Present.Game.CurrentState is IMouseInputState imis)
             {
-                imis.MouseDown(MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X,e.Position.Y));
+                imis.MouseDown(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X,e.Position.Y));
             }
         }
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
-                imis.MouseUp(MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X, e.Position.Y));
+                imis.MouseUp(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X, e.Position.Y));
             }
         }
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
-                imis.MouseMove(new BCPoint(e.Position.X, e.Position.Y));
+                imis.MouseMove(this,new BCPoint(e.Position.X, e.Position.Y));
             }
         }
         protected override void OnKeyUp(KeyboardKeyEventArgs e)

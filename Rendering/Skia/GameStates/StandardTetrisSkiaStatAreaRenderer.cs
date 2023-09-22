@@ -66,7 +66,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             //for (int i = 0; i < useTetrominoSources.Length; i++)
             {
                 Object currentTet = RenderLines[i].ElementSource;
-                if (Source.GameHandler is StandardTetrisHandler)
+                 if (Source.GameHandler is StandardTetrisHandler)
                 {
 
                     
@@ -96,7 +96,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     if (currYPos > Bounds.Bottom)
                     {
-                        useXPos += TextPos.X + StatTextSize.Width + 5;
+                        useXPos += (float)((4 * pOwner.ScaleFactor) + StatTextSize.Width + 5 + DrawRect.Width);
                         currYPos = StartYPos;
 
 
