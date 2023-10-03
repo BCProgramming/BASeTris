@@ -277,6 +277,7 @@ namespace BASeTris.Rendering
     {
         public float CharacterNumberModifier { get; set; } = 0.5f;
         public float Height { get; set; } = 5;
+        
         public sealed override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
         {
             float XPos = Position.X, YPos = Position.Y;
@@ -299,36 +300,35 @@ namespace BASeTris.Rendering
     }
     public static class StandardPositionCalculators
     {
-        public static void RotatingPositionCalculator(ref float XPos, ref float YPos, float Width, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f, float Radius = 10, float XScale = 1,float YScale = 1)
+        public static void RotatingPositionCalculator(ref float XPos, ref float YPos, float Width, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f, float Radius = 10, float XScale = 1,float YScale = 1,float Phase=0,float Frequency = 750)
         {
-            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
+            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % Frequency) / Frequency;
             var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
-            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
+            double Angle = Phase + (rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI));
             float NewXPos = (float)Math.Cos(Angle) * Radius;
             float NewYPos = (float)Math.Sin(Angle) * Radius;
             XPos = XPos + (NewXPos*XScale);
             YPos = YPos + (NewYPos * YScale) ;
 
         }
-        public static void VerticalWavePositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)
+        public static void VerticalWavePositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f,float Phase = 0,float Frequency = 750)
         {
-            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
+            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % Frequency) / Frequency;
             var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
-            double Angle = rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI);
+            double Angle = Phase + (rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI));
             
             float NewYPos = (float)Math.Sin(Angle) * Height;
             
             YPos = YPos + NewYPos;
         }
-        public static void RandomPositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)
+        public static void RandomPositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f,float Radius = 1)
         {
-            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % 750) / 750;
-            var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
             double Angle = TetrisGame.rgen.NextDouble() * Math.PI;
 
-            float NewYPos = (float)Math.Sin(Angle) * 3;
-
+            float NewYPos = (float)Math.Sin(Angle) * Radius;
+            float NewXPos = (float)Math.Cos(Angle) * Radius;
             YPos = YPos + NewYPos;
+            XPos = XPos + NewXPos;
         }
         public static void HorizontalWavePositionCalculator(ref float XPos, ref float YPos, float Width, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f)
         {

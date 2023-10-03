@@ -162,6 +162,7 @@
     <Compile Include="GameStates\GameHandlers\ReverseTetrisHandler.cs" />
     <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
     <Compile Include="GameStates\ThemeSelectionMenuState.cs" />
+    <Compile Include="GameStates\TransitState.cs" />
     <Compile Include="Particles\ShapeParticle.cs" />
     <Compile Include="RandomHelpers.cs" />
     <Compile Include="Rendering\Skia\GameStates\ControlSettingsViewStateSkiaRenderingHandler.cs" />

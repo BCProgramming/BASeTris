@@ -12,6 +12,29 @@ using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
+    [RenderingHandler(typeof(TransitState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class TransitStateRenderingHandler : StandardStateRenderingHandler<SKCanvas, TransitState, GameStateSkiaDrawParameters>
+    {
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TransitState Source, GameStateSkiaDrawParameters Element)
+        {
+            RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.GetCompositeState(), Element);
+        }
+
+        public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, TransitState Source, GameStateSkiaDrawParameters Element)
+        {
+            var composite = Source.GetCompositeState();
+            var grabhandler = RenderingProvider.Static.GetHandler(typeof(SKCanvas), composite.GetType(), typeof(GameStateSkiaDrawParameters));
+            if (grabhandler != null)
+                if (grabhandler is IStateRenderingHandler isrh)
+                {
+                    isrh.RenderStats(pOwner, pRenderTarget, composite, Element);
+                }
+            
+        }
+    }
+
+
+
     [RenderingHandler(typeof(GameOverGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class GameOverStateRenderingHandler : StandardStateRenderingHandler<SKCanvas, GameOverGameState, GameStateSkiaDrawParameters>
     {

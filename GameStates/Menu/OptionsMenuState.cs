@@ -42,8 +42,9 @@ namespace BASeTris.GameStates.Menu
                 if (e.MenuElement == ReturnItem)
                 {
                     _AlterSet.Save();
-                    pOwner.CurrentState = _OriginalState;
-                    
+                   
+                        pOwner.CurrentState = MenuState.CreateOutroState(pOwner, _OriginalState);
+                   
                 }
             };
             //add the sound options label.
@@ -277,7 +278,8 @@ namespace BASeTris.GameStates.Menu
                 if (e.MenuElement == ReturnItem)
                 {
                     pOwner.Settings.Save();
-                    pOwner.CurrentState = _OriginalState;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, _OriginalState);
+                    //pOwner.CurrentState = _OriginalState;
                 }
                 else
                 {

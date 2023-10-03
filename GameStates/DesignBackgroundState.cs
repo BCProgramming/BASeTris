@@ -403,14 +403,14 @@ namespace BASeTris.GameStates
                         }
 
                     });
-                    pOwner.CurrentState = submenu;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,submenu);
                     DesignOptionsMenuState.ActivatedItem = null;
 
                 }
                 else if (e.MenuElement == LayerOptions)
                 {
                     var submenu = GetSizeEditState(pOwner, DesignOptionsMenuState);
-                    pOwner.CurrentState = submenu;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,submenu);
                     DesignOptionsMenuState.ActivatedItem = null;
 
                 }
@@ -478,7 +478,7 @@ namespace BASeTris.GameStates
             {
                 if (e.MenuElement == ReturnMenuItem)
                 {
-                    pOwner.CurrentState = Parent;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, Parent);
                     ResultState.ActivatedItem = null;
                 }
             };
@@ -544,7 +544,7 @@ namespace BASeTris.GameStates
             {
                 if (b.MenuElement == ReturnMenuItem)
                 {
-                    pOwner.CurrentState = DesignOptionsMenuState;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, DesignOptionsMenuState);
                 }
                 else if (b.MenuElement == BitmapFileItem)
                 {
@@ -562,7 +562,7 @@ namespace BASeTris.GameStates
                         }
                     }
 
-                    pOwner.CurrentState = DesignOptionsMenuState;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, DesignOptionsMenuState);
                 }
                 else
                 {

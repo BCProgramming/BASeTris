@@ -104,7 +104,7 @@ namespace BASeTris.GameStates.Menu
                 if (e.MenuElement == NewGameItem)
                 {
                     GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target));
-                    pOwner.CurrentState = gms;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,pOwner.CurrentState,gms);
                     Target.ActivatedItem = null;
                 }
 
@@ -113,19 +113,19 @@ namespace BASeTris.GameStates.Menu
                     //Show the options menu
                     //var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
                     var OptionsMenu = new OptionsMenuSettingsSelectorState(Target.BG, pOwner, pOwner.CurrentState);
-                    pOwner.CurrentState = OptionsMenu;
+                    pOwner.CurrentState =  MenuState.CreateOutroState(pOwner, OptionsMenu);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == Controls)
                 {
                     var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
-                    pOwner.CurrentState = ControlsState;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,ControlsState);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == BGDesign)
                 {
                     var DesignState = new DesignBackgroundState(pOwner, pOwner.CurrentState, null);
-                    pOwner.CurrentState = DesignState;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,DesignState);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == ExitItem)
@@ -135,7 +135,7 @@ namespace BASeTris.GameStates.Menu
                 else if (e.MenuElement == CrappyThemeTestthing)
                 {
                     ThemeSelectionMenuState themestate = new ThemeSelectionMenuState(pOwner, pOwner.CurrentState.BG, pOwner.CurrentState, typeof(StandardTetrisHandler), typeof(SNESTetrominoTheme), (nt) => { });
-                    pOwner.CurrentState = themestate;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,themestate);
                     Target.ActivatedItem = null;
                 }
 
@@ -273,7 +273,7 @@ namespace BASeTris.GameStates.Menu
                         });
                         Target.ActivatedItem = null;
 
-                        pOwner.CurrentState = createstate;
+                        pOwner.CurrentState = MenuState.CreateOutroState(pOwner,createstate);
 
 
                     }
@@ -285,14 +285,14 @@ namespace BASeTris.GameStates.Menu
                 else if (CategoryItems.Contains(e.MenuElement))
                 {
                     GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target,(String)(((MenuStateTextMenuItem)e.MenuElement).Tag)));
-                    pOwner.CurrentState = gms;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,gms);
                     Target.ActivatedItem = null;
 
 
                 }
                 else if (e.MenuElement == BackItem)
                 {
-                    pOwner.CurrentState = RevertState;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, RevertState);
                 }
 
 
@@ -359,7 +359,7 @@ namespace BASeTris.GameStates.Menu
                 if (e.MenuElement == HighScoresItem)
                 {
                     ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], Target, null);
-                    pOwner.CurrentState = scorestate;
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,scorestate);
                     Target.ActivatedItem = null;
                 }
                 if (e.MenuElement == ExitItem)

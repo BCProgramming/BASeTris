@@ -15,7 +15,7 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.Menu
 {
-    public class MenuState : GameState,IMouseInputState
+    public class MenuState : GameState, IMouseInputState, ITransitableState
     {
         public class MenuStateFadedParentStateInformation
         {
@@ -42,10 +42,10 @@ namespace BASeTris.GameStates.Menu
 
         public String BackgroundMusicKey = null;
 
-        public static MenuState CreateMenu(IStateOwner pOwner,String pHeaderText, GameState ReversionState, IBackground usebg,String sCancelText, int PerPageItems = int.MaxValue,params MenuStateMenuItem[] Items)
+        public static MenuState CreateMenu(IStateOwner pOwner, String pHeaderText, GameState ReversionState, IBackground usebg, String sCancelText, int PerPageItems = int.MaxValue, params MenuStateMenuItem[] Items)
         {
             MenuState ResultState = new MenuState(usebg ?? ReversionState.BG);
-            
+
             var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
             ResultState.StateHeader = pHeaderText;
             ResultState.HeaderTypeface = FontSrc.FontFamily.Name;
@@ -82,11 +82,11 @@ namespace BASeTris.GameStates.Menu
             if (PerPageItems < Items.Length)
             {
                 //we need to paginate, create a new Menuitem...
-                
+
                 MenuStateTextMenuItem NextPageItem = new MenuStateTextMenuItem() { Text = "Next Page>>", TipText = "Switch to the next page" };
                 ResultState.MenuItemActivated += (o, e) =>
                 {
-                   
+
 
                     if (e.MenuElement == NextPageItem)
                     {
@@ -111,7 +111,7 @@ namespace BASeTris.GameStates.Menu
             }
 
 
-            foreach (var designeritem in sCancelText==null?Items:Items.Prepend(ReturnItem))
+            foreach (var designeritem in sCancelText == null ? Items : Items.Prepend(ReturnItem))
             {
                 if (designeritem is MenuStateTextMenuItem mstmi)
                 {
@@ -147,13 +147,98 @@ namespace BASeTris.GameStates.Menu
         //used to scroll the menu up and down.
         public int SelectedIndex = 0;
 
-        
 
+        public enum TransitionDirectionConstants
+        {
+            Forward,
+            Reverse
+        }
         public override GameState.DisplayMode SupportedDisplayMode
         {
             get { return GameState.DisplayMode.Full; }
         }
+        
+        public static TransitState CreateOutroState(IStateOwner pOwner, GameState NextState)
+        {
+            return CreateOutroState(pOwner, pOwner.CurrentState, NextState,TransitionDirectionConstants.Reverse);
+        }
+        public static TransitState CreateOutroState(IStateOwner pOwner, GameState CurrentState, GameState NextState, TransitionDirectionConstants Direction = TransitionDirectionConstants.Reverse)
+        {
+            //if the state is a menustate, it can transition, so we will delegate to the CreateMenuOutroState.
+            if (CurrentState is MenuState ms)
+                return CreateMenuOutroState(pOwner, ms, NextState,Direction);
+            else
+            {
+                //otherwise, it cannot transition. we need to return a transitstate, though, so give back one that basically switches to the new state provided immediately without a transition.
+                return new TransitState<GameState>(CurrentState, () => { }, () => { }, () => true, ()=> { pOwner.CurrentState = NextState; });
+            }
+        }
+        public static TransitState<T> CreateMenuIntroState<T>(IStateOwner pOwner, T IntroState, TransitionDirectionConstants Direction = TransitionDirectionConstants.Forward) where T:GameState,ITransitableState
+        {
+            DateTime StartTransition = DateTime.Now;
+            TransitState<T> transState = new TransitState<T>(IntroState, () => {
+                StartTransition = DateTime.Now; IntroState.AppearanceTransitionPercentage = 1;
+            },
+                () => {
 
+                    IntroState.AppearanceTransitionPercentage = Direction switch
+                    {
+                        TransitionDirectionConstants.Forward => ((DateTime.Now - StartTransition).TotalMilliseconds / IntroState.AppearanceTransitionLength),
+                        TransitionDirectionConstants.Reverse => 1 - ((DateTime.Now - StartTransition).TotalMilliseconds / IntroState.AppearanceTransitionLength),
+                        _ => ((DateTime.Now - StartTransition).TotalMilliseconds / IntroState.AppearanceTransitionLength)
+                    };
+
+
+                },
+                () =>
+                {
+                    return (DateTime.Now - StartTransition).TotalMilliseconds > IntroState.AppearanceTransitionLength;
+                }, () =>
+                {
+                    //we set the state direct to the intro state here.
+                    pOwner.CurrentState = IntroState;
+                });
+
+            return transState;
+        }
+        public static TransitState<T> CreateMenuOutroState<T>(IStateOwner pOwner,T CurrentState,GameState NextState, TransitionDirectionConstants Direction = TransitionDirectionConstants.Reverse) where T:GameState,ITransitableState
+        {
+            
+            DateTime StartTransition = DateTime.Now;
+            TransitState<T> newstate = new TransitState<T>(CurrentState,
+                () => {
+                    StartTransition = DateTime.Now; CurrentState.AppearanceTransitionPercentage = 1; },
+                () => {
+
+                    CurrentState.AppearanceTransitionPercentage = Direction switch
+                    {
+                        TransitionDirectionConstants.Forward => ((DateTime.Now - StartTransition).TotalMilliseconds / CurrentState.AppearanceTransitionLength),
+                        TransitionDirectionConstants.Reverse => 1 - ((DateTime.Now - StartTransition).TotalMilliseconds / CurrentState.AppearanceTransitionLength),
+                        _ => ((DateTime.Now - StartTransition).TotalMilliseconds / CurrentState.AppearanceTransitionLength)
+                    };
+
+                    
+                },
+                () =>
+                {
+                    return (DateTime.Now - StartTransition).TotalMilliseconds > CurrentState.AppearanceTransitionLength;
+                }, () =>
+                {
+                    if (NextState != null)
+                    {
+                        if (NextState is MenuState ms)
+                        {
+                            pOwner.CurrentState = CreateMenuIntroState<MenuState>(pOwner, ms);
+                        }
+                        else
+                        {
+                            pOwner.CurrentState = NextState;
+                        }
+                    }
+                });
+
+            return newstate;
+        }
         
 
         public MenuState(IBackground pBG)
@@ -164,9 +249,22 @@ namespace BASeTris.GameStates.Menu
         {
             
         }
-        public double AppearanceTransitionPercentage = 0;
+        private double _AppearanceTransitionPercentage = 0;
+        public double AppearanceTransitionPercentage { get { return _AppearanceTransitionPercentage; } 
+            
+            set { 
+                _AppearanceTransitionPercentage = value;
+                if (MenuElements == null) return;
+                lock (MenuElements)
+                {
+                    foreach (var iterate in MenuElements)
+                    {
+                        iterate.TransitionPercentage = AppearanceTransitionPercentage;
+                    }
+                }
+            } }
         public Stopwatch AppearanceTransitionStopWatch = null;
-        public static readonly long AppearanceTransitionLength = 400;
+        public double AppearanceTransitionLength { get; private set; } = 700;
         public bool Rendered { get; set; } = false;
         
         public override void GameProc(IStateOwner pOwner)
@@ -202,19 +300,15 @@ namespace BASeTris.GameStates.Menu
             }
             if (AppearanceTransitionStopWatch != null)
             {
-                if (AppearanceTransitionStopWatch.IsRunning && AppearanceTransitionStopWatch.ElapsedMilliseconds > MenuState.AppearanceTransitionLength)
+                if (AppearanceTransitionStopWatch.IsRunning && AppearanceTransitionStopWatch.ElapsedMilliseconds > AppearanceTransitionLength)
                 {
                     AppearanceTransitionStopWatch.Stop();
+                    AppearanceTransitionPercentage = 1;
 
                 }
-                AppearanceTransitionPercentage =  (double)MenuState.AppearanceTransitionLength / (double)AppearanceTransitionStopWatch.ElapsedMilliseconds;
-                lock (MenuElements)
-                {
-                    foreach (var iterate in MenuElements)
-                    {
-                        iterate.TransitionPercentage = AppearanceTransitionPercentage;
-                    }
-                }
+
+                AppearanceTransitionPercentage = (double)AppearanceTransitionStopWatch.ElapsedMilliseconds / (double)AppearanceTransitionLength;
+                
             }
             /*if (!OffsetUsed)
             {

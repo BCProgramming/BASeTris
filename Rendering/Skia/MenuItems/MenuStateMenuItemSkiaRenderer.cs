@@ -49,19 +49,23 @@ namespace BASeTris.Rendering.Skia.MenuItems
         public TransitionFunctionDelegate TransitionFunction { get; set; } = StaggeredTranslationTransitionFunction;
         public static void StaggeredTranslationTransitionFunction(SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
         {
-            if (Element.Index % 2 == 0)
+            if (Source.TransitionPercentage < 1)
             {
-                pRenderTarget.Translate((float)((-Element.Bounds.Width / 2) + ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
+                if (Element.Index % 2 == 0)
+                {
+                    pRenderTarget.Translate((float)((-Element.Bounds.Width) + ((Element.Bounds.Width ) * Source.TransitionPercentage)), 0);
+                }
+                else
+                {
+                    pRenderTarget.Translate((float)((Element.Bounds.Width) - ((Element.Bounds.Width ) * Source.TransitionPercentage)), 0);
+                    //   pRenderTarget.Translate((float)((Element.Bounds.Right+Element.Bounds.Width / 2) - ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
+                }
             }
-            else
-            {
-                pRenderTarget.Translate((float)((Element.Bounds.Width / 2) - ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
-                //   pRenderTarget.Translate((float)((Element.Bounds.Right+Element.Bounds.Width / 2) - ((Element.Bounds.Width / 2) * Source.TransitionPercentage)), 0);
-            }
+
 
 
         }
-        public void MenuTransitioner(Action CallRoutine,Action<SKCanvas,MenuStateMenuItem,MenuStateMenuItemSkiaDrawData> TransitionAction, SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
+        public void MenuTransitioner(Action CallRoutine,TransitionFunctionDelegate TransitionAction, SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
         {
             using (SKAutoCanvasRestore skc = new SKAutoCanvasRestore(pRenderTarget, true))
             {
@@ -169,104 +173,108 @@ namespace BASeTris.Rendering.Skia.MenuItems
         //Would be a good idea to redesign this to draw using tetromino elements. Long piece for a slider indicator for example. Maybe little tetrominoes for the border and detents?
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateSliderOption Source, MenuStateMenuItemSkiaDrawData Element)
         {
-            if(SliderImage==null) SliderImage =  SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("slider_pointer"));
-            if (SliderBG == null) SliderBG = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("slider_bg"));
-            double ShadowOffset = 1 * pOwner.ScaleFactor;
-            SKColor ForeColor = SKColors.Magenta;
-            SKColor ShadowColor = SKColors.Magenta;
-            if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Normal)
+
+            MenuTransitioner(() =>
             {
-                ForeColor = SKColors.Black;
-                ShadowColor = SKColors.White;
-            }
-            else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
-            {
-                ForeColor = SKColors.White;
-                ShadowColor = SKColors.Black;
-                using (SKAutoCanvasRestore sk = new SKAutoCanvasRestore(pRenderTarget))
+
+                if (SliderImage == null) SliderImage = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("slider_pointer"));
+                if (SliderBG == null) SliderBG = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("slider_bg"));
+                double ShadowOffset = 1 * pOwner.ScaleFactor;
+                SKColor ForeColor = SKColors.Magenta;
+                SKColor ShadowColor = SKColors.Magenta;
+                if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Normal)
                 {
-                    pRenderTarget.ClipRect(Element.Bounds, SKClipOperation.Intersect, false);
-                    pRenderTarget.DrawColor(SKColors.OrangeRed, SKBlendMode.ColorBurn);
+                    ForeColor = SKColors.Black;
+                    ShadowColor = SKColors.White;
                 }
-            }
-            else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Unavailable)
-            {
-                ForeColor = SKColors.Gray;
-                ShadowColor = SKColors.DarkGray;
-            }
-            
-            SKPaint ForePaint = new SKPaint() { IsStroke = true, Color = ForeColor,  StrokeWidth = 3 };
-            SKPaint ShadowPaint = new SKPaint() { IsStroke = true,Color = ShadowColor,StrokeWidth=3 };
-            SKPaint ForeFill = new SKPaint() { Color = ForeColor, Style = SKPaintStyle.Fill,StrokeWidth=7 };
-            SKPaint ShadowFill = new SKPaint() { Color = ShadowColor,Style=SKPaintStyle.Fill, StrokeWidth = 7 };
+                else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+                {
+                    ForeColor = SKColors.White;
+                    ShadowColor = SKColors.Black;
+                    using (SKAutoCanvasRestore sk = new SKAutoCanvasRestore(pRenderTarget))
+                    {
+                        pRenderTarget.ClipRect(Element.Bounds, SKClipOperation.Intersect, false);
+                        pRenderTarget.DrawColor(SKColors.OrangeRed, SKBlendMode.ColorBurn);
+                    }
+                }
+                else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Unavailable)
+                {
+                    ForeColor = SKColors.Gray;
+                    ShadowColor = SKColors.DarkGray;
+                }
 
-            double MiddleY = Element.Bounds.Top + Element.Bounds.Height / 2;
-            //step one
-            // var shadowoff = Element.Bounds;
-            // shadowoff.Offset((float)ShadowOffset, (float)ShadowOffset);
-            // pRenderTarget.DrawRect(shadowoff, ShadowPaint );
-            // pRenderTarget.DrawRect(Element.Bounds,ForePaint);
-            //pRenderTarget.DrawImage(SliderBG, Element.Bounds);
+                SKPaint ForePaint = new SKPaint() { IsStroke = true, Color = ForeColor, StrokeWidth = 3 };
+                SKPaint ShadowPaint = new SKPaint() { IsStroke = true, Color = ShadowColor, StrokeWidth = 3 };
+                SKPaint ForeFill = new SKPaint() { Color = ForeColor, Style = SKPaintStyle.Fill, StrokeWidth = 7 };
+                SKPaint ShadowFill = new SKPaint() { Color = ShadowColor, Style = SKPaintStyle.Fill, StrokeWidth = 7 };
 
-            double FullRange = (Source.MaximumValue - Source.MinimumValue);
-            int detentCount = 0;
-            for (double detent = Source.MinimumValue; detent < Source.MaximumValue; detent += Source.SmallDetent)
-            {
-                //calculate our position for this detent.
-              
-                double XPosition = Element.Bounds.Left + Element.Bounds.Width * ((detent - Source.MinimumValue) / FullRange);
+                double MiddleY = Element.Bounds.Top + Element.Bounds.Height / 2;
+                //step one
+                // var shadowoff = Element.Bounds;
+                // shadowoff.Offset((float)ShadowOffset, (float)ShadowOffset);
+                // pRenderTarget.DrawRect(shadowoff, ShadowPaint );
+                // pRenderTarget.DrawRect(Element.Bounds,ForePaint);
+                //pRenderTarget.DrawImage(SliderBG, Element.Bounds);
 
-                double detentSize = Math.Abs(detentCount % Source.LargeDetentCount) < 0.001 ? Element.Bounds.Height / 5 : Element.Bounds.Height / 10;
-                double Ypos = Element.Bounds.Top + Element.Bounds.Height / 2 - detentSize / 2;
+                double FullRange = (Source.MaximumValue - Source.MinimumValue);
+                int detentCount = 0;
+                for (double detent = Source.MinimumValue; detent < Source.MaximumValue; detent += Source.SmallDetent)
+                {
+                    //calculate our position for this detent.
 
-                DrawLine(pRenderTarget, new SKPoint((float)XPosition, (float)Ypos), new SKPoint((float)XPosition, (float)(Ypos+ (float)detentSize)), ForePaint, ShadowPaint, ShadowOffset);
+                    double XPosition = Element.Bounds.Left + Element.Bounds.Width * ((detent - Source.MinimumValue) / FullRange);
 
+                    double detentSize = Math.Abs(detentCount % Source.LargeDetentCount) < 0.001 ? Element.Bounds.Height / 5 : Element.Bounds.Height / 10;
+                    double Ypos = Element.Bounds.Top + Element.Bounds.Height / 2 - detentSize / 2;
 
-                detentCount++;
-            }
-            double SliderPosition = Element.Bounds.Left + Element.Bounds.Width * ((Source.Value - Source.MinimumValue) / FullRange);
-
-          
-
-            float SliderWidth = 10;
-            var shadoffset = new SKPoint((float)ShadowOffset, (float)ShadowOffset);
-            pRenderTarget.DrawImage(SliderImage, new SKRect((float)(SliderPosition - SliderWidth), Element.Bounds.Top, (float)(SliderPosition + SliderWidth), Element.Bounds.Top + Element.Bounds.Height / 2), null);
-
-            SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.Black };
-            SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.White };
-            DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = textforeground,  ShadowPaint = textshadow };
-            dtis.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, Element.Bounds.Height / 4);
-            dtis.Text = Source.Value.ToString("0.##");
-            dtis.Position = new SKPoint( (float)SliderPosition+SliderWidth,  Element.Bounds.Top+ Element.Bounds.Height * 0.15f);
-            if (Source.Activated)
-            {
-                (textforeground, textshadow) = (textshadow, textforeground);
-                dtis.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
-            }
-            pRenderTarget.DrawTextSK(dtis);
-            DrawTextInformationSkia tTitle= new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
-            SKRect bnd = new SKRect();
-            textforeground.MeasureText(dtis.Text, ref bnd);
-            tTitle.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, textforeground.TextSize);
-            tTitle.Text = Source.Label;
-
-            
-
-            tTitle.Position = new SKPoint((float)(Element.Bounds.Left+10*pOwner.ScaleFactor), Element.Bounds.Top + Element.Bounds.Height);
-            if (Source.Activated)
-            {
-                tTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
-            }
-            pRenderTarget.DrawTextSK(tTitle);
-
-            base.Render(pOwner, pRenderTarget, Source, Element);
+                    DrawLine(pRenderTarget, new SKPoint((float)XPosition, (float)Ypos), new SKPoint((float)XPosition, (float)(Ypos + (float)detentSize)), ForePaint, ShadowPaint, ShadowOffset);
 
 
-            //pRenderTarget.DrawPoints(SKPointMode.Polygon, SliderShadow, ShadowFill);
-            //pRenderTarget.DrawPoints(SKPointMode.Polygon, SliderPoly, ForeFill);
-            //FillPoly(pRenderTarget, SliderShadow, ShadowFill);
-            //FillPoly(pRenderTarget, SliderPoly, ForeFill);
+                    detentCount++;
+                }
+                double SliderPosition = Element.Bounds.Left + Element.Bounds.Width * ((Source.Value - Source.MinimumValue) / FullRange);
 
+
+
+                float SliderWidth = 10;
+                var shadoffset = new SKPoint((float)ShadowOffset, (float)ShadowOffset);
+                pRenderTarget.DrawImage(SliderImage, new SKRect((float)(SliderPosition - SliderWidth), Element.Bounds.Top, (float)(SliderPosition + SliderWidth), Element.Bounds.Top + Element.Bounds.Height / 2), null);
+
+                SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.Black };
+                SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.White };
+                DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+                dtis.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, Element.Bounds.Height / 4);
+                dtis.Text = Source.Value.ToString("0.##");
+                dtis.Position = new SKPoint((float)SliderPosition + SliderWidth, Element.Bounds.Top + Element.Bounds.Height * 0.15f);
+                if (Source.Activated)
+                {
+                    (textforeground, textshadow) = (textshadow, textforeground);
+                    dtis.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+                }
+                pRenderTarget.DrawTextSK(dtis);
+                DrawTextInformationSkia tTitle = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+                SKRect bnd = new SKRect();
+                textforeground.MeasureText(dtis.Text, ref bnd);
+                tTitle.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, textforeground.TextSize);
+                tTitle.Text = Source.Label;
+
+
+
+                tTitle.Position = new SKPoint((float)(Element.Bounds.Left + 10 * pOwner.ScaleFactor), Element.Bounds.Top + Element.Bounds.Height);
+                if (Source.Activated)
+                {
+                    tTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+                }
+                pRenderTarget.DrawTextSK(tTitle);
+
+                base.Render(pOwner, pRenderTarget, Source, Element);
+
+
+                //pRenderTarget.DrawPoints(SKPointMode.Polygon, SliderShadow, ShadowFill);
+                //pRenderTarget.DrawPoints(SKPointMode.Polygon, SliderPoly, ForeFill);
+                //FillPoly(pRenderTarget, SliderShadow, ShadowFill);
+                //FillPoly(pRenderTarget, SliderPoly, ForeFill);
+            }, TransitionFunction, pRenderTarget, Source, Element);
 
 
 
@@ -430,11 +438,18 @@ namespace BASeTris.Rendering.Skia.MenuItems
                     Position = new SKPoint(DrawPosition.X, DrawPosition.Y + MeasureText.Height / 2),
                     ShadowOffset = new SKPoint(5f, 5f),
                 };
+                if (Source.TransitionPercentage < 1)
+                {
+                    useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia() { Radius = (float)(Element.Bounds.Width - (Element.Bounds.Width * Source.TransitionPercentage)),CharacterNumberModifier=TetrisGame.rgen.Next(0,4) });
+                }
 
-                if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
+                else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)
                 {
                     useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia());
                 }
+
+                
+
 
                 pRenderTarget.DrawTextSK(useStyle);
 
