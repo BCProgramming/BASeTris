@@ -395,12 +395,12 @@ namespace BASeTris.GameStates
                 List<BaseParticle> ToAdd = new List<BaseParticle>((int)(ParticleCountPerBlock*ReductionFactor));
                 for (int i = 0; i < (int)(ParticleCountPerBlock*ReductionFactor); i++)
                 {
-                    BCPoint ParticlePos = new BCPoint((float)TetrisGame.rgen.NextDouble(), (float)TetrisGame.rgen.NextDouble());
+                    BCPoint ParticlePos = new BCPoint((float)TetrisGame.StatelessRandomizer.NextDouble(), (float)TetrisGame.StatelessRandomizer.NextDouble());
                     //choose a new random position within the block.
                     BCPoint NewParticlePoint = new BCPoint(CoordPos.X + ParticlePos.X, CoordPos.Y + ParticlePos.Y );
                     BCPoint Velocity = new BCPoint(
 
-                        (float)(DirectionMultiplier * (TetrisGame.rgen.NextDouble() * 1 + (Math.Abs(BlockX - (_BaseState.PlayField.ColCount / 2))/5))), 0
+                        (float)(DirectionMultiplier * (TetrisGame.StatelessRandomizer.NextDouble() * 1 + (Math.Abs(BlockX - (_BaseState.PlayField.ColCount / 2))/5))), 0
                     
                         );
                     BCColor ChosenColor = baseColor;
@@ -415,7 +415,7 @@ namespace BASeTris.GameStates
                     BaseParticle p = new BaseParticle(NewParticlePoint, Velocity, ChosenColor);
                     if (RowsCleared >= 4)
                     {
-                        if(TetrisGame.rgen.NextDouble()>0.25d)
+                        if(TetrisGame.StatelessRandomizer.NextDouble()>0.25d)
                         {
                             p.ColorCalculatorFunction = BaseParticle.GetRainbowColorFunc(pOwner, 500);
                         }

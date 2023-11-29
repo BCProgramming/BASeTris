@@ -24,7 +24,7 @@ namespace BASeTris.Choosers
             return sl.Select(iterator => iterator.Value);
         }
 
-        public BagChooser(Func<Nomino>[] SelectionFunctions) : base(SelectionFunctions)
+        public BagChooser(Func<Nomino>[] SelectionFunctions, int Seed) : base(SelectionFunctions,Seed)
         {
         }
 

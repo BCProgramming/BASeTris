@@ -31,6 +31,7 @@ namespace BASeTris.Rendering
             _Stats = new TetrisStatistics() {I_Line_Count=pLevel*10 };
             
         }
+        public GamePreparerOptions PrepInstance { get; set; } = null;
         public string Name => "Fake Collage Hander";
 
         public NominoTheme DefaultTheme => null;
@@ -103,7 +104,7 @@ namespace BASeTris.Rendering
         public static SKBitmap GetNominoBitmap(NominoTheme _theme)
         {
             //similar to "Collage", but we only want to use One Nomino, at random. (one of the tetrominoes, for the moment.)
-            int generatedlevel = TetrisGame.rgen.Next(0, 21);
+            int generatedlevel = TetrisGame.StatelessRandomizer.Next(0, 21);
             //first, choose a random Tetromino Type.
             var buildNominoFunc = TetrisGame.Choose(Tetrominoes.Tetromino.StandardTetrominoFunctions);
             Nomino GenerateResult = buildNominoFunc();
@@ -268,13 +269,13 @@ namespace BASeTris.Rendering
             XElement RootNode = null;
             Nomino[][] AddBlocks = Contents;
 
-            int generatedlevel = TetrisGame.rgen.Next(0, 21);
+            int generatedlevel = TetrisGame.StatelessRandomizer.Next(0, 21);
             int Cols = ColumnCount;
             int Rows = RowCount;
             TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(Cols, Rows, BlockSize, BlockSize, generatedlevel, _theme, SKColors.Black);
 
             //Nomino[][] AddBlocks = new Nomino[][] { new Nomino[] { IBlock, IBlock2 }, new Nomino[] { TBlock1, TBlock2, TBlock3 }, new Nomino[] { SBlock }, new Nomino[] { LBlock1, LBlock2 }, new Nomino[] { JBlock1, JBlock2 }, new Nomino[] { ZBlock1 }, new Nomino[] { LBlock3 } };
-            bool doRandomize = TetrisGame.rgen.NextDouble() > 0.5;
+            bool doRandomize = TetrisGame.StatelessRandomizer.NextDouble() > 0.5;
 
             foreach (var groupadd in AddBlocks)
             {
@@ -283,7 +284,7 @@ namespace BASeTris.Rendering
                     _theme.ApplyTheme(blockadd, null, tcr._field, NominoTheme.ThemeApplicationReason.FieldSet);
                     tcr.AddNomino(blockadd);
                 }
-                if (doRandomize) (tcr.DummyHandler.Statistics as TetrisStatistics).SetLineCount(typeof(Tetrominoes.Tetromino_I), TetrisGame.rgen.Next(0, 21));
+                if (doRandomize) (tcr.DummyHandler.Statistics as TetrisStatistics).SetLineCount(typeof(Tetrominoes.Tetromino_I), TetrisGame.StatelessRandomizer.Next(0, 21));
             }
 
             SKBitmap CreateBitmap = tcr.Render();

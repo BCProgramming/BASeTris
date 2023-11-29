@@ -50,7 +50,7 @@ namespace BASeTris.AI
                 {
                     if(rules.StupidFactor<1)
                     {
-                        if (TetrisGame.rgen.NextDouble() < rules.StupidFactor) continue;
+                        if (TetrisGame.StatelessRandomizer.NextDouble() < rules.StupidFactor) continue;
                     }
                     Nomino cloneFor = new Nomino(bg);
                     foreach (var resetblock in cloneFor)
@@ -117,7 +117,7 @@ namespace BASeTris.AI
                     var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup,ScoringRules).ToList();
                     
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
-                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.rgen.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(stdState.GameHandler.GetType(), ScoringRules))).ToList();
+                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.StatelessRandomizer.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(stdState.GameHandler.GetType(), ScoringRules))).ToList();
 
                     //var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
                     /*foreach (var writedebug in Scores)

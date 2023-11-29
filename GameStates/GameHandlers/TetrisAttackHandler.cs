@@ -73,13 +73,15 @@ namespace BASeTris.GameStates.GameHandlers
 
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
-            return new SingleFunctionChooser(() => new Duomino.Duomino((a) => new Blocks.LineSeriesBlock() { BlockColor = Color.Yellow , Popping = true }) { NoGhost = true, FallSpeed = 0, Y = 6, Flags = Nomino.NominoControlFlags.ControlFlags_DropMove | Nomino.NominoControlFlags.ControlFlags_NoClip });
+            int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
+            return new SingleFunctionChooser(() => new Duomino.Duomino((a) => new Blocks.LineSeriesBlock() { BlockColor = Color.Yellow , Popping = true }) { NoGhost = true, FallSpeed = 0, Y = 6, Flags = Nomino.NominoControlFlags.ControlFlags_DropMove | Nomino.NominoControlFlags.ControlFlags_NoClip },useSeed);
         }
     
 
         public override BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
-            return new SingleFunctionChooser(() => new Duomino.Duomino((a) => new Blocks.LineSeriesBlock() { BlockColor = Color.Yellow, Popping = true }) { NoGhost = true, FallSpeed = 0, Y = 6, Flags = Nomino.NominoControlFlags.ControlFlags_DropMove | Nomino.NominoControlFlags.ControlFlags_NoClip }) ;
+            int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
+            return new SingleFunctionChooser(() => new Duomino.Duomino((a) => new Blocks.LineSeriesBlock() { BlockColor = Color.Yellow, Popping = true }) { NoGhost = true, FallSpeed = 0, Y = 6, Flags = Nomino.NominoControlFlags.ControlFlags_DropMove | Nomino.NominoControlFlags.ControlFlags_NoClip },useSeed) ;
         }
        
         public override GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)

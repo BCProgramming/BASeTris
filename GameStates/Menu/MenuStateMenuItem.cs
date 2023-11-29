@@ -164,5 +164,12 @@ namespace BASeTris.GameStates.Menu
     //Possibly just activating and then allowing different options to be chosen if there are too many to fit.
 
     //Some kind of "Text Entry" Menu item. We can cheat for a start and just use the TextInput State to get the appropriate text input needed.
-    
+    public interface IMenuItemKeyboardInput
+    {
+        void KeyPressed(IStateOwner pOwner, MenuState StateOwner, int pKey);
+
+
+        void KeyUp(IStateOwner pOwner, MenuState StateOwner, int pKey);
+        void KeyDown(IStateOwner pOwner, MenuState eStateOwner, int pKey);
+    }
 }

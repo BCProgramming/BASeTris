@@ -86,7 +86,7 @@ namespace BASeTris.BackgroundDrawers
             
             var useImage = TetrisGame.Imageman["block_arrangement"];
             SKImage usebg = null;
-            if (true || TetrisGame.rgen.NextDouble() > 0.5)
+            if (true || TetrisGame.StatelessRandomizer.NextDouble() > 0.5)
             {
                 NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(), () => new StandardTetrominoTheme(), () => new NESTetris2Theme(), () => new Tetris2Theme_Enhanced(), () => new GameBoyMottledTheme(),() => new SNESTetris2Theme() })();
                 SKBitmap skb = TetrominoCollageRenderer.GetBackgroundCollage(chosen);
@@ -114,7 +114,12 @@ namespace BASeTris.BackgroundDrawers
         }
         public override void FrameProc(IStateOwner pOwner)
         {
-            
+            double movementscale = 1;
+            if (pOwner is IGamePresenter igp)
+            {
+                movementscale = Math.Max(1,((1d / 60d) / igp.FrameTime));
+                if (double.IsInfinity(movementscale)) movementscale = 1;
+            }
             StandardImageBackgroundDrawSkiaCapsule dd = Data;
             if (dd == null) return;
 
@@ -129,7 +134,7 @@ namespace BASeTris.BackgroundDrawers
             if (!dd.Movement.IsEmpty)
             {
                 
-                dd.CurrOrigin = new SKPoint((dd.CurrOrigin.X + dd.Movement.X) % dd._BackgroundImage.Width, (dd.CurrOrigin.Y + dd.Movement.Y) % dd._BackgroundImage.Height);
+                dd.CurrOrigin = new SKPoint((dd.CurrOrigin.X + (float)(dd.Movement.X/movementscale)) % dd._BackgroundImage.Width, (dd.CurrOrigin.Y + (float)(dd.Movement.Y/movementscale)) % dd._BackgroundImage.Height);
                 if (dd.CurrOrigin.X == float.NaN) dd.CurrOrigin = new SKPoint(0, dd.CurrOrigin.Y);
                 if (dd.CurrOrigin.Y == float.NaN) dd.CurrOrigin = new SKPoint(dd.CurrOrigin.X, 0);
             }

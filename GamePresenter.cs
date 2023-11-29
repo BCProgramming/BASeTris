@@ -180,7 +180,7 @@ namespace BASeTris
 
                 _Presenter.Present();
 
-                Thread.Sleep(1);
+                //Thread.Sleep(1);
             }
         }
         private bool CheckButtonState(XInput.Wrapper.X.Gamepad.GamepadButtons button, bool flUpState)
@@ -263,7 +263,6 @@ namespace BASeTris
             {
                 return;
             }
-            
         }
         
         public GameState.GameKeys? TranslateKey(Key source)

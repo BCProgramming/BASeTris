@@ -80,14 +80,14 @@ namespace BASeTris.GameStates.GameHandlers
             return _Chooser;
         }
 
-        private void DrMarioNominoTweaker(Nomino Source)
+        private void DrMarioNominoTweaker(BlockGroupChooser bgc,Nomino Source)
         {
             //tweak the nomino and set a random combining index.
             foreach (var iterate in Source)
             {
                 if (iterate.Block is LineSeriesBlock lsb)
                 {
-                    lsb.CombiningIndex = TetrisGame.Choose(GetValidBlockCombiningTypes());
+                    lsb.CombiningIndex = TetrisGame.Choose(GetValidBlockCombiningTypes(), bgc.rgen);
                 }
             }
 
@@ -109,9 +109,10 @@ namespace BASeTris.GameStates.GameHandlers
 
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
+            int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
             if (DesiredChooserType == typeof(SingleFunctionChooser))
             {
-                var result = Duomino.Duomino.DrMarioDuominoChooser();
+                var result = Duomino.Duomino.DrMarioDuominoChooser(useSeed);
                 result.ResultAffector = DrMarioNominoTweaker;
                 return result;
             }

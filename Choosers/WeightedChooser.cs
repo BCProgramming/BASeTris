@@ -31,13 +31,13 @@ namespace BASeTris.Choosers
             return pWeights[foundindex % pWeights.Length];
         }
 
-        public WeightedChooser(Func<Nomino>[] pAvailable, float[] pWeight) : base(pAvailable)
+        public WeightedChooser(Func<Nomino>[] pAvailable, float[] pWeight,int pSeed) : base(pAvailable,pSeed)
         {
             pWeights = pWeight;
             LookupRoutine = DefaultWeightLookup;
         }
 
-        public WeightedChooser(Func<Nomino>[] pAvailable, WeightLookupRoutine lookuproutine) : base(pAvailable)
+        public WeightedChooser(Func<Nomino>[] pAvailable, WeightLookupRoutine lookuproutine,int pSeed) : base(pAvailable,pSeed)
         {
             LookupRoutine = lookuproutine;
         }
@@ -46,7 +46,7 @@ namespace BASeTris.Choosers
         internal override Nomino GetNext()
         {
             float[] useWeight = (from p in _Available select LookupRoutine(p)).ToArray();
-            return RandomHelpers.Static.Select(_Available, useWeight)();
+            return RandomHelpers.Static.Select(_Available, useWeight,base.rgen)();
         }
     }
 }

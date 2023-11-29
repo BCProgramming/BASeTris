@@ -126,7 +126,7 @@ namespace BASeTris.Blocks
                 CombiningTypes.Green => SKColors.Green,
                 CombiningTypes.Magenta => SKColors.Magenta,
                 CombiningTypes.Orange => SKColors.Orange,
-                _ => new SKColor((byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255))
+                _ => new SKColor((byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255))
             }; 
             
 

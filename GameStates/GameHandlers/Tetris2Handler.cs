@@ -80,7 +80,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             
         }
-        private void Tetris2NominoTweaker(Nomino Source)
+        private void Tetris2NominoTweaker(BlockGroupChooser bgc,Nomino Source)
         {
             //tweak the nomino and set a random combining index.
             foreach (var iterate in Source)
@@ -146,27 +146,28 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
+            int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
             if (DesiredChooserType == typeof(BagChooser))
             {
-                BagChooser bc = new BagChooser(Tetromino.Tetris2TetrominoFunctions);
+                BagChooser bc = new BagChooser(Tetromino.Tetris2TetrominoFunctions,useSeed);
                 bc.ResultAffector = Tetris2NominoTweaker;
                 return bc;
             }
             else if (DesiredChooserType == typeof(NESChooser))
             {
-                NESChooser nc = new NESChooser(Tetromino.Tetris2TetrominoFunctions);
+                NESChooser nc = new NESChooser(Tetromino.Tetris2TetrominoFunctions,useSeed);
                 nc.ResultAffector = Tetris2NominoTweaker;
                 return nc;
             }
             else if (DesiredChooserType == typeof(GameBoyChooser))
             {
-                GameBoyChooser gbc = new GameBoyChooser(Tetromino.Tetris2TetrominoFunctions);
+                GameBoyChooser gbc = new GameBoyChooser(Tetromino.Tetris2TetrominoFunctions,useSeed);
                 gbc.ResultAffector = Tetris2NominoTweaker;
                 return gbc;
             }
             else if (DesiredChooserType == typeof(FullRandomChooser))
             {
-                FullRandomChooser frc = new FullRandomChooser(Tetromino.Tetris2TetrominoFunctions);
+                FullRandomChooser frc = new FullRandomChooser(Tetromino.Tetris2TetrominoFunctions,useSeed);
                 frc.ResultAffector = Tetris2NominoTweaker;
                 return frc;
             }

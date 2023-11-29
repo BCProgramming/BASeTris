@@ -21,7 +21,7 @@ namespace BASeTris.Particles
         }
         public ShapeParticle(BCPoint pPosition, BCPoint pVelocity, BCColor[] pColors) : base(pPosition, pVelocity, pColors.First())
         {
-            ColorCalculatorFunction = (e) => pColors[TetrisGame.rgen.Next(pColors.Length)];
+            ColorCalculatorFunction = (e) => pColors[TetrisGame.StatelessRandomizer.Next(pColors.Length)];
         }
     }
 }

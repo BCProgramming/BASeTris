@@ -8,9 +8,9 @@ namespace BASeTris
 {
     public class RandomHelpers
     {
-        public Random rgen = new Random();
+        public Random def_rgen = new Random();
         public static RandomHelpers Static = new RandomHelpers();
-        public T[] Choose<T>(IEnumerable<T> ChooseArray, int numselect)
+        public T[] Choose<T>(IEnumerable<T> ChooseArray, int numselect,Random rgen = null)
         {
             if (rgen == null) rgen = new Random();
             T[] returnarray = new T[numselect];
@@ -27,7 +27,7 @@ namespace BASeTris
             }
             return returnarray;
         }
-        public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese)
+        public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese,Random rgen)
         {
             if (rgen == null) rgen = new Random();
             var sl = new SortedList<float, T>();
@@ -43,7 +43,7 @@ namespace BASeTris
 
         public T Select<T>(T[] items, float[] Probabilities)
         {
-            return Select(items, Probabilities, rgen);
+            return Select(items, Probabilities, def_rgen);
         }
 
         public T Select<T>(T[] items, float[] Probabilities, Random rgen)
@@ -54,7 +54,7 @@ namespace BASeTris
 
         public T Select<T>(T[] items, float[] Probabilities, ref float[] sumulations)
         {
-            return Select(items, Probabilities, rgen, ref sumulations);
+            return Select(items, Probabilities, def_rgen, ref sumulations);
         }
 
         public T Select<T>(T[] items, float[] Probabilities, Random rgen, ref float[] sumulations)

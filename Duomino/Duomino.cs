@@ -21,9 +21,9 @@ namespace BASeTris.Duomino
 
 
 
-        public static Choosers.BlockGroupChooser DrMarioDuominoChooser()
+        public static Choosers.BlockGroupChooser DrMarioDuominoChooser(int pSeed)
         {
-            BlockGroupChooser Chooser = new SingleFunctionChooser(StandardDuominoFunctions[0]);
+            BlockGroupChooser Chooser = new SingleFunctionChooser(StandardDuominoFunctions[0],pSeed);
             return Chooser;
         }
         private static Point[] Duomino_Point_1 = new Point[]

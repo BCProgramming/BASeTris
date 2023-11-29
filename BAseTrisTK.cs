@@ -171,41 +171,52 @@ namespace BASeTris
         {
 
             _Present.IgnoreController = true;
-            if (e.Key == Key.G)
+
+            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
             {
-                if (_Present.Game.CurrentState is GameplayGameState)
+
+                Casted.KeyDown(this, (int)e.Key);
+
+            }
+            else
+            {
+
+                if (e.Key == Key.G)
                 {
-                    GameplayGameState gs = _Present.Game.CurrentState as GameplayGameState;
-                    NominoBlock[][] inserts = new NominoBlock[4][];
-                    for (int i = 0; i < inserts.Length; i++)
+                    if (_Present.Game.CurrentState is GameplayGameState)
                     {
-                        inserts[i] = new NominoBlock[gs.PlayField.ColCount];
-                        for (int c = 1; c < inserts[i].Length; c++)
+                        GameplayGameState gs = _Present.Game.CurrentState as GameplayGameState;
+                        NominoBlock[][] inserts = new NominoBlock[4][];
+                        for (int i = 0; i < inserts.Length; i++)
                         {
-                            inserts[i][c] = new StandardColouredBlock() { BlockColor = Color.Red, DisplayStyle = StandardColouredBlock.BlockStyle.Style_CloudBevel };
+                            inserts[i] = new NominoBlock[gs.PlayField.ColCount];
+                            for (int c = 1; c < inserts[i].Length; c++)
+                            {
+                                inserts[i][c] = new StandardColouredBlock() { BlockColor = Color.Red, DisplayStyle = StandardColouredBlock.BlockStyle.Style_CloudBevel };
+                            }
                         }
+
+                        InsertBlockRowsActionGameState irs = new InsertBlockRowsActionGameState(gs, 0, inserts, Enumerable.Empty<Action>());
+                        CurrentState = irs;
                     }
-
-                    InsertBlockRowsActionGameState irs = new InsertBlockRowsActionGameState(gs, 0, inserts, Enumerable.Empty<Action>());
-                    CurrentState = irs;
                 }
-            }
-            else if (e.Key == Key.C)
-            {
-                if (e.Shift && e.Control)
+                else if (e.Key == Key.C)
                 {
-                    EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Present.Game, 64);
-                    CurrentState = cheatstate;
+                    if (e.Shift && e.Control)
+                    {
+                        EnterCheatState cheatstate = new EnterCheatState(CurrentState, _Present.Game, 64);
+                        CurrentState = cheatstate;
+                    }
                 }
-            }
 
-            Debug.Print("Button pressed:" + e.Key);
-            var translated = _Present.TranslateKey(e.Key);
-            if (translated != null)
-            {
-                _Present.Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
-                _Present.GameKeyDown(translated.Value);
+                Debug.Print("Button pressed:" + e.Key);
+                var translated = _Present.TranslateKey(e.Key);
+                if (translated != null)
+                {
+                    _Present.Game.HandleGameKey(this, translated.Value, TetrisGame.KeyInputSource.Input_HID);
+                    _Present.GameKeyDown(translated.Value);
 
+                }
             }
         }
         protected override void OnMouseDown(MouseButtonEventArgs e)

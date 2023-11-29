@@ -258,17 +258,22 @@ namespace BASeTris.Rendering
             Position.Y = YPos;
         }
     }
+    
     public class RotatingPositionCharacterPositionCalculatorSkia :DrawCharacterPositionCalculatorSkia
     {
         public float Radius { get; set; } = 10;
         public float CharacterNumberModifier { get; set; } = 0.5f;
 
+        public double? CycleLength { get; set; } = null;
+        public float Phase { get; set; } = 0;
+        public float Frequency { get; set; } = 750;
+        public float? ForceAngle { get; set; } = null;
         public float XScale { get; set; } = 1;
         public float YScale { get; set; } = 1;
         public sealed override void AdjustPositioning(ref SKPoint Position, SKPoint size, DrawTextInformationSkia DrawData, int pCharacterNumber, int TotalCharacters, int Pass)
         {
             float XPos = Position.X, YPos = Position.Y;
-            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.X, size.Y, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius,XScale,YScale);
+            StandardPositionCalculators.RotatingPositionCalculator(ref XPos, ref YPos, size.X, size.Y, pCharacterNumber, TotalCharacters, Pass, CharacterNumberModifier, Radius,XScale,YScale,Phase,Frequency,CycleLength,ForceAngle);
             Position.X = XPos;
             Position.Y = YPos;
         }
@@ -300,11 +305,13 @@ namespace BASeTris.Rendering
     }
     public static class StandardPositionCalculators
     {
-        public static void RotatingPositionCalculator(ref float XPos, ref float YPos, float Width, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f, float Radius = 10, float XScale = 1,float YScale = 1,float Phase=0,float Frequency = 750)
+        public static void RotatingPositionCalculator(ref float XPos, ref float YPos, float Width, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f, float Radius = 10, float XScale = 1,float YScale = 1,float Phase=0,float Frequency = 750,double? CycleLength = null,double? ForceAngle = null)
         {
-            var rotationpercentage = (DateTime.Now.TimeOfDay.TotalMilliseconds % Frequency) / Frequency;
+            double useCycleLength = CycleLength ?? DateTime.Now.TimeOfDay.TotalMilliseconds;
+            var rotationpercentage = (useCycleLength % Frequency) / Frequency;
             var addedpercentage = (float)pCharacterNumber / (float)TotalCharacters;
-            double Angle = Phase + (rotationpercentage * 2 * Math.PI + (addedpercentage * CharacterNumberModifier * Math.PI));
+            double useBaseAngle = ForceAngle ?? Phase + (rotationpercentage * 2 * Math.PI);
+            double Angle = useBaseAngle + (addedpercentage * CharacterNumberModifier * Math.PI);
             float NewXPos = (float)Math.Cos(Angle) * Radius;
             float NewYPos = (float)Math.Sin(Angle) * Radius;
             XPos = XPos + (NewXPos*XScale);
@@ -323,7 +330,7 @@ namespace BASeTris.Rendering
         }
         public static void RandomPositionCalculator(ref float XPos, ref float YPos, float Height, int pCharacterNumber, int TotalCharacters, int Pass, float CharacterNumberModifier = 0.5f,float Radius = 1)
         {
-            double Angle = TetrisGame.rgen.NextDouble() * Math.PI;
+            double Angle = TetrisGame.StatelessRandomizer.NextDouble() * Math.PI;
 
             float NewYPos = (float)Math.Sin(Angle) * Radius;
             float NewXPos = (float)Math.Cos(Angle) * Radius;

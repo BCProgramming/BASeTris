@@ -177,7 +177,7 @@ namespace BASeTris.AI
             Debug.Print($"--------Running Simulation " + scoredata.ToString() + "-----");
                 
             //create the chooser.
-            BlockGroupChooser bgc = new BagChooser(Tetromino.StandardTetrominoFunctions);
+            BlockGroupChooser bgc = new BagChooser(Tetromino.StandardTetrominoFunctions,Environment.TickCount);
             List<Nomino> ChosenNominos = new List<Nomino>();
            
 

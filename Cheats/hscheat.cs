@@ -28,7 +28,7 @@ namespace BASeTris.Cheats
             var useStats = new TetrisStatistics();
             EnterHighScoreState ehs = new EnterHighScoreState
                             (pStateOwner.CurrentState, pOwner, pStateOwner.CurrentState,
-                                new XMLHighScores<TetrisHighScoreData>("TEST",50000), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats))
+                                new XMLHighScores<TetrisHighScoreData>("TEST",50000), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats,null))
                                 , useStats);
             pOwner.CurrentState = ehs;
             return true;

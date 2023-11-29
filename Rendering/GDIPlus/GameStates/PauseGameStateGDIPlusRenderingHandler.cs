@@ -99,7 +99,7 @@ namespace BASeTris.Rendering.GDIPlus
         {
             if (Source.PausedState is GameplayGameState std)
             {
-                var rgen = new Random();
+                var rgen = TetrisGame.StatelessRandomizer;
                 //TODO: well this clearly shouldn't be here...
                 Image[] availableImages = std.GetTetronimoImages();
                 var Areause = pOwner.GameArea;

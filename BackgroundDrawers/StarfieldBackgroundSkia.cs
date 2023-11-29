@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,8 +23,8 @@ namespace BASeTris.BackgroundDrawers
             var Stars = new StarfieldStarData[Count];
             for (int i = 0; i < Stars.Length; i++)
             {
-                float sx = (float)(CenterX + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Width);
-                float sy = (float)(CenterY + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Height);
+                float sx = (float)(CenterX + (TetrisGame.StatelessRandomizer.NextDouble() - 0.5) * Bounds.Width);
+                float sy = (float)(CenterY + (TetrisGame.StatelessRandomizer.NextDouble() - 0.5) * Bounds.Height);
 
                 Stars[i] = new StarfieldStarData(sx, sy);
                 Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors) / 3;
@@ -62,6 +63,14 @@ namespace BASeTris.BackgroundDrawers
 
         public override void FrameProc(IStateOwner pState)
         {
+
+            double movementscale = 1;
+            
+            if (pState is IGamePresenter igp)
+            {
+                movementscale = igp.GetSpeedDivider(60);
+            }
+
             var boundcheck = Data.Bounds;
             if (boundcheck != null)
             {
@@ -77,17 +86,17 @@ namespace BASeTris.BackgroundDrawers
 
                 foreach (var stardraw in Data.Stars)
                 {
-
-
-                    stardraw.X = (float)(stardraw.X + ((stardraw.X - MiddleX) * 0.025) * (stardraw.SpeedFactor * Data.WarpFactor) + Data.DirectionAdd.X);
-                    stardraw.Y = (float)(stardraw.Y + ((stardraw.Y - MiddleY) * 0.025) * (stardraw.SpeedFactor * Data.WarpFactor) + Data.DirectionAdd.Y);
+                    var XAmount = ((stardraw.X - MiddleX) * 0.025)/movementscale;
+                    var YAmount = ((stardraw.Y - MiddleY) * 0.025)/ movementscale;
+                    stardraw.X = (float)(stardraw.X + XAmount * (stardraw.SpeedFactor * Data.WarpFactor) + Data.DirectionAdd.X);
+                    stardraw.Y = (float)(stardraw.Y + YAmount * (stardraw.SpeedFactor * Data.WarpFactor) + Data.DirectionAdd.Y);
 
 
                     if (stardraw.X < usebounds.Left - 50 || stardraw.X > usebounds.Right + 50 ||
                         stardraw.Y < usebounds.Top - 50 || stardraw.Y > usebounds.Bottom + 50)
                     {
-                        float sx = (float)(MiddleX + (TetrisGame.rgen.NextDouble() - 0.5) * (usebounds.Width / 3));
-                        float sy = (float)(MiddleY + (TetrisGame.rgen.NextDouble() - 0.5) * (usebounds.Width / 3));
+                        float sx = (float)(MiddleX + (TetrisGame.StatelessRandomizer.NextDouble() - 0.5) * (usebounds.Width / 3));
+                        float sy = (float)(MiddleY + (TetrisGame.StatelessRandomizer.NextDouble() - 0.5) * (usebounds.Width / 3));
                         stardraw.X = sx;
                         stardraw.Y = sy;
                     }

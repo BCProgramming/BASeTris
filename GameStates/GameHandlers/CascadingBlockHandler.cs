@@ -46,6 +46,7 @@ namespace BASeTris.GameStates.GameHandlers
         public abstract BlockGroupChooser GetChooser(IStateOwner pOwner);
         public abstract void HandleLevelComplete(IStateOwner pOwner, GameplayGameState state);
 
+        GamePreparerOptions IBlockGameCustomizationHandler.PrepInstance { get { return this.PrepInstance; } set { if(value is CascadingBlockPreparer cbp) this.PrepInstance = cbp; } }
         public CascadingBlockPreparer PrepInstance { get; set; }
         protected CascadingPopBlockGameHandler(CascadingBlockPreparer cbp)
         {
@@ -1013,7 +1014,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
         private void GeneratePopParticles(IStateOwner pOwner, GameplayGameState gstate, SKPointI pt)
         {
-            var rgen = TetrisGame.rgen;
+            var rgen = TetrisGame.StatelessRandomizer;
             var popItem = gstate.PlayField.Contents[pt.Y][pt.X];
             BCColor[] useColor = YellowColors;
             if (popItem is LineSeriesBlock lsb)
@@ -1139,10 +1140,10 @@ namespace BASeTris.GameStates.GameHandlers
 
             for (int i = 0; i < ParticleCountBase; i++)
             {
-                float XPosition = (float)Column + (float)TetrisGame.rgen.NextDouble();
-                float YPosition = (float)Row + (float)TetrisGame.rgen.NextDouble();
+                float XPosition = (float)Column + (float)TetrisGame.StatelessRandomizer.NextDouble();
+                float YPosition = (float)Row + (float)TetrisGame.StatelessRandomizer.NextDouble();
 
-                var UseVelocity = new BCPoint(((float)TetrisGame.rgen.NextDouble() - 0.5f) / 80f, ((float)TetrisGame.rgen.NextDouble() - 0.5f) / 80f);
+                var UseVelocity = new BCPoint(((float)TetrisGame.StatelessRandomizer.NextDouble() - 0.5f) / 80f, ((float)TetrisGame.StatelessRandomizer.NextDouble() - 0.5f) / 80f);
                 var UsePosition = new BCPoint(XPosition, YPosition);
                 ShapeParticle sp = new ShapeParticle(UsePosition, UseVelocity, sUseColors); //sUseColors
                 sp.Decay = new BCPoint(1, 1);

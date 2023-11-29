@@ -9,16 +9,50 @@ using BASeCamp.Elementizer;
 
 namespace BASeTris
 {
-    public class DrMarioHighScoreData : IHighScoreEntryCustomData
+    public abstract class BaseHighScoreData : IHighScoreEntryCustomData
+    {
+        public virtual GameplayRecord ReplayData { get; set; }
+
+        public BaseHighScoreData(GameplayRecord pReplayData)
+        {
+            ReplayData = pReplayData;
+        }
+        public BaseHighScoreData(XElement Source, object PersistenceData)
+        {
+            var FindElement = Source.Element("ReplayData");
+            if (FindElement != null)
+            {
+                ReplayData = new GameplayRecord(FindElement, PersistenceData);
+            }
+            else
+            {
+                //no replay data...
+            }
+        }
+        public abstract XElement GetHighScoreXMLData(String pNodeName, object pPersistenceData);
+        
+        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+
+            var result = ReplayData==null?null:ReplayData.GetXmlData(pNodeName, PersistenceData);
+            if (ReplayData != null)
+            {
+                result.Add("ReplayData", ReplayData.GetXmlData(pNodeName, PersistenceData));
+            }
+            return result;
+
+        }
+    }
+    public class DrMarioHighScoreData : BaseHighScoreData
     {
 
         public Dictionary<int, int> BlocksDestroyedCounts = new Dictionary<int, int>();
         public Dictionary<int, int> VirusDestroyedCounts = new Dictionary<int, int>();
-        public DrMarioHighScoreData(XElement Source, object PersistenceData)
+        public DrMarioHighScoreData(XElement Source, object PersistenceData) : base(Source, PersistenceData)
         {
             //
         }
-        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        public override XElement GetHighScoreXMLData(string pNodeName, object PersistenceData)
         {
             return new XElement("Dr. Mario");
             //throw new NotImplementedException();
@@ -38,7 +72,7 @@ namespace BASeTris
 
     //(Other possibility: What if we track each dropped block, such that we could "replay" a game in some capacity- we could put that here...)
     //That might benefit from other architectural changes involving random seeds, too...
-    public class TetrisHighScoreData : IHighScoreEntryCustomData
+    public class TetrisHighScoreData : BaseHighScoreData
     {
         public TimeSpan[] LevelReachedTimes = new TimeSpan[] {TimeSpan.Zero};
         public int TotalLines { get; set; }
@@ -51,7 +85,9 @@ namespace BASeTris
         /// 
         /// </summary>
         /// <param name="InitializationData"></param>
-        public TetrisHighScoreData(TetrisStatistics InitializationData)
+        /// 
+        //todo: this needs to bring in the actual replay data...
+        public TetrisHighScoreData(TetrisStatistics InitializationData,GameplayRecord InputRecord):base(InputRecord)
         {
             if (InitializationData == null)
             {
@@ -68,7 +104,7 @@ namespace BASeTris
             }
         }
 
-        public TetrisHighScoreData(XElement Source, object PersistenceData)
+        public TetrisHighScoreData(XElement Source, object PersistenceData):base(Source,PersistenceData)
         {
             if (Source.HasElements)
             {
@@ -109,7 +145,7 @@ namespace BASeTris
             }
         }
 
-        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        public override XElement GetHighScoreXMLData(string pNodeName, object PersistenceData)
         {
             XElement BuildNode = new XElement(pNodeName);
             BuildNode.Add(new XAttribute("Lines", TotalLines));

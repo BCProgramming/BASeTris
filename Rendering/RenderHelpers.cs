@@ -96,7 +96,7 @@ namespace BASeTris.Rendering
         }
         public static SKColor RandomColor()
         {
-            return new SKColor((byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256));
+            return new SKColor((byte)TetrisGame.StatelessRandomizer.Next(256), (byte)TetrisGame.StatelessRandomizer.Next(256), (byte)TetrisGame.StatelessRandomizer.Next(256));
         }
 
     }

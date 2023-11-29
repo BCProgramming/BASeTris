@@ -17,7 +17,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         {
             if (Source.PausedState is GameplayGameState std)
             {
-                var rgen = new Random();
+                var rgen = TetrisGame.StatelessRandomizer;
                 SKBitmap[] availableImages = std.GetTetrominoSKBitmaps();
                 var Areause = pOwner.GameArea;
                 Source.FallImages = new List<PauseGameState.PauseFallImageBase>();
@@ -82,7 +82,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             var ColorShader = SKShader.CreateColor(new SKColor(128,128,0,128));
 
             var PerlinShader = SKShader.CreatePerlinNoiseFractalNoise(0.5f, 0.5f, 4, 0,new SKPointI((int)Element.Bounds.Width,(int)Element.Bounds.Height)); //SKShader.CreatePerlinNoiseFractalNoise(0.5f, 0.5f, 5, (float)TetrisGame.rgen.NextDouble() * 3000000);
-            var DualPerlinShader = SKShader.CreateCompose(SKShader.CreatePerlinNoiseTurbulence(0.5f, 0.5f, 4, (float)TetrisGame.rgen.NextDouble() * 3000000), PerlinShader);
+            var DualPerlinShader = SKShader.CreateCompose(SKShader.CreatePerlinNoiseTurbulence(0.5f, 0.5f, 4, (float)TetrisGame.StatelessRandomizer.NextDouble() * 3000000), PerlinShader);
 
 
             var Gradcolors = new SKColor[] {

@@ -10,7 +10,7 @@ namespace BASeTris.Choosers
     [ChooserCompatibility(typeof(StandardTetrisHandler))]
     public class FullRandomChooser : BlockGroupChooser
     {
-        public FullRandomChooser(Func<Nomino>[] SelectionFunctions) : base(SelectionFunctions)
+        public FullRandomChooser(Func<Nomino>[] SelectionFunctions,int pSeed) : base(SelectionFunctions,pSeed)
         {
         }
 
@@ -25,7 +25,7 @@ namespace BASeTris.Choosers
     public class SequentialChooser : BlockGroupChooser
     {
         int currentindex = 0;
-        public SequentialChooser(Func<Nomino>[] SelectionFunctions) : base(SelectionFunctions)
+        public SequentialChooser(Func<Nomino>[] SelectionFunctions,int pSeed) : base(SelectionFunctions,pSeed) //note: seed isn't actually relevant here...
         {
         }
 

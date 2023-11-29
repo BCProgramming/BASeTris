@@ -66,33 +66,33 @@ namespace BASeTris.Tetrominoes
         };
         //TODO: make these able to work with the tetris two sets. Probably (ideally) a standard one for each that allows for an arbitrary Func<Nomino>[].
 
-        public static Choosers.BlockGroupChooser NESTetrominoChooser()
+        public static Choosers.BlockGroupChooser NESTetrominoChooser(int pSeed)
         {
-            BlockGroupChooser Chooser = new NESChooser(StandardTetrominoFunctions);
+            BlockGroupChooser Chooser = new NESChooser(StandardTetrominoFunctions,pSeed);
             return Chooser;
         }
 
-        public static Choosers.BlockGroupChooser BagTetrominoChooser()
+        public static Choosers.BlockGroupChooser BagTetrominoChooser(int pSeed)
         {
-            BlockGroupChooser Chooser = new BagChooser(StandardTetrominoFunctions);
+            BlockGroupChooser Chooser = new BagChooser(StandardTetrominoFunctions,pSeed);
             return Chooser;
         }
 
-        public static Choosers.BlockGroupChooser RandomTetrominoChooser()
+        public static Choosers.BlockGroupChooser RandomTetrominoChooser(int pSeed)
         {
-            BlockGroupChooser Chooser = new FullRandomChooser(StandardTetrominoFunctions);
+            BlockGroupChooser Chooser = new FullRandomChooser(StandardTetrominoFunctions,pSeed);
             return Chooser;
         }
 
-        public static Choosers.BlockGroupChooser GameBoyTetrominoChooser()
+        public static Choosers.BlockGroupChooser GameBoyTetrominoChooser(int pSeed)
         {
-            BlockGroupChooser Chooser = new GameBoyChooser(StandardTetrominoFunctions);
+            BlockGroupChooser Chooser = new GameBoyChooser(StandardTetrominoFunctions,pSeed);
             return Chooser;
         }
 
-        public static Choosers.BlockGroupChooser WeightedTetrominoChooser()
+        public static Choosers.BlockGroupChooser WeightedTetrominoChooser(int pSeed)
         {
-            BlockGroupChooser Chooser = new WeightedChooser(StandardTetrominoFunctions, StandardTetrominoWeights);
+            BlockGroupChooser Chooser = new WeightedChooser(StandardTetrominoFunctions, StandardTetrominoWeights,pSeed);
             return Chooser;
         }
     }

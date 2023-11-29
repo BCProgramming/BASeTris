@@ -14,13 +14,13 @@ namespace BASeTris.Choosers
         /// 
 
         protected Func<Nomino>[] _Available;
-        protected Random rgen = null;
+        public Random rgen = null;
         /// <summary>
         /// Action delegate that is called that can make additional changes to chosen Nomino's.
         /// used by things like the Dr.Mario handler to change the colours of the blocks in the pill.
         /// </summary>
-        public Action<Nomino> ResultAffector { get; set; } = null;
-        public BlockGroupChooser(Func<Nomino>[] pAvailable)
+        public Action<BlockGroupChooser,Nomino> ResultAffector { get; set; } = null;
+        private BlockGroupChooser(Func<Nomino>[] pAvailable)
         {
             _Available = pAvailable;
             rgen = new Random();
@@ -46,7 +46,7 @@ namespace BASeTris.Choosers
         public virtual Nomino RetrieveNext()
         {
             var result = GetNext();
-            if (ResultAffector != null) ResultAffector(result);
+            if (ResultAffector != null) ResultAffector(this,result);
             return result;
         }
         public static Type ChooserTypeFromString(String strName)

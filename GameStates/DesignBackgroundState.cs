@@ -54,7 +54,7 @@ namespace BASeTris.GameStates
         }
         public void RandomizeLayer(int MinimumSize, int MaximumSize)
         {
-            int chosensize = TetrisGame.rgen.Next((MaximumSize - MinimumSize)) + MinimumSize;
+            int chosensize = TetrisGame.StatelessRandomizer.Next((MaximumSize - MinimumSize)) + MinimumSize;
             _DesignColumns = _DesignRows = chosensize;
             DesignNominoes = new List<Nomino>();
             RecreateFakeHandler();
@@ -70,9 +70,9 @@ namespace BASeTris.GameStates
 
                 Type choosetype = TetrisGame.Choose(DesignBackgroundState.TetrominoTypes);
                 Nomino ConstructNext = (Nomino)Activator.CreateInstance(choosetype, new Object[] { null });
-                ConstructNext.SetRotation(TetrisGame.rgen.Next(4));
-                ConstructNext.X = TetrisGame.rgen.Next(_DesignColumns);
-                ConstructNext.Y = TetrisGame.rgen.Next(_DesignRows);
+                ConstructNext.SetRotation(TetrisGame.StatelessRandomizer.Next(4));
+                ConstructNext.X = TetrisGame.StatelessRandomizer.Next(_DesignColumns);
+                ConstructNext.Y = TetrisGame.StatelessRandomizer.Next(_DesignRows);
                 if (ConstructNext.Any((ne) => UsedPositions.Contains(new Point(ne.X+ConstructNext.X, ne.Y+ConstructNext.Y))))
                 {
                     NoneAddedSequence++;

@@ -46,7 +46,7 @@ namespace BASeTris.Cheats
                     case "BAG":
                         if (pStateOwner.CurrentState is GameplayGameState stdstate)
                         {
-                            stdstate.SetChooser(new BagChooser(Tetromino.StandardTetrominoFunctions));
+                            stdstate.SetChooser(new BagChooser(Tetromino.StandardTetrominoFunctions,stdstate.GameHandler.PrepInstance.RandomSeed  ));
 
                             stdstate.NextBlocks.Clear();
                             stdstate.RefillBlockQueue(pStateOwner);
@@ -92,13 +92,14 @@ namespace BASeTris.Cheats
                 
                 if(pStateOwner.CurrentState is GameplayGameState mainstate)
                 {
+                    
                     if (buildNominoFunc != null)
                     {
-                        mainstate.SetChooser(new SingleFunctionChooser(buildNominoFunc));
+                        mainstate.SetChooser(new SingleFunctionChooser(buildNominoFunc,Environment.TickCount));
                     }
                     else if(buildNominoFuncs !=null)
                     {
-                        mainstate.SetChooser(new SequentialChooser(buildNominoFuncs));
+                        mainstate.SetChooser(new SequentialChooser(buildNominoFuncs, Environment.TickCount));
                     }
                     mainstate.NextBlocks.Clear();
                     mainstate.RefillBlockQueue(pStateOwner);

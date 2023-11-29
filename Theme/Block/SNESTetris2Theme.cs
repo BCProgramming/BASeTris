@@ -169,7 +169,7 @@ namespace BASeTris.Theme.Block
             
             foreach (var iterate in Group)
             {
-                var chosenColor = new SKColor((byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255), (byte)TetrisGame.rgen.Next(255));
+                var chosenColor = new SKColor((byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255));
                
                 
                 if (iterate.Block is ImageBlock ibb)
@@ -312,7 +312,7 @@ namespace BASeTris.Theme.Block
         }
         private SKColor RandomColor()
         {
-            return new SKColor((byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256), (byte)TetrisGame.rgen.Next(256));
+            return new SKColor((byte)TetrisGame.StatelessRandomizer.Next(256), (byte)TetrisGame.StatelessRandomizer.Next(256), (byte)TetrisGame.StatelessRandomizer.Next(256));
         }
         private bool VisuallyConnectOnlySameCombiningType = false;
         private bool UseConnectedImages = true;

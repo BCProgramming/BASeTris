@@ -18,7 +18,7 @@ namespace BASeTris.Choosers
     public class SingleFunctionChooser : BlockGroupChooser
     {
         
-        public SingleFunctionChooser(Func<Nomino> pAvailable) : base(new Func<Nomino>[] { pAvailable })
+        public SingleFunctionChooser(Func<Nomino> pAvailable,int pSeed) : base(new Func<Nomino>[] { pAvailable },pSeed) //seed is not used here.
         {
         }
         internal override Nomino GetNext()

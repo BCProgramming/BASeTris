@@ -121,16 +121,18 @@ namespace BASeTris.GameStates
             {
                 if (NewScorePosition > -1)
                 {
-                    if (GameOveredState is GameplayGameState)
+                    if (GameOveredState is GameplayGameState ggs)
                     {
-                        var useStats = ((GameplayGameState)GameOveredState).GameStats;
-                        var MenuState = ((GameplayGameState)GameOveredState).MainMenuState;
+                        var useStats = ggs.GameStats;
+                        var MenuState = ggs.MainMenuState;
                         if (useStats is TetrisStatistics)
                         {
+                            GameplayRecord gpr = null;
+                            if (pOwner is IGamePresenter igp) gpr = igp.GetPresenter().Game.GameRecorder;
 
                             EnterHighScoreState ehs = new EnterHighScoreState
                             (GameOveredState, pOwner,MenuState,
-                                ((GameplayGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats as TetrisStatistics))
+                                ((GameplayGameState)GameOveredState).GetLocalScores(), (n, s) => new XMLScoreEntry<TetrisHighScoreData>(n, s, new TetrisHighScoreData(useStats as TetrisStatistics,gpr))
                                 , useStats as TetrisStatistics);
                             pOwner.CurrentState = ehs;
                             TetrisGame.Soundman.PlayMusic("highscoreentry", pOwner.Settings.std.MusicVolume, true);

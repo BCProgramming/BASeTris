@@ -347,6 +347,7 @@
     <Compile Include="Win10MenuRenderer.cs" />
     <EmbeddedResource Include="BASeTris.resx">
       <DependentUpon>BASeTris.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

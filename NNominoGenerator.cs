@@ -580,8 +580,9 @@ namespace BASeTris
             Flag_None = 0,
             Flag_Randomize = 1
         }
-        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None)
+        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,Random rgen = null)
         {
+            rgen = rgen ?? new Random();
             if (CurrentBuild == null)
             {
                 
@@ -621,7 +622,7 @@ namespace BASeTris
 
                 List<NominoPoint> MoveList = new List<NominoPoint>() { LeftMove, ForwardMove, RightwardMove };
                 int[] ArrayOrder = new int[] { 0, 1, 2 };
-                if (GenerationFlags.HasFlag(NominoPieceGenerationFlags.Flag_Randomize)) ArrayOrder = RandomHelpers.Static.Shuffle(ArrayOrder).ToArray();
+                if (GenerationFlags.HasFlag(NominoPieceGenerationFlags.Flag_Randomize)) ArrayOrder = RandomHelpers.Static.Shuffle(ArrayOrder,rgen).ToArray();
                 foreach (int index in ArrayOrder)
                 {
                     

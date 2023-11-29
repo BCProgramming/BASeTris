@@ -97,7 +97,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
                             PointF FirstPoint = new PointF((float)(Math.Cos(Angle) * startradius),
                                 (float)(Math.Sin(Angle) * startradius));
 
-                            float VelocityFactor = (float)TetrisGame.rgen.NextDouble() * 0.3f;
+                            float VelocityFactor = (float)TetrisGame.StatelessRandomizer.NextDouble() * 0.3f;
 
                             PointF PointSpeed = new PointF((float)(Math.Cos(Angle) * VelocityFactor),
                                 (float)(Math.Sin(Angle) * VelocityFactor));

@@ -45,7 +45,7 @@ namespace BASeTris.BackgroundDrawers
         public override SKPoint DoMutate(SKPoint src)
         {
             var len = src.Length;
-            var Angle = TetrisGame.rgen.NextDouble() * 2 * Math.PI;
+            var Angle = TetrisGame.StatelessRandomizer.NextDouble() * 2 * Math.PI;
             return new SKPoint((float)(Math.Sin(Angle) * len), ((float)(Math.Cos(Angle) * len)));
         }
     }
@@ -128,7 +128,7 @@ namespace BASeTris.BackgroundDrawers
             if (AdvanceType == MutatorAdvancementType.Sequential)
                 return (CurrentMutator + 1) % Mutators.Length;
             else
-                return TetrisGame.rgen.Next(Mutators.Length);
+                return TetrisGame.StatelessRandomizer.Next(Mutators.Length);
             
         }
         public override SKPoint DoMutate(SKPoint src)

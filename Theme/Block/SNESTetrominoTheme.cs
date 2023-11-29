@@ -364,7 +364,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field)
         {
             //choose a random level...
-            int Randomlevel = TetrisGame.rgen.Next(0, 13);
+            int Randomlevel = TetrisGame.StatelessRandomizer.Next(0, 13);
 
             //choose a random tetromino type.
             char randomTet = TetrisGame.Choose(TetOrder.ToCharArray());
@@ -430,7 +430,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
 
                 if (!ChosenNominoLevelAssignments.ContainsKey(sKey))
                 {
-                    var generated = TetrisGame.rgen.Next(13);
+                    var generated = TetrisGame.StatelessRandomizer.Next(13);
                     ChosenNominoLevelAssignments[sKey] = generated;
                     //get the three rotations and add the key for them too.
                     String[] Otherkeys = NNominoGenerator.GetOtherRotationStrings(Group);

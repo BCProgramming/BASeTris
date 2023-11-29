@@ -718,7 +718,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                             var Listeq = SoundQueue.ToList();
 
                             //select a random element
-                            int randomindex = TetrisGame.rgen.Next(0, Listeq.Count);
+                            int randomindex = TetrisGame.StatelessRandomizer.Next(0, Listeq.Count);
                             Debug.Print("Chosen item index:" + randomindex);
                             playit = Listeq[randomindex];
                             //remove the selected element...
@@ -787,7 +787,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                             var Listeq = SoundQueue.ToList();
 
                             //select a random element
-                            int randomindex = TetrisGame.rgen.Next(0, Listeq.Count);
+                            int randomindex = TetrisGame.StatelessRandomizer.Next(0, Listeq.Count);
                             Debug.Print("Chosen item index:" + randomindex);
                             var grabbeditem = Listeq[randomindex];
                             //remove the selected element...
@@ -1066,7 +1066,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             {
                 String[] splitopt = keyprefix.Split(new char[] {':'}, StringSplitOptions.RemoveEmptyEntries);
                 //choose a random index.
-                int randomidex = TetrisGame.rgen.Next(splitopt.Length);
+                int randomidex = TetrisGame.StatelessRandomizer.Next(splitopt.Length);
                 keyprefix = splitopt[randomidex];
             }
 
@@ -1075,7 +1075,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 where w.ToUpper().StartsWith(keyprefix.ToUpper())
                 select w).ToArray();
             if (gotkeys.Length == 0) return "";
-            int randomindex = TetrisGame.rgen.Next(0, gotkeys.Length);
+            int randomindex = TetrisGame.StatelessRandomizer.Next(0, gotkeys.Length);
             return gotkeys[randomindex];
         }
 

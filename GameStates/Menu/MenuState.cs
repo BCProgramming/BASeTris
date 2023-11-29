@@ -15,7 +15,7 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.Menu
 {
-    public class MenuState : GameState, IMouseInputState, ITransitableState
+    public class MenuState : GameState, IMouseInputState, ITransitableState,IDirectKeyboardInputState
     {
         public class MenuStateFadedParentStateInformation
         {
@@ -508,6 +508,40 @@ namespace BASeTris.GameStates.Menu
                 }
             }
             LastMouseMovement = Position;
+        }
+
+        public bool AllowDirectKeyboardInput()
+        {
+            if (this.ActivatedItem != null && this.ActivatedItem is IMenuItemKeyboardInput iki)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void KeyPressed(IStateOwner pOwner, int pKey)
+        {
+            if (this.ActivatedItem != null && this.ActivatedItem is IMenuItemKeyboardInput iki)
+            {
+                iki.KeyPressed(pOwner, this, pKey);
+            }
+            //throw new NotImplementedException();
+        }
+
+        public void KeyUp(IStateOwner pOwner, int pKey)
+        {
+            if (this.ActivatedItem != null && this.ActivatedItem is IMenuItemKeyboardInput iki)
+            {
+                iki.KeyUp(pOwner, this, pKey);
+            }
+            //throw new NotImplementedException();
+        }
+        public void KeyDown(IStateOwner pOwner, int pKey)
+        {
+            if (this.ActivatedItem != null && this.ActivatedItem is IMenuItemKeyboardInput iki)
+            {
+                iki.KeyDown(pOwner, this, pKey);
+            }
         }
     }
     public class MenuStateEventArgs : EventArgs

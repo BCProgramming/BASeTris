@@ -31,8 +31,8 @@ namespace BASeTris.Rendering.Skia.GameStates
             Stars = new StarfieldStarData[265];
             for (int i = 0; i < Stars.Length; i++)
             {
-                float sx = (float)(CenterX + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Width);
-                float sy = (float)(CenterY + (TetrisGame.rgen.NextDouble() - 0.5) * Bounds.Height);
+                float sx = (float)(CenterX + (TetrisGame.StatelessRandomizer.NextDouble() - 0.5) * Bounds.Width);
+                float sy = (float)(CenterY + (TetrisGame.StatelessRandomizer.NextDouble() - 0.5) * Bounds.Height);
                 
                 Stars[i] = new StarfieldStarData(sx, sy);
                 Stars[i].SpeedFactor = TetrisGame.Choose(AvailableFactors)/3;

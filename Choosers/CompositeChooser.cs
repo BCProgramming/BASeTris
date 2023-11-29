@@ -11,7 +11,7 @@ namespace BASeTris.Choosers
         private BlockGroupChooser[] Choosers = null;
         private Func<BlockGroupChooser, float> WeightFunction;
 
-        public CompositeChooser(BlockGroupChooser[] pChoosers, Func<BlockGroupChooser, float> pWeightFunction):base(null)
+        public CompositeChooser(BlockGroupChooser[] pChoosers, Func<BlockGroupChooser, float> pWeightFunction,int Seed):base(null,Seed)
         {
             Choosers = pChoosers;
             WeightFunction = pWeightFunction;
@@ -22,7 +22,7 @@ namespace BASeTris.Choosers
 
             float[] BuildWeights = (from i in Choosers select WeightFunction(i)).ToArray();
 
-            var resultvalue = RandomHelpers.Static.Select(Choosers, BuildWeights);
+            var resultvalue = RandomHelpers.Static.Select(Choosers, BuildWeights,this.rgen);
             return resultvalue.GetNext();
             
 

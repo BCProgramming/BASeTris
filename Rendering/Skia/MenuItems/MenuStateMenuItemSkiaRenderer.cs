@@ -440,7 +440,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
                 };
                 if (Source.TransitionPercentage < 1)
                 {
-                    useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia() { Radius = (float)(Element.Bounds.Width - (Element.Bounds.Width * Source.TransitionPercentage)),CharacterNumberModifier=TetrisGame.rgen.Next(0,4) });
+                    useStyle.CharacterHandler.SetPositionCalculator(new RotatingPositionCharacterPositionCalculatorSkia() { Radius = (float)(Element.Bounds.Width - (Element.Bounds.Width * Source.TransitionPercentage)) });
                 }
 
                 else if (Element.DrawState == MenuStateMenuItem.StateMenuItemState.State_Selected)

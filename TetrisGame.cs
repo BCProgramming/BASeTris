@@ -27,6 +27,8 @@ using BASeTris.Rendering.Adapters;
 using BASeTris.GameStates.GameHandlers;
 using System.Runtime.InteropServices;
 using BASeTris.Settings;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace BASeTris
 {
@@ -46,8 +48,10 @@ namespace BASeTris
 
         //public static HighScoreManager ScoreMan;
         public static XMLScoreManager<TetrisHighScoreData> ScoreMan;
+
         //public static AudioThemeManager AudioThemeMan;
-        public static Random rgen = new Random();
+        //the  "stateless" randomizer below is intended for stuff that "doesn't matter" for deterministic stuff like replays. It shouldn't be used by, for example, choosers, but it should be used by stuff like drawing randomization, or choices made for drawing and themes and stuff.
+        public static Random StatelessRandomizer = new Random();
         public static bool PortableMode = false;
         private GameState CurrentGameState = null;
         private IStateOwner GameOwner = null;
@@ -61,6 +65,7 @@ namespace BASeTris
         public static SKTypeface LCDFontSK;
         public static SKTypeface ArialFontSK;
         private static Image _TiledCache = null;
+        public GameplayRecord GameRecorder { get; set; } = null;
         public AudioThemeManager AudioThemeMan { get { return GameOwner.AudioThemeMan; } set
             {
                 //???
@@ -366,6 +371,14 @@ namespace BASeTris
         }
         public void GameProc()
         {
+            
+            if (GameRecorder==null) //if we don't have a game recorder, see if the current state is a preparable game. if it is, than initialize with that prep data.
+            {
+                if (GameOwner.GetHandler() is IPreparableGame ipg)
+                {
+                    GameRecorder = new GameplayRecord(ipg.PrepInstance);
+                }
+            }
             CurrentGameState.GameProc(GameOwner);
             if (CurrentGameState.BG != null)
             {
@@ -424,12 +437,13 @@ namespace BASeTris
                 return Settings.GetKeyboardKeyAssignment((int)source);
             return null;
         }
-        GameplayRecord GameKeyRecorder = new GameplayRecord();
+        //GameplayRecord GameKeyRecorder = new GameplayRecord();
         public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g, KeyInputSource pSource)
         {
             if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState && (CurrentGameState as IDirectKeyboardInputState).AllowDirectKeyboardInput()) return; //do nothing if it supports that interface.
             if (pSource == KeyInputSource.Input_HID && CurrentGameState is IDirectGamepadInputState && (CurrentGameState as IDirectGamepadInputState).AllowDirectGamepadInput()) return;
-            GameKeyRecorder.AddKeyRecord(GetElapsedTime(), g);
+            if (GameRecorder != null && CurrentState is GameplayGameState)
+                GameRecorder.AddKeyRecord(GetElapsedTime(), g);
             CurrentGameState.HandleGameKey(pOwner, g);
         }
 
@@ -439,10 +453,10 @@ namespace BASeTris
             //CurrentGameState.DrawForegroundEffect(this, g, Bounds);
         }
 
-
-        public static T Choose<T>(IEnumerable<T> ChooseArray)
+        
+        public static T Choose<T>(IEnumerable<T> ChooseArray,Random rgen = null)
         {
-            if (rgen == null) rgen = new Random();
+            if (rgen == null) rgen = TetrisGame.StatelessRandomizer;
             SortedList<double, T> sorttest = new SortedList<double, T>();
             foreach (T loopvalue in ChooseArray)
             {

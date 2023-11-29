@@ -16,6 +16,7 @@ namespace BASeTris.GameStates
         bool AllowDirectKeyboardInput();
         void KeyPressed(IStateOwner pOwner, int pKey);
         void KeyUp(IStateOwner pOwner, int pKey);
+        void KeyDown(IStateOwner pOwner, int pKey);
     }
 
     public interface IDirectGamepadInputState

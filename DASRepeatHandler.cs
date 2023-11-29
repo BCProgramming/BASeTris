@@ -9,11 +9,16 @@ using System.Threading.Tasks;
 
 namespace BASeTris
 {
+    /// <summary>
+    /// Helper class for handling of Button repeat. (eg 'typematic rate' for buttons, pretty much.)
+    /// </summary>
     public class DASRepeatHandler
     {
         Dictionary<GameState.GameKeys, KeyRepeatInformation> KeyData = new Dictionary<GameState.GameKeys, KeyRepeatInformation>();
+        //Action invoked when a key event fires.
         Action<GameState.GameKeys> _FireKey;
-        List<GameState.GameKeys> RepeatKeys = new List<GameState.GameKeys>() {GameState.GameKeys.GameKey_Down, GameState.GameKeys.GameKey_Left, GameState.GameKeys.GameKey_Right};
+        //set of keys that we will repeat.
+        HashSet<GameState.GameKeys> RepeatKeys = new HashSet<GameState.GameKeys>() {GameState.GameKeys.GameKey_Down, GameState.GameKeys.GameKey_Left, GameState.GameKeys.GameKey_Right};
 
         Thread DASRepeatThread = null;
 

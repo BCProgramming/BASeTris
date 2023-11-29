@@ -352,7 +352,7 @@ namespace BASeTris
 
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field)
         {
-            int useLevel = TetrisGame.rgen.Next(50);
+            int useLevel = TetrisGame.StatelessRandomizer.Next(50);
             ApplyColorSet(Group,useLevel);
         }
 

@@ -444,7 +444,7 @@ namespace BASeTris.Theme.Block
         {
 
             var SelectedColourSet = AllThemeColors;
-            if (TetrisGame.rgen.NextDouble() > 0.5d)
+            if (TetrisGame.StatelessRandomizer.NextDouble() > 0.5d)
             {
                 SelectedColourSet = SelectedColourSet.Concat(CreateHues(25)).ToArray();
             }

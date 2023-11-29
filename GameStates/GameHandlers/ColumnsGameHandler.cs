@@ -53,7 +53,7 @@ namespace BASeTris.GameStates
             return _Chooser;
         }
 
-        private void ColumnsNominoTweaker(Nomino Source)
+        private void ColumnsNominoTweaker(BlockGroupChooser bgc,Nomino Source)
         {
             int conIndex = 0;
             Source.AllowRotationAnimations = false;
@@ -88,9 +88,10 @@ namespace BASeTris.GameStates
 
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
+            int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
             if (DesiredChooserType == typeof(SingleFunctionChooser))
             {
-                var result = new SingleFunctionChooser(CreateColumnNomino);
+                var result = new SingleFunctionChooser(CreateColumnNomino,useSeed);
                 result.ResultAffector = ColumnsNominoTweaker;
                 return result;
             }

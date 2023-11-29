@@ -255,7 +255,7 @@ namespace BASeTris
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler,TetrisField Field)
         {
             PrepareTheme();
-            int RandomLevel = TetrisGame.rgen.Next(25);
+            int RandomLevel = TetrisGame.StatelessRandomizer.Next(25);
             Action<Nomino,TetrisField,int> SelectL = Apply_L;
             Action<Nomino, TetrisField, int>[] Types = new Action<Nomino, TetrisField, int>[]
             {
@@ -433,7 +433,7 @@ namespace BASeTris
                 {
                     BlockData.Add(null);
                 }
-                BlockData = RandomHelpers.Static.Shuffle(BlockData).ToList();
+                BlockData = RandomHelpers.Static.Shuffle(BlockData,TetrisGame.StatelessRandomizer).ToList();
             }
             var LeftSide = BlockData[0];
             var LeftMiddle = BlockData[1];

@@ -9,7 +9,7 @@ namespace BASeTris.Choosers
     public class NTrisChooser : Choosers.SingleFunctionChooser
     {
         public int BlockCount { get; set; } = 4;
-        public NTrisChooser(int pBlockCount) : base(null)
+        public NTrisChooser(int pBlockCount,int pSeed) : base(null,pSeed)
         {
             _Available = new Func<Nomino>[] { ChooserFunction };
             BlockCount = pBlockCount;

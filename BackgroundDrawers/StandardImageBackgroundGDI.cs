@@ -40,8 +40,8 @@ namespace BASeTris.BackgroundDrawers
         {
             ImageAttributes useBGAttributes = new ImageAttributes();
             useBGAttributes.SetColorMatrix(ColorMatrices.GetFader(fade));
-            double xpoint = 1 + TetrisGame.rgen.NextDouble() * 2;
-            double ypoint = 1 + TetrisGame.rgen.NextDouble() * 2;
+            double xpoint = 1 + TetrisGame.StatelessRandomizer.NextDouble() * 2;
+            double ypoint = 1 + TetrisGame.StatelessRandomizer.NextDouble() * 2;
             var sib = new StandardImageBackgroundGDI(new StandardImageBackgroundDrawGDICapsule() { _BackgroundImage = TetrisGame.StandardTiledTetrisBackground, theAttributes = useBGAttributes, Movement = new PointF((float)xpoint, (float)ypoint) });
             
             return sib;

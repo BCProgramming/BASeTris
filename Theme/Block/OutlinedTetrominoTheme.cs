@@ -114,7 +114,7 @@ namespace BASeTris
 
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler Handler,TetrisField Field)
         {
-            int LevelUse = TetrisGame.rgen.Next(10);
+            int LevelUse = TetrisGame.StatelessRandomizer.Next(10);
 
             ApplyImages(Group, new Image[] { GetOutlinedImage(BlockOutlines.Outline_Bottom | BlockOutlines.Outline_Top | BlockOutlines.Outline_Right | BlockOutlines.Outline_Left, GetLevelColor(LevelUse)) });
 

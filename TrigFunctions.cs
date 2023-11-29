@@ -102,7 +102,7 @@ namespace BASeTris
 
         public static PointF GetRandomVelocity(float minspeed, float maxspeed)
         {
-            return GetRandomVelocity(minspeed, maxspeed, (Math.PI * TetrisGame.rgen.NextDouble() * 2));
+            return GetRandomVelocity(minspeed, maxspeed, (Math.PI * TetrisGame.StatelessRandomizer.NextDouble() * 2));
         }
 
         public static float Distance(float X, float Y, float X2, float Y2)
@@ -128,7 +128,7 @@ namespace BASeTris
             else
             {
                 //choose a random speed.
-                usespeed = (TetrisGame.rgen.NextDouble() * (maxspeed - minspeed)) + minspeed;
+                usespeed = (TetrisGame.StatelessRandomizer.NextDouble() * (maxspeed - minspeed)) + minspeed;
             }
 
             double useangle = angle;

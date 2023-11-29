@@ -134,27 +134,28 @@ namespace BASeTris.GameStates.GameHandlers
 
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
+            int useSeed = PrepInstance != null ? PrepInstance.RandomSeed : Environment.TickCount;
             if (DesiredChooserType == typeof(BagChooser))
             {
-                BagChooser bc = new BagChooser(Tetromino.StandardTetrominoFunctions);
+                BagChooser bc = new BagChooser(Tetromino.StandardTetrominoFunctions,useSeed);
                 
                 return bc;
             }
             else if (DesiredChooserType == typeof(NESChooser))
             {
-                NESChooser nc = new NESChooser(Tetromino.StandardTetrominoFunctions);
+                NESChooser nc = new NESChooser(Tetromino.StandardTetrominoFunctions,useSeed);
                 
                 return nc;
             }
             else if (DesiredChooserType == typeof(GameBoyChooser))
             {
-                GameBoyChooser gbc = new GameBoyChooser(Tetromino.StandardTetrominoFunctions);
+                GameBoyChooser gbc = new GameBoyChooser(Tetromino.StandardTetrominoFunctions,useSeed);
                 
                 return gbc;
             }
             else if (DesiredChooserType == typeof(FullRandomChooser))
             {
-                FullRandomChooser frc = new FullRandomChooser(Tetromino.StandardTetrominoFunctions);
+                FullRandomChooser frc = new FullRandomChooser(Tetromino.StandardTetrominoFunctions,useSeed);
                 
                 return frc;
             }
@@ -165,6 +166,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         public virtual Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
+            int UseSeed = PrepInstance==null?Environment.TickCount:PrepInstance.RandomSeed;
             //TODO: proper per-handler configs should include the chooser class to use.
             if (_Chooser == null || CurrentChooserValue != pOwner.Settings.std.Chooser)
             {
@@ -187,7 +189,7 @@ namespace BASeTris.GameStates.GameHandlers
             }
             if (ProgressiveMode)
             {
-                _Chooser = new CompositeChooser(new BlockGroupChooser[] { _Chooser, new NTrisChooser(5), new NTrisChooser(6) },
+                _Chooser = new CompositeChooser(new BlockGroupChooser[] { _Chooser, new NTrisChooser(5,UseSeed), new NTrisChooser(6,UseSeed) },
                     (bgc) =>
                     {
                         if (bgc is NTrisChooser ntc)
@@ -215,7 +217,7 @@ namespace BASeTris.GameStates.GameHandlers
                         {
                             return 100.0f;
                         }
-                    });
+                    },UseSeed);
             }
             return _Chooser;
         }
@@ -449,7 +451,11 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return null;
         }
+
+        GamePreparerOptions IBlockGameCustomizationHandler.PrepInstance { get { return this.PrepInstance; } set { if (value is StandardTetrisPreparer stp) this.PrepInstance = stp; } }
+        GamePreparerOptions IPreparableGame.PrepInstance { get { return this.PrepInstance; }  }
         public StandardTetrisPreparer PrepInstance { get; set; } = null;
+        
         public virtual void SetPrepData(GamePreparerOptions gpo)
         {
             if (gpo is StandardTetrisPreparer stp)
@@ -500,7 +506,7 @@ namespace BASeTris.GameStates.GameHandlers
             base.PrepareField(state, pOwner);
             state.ForceSpeedLevel = 0;
             state.MaxHoldStackSize = 10;
-            state.AdditionalNewNominoAction = (Action<Nomino>)((b) => { b.SetRotation(TetrisGame.rgen.Next(5)); b.CanRotate = false;  });
+            state.AdditionalNewNominoAction = (Action<Nomino>)((b) => { b.SetRotation(TetrisGame.StatelessRandomizer.Next(5)); b.CanRotate = false;  });
         }
         
     }

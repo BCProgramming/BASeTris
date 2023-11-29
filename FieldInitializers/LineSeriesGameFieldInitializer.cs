@@ -71,13 +71,13 @@ namespace BASeTris.FieldInitializers
                 Target.Theme.ApplyTheme(Dummino, _Handler, Target, NominoTheme.ThemeApplicationReason.Normal);
                 lsmb.CriticalMass = _params.GetCriticalMassFunc(lsmb);
 
-                int RandomXPos = TetrisGame.rgen.Next(Target.ColCount);
-                int RandomYPos = Target.RowCount - 1 - (TetrisGame.rgen.Next(Target.RowCount / (NearBottom?8:2)));
+                int RandomXPos = TetrisGame.StatelessRandomizer.Next(Target.ColCount);
+                int RandomYPos = Target.RowCount - 1 - (TetrisGame.StatelessRandomizer.Next(Target.RowCount / (NearBottom?8:2)));
                 SKPointI randomPos = new SKPointI(RandomXPos, RandomYPos);
                 while (usedPositions.Contains(randomPos))
                 {
-                    int rndXPos = TetrisGame.rgen.Next(Target.ColCount);
-                    int rndYPos = Target.RowCount - 1 - TetrisGame.rgen.Next(Target.RowCount / (NearBottom ? 8 : 2));
+                    int rndXPos = TetrisGame.StatelessRandomizer.Next(Target.ColCount);
+                    int rndYPos = Target.RowCount - 1 - TetrisGame.StatelessRandomizer.Next(Target.RowCount / (NearBottom ? 8 : 2));
                     randomPos = new SKPointI(rndXPos, rndYPos);
                 }
                 Target.Contents[RandomYPos][RandomXPos] = lsmb;

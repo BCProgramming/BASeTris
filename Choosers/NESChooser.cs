@@ -13,7 +13,7 @@ namespace BASeTris.Choosers
         
         int prev, roll;
 
-        public NESChooser(Func<Nomino>[] pAvailable) : base(pAvailable)
+        protected NESChooser(Func<Nomino>[] pAvailable) : base(pAvailable,Environment.TickCount)
         {
         }
 

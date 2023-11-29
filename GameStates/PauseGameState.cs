@@ -359,14 +359,14 @@ namespace BASeTris.GameStates
                     var minTime = MinimumRotationTime.Ticks;
                     var Range = maxTime - minTime;
                     //if the next spin time is not set, then set it to the current time plus a random rotation time.
-                    var randomticks = (long)((TetrisGame.rgen.NextDouble() * (double)Range) + minTime);
+                    var randomticks = (long)((TetrisGame.StatelessRandomizer.NextDouble() * (double)Range) + minTime);
                     NextSpinTime = DateTime.Now + TimeSpan.FromTicks(randomticks);
                 }
                 else if(DateTime.Now > NextSpinTime)
                 {
                     NextSpinTime = null;//nullify it
                     //increment the rotation and set the last RotationTime
-                    Rotation = MathHelper.mod(Rotation + (TetrisGame.rgen.NextDouble() >0.5?1:-1), 4);
+                    Rotation = MathHelper.mod(Rotation + (TetrisGame.StatelessRandomizer.NextDouble() >0.5?1:-1), 4);
                     LastRotation = DateTime.Now;
                 }
             }

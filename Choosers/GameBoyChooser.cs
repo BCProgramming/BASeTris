@@ -12,7 +12,7 @@ namespace BASeTris.Choosers
     {
         int id, roll;
 
-        public GameBoyChooser(Func<Nomino>[] pSelectionFunctions) : base(pSelectionFunctions)
+        public GameBoyChooser(Func<Nomino>[] pSelectionFunctions,int pSeed) : base(pSelectionFunctions,pSeed)
         {
             id = rgen.Next(_Available.Length);
             roll = 6 * _Available.Length - 3;

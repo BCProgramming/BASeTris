@@ -35,6 +35,7 @@ namespace BASeTris
         BCRect LastDrawBounds { get; }
         SettingsManager Settings { get; }
         event EventHandler<GameClosingEventArgs> GameClosing;
+        
     }
     public class StateOwnerEventArgs :EventArgs
     {
@@ -59,6 +60,7 @@ namespace BASeTris
         GamePresenter GetPresenter();
         Type GetCanvasType();
         public double FrameTime { get; }
+       
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs
@@ -72,6 +74,23 @@ namespace BASeTris
             PreviousState = pPrevious;
             NewState = pNew;
             Cancel = false;
+        }
+    }
+
+    public static class IGamePresenterExtensions
+    {
+        /// <summary>
+        /// determines the divider between the desired framerate per second and the specified target framerate using the IGamePresenter's current frametime.
+        /// for example, if the current frametime is 1/120 than it will return 0.5, as any "speed" values need to be divided by that to approximate the same movement over a specific absolute time period.
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="DesiredFramerate"></param>
+        /// <returns></returns>
+        public static double GetSpeedDivider(this IGamePresenter src, double DesiredFramerate)
+        {
+            double movementscale = Math.Max(1, ((1d / 60d) / src.FrameTime));
+            if (double.IsInfinity(movementscale)) movementscale = 1;
+            return movementscale; 
         }
     }
 }

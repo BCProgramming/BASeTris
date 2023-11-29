@@ -69,12 +69,13 @@ namespace BASeTris.GameStates.GameHandlers
         private IStateOwner _Owner = null;
         public override BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
+            int useSeed = PrepInstance != null ? PrepInstance.RandomSeed : Environment.TickCount;
             _Owner = pOwner;
             if (_Chooser == null)
             {
                 if (MaxAddedBlockCount == 0)
                 {
-                    _Chooser = new Choosers.SingleFunctionChooser(NTrisChooserFunction);
+                    _Chooser = new Choosers.SingleFunctionChooser(NTrisChooserFunction,useSeed);
                 }
                 else
                 {
@@ -85,7 +86,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public Nomino NTrisChooserFunction()
         {
-            int chooseSize = TetrisGame.rgen.Next(_NTrisPreparer.MinimumNominoSize, _NTrisPreparer.MaximumNominoSize + 1);
+            int chooseSize = TetrisGame.StatelessRandomizer.Next(_NTrisPreparer.MinimumNominoSize, _NTrisPreparer.MaximumNominoSize + 1);
             var newpiece = NNominoGenerator.GetPiece(chooseSize);
             var buildNomino = NNominoGenerator.CreateNomino(newpiece);
             return buildNomino;

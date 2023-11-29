@@ -17,7 +17,7 @@ namespace BASeTris.Choosers.AIChoosers
     public class MeanChooser : BaseAIChooser
     {
         StoredBoardState.TetrisScoringRuleData AIRules = new StoredBoardState.TetrisScoringRuleData();
-        public MeanChooser(GameplayGameState _StandardState, Func<Nomino>[] pAvailable) : base(_StandardState, pAvailable)
+        public MeanChooser(GameplayGameState _StandardState, Func<Nomino>[] pAvailable,int pSeed) : base(_StandardState, pAvailable,pSeed)
         {
         }
 

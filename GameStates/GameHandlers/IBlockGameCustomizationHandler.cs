@@ -25,7 +25,7 @@ namespace BASeTris.GameStates.GameHandlers
     /// <summary>
     /// interface for game customization, for different Nomino-based games. (eg. Tetris being standard, but could be Tetris 2 or Dr Mario and stuff)
     /// </summary>
-    public interface IBlockGameCustomizationHandler
+    public interface IBlockGameCustomizationHandler 
     {
         String Name { get; }
         FieldChangeResult ProcessFieldChange(GameplayGameState state, IStateOwner pOwner, Nomino Trigger);
@@ -37,6 +37,9 @@ namespace BASeTris.GameStates.GameHandlers
         BaseStatistics Statistics { get; }
         Nomino[] GetNominos();
         GameOptions GameOptions { get; }
+
+        GamePreparerOptions PrepInstance { get; set; }
+        
 
         GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner);
 

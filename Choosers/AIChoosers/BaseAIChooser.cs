@@ -16,7 +16,7 @@ namespace BASeTris.Choosers.AIChoosers
     {
         protected GameplayGameState _State;
 
-        public BaseAIChooser(GameplayGameState _StandardState, Func<Nomino>[] pAvailable) : base(pAvailable)
+        public BaseAIChooser(GameplayGameState _StandardState, Func<Nomino>[] pAvailable,int pSeed) : base(pAvailable,pSeed)
         {
             _State = _StandardState;
         }
