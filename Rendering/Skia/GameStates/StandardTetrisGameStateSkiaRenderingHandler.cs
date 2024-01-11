@@ -129,9 +129,31 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 if (!SkipParticles) RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.TopParticles, Element);
             }
-            
+            if (Source.MouseInputData.MouseActive)
+            {
+                if (MenuStateSkiaRenderingHandler.CursorBitmap == null)
+                {
+                    MenuStateSkiaRenderingHandler.CursorBitmap = TetrisGame.Imageman.GetSKBitmap("cursor");
+                    /*var CursorImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new System.Drawing.Bitmap(TetrisGame.Imageman["cursor"]));
+
+                    SKImageInfo CursorInfo = new SKImageInfo(CursorImage.Width, CursorImage.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+                    var skversion = new SKBitmap(CursorInfo);
+                    using (SKCanvas canvo = new SKCanvas(skversion))
+                    {
+                        canvo.Clear(SKColors.Transparent);
+                        canvo.DrawImage(CursorImage, new SKPoint(0, 0));
+                    }
+                    CursorBitmap = skversion;*/
+                }
+
+                var lmove = Source.MouseInputData.LastMouseMovementPosition;
+                pRenderTarget.DrawBitmap(MenuStateSkiaRenderingHandler.CursorBitmap,new SKRect(lmove.X, lmove.Y, lmove.X+64, lmove.Y+64), null);
+
+            }
 
         }
+
+        bool MouseActive = true;
         private String FormatGameTime(IStateOwner stateowner)
         {
             TimeSpan useCalc = stateowner.GetElapsedTime();

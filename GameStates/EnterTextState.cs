@@ -145,7 +145,9 @@ namespace BASeTris.GameStates
                 CommitEntry(pOwner, sEntry);
             }
         }
-       
+        public void KeyDown(IStateOwner pOwner, int pKey)
+        {
+        }
         public void KeyUp(IStateOwner pOwner, int pKey)
         {
 

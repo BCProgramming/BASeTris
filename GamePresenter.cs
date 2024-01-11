@@ -21,6 +21,7 @@ using XInput.Wrapper;
 
 namespace BASeTris
 {
+    
     /// <summary>
     /// Game Presenter implements the base logic that is above TetrisGame itself, but "below" the ultimate "UI" layer involved in handling keys or rendering.
     /// The overall idea is that whatever layer is being used will pass key events to this class, which will handle the Game Logic involved in those keys, and
@@ -40,6 +41,7 @@ namespace BASeTris
             {X.Gamepad.GamepadButtons.Start, GameState.GameKeys.GameKey_Pause}
         };*/
         public bool GameThreadPaused = false;
+        public bool UserInputDisabled = false;
         public ControllerInputState CIS { get; set; } = null;
         private IStateOwner _Owner = null;
         private IGamePresenter _Presenter = null;
@@ -54,7 +56,36 @@ namespace BASeTris
         public DASRepeatHandler RepeatHandler { get; set; } = null;
         public Thread GameThread = null;
         public Thread InputThread = null;
-        public StandardNominoAI ai { get; set; }
+        public BaseAI ai { get; set; }
+
+        private Dictionary<String, RenderTag> RenderTags = new Dictionary<string, RenderTag>();
+        
+
+        public void AddRenderTag(String Key,RenderTag tag)
+        {
+            lock (RenderTags)
+            {
+                if(!RenderTags.ContainsKey(Key))
+                RenderTags.Add(Key,tag);
+            }
+        }
+        public void ProcessRenderTags(Func<RenderTag,bool> ProcessTagFunc)
+        {
+            if (!RenderTags.Any()) return;
+            HashSet<String> RemoveItems = new HashSet<String>();
+            lock (RenderTags)
+            {
+                foreach (var iterate in RenderTags)
+                {
+                    if (ProcessTagFunc(iterate.Value));
+                    RemoveItems.Add(iterate.Key);
+                }
+                foreach (var removekey in RemoveItems)
+                {
+                    RenderTags.Remove(removekey);
+                }
+            }
+        }
 
         public ConcurrentQueue<Action> ProcThreadActions { get; set; } = new ConcurrentQueue<Action>();
         public void EnqueueAction(Action pAction)
@@ -111,14 +142,49 @@ namespace BASeTris
 
             return 0;
         }
+        
+        public Func<GameState> ReplayStateCreator(GameReplayOptions gpo)
+        {
+            //task: create an action that sets up this GamePresenter and returns a new GameplayGame that is prepared and ready to start a replay with the correct handler.
+
+
+            return () =>
+            {
+                GameSettings = gpo?.Settings ?? GameSettings;
+                IBlockGameCustomizationHandler GameHandler = null;
+
+                Type desiredHandlerType = gpo.GameplayRecord.InitialData.InitialOptions.HandlerType;
+                //construct the Game Handler type.
+                GameHandler = (IBlockGameCustomizationHandler)Activator.CreateInstance(desiredHandlerType);
+                //set the initial options to the ones we saved.
+                GameHandler.PrepInstance = gpo.GameplayRecord.InitialData.InitialOptions;
+
+                this.UserInputDisabled = true; //disable user-capable inputs, only take from the injector.
+                this.ai = new ReplayInputInjector(_Owner,gpo.GameplayRecord.GetPlayQueue());
+
+                return new GameplayGameState(_Owner, GameHandler, null, TetrisGame.Soundman, null);
+
+
+            };
+
+            
+        }
         public void StartGame(GameHandlingConstants option=GameHandlingConstants.Handle_GameThread)
         {
             String[] sDataFolders = TetrisGame.GetSearchFolders();
             String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d) && IsDirectoryWritable(d)), "Settings.xml");
+            //Note: GameStartOptions could optionally include this data...
             GameSettings = new SettingsManager(sSettingsFile,_Owner,GetKeyboardKeyFromName,GetGamepadButtonFromName,typeof(OpenTK.Input.Key),typeof(XInput.Wrapper.X.Gamepad.GamepadButtons));
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();
             if (GameLoopsRunning) return;
+
+            /*if (gso.GameplayRecord != null)
+            {
+                //if we are supplied a record, than this "game" is supposed to be a replay.
+                //gso.GameplayRecord should have everything we need to set stuff up.
+            }*/
+            
             
             GameLoopsRunning = true;
             
@@ -150,10 +216,14 @@ namespace BASeTris
         }
         public void RunNextThreadAction()
         {
-            if (ProcThreadActions.TryDequeue(out Action pResult))
+            while (!ProcThreadActions.IsEmpty)
             {
-                pResult();
+                if (ProcThreadActions.TryDequeue(out Action pResult))
+                {
+                    pResult();
+                }
             }
+        
         }
         private GameState LastFrameState = null;
         private void GameProc()
@@ -324,7 +394,11 @@ namespace BASeTris
             if (!DownState) return;
             ActiveKeys.Add(key);
             GameKeyDown(key);
-            if(pSource==TetrisGame.KeyInputSource.Input_HID) IgnoreController = false;
+            if (pSource == TetrisGame.KeyInputSource.Input_HID)
+            {
+                if(UserInputDisabled) return;
+                IgnoreController = false;
+            }
             Game.HandleGameKey(_Owner, key, pSource);
         }
         private void CIS_ButtonPressed(Object sender, ControllerInputState.ControllerButtonEventArgs args)
@@ -360,5 +434,17 @@ namespace BASeTris
             RepeatHandler.GameKeyDown(key);
         }
 
+    }
+    public class GameReplayOptions
+    {
+        public SettingsManager Settings { get; set; } = null;
+        public GameplayRecord GameplayRecord { get; set; } = null;
+
+    }
+    //Presenter has a list of RenderTags. after drawing everything, each rendertag is also called with the RenderObject as the source element. It does this until the DoRender delegate returns false. At that point the RenderTag is removed from the list.
+    public class RenderTag
+    {
+        public Object RenderObject;
+        public Func<bool> DoRender;
     }
 }

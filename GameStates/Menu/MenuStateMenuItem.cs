@@ -1,4 +1,5 @@
 ﻿using BASeTris.Rendering.Adapters;
+using OpenTK.Input;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -40,6 +41,9 @@ namespace BASeTris.GameStates.Menu
         public BCRect LastBounds { get; set; }
         public String TipText { get; set; } = "";
         public Object Tag { get; set; }
+        public string Label { get; set; } = "";
+
+
         public enum StateMenuItemState
         {
             State_Normal,
@@ -96,9 +100,66 @@ namespace BASeTris.GameStates.Menu
     }
     public abstract class MenuStateSizedMenuItem : MenuStateMenuItem
     {
-        
-        
+     
+
     }
+
+    //like MenuStateTextMenuItem. 
+    //1. Should be visually labelled
+    //2. When activated, accepts typed text
+    public class MenuStateTextInputMenuItem : MenuStateTextMenuItem, IMenuItemKeyboardInput
+    {
+        bool IsActivated = false;
+        long ActivationTick = 0;
+        public void KeyDown(IStateOwner pOwner, MenuState eStateOwner, int pKey)
+        {
+            if (!IsActivated) return;
+            //throw new NotImplementedException();
+
+        }
+
+        public void KeyPressed(IStateOwner pOwner, MenuState StateOwner, int pKey)
+        {
+          
+            if (!IsActivated) return;
+            //throw new NotImplementedException();
+            
+            Text = Text+(char)pKey;
+        }
+
+        public void KeyUp(IStateOwner pOwner, MenuState StateOwner, int pKey)
+        {
+            var currenttick = TetrisGame.GetTickCount();
+
+            if (!IsActivated || currenttick-ActivationTick < 500) return;
+            
+            if (pKey == (int)Keys.Enter || pKey == (int)Key.Enter)
+            {
+                StateOwner.ActivatedItem = null;
+                OnDeactivated(pOwner);
+            }
+            //throw new NotImplementedException();
+        }
+        String RememberedText = "";
+        public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
+        {
+            ActivationTick = TetrisGame.GetTickCount();
+            IsActivated = true;
+            RememberedText = Text;
+            this.Text = "";
+            return MenuEventResultConstants.Handled;
+        }
+        public override MenuEventResultConstants OnDeactivated(IStateOwner pOwner)
+        {
+            IsActivated = false;
+            if (Text == "") Text = RememberedText;
+            return MenuEventResultConstants.Handled;
+        }
+
+
+    }
+
+
     //Standard Item in a menu for a Menu State.
     public class MenuStateTextMenuItem: MenuStateSizedMenuItem
     {

@@ -17,7 +17,7 @@ namespace BASeTris.GameStates.Menu
                 Value = pValue;
             }
         }
-        public string Label { get; set; } = "";
+        
         public event EventHandler<SliderValueChangeEventArgs> ValueChanged;
         public double Value { get; set; } = 50;
         public double MinimumValue { get; set; } = 0;
@@ -27,17 +27,10 @@ namespace BASeTris.GameStates.Menu
         public double LargeDetentCount { get; set; } = 4;
         public double SmallDetent { get; set; } = 5;
         public bool Activated { get; set; } = false;
-
-        public MenuStateSliderOption(double pMinimum, double pMaximum, double pValue)
-        {
-            MinimumValue = pMinimum;
-            MaximumValue = pMaximum;
-            Value = pValue;
-        }
         public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
         {
             Activated = true;
-            return MenuEventResultConstants.Handled; 
+            return MenuEventResultConstants.Handled;
         }
         public override MenuEventResultConstants OnDeactivated(IStateOwner pOwner)
         {
@@ -45,6 +38,13 @@ namespace BASeTris.GameStates.Menu
             return MenuEventResultConstants.Handled;
         }
 
+        public MenuStateSliderOption(double pMinimum, double pMaximum, double pValue)
+        {
+            MinimumValue = pMinimum;
+            MaximumValue = pMaximum;
+            Value = pValue;
+        }
+        
 
         public override bool GetSelectable()
         {

@@ -29,7 +29,7 @@ namespace BASeTris.Theme.Audio
             PropertyInfo grabprop = CurrentTheme.GetType().GetProperty(pProp, typeof(AudioThemeElement));
             Object result = grabprop.GetGetMethod().Invoke(CurrentTheme, new object[] { });
             AudioThemeElement CastResult = result as AudioThemeElement;
-            if (CastResult.AudioKeys == null || CastResult.AudioKeys.Length == 0) return null;
+            if (CastResult==null || CastResult.AudioKeys == null || CastResult.AudioKeys.Length == 0) return null;
             if (CastResult.AudioKeys.Length == 1) return CastResult.AudioKeys[0];
             if (CastResult.ChooseFlag==AudioThemeElement.AudioThemeElementChooseFlags.Flag_Static)
             {

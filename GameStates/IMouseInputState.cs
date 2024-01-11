@@ -25,6 +25,8 @@ namespace BASeTris.GameStates
         void MouseDown(IStateOwner pOwner,StateMouseButtons ButtonDown, BCPoint Position);
         void MouseUp(IStateOwner pOwner,StateMouseButtons ButtonUp, BCPoint Position);
         void MouseMove(IStateOwner pOwner,BCPoint Position);
+
+        public MouseStateAggregate MouseInputData { get; }
     }
     public class MouseInputStateHelper
     {

@@ -583,7 +583,7 @@ namespace BASeTris
         public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,Random rgen = null)
         {
             rgen = rgen ?? new Random();
-            if (CurrentBuild == null)
+            if (CurrentBuild == null) //Starting case, we make two blocks, then recursively call to add to it if needed.
             {
                 
                 CurrentBuild = new List<NominoPoint>() {new NominoPoint(0, 0), new NominoPoint(1, 0) }; //create first two blocks
@@ -622,6 +622,7 @@ namespace BASeTris
 
                 List<NominoPoint> MoveList = new List<NominoPoint>() { LeftMove, ForwardMove, RightwardMove };
                 int[] ArrayOrder = new int[] { 0, 1, 2 };
+                //if set to randomize, randomize the order of the direction
                 if (GenerationFlags.HasFlag(NominoPieceGenerationFlags.Flag_Randomize)) ArrayOrder = RandomHelpers.Static.Shuffle(ArrayOrder,rgen).ToArray();
                 foreach (int index in ArrayOrder)
                 {

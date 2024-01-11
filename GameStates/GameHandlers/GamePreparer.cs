@@ -107,7 +107,7 @@ namespace BASeTris.GameStates.GameHandlers
     {
         [GamePreparerCustomItem("Seed")]
         public int RandomSeed { get; set; } = Environment.TickCount;
-        protected Type HandlerType { get; set; }
+        public Type HandlerType { get; set; }
         protected Dictionary<PropertyInfo, MenuStateMenuItem> MenuPropertyValues = new Dictionary<PropertyInfo, MenuStateMenuItem>();
         protected Dictionary<String, PropertyInfo> PropertiesbyName = new Dictionary<string, PropertyInfo>();
         protected MenuStateMenuItem GetMenuFromPropertyName(String sName)
@@ -287,6 +287,11 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return null;
         }
+
+
+       
+
+
     }
 
   

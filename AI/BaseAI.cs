@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,9 +24,9 @@ namespace BASeTris.AI
             AIThread.Start();
         }
 
-        bool AIProcessing = true;
+        protected bool AIProcessing = true;
 
-        protected void AIActionThread()
+        protected virtual void AIActionThread()
         {
             //the meat and potatoes...
             while (AIProcessing)

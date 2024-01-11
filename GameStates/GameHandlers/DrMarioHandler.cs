@@ -58,7 +58,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             SimplePopHandling = true;
         }
-        protected DrMarioHandler()
+        public DrMarioHandler()
         {
             SimplePopHandling = true;
             Level = 0;

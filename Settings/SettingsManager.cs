@@ -273,6 +273,19 @@ namespace BASeTris.Settings
             }
             
         }
+        public SettingsManager(XElement pSettingsNode, IStateOwner pOwner, GetKeyboardKeyFromName KeyFunction, GetGamepadKeyFromName GamepadFunction, Type pKeyEnumType, Type pGamepadEnumType)
+        {
+
+            KeyboardKeyFunc = KeyFunction;
+            GamepadKeyFunc = GamepadFunction;
+            KeyEnumType = pKeyEnumType;
+            GamepadEnumType = pGamepadEnumType;
+            _Owner = pOwner;
+            
+            LoadSettings(pSettingsNode);
+            
+            MyCreator = new StackTrace();
+        }
         public SettingsManager(String pSourceFile,IStateOwner pOwner,GetKeyboardKeyFromName KeyFunction,GetGamepadKeyFromName GamepadFunction,Type pKeyEnumType,Type pGamepadEnumType)
         {
             
@@ -285,41 +298,47 @@ namespace BASeTris.Settings
             if(File.Exists(pSourceFile))
             {
                 XDocument xdoc = XDocument.Load(pSourceFile);
-                var RootNode = xdoc.Root;
-
-                if (RootNode.Name == "Settings")
-                {
-                    //old settings, add those as the default.
-                    StandardSettings DefaultSettings = new StandardSettings(RootNode);
-                    DefaultSettings.SetOwner(this);
-                    AllSettings.Add("Default", DefaultSettings);
-                }
-                else if(RootNode.Name=="SettingsGroups")
-                {
-                    //load "core" settings. Controls, for example.
-                    var ControlsNode = RootNode.Element("Controls");
-                    if (ControlsNode != null)
-                    {
-                        LoadControlSettings(ControlsNode);
-                    }
-                    else
-                    {
-                        SetupDefaultControls();
-                    }
-
-                    foreach(var groupnode in RootNode.Elements("SettingsGroup"))
-                    {
-                        String sGroupName = groupnode.Attribute("Name").Value;
-                        XElement DataNode = groupnode.Element("Data");
-                        StandardSettings SettingsData = new StandardSettings(DataNode);
-                        SettingsData.SetOwner(this);
-                        AllSettings.Add(sGroupName, SettingsData);
-                    }
-                    
-                }
+                LoadSettings(xdoc.Root);
             }
             MyCreator = new StackTrace();
         }
+
+        private void LoadSettings(XElement xdoc)
+        {
+            var RootNode = xdoc;
+
+            if (RootNode.Name == "Settings")
+            {
+                //old settings, add those as the default.
+                StandardSettings DefaultSettings = new StandardSettings(RootNode);
+                DefaultSettings.SetOwner(this);
+                AllSettings.Add("Default", DefaultSettings);
+            }
+            else if (RootNode.Name == "SettingsGroups")
+            {
+                //load "core" settings. Controls, for example.
+                var ControlsNode = RootNode.Element("Controls");
+                if (ControlsNode != null)
+                {
+                    LoadControlSettings(ControlsNode);
+                }
+                else
+                {
+                    SetupDefaultControls();
+                }
+
+                foreach (var groupnode in RootNode.Elements("SettingsGroup"))
+                {
+                    String sGroupName = groupnode.Attribute("Name").Value;
+                    XElement DataNode = groupnode.Element("Data");
+                    StandardSettings SettingsData = new StandardSettings(DataNode);
+                    SettingsData.SetOwner(this);
+                    AllSettings.Add(sGroupName, SettingsData);
+                }
+
+            }
+        }
+
         /// <summary>
         /// Returns the current applicable settings. This is based on the handler of the current owner state.
         /// </summary>

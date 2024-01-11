@@ -35,7 +35,7 @@ using static System.Windows.Forms.AxHost;
 
 namespace BASeTris.GameStates
 {
-    public class GameplayGameState : GameState
+    public class GameplayGameState : GameState,IMouseInputState
     {
         [Flags]
         public enum GameplayStateFlags
@@ -55,7 +55,7 @@ namespace BASeTris.GameStates
         public bool DoRefreshBackground = false;
         public GameplayStateFlags Flags { get; set; } = GameplayStateFlags.Normal;
         BlockGroupChooser overrideChooser = null;
-
+        public MouseStateAggregate MouseInputData { get; private set; } = new MouseStateAggregate();
         public Choosers.BlockGroupChooser GetChooser(IStateOwner pOwner)
             {
             if (overrideChooser != null) return overrideChooser;
@@ -1294,5 +1294,48 @@ namespace BASeTris.GameStates
             }
             
         }
+
+        public void MouseDown(IStateOwner pOwner, StateMouseButtons ButtonDown, BCPoint Position)
+        {
+            //throw new NotImplementedException();
+            //delegate some buttons to specific gamekeys.
+        }
+
+        public void MouseUp(IStateOwner pOwner, StateMouseButtons ButtonUp, BCPoint Position)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void MouseMove(IStateOwner pOwner, BCPoint Position)
+        {
+            //calculate where the piece should move based on the position of the cursor, and move it there. The cursor should be around the center of the Mino (horizontally, of course- we don't move it down)
+            //throw new NotImplementedException();
+            if (pOwner is IGamePresenter gp)
+            {
+                var BlockWidth = gp.LastDrawBounds.Width / PlayField.ColCount;
+                int CursorColumn = (int)(Position.X / BlockWidth);
+                lock (PlayField.BlockGroups)
+                {
+                    foreach (var active in PlayField.BlockGroups)
+                    {
+                        if (active.X != CursorColumn)
+                        {
+                            var fitresult = PlayField.CanFit(active, CursorColumn, active.Y, true);
+                            if (fitresult.CanFit)
+                            {
+                                active.X = CursorColumn;
+                                Sounds.PlaySound(pOwner.AudioThemeMan.BlockGroupMove.Key, pOwner.Settings.std.EffectVolume);
+                            }
+                        }
+                    }
+                }
+                MouseInputData.LastMouseMovementPosition = Position;
+                MouseInputData.LastMouseMovement = DateTime.Now;
+            }
+            
+            
+            
+        }
+        //public BCPoint LastMouseMovement { get; set; }
     }
 }

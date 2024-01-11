@@ -1,5 +1,7 @@
-﻿using BASeTris.BackgroundDrawers;
+﻿using BASeTris.AI;
+using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using System;
 using System.Collections.Generic;
@@ -79,6 +81,10 @@ namespace BASeTris.GameStates.Menu
             var BGDesign = new MenuStateTextMenuItem() { Text = "Design", TipText = "Background Designer. Why does this exist?" };
             var CrappyThemeTestthing = new MenuStateTextMenuItem() { Text = "Theme shit", TipText = "Crappy item for testing new theme menu. ignore me" };
             var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
+            var TestReplay = new ConfirmedTextMenuItem() { Text = "Replay Test", TipText = "Test Replays" };
+            var TestTextEdit = new MenuStateTextInputMenuItem() { Text = "EDITABLE!", TipText = "Test Editing text.", Label="Editable Item"};
+
+
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
                 
@@ -104,7 +110,7 @@ namespace BASeTris.GameStates.Menu
                 if (e.MenuElement == NewGameItem)
                 {
                     GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target));
-                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,pOwner.CurrentState,gms);
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, pOwner.CurrentState, gms);
                     Target.ActivatedItem = null;
                 }
 
@@ -113,19 +119,19 @@ namespace BASeTris.GameStates.Menu
                     //Show the options menu
                     //var OptionsMenu = new OptionsMenuState(Target.BG, pOwner, pOwner.CurrentState); // GenericMenuState(Target.BG, pOwner, new OptionsMenuPopulator());
                     var OptionsMenu = new OptionsMenuSettingsSelectorState(Target.BG, pOwner, pOwner.CurrentState);
-                    pOwner.CurrentState =  MenuState.CreateOutroState(pOwner, OptionsMenu);
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, OptionsMenu);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == Controls)
                 {
                     var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
-                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,ControlsState);
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, ControlsState);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == BGDesign)
                 {
                     var DesignState = new DesignBackgroundState(pOwner, pOwner.CurrentState, null);
-                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,DesignState);
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, DesignState);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == ExitItem)
@@ -135,8 +141,19 @@ namespace BASeTris.GameStates.Menu
                 else if (e.MenuElement == CrappyThemeTestthing)
                 {
                     ThemeSelectionMenuState themestate = new ThemeSelectionMenuState(pOwner, pOwner.CurrentState.BG, pOwner.CurrentState, typeof(StandardTetrisHandler), typeof(SNESTetrominoTheme), (nt) => { });
-                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner,themestate);
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, themestate);
                     Target.ActivatedItem = null;
+                }
+                else if (e.MenuElement == TestReplay)
+                {
+                    if (pOwner is IGamePresenter igp)
+                    {
+                        var statefunc = igp.GetPresenter().ReplayStateCreator(new GameReplayOptions() { Settings = pOwner.Settings, GameplayRecord = GameplayRecord.GetDrunkRecording(new TimeSpan(0, 10, 0)) });
+                        pOwner.CurrentState = statefunc();
+                        Target.ActivatedItem = null;
+                    }
+
+
                 }
 
 

@@ -66,7 +66,9 @@ namespace BASeTris.GameStates
                 });
             }
         }
-
+        public void KeyDown(IStateOwner pOwner, int pKey)
+        {
+        }
         public void KeyPressed(IStateOwner pOwner, int pKey)
         {
             //throw new NotImplementedException();

@@ -27,7 +27,7 @@ namespace BASeTris
         /// <summary>
         /// Indicates whether this GameState allows active play. This is used to determine certain actions such as movement interpolation.
         /// </summary>
-        public virtual bool GamePlayActive { get{ return false; } }
+        public virtual bool GamePlayActive { get { return false; } }
         public enum DisplayMode
         {
             Partitioned,
@@ -90,7 +90,7 @@ namespace BASeTris
         /*[Obsolete("Use Rendering Providers")]
         public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void GameProc(IStateOwner pOwner);
-        
+
         //Obbsolete("Use Rendering Providers")]
         /*public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
         public abstract void HandleGameKey(IStateOwner pOwner, GameKeys g);
@@ -101,5 +101,13 @@ namespace BASeTris
         protected IBackground _BG;
         public IBackground BG { get => _BG;
             set { _BG = value; } }
+
+        /// <summary>
+        /// called to validate a user-initiated key, and whether it is allowed. A good example is that when there is a replay in progress, only the pause key should be allowed by the gameplay state.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public virtual bool AllowUserGameKey(GameKeys key) { return true; }
+
     }
 }

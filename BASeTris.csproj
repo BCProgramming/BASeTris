@@ -126,6 +126,7 @@
     <Compile Include="AI\BaseAI.cs" />
     <Compile Include="AI\DrMarioAIScoringHandler.cs" />
     <Compile Include="AI\IStateScoringHandler.cs" />
+    <Compile Include="AI\ReplayInputInjector.cs" />
     <Compile Include="AI\StandardTetrisAIScoringHandler.cs" />
     <Compile Include="AI\TetrisAI.cs" />
     <Compile Include="AssetManager\AssetManager.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="GameStates\GameHandlers\GamePreparer.cs" />
     <Compile Include="GameStates\GameHandlers\ReverseTetrisHandler.cs" />
     <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
+    <Compile Include="GameStates\MouseStateAggregate.cs" />
     <Compile Include="GameStates\ThemeSelectionMenuState.cs" />
     <Compile Include="GameStates\TransitState.cs" />
     <Compile Include="Particles\ShapeParticle.cs" />

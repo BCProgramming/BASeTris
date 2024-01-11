@@ -17,9 +17,10 @@ namespace BASeTris
     public class GameplayRecord:IXmlPersistable
     {
 
-        GameplayInitialStateData InitialData = null;
+        public GameplayInitialStateData InitialData = null;
         //be sourced from it's own separate random instance.
 
+        
         List<GameplayRecordElement> Elements = null;
 
         public Predicate<GameKeys> IsRecordableKey = IsRecordableKey_Default;
@@ -39,23 +40,47 @@ namespace BASeTris
             }
             
         }
+        //for testing purposes. Just random inputs with random delay.
+        public static GameplayRecord GetDrunkRecording(TimeSpan TotalLength)
+        {
+            GameplayRecord DrunkResult = new GameplayRecord();
+            TimeSpan CurrentTime = TimeSpan.Zero;
+            while (CurrentTime < TotalLength)
+            {
+                
+                
+                var Delta = new TimeSpan(TetrisGame.StatelessRandomizer.Next(5000000,10000000));
+                var ChooseKey = TetrisGame.Choose(new GameKeys[] { GameKeys.GameKey_Left, GameKeys.GameKey_Right, GameKeys.GameKey_RotateCCW, GameKeys.GameKey_RotateCW,GameKeys.GameKey_Drop }, TetrisGame.StatelessRandomizer);
+                //GameplayRecordElement gre = new GameplayRecordElement(CurrentTime += Delta, ChooseKey);
+
+                DrunkResult.AddKeyRecord(CurrentTime+=Delta, ChooseKey);
+
+            }
+            DrunkResult.InitialData = new GameplayInitialStateData() { InitialOptions = new StandardTetrisPreparer(null)};
+            DrunkResult.InitialData.InitialOptions.HandlerType = typeof(StandardTetrisHandler);
+            return DrunkResult;
+
+
+        }
         private GameplayRecord()
         {
         }
-        public GameplayRecord(int pSeed,GamePreparerOptions gpo):this(gpo)
-        {
-            InitialData = new GameplayInitialStateData() { InitialOptions = gpo };
-         
-            
-        }
+        
         public GameplayRecord(GamePreparerOptions gpo)
         {
             Elements = new List<GameplayRecordElement>();
+            InitialData = new GameplayInitialStateData() { InitialOptions = gpo };
         }
-        public void AddKeyRecord(TimeSpan Elapsed, GameState.GameKeys key)
+        public GameplayRecordElement AddKeyRecord(TimeSpan Elapsed, GameState.GameKeys key)
         {
-            if(IsRecordableKey(key))
-                Elements.Add(new GameplayRecordElement(Elapsed, key));
+            if (IsRecordableKey(key))
+            {
+                var gree = new GameplayRecordElement(Elapsed, key);
+                if (Elements == null) Elements = new List<GameplayRecordElement>();
+                Elements.Add(gree);
+                return gree;
+            }
+            return null;
         }
         public Queue<GameplayRecordElement> GetPlayQueue()
         {

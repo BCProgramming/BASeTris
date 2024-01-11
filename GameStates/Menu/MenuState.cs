@@ -42,6 +42,7 @@ namespace BASeTris.GameStates.Menu
 
         public String BackgroundMusicKey = null;
 
+        public MouseStateAggregate MouseInputData { get; private set; } = new MouseStateAggregate();
         public static MenuState CreateMenu(IStateOwner pOwner, String pHeaderText, GameState ReversionState, IBackground usebg, String sCancelText, int PerPageItems = int.MaxValue, params MenuStateMenuItem[] Items)
         {
             MenuState ResultState = new MenuState(usebg ?? ReversionState.BG);
@@ -132,7 +133,7 @@ namespace BASeTris.GameStates.Menu
         public String StateHeader { get; set; }
 
         public String FooterText { get; set; } = "";
-        public BCPoint LastMouseMovement { get; set; }
+        //public BCPoint LastMouseMovement { get; set; }
 
         public String HeaderTypeface { get; set; } = "Arial";
         public float HeaderTypeSize { get; set; } = 18;
@@ -273,14 +274,19 @@ namespace BASeTris.GameStates.Menu
             if (!String.IsNullOrEmpty(BackgroundMusicKey))
             {
                 var currentmusic = TetrisGame.Soundman.GetPlayingMusic();
-                if (BackgroundMusicKey != TetrisGame.Soundman.scurrentPlayingMusic)
+                if (String.Compare(BackgroundMusicKey,TetrisGame.Soundman.scurrentPlayingMusic,true)!=0)
                 {
+                    if (!String.IsNullOrEmpty(TetrisGame.Soundman.scurrentPlayingMusic)) {; }
                     TetrisGame.Soundman.PlayMusic(BackgroundMusicKey,0.5f,true );
+                    Debug.Print("Playing BG");
                 }
 
                 pOwner.EnqueueAction(() =>
                 {
-                    if (pOwner.CurrentState != this && TetrisGame.Soundman.GetPlayingMusic() != null && TetrisGame.Soundman.scurrentPlayingMusic == BackgroundMusicKey)
+                    bool SameState = pOwner.CurrentState == this || (pOwner.CurrentState is ICompositeState<MenuState> icomp && icomp.GetComposite() == this);
+
+
+                    if (!SameState && TetrisGame.Soundman.GetPlayingMusic() != null && TetrisGame.Soundman.scurrentPlayingMusic == BackgroundMusicKey)
                     {
                         TetrisGame.Soundman.StopMusic();
                     }
@@ -507,7 +513,8 @@ namespace BASeTris.GameStates.Menu
                     }
                 }
             }
-            LastMouseMovement = Position;
+            MouseInputData.LastMouseMovementPosition = Position;
+            MouseInputData.LastMouseMovement = DateTime.Now;
         }
 
         public bool AllowDirectKeyboardInput()

@@ -37,10 +37,17 @@ namespace BASeTris.Rendering.Skia.MenuItems
             if (!RenderedNominoElements.ContainsKey(sKey))
             {
                 NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(new Func<NominoTheme>[] { () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(), () => new StandardTetrominoTheme(), () => new NESTetris2Theme(), () => new SNESTetris2Theme(), () => new GameBoyMottledTheme() })();
-                var SelectionNomino = TetrominoCollageRenderer.GetNominoBitmap(chosen);
-                SelectionNomino = ImageManager.ReduceImageSK(SelectionNomino, new SKSizeI((int)(SelectionNomino.Width / 10), (int)(SelectionNomino.Height / 10)));
-                SelectionNomino = TetrisGame.OutlineImageSK(SelectionNomino,10);
-                RenderedNominoElements.Add(sKey, SKImage.FromBitmap(SelectionNomino));
+                using (var SelectionNominoA = TetrominoCollageRenderer.GetNominoBitmap(chosen))
+                {
+                    using (var SelectionNominoB = ImageManager.ReduceImageSK(SelectionNominoA, new SKSizeI((int)(SelectionNominoA.Width / 10), (int)(SelectionNominoA.Height / 10))))
+                    {
+
+                        using (var SelectionNominoC = TetrisGame.OutlineImageSK(SelectionNominoB, 10))
+                        {
+                            RenderedNominoElements.Add(sKey, SKImage.FromBitmap(SelectionNominoC));
+                        }
+                    }
+                }
             }
             return RenderedNominoElements[sKey];
             
@@ -121,6 +128,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
                     }
 
+                    
 
                     //pRenderTarget.DrawImage(SelectionNomino,new SKRect(0,0,50,50),new SKPaint() { } );
                     //pRenderTarget.DrawImage(SelectionNomino, new SKRect(50, 50, 100, 100), new SKPaint() { });
@@ -128,8 +136,35 @@ namespace BASeTris.Rendering.Skia.MenuItems
                     //pRenderTarget.DrawImage(SelectionNomino, new SKPoint(0, 0));
                     // pRenderTarget.DrawCircle(new SKPoint(Element.Bounds.Left - 40, Element.Bounds.Top + Element.Bounds.Height / 2), 40, new SKPaint() { Color = SKColors.Black });
                 }
+                DrawItemLabel(pOwner, pRenderTarget, Source, Element);
+
+
+
+
         }
-     
+        public virtual void DrawItemLabel(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateMenuItem Source, MenuStateMenuItemSkiaDrawData Element)
+        {
+            if (!String.IsNullOrWhiteSpace(Source.Label))
+            {
+                using SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.Black };
+                using SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.White };
+                DrawTextInformationSkia tTitle = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+                DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+                SKRect bnd = new SKRect();
+                textforeground.MeasureText(dtis.Text, ref bnd);
+                tTitle.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, textforeground.TextSize);
+                tTitle.Text = Source.Label;
+
+
+                
+                tTitle.Position = new SKPoint((float)(Element.Bounds.Left + 10 * pOwner.ScaleFactor), Element.Bounds.Top + Element.Bounds.Height/2);
+                //if (Source.Activated)
+                // {
+                //     tTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+                // }
+                pRenderTarget.DrawTextSK(tTitle);
+            }
+        }
         public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
             Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateMenuItem)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
@@ -252,20 +287,13 @@ namespace BASeTris.Rendering.Skia.MenuItems
                     dtis.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
                 }
                 pRenderTarget.DrawTextSK(dtis);
-                DrawTextInformationSkia tTitle = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+
+
+
+                
                 SKRect bnd = new SKRect();
                 textforeground.MeasureText(dtis.Text, ref bnd);
-                tTitle.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, textforeground.TextSize);
-                tTitle.Text = Source.Label;
-
-
-
-                tTitle.Position = new SKPoint((float)(Element.Bounds.Left + 10 * pOwner.ScaleFactor), Element.Bounds.Top + Element.Bounds.Height);
-                if (Source.Activated)
-                {
-                    tTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
-                }
-                pRenderTarget.DrawTextSK(tTitle);
+                
 
                 base.Render(pOwner, pRenderTarget, Source, Element);
 
@@ -280,6 +308,28 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
 
         }
+        public override void DrawItemLabel(IStateOwner pOwner, SKCanvas pRenderTarget, MenuStateMenuItem Src, MenuStateMenuItemSkiaDrawData Element)
+        {
+            using SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.Black };
+            using SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.White };
+            DrawTextInformationSkia tTitle = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
+            if (Src is MenuStateSliderOption Source)
+            {
+                tTitle.DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, textforeground.TextSize);
+                tTitle.Text = Source.Label;
+
+
+
+                tTitle.Position = new SKPoint((float)(Element.Bounds.Left + 10 * pOwner.ScaleFactor), Element.Bounds.Top + Element.Bounds.Height);
+                if (Source.Activated)
+                {
+                    tTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia { Height = (float)(pOwner.ScaleFactor * 6) });
+                }
+                pRenderTarget.DrawTextSK(tTitle);
+
+            }
+        }
+
         private void FillPoly(SKCanvas Target, SKPoint[] array, SKPaint fill)
         {
             using (SKPath skp = new SKPath() { FillType = SKPathFillType.Winding,  Convexity = SKPathConvexity.Concave })

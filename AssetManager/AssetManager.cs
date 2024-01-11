@@ -1577,6 +1577,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         }
         public iActiveSoundObject PlayMusic(String key, AudioHandlerPlayDetails pDetails)
         {
+            Debug.Print(new StackTrace().ToString());
             if (mPlayingMusicSource is QueuedSoundManager)
             {
                 ((QueuedSoundManager) mPlayingMusicSource).Stop();

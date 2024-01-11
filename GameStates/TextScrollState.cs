@@ -312,7 +312,7 @@ namespace BASeTris.GameStates
         public ScrollEntry CurrentItem = null;
         public GameState ReversionState { get; set; }
 
-        public IBackground BG;
+        //public IBackground BG;
         public TextScrollState(GameState pReversionState,IBackground pBG = null)
         {
             if (pBG == null) pBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule() { StarCount=300,WarpFactor=0.33f});

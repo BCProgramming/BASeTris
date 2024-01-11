@@ -169,7 +169,7 @@ namespace BASeTris
         }
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
-
+            if (_Present.UserInputDisabled) return;
             _Present.IgnoreController = true;
 
             if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
@@ -221,13 +221,15 @@ namespace BASeTris
         }
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            if(_Present.Game.CurrentState is IMouseInputState imis)
+            if (_Present.UserInputDisabled) return;
+            if (_Present.Game.CurrentState is IMouseInputState imis)
             {
                 imis.MouseDown(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X,e.Position.Y));
             }
         }
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
+            if (_Present.UserInputDisabled) return;
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
                 imis.MouseUp(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X, e.Position.Y));
@@ -235,6 +237,7 @@ namespace BASeTris
         }
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
+            if (_Present.UserInputDisabled) return;
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
                 imis.MouseMove(this,new BCPoint(e.Position.X, e.Position.Y));
@@ -242,6 +245,7 @@ namespace BASeTris
         }
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
         {
+            if (_Present.UserInputDisabled) return;
             Debug.Print("Button released:" + e.Key);
             if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
             {
@@ -254,13 +258,15 @@ namespace BASeTris
                 var translated = _Present.TranslateKey(e.Key);
                 if (translated != null)
                 {
-                    _Present.GameKeyUp(translated.Value);
+                    if(_Present.Game.CurrentState.AllowUserGameKey(translated.Value))
+                        _Present.GameKeyUp(translated.Value);
                 }
             }
         }
         protected override void OnKeyPress(OpenTK.KeyPressEventArgs e)
         {
-            if (_Present.Game != null && _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
+            if (_Present.UserInputDisabled) return;
+            if (_Present.Game != null &&  _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
             {
                 Casted.KeyPressed(this, (int)e.KeyChar);
             }
@@ -288,6 +294,7 @@ namespace BASeTris
         private IBlockGameCustomizationHandler HandlerTitleSet = null;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            
             LastFrameData = CurrentFrameData;
             CurrentFrameData = e;
             if (!TetrisGame.Imageman.ImagePrepped) return;
@@ -335,6 +342,7 @@ namespace BASeTris
                 backColor.R = 0f;// 0.1f;
                 backColor.G = 0f;// 0.1f;
                 backColor.B = 0f; //0.3f;
+                
                 GL.ClearColor(backColor);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
                 using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType))
@@ -435,6 +443,12 @@ namespace BASeTris
                     canvas.DrawText(sDisplayVersion, new SKPoint(9, FPSPosition.Y - 3), FPSPaint);
                     canvas.DrawText(sFPS, FPSPosition, FPSShadow);
                     canvas.DrawText(sFPS, new SKPoint(FPSPosition.X - 3, FPSPosition.Y - 3), FPSPaint);
+
+                    _Present.ProcessRenderTags((r) =>
+                    {
+                        RenderingProvider.Static.DrawElement(this, canvas, r, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
+                        return r.DoRender();
+                    });
                     //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
                     //canvas.Flush();
                 }
@@ -451,6 +465,9 @@ namespace BASeTris
                 
             }
         }
+
+
+
         SKPaint FPSPaint = null;
         SKPaint FPSShadow = null;
         public void SetDisplayMode(GameState.DisplayMode pMode)

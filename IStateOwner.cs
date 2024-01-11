@@ -60,7 +60,10 @@ namespace BASeTris
         GamePresenter GetPresenter();
         Type GetCanvasType();
         public double FrameTime { get; }
-       
+
+        BCRect LastDrawBounds { get; }
+
+
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

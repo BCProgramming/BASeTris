@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 using BASeTris.Settings;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using BASeTris.AI;
 
 namespace BASeTris
 {
@@ -443,7 +444,15 @@ namespace BASeTris
             if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState && (CurrentGameState as IDirectKeyboardInputState).AllowDirectKeyboardInput()) return; //do nothing if it supports that interface.
             if (pSource == KeyInputSource.Input_HID && CurrentGameState is IDirectGamepadInputState && (CurrentGameState as IDirectGamepadInputState).AllowDirectGamepadInput()) return;
             if (GameRecorder != null && CurrentState is GameplayGameState)
+            {
+                if (pOwner is IGamePresenter igp)
+                {
+                    var gp = igp.GetPresenter();
+                    if (gp != null && gp.ai is ReplayInputInjector)
+                        return;
+                }
                 GameRecorder.AddKeyRecord(GetElapsedTime(), g);
+            }
             CurrentGameState.HandleGameKey(pOwner, g);
         }
 
