@@ -535,7 +535,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
             // Source.Draw(pOwner,pRenderTarget,Element.Bounds,Element.DrawState);
         }
         const char MarlettRightArrow = '8';
-        public virtual void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
+        public override void Render(IStateOwner pOwner, object pRenderTarget, object RenderSource, object Element)
         {
             Render(pOwner, (SKCanvas)pRenderTarget, (MenuStateTextMenuItem)RenderSource, (MenuStateMenuItemSkiaDrawData)Element);
         }

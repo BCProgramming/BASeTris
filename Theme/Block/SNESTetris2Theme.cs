@@ -92,9 +92,34 @@ namespace BASeTris.Theme.Block
         //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> ShinyBlocks_Combine = null;
         //public Dictionary<LineSeriesBlock.CombiningTypes, SKImage> PopBlocks_Combine = null;
     }
+    [HandlerTheme("Tetris 3 SNES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+    [ThemeDescription("Tetris 3 Theme from the SNES")]
+
+    public class SNESTetris3Theme : ConnectedImageLineSeriesBlockTheme
+    {
+        public override string Name => "Tetris 3 SNES";
+        protected override string GetImageKeyBase()
+        {
+            return "Tetris_3";
+        }
+        Bitmap DarkImage;
+        public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
+        {
+            if (DarkImage == null)
+            {
+                DarkImage = new Bitmap(250, 500);
+                using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                {
+                    drawdark.Clear(Color.FromArgb(10, 10, 10));
+                }
+            }
+            return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+        }
+    }
 
 
-    [HandlerTheme("Tetris 2SNES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
+
+    [HandlerTheme("Tetris 2 NES", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler))]
     [ThemeDescription("Tetris 2 Theme from the NES")]
 
     public class NESTetris2Theme : ConnectedImageLineSeriesBlockTheme
@@ -238,7 +263,7 @@ namespace BASeTris.Theme.Block
                     else if (Group is Tetromino_T) useColor = SKColors.Purple;
                     else if (Group is Tetromino_S) useColor = SKColors.Green;
                     else if (Group is Tetromino_Z) useColor = SKColors.Red;
-                    else if (Group is Tetromino_J) useColor = SKColors.Blue;
+                    else if (Group is Tetromino_J) useColor = SKColors.Navy;
                     else if (Group is Tetromino_L) useColor = SKColors.OrangeRed;
                     else {
                         useColor = NNominoGenerator.GetNominoData<SKColor>(ChosenNominoColours, Group, () => RandomColor());
@@ -348,7 +373,7 @@ namespace BASeTris.Theme.Block
                         }
                         else
                         {
-                            ;
+                            SNES_Red_Normal[checkflags] = SNES_Red_Normal[CardinalConnectionSet.ConnectedStyles.None];
                         }
                     }
                     finally

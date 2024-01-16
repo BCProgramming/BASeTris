@@ -121,15 +121,16 @@ namespace BASeTris.GameStates.GameHandlers
 
         public override void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
+            
             for (int i = 0; i < 3; i++)
-                state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewColumn(state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
+                state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewColumn(pOwner,state, state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
 
             
         }
         TimeSpan onesecond = new TimeSpan(0, 0, 1);
         bool MultiGroups = false;
         private ExtendedCustomizationHandlerResult PositiveResult = new ExtendedCustomizationHandlerResult(true);
-        public ExtendedCustomizationHandlerResult GameProc(GameplayGameState state, IStateOwner pOwner)
+        ExtendedCustomizationHandlerResult IExtendedGameCustomizationHandler.GameProc(GameplayGameState state, IStateOwner pOwner)
         {
             
             state.DrawNextQueue = false;
@@ -182,7 +183,7 @@ namespace BASeTris.GameStates.GameHandlers
                     Array.Copy(state.PlayField.Contents[r + 1], state.PlayField.Contents[r], state.PlayField.ColCount);
 
                 }
-                var arraynew = GenerateNewColumn(state.PlayField, state.PlayField.Contents.Length - 1, state.PlayField.ColCount).ToArray();
+                var arraynew = GenerateNewColumn(pOwner,state,state.PlayField, state.PlayField.Contents.Length - 1, state.PlayField.ColCount).ToArray();
 
                 Array.Copy(arraynew, state.PlayField.Contents[state.PlayField.Contents.Length - 1], state.PlayField.ColCount);
                 //move all ActiveGroups -1...
@@ -209,8 +210,9 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return (from y in AllowedTetrisAttackSpawns select (LineSeriesBlock.CombiningTypes)y).ToArray();
         }
-        private IEnumerable<NominoBlock> GenerateNewColumn(TetrisField pf,int row,int Count)
+        private IEnumerable<NominoBlock> GenerateNewColumn(IStateOwner pOwner,GameplayGameState state,TetrisField pf,int row,int Count)
         {
+            
             NominoBlock previouslyyielded = null;
             //TODO: generated lines should not create matches at the time they generate.
             //To accomplish this:
@@ -229,7 +231,7 @@ namespace BASeTris.GameStates.GameHandlers
                         combinecheck.Remove(lsb.CombiningIndex);
                     }
                 }
-                var createBlock = new LineSeriesPrimaryBlock() { Fixed=false, CombiningIndex = TetrisGame.Choose(combinecheck) };
+                var createBlock = new LineSeriesPrimaryBlock() { Fixed=false, CombiningIndex = TetrisGame.Choose(combinecheck,state.GetChooser(pOwner).rgen) };
                 var Dummino = new Nomino() { };
                 Dummino.AddBlock(new Point[] { new Point(0, 0) }, createBlock);
                 Dummino.Y = row;
