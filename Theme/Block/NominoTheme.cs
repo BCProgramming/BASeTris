@@ -106,7 +106,10 @@ namespace BASeTris
             return result;
 
         }
-
+        public static Func<NominoTheme>[] GetVisualizationThemes()
+        {
+            return new Func<NominoTheme>[] { () => new SNESTetris3Theme(), () => new GameBoyTetrominoTheme(), () => new SNESTetrominoTheme(), () => new NESTetrominoTheme(), () => new StandardTetrominoTheme(), () => new NESTetris2Theme(), () => new SNESTetris2Theme(), () => new GameBoyMottledTheme() };
+        }
         public virtual ThemeImageProvider ThemeProvider { get; set; }
         public abstract String Name { get; }
         public virtual bool IsAnimated(NominoBlock block)

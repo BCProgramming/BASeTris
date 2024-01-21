@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using BASeCamp.Logging;
 using Ionic.Zip;
 using Ionic.Zlib;
 using OpenTK.Input;
@@ -1885,6 +1886,11 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             if (!SkiaImages.ContainsKey(sFindKey))
             {
                 Image findkey = this[man_key, reductionfactor];
+                if (findkey == null)
+                {
+                    DebugLogger.Log.WriteLine($"unable to locate key:{findkey}; returning null");
+                    return null;
+                }
                 SkiaImages.Add(sFindKey, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
             }
             return SkiaImages[sFindKey];

@@ -329,6 +329,10 @@
     <Compile Include="Theme\Audio\AudioTheme.cs" />
     <Compile Include="Theme\Audio\AudioThemeManager.cs" />
     <Compile Include="Theme\Block\BasicBlockTheme.cs" />
+    <Compile Include="Theme\Block\CompositeBlockTheme.cs" />
+    <Compile Include="Theme\Block\Composite\NESVarietyTheme.cs" />
+    <Compile Include="Theme\Block\Composite\ShadedVarietyTheme.cs" />
+    <Compile Include="Theme\Block\Composite\VarietyThemeBase.cs" />
     <Compile Include="Theme\Block\ConnectedCustomPixelTheme.cs" />
     <Compile Include="Theme\Block\CardinalConnectionSet.cs" />
     <Compile Include="Theme\Block\CustomPixelTheme.cs" />
@@ -338,6 +342,7 @@
     <Compile Include="Theme\Block\OutlinedTetrominoTheme.cs" />
     <Compile Include="Theme\Block\SNESTetris2Theme.cs" />
     <Compile Include="Theme\Block\SNESTetrominoTheme.cs" />
+    <Compile Include="Theme\Block\Composite\SNESVarietyTheme.cs" />
     <Compile Include="Theme\Block\Tetris2Theme_Enhanced.cs" />
     <Compile Include="Theme\Block\NominoTheme.cs" />
     <Compile Include="Theme\Block\ThemeImageProvider.cs" />

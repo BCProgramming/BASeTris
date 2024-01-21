@@ -123,6 +123,7 @@ namespace BASeTris.Theme.Block
             if (SuffixLookup.ContainsKey(value)) return SuffixLookup[value]; return null;
         }
     }
+    
     public class CardinalImageSet : CardinalConnectionSet<SKImage, SKColor>
     {
         public CardinalImageSet()
@@ -131,11 +132,18 @@ namespace BASeTris.Theme.Block
         public CardinalImageSet(CardinalImageSet Source, SKColor Colorize):base(Source,Colorize,(c,i)=> TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i,c))
         {
         }
+        public static CardinalConnectionSet GetImageSet(CardinalImageSet Source, SKColor Colorize)
+        {
+            return new CardinalConnectionSet<SKImage, SKColor>(Source, Colorize, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c));
+        }
     }
+
+
+
     public class CardinalConnectionSet<Element,Data> : CardinalConnectionSet
     {
+
         
-       
        
         Element[] AllImages = new Element[(int)ConnectedStyles.MaxValue];
         /*
@@ -159,7 +167,7 @@ namespace BASeTris.Theme.Block
         public CardinalConnectionSet()
         {
         }
-        public CardinalConnectionSet(CardinalConnectionSet<Element,Data> Source, Data Input, Func<Data,Element,Element> ProcessFunc )
+        public CardinalConnectionSet(CardinalConnectionSet<Element,Data> Source, Data Input, Func<Data,Element,Element> ProcessFunc,String sOptionalSuffix = "" )
         {
             for (int i = 0; i < (int)ConnectedStyles.MaxValue; i++)
             {
