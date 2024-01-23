@@ -335,6 +335,8 @@
     <Compile Include="Theme\Block\Composite\VarietyThemeBase.cs" />
     <Compile Include="Theme\Block\ConnectedCustomPixelTheme.cs" />
     <Compile Include="Theme\Block\CardinalConnectionSet.cs" />
+    <Compile Include="Theme\Block\ConnectedImageBlockTheme.cs" />
+    <Compile Include="Theme\Block\ConnectedThemeCache.cs" />
     <Compile Include="Theme\Block\CustomPixelTheme.cs" />
     <Compile Include="Theme\Block\DrMarioTheme.cs" />
     <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />
