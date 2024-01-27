@@ -344,21 +344,33 @@ namespace BASeTris.Rendering.Skia.GameStates
                         g.DrawBitmap(DisplayBox, useRectangle);
 
                         g.DrawCircle(CenterPoint.X - 5, CenterPoint.Y - 5, 5, BlackBrush);
+                        double movementscale = 1d;
+                        if (pOwner is IGamePresenter igp)
+                        {
+                            movementscale = igp.GetSpeedDivider(60);
 
+                        }
                         //new "wiggling" mode. add Sin(timer*(5*index))*30 to the angle.
+                        
+
+
+                        //var AngleAdd = Math.Sin(baseval) * 10; //old approach.
+                       
+                        double StartAngle = Math.PI;
+                        double AngleIncrementSize = (Math.PI * 1.8) / (double)NextTetrominoes.Length;
 
                         for (int i = NextTetrominoes.Length - 1; i > -1; i--)
                         {
                             var ThisNomino = QueueList[i];
-                            var baseval = ((double)(DateTime.Now.Ticks + (250000 * i)) / 5000000);
-                            //var AngleAdd = Math.Sin(baseval) * 10; //old approach.
-                            var AngleAdd =(Math.Sin(baseval)*Math.Cos(baseval*2)) * 7; //new approach, tries to be a little bit different...
+
+
+
 
                             //var AngleAdd = Math.Sin(((double)DateTime.Now.Millisecond / 166)) * 15;
 
 
-                            double StartAngle = Math.PI;
-                            double AngleIncrementSize = (Math.PI * 1.8) / (double)NextTetrominoes.Length;
+                            var baseval = ((double)(DateTime.Now.Ticks + (250000 * i / movementscale)) / 6000000);
+                            var AngleAdd = (Math.Sin(baseval) * Math.Cos(baseval * 2)) * 7; //new approach, tries to be a little bit different...
                             //we draw starting at StartAngle, in increments of AngleIncrementSize.
                             //i is the index- we want to increase the angle by that amount (well, obviously, I suppose...
 
@@ -373,7 +385,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                             float Deviation = (i - NextTetrominoes.Length / 2);
                             Point Deviate = new Point((int)(Deviation * 20 * Factor), (int)(Deviation * 20 * Factor));
 
-                            var AngleRotateLocation = DateTime.Now.Ticks / 5000000;
+                            var AngleRotateLocation = DateTime.Now.Ticks / 5000000/ movementscale;
                             double AngleMovePercent = Source.NextAngleOffset / AngleIncrementSize;
                             Size DrawTetSize = new Size
                            (

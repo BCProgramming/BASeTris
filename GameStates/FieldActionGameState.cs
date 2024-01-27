@@ -47,7 +47,7 @@ namespace BASeTris.GameStates
 
             if (desiredState!=null)
             {
-                desiredState.FrameUpdate();
+                desiredState.FrameUpdate(pOwner);
                 
             }
         }

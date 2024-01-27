@@ -360,11 +360,16 @@ namespace BASeTris.GameStates
             return PlayField.GetGhostDrop(pOwner, Source, out dropLength, CancelProximity);
         }
 
-        public void FrameUpdate()
+        public void FrameUpdate(IStateOwner pOwner)
         {
             if (NextAngleOffset != 0)
             {
-                double AngleChange = ((Math.PI * 2 / 360)) * 5;
+                double movementscale = 0;
+                if (pOwner is IGamePresenter igp)
+                {
+                    movementscale = igp.GetSpeedDivider(60);
+                }
+                double AngleChange = (((Math.PI * 2 / 360)) * 5)/movementscale;
                 NextAngleOffset = Math.Sign(NextAngleOffset) * (Math.Abs(NextAngleOffset) - AngleChange);
                 if (NextAngleOffset < AngleChange) NextAngleOffset = 0;
             }
@@ -459,7 +464,7 @@ namespace BASeTris.GameStates
                 
                 iextend.GameProc(this, pOwner);
             }
-            FrameUpdate();
+            FrameUpdate(pOwner);
             
           
             

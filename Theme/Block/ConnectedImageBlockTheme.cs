@@ -11,10 +11,259 @@ using static SkiaSharp.SKPath;
 using OpenTK.Input;
 using System.Security.AccessControl;
 using System.Runtime.InteropServices;
+using System.IO;
+using System.CodeDom;
+using OpenTK.Graphics.ES11;
+
 
 
 namespace BASeTris.Theme.Block
 {
+
+    public abstract class ConnectedBCTBlockTheme<BlockEnum, PixelEnum> :  ConnectedImageLineSeriesBlockThemeBase<BlockEnum, PixelEnum[][]> where BlockEnum:struct where PixelEnum:struct
+    {
+
+        //indexes the cardinal block data by the BlockEnum
+        CardinalConnectionDictionary<BlockEnum, PixelEnum[][]> ConnectedPixelSets = new CardinalConnectionDictionary<BlockEnum, PixelEnum[][]>();
+        
+        Dictionary<String, SKImage> CardinalImageCache = new Dictionary<String, SKImage>();
+
+        /// <summary>
+        /// given the pixel in the "default" image asset, return the corresponding Pixel enumeration.
+        /// </summary>
+        /// <param name="PixelColor"></param>
+        /// <returns></returns>
+        public abstract PixelEnum FromDefaultImagePixel(SKColor PixelColor);
+        
+
+        //ConnectedBCTBlockTheme is the base class for themes that want to use the customPixelTheme featureset but for connected images.
+        /// <summary>
+        /// retrieves the Color of a particular Pixel type in a given BlockType, given the information about the appropriate field and Nomino information.
+        /// </summary>
+        /// <param name="BlockType"></param>
+        /// <param name="PixelType"></param>
+        /// <param name="Group"></param>
+        /// <param name="Block"></param>
+        /// <param name="GameHandler"></param>
+        /// <param name="Field"></param>
+        /// <param name="Reason"></param>
+        /// <returns></returns>
+        /// 
+        public abstract SKColor GetPixelColor(BlockEnum BlockType,PixelEnum PixelType, Nomino Group, NominoBlock Block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
+
+        //return any additional key to be stapled on when indexing images. For example, NES Theme also indexes by the current level number.
+        public abstract String GetBlockAdditionalKey(BlockEnum BlockType, Nomino Group, NominoBlock Block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
+
+        public abstract BlockEnum GetBlockType(Nomino Group, NominoBlock Block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
+        /// <summary>
+        /// retrieve the filename suffix for this blocktype. This is used when deciding what filenames to load and translate into Pixel arrays.
+        /// </summary>
+        /// <param name="BlockType"></param>
+        /// <returns></returns>
+        public abstract string GetBlockEnumSuffix(BlockEnum BlockType);
+
+        
+
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        {
+            PrepareThemeData();
+            if (Reason == ThemeApplicationReason.FieldSet)
+            {
+
+                ;
+            }
+            //---
+            Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
+            foreach (var iterate in Group)
+            {
+                
+                //Dictionary<SKColor, SKImage> Sourcedict = null;
+                LineSeriesBlock.CombiningTypes? chosenType = null;
+
+
+
+
+
+                BlockEnum blocktype = GetBlockType(Group, iterate.Block, GameHandler, Field, Reason);
+
+                string useKey = BuildSpecialKey(blocktype, Group, iterate.Block, GameHandler, Field, Reason);
+                //---
+                if (iterate.Block is ImageBlock ibb)
+                {
+                    if (iterate.Block is StandardColouredBlock scb)
+                    {
+                        scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
+                    }
+
+                    if (UseConnectedImages)
+                    {
+
+                        //determine the flags by checking the Nomino.
+                        CardinalConnectionSet.ConnectedStyles cs = CardinalConnectionSet.ConnectedStyles.None;
+                        //check above
+                        Point North = new Point(iterate.BaseX(), iterate.BaseY() - 1);
+                        Point South = new Point(iterate.BaseX(), iterate.BaseY() + 1);
+                        Point West = new Point(iterate.BaseX() - 1, iterate.BaseY());
+                        Point East = new Point(iterate.BaseX() + 1, iterate.BaseY());
+
+                        Point[] DirectionPoints = new Point[] { North, South, West, East };
+                        List<(Point, CardinalConnectionSet.ConnectedStyles)> Setuplist = new List<(Point, CardinalConnectionSet.ConnectedStyles)>()
+                        {
+                            (DirectionPoints[0],CardinalConnectionSet.ConnectedStyles.North),
+                            (DirectionPoints[2],CardinalConnectionSet.ConnectedStyles.West),
+                            (DirectionPoints[1],CardinalConnectionSet.ConnectedStyles.South),
+                            (DirectionPoints[3],CardinalConnectionSet.ConnectedStyles.East)
+
+                        };
+                        foreach (var Checkconnected in Setuplist)
+                        {
+                            if (GroupElements.ContainsKey(Checkconnected.Item1))
+                            {
+
+                                if (IsConnected(GroupElements[Checkconnected.Item1].Block, iterate.Block))
+                                {
+                                    cs |= Checkconnected.Item2;
+                                }
+                                else
+                                {
+                                    cs |= Checkconnected.Item2;
+                                }
+                            }
+                        }
+                        CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
+
+
+
+
+                        var useRotationData = from c in useConnectionStyles select ConnectedPixelSets[blocktype, c];
+                        var currdata = ConnectedPixelSets[blocktype,cs];
+
+                        var useRotationImages = from r in useConnectionStyles select GetImageFromPixelData(blocktype, ConnectedPixelSets[blocktype, r], r, Group, iterate.Block, GameHandler, Field, Reason);
+
+                        ibb._RotationImagesSK = useRotationImages.ToArray();
+                        //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
+                    }
+                    else
+                    {
+                        //ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock(blocktype, useKey) };
+                    }
+
+                }
+            }
+        }
+        
+        private SKImage GetImageFromPixelData(BlockEnum BlockType, PixelEnum[][] pixeldata, CardinalConnectionSet.ConnectedStyles Connection, Nomino Group, NominoBlock Block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason reason)
+        {
+
+            String sUseKey = BuildCacheKey(BlockType, Connection, Group, Block, GameHandler, Field, reason);
+            if (!CardinalImageCache.ContainsKey(sUseKey))
+            {
+
+
+                int RowCount = pixeldata.Length;
+                int ColCount = pixeldata[0].Length;
+                SKImageInfo drawinfo = new SKImageInfo(ColCount, RowCount, SKColorType.Rgba8888, SKAlphaType.Premul);
+                using (SKBitmap DrawBitmap = new SKBitmap(drawinfo))
+                {
+
+                    for (int r = 0; r < RowCount; r++)
+                    {
+                        for (int c = 0; c < ColCount; c++)
+                        {
+                            PixelEnum pixel = pixeldata[r][c];
+                            SKColor getColor = GetPixelColor(BlockType, pixel, Group, Block, GameHandler, Field, reason);
+                            DrawBitmap.SetPixel(c, r, getColor);
+
+                        }
+                    }
+                    CardinalImageCache.Add(sUseKey, SKImage.FromBitmap(DrawBitmap));
+                }
+            }
+            return CardinalImageCache[sUseKey];
+        }
+        private String BuildCacheKey(BlockEnum BlockType, CardinalConnectionSet.ConnectedStyles Connections,  Nomino Group, NominoBlock Block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        {
+
+            String sSpecialKey = GetBlockAdditionalKey(BlockType, Group, Block, GameHandler, Field, Reason);
+            String sBuildKey = String.Join("_", from j in new String[] { BlockType.ToString(),CardinalConnectionSet.GetSuffix(Connections),   sSpecialKey } where !String.IsNullOrEmpty(j) select j);
+            return sBuildKey;
+
+
+        }
+
+        private String BuildSpecialKey(BlockEnum BlockType, Nomino Group, NominoBlock Block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        {
+
+            String sSpecialKey = GetBlockAdditionalKey(BlockType, Group, Block, GameHandler, Field, Reason);
+            String sBuildKey = String.Join("_",from j in new String[] { BlockType.ToString(), sSpecialKey } where !String.IsNullOrEmpty(j) select j );
+            return sBuildKey;
+
+
+        }
+
+        protected override void PrepareThemeData()
+        {
+            var AllArrangements = EnumHelper.GetAllEnums<CardinalConnectionSet.ConnectedStyles>();
+            //task: we want to populate ConnectedPixelSets.
+            foreach (var blocktype in Enum.GetValues(typeof(BlockEnum)))
+            {
+                //processing for each blocktype.
+                //1 get the suffix we want for this blocktype.
+                String sBlockTypeSuffix = GetBlockEnumSuffix((BlockEnum)blocktype);
+                String sGetBaseKey = GetImageKeyBase();
+
+                foreach (var arrangement in AllArrangements)
+                {
+
+                    //filename to seek is sGetBaseKey_sBlockTypeSuffix_Cardinal
+                    String sCardinalStr = CardinalConnectionSet.GetSuffix(arrangement);
+
+
+                    String sImageKey = String.Join("_", from j in new[] { sBlockTypeSuffix.ToString(), sGetBaseKey, sCardinalStr } where !String.IsNullOrEmpty(j) select j);
+                    var getresult = LoadPixelDataArrayFromDefaultAsset(sImageKey);
+                    ConnectedPixelSets[(BlockEnum)blocktype, arrangement] = getresult;
+                }
+            }
+        }
+        
+        protected PixelEnum[][] LoadPixelDataArrayFromDefaultAsset(String sImageKey)
+        {
+            try
+            {
+                if (TetrisGame.Imageman.HasSKBitmap(sImageKey))
+                {
+                    var getimage = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(sImageKey));
+                    return LoadPixelDataArrayFromDefaultAsset(getimage);
+                }
+            }
+            finally
+            {
+            }
+            return null;
+
+        }
+        protected PixelEnum[][] LoadPixelDataArrayFromDefaultAsset(SKImage ImageSource)
+        {
+            SKPixmap map = ImageSource.PeekPixels();
+
+            PixelEnum[][] MapResult = new PixelEnum[map.Height][];
+            for (int row = 0; row < map.Height; row++)
+            {
+                MapResult[row] = new PixelEnum[map.Width];
+                for (int col = 0; col < map.Width; col++)
+                {
+                    SKColor thispixel = map.GetPixelColor(col, row);
+                    MapResult[row][col] = FromDefaultImagePixel(thispixel);
+                }
+            }
+            return MapResult;
+
+        }
+        
+
+    }
+
+
     public abstract class ConnectedImageBlockTheme : ConnectedImageLineSeriesBlockThemeBase<SKColor, SKImage>
     {
         protected CardinalImageSetBlockData Red = new CardinalImageSetBlockData();
@@ -291,7 +540,7 @@ namespace BASeTris.Theme.Block
 
 
 
-        protected CachedImageData<SKColor> ImageCache = null;
+        protected CachedImageData<Key> ImageCache = null;
         //protected CachedImageDataByColor ImageCache = new CachedImageDataByColor();
         //static Dictionary<LineSeriesBlock.CombiningTypes, CardinalImageSet> NormalConnectedBlocks = null;
         //static Dictionary<LineSeriesBlock.CombiningTypes, SKImage> NormalBlocks = null;
@@ -310,7 +559,7 @@ namespace BASeTris.Theme.Block
         //public abstract void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field);
         
 
-        Dictionary<String, SKColor> ChosenNominoColours = new Dictionary<string, SKColor>();
+        Dictionary<String, Key> ChosenNominoColours = new Dictionary<string, Key>();
 
 
 
@@ -332,61 +581,17 @@ namespace BASeTris.Theme.Block
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             foreach (var iterate in Group)
             {
-                CachedImageDataByColor.BlockTypeConstants blocktype = CachedImageDataByColor.BlockTypeConstants.Normal;
+                CachedImageData<Key>.BlockTypeConstants blocktype = CachedImageData<Key>.BlockTypeConstants.Normal;
                 //Dictionary<SKColor, SKImage> Sourcedict = null;
                 LineSeriesBlock.CombiningTypes? chosenType = null;
-                SKColor useColor = SKColors.Red;
-                if (iterate.Block is LineSeriesBlock lsb)
-                {
-                    chosenType = lsb.CombiningIndex;
-
-                    if (lsb.Popping)
-                    {
-                        blocktype = CachedImageDataByColor.BlockTypeConstants.Pop;
-                        //Sourcedict = ImageCache.PopBlocks_Color;
-                    }
-                    else
-                    {
-                        blocktype = CachedImageDataByColor.BlockTypeConstants.Normal;
-
-                        if (lsb is LineSeriesPrimaryBlock lsbp)
-                        {
-
-                            if (lsbp is LineSeriesPrimaryShinyBlock)
-                            {
-                                blocktype = CachedImageDataByColor.BlockTypeConstants.Shiny;
-
-                            }
-                            else
-                            {
-                                blocktype = CachedImageDataByColor.BlockTypeConstants.Fixed;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    //I,O,T,S,Z,J,L
-                    //{Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
-                    //chosen color based on the type.
-                    if (Group is Tetromino_I) useColor = SKColors.Cyan;
-                    else if (Group is Tetromino_O) useColor = SKColors.Yellow;
-                    else if (Group is Tetromino_T) useColor = SKColors.Purple;
-                    else if (Group is Tetromino_S) useColor = SKColors.Green;
-                    else if (Group is Tetromino_Z) useColor = SKColors.Red;
-                    else if (Group is Tetromino_J) useColor = SKColors.Navy;
-                    else if (Group is Tetromino_L) useColor = SKColors.OrangeRed;
-                    else
-                    {
-                        useColor = NNominoGenerator.GetNominoData<SKColor>(ChosenNominoColours, Group, () => RandomColor());
-                    }
-                    //else useColor = SKColors.Gray;
 
 
+                GenericCachedData<Key, DataType>.BlockTypeConstants btc;
 
-                    //chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));
-                }
-                if (chosenType != null) useColor = LineSeriesBlock.GetCombiningTypeColor(chosenType.Value);
+                
+                Key useKey;
+                (btc, useKey) = GetBlockData(Group, iterate.Block, GameHandler, Field, Reason);
+
                 //---
                 if (iterate.Block is ImageBlock ibb)
                 {
@@ -395,7 +600,7 @@ namespace BASeTris.Theme.Block
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     }
 
-                    if (blocktype == CachedImageDataByColor.BlockTypeConstants.Normal && UseConnectedImages)
+                    if (blocktype == CachedImageData<Key>.BlockTypeConstants.Normal && UseConnectedImages)
                     {
 
                         //determine the flags by checking the Nomino.
@@ -435,8 +640,8 @@ namespace BASeTris.Theme.Block
                         }
                         CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
 
-                        var useRotationImages = from c in useConnectionStyles select   ImageCache.GetConnectedBlocks(useColor)[c];
-                        var useImage = ImageCache.GetConnectedBlocks(useColor)[cs];
+                        var useRotationImages = from c in useConnectionStyles select   ImageCache.GetConnectedBlocks(useKey)[c];
+                        var useImage = ImageCache.GetConnectedBlocks(useKey)[cs];
                         ibb._RotationImagesSK = useRotationImages.ToArray();//GetImageRotations(SKBitmap.FromImage(useImage));
                         //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
 
@@ -444,7 +649,7 @@ namespace BASeTris.Theme.Block
                     }
                     else
                     {
-                        ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock(blocktype, useColor) };
+                        ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock(blocktype, useKey) };
                     }
 
                 }
@@ -456,8 +661,8 @@ namespace BASeTris.Theme.Block
         {
             return new SKColor((byte)TetrisGame.StatelessRandomizer.Next(256), (byte)TetrisGame.StatelessRandomizer.Next(256), (byte)TetrisGame.StatelessRandomizer.Next(256));
         }
-        private bool VisuallyConnectOnlySameCombiningType = false;
-        private bool UseConnectedImages = true;
+        protected bool VisuallyConnectOnlySameCombiningType = false;
+        protected bool UseConnectedImages = true;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
             return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_4", 0.5f], Color.Transparent);

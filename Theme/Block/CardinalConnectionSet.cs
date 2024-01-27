@@ -138,7 +138,34 @@ namespace BASeTris.Theme.Block
         }
     }
 
+    public class CardinalConnectionDictionary<Key, Data>
+    {
+        Dictionary<Key, Data[]> AllData = new Dictionary<Key, Data[]>();
 
+        
+        public Data this[Key key, ConnectedStyles connection]
+        {
+            get
+            {
+                if (AllData.ContainsKey(key))
+                    return AllData[key][(int)connection];
+
+                return default(Data);
+
+            }
+            set
+            {
+                if (!AllData.ContainsKey(key))
+                    AllData[key] = new Data[(int)ConnectedStyles.MaxValue];
+
+                AllData[key][(int)connection] = value;
+
+            }
+        }
+
+
+
+    }
 
     public class CardinalConnectionSet<Element,Data> : CardinalConnectionSet
     {
