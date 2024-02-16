@@ -33,7 +33,19 @@ namespace BASeTris
             var sl = new SortedList<float, T>();
             foreach (T iterate in Shufflethese)
             {
-                sl.Add((float)rgen.NextDouble(), iterate);
+                bool AddError = true;
+                while (AddError)
+                {
+                    try
+                    {
+                        sl.Add((float)rgen.NextDouble(), iterate);
+                        AddError = false;
+                    }
+                    catch (Exception exr)
+                    {
+                        AddError = true;
+                    }
+                }
             }
             Random rg = new Random();
 

@@ -5,6 +5,7 @@ using BASeTris.Rendering;
 using SkiaSharp;
 using BASeTris.Theme.Block;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace BASeTris.BackgroundDrawers
 {
@@ -62,7 +63,7 @@ namespace BASeTris.BackgroundDrawers
             //BackgroundBrush.WrapMode = WrapMode.Tile;
         }
     }
-
+    
 
     [BackgroundInformation(typeof(SKCanvas), "STANDARD")]
     public class StandardImageBackgroundSkia : Background<StandardImageBackgroundDrawSkiaCapsule>
@@ -78,6 +79,40 @@ namespace BASeTris.BackgroundDrawers
             _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
             return _Background;
         }
+        static Dictionary<SKColor, SKImage> singlecolorbitmaps = new Dictionary<SKColor, SKImage>();
+        public static StandardImageBackgroundSkia GetSolidBackground(SKColor color)
+        {
+            if (!singlecolorbitmaps.ContainsKey(color))
+            {
+                //draw 1x1 pixel of the given color.
+                SKBitmap skb = new SKBitmap(1, 1);
+                using (SKCanvas skc = new SKCanvas(skb))
+                {
+                    skc.Clear(color);
+                }
+                singlecolorbitmaps.Add(color, SKImage.FromBitmap(skb));
+            }
+            return GetImageBackground(singlecolorbitmaps[color]);
+
+
+        }
+        public static StandardImageBackgroundSkia GetImageBackground(SKImage pImage)
+        {
+            return GetImageBackground(pImage, new SKPoint(0, 0));
+        }
+        public static StandardImageBackgroundSkia GetImageBackground(SKImage pImage, SKPoint pMovement)
+        {
+            return GetImageBackground(pImage, pMovement, null);
+        }
+        public static StandardImageBackgroundSkia GetImageBackground(SKImage pImage, SKPoint pMovement, SKColorFilter filter)
+        {
+            var _background = new StandardImageBackgroundSkia();
+            _background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = pImage, Movement = pMovement };
+            if(filter!=null) _background.Data.theFilter = filter;
+
+            return _background;
+        }
+
         public static StandardImageBackgroundSkia GetMenuBackgroundDrawer()
         {
             var _Background = new StandardImageBackgroundSkia();

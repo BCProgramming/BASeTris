@@ -302,10 +302,6 @@ namespace BASeTris
             try
             {
                 var CurrentGameState = _Present.Game.CurrentState;
-                if(CurrentGameState is FieldLineActionGameState)
-                {
-                    ;
-                }
                 //int ParticleCount = CurrentGameState is GameplayGameState ? (CurrentGameState as GameplayGameState).Particles.Count : CurrentGameState is ICompositeState<GameplayGameState>?(CurrentGameState as ICompositeState<GameplayGameState>).GetComposite().Particles.Count :0;
                 Title = "BASeTris";
                 var handler = (this as IStateOwner).GetHandler();

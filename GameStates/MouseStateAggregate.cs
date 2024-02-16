@@ -11,7 +11,7 @@ namespace BASeTris.GameStates
     
     public class MouseStateAggregate
     {
-        public bool MouseActive { get { return (DateTime.Now - LastMouseMovement).Seconds > 5; } }
+        public bool MouseActive { get { return (DateTime.Now - LastMouseMovement).TotalSeconds < 5; } }
         public BCPoint LastMouseMovementPosition { get; set; }
 
         public DateTime LastMouseMovement { get; set; }

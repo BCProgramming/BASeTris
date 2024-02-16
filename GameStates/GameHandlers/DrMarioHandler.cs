@@ -56,10 +56,12 @@ namespace BASeTris.GameStates.GameHandlers
 
         public DrMarioHandler(DrMarioBlockPreparer input) : base(input)
         {
-            SimplePopHandling = true;
+           CriticalMassToPopAllOfSameColor = 100;
+           SimplePopHandling = true;
         }
         public DrMarioHandler()
         {
+            CriticalMassToPopAllOfSameColor = 100;
             SimplePopHandling = true;
             Level = 0;
         }

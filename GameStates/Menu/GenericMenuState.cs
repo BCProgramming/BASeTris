@@ -125,7 +125,13 @@ namespace BASeTris.GameStates.Menu
                 else if (e.MenuElement == Controls)
                 {
                     var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
-                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, ControlsState);
+                    ControlsState.BG = pOwner.CurrentState.BG;
+
+                    TransitionState tstatePixelate = new TransitionState_Pixelate(pOwner.CurrentState, ControlsState, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+
+
+
+                    pOwner.CurrentState = tstatePixelate; //MenuState.CreateOutroState(pOwner, ControlsState);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == BGDesign)

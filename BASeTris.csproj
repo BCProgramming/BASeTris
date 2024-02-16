@@ -297,6 +297,7 @@
     <Compile Include="Rendering\Skia\GameStates\ShowHighScoresStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\TextScrollStateSkiaRenderingHandler.cs" />
+    <Compile Include="Rendering\Skia\GameStates\TransitioningStatesSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
     <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
     <Compile Include="Rendering\Skia\GameStates\PrimaryBlockAppearanceStateSkiaRenderingHandler.cs" />
@@ -333,7 +334,7 @@
     <Compile Include="Theme\Block\Composite\NESVarietyTheme.cs" />
     <Compile Include="Theme\Block\Composite\ShadedVarietyTheme.cs" />
     <Compile Include="Theme\Block\Composite\VarietyThemeBase.cs" />
-    <Compile Include="Theme\Block\ConnectedCustomPixelTheme.cs" />
+    <Compile Include="Theme\Block\ConnectedBCTBlockTheme.cs" />
     <Compile Include="Theme\Block\CardinalConnectionSet.cs" />
     <Compile Include="Theme\Block\ConnectedImageBlockTheme.cs" />
     <Compile Include="Theme\Block\ConnectedThemeCache.cs" />

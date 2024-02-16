@@ -15,6 +15,17 @@ using SkiaSharp;
 
 namespace BASeTris.GameStates.Menu
 {
+    public interface IMouseAwareMenuItem
+    {
+        void MouseDown(IStateOwner pOwner, StateMouseButtons ButtonDown, BCPoint Position);
+        void MouseUp(IStateOwner pOwner, StateMouseButtons ButtonUp, BCPoint Position);
+        void MouseMove(IStateOwner pOwner, BCPoint Position);
+
+        public MouseStateAggregate MouseInputData { get; }
+
+
+    }
+
     public class MenuState : GameState, IMouseInputState, ITransitableState,IDirectKeyboardInputState
     {
         public class MenuStateFadedParentStateInformation
@@ -447,6 +458,10 @@ namespace BASeTris.GameStates.Menu
                 {
                     MouseDownedItem = selecteditem;
                 }
+                if (selecteditem is IMouseAwareMenuItem imami)
+                {
+                    imami.MouseMove(pOwner, Position);
+                }
             }
         }
 
@@ -456,25 +471,33 @@ namespace BASeTris.GameStates.Menu
             {
                 if (MouseDownedItem != null)
                 {
-                    if (ButtonUp == StateMouseButtons.LButton)
+                    if (MouseDownedItem is IMouseAwareMenuItem imami)
                     {
-                        if (MouseDownedItem.LastBounds.Contains(Position))
-                        {
-                            HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
-                        }
+                        imami.MouseUp(pOwner, ButtonUp, Position);
                     }
-                    else if (ButtonUp == StateMouseButtons.xButton1)
+                    else
                     {
-                        if (MouseDownedItem.LastBounds.Contains(Position))
+
+                        if (ButtonUp == StateMouseButtons.LButton)
                         {
-                            HandleGameKey(pOwner, GameKeys.GameKey_Left);
+                            if (MouseDownedItem.LastBounds.Contains(Position))
+                            {
+                                HandleGameKey(pOwner, GameKeys.GameKey_RotateCW);
+                            }
                         }
-                    }
-                    else if (ButtonUp == StateMouseButtons.xButton2)
-                    {
-                        if (MouseDownedItem.LastBounds.Contains(Position))
+                        else if (ButtonUp == StateMouseButtons.xButton1)
                         {
-                            HandleGameKey(pOwner, GameKeys.GameKey_Right);
+                            if (MouseDownedItem.LastBounds.Contains(Position))
+                            {
+                                HandleGameKey(pOwner, GameKeys.GameKey_Left);
+                            }
+                        }
+                        else if (ButtonUp == StateMouseButtons.xButton2)
+                        {
+                            if (MouseDownedItem.LastBounds.Contains(Position))
+                            {
+                                HandleGameKey(pOwner, GameKeys.GameKey_Right);
+                            }
                         }
                     }
 
@@ -508,11 +531,18 @@ namespace BASeTris.GameStates.Menu
 
                         }
 
-
+                        if (checkitem is IMouseAwareMenuItem imami)
+                        {
+                            imami.MouseMove(pOwner, Position);
+                        }
                         SelectedIndex = i;
                     }
                 }
             }
+
+
+
+
             MouseInputData.LastMouseMovementPosition = Position;
             MouseInputData.LastMouseMovement = DateTime.Now;
         }

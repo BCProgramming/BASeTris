@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BASeTris.BackgroundDrawers;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -22,7 +24,23 @@ namespace BASeTris.GameStates.Menu
         public override MenuEventResultConstants OnActivated(IStateOwner pOwner)
         {
             ShowHighScoresState scorestate = new ShowHighScoresState(TetrisGame.ScoreMan["Standard"], _State, null);
-            _Owner.CurrentState = scorestate;
+
+
+            
+
+
+
+            //currentstate->tstateC->tstateblack->tstateA->scorestate
+
+            //TransitionState tstateBlocks = new TransitionState_BlockRandom(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0,0,500)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous ,BlockSize=64};
+            //TransitionState tstateBlocks = new TransitionState_Melt(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, Size=1,SnapshotSettings=TransitionState.SnapshotConstants.Snapshot_Both };
+            
+                TransitionState tstateBlocks = new TransitionState_Pixelate(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous,SnapshotSettings=TransitionState.SnapshotConstants.Snapshot_Both };
+
+            //TransitionState tstate = TransitionState.GetTransitionState(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 500));
+            //tstateblack.GameProcDelegationMode = tstateA.GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_None;
+
+            _Owner.CurrentState = tstateBlocks;
             _State.ActivatedItem = null;
             EnterExitScoreCount++;
             if (EnterExitScoreCount == 5)
@@ -30,10 +48,11 @@ namespace BASeTris.GameStates.Menu
                 MenuStateTextMenuItem CreditsMenu = new MenuStateTextMenuItem() { Text = "Credits", TipText = "View Credits!" };
                 CreditsMenu.FontFace = FontSrc.FontFamily.Name;
                 CreditsMenu.FontSize = FontSrc.Size;
-                _State.MenuElements.Add(CreditsMenu);
+                
                 scorestate.BeforeRevertState += (o, e) =>
                 {
-                    TetrisGame.Soundman.PlaySound("level_up", false).Tempo = 2;
+                    _State.MenuElements.Add(CreditsMenu);
+                    TetrisGame.Soundman.PlaySound("level_up", false).Tempo = 4;
                 };
                 _State.MenuItemActivated += ((a, b) =>
                 {
@@ -45,6 +64,7 @@ namespace BASeTris.GameStates.Menu
                     }
                 });
             }
+
             return MenuEventResultConstants.Handled;
         }
 

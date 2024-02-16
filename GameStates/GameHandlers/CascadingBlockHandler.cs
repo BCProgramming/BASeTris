@@ -429,7 +429,7 @@ namespace BASeTris.GameStates.GameHandlers
             return CreateResult;
         }
         public TimeSpan LastPopComplete = TimeSpan.Zero;
-        public int CriticalMassToPopAllOfSameColor = 4;
+        public int CriticalMassToPopAllOfSameColor = 5;
         public int Level { get; set; } = 0;
         public int PrimaryBlockCount = 0;
         protected bool IgnoreActiveGroupsForFieldChange = false;

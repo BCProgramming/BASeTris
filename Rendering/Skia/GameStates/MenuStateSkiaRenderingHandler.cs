@@ -197,10 +197,12 @@ namespace BASeTris.Rendering.Skia.GameStates
                     canvo.DrawImage(CursorImage, new SKPoint(0, 0));
                 }
                 CursorBitmap = skversion;*/
+                
             }
+            if (Source.MouseInputData.MouseActive)
+                g.DrawBitmap(CursorBitmap, Source.MouseInputData.LastMouseMovementPosition, null);
 
 
-            g.DrawBitmap(CursorBitmap, Source.MouseInputData.LastMouseMovementPosition, null);
 
         }
         static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightGreen, BlendMode = SKBlendMode.HardLight };
