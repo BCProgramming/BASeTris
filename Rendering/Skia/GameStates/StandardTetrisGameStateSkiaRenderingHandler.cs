@@ -28,7 +28,47 @@ namespace BASeTris.Rendering.Skia.GameStates
         private StandardImageBackgroundSkia _Background = null;
         private NominoTheme CurrentTheme = null;
         public SKRect LastDrawStat = SKRect.Empty;
-        
+
+        public static void PaintPartitionedState(IStateOwner pOwner,GameState PaintState, SKCanvas canvas,GameStateSkiaDrawParameters Element,out SKRect pFieldRect,out SKRect pStatsRect)
+        {
+            RenderHelpers.GetHorizontalSizeData(Element.Bounds.Height, Element.Bounds.Width, out float FieldWidth, out float StatWidth);
+            var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), PaintState.GetType(), typeof(GameStateSkiaDrawParameters));
+            pFieldRect = new SKRect();
+            pStatsRect = new SKRect();
+            if (renderer != null)
+            {
+                if (renderer is IStateRenderingHandler staterender)
+                {
+                    SKRect FieldRect = new SKRect(0, 0, FieldWidth, Element.Bounds.Height);
+                    SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, Element.Bounds.Height);
+                    //_LastDrawBounds = FieldRect;
+                    pFieldRect = FieldRect;
+                    pStatsRect = StatsRect;
+                    using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
+                    {
+                        canvas.ClipRect(FieldRect);
+                        staterender.Render(pOwner, canvas, PaintState, new GameStateSkiaDrawParameters(FieldRect));
+                    }
+                    using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
+                    {
+                        canvas.ClipRect(StatsRect);
+                        staterender.RenderStats(pOwner, canvas, PaintState, new GameStateSkiaDrawParameters(StatsRect));
+                    }
+
+                }
+                else
+                {
+                    ;
+                }
+            }
+            else
+            {
+                ;
+            }
+        }
+
+
+
         private void BuildBackground(GameplayGameState Self,SKRect Size)
         {
             var bgInfo = Self.PlayField.Theme.GetThemePlayFieldBackground(Self.PlayField,Self.GameHandler);

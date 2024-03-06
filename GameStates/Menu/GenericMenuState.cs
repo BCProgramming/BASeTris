@@ -127,11 +127,11 @@ namespace BASeTris.GameStates.Menu
                     var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
                     ControlsState.BG = pOwner.CurrentState.BG;
 
-                    TransitionState tstatePixelate = new TransitionState_Pixelate(pOwner.CurrentState, ControlsState, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+                    //TransitionState tstatePixelate = new TransitionState_Pixelate(pOwner.CurrentState, ControlsState, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+                    var tstate = TransitionState.GetRandomTransitionState(pOwner.CurrentState,ControlsState,TransitionState.StandardTransitionLength);
 
 
-
-                    pOwner.CurrentState = tstatePixelate; //MenuState.CreateOutroState(pOwner, ControlsState);
+                    pOwner.CurrentState = tstate; //MenuState.CreateOutroState(pOwner, ControlsState);
                     Target.ActivatedItem = null;
                 }
                 else if (e.MenuElement == BGDesign)
@@ -276,10 +276,12 @@ namespace BASeTris.GameStates.Menu
                     {
                         if (pOwner is IGamePresenter igp)
                         {
+                            
 
-
-                            pOwner.CurrentState = new GameplayGameState(pOwner, usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
-
+                            var NewGameState = new GameplayGameState(pOwner, usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
+                            //TransitionState ts = new TransitionState_Pixelate(pOwner.CurrentState, NewGameState, new TimeSpan(0, 0, 0, 0, 10000)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_None, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+                            var ts = TransitionState.GetRandomTransitionState(pOwner.CurrentState, NewGameState, TransitionState.StandardTransitionLength);
+                            pOwner.CurrentState = ts;
                             igp.StartGame();
                         }
                     };

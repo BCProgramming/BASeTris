@@ -35,7 +35,7 @@ namespace BASeCamp.Logging
             _LoggerName = sName;
             InitLog(sLogFolder);
             if (EnableLogging)
-                Debug.Listeners.Add(this);
+                Trace.Listeners.Add(this);
         }
 
         public DebugLogger(String sName)
@@ -44,7 +44,7 @@ namespace BASeCamp.Logging
             InitLog();
             if (EnableLogging)
             {
-                Debug.Listeners.Add(this);
+                Trace.Listeners.Add(this);
             }
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;

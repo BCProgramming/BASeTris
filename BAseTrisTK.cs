@@ -26,6 +26,7 @@ using BASeTris.Settings;
 using System.IO;
 using System.Reflection;
 using Microsoft.VisualBasic.ApplicationServices;
+using BASeTris.Rendering.Skia.GameStates;
 
 namespace BASeTris
 {
@@ -283,11 +284,7 @@ namespace BASeTris
             base.OnUpdateFrame(e);
             //run update...
         }
-        private void GetHorizontalSizeData(float WindowHeight, float WindowWidth, out float FieldSize, out float StatSize)
-        {
-            FieldSize = WindowHeight * (332f / 641f);
-            StatSize = WindowWidth - FieldSize;
-        }
+        
         public double FrameTime { get { if (CurrentFrameData == null) return 0; return CurrentFrameData.Time; } }
         private FrameEventArgs LastFrameData = null;
         private FrameEventArgs CurrentFrameData = null;
@@ -374,43 +371,10 @@ namespace BASeTris
                     }
                     else if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                     {
-                        GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
-                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), CurrentGameState.GetType(), typeof(GameStateSkiaDrawParameters));
-                        if (renderer != null)
-                        {
-                            if (renderer is IStateRenderingHandler staterender)
-                            {
-                                SKRect FieldRect = new SKRect(0, 0, FieldWidth, ClientSize.Height);
-                                SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height);
-                                //canvas.Clear(SKColors.Blue);
-                                //canvas.Save(); //save state before setting clip to field.
-                                _LastDrawBounds = FieldRect;
-                                
-                                using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
-                                {
-                                    canvas.ClipRect(FieldRect);
-                                    staterender.Render(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(FieldRect));
-                                }
-                                //canvas.Restore();
-                                
-                                //now, call rendder to render the stats.
-                                
-                                using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
-                                {
-                                    canvas.ClipRect(StatsRect);
-                                    staterender.RenderStats(this, canvas, CurrentGameState, new GameStateSkiaDrawParameters(StatsRect));
-                                }
-
-                            }
-                            else
-                            {
-                                ;
-                            }
-                        }
-                        else
-                        {
-                            ;
-                        }
+                        SKRect LastDraw;
+                        //StandardTetrisGameStateSkiaRenderingHandler.PaintPartitionedState(this, CurrentGameState, canvas, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)),out LastDraw,out _);
+                        //_LastDrawBounds = LastDraw;
+                        PaintPartitionedState(CurrentGameState, canvas);
                     }
                     if (FPSPaint == null)
                     {
@@ -462,7 +426,40 @@ namespace BASeTris
             }
         }
 
+        private void PaintPartitionedState(GameState PaintState, SKCanvas canvas)
+        {
+            RenderHelpers.GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
+            var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), PaintState.GetType(), typeof(GameStateSkiaDrawParameters));
+            if (renderer != null)
+            {
+                if (renderer is IStateRenderingHandler staterender)
+                {
+                    SKRect FieldRect = new SKRect(0, 0, FieldWidth, ClientSize.Height);
+                    SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height);
+                    _LastDrawBounds = FieldRect;
 
+                    using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
+                    {
+                        canvas.ClipRect(FieldRect);
+                        staterender.Render(this, canvas, PaintState, new GameStateSkiaDrawParameters(FieldRect));
+                    }
+                    using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
+                    {
+                        canvas.ClipRect(StatsRect);
+                        staterender.RenderStats(this, canvas, PaintState, new GameStateSkiaDrawParameters(StatsRect));
+                    }
+
+                }
+                else
+                {
+                    ;
+                }
+            }
+            else
+            {
+                ;
+            }
+        }
 
         SKPaint FPSPaint = null;
         SKPaint FPSShadow = null;
@@ -484,7 +481,7 @@ namespace BASeTris
 
         public Rectangle GameArea { get {
 
-                GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
+                RenderHelpers.GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
 
                 return new Rectangle(0,0,(int)FieldWidth,ClientSize.Height);
             } }

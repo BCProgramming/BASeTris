@@ -11,6 +11,28 @@ using System;
 
 namespace BASeTris.Theme.Block
 {
+    [HandlerTheme("NES Style (Glitched)", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [ThemeDescription("The glitched out colours from very high level play in the NES Game.")]
+    public class NESGlitchedTetrominoTheme : NESTetrominoTheme
+    {
+        public override string Name => "NES (Glitched)";
+        public NESGlitchedTetrominoTheme()
+        {
+            this.ColourSelectionType = NESTetrominoThemeColourSelectionTypeConstants.Glitched;
+        }
+    }
+    [HandlerTheme("NES Style (Random)", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [ThemeDescription("NES Style, but with randomly chosen colourways.")]
+    public class NESRandomTetrominoTheme : NESTetrominoTheme
+    {
+        public override string Name => "NES (Random)";
+        public NESRandomTetrominoTheme()
+        {
+            this.ColourSelectionType = NESTetrominoThemeColourSelectionTypeConstants.Random;
+        }
+    }
+
+
     [HandlerTheme("NES Style", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     [ThemeDescription("From the Visuals of the NES Release.")]
     public class NESTetrominoTheme : CustomPixelTheme<NESTetrominoTheme.BCT, NESTetrominoTheme.NESBlockTypes>
@@ -34,8 +56,26 @@ namespace BASeTris.Theme.Block
         }
         SKColor[][] LevelColorSets = new SKColor[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
 
+        private Dictionary<int, SKColor[]> StoredRandomColorSets = new Dictionary<int, SKColor[]>();
 
+        public SKColor[] GetRandomLevelColorSet(int pLevel,Random rgen)
+        {
 
+            if (!StoredRandomColorSets.ContainsKey(pLevel))
+            {
+                StoredRandomColorSets.Add(pLevel, GetRandomColorSet(rgen));
+            }
+            return StoredRandomColorSets[pLevel];
+
+        }
+        public SKColor[] GetRandomColorSet(Random rgen)
+        {
+            return new SKColor[] { RandomColor(rgen), RandomColor(rgen), SKColors.Black, RandomColor(rgen) };
+        }
+        private SKColor RandomColor(Random rgen)
+        {
+            return new SKColor((byte)rgen.Next(255), (byte)rgen.Next(255), (byte)rgen.Next(255));
+        }
         public override SKPointI GetBlockSize(TetrisField field, NESBlockTypes BlockType)
         {
             return new SKPointI(DarkerBlock.Length, DarkerBlock[0].Length);
@@ -44,18 +84,37 @@ namespace BASeTris.Theme.Block
         {
             return CustomPixelTheme<BCT, NESBlockTypes>.BlockFlags.Static;
         }
+
+        public enum NESTetrominoThemeColourSelectionTypeConstants
+        {
+            Default,
+            Glitched,
+            Random
+        }
+
+        public NESTetrominoThemeColourSelectionTypeConstants ColourSelectionType = NESTetrominoThemeColourSelectionTypeConstants.Default;
         public override SKColor GetColor(TetrisField field, Nomino Element, NominoElement block, NESBlockTypes BlockType, BCT PixelType)
         {
             int LevelNum = field.Level % 256;
             int LevelIndex = MathHelper.mod(LevelNum, AllLevelColors.Length);
             
             var ChosenLevelSet = LevelColorSets[LevelIndex];
-            if (LevelNum >= 138)
+
+            if (ColourSelectionType == NESTetrominoThemeColourSelectionTypeConstants.Random)
+            {
+                ChosenLevelSet = GetRandomLevelColorSet(LevelNum, TetrisGame.StatelessRandomizer);
+            }
+            else if (LevelNum >= 138)
             {
                 LevelIndex = LevelNum;
-                ChosenLevelSet = GlitchColourSets[LevelNum-138];
+                ChosenLevelSet = GlitchColourSets[LevelNum - 138];
             }
-            int BlockCount = 0;
+            else if (ColourSelectionType == NESTetrominoThemeColourSelectionTypeConstants.Glitched)
+            {
+                ChosenLevelSet = GlitchColourSets[LevelNum];
+            }
+            
+                int BlockCount = 0;
             if (!(Element is Tetromino) && Element.Count() > 1)
             {
                 //get the index.

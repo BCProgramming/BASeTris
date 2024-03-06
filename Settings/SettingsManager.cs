@@ -355,7 +355,7 @@ namespace BASeTris.Settings
                 }  
                 else
                 {
-                    Debug.Print("Found Handler:" + currenthandler.Name);
+                    //Debug.Print("Found Handler:" + currenthandler.Name);
                     return GetSettings(currenthandler.Name);
                 }
                 

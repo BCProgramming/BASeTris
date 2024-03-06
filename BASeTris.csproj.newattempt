@@ -1,0 +1,257 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <OutputType>WinExe</OutputType>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <LangVersion>10.0</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <LangVersion>10.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>BaseTris.ico</ApplicationIcon>
+    <StartupObject>BASeTris.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <LangVersion>10.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <LangVersion>10.0</LangVersion>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Pixel.ttf" />
+    <EmbeddedResource Include="LCD.ttf" />
+    <EmbeddedResource Include="Enterprise.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BASeScores\BASeScores.csproj" />
+    <ProjectReference Include="..\BCRenderingAdapter\BCRenderingAdapter\BCRenderingAdapter.csproj" />
+    <ProjectReference Include="..\XMLSerialization\Elementizer.csproj" />
+    <PackageReference Include="ManagedBass">
+      <Version>3.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="ManagedBass.Fx">
+      <Version>3.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="ManagedBass.Mix">
+      <Version>3.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="OpenTK">
+      <Version>4.8.2</Version>
+    </PackageReference>
+    <PackageReference Include="SkiaSharp">
+      <Version>2.80.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Audio\BCsong.ogg" />
+    <Content Include="Assets\Audio\block_falling.ogg" />
+    <Content Include="Assets\Audio\block_move.ogg" />
+    <Content Include="Assets\Audio\block_move_2.ogg" />
+    <Content Include="Assets\Audio\block_move_3.ogg" />
+    <Content Include="Assets\Audio\block_place.ogg" />
+    <Content Include="Assets\Audio\block_place_2.ogg" />
+    <Content Include="Assets\Audio\block_place_3.ogg" />
+    <Content Include="Assets\Audio\block_pop.ogg" />
+    <Content Include="Assets\Audio\block_rotate.ogg" />
+    <Content Include="Assets\Audio\block_rotate_2.ogg" />
+    <Content Include="Assets\Audio\block_rotate_3.ogg" />
+    <Content Include="Assets\Audio\block_rotate_4.ogg" />
+    <Content Include="Assets\Audio\block_rotate_5.ogg" />
+    <Content Include="Assets\Audio\block_stop.ogg" />
+    <Content Include="Assets\Audio\brickbreak.ogg" />
+    <Content Include="Assets\Audio\chain_chime.ogg" />
+    <Content Include="Assets\Audio\char_change.ogg" />
+    <Content Include="Assets\Audio\DrMarioChill.ogg" />
+    <Content Include="Assets\Audio\DrMarioFever.ogg" />
+    <Content Include="Assets\Audio\drop.ogg" />
+    <Content Include="Assets\Audio\emerge.ogg" />
+    <Content Include="Assets\Audio\gren.ogg" />
+    <Content Include="Assets\Audio\highscoreentry.ogg" />
+    <Content Include="Assets\Audio\high_score_list.ogg" />
+    <Content Include="Assets\Audio\journey3.ogg" />
+    <Content Include="Assets\Audio\kirbysand.ogg" />
+    <Content Include="Assets\Audio\level_up.ogg" />
+    <Content Include="Assets\Audio\line_clear.ogg" />
+    <Content Include="Assets\Audio\line_clear_2.ogg" />
+    <Content Include="Assets\Audio\line_clear_3.ogg" />
+    <Content Include="Assets\Audio\line_clear_4.ogg" />
+    <Content Include="Assets\Audio\line_tetris.ogg" />
+    <Content Include="Assets\Audio\line_tetris_2.ogg" />
+    <Content Include="Assets\Audio\menu_select.ogg" />
+    <Content Include="Assets\Audio\metal1.ogg" />
+    <Content Include="Assets\Audio\metal2.ogg" />
+    <Content Include="Assets\Audio\metal3.ogg" />
+    <Content Include="Assets\Audio\mmDeath.ogg" />
+    <Content Include="Assets\Audio\pause.ogg" />
+    <Content Include="Assets\Audio\right.ogg" />
+    <Content Include="Assets\Audio\score_chime.ogg" />
+    <Content Include="Assets\Audio\shade_move.ogg" />
+    <Content Include="Assets\Audio\silius1.ogg" />
+    <Content Include="Assets\Audio\smb3_tetris.ogg" />
+    <Content Include="Assets\Audio\switch_active.ogg" />
+    <Content Include="Assets\Audio\switch_inactive.ogg" />
+    <Content Include="Assets\Audio\TDM_A_theme.ogg" />
+    <Content Include="Assets\Audio\TetrisDS.ogg" />
+    <Content Include="Assets\Audio\tetris_2.ogg" />
+    <Content Include="Assets\Audio\tetris_2_A.ogg" />
+    <Content Include="Assets\Audio\tetris_a_theme_techno.ogg" />
+    <Content Include="Assets\Audio\tetris_a_theme_techno_A.ogg" />
+    <Content Include="Assets\Audio\tetris_game_over.ogg" />
+    <Content Include="Assets\Audio\tetris_gb_theme.ogg" />
+    <Content Include="Assets\Audio\tetris_nes_theme.ogg" />
+    <Content Include="Assets\Audio\tetris_theme_A.ogg" />
+    <Content Include="Assets\Audio\tetris_theme_B.ogg" />
+    <Content Include="Assets\Audio\tetris_theme_C.ogg" />
+    <Content Include="Assets\Audio\wrong.ogg" />
+    <Content Include="Assets\background.png" />
+    <Content Include="Assets\background_2.png" />
+    <Content Include="Assets\block_arrangement.png" />
+    <Content Include="Assets\block_chisel_red.png" />
+    <Content Include="Assets\block_lightbevel_red.png" />
+    <Content Include="Assets\block_mottled.png" />
+    <Content Include="Assets\block_pixeled_red.png" />
+    <Content Include="Assets\block_pixeled_red_outline.png" />
+    <Content Include="Assets\block_shine_red.png" />
+    <Content Include="Assets\block_std.png" />
+    <Content Include="Assets\block_std_red.png" />
+    <Content Include="Assets\blue_virus_1.png" />
+    <Content Include="Assets\blue_virus_2.png" />
+    <Content Include="Assets\bubble.png" />
+    <Content Include="Assets\cursor.png" />
+    <Content Include="Assets\dark_dotted.png" />
+    <Content Include="Assets\display_box.png" />
+    <Content Include="Assets\green_virus_1.png" />
+    <Content Include="Assets\green_virus_2.png" />
+    <Content Include="bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassflac.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassmidi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bassopus.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bass_fx.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\lighter_big_dotted.png" />
+    <Content Include="Assets\light_dotted.png" />
+    <Content Include="Assets\Mottle_horizontal.png" />
+    <Content Include="Assets\mottle_right_cap.png" />
+    <Content Include="Assets\pill_left.png" />
+    <Content Include="Assets\pill_pop.png" />
+    <Content Include="Assets\pill_right.png" />
+    <Content Include="Assets\pill_single.png" />
+    <Content Include="Assets\red_virus_1.png" />
+    <Content Include="Assets\red_virus_2.png" />
+    <Content Include="Assets\Settings.xml" />
+    <Content Include="Assets\smoke1.png" />
+    <Content Include="Assets\smoke2.png" />
+    <Content Include="Assets\smoke3.png" />
+    <Content Include="Assets\smoke4.png" />
+    <Content Include="Assets\smoke5.png" />
+    <Content Include="Assets\smoke6.png" />
+    <Content Include="Assets\smoke7.png" />
+    <Content Include="Assets\smoke8.png" />
+    <Content Include="Assets\solid_beveled.png" />
+    <Content Include="Assets\standard_square.png" />
+    <Content Include="Assets\yellow_virus_1.png" />
+    <Content Include="Assets\yellow_virus_2.png" />
+    <Content Include="BaseTris.ico" />
+    <Content Include="to-do-list.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="GameObjects\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Installer\NSI Version Getter\obj\x86\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Remove="Installer\NSI Version Getter\obj\x86\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Remove="Installer\NSI Version Getter\obj\x86\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+    <Compile Remove="Installer\NSI Version Getter\Program.cs" />
+    <Compile Remove="Installer\NSI Version Getter\Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
+    <PropertyGroup>
+      <VerFile>$(IntermediateOutputPath)gitver</VerFile>
+    </PropertyGroup>
+    <Exec Command="git -C &quot;$(ProjectDir.TrimEnd('\'))&quot; describe --long --always --dirty &gt; $(VerFile)" />
+    <ReadLinesFromFile File="$(VerFile)">
+      <Output TaskParameter="Lines" ItemName="GitVersion" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <BuildHash>@(GitVersion)</BuildHash>
+    </PropertyGroup>
+  </Target>
+  <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <CustomAssemblyInfoFile>$(IntermediateOutputPath)CustomAssemblyInfo.cs</CustomAssemblyInfoFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(CustomAssemblyInfoFile)" />
+    </ItemGroup>
+    <ItemGroup>
+      <AssemblyAttributes Include="AssemblyMetadata">
+        <_Parameter1>GitHash</_Parameter1>
+        <_Parameter2>$(BuildHash)</_Parameter2>
+      </AssemblyAttributes>
+    </ItemGroup>
+    <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
+  </Target>
+</Project>

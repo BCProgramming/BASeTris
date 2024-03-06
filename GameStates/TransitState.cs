@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.BASeCamp;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -107,12 +108,8 @@ namespace BASeTris.GameStates
 
         public override DisplayMode SupportedDisplayMode {
             get {
-                if (PreviousState != null && PreviousState.SupportedDisplayMode == DisplayMode.Partitioned)
-                    return DisplayMode.Partitioned;
-                else if (NextState != null && NextState.SupportedDisplayMode == DisplayMode.Partitioned)
-                    return DisplayMode.Partitioned;
-
                 return DisplayMode.Full;
+                
             } }
         public DateTime? StartTime { get; set; }
         public TimeSpan TransitWait { get; set; } = TimeSpan.Zero; //time to wait before starting transition.
@@ -136,13 +133,24 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
-            if (GameProcDelegationMode.HasFlag(DelegateProcConstants.Delegate_Previous))
+            if (GameProcDelegationMode.HasFlag(DelegateProcConstants.Delegate_Previous) || GameProcDelegationMode.HasFlag(DelegateProcConstants.Delegate_Next))
             {
-                PreviousState.GameProc(pOwner);
-            }
-            if (GameProcDelegationMode.HasFlag(DelegateProcConstants.Delegate_Next))
-            {
-                NextState.GameProc(pOwner);
+                var PrevStateTask = Task.Run(() =>
+                {
+
+                    if (GameProcDelegationMode.HasFlag(DelegateProcConstants.Delegate_Previous))
+                    {
+                        PreviousState.GameProc(pOwner);
+                    }
+                });
+                var NextStateTask = Task.Run(() =>
+                {
+                    if (GameProcDelegationMode.HasFlag(DelegateProcConstants.Delegate_Next))
+                    {
+                        NextState.GameProc(pOwner);
+                    }
+                });
+                Task.WaitAll(PrevStateTask, NextStateTask);
             }
             if (PreviousState is ITransitableState its)
             {
@@ -162,11 +170,26 @@ namespace BASeTris.GameStates
             if (GameKeyDelegationMode.HasFlag(DelegateProcConstants.Delegate_Next))
                 NextState.HandleGameKey(pOwner, g);
         }
-        public static Type[] AllTransitionalStates = new Type[] { typeof(TransitionState_BoxWipe), typeof(TransitionState_AlphaBlend) };
-        public static TransitionState GetTransitionState(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength)
+        public static TimeSpan StandardTransitionLength = new TimeSpan(0, 0, 0, 0, 750);
+        private static Type[] _AllTransitionTypes = null;
+        public static Type[] AllTransitionStates
         {
-            Type useType = TetrisGame.Choose(AllTransitionalStates, TetrisGame.StatelessRandomizer);
+            get
+            {
+                if (_AllTransitionTypes == null)
+                {
+                    _AllTransitionTypes = Program.DITypes[typeof(TransitionState)].ManagedTypes.ToArray();
+                }
+                return _AllTransitionTypes;
+            }
+        }
+        
+        public static TransitionState GetRandomTransitionState(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength)
+        {
+            Type useType = TetrisGame.Choose(AllTransitionStates, TetrisGame.StatelessRandomizer);
             TransitionState result = (TransitionState)Activator.CreateInstance(useType, pPrevState, pNextState, pTransitionLength);
+            result.GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_None;
+            result.SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both;
             return result;
 
 
@@ -176,7 +199,7 @@ namespace BASeTris.GameStates
         {
             if (TransitionBuilder == null) TransitionBuilder = (p, n, ts) =>
             {
-                Type useType = TetrisGame.Choose(AllTransitionalStates, TetrisGame.StatelessRandomizer);
+                Type useType = TetrisGame.Choose(AllTransitionStates, TetrisGame.StatelessRandomizer);
                 TransitionState result = (TransitionState)Activator.CreateInstance(useType, p, n, ts);
                 return result;
             };
@@ -248,17 +271,7 @@ namespace BASeTris.GameStates
         {
         }
     }
-    public class TransitionState_BackgroundWait : TransitionState
-    {
-        //a simple "transition" that actually isn't. It is given a background and only paints it.
-
-        public IBackground background { get; set; }
-
-        public TransitionState_BackgroundWait(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
-        {
-        }
-    }
-
+   
     public class TransitionState_Melt : TransitionState
     {
         public int Size { get; set; } = 1;

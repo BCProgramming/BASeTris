@@ -138,7 +138,8 @@ namespace BASeTris.Rendering.Skia
                     }
                     else
                     {
-                        using (var CreateContext = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface))
+                        using (var CreateContext = GRContext.CreateGl(GlobalResources.OpenGLInterface))
+                        //using (var CreateContext = GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface))
                         {
                             SKCanvas gfield = null;
 
@@ -163,23 +164,21 @@ namespace BASeTris.Rendering.Skia
                     
                     parms.LastFieldSave = Bounds;
                     Source.HasChanged = false;
-                    Debug.Print("Finished Field Paint:" + sw.Elapsed.ToString());
+
 
                 }
             }
-            Debug.Print("Drawing Field Bitmap" + sw.Elapsed.ToString());
+            
             g.DrawImage(parms.FieldBitmap, new SKPoint(0, 0));
             //g.DrawBitmap(parms.FieldBitmap,new SKPoint(0,0));
-            Debug.Print("Field Bitmap finished" + sw.Elapsed.ToString());
+            
             if (hadAnimated)
             {
-                Debug.Print("Animated Field blocks found");
                 DrawFieldContents(pState, Source, parms, g, Bounds, true);
             }
 
 
             var activegroups = Source.GetActiveBlockGroups();
-            Debug.Print("Painting Active Groups:" + sw.Elapsed.ToString());
                 lock (activegroups)
                 {
 

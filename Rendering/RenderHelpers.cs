@@ -10,7 +10,11 @@ namespace BASeTris.Rendering
 {
     public static class RenderHelpers
     {
-        
+        public static void GetHorizontalSizeData(float WindowHeight, float WindowWidth, out float FieldSize, out float StatSize)
+        {
+            FieldSize = WindowHeight * (332f / 641f);
+            StatSize = WindowWidth - FieldSize;
+        }
         public static Color MixColor(Color ColorA, Color ColorB, float percentage)
         {
             float[] ColorAValues = new float[] { (float)ColorA.A, (float)ColorA.R, (float)ColorA.G, (float)ColorA.B };

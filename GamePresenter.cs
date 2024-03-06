@@ -77,7 +77,7 @@ namespace BASeTris
             {
                 foreach (var iterate in RenderTags)
                 {
-                    if (ProcessTagFunc(iterate.Value));
+                    if (ProcessTagFunc(iterate.Value))
                     RemoveItems.Add(iterate.Key);
                 }
                 foreach (var removekey in RemoveItems)
@@ -325,7 +325,7 @@ namespace BASeTris
             {
                 while (true)
                 {
-                    Thread.Sleep(5);
+                    Thread.Sleep(2);
                     CIS.CheckState();
                 }
             }

@@ -388,7 +388,6 @@ namespace BASeTris
                     foreach (var bg in groups)
                     {
                         if (bg.Flags.HasFlag(Nomino.NominoControlFlags.ControlFlags_NoClip)) continue;
-                        Debug.Print("Setting Nomino to Field:" + bg.ToString());
                         foreach (var groupblock in bg)
                         {
                             int RowPos = groupblock.Y + bg.Y;

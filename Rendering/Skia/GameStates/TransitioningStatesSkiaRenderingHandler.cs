@@ -9,12 +9,24 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
-
+    //TODO: fix this up to have the snapshots properly handle re-entrancy.
+    public class TransitionStateBitmapCacheElement
+    {
+        public SKBitmap Image { get; private set; }
+        public GameState SourceState { get; private set; }
+        public TransitionStateBitmapCacheElement(GameState pState, SKBitmap pImage)
+        {
+            Image = pImage;
+            SourceState = pState;
+        }
+        
+    }
     public abstract class TransitioningStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, TransitionState, GameStateSkiaDrawParameters>
     {
         [Flags]
@@ -25,9 +37,32 @@ namespace BASeTris.Rendering.Skia.GameStates
             TransitType_Next_Composite = 2,
             TransitType_Dual = 3
         }
-        SKBitmap CachePrev = null;
-        SKBitmap CacheNext = null;
+
+
+
+
+        //SKBitmap CachePrev = null;
+        //SKBitmap CacheNext = null;
+        
+        //GameState CachedPrevState = null;
+        //GameState CachedNextState = null; //keep track of what state ewe actually have a cached bitmap for.
         protected TransitionTypeConstants TransitionType = TransitionTypeConstants.TransitType_Dual;
+
+        private void PaintState(IStateOwner pOwner,GameState State, SKCanvas skc,GameStateSkiaDrawParameters Element)
+        {
+            skc.Clear(SKColors.Pink);
+            if (State.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+            {
+                StandardTetrisGameStateSkiaRenderingHandler.PaintPartitionedState(pOwner, State, skc, Element,out _,out _);
+            }
+            else
+            {
+                RenderingProvider.Static.DrawElement(pOwner, skc, State, Element);
+            }
+
+        }
+        public const String NEXTSNAPKEY = "TransitState::NextSnapshot";
+        public const String PREVSNAPKEY = "TransitState::PrevSnapshot";
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TransitionState Source, GameStateSkiaDrawParameters Element)
         {
             //we want to render both, and then blit from those sources to the target.
@@ -36,63 +71,75 @@ namespace BASeTris.Rendering.Skia.GameStates
             SKBitmap BitmapPrev = null;
             SKBitmap BitmapNext = null;
 
+            //for (hopefully!) better performance, we'll do the drawing for the two states at the same time via async. 
 
-            if (TransitionType.HasFlag(TransitionTypeConstants.TransitType_Prev_Composite))
+            Task PrevTask = Task.Run(() =>
             {
-
-                if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Previous) && CachePrev != null)
+                if (TransitionType.HasFlag(TransitionTypeConstants.TransitType_Prev_Composite))
                 {
-                    BitmapPrev = CachePrev;
-                }
-                else
-                {
-                    if (!Source.GameProcDelegationMode.HasFlag(TransitionState.DelegateProcConstants.Delegate_Previous)) Source.GameProc(pOwner); //for snapshot, if not running gameproc, we want to call it once.
-                    BitmapPrev = new SKBitmap((int)Element.Bounds.Width, (int)Element.Bounds.Height);
 
-                    using (SKCanvas skc = new SKCanvas(BitmapPrev))
+                    if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Previous) && Source.HasCustomProperty(PREVSNAPKEY))
                     {
-                        skc.Clear(SKColors.Pink);
-                        RenderingProvider.Static.DrawElement(pOwner, skc, Source.PreviousState, Element);
+
+
+
+                        BitmapPrev = (SKBitmap)Source.GetCustomProperty(PREVSNAPKEY);
                     }
-                    if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Previous))
-                        CachePrev = BitmapPrev;
+                    else
+                    {
+                        if (!Source.GameProcDelegationMode.HasFlag(TransitionState.DelegateProcConstants.Delegate_Previous) && Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Previous)) Source.PreviousState.GameProc(pOwner); //for snapshot, if not running gameproc, we want to call it once.
+                        BitmapPrev = new SKBitmap((int)Element.Bounds.Width, (int)Element.Bounds.Height);
+
+                        using (SKCanvas skc = new SKCanvas(BitmapPrev))
+                        {
+                            PaintState(pOwner, Source.PreviousState, skc, Element);
+                        }
+                        if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Previous))
+                        {
+                            Source.SetCustomProperty(PREVSNAPKEY, BitmapPrev);
+                        }
+                    }
                 }
-            }
-            if (TransitionType.HasFlag(TransitionTypeConstants.TransitType_Next_Composite))
+            });
+            Task NextTask = Task.Run(() =>
             {
-                if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Next) && CacheNext != null)
+                if (TransitionType.HasFlag(TransitionTypeConstants.TransitType_Next_Composite))
                 {
-                    BitmapNext = CacheNext;
-                }
-                else
-                {
-                    if (!Source.GameProcDelegationMode.HasFlag(TransitionState.DelegateProcConstants.Delegate_Next)) Source.GameProc(pOwner); //for snapshot, if not running gameproc, we want to call it once.
-                    BitmapNext = new SKBitmap((int)Element.Bounds.Width, (int)Element.Bounds.Height);
-                    using (SKCanvas skb = new SKCanvas(BitmapNext))
+                    if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Next) && Source.HasCustomProperty(NEXTSNAPKEY))
                     {
-                        skb.Clear(SKColors.Pink);
-                        RenderingProvider.Static.DrawElement(pOwner, skb, Source.NextState, Element);
+                        BitmapNext = (SKBitmap)Source.GetCustomProperty(NEXTSNAPKEY);
+
                     }
-                    if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Next))
-                        CacheNext = BitmapNext;
+                    else
+                    {
+                        if (!Source.GameProcDelegationMode.HasFlag(TransitionState.DelegateProcConstants.Delegate_Next) && Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Next)) Source.NextState.GameProc(pOwner); //for snapshot, if not running gameproc for next state, we want to call it at least once.
+                        BitmapNext = new SKBitmap((int)Element.Bounds.Width, (int)Element.Bounds.Height);
+                        using (SKCanvas skb = new SKCanvas(BitmapNext))
+                        {
+                            PaintState(pOwner, Source.NextState, skb, Element);
+                        }
+                        if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Next))
+                        {
+                            Source.SetCustomProperty(NEXTSNAPKEY, BitmapNext);
+                        }
+                    }
                 }
-            }
+            });
+
+            Task.WaitAll(PrevTask, NextTask);
+
             //this is not in the State GameProc itself, because the drawing itself can sometimes take some time. If the transition time elapses in that time than we won't really see it.
             
             RenderTransition(pOwner, pRenderTarget, BitmapPrev, BitmapNext, Source, Element);
             if (Source.StartTime == null) Source.StartTime = DateTime.Now;
-            if (BitmapPrev != CachePrev) BitmapPrev.Dispose();
-            if (BitmapNext != CacheNext) BitmapNext.Dispose();
+            
 
         }
         public abstract void RenderTransition(IStateOwner pOwner, SKCanvas Target, SKBitmap Previous, SKBitmap Next, TransitionState Source, GameStateSkiaDrawParameters Element);
 
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, TransitionState Source, GameStateSkiaDrawParameters Element)
         {
-            if (Source.PreviousState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source.PreviousState, Element);
-            else if(Source.NextState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                RenderingProvider.Static.DrawStateStats(pOwner, pRenderTarget, Source.NextState, Element);
+           
             //throw new NotImplementedException();
         }
     }
@@ -153,19 +200,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
     }
-    [RenderingHandler(typeof(TransitionState_BackgroundWait), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class TransitionState_BackgroundWaitSkiaRenderingHandler : TransitioningStateSkiaRenderingHandler
-    {
-        public TransitionState_BackgroundWaitSkiaRenderingHandler()
-        {
-            TransitionType = TransitionTypeConstants.TransitionType_Neither;
-        }
-        public override void RenderTransition(IStateOwner pOwner, SKCanvas Target, SKBitmap Previous, SKBitmap Next, TransitionState Source, GameStateSkiaDrawParameters Element)
-        {
-            RenderingProvider.Static.DrawElement(pOwner, Target, Source.BG, new SkiaBackgroundDrawData(Element.Bounds));
-
-        }
-    }
+   
     [RenderingHandler(typeof(TransitionState_Melt), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class TransitionState_MeltSkiaRenderingHandler : TransitioningStateSkiaRenderingHandler
     {
@@ -264,7 +299,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             return (int)((float)Percentage * (Math.Max(Element.Bounds.Width, Element.Bounds.Height)/8 - 1f) + 1f);
         }
         
-        private void PaintPixelated(SKCanvas Target, SKBitmap Source,float Percentage, TransitionState SourceState, GameStateSkiaDrawParameters Element)
+        private void PaintPixelated(SKCanvas Target, SKBitmap Source,float Percentage, TransitionState SourceState, GameStateSkiaDrawParameters Element,int XOffset=0,int YOffset=0)
         {
 
             //percentage: amount of pixelation.

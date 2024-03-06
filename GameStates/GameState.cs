@@ -18,11 +18,26 @@ using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
+using System.Collections.Concurrent;
 
 namespace BASeTris
 {
     public abstract class GameState
     {
+        private ConcurrentDictionary<String, Object> CustomStateProperties = new ConcurrentDictionary<string, object>();
+
+        public Object GetCustomProperty(String pKey)
+        {
+            return CustomStateProperties?[pKey];
+        }
+        public bool HasCustomProperty(String pKey)
+        {
+            return CustomStateProperties.ContainsKey(pKey);
+        }
+        public void SetCustomProperty(String pKey, Object Value)
+        {
+            CustomStateProperties[pKey] = Value;
+        }
         public virtual bool GameProcSuspended { get; set; } = false;
         /// <summary>
         /// Indicates whether this GameState allows active play. This is used to determine certain actions such as movement interpolation.
