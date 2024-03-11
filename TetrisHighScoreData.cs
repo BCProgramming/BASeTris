@@ -13,6 +13,7 @@ namespace BASeTris
     {
         public virtual GameplayRecord ReplayData { get; set; }
 
+
         public BaseHighScoreData(GameplayRecord pReplayData)
         {
             ReplayData = pReplayData;

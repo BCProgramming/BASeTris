@@ -22,7 +22,7 @@ namespace BASeTris
 
         
         List<GameplayRecordElement> Elements = null;
-
+        public int EntryCount { get { return Elements.Count; } }
         public Predicate<GameKeys> IsRecordableKey = IsRecordableKey_Default;
         private static GameKeys[] DefaultRejected = new[] { GameKeys.GameKey_Pause };
         private static bool IsRecordableKey_Default(GameKeys input)
@@ -82,6 +82,7 @@ namespace BASeTris
             }
             return null;
         }
+
         public Queue<GameplayRecordElement> GetPlayQueue()
         {
             return GetPlayQueue(TimeSpan.Zero);

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace XInput.Wrapper
+namespace XInput.Wrap
 {
     public static partial class X
     {

@@ -1,4 +1,4 @@
-﻿namespace XInput.Wrapper
+﻿namespace XInput.Wrap
 {
     public static partial class X
     {

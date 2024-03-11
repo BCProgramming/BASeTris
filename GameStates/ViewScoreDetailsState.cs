@@ -66,6 +66,23 @@ namespace BASeTris.GameStates
                 case GameKeys.GameKey_RotateCCW:
                     pOwner.CurrentState = _Owner;
                     break;
+                case GameKeys.GameKey_RotateCW:
+                    if (ShowEntry.CustomData is BaseHighScoreData bhsd && bhsd.ReplayData != null)
+                    {
+                        if (bhsd.ReplayData != null && bhsd.ReplayData.EntryCount > 0)
+                        {
+                            if (pOwner is IGamePresenter igp)
+                            {
+                                var gp = igp.GetPresenter();
+                                GameReplayOptions gro = new GameReplayOptions() { GameplayRecord = bhsd.ReplayData,Settings = pOwner.Settings};
+                                var replaystate = gp.ReplayStateCreator(gro);
+                                pOwner.CurrentState = replaystate();
+                            }
+
+
+                        }
+                    }
+                    break;
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace XInput.Wrapper
+namespace XInput.Wrap
 {
     public static partial class X
     {
