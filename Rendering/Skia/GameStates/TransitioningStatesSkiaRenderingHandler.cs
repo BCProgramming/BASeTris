@@ -263,6 +263,57 @@ namespace BASeTris.Rendering.Skia.GameStates
 
         }
     }
+    [RenderingHandler(typeof(TransitionState_Blur), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class TransitionState_BlurSkiaRenderingHandler : TransitioningStateSkiaRenderingHandler
+    {
+        public override void RenderTransition(IStateOwner pOwner, SKCanvas Target, SKBitmap Previous, SKBitmap Next, TransitionState Source, GameStateSkiaDrawParameters Element)
+        {
+            double CurrentTotalPercentage = Source.TransitionPercentage;
+            double usePercentage = 0;
+            DebugLogger.Log.WriteLine("Transition percentage:" + CurrentTotalPercentage);
+            if (CurrentTotalPercentage < .45)
+            {
+                if (CurrentTotalPercentage > 0.2) {; }
+                usePercentage = CurrentTotalPercentage / .45;
+            }
+            else if (CurrentTotalPercentage < .55)
+                usePercentage = 1.00;
+
+            else
+            {
+                usePercentage = 1 - (CurrentTotalPercentage - .55) / .45;
+            }
+            usePercentage = TetrisGame.ClampValue(usePercentage, 0, 1);
+            SKBitmap chooseSource = CurrentTotalPercentage < .50 ? Previous : Next;
+
+            PaintBlur(Target, chooseSource, (float)usePercentage, Source, Element);
+        }
+        private void PaintBlur(SKCanvas Target, SKBitmap Source, float Percentage, TransitionState SourceState, GameStateSkiaDrawParameters Element, int XOffset = 0, int YOffset = 0)
+        {
+            SKMaskFilter mask = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 50 * Percentage);
+            SKImageFilter ImageFilter = SKImageFilter.CreateBlur(20 * Percentage, 20 * Percentage);
+            SKPaint paint = new SKPaint()
+            {
+                ImageFilter = ImageFilter,
+                Color = new SKColor(0, 0, 0, 200),
+                MaskFilter = mask,
+            };
+            Target.DrawBitmap(Source, SKPoint.Empty, paint);
+
+        }
+    }
+  
+    /*
+     SKMaskFilter mask = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 50);
+       SKImageFilter ImageFilter = SKImageFilter.CreateBlur(5, 5);
+       SKPaint paint = new SKPaint() {
+           ImageFilter = ImageFilter,
+           Color = new SKColor(0, 0, 0, 200),
+           MaskFilter = mask,
+       };
+            g.DrawRect(Element.Bounds, paint);
+     
+     */
     [RenderingHandler(typeof(TransitionState_Pixelate), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class TransitionState_PixelateSkiaRenderingHandler : TransitioningStateSkiaRenderingHandler
     {

@@ -355,11 +355,6 @@
     <Compile Include="TrigFunctions.cs" />
     <Compile Include="Particles\VelocityChanger.cs" />
     <Compile Include="Win10MenuRenderer.cs" />
-    <Compile Include="XInput\Axis.cs" />
-    <Compile Include="XInput\Battery.cs" />
-    <Compile Include="XInput\Button.cs" />
-    <Compile Include="XInput\Gamepad.cs" />
-    <Compile Include="XInput\Native.cs" />
     <Compile Include="XInput\X.cs" />
     <EmbeddedResource Include="BASeTris.resx">
       <DependentUpon>BASeTris.cs</DependentUpon>
@@ -426,7 +421,6 @@
     <PackageReference Include="SkiaSharp.Views">
       <Version>2.80.3</Version>
     </PackageReference>
-    <PackageReference Include="XInput.Wrapper" Version="0.3.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Audio\BCsong.ogg" />

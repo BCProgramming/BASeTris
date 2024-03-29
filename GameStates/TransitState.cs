@@ -271,7 +271,12 @@ namespace BASeTris.GameStates
         {
         }
     }
-   
+    public class TransitionState_Blur : TransitionState
+    {
+        public TransitionState_Blur(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
+        {
+        }
+    }
     public class TransitionState_Melt : TransitionState
     {
         public int Size { get; set; } = 1;

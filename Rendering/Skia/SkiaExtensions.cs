@@ -116,9 +116,18 @@ namespace BASeTris.Rendering.Skia
             }
             return results;
         }
-       
- 
 
+
+        /*
+         SKMaskFilter mask = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 50);
+        SKImageFilter ImageFilter = SKImageFilter.CreateBlur(5, 5);
+        SKPaint paint = new SKPaint() {
+            ImageFilter = ImageFilter,
+            Color = new SKColor(0, 0, 0, 200),
+            MaskFilter = mask,
+        };
+         
+         */
     }
-    
+
 }

@@ -203,6 +203,12 @@ namespace BASeTris.Rendering.Skia.GameStates
                 g.DrawBitmap(CursorBitmap, Source.MouseInputData.LastMouseMovementPosition, null);
 
 
+            
+        
+        
+
+
+
 
         }
         static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightGreen, BlendMode = SKBlendMode.HardLight };
