@@ -22,6 +22,7 @@ using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.BASeCamp;
@@ -33,12 +34,12 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using BASeCamp.Logging;
-using Ionic.Zip;
-using Ionic.Zlib;
+
 using OpenTK.Input;
 using SkiaSharp;
 using XInput.Wrapper;
 using static BASeTris.AssetManager.cNewSoundManager;
+using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 namespace BASeTris.AssetManager
 {
@@ -134,10 +135,10 @@ X.Gamepad.GamepadButtons.RightStick
             Tall,
             Super_Wide
         }
-        private static OpenTK.Input.Key[] SuperWide = new OpenTK.Input.Key[] { };
-        private static OpenTK.Input.Key[] Wide = new[] { OpenTK.Input.Key.ShiftLeft, OpenTK.Input.Key.ShiftRight, OpenTK.Input.Key.Enter };
-        private static OpenTK.Input.Key[] Tall = new[] { OpenTK.Input.Key.KeypadPlus, OpenTK.Input.Key.KeypadEnter };
-        private static KeyboardKeyType GetKeyboardKeyType(OpenTK.Input.Key k)
+        private static TKKey[] SuperWide = new TKKey[] { };
+        private static TKKey[] Wide = new[] { TKKey.LeftShift, TKKey.RightShift, TKKey.Enter };
+        private static TKKey[] Tall = new[] { TKKey.KeyPadAdd, TKKey.KeyPadEnter };
+        private static KeyboardKeyType GetKeyboardKeyType(TKKey k)
         {
             if (SuperWide.Contains(k)) return KeyboardKeyType.Super_Wide;
             else if (Wide.Contains(k)) return KeyboardKeyType.Wide;
@@ -147,54 +148,54 @@ X.Gamepad.GamepadButtons.RightStick
         }
         public static String[] AllControllerTypes = new string[] { "XBox Series X", "XBox One", "XBox 360" };
 
-        private static Dictionary<OpenTK.Input.Key, String> ImageKeyKeyPrefixes = new Dictionary<Key, string>()
+        private static Dictionary<TKKey, String> ImageKeyKeyPrefixes = new Dictionary<TKKey, string>()
         {
-            { Key.AltLeft,"Alt_Key" },
-            { Key.AltRight,"Alt_Key" },
-            { Key.Down,"Arrow_Down" },
-            { Key.Up,"Arrow_Up" },
-            { Key.Left,"Arrow_Left" },
-            { Key.Right,"Arrow_Right" },
-            { Key.KeypadMultiply,"Asterisk" },
-            {Key.BracketLeft,"Bracket_Left" },
-            {Key.BracketRight,"Bracket_Right" },
-            {Key.CapsLock,"Caps_Lock" },
-            {Key.Escape,"Esc" }
+            { TKKey.LeftAlt,"Alt_Key" },
+            { TKKey.RightAlt,"Alt_Key" },
+            { TKKey.Down,"Arrow_Down" },
+            { TKKey.Up,"Arrow_Up" },
+            { TKKey.Left,"Arrow_Left" },
+            { TKKey.Right,"Arrow_Right" },
+            { TKKey.KeyPadMultiply,"Asterisk" },
+            {TKKey.LeftBracket,"Bracket_Left" },
+            {TKKey.RightBracket,"Bracket_Right" },
+            {TKKey.CapsLock,"Caps_Lock" },
+            {TKKey.Escape,"Esc" }
 
 
         };
 
 
-        private static Dictionary<OpenTK.Input.Key, String> KeyboardKeyDisplaytext = new Dictionary<Key, string>()
+        private static Dictionary<TKKey, String> KeyboardKeyDisplaytext = new Dictionary<TKKey, string>()
         {
             
-            { Key.AltLeft,"Alt" },
-            { Key.AltRight,"Alt" },
-            { Key.Down,"↓" },
-            { Key.Up,"↑" },
-            { Key.Left,"←" },
-            { Key.Right,"→" },
-            { Key.KeypadMultiply,"*" },
-            {Key.BracketLeft,"[" },
-            {Key.BracketRight,"]" },
-            {Key.CapsLock,"Caps Lock" },
-            {Key.ShiftLeft,"Shift" },
-            {Key.ShiftRight,"Shift" },
-            {Key.ControlLeft,"Ctrl" },
-            {Key.ControlRight,"Ctrl" },
-            {Key.KeypadDivide,"/" },
-            {Key.Grave,"`" },
-            {Key.Escape,"Esc" },
-            {Key.PageUp,"PgUp" },
-            {Key.PageDown,"PgDn" }
+            { TKKey.LeftAlt,"Alt" },
+            { TKKey.RightAlt,"Alt" },
+            { TKKey.Down,"↓" },
+            { TKKey.Up,"↑" },
+            { TKKey.Left,"←" },
+            { TKKey.Right,"→" },
+            { TKKey.KeyPadMultiply,"*" },
+            {TKKey.LeftBracket,"[" },
+            {TKKey.RightBracket,"]" },
+            {TKKey.CapsLock,"Caps Lock" },
+            {TKKey.LeftShift,"Shift" },
+            {TKKey.RightShift,"Shift" },
+            {TKKey.LeftControl,"Ctrl" },
+            {TKKey.RightControl,"Ctrl" },
+            {TKKey.KeyPadDivide,"/" },
+            {TKKey.GraveAccent,"`" },
+            {TKKey.Escape,"Esc" },
+            {TKKey.PageUp,"PgUp" },
+            {TKKey.PageDown,"PgDn" }
 
         };
 
-        private static SKBitmap DrawKeyboardKey(OpenTK.Input.Key k)
+        private static SKBitmap DrawKeyboardKey(TKKey k)
         {
             String sDrawText = null;
             if (KeyboardKeyDisplaytext.ContainsKey(k)) sDrawText = KeyboardKeyDisplaytext[k];
-            else sDrawText = Enum.GetName(typeof(Key), k);
+            else sDrawText = Enum.GetName(typeof(TKKey), k);
             var keytype = GetKeyboardKeyType(k);
             String sBlankKey = "Blank_Black_" + keytype.ToString();
             //retrieve the key blank SKBitmap.
@@ -225,9 +226,9 @@ X.Gamepad.GamepadButtons.RightStick
 
 
         }
-        public static SKBitmap GetSKBitmapForKeyboardKey(OpenTK.Input.Key k)
+        public static SKBitmap GetSKBitmapForKeyboardKey(TKKey k)
         {
-            if (k == OpenTK.Input.Key.Escape)
+            if (k == TKKey.Escape)
             {
                 ;
             }
@@ -244,14 +245,14 @@ X.Gamepad.GamepadButtons.RightStick
 
 
         }
-        public static String ImageKeyForKeyboardKey(OpenTK.Input.Key k)
+        public static String ImageKeyForKeyboardKey(TKKey k)
         {
             String sPrefix = null;
             if (ImageKeyKeyPrefixes.ContainsKey(k))
                 sPrefix = ImageKeyKeyPrefixes[k];
             else
             {
-                sPrefix = Enum.GetName(typeof(OpenTK.Input.Key), k);
+                sPrefix = Enum.GetName(typeof(TKKey), k);
             }
 
             String sFindKey = sPrefix + "_Key_Dark";
@@ -275,22 +276,24 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         }
         public static IEnumerable<(String, StreamReader)> GetZipContents(String sZipPath, Predicate<String> FileNameFilterFunc)
         {
+            
 
-            ZipFile zf = ZipFile.Read(sZipPath);
-            foreach (ZipEntry ze in zf.Entries)
+            var zf = ZipFile.OpenRead(sZipPath);
+            foreach (var ze in zf.Entries)
             {
-                if (ze.IsDirectory)
-                {
+                //if (ze.IsDirectory)
+                //{
                     //skip directories
-                }
-                else 
+                //}
+                //else 
                 {
-                    if (FileNameFilterFunc(ze.FileName))
+                    var basename = Path.GetFileName(ze.FullName);
+                    if (FileNameFilterFunc(basename))
                     {
                         //we could use a using block here, but that would require that the stream be dealt with before the caller retrieves the next result of the enumeration, which could
                         //cause problems for things like parallelization. Instead, the caller will be responsible for closing any streams it gets back after it is done with them.
-                        StreamReader sr = new StreamReader(ze.InputStream);
-                        yield return (ze.FileName, sr);
+                        StreamReader sr = new StreamReader(ze.Open());
+                        yield return (basename, sr);
 
                     }
                 }
@@ -2304,28 +2307,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return 0;
         }
         */
-        public void decodegzi(Stream readfrom, Stream WriteTo)
-        {
-            //read the stream...
-            //StreamReader sreader = new StreamReader(readfrom);
-            //gzi "format" is simply a gzipped stream...
-            var gzipper = new GZipStream(readfrom, CompressionMode.Decompress);
-            //read the entire thing into memory
-            //MemoryStream readto = new MemoryStream();
-            long fullength = gzipper.TotalOut;
-            byte[] readit = new byte[fullength];
-            readfrom.Read(readit, 0, (int) fullength);
-            WriteTo.Write(readit, 0, readit.Length);
-        }
-
-        public void encodegzi(Stream readfrom, Stream writeto)
-        {
-            var gzipper = new GZipStream(readfrom, CompressionMode.Compress);
-            long newlength = gzipper.TotalOut;
-            byte[] readit = new byte[newlength];
-            readfrom.Read(readit, 0, (int) newlength);
-            writeto.Write(readit, 0, readit.Length);
-        }
+       
 
         /// <summary>
         /// Reads a Zip File Image pack. Each image file is added or replaced in our set of images, using the base filename as the key.
@@ -2336,25 +2318,29 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         {
             if (!File.Exists(sFileName)) throw new FileNotFoundException(sFileName);
             //open the ZipFile. we let Exceptions bubble up to the calling method.
-            ZipFile zf = new ZipFile(sFileName);
+            var zf = ZipFile.OpenRead(sFileName);
             String[] validExtensions = new string[] {"*.png", "*.ico"};
             //go through each entry.
             int totalcount = 0;
-            foreach (var entry in zf)
+            foreach (var entry in zf.Entries)
             {
+                
                 //get the extension...
-                String Extensionget = entry.FileName.Substring(entry.FileName.LastIndexOf(".", System.StringComparison.OrdinalIgnoreCase));
+                String Extensionget = entry.Name.Substring(entry.Name.LastIndexOf(".", System.StringComparison.OrdinalIgnoreCase));
 
                 if (validExtensions.Contains(Extensionget))
                 {
                     //grab a stream...
                     MemoryStream ms = new MemoryStream();
-                    entry.Extract(ms);
+                    byte[] buff = new byte[entry.Length];
+                    entry.Open().Read(buff, 0, (int)entry.Length);
+                    ms.Write(buff, 0, (int)entry.Length);
+                   
                     ms.Seek(0, SeekOrigin.Begin);
 
-                    int lastdirsep = entry.FileName.LastIndexOf(Path.DirectorySeparatorChar);
-                    int lastdot = entry.FileName.LastIndexOf(".", StringComparison.Ordinal);
-                    String gotbasename = entry.FileName.Substring(lastdirsep, lastdot - lastdirsep);
+                    int lastdirsep = entry.Name.LastIndexOf(Path.DirectorySeparatorChar);
+                    int lastdot = entry.Name.LastIndexOf(".", StringComparison.Ordinal);
+                    String gotbasename = entry.Name.Substring(lastdirsep, lastdot - lastdirsep);
                     totalcount += AddImage(ms, gotbasename) ? 1 : 0;
                 }
             }
@@ -2406,28 +2392,23 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                             }
                         }
 
-                        else if(loopfile.Extension.Equals(".zip",StringComparison.OrdinalIgnoreCase) && (ZipFile.IsZipFile(loopfile.FullName)))
+                        else if(loopfile.Extension.Equals(".zip",StringComparison.OrdinalIgnoreCase))
                         {
                             //if this is a zipfile, then we read the contents of the zipfile and get all the applicable entries that have image file extensions, and add them using AddImage...
-                            ZipFile readfile = new ZipFile(loopfile.FullName);
-                            foreach (ZipEntry loopentry in readfile.Entries)
+                            var readfile = ZipFile.OpenRead(loopfile.FullName);
+                            foreach (var loopentry in readfile.Entries)
                             {
-                                if (isFileSupported(loopentry.FileName))
+                                if (isFileSupported(loopentry.Name))
                                 {
-                                    byte[] readbuffer = new byte[loopentry.UncompressedSize];
+                                    byte[] readbuffer = new byte[loopentry.Length];
 
-                                    loopentry.OpenReader().Read(readbuffer, 0, (int)loopentry.UncompressedSize);
+                                    loopentry.Open().Read(readbuffer, 0, (int)loopentry.Length);
                                     //MemoryStream streamread = new MemoryStream(new StreamReader(loopentry.InputStream));
                                     MemoryStream streamread = new MemoryStream(readbuffer);
-                                    String basenameonly = Path.GetFileNameWithoutExtension(loopentry.FileName).ToUpper();
-                                    if (Path.GetExtension(loopentry.FileName).Equals(".gzi", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        MemoryStream resultstream = new MemoryStream();
-                                        decodegzi(streamread, resultstream);
-                                        streamread = resultstream;
-                                    }
+                                    String basenameonly = Path.GetFileNameWithoutExtension(loopentry.Name).ToUpper();
+                                    
 
-                                    if ((Path.GetExtension(loopentry.FileName).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
+                                    if ((Path.GetExtension(loopentry.Name).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
                                     {
                                         //icon file, so add to our icon list.
                                         Icon geticon = new Icon(streamread, 16, 16);

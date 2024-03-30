@@ -75,7 +75,7 @@ namespace XInput.Wrapper
         }
         #endregion
 
-
+        private static bool AvailableRecurseFlag = false;
         /// <summary>
         /// Should not call often! This one not cached.
         /// </summary>
@@ -83,18 +83,26 @@ namespace XInput.Wrapper
         {
             get
             {
+                if (AvailableRecurseFlag)
+                {
+                    return false; //uh, I mean I guess false works.
+                }
+                AvailableRecurseFlag = true;
                 bool xinput_ready = false;
                 try
                 {
                     Gamepad.PacketState state = new Gamepad.PacketState();
-                    Gamepad.InputWrapper.XInputGetState(0, ref state);
+                    Gamepad.InputWrapper.XInputGetState(0, ref state); //puzzlingly, this seems to cause a stack overflow. Somehow it triggers the OpenTK window to close, which if we are currently handling will cause it to recursively try to deal with closing over and over....
                     xinput_ready = true;
                 }
                 catch
                 {
                     xinput_ready = false;
                 }
-
+                finally
+                {
+                    AvailableRecurseFlag = false;
+                }
                 return xinput_ready;
             }
         }

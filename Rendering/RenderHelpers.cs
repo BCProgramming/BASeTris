@@ -13,6 +13,7 @@ namespace BASeTris.Rendering
         public static void GetHorizontalSizeData(float WindowHeight, float WindowWidth, out float FieldSize, out float StatSize)
         {
             FieldSize = WindowHeight * (332f / 641f);
+            //Statusbar is 80% of the size of the field.
             StatSize = WindowWidth - FieldSize;
         }
         public static Color MixColor(Color ColorA, Color ColorB, float percentage)

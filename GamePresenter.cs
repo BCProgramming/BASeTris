@@ -18,6 +18,7 @@ using BASeTris.Theme.Audio;
 using BASeTris.Theme.Block;
 using OpenTK.Input;
 using XInput.Wrapper;
+using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 namespace BASeTris
 {
@@ -128,8 +129,9 @@ namespace BASeTris
         }
         public int GetKeyboardKeyFromName(String input)
         {
-            OpenTK.Input.Key result;
-            if (Enum.TryParse<OpenTK.Input.Key>(input, out result))
+
+            TKKey result;
+            if (Enum.TryParse<TKKey>(input, out result))
                 return (int)result;
 
             return 0;
@@ -174,7 +176,7 @@ namespace BASeTris
             String[] sDataFolders = TetrisGame.GetSearchFolders();
             String sSettingsFile = Path.Combine(sDataFolders.First((d)=>Directory.Exists(d) && IsDirectoryWritable(d)), "Settings.xml");
             //Note: GameStartOptions could optionally include this data...
-            GameSettings = new SettingsManager(sSettingsFile,_Owner,GetKeyboardKeyFromName,GetGamepadButtonFromName,typeof(OpenTK.Input.Key),typeof(XInput.Wrapper.X.Gamepad.GamepadButtons));
+            GameSettings = new SettingsManager(sSettingsFile,_Owner,GetKeyboardKeyFromName,GetGamepadButtonFromName,typeof(TKKey),typeof(XInput.Wrapper.X.Gamepad.GamepadButtons));
             AudioThemeMan = new AudioThemeManager(AudioTheme.GetDefault(GameSettings.std.SoundScheme));
             AudioThemeMan.ResetTheme();
             if (GameLoopsRunning) return;
@@ -335,7 +337,7 @@ namespace BASeTris
             }
         }
         
-        public GameState.GameKeys? TranslateKey(Key source)
+        public GameState.GameKeys? TranslateKey(TKKey source)
         {
             if(Game!=null)
             {

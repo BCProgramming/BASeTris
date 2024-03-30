@@ -18,7 +18,7 @@
       <Key GameKey="GameKey_Debug2" Binding="F7" />
       <Key GameKey="GameKey_Debug3" Binding="F11" />
       <Key GameKey="GameKey_Debug4" Binding="F12" />
-      <Key GameKey="GameKey_Debug5" Binding="Number5" />
+      <Key GameKey="GameKey_Debug5" Binding="0" />
       <Key GameKey="GameKey_DesignerNextNomino" Binding="PageUp" />
       <Key GameKey="GameKey_DesignerPrevNomino" Binding="PageDown" />
       <Key GameKey="GameKey_DesignerChangeNomino" Binding="Tab" />

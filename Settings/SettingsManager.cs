@@ -165,6 +165,7 @@ namespace BASeTris.Settings
             else
             {
                 KeyMap[Code] = Value.Value;
+                if (!MapKey.ContainsKey(Value.Value)) MapKey.Add(Value.Value, new List<int>());
                 MapKey[Value.Value].Add(Code);
 
             }

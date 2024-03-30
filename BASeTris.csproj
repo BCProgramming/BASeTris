@@ -1,595 +1,85 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <LangVersion>10.0</LangVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4A858685-9698-4D99-9381-17121D91089B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>BASeTris</RootNamespace>
-    <AssemblyName>BASeTris</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <LangVersion>10.0</LangVersion>
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <LangVersion>10.0</LangVersion>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>BaseTris.ico</ApplicationIcon>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Deterministic>False</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Deterministic>False</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <LangVersion>10.0</LangVersion>
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <LangVersion>10.0</LangVersion>
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>ThirdParty\Ionic.Zip.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="Assets\**" />
+    <EmbeddedResource Remove="Assets\**" />
+    <None Remove="Assets\**" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AI\AIEvolver.cs" />
-    <Compile Include="AI\BaseAI.cs" />
-    <Compile Include="AI\DrMarioAIScoringHandler.cs" />
-    <Compile Include="AI\IStateScoringHandler.cs" />
-    <Compile Include="AI\ReplayInputInjector.cs" />
-    <Compile Include="AI\StandardTetrisAIScoringHandler.cs" />
-    <Compile Include="AI\TetrisAI.cs" />
-    <Compile Include="AssetManager\AssetManager.cs" />
-    <Compile Include="AssetManager\DeletionHelper.cs" />
-    <Compile Include="AssetManager\LoadedTypeManager.cs" />
-    <Compile Include="AssetManager\NullSoundDriver.cs" />
-    <Compile Include="AssetManager\SoundInterfaces.cs" />
-    <Compile Include="BackgroundDrawers\CompositeBackground.cs" />
-    <Compile Include="BackgroundDrawers\IBackground.cs" />
-    <Compile Include="BackgroundDrawers\StandardImageBackgroundGDI.cs" />
-    <Compile Include="BackgroundDrawers\StandardImageBackgroundSkia.cs" />
-    <Compile Include="BackgroundDrawers\StarfieldBackgroundSkia.cs" />
-    <Compile Include="BackgroundDrawers\VectorMutator.cs" />
-    <Compile Include="BASeTrisTK.cs" />
-    <Compile Include="BASSDriver.cs" />
-    <Compile Include="Blocks\LineSeriesBlock.cs" />
-    <Compile Include="Cheats\FillCheat.cs" />
-    <Compile Include="Cheats\hscheat.cs" />
-    <Compile Include="Cheats\SetLinesCheat.cs" />
-    <Compile Include="Cheats\SetPieceCheat.cs" />
-    <Compile Include="Choosers\ChooserCompatibilityAttribute.cs" />
-    <Compile Include="Choosers\CompositeChooser.cs" />
-    <Compile Include="Choosers\IGameHandlerChooserInitializer.cs" />
-    <Compile Include="Choosers\NTrisChooser.cs" />
-    <Compile Include="Choosers\SingleFunctionChooser.cs" />
-    <Compile Include="CompilerNeeded.cs" />
-    <Compile Include="Duomino\Duomino.cs" />
-    <Compile Include="EnumHelper.cs" />
-    <Compile Include="FieldInitializers\LineSeriesGameFieldInitializer.cs" />
-    <Compile Include="GameplayRecord.cs" />
-    <Compile Include="GameStates\DesignBackgroundState.cs" />
-    <Compile Include="GameStates\GameHandlers\GameHandlerOptionsAttribute.cs" />
-    <Compile Include="GameStates\GameHandlers\GamePreparer.cs" />
-    <Compile Include="GameStates\GameHandlers\ReverseTetrisHandler.cs" />
-    <Compile Include="GameStates\Menu\MenuStateSliderOption.cs" />
-    <Compile Include="GameStates\MouseStateAggregate.cs" />
-    <Compile Include="GameStates\ThemeSelectionMenuState.cs" />
-    <Compile Include="GameStates\TransitState.cs" />
-    <Compile Include="Particles\ShapeParticle.cs" />
-    <Compile Include="RandomHelpers.cs" />
-    <Compile Include="Rendering\Skia\GameStates\ControlSettingsViewStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\DesignBackgroundStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\StandardTetrisSkiaStatAreaRenderer.cs" />
-    <Compile Include="GameStates\GameHandlers\TetrisAttackHandler.cs" />
-    <Compile Include="Particles\BitmapParticle.cs" />
-    <Compile Include="Particles\BlockInteractingParticle.cs" />
-    <Compile Include="Particles\CharParticle.cs" />
-    <Compile Include="Particles\LineParticle.cs" />
-    <Compile Include="Particles\Particle.cs" />
-    <Compile Include="GamePresenter.cs" />
-    <Compile Include="GameStates\GameHandlers\ColumnsGameHandler.cs" />
-    <Compile Include="GameStates\ControlSettingsViewState.cs" />
-    <Compile Include="GameStates\DropWaitState.cs" />
-    <Compile Include="GameStates\GameHandlers\CascadingBlockHandler.cs" />
-    <Compile Include="GameStates\GameHandlers\DrMarioHandler.cs" />
-    <Compile Include="GameStates\GameHandlers\HandlerOptions\HandlerOptionsMenuPopulator.cs" />
-    <Compile Include="GameStates\GameHandlers\HandlerStates\PrimaryBlockLevelCompleteState.cs" />
-    <Compile Include="GameStates\GameHandlers\HandlerStates\DrMarioVirusAppearanceState.cs" />
-    <Compile Include="GameStates\GameHandlers\IBlockGameCustomizationHandler.cs" />
-    <Compile Include="GameStates\GameHandlers\NTrisGameHandler.cs" />
-    <Compile Include="GameStates\GameHandlers\Tetris2Handler.cs" />
-    <Compile Include="GameStates\GameHandlers\TetrisGameHandler.cs" />
-    <Compile Include="GameStates\GameHandlers\TetrisHandlerThemeAttribute.cs" />
-    <Compile Include="GameStates\IMouseInputState.cs" />
-    <Compile Include="GameStates\Menu\GenericMenuState.cs" />
-    <Compile Include="GameStates\ICompositeState.cs" />
-    <Compile Include="GameStates\Menu\MenuStateHighScoreItem.cs" />
-    <Compile Include="GameStates\Menu\MenuStateMusicMenuItem.cs" />
-    <Compile Include="GameStates\Menu\MenuStateNewGameMenuItem.cs" />
-    <Compile Include="GameStates\TemporaryPauseGameState.cs" />
-    <Compile Include="GameStates\Menu\TitleMenuState.cs" />
-    <Compile Include="GameStates\TextScrollState.cs" />
-    <Compile Include="GlobalResources.cs" />
-    <Compile Include="MathHelper.cs" />
-    <Compile Include="NNominoGenerator.cs" />
-    <Compile Include="Nomino.cs" />
-    <Compile Include="Cheats\Cheat.cs" />
-    <Compile Include="Cheats\DebugCheat.cs" />
-    <Compile Include="Cheats\SetMusicCheat.cs" />
-    <Compile Include="Choosers\AIChoosers\MeanChooser.cs" />
-    <Compile Include="Choosers\BagChooser.cs" />
-    <Compile Include="Choosers\AIChoosers\BaseAIChooser.cs" />
-    <Compile Include="Choosers\BlockGroupChooser.cs" />
-    <Compile Include="Choosers\FullRandomChooser.cs" />
-    <Compile Include="Choosers\GameBoyChooser.cs" />
-    <Compile Include="Choosers\NESChooser.cs" />
-    <Compile Include="Choosers\WeightedChooser.cs" />
-    <Compile Include="ControllerInputHelper.cs" />
-    <Compile Include="DASRepeatHandler.cs" />
-    <Compile Include="DrawHelper\StandardTetrisGameStateDrawHelper.cs" />
-    <Compile Include="FieldInitializers\FieldInitializer.cs" />
-    <Compile Include="FieldInitializers\GarbageFieldInitializer.cs" />
-    <Compile Include="GameStates\EnterCheatState.cs" />
-    <Compile Include="GameStates\EnterTextState.cs" />
-    <Compile Include="GameStates\FieldActionGameState.cs" />
-    <Compile Include="GameStates\EnterHighScoreState.cs" />
-    <Compile Include="GameStates\FieldBlockClearAction.cs" />
-    <Compile Include="GameStates\GameOverGameState.cs" />
-    <Compile Include="GameStates\IDirectKeyboardInputState.cs" />
-    <Compile Include="GameStates\Menu\ConfirmedMenuItem.cs" />
-    <Compile Include="GameStates\Menu\MenuState.cs" />
-    <Compile Include="GameStates\Menu\MenuStateDisplayThemeMenuItem.cs" />
-    <Compile Include="GameStates\Menu\MenuStateMenuItem.cs" />
-    <Compile Include="GameStates\Menu\MenuStateMultiOption.cs" />
-    <Compile Include="GameStates\Menu\MenuStateScaleMenuItem.cs" />
-    <Compile Include="GameStates\Menu\OptionsMenuState.cs" />
-    <Compile Include="GameStates\PauseGameState.cs" />
-    <Compile Include="GameStates\ShowHighScoresState.cs" />
-    <Compile Include="GameStates\StandardGameOptions.cs" />
-    <Compile Include="GameStates\StandardTetrisGameState.cs" />
-    <Compile Include="GameStates\UnpauseDelayGameState.cs" />
-    <Compile Include="GameStates\ViewScoreDetailsState.cs" />
-    <Compile Include="HotLine.cs" />
-    <Compile Include="NominoBuilder.cs" />
-    <Compile Include="DebugLog.cs" />
-    <Compile Include="BASeTris.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="BASeTris.Designer.cs">
-      <DependentUpon>BASeTris.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GameStates\GameState.cs" />
-    <Compile Include="GraphicsPathExtensions.cs" />
-    <Compile Include="GummyImage.cs" />
-    <Compile Include="IStateOwner.cs" />
-    <Compile Include="NominoDictionary.cs" />
-    <Compile Include="Particles\RotatableBaseParticle.cs" />
-    <Compile Include="Polygon.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rendering\BackgroundDrawRenderHandler.cs" />
-    <Compile Include="Rendering\DrawTextInfo.cs" />
-    <Compile Include="Rendering\GDIPlus\Backgrounds\StandardImageBackgroundGDIRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\EnterTextStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\FieldActionStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\GameOverStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\MenuStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\ShowHighScoreStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\StandardTetrisGameStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\UnpauseDelayStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\ViewScoreDetailsStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\GDIPlusHelpers.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\GameStateDrawParameters.cs" />
-    <Compile Include="Rendering\GDIPlus\GraphicsExtensions.cs" />
-    <Compile Include="Rendering\GDIPlus\GameStates\PauseGameStateGDIPlusRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\ParticleRenderingGDIPlusHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\TetrisBlockGDIRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\TetrisImageBlockGDIRenderingHandler.cs" />
-    <Compile Include="Rendering\GDIPlus\TetrisStandardColouredBlockGDIRenderingHandler.cs" />
-    <Compile Include="Rendering\IRenderingHandler.cs" />
-    <Compile Include="Rendering\IRenderingProvider.cs" />
-    <Compile Include="Rendering\Adapter\ProviderWrappers.cs" />
-    <Compile Include="Rendering\GDIPlus\MenuItems\MenuStateMenuItemGDIRenderer.cs" />
-    <Compile Include="Rendering\RenderElements\ElementRenderData.cs" />
-    <Compile Include="Rendering\RenderHelpers.cs" />
-    <Compile Include="Rendering\RenderingProvider.cs" />
-    <Compile Include="Rendering\Skia\Backgrounds\StandardImageBackgroundSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\Backgrounds\StarfieldBackgroundRenderingHandlerSkia.cs" />
-    <Compile Include="Rendering\Skia\GameStateSkiaDrawParameters.cs" />
-    <Compile Include="Rendering\Skia\GameStates\EnterTextStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\FieldActionStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\GameOverStateSkaiRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\HandlerStates\DrMarioLevelCompleteStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\IMouseHandling.cs" />
-    <Compile Include="Rendering\Skia\GameStates\LineSeriesLevelCompletionStateSkiaRenderingProvider.cs" />
-    <Compile Include="Rendering\Skia\GameStates\MenuStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\PauseGameStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\ShowHighScoresStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\StandardTetrisGameStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\TextScrollStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\TransitioningStatesSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\UnpauseDelayStateSkiaRenderingProvider.cs" />
-    <Compile Include="Rendering\Skia\GameStates\ViewScoreDetailsStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\GameStates\PrimaryBlockAppearanceStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\MenuItems\MenuStateMenuItemSkiaRenderer.cs" />
-    <Compile Include="Rendering\Skia\ParticleRenderingSkiaHandler.cs" />
-    <Compile Include="Rendering\Skia\SkiaExtensions.cs" />
-    <Compile Include="Rendering\Skia\SkiaRenderingProvider.cs" />
-    <Compile Include="Rendering\Skia\TetrisBlockSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\TetrisFieldHotLineSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\TetrisFieldRenderingHandlerSkia.cs" />
-    <Compile Include="Rendering\Skia\TetrisImageBlockSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\TetrisStandardColouredBlockSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\Skia\ThemeSelectionStateSkiaRenderingHandler.cs" />
-    <Compile Include="Rendering\StandardRenderingProvider.cs" />
-    <Compile Include="Rendering\TetrominoCollageRenderer.cs" />
-    <Compile Include="Replay\StatefulReplay.cs" />
-    <Compile Include="Settings\CustomBackgroundData.cs" />
-    <Compile Include="Settings\SettingsManager.cs" />
-    <Compile Include="Settings\StandardSettings.cs" />
-    <Compile Include="Statistics.cs" />
-    <Compile Include="AssetManager\QColorMatrix.cs" />
-    <Compile Include="Blocks\StandardColouredBlock.cs" />
-    <Compile Include="Blocks\NominoBlock.cs" />
-    <Compile Include="TetrisField.cs" />
-    <Compile Include="TetrisGame.cs" />
-    <Compile Include="TetrisHighScoreData.cs" />
-    <Compile Include="TetrominoData.cs" />
-    <Compile Include="Tetrominoes\Tetrominoes.cs" />
-    <Compile Include="Tetrominoes\Tetromino.cs" />
-    <Compile Include="Theme\Audio\AudioTheme.cs" />
-    <Compile Include="Theme\Audio\AudioThemeManager.cs" />
-    <Compile Include="Theme\Block\BasicBlockTheme.cs" />
-    <Compile Include="Theme\Block\CompositeBlockTheme.cs" />
-    <Compile Include="Theme\Block\Composite\NESVarietyTheme.cs" />
-    <Compile Include="Theme\Block\Composite\ShadedVarietyTheme.cs" />
-    <Compile Include="Theme\Block\Composite\VarietyThemeBase.cs" />
-    <Compile Include="Theme\Block\ConnectedBCTBlockTheme.cs" />
-    <Compile Include="Theme\Block\CardinalConnectionSet.cs" />
-    <Compile Include="Theme\Block\ConnectedImageBlockTheme.cs" />
-    <Compile Include="Theme\Block\ConnectedThemeCache.cs" />
-    <Compile Include="Theme\Block\CustomPixelTheme.cs" />
-    <Compile Include="Theme\Block\DrMarioTheme.cs" />
-    <Compile Include="Theme\Block\GameBoyTetrominoTheme.cs" />
-    <Compile Include="Theme\Block\NESTetrominoTheme.cs" />
-    <Compile Include="Theme\Block\OutlinedTetrominoTheme.cs" />
-    <Compile Include="Theme\Block\SNESTetris2Theme.cs" />
-    <Compile Include="Theme\Block\SNESTetrominoTheme.cs" />
-    <Compile Include="Theme\Block\Composite\SNESVarietyTheme.cs" />
-    <Compile Include="Theme\Block\Tetris2Theme_Enhanced.cs" />
-    <Compile Include="Theme\Block\NominoTheme.cs" />
-    <Compile Include="Theme\Block\ThemeImageProvider.cs" />
-    <Compile Include="Theme\Block\XMLDefinedTheme.cs" />
-    <Compile Include="Theme\Block\TetrisAttackTheme.cs" />
-    <Compile Include="Theme\TetrominoImageManager.cs" />
-    <Compile Include="TrigFunctions.cs" />
-    <Compile Include="Particles\VelocityChanger.cs" />
-    <Compile Include="Win10MenuRenderer.cs" />
-    <Compile Include="XInput\X.cs" />
-    <EmbeddedResource Include="BASeTris.resx">
-      <DependentUpon>BASeTris.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <EmbeddedResource Include="Pixel.ttf" />
-    <EmbeddedResource Include="LCD.ttf" />
+    <None Remove="Enterprise.ttf" />
+    <None Remove="LCD.ttf" />
+    <None Remove="Pixel.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Enterprise.ttf" />
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
+    <EmbeddedResource Include="LCD.ttf" />
+    <EmbeddedResource Include="Pixel.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
+    <PackageReference Include="OpenTK" Version="4.8.2" />
+    <PackageReference Include="SkiaSharp" Version="2.88.7" />
+    <PackageReference Include="SkiaSharp.Views" Version="2.88.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BASeScores\BASeScores.csproj" />
+    <ProjectReference Include="..\BCRenderingAdapter\BCRenderingAdapter\BCRenderingAdapter.csproj" />
+    <ProjectReference Include="..\XMLSerialization\Elementizer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassflac.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassmidi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassopus.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bass_fx.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BASeScores\BASeScores.csproj">
-      <Project>{7d03d6d6-4b21-4d87-ba1f-48ace062510d}</Project>
-      <Name>BASeScores</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BCRenderingAdapter\BCRenderingAdapter\BCRenderingAdapter.csproj">
-      <Project>{e7c2ca46-4aab-4966-b251-02b68e3aa0f2}</Project>
-      <Name>BCRenderingAdapter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\XMLSerialization\Elementizer.csproj">
-      <Project>{850a1563-ac23-4b60-bbcf-503b2bb69547}</Project>
-      <Name>Elementizer</Name>
-    </ProjectReference>
-    <PackageReference Include="ManagedBass">
-      <Version>3.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="ManagedBass.Fx">
-      <Version>3.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="ManagedBass.Mix">
-      <Version>3.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="OpenGL.Net.WinForms">
-      <Version>0.8.4</Version>
-    </PackageReference>
-    <PackageReference Include="OpenTK">
-      <Version>3.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="SkiaSharp">
-      <Version>2.80.3</Version>
-    </PackageReference>
-    <PackageReference Include="SkiaSharp.Views">
-      <Version>2.80.3</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\Audio\BCsong.ogg" />
-    <Content Include="Assets\Audio\block_falling.ogg" />
-    <Content Include="Assets\Audio\block_move.ogg" />
-    <Content Include="Assets\Audio\block_move_2.ogg" />
-    <Content Include="Assets\Audio\block_move_3.ogg" />
-    <Content Include="Assets\Audio\block_place.ogg" />
-    <Content Include="Assets\Audio\block_place_2.ogg" />
-    <Content Include="Assets\Audio\block_place_3.ogg" />
-    <Content Include="Assets\Audio\block_pop.ogg" />
-    <Content Include="Assets\Audio\block_rotate.ogg" />
-    <Content Include="Assets\Audio\block_rotate_2.ogg" />
-    <Content Include="Assets\Audio\block_rotate_3.ogg" />
-    <Content Include="Assets\Audio\block_rotate_4.ogg" />
-    <Content Include="Assets\Audio\block_rotate_5.ogg" />
-    <Content Include="Assets\Audio\block_stop.ogg" />
-    <Content Include="Assets\Audio\brickbreak.ogg" />
-    <Content Include="Assets\Audio\chain_chime.ogg" />
-    <Content Include="Assets\Audio\char_change.ogg" />
-    <Content Include="Assets\Audio\DrMarioChill.ogg" />
-    <Content Include="Assets\Audio\DrMarioFever.ogg" />
-    <Content Include="Assets\Audio\drop.ogg" />
-    <Content Include="Assets\Audio\emerge.ogg" />
-    <Content Include="Assets\Audio\gren.ogg" />
-    <Content Include="Assets\Audio\highscoreentry.ogg" />
-    <Content Include="Assets\Audio\high_score_list.ogg" />
-    <Content Include="Assets\Audio\journey3.ogg" />
-    <Content Include="Assets\Audio\kirbysand.ogg" />
-    <Content Include="Assets\Audio\level_up.ogg" />
-    <Content Include="Assets\Audio\line_clear.ogg" />
-    <Content Include="Assets\Audio\line_clear_2.ogg" />
-    <Content Include="Assets\Audio\line_clear_3.ogg" />
-    <Content Include="Assets\Audio\line_clear_4.ogg" />
-    <Content Include="Assets\Audio\line_tetris.ogg" />
-    <Content Include="Assets\Audio\line_tetris_2.ogg" />
-    <Content Include="Assets\Audio\menu_select.ogg" />
-    <Content Include="Assets\Audio\metal1.ogg" />
-    <Content Include="Assets\Audio\metal2.ogg" />
-    <Content Include="Assets\Audio\metal3.ogg" />
-    <Content Include="Assets\Audio\mmDeath.ogg" />
-    <Content Include="Assets\Audio\pause.ogg" />
-    <Content Include="Assets\Audio\right.ogg" />
-    <Content Include="Assets\Audio\score_chime.ogg" />
-    <Content Include="Assets\Audio\shade_move.ogg" />
-    <Content Include="Assets\Audio\silius1.ogg" />
-    <Content Include="Assets\Audio\smb3_tetris.ogg" />
-    <Content Include="Assets\Audio\switch_active.ogg" />
-    <Content Include="Assets\Audio\switch_inactive.ogg" />
-    <Content Include="Assets\Audio\TDM_A_theme.ogg" />
-    <Content Include="Assets\Audio\TetrisDS.ogg" />
-    <Content Include="Assets\Audio\tetris_2.ogg" />
-    <Content Include="Assets\Audio\tetris_2_A.ogg" />
-    <Content Include="Assets\Audio\tetris_a_theme_techno.ogg" />
-    <Content Include="Assets\Audio\tetris_a_theme_techno_A.ogg" />
-    <Content Include="Assets\Audio\tetris_game_over.ogg" />
-    <Content Include="Assets\Audio\tetris_gb_theme.ogg" />
-    <Content Include="Assets\Audio\tetris_nes_theme.ogg" />
-    <Content Include="Assets\Audio\tetris_theme_A.ogg" />
-    <Content Include="Assets\Audio\tetris_theme_B.ogg" />
-    <Content Include="Assets\Audio\tetris_theme_C.ogg" />
-    <Content Include="Assets\Audio\wrong.ogg" />
-    <Content Include="Assets\background.png" />
-    <Content Include="Assets\background_2.png" />
-    <Content Include="Assets\block_arrangement.png" />
-    <Content Include="Assets\block_chisel_red.png" />
-    <Content Include="Assets\block_lightbevel_red.png" />
-    <Content Include="Assets\block_mottled.png" />
-    <Content Include="Assets\block_pixeled_red.png" />
-    <Content Include="Assets\block_pixeled_red_outline.png" />
-    <Content Include="Assets\block_shine_red.png" />
-    <Content Include="Assets\block_std.png" />
-    <Content Include="Assets\block_std_red.png" />
-    <Content Include="Assets\blue_virus_1.png" />
-    <Content Include="Assets\blue_virus_2.png" />
-    <Content Include="Assets\bubble.png" />
-    <Content Include="Assets\cursor.png" />
-    <Content Include="Assets\dark_dotted.png" />
-    <Content Include="Assets\display_box.png" />
-    <Content Include="Assets\green_virus_1.png" />
-    <Content Include="Assets\green_virus_2.png" />
-    <Content Include="bass.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bassflac.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bassmidi.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bassmix.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bassopus.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bass_fx.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\lighter_big_dotted.png" />
-    <Content Include="Assets\light_dotted.png" />
-    <Content Include="Assets\Mottle_horizontal.png" />
-    <Content Include="Assets\mottle_right_cap.png" />
-    <Content Include="Assets\pill_left.png" />
-    <Content Include="Assets\pill_pop.png" />
-    <Content Include="Assets\pill_right.png" />
-    <Content Include="Assets\pill_single.png" />
-    <Content Include="Assets\red_virus_1.png" />
-    <Content Include="Assets\red_virus_2.png" />
-    <Content Include="Assets\Settings.xml" />
-    <Content Include="Assets\smoke1.png" />
-    <Content Include="Assets\smoke2.png" />
-    <Content Include="Assets\smoke3.png" />
-    <Content Include="Assets\smoke4.png" />
-    <Content Include="Assets\smoke5.png" />
-    <Content Include="Assets\smoke6.png" />
-    <Content Include="Assets\smoke7.png" />
-    <Content Include="Assets\smoke8.png" />
-    <Content Include="Assets\solid_beveled.png" />
-    <Content Include="Assets\standard_square.png" />
-    <Content Include="Assets\yellow_virus_1.png" />
-    <Content Include="Assets\yellow_virus_2.png" />
-    <Content Include="BaseTris.ico" />
-    <Content Include="to-do-list.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GameObjects\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
-    <PropertyGroup>
-      <!-- temp file for the git version (lives in "obj" folder)-->
-      <VerFile>$(IntermediateOutputPath)gitver</VerFile>
-    </PropertyGroup>
-    <!-- write the hash to the temp file.-->
-    <Exec Command="git -C &quot;$(ProjectDir.TrimEnd('\'))&quot; describe --long --always --dirty &gt; $(VerFile)" />
-    <!-- read the version into the GitVersion itemGroup-->
-    <ReadLinesFromFile File="$(VerFile)">
-      <Output TaskParameter="Lines" ItemName="GitVersion" />
-    </ReadLinesFromFile>
-    <!-- Set the BuildHash property to contain the GitVersion, if it wasn't already set.-->
-    <PropertyGroup>
-      <BuildHash>@(GitVersion)</BuildHash>
-    </PropertyGroup>
-  </Target>
-  <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
-    <!-- names the obj/.../CustomAssemblyInfo.cs file -->
-    <PropertyGroup>
-      <CustomAssemblyInfoFile>$(IntermediateOutputPath)CustomAssemblyInfo.cs</CustomAssemblyInfoFile>
-    </PropertyGroup>
-    <!-- includes the CustomAssemblyInfo for compilation into your project -->
-    <ItemGroup>
-      <Compile Include="$(CustomAssemblyInfoFile)" />
-    </ItemGroup>
-    <!-- defines the AssemblyMetadata attribute that will be written -->
-    <ItemGroup>
-      <AssemblyAttributes Include="AssemblyMetadata">
-        <_Parameter1>GitHash</_Parameter1>
-        <_Parameter2>$(BuildHash)</_Parameter2>
-      </AssemblyAttributes>
-    </ItemGroup>
-    <!-- writes the attribute to the customAssemblyInfo file -->
-    <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
-  </Target>
+
 </Project>

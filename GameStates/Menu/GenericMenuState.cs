@@ -90,7 +90,7 @@ namespace BASeTris.GameStates.Menu
                 
                 if(pOwner is BASeTrisTK)
                 {
-                    ((BASeTrisTK)pOwner).Exit();
+                    ((BASeTrisTK)pOwner).Close();
                 }
                 else if(pOwner is BASeTris)
                 {
@@ -360,7 +360,7 @@ namespace BASeTris.GameStates.Menu
 
                 if (pOwner is BASeTrisTK)
                 {
-                    ((BASeTrisTK)pOwner).Exit();
+                    ((BASeTrisTK)pOwner).Close();
                 }
                 else if (pOwner is BASeTris)
                 {

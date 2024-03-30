@@ -27,10 +27,10 @@ using BASeTris.Rendering.RenderElements;
 using BASeTris.Rendering.Skia;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
-using OpenGL;
+
 using OpenTK.Platform;
 using SkiaSharp;
-using SkiaSharp.Views.Desktop;
+
 using XInput.Wrapper;
 using BASeTris.GameStates.Menu;
 using BASeTris.BackgroundDrawers;

@@ -30,6 +30,7 @@ using BASeTris.Settings;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using BASeTris.AI;
+using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 namespace BASeTris
 {
@@ -431,7 +432,7 @@ namespace BASeTris
                 return Settings.GetKeyboardKeyAssignment((int)source);
             return null;
         }
-        public GameState.GameKeys? TranslateKey(Key source)
+        public GameState.GameKeys? TranslateKey(TKKey source)
         {
 
             if (Settings.hasAssignedKeyboardKey((int)source))
@@ -509,10 +510,24 @@ namespace BASeTris
 
         private static String GetLocalAssets()
         {
-            String exepath;
+            String exepath = "";
             if (Debugger.IsAttached)
             {
-                exepath = Path.Combine(new FileInfo(Application.ExecutablePath).DirectoryName, "..", "..");
+                int numUppies = 1;
+                while (numUppies < 10)
+                {
+                    String testDir = Path.Combine(new FileInfo(Application.ExecutablePath).DirectoryName, String.Join("", Enumerable.Repeat("..\\", numUppies)),"Assets");
+                    if (Directory.Exists(testDir))
+                    {
+                        exepath = testDir;
+                        return exepath;
+                    }
+                    numUppies++;
+                }
+
+
+
+                //exepath = Path.Combine(new FileInfo(Application.ExecutablePath).DirectoryName, "..", "..");
             }
             else
             {

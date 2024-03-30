@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using OpenTK.Input;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BASeTris.GameStates
 {
@@ -151,12 +152,12 @@ namespace BASeTris.GameStates
         public void KeyUp(IStateOwner pOwner, int pKey)
         {
 
-            var k= (OpenTK.Input.Key)pKey;
-            if (pKey == (int)OpenTK.Input.Key.Enter)
+            var k= (OpenTK.Windowing.GraphicsLibraryFramework.Keys)pKey;
+            if (pKey == (int)OpenTK.Windowing.GraphicsLibraryFramework.Keys.Enter)
             {
                 CommitScore(pOwner);
             }
-            else if (k == Key.BackSpace)
+            else if (k == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Backspace)
             {
                 for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
                 {
@@ -167,7 +168,7 @@ namespace BASeTris.GameStates
                 if (CurrentPosition > 0)
                     CurrentPosition--;
             }
-            else if (k== OpenTK.Input.Key.Delete)
+            else if (k== OpenTK.Windowing.GraphicsLibraryFramework.Keys.Delete)
             {
                 for (int i = CurrentPosition + 1; i < NameEntered.Length - 1; i++)
                 {
@@ -181,14 +182,14 @@ namespace BASeTris.GameStates
         public void KeyPressed(IStateOwner pOwner, int pKey)
         {
             
-            var k = (OpenTK.Input.Key)pKey;
+            var k = (OpenTK.Windowing.GraphicsLibraryFramework.Keys)pKey;
             if (!AllowTextEntry()) return;
 
             //if (k == Key.Enter) CommitScore(pOwner);
-            if (k == Key.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
-            else if (k == Key.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
-            else if (k == Key.Left) MovePos(pOwner, -1);
-            else if (k == Key.Right) MovePos(pOwner, 1);
+            if (k == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down) HandleGameKey(pOwner, GameKeys.GameKey_Down);
+            else if (k == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up) HandleGameKey(pOwner, GameKeys.GameKey_Drop);
+            else if (k == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left) MovePos(pOwner, -1);
+            else if (k == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right) MovePos(pOwner, 1);
            
 
             else if (AvailableChars.Contains(Char.ToUpper((char)pKey)))

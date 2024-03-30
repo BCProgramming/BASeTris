@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Management;
 using System.Net.Mime;
 using System.Reflection;
 using System.Runtime.ExceptionServices;

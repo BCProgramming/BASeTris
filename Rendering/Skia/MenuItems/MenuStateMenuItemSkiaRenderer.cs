@@ -3,7 +3,7 @@ using BASeTris.AssetManager;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Block;
-using OpenTK.Platform.MacOS;
+//using OpenTK.Platform.MacOS;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;

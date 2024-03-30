@@ -134,7 +134,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     CurrentX = (float)(pOwner.ScaleFactor * 400f);
                     foreach (var key in kvp.Value.Item2)
                     {
-                        SKBitmap keybitmap = AssetHelper.GetSKBitmapForKeyboardKey((Key)key);
+                        SKBitmap keybitmap = AssetHelper.GetSKBitmapForKeyboardKey((OpenTK.Windowing.GraphicsLibraryFramework.Keys)key);
                         pRenderTarget.DrawBitmap(keybitmap, new SKRect(CurrentX, CurrentY,CurrentX+keybitmap.Width*.66f,CurrentY+keybitmap.Height*.66f));
                         CurrentX += keybitmap.Width;
                         MaxHeight = Math.Max(keybitmap.Height, MaxHeight);

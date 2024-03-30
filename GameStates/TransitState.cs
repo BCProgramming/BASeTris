@@ -279,7 +279,7 @@ namespace BASeTris.GameStates
     }
     public class TransitionState_Melt : TransitionState
     {
-        public int Size { get; set; } = 1;
+        public int Size { get; set; } = 5;
         public List<int> MeltOffset = null;
         public TransitionState_Melt(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
         {

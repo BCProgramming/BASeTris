@@ -27,7 +27,13 @@ using System.IO;
 using System.Reflection;
 using Microsoft.VisualBasic.ApplicationServices;
 using BASeTris.Rendering.Skia.GameStates;
-
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.Common.Input;
+using System.Configuration;
+using System.Runtime.InteropServices;
+using OpenTK.Windowing.Common;
+using OpenTK.Mathematics;
+using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 namespace BASeTris
 {
     public class BASeTrisTK : GameWindow,IStateOwner,IGamePresenter
@@ -51,14 +57,10 @@ namespace BASeTris
             GL.GetInteger(GetPName.FramebufferBinding, out int framebuffer);
             GL.GetInteger(GetPName.StencilBits, out int stencil);
             GL.GetInteger(GetPName.Samples, out int samples);
-            stencil = stencil == 0 ?1:stencil;
-            int bufferWidth = 0;
-            int bufferHeight = 0;
-            GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferWidth, out bufferWidth);
-            GL.GetRenderbufferParameter(RenderbufferTarget.Renderbuffer, RenderbufferParameterName.RenderbufferHeight, out bufferHeight);
-            samples = 1;
+
+            
             //todo: diagnose issues with Intel graphics
-            return new GRBackendRenderTarget(Window.ClientSize.Width, Window.ClientSize.Height, samples, stencil, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
+            return new GRBackendRenderTarget(Window.ClientSize.X, Window.ClientSize.Y, 2, 8, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
            
         }
         public const int DEFAULT_GAME_WIDTH = 520;
@@ -67,7 +69,7 @@ namespace BASeTris
 
         private BCRect _LastDrawBounds;
         public BCRect LastDrawBounds {  get { return _LastDrawBounds; } }
-        public BASeTrisTK(int Width,int Height):base(Width,Height,GraphicsMode.Default,"BASeTris",GameWindowFlags.FixedWindow)
+        public BASeTrisTK(int Width, int Height) : base(new GameWindowSettings() { }, new NativeWindowSettings() {  Flags = ContextFlags.Default | ContextFlags.Debug, Profile = ContextProfile.Core, Vsync = VSyncMode.Adaptive,Size = new OpenTK.Mathematics.Vector2i((int)(Width),(int)(Height)) })
         {
             
         }
@@ -80,94 +82,105 @@ namespace BASeTris
             //this.Location = new Point(140);
             var makesize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
             Debug.Print($"Scale Size: Factor:{ScaleFactor} - {makesize.ToString()}");
-            this.ClientSize = makesize;
+            this.ClientSize = new OpenTK.Mathematics.Vector2i(makesize.Width,makesize.Height);
             InitializeGraphics();
             //this.renderTarget = CreateRenderTarget(this);
         }
-     
-        protected override void OnLoad(EventArgs e)
+        
+        protected override void OnLoad()
         {
-            base.OnLoad(e);
+            base.OnLoad();
             //GlobalResources.OpenGLInterface = GRGlInterface.CreateNativeGlInterface();
             GlobalResources.OpenGLInterface = GRGlInterface.Create();
             Debug.Assert(GlobalResources.OpenGLInterface.Validate());
             InitializeGraphics();
-            CursorVisible = false;
+            this.CursorState = OpenTK.Windowing.Common.CursorState.Normal;
+            //CursorVisible = false;
 
-            Icon = Properties.Resources.AppIcon;
-            Location = new Point(Location.X, 0);
+            //Icon = OpenTK.Windowing.Common.Input.WindowIcon.   Properties.Resources.AppIcon;
+            //todo: fix this
+            //Icon = null; // Properties.Resources.AppIcon;
+            Location = new OpenTK.Mathematics.Vector2i(Location.X, 0);
             _Present = new GamePresenter(this);
-            _ScaleFactor = Math.Round(((float)(this.ClientSize.Height) / 950f),1);
+            _ScaleFactor = Math.Round(((float)(this.ClientSize.Y) / 950f),1);
             StartGame();
 
             //should be initialized enough for test code....
 
             //var testbitmap = TetrominoCollageRenderer.GetBackgroundCollage(new GameBoyTetrominoTheme());
-           /* var testbitmap = TetrominoCollageRenderer.GetNominoBitmap(new GameBoyTetrominoTheme());
-            
-            using (var data = testbitmap.Encode(SKEncodedImageFormat.Png, 80))
-            {
-                using (var writer = new FileStream("T:\\testout.png",FileMode.Create))
-                {
-                    data.SaveTo(writer);
-                }
-            }*/
-            
+            /* var testbitmap = TetrominoCollageRenderer.GetNominoBitmap(new GameBoyTetrominoTheme());
+
+             using (var data = testbitmap.Encode(SKEncodedImageFormat.Png, 80))
+             {
+                 using (var writer = new FileStream("T:\\testout.png",FileMode.Create))
+                 {
+                     data.SaveTo(writer);
+                 }
+             }*/
+            this.Resize += BASeTrisTK_Resize;
 
 
             //var useBG = new StarfieldBackgroundSkia(new StarfieldBackgroundSkiaCapsule());
             var useBG = StandardImageBackgroundSkia.GetMenuBackgroundDrawer();
             CurrentState = new TitleMenuState(useBG, this);
         }
+
+        private void BASeTrisTK_Resize(OpenTK.Windowing.Common.ResizeEventArgs obj)
+        {
+            GL.Viewport(0, 0, obj.Width, obj.Height);
+        }
         private void InitializeGraphics()
         {
             var oldcontext = this.context;
             var oldtarget = this.renderTarget;
+
             this.context = GRContext.CreateGl(GlobalResources.OpenGLInterface); //GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
             Debug.Assert(this.context.Handle != IntPtr.Zero);
             this.renderTarget = CreateRenderTarget(this);
             if (oldcontext != null) oldcontext.Dispose();
             if (oldtarget != null) oldtarget.Dispose();
-            CursorVisible = false;
+            //CursorVisible = false;
         }
         public void StartGame()
         {
             _Present.StartGame(GamePresenter.GameHandlingConstants.Handle_Manual);
            
         }
-        protected override void OnUnload(EventArgs e)
+        protected override void OnUnload()
         {
-            base.OnUnload(e);
+            base.OnUnload();
             this.context?.Dispose();
             this.context = null;
         }
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
+            OnClosed();
         }
-        protected override void OnClosed(EventArgs e)
+        
+        void OnClosed()
         {
             FireGameClosing();
             if (_Present.GameThread != null)
                 _Present.GameThread.Abort();
             if (_Present.InputThread != null)
             {
-                _Present.InputThread.Abort();
+                //_Present.InputThread.Abort();
             }
 
-            if (XInput.Wrapper.X.IsAvailable)
-            {
+            //if (XInput.Wrapper.X.IsAvailable)
+            //{
                 XInput.Wrapper.X.StopPolling();
-            }
+            //}
 
             if (_Present.ai != null) _Present.ai.AbortAI();
             TetrisGame.Soundman.StopMusic();
-            Exit();
+            //this.Close();
+            GameWindow gw;
+            
         }
-        protected override void OnResize(EventArgs e)
-        {
-            GL.Viewport(0, 0, Width, Height);
-        }
+
+
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             if (_Present.UserInputDisabled) return;
@@ -182,7 +195,7 @@ namespace BASeTris
             else
             {
 
-                if (e.Key == Key.G)
+                if (e.Key == TKKey.G)
                 {
                     if (_Present.Game.CurrentState is GameplayGameState)
                     {
@@ -201,7 +214,7 @@ namespace BASeTris
                         CurrentState = irs;
                     }
                 }
-                else if (e.Key == Key.C)
+                else if (e.Key == TKKey.C)
                 {
                     if (e.Shift && e.Control)
                     {
@@ -225,7 +238,7 @@ namespace BASeTris
             if (_Present.UserInputDisabled) return;
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
-                imis.MouseDown(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X,e.Position.Y));
+                imis.MouseDown(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(LastMousePosition.X, LastMousePosition.Y));
             }
         }
         protected override void OnMouseUp(MouseButtonEventArgs e)
@@ -233,11 +246,13 @@ namespace BASeTris
             if (_Present.UserInputDisabled) return;
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
-                imis.MouseUp(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(e.Position.X, e.Position.Y));
+                imis.MouseUp(this,MouseInputStateHelper.TranslateButton(e.Button), new BCPoint(LastMousePosition.X, LastMousePosition.Y));
             }
         }
+        OpenTK.Mathematics.Vector2 LastMousePosition = OpenTK.Mathematics.Vector2.Zero;
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
+            LastMousePosition = e.Position;
             if (_Present.UserInputDisabled) return;
             if (_Present.Game.CurrentState is IMouseInputState imis)
             {
@@ -252,6 +267,7 @@ namespace BASeTris
             {
 
                 Casted.KeyUp(this, (int)e.Key);
+                
 
             }
             else
@@ -264,7 +280,8 @@ namespace BASeTris
                 }
             }
         }
-        protected override void OnKeyPress(OpenTK.KeyPressEventArgs e)
+        //TODO: fix keypress delegation!
+        /*protected override void OnKeyPress(KeyPressEventArgs e)
         {
             if (_Present.UserInputDisabled) return;
             if (_Present.Game != null &&  _Present.Game.CurrentState is IDirectKeyboardInputState Casted && Casted.AllowDirectKeyboardInput())
@@ -272,7 +289,7 @@ namespace BASeTris
                 Casted.KeyPressed(this, (int)e.KeyChar);
             }
             
-        }
+        }*/
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             _Present.RunNextThreadAction();
@@ -285,9 +302,9 @@ namespace BASeTris
             //run update...
         }
         
-        public double FrameTime { get { if (CurrentFrameData == null) return 0; return CurrentFrameData.Time; } }
-        private FrameEventArgs LastFrameData = null;
-        private FrameEventArgs CurrentFrameData = null;
+        public double FrameTime { get { if (CurrentFrameData == null) return 0; return CurrentFrameData.Value.Time; } }
+        private FrameEventArgs? LastFrameData = null;
+        private FrameEventArgs? CurrentFrameData = null;
         private IBlockGameCustomizationHandler HandlerTitleSet = null;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
@@ -338,10 +355,13 @@ namespace BASeTris
                 
                 GL.ClearColor(backColor);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+                //SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType);
                 using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType))
                 {
-                    Debug.Assert(surface != null);
-                    Debug.Assert(surface.Handle != IntPtr.Zero);
+                    if (surface == null) return;
+                    //Debug.Assert(surface != null);
+                    //Debug.Assert(surface.Handle != IntPtr.Zero);
 
                     var canvas = surface.Canvas;
 
@@ -358,7 +378,7 @@ namespace BASeTris
                             if (renderer is IStateRenderingHandler staterender)
                             {
                                 canvas.Save();
-                                var FullRect = new SKRect(0, 0, ClientSize.Width, ClientSize.Height);
+                                var FullRect = new SKRect(0, 0, ClientSize.X, ClientSize.Y);
                                 canvas.ClipRect(FullRect);
                                 staterender.Render(this, canvas, CurrentGameState,
                                     new GameStateSkiaDrawParameters(FullRect));
@@ -386,7 +406,7 @@ namespace BASeTris
                     String sVersion;
                     String sFPS = String.Format("{0:0.0} FPS", Framerate);
                     FPSPaint.MeasureText(sFPS, ref FPSBound);
-                    var FPSPosition = new SKPoint(ClientSize.Width - (FPSBound.Width ), ClientSize.Height - (FPSBound.Height/2 ));
+                    var FPSPosition = new SKPoint(ClientSize.X - (FPSBound.Width ), ClientSize.Y - (FPSBound.Height/2 ));
                     //FPSPosition = new SKPoint(50, 50);
 
                     var asm = typeof(AssemblyInfo).Assembly;
@@ -406,7 +426,7 @@ namespace BASeTris
 
                     _Present.ProcessRenderTags((r) =>
                     {
-                        RenderingProvider.Static.DrawElement(this, canvas, r, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
+                        RenderingProvider.Static.DrawElement(this, canvas, r, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.X, ClientSize.Y)));
                         return r.DoRender();
                     });
                     //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
@@ -428,14 +448,14 @@ namespace BASeTris
 
         private void PaintPartitionedState(GameState PaintState, SKCanvas canvas)
         {
-            RenderHelpers.GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
+            RenderHelpers.GetHorizontalSizeData(ClientSize.Y, ClientSize.X, out float FieldWidth, out float StatWidth);
             var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), PaintState.GetType(), typeof(GameStateSkiaDrawParameters));
             if (renderer != null)
             {
                 if (renderer is IStateRenderingHandler staterender)
                 {
-                    SKRect FieldRect = new SKRect(0, 0, FieldWidth, ClientSize.Height);
-                    SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Height);
+                    SKRect FieldRect = new SKRect(0, 0, FieldWidth, ClientSize.Y);
+                    SKRect StatsRect = new SKRect(FieldWidth, 0, FieldWidth + StatWidth, ClientSize.Y);
                     _LastDrawBounds = FieldRect;
 
                     using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(canvas))
@@ -481,9 +501,9 @@ namespace BASeTris
 
         public Rectangle GameArea { get {
 
-                RenderHelpers.GetHorizontalSizeData(ClientSize.Height, ClientSize.Width, out float FieldWidth, out float StatWidth);
+                RenderHelpers.GetHorizontalSizeData(ClientSize.Y, ClientSize.X, out float FieldWidth, out float StatWidth);
 
-                return new Rectangle(0,0,(int)FieldWidth,ClientSize.Height);
+                return new Rectangle(0,0,(int)FieldWidth,ClientSize.Y);
             } }
         public void Feedback(float Strength, int Length)
         {

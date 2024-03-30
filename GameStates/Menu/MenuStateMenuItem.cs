@@ -133,7 +133,7 @@ namespace BASeTris.GameStates.Menu
 
             if (!IsActivated || currenttick-ActivationTick < 500) return;
             
-            if (pKey == (int)Keys.Enter || pKey == (int)Key.Enter)
+            if (pKey == (int)Keys.Enter || pKey == (int)OpenTK.Windowing.GraphicsLibraryFramework.Keys.Enter)
             {
                 StateOwner.ActivatedItem = null;
                 OnDeactivated(pOwner);

@@ -15,7 +15,7 @@ using BASeTris.Rendering.RenderElements;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
-using SkiaSharp.Views.Desktop;
+//using SkiaSharp.Views.Desktop;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
 using BASeTris.Particles;
@@ -159,7 +159,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                         });
                 
                 TetrisFieldDrawSkiaParameters parameters = (TetrisFieldDrawSkiaParameters)grabdata;
-                parameters.LastFieldSave = Element.Bounds;
+                parameters.LastFieldSave = parameters.Bounds;
                 //if (!Source.GameHandler.AllowFieldImageCache) parameters.FieldBitmap = null;
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
             }

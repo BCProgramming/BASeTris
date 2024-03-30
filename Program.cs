@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace BASeTris
 {
     static class Program
     {
-        
+
         private const int SPI_GETWORKAREA = 48;
         [DllImport("user32.dll", EntryPoint = "SystemParametersInfoA")]
         private static extern int SystemParametersInfo(int uAction, IntPtr uParam, ref RECT lpvParam, int fuWinIni);
@@ -39,7 +39,7 @@ namespace BASeTris
         }
 
         public static System.Reflection.BASeCamp.MultiTypeManager DITypes = null;
-        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IBlockGameCustomizationHandler),typeof(BlockGroupChooser) };
+        public static Type[] LoadTypes = new Type[] { typeof(NominoTheme), typeof(IBlockGameCustomizationHandler), typeof(BlockGroupChooser) };
 
         public enum StartMode
         {
@@ -51,19 +51,19 @@ namespace BASeTris
         private static Dictionary<Type, Type[]> CacheHandlerTheme = new Dictionary<Type, Type[]>();
         public static IEnumerable<Type> GetHandlerThemes(Type HandlerType)
         {
-            if(CacheHandlerTheme.ContainsKey(HandlerType))
+            if (CacheHandlerTheme.ContainsKey(HandlerType))
             {
                 return CacheHandlerTheme[HandlerType];
             }
 
             var TheTypes = DITypes[typeof(NominoTheme)].GetManagedTypes();
             List<Type> ConstructType = new List<Type>();
-            foreach(var iteratetype in TheTypes)
+            foreach (var iteratetype in TheTypes)
             {
                 var attrib = (HandlerThemeAttribute)iteratetype.GetCustomAttribute(typeof(HandlerThemeAttribute));
-                if(attrib!=null)
+                if (attrib != null)
                 {
-                    if(attrib.HandlerType.Any((t)=>t.IsAssignableFrom(HandlerType)))
+                    if (attrib.HandlerType.Any((t) => t.IsAssignableFrom(HandlerType)))
 
                     //if(attrib.HandlerType.Contains(HandlerType))
                     {
@@ -80,10 +80,10 @@ namespace BASeTris
             return DITypes[typeof(IBlockGameCustomizationHandler)].ManagedTypes;
         }
         const double Phi = 1.618033988749895;
-        const double phi = -1 /Phi;
+        const double phi = -1 / Phi;
         public static double Fibonacci(int n)
         {
-            return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5),2);
+            return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5), 2);
         }
 
         private static void MultiMinoTest()
@@ -113,7 +113,7 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-           
+
             //Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
 
             //var testresult = MakeTester.GetContiguousSets();
@@ -133,7 +133,7 @@ namespace BASeTris
             Application.SetCompatibleTextRenderingDefault(false);
             DebugLogger.EnableLogging = true;
             iManagerCallback cback = new LoggingCallback();
-            
+
             DITypes = new System.Reflection.BASeCamp.MultiTypeManager(
                 new Assembly[] { Assembly.GetExecutingAssembly() }.AsEnumerable(),
                 LoadTypes,
@@ -145,7 +145,7 @@ namespace BASeTris
 
             if (RunMode == StartMode.Mode_WinForms)
             {
-             
+
                 Application.Run(new BASeTris());
             }
             else
@@ -162,12 +162,13 @@ namespace BASeTris
                 RECT returnedvalue = new RECT();
                 SystemParametersInfo(SPI_GETWORKAREA, IntPtr.Zero, ref returnedvalue, 0);
 
-                var DesiredHeight = (int)(((returnedvalue.Bottom - returnedvalue.Top)- 64)*.80f);
+                var DesiredHeight = (int)(((returnedvalue.Bottom - returnedvalue.Top) - 64) * .80f);
                 var DesiredWidth = (int)((float)DesiredHeight * .95f);
-
-
+                //DesiredHeight = 1557;
+                //DesiredWidth = 1672;
+                //1557,1672
                 Debug.Print($"Starting BTTK: {DesiredWidth},{DesiredHeight}");
-                new BASeTrisTK(DesiredWidth,DesiredHeight).Run();
+                new BASeTrisTK((int)(DesiredWidth*1.5f), (int)(DesiredHeight*1.5f)).Run();
             }
         }
     }

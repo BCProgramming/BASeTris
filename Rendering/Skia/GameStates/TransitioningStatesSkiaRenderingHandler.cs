@@ -8,6 +8,7 @@ using OpenTK.Graphics.ES20;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -72,8 +73,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             SKBitmap BitmapNext = null;
 
             //for (hopefully!) better performance, we'll do the drawing for the two states at the same time via async. 
-
-            Task PrevTask = Task.Run(() =>
+            Action NextAction = () =>
             {
                 if (TransitionType.HasFlag(TransitionTypeConstants.TransitType_Prev_Composite))
                 {
@@ -96,12 +96,13 @@ namespace BASeTris.Rendering.Skia.GameStates
                         }
                         if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Previous))
                         {
+                            BitmapPrev.SetImmutable();
                             Source.SetCustomProperty(PREVSNAPKEY, BitmapPrev);
                         }
                     }
                 }
-            });
-            Task NextTask = Task.Run(() =>
+            };
+            Action PrevAction = () =>
             {
                 if (TransitionType.HasFlag(TransitionTypeConstants.TransitType_Next_Composite))
                 {
@@ -120,17 +121,30 @@ namespace BASeTris.Rendering.Skia.GameStates
                         }
                         if (Source.SnapshotSettings.HasFlag(TransitionState.SnapshotConstants.Snapshot_Next))
                         {
+                            BitmapNext.SetImmutable();
                             Source.SetCustomProperty(NEXTSNAPKEY, BitmapNext);
                         }
                     }
                 }
+            };
+
+            Task PrevTask = Task.Run(() =>
+            {
+                PrevAction();
+            });
+            Task NextTask = Task.Run(() =>
+            {
+                NextAction();
             });
 
             Task.WaitAll(PrevTask, NextTask);
 
             //this is not in the State GameProc itself, because the drawing itself can sometimes take some time. If the transition time elapses in that time than we won't really see it.
+            Debug.Assert(BitmapPrev != null);
+            Debug.Assert(BitmapNext != null);
             
             RenderTransition(pOwner, pRenderTarget, BitmapPrev, BitmapNext, Source, Element);
+            Thread.Sleep(0);
             if (Source.StartTime == null) Source.StartTime = DateTime.Now;
             
 
@@ -236,21 +250,22 @@ namespace BASeTris.Rendering.Skia.GameStates
                 //ok, now, first: calculate the melt position. This is between the top and the height plus a quarter.
 
                 double MeltPos = Source.TransitionPercentage * Element.Bounds.Height * 1.05;
-
-                //now go through all slices....
-                int meltindex = 0;
-                double UseWidth = Element.Bounds.Width / tmelt.MeltOffset.Count;
-                foreach (int Offset in tmelt.MeltOffset)
+                using (SKImage PrevImage = SKImage.FromBitmap(Previous))
                 {
-                    double CurrX = meltindex * tmelt.Size;
-                    double UseY = Math.Max(0, MeltPos + (double)Offset);
-                    SKRect SrcRect = new SKRect((float)CurrX, 0, (float)(CurrX + UseWidth), Element.Bounds.Height);
-                    SKRect DestRect = new SKRect((float)CurrX, (float)UseY, (float)(CurrX + UseWidth), (float)(UseY + Element.Bounds.Height));
-                    Target.DrawBitmap(Previous, SrcRect, DestRect);
-                    meltindex++;
+                    //now go through all slices....
+                    int meltindex = 0;
+                    double UseWidth = Element.Bounds.Width / tmelt.MeltOffset.Count;
+                    foreach (int Offset in tmelt.MeltOffset)
+                    {
+                        double CurrX = meltindex * tmelt.Size;
+                        double UseY = Math.Max(0, MeltPos + (double)Offset);
+                        SKRect SrcRect = new SKRect((float)CurrX, 0, (float)(CurrX + UseWidth), Element.Bounds.Height);
+                        SKRect DestRect = new SKRect((float)CurrX, (float)UseY, (float)(CurrX + UseWidth), (float)(UseY + Element.Bounds.Height));
+                        Target.DrawImage(PrevImage, SrcRect, DestRect);
+                        meltindex++;
+                    }
+
                 }
-
-
 
 
                 
@@ -347,12 +362,14 @@ namespace BASeTris.Rendering.Skia.GameStates
         {
             //max pixelation is a quarter the size of the bounds.
             //minimum is 1.
-            return (int)((float)Percentage * (Math.Max(Element.Bounds.Width, Element.Bounds.Height)/8 - 1f) + 1f);
+            var calculated =  (int)((float)Percentage * (Math.Max(Element.Bounds.Width, Element.Bounds.Height)/8 - 1f) + 1f);
+            calculated = Math.Max(3, calculated);
+            return calculated;
         }
         
         private void PaintPixelated(SKCanvas Target, SKBitmap Source,float Percentage, TransitionState SourceState, GameStateSkiaDrawParameters Element,int XOffset=0,int YOffset=0)
         {
-
+            var SrcImage = SKImage.FromBitmap(Source);
             //percentage: amount of pixelation.
             int ChosenPixelSize = ChoosePixelSize(Percentage, Element);
             if (ChosenPixelSize <=4)
@@ -370,7 +387,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                         int ChoseX = x + ChosenPixelSize / 2;
                         int ChoseY = y + ChosenPixelSize / 2;
                         SKRect skr = new SKRect(x, y, x + ChosenPixelSize, y + ChosenPixelSize);
-                        Target.DrawBitmap(Source, new SKRect(ChoseX, ChoseY, ChoseX + 1, ChoseY + 1), skr);
+                        Target.DrawImage(SrcImage, new SKRect(ChoseX, ChoseY, ChoseX + 1, ChoseY + 1), skr);
 
                     }
                 }
@@ -462,9 +479,6 @@ namespace BASeTris.Rendering.Skia.GameStates
                 for (int drawindex = 0; drawindex < NumDraw; drawindex++)
                 {
                     Target.DrawBitmap(Next, tsb.ShuffledBlocks[drawindex], tsb.ShuffledBlocks[drawindex]);
-                    
-
-
                 }
             }
             //RenderingProvider.Static.DrawElement(pOwner, Target, Source.BG, new SkiaBackgroundDrawData(Element.Bounds));

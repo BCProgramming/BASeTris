@@ -48,19 +48,19 @@ namespace BASeTris.GameStates
             return StateMouseButtons.LButton;
                 
         }
-        public static StateMouseButtons TranslateButton(MouseButton button)
+        public static StateMouseButtons TranslateButton(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton button)
         {
             switch(button)
             {
-                case MouseButton.Left:
+                case OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Left:
                     return StateMouseButtons.LButton;
-                case MouseButton.Right:
+                case OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Right:
                     return StateMouseButtons.RButton;
-                case MouseButton.Middle:
+                case OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Middle:
                     return StateMouseButtons.MButton;
-                case MouseButton.Button1:
+                case OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Button4:
                     return StateMouseButtons.xButton1;
-                case MouseButton.Button2:
+                case OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Button5:
                     return StateMouseButtons.xButton2;
             }
             return StateMouseButtons.LButton;
