@@ -100,6 +100,13 @@ namespace BASeTris
             //Icon = OpenTK.Windowing.Common.Input.WindowIcon.   Properties.Resources.AppIcon;
             //todo: fix this
             //Icon = null; // Properties.Resources.AppIcon;
+            var AppIconBitmap = Properties.Resources.AppIcon.ToBitmap();
+            var bitmapData = AppIconBitmap.LockBits(new Rectangle(0, 0, AppIconBitmap.Width, AppIconBitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite,AppIconBitmap.PixelFormat);
+            int length = bitmapData.Stride * bitmapData.Height;
+            byte[] bitmapbytes = new byte[length];
+            Marshal.Copy(bitmapData.Scan0, bitmapbytes, 0, length);
+            Icon = new WindowIcon(new OpenTK.Windowing.Common.Input.Image(AppIconBitmap.Width, AppIconBitmap.Height, bitmapbytes));
+
             Location = new OpenTK.Mathematics.Vector2i(Location.X, 0);
             _Present = new GamePresenter(this);
             _ScaleFactor = Math.Round(((float)(this.ClientSize.Y) / 950f),1);
