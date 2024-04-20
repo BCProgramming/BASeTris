@@ -141,7 +141,7 @@ namespace BASeTris.Theme.Block
     public class CardinalConnectionDictionary<Key, Data>
     {
         Dictionary<Key, Data[]> AllData = new Dictionary<Key, Data[]>();
-
+        public Data DefaultValue = default(Data);
         
         public Data this[Key key, ConnectedStyles connection]
         {
@@ -150,7 +150,7 @@ namespace BASeTris.Theme.Block
                 if (AllData.ContainsKey(key))
                     return AllData[key][(int)connection];
 
-                return default(Data);
+                return DefaultValue;
 
             }
             set
@@ -166,12 +166,12 @@ namespace BASeTris.Theme.Block
 
 
     }
-
+    
     public class CardinalConnectionSet<Element,Data> : CardinalConnectionSet
     {
 
         
-       
+        
         Element[] AllImages = new Element[(int)ConnectedStyles.MaxValue];
         /*
         public SKImage None { get; set; }
@@ -191,10 +191,16 @@ namespace BASeTris.Theme.Block
         public SKImage NorthWestEast { get; set; }
         public SKImage SouthWestEast { get; set; }
         */
+
+        public void SetAll(Element Value)
+        {
+            
+        }
+
         public CardinalConnectionSet()
         {
         }
-        public CardinalConnectionSet(CardinalConnectionSet<Element,Data> Source, Data Input, Func<Data,Element,Element> ProcessFunc,String sOptionalSuffix = "" )
+        public CardinalConnectionSet(CardinalConnectionSet<Element,Data> Source, Data Input, Func<Data,Element,Element> ProcessFunc, String sOptionalSuffix = "" )
         {
             for (int i = 0; i < (int)ConnectedStyles.MaxValue; i++)
             {
@@ -202,7 +208,11 @@ namespace BASeTris.Theme.Block
                 Element getimage = Source[i];
                 if (getimage != null)
                 {
-                    AllImages[i] = ProcessFunc(Input,getimage); //  TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(getimage, Input);
+                    AllImages[i] = ProcessFunc(Input, getimage); //  TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(getimage, Input);
+                }
+                else
+                {
+                    
                 }
 
 

@@ -181,6 +181,18 @@ namespace XInput.Wrapper
             #region // Buttons, sticks, thumbs, etc //////////////////////////////////////////////////////////////////
 
 
+            public bool IsButtonDown(GamepadButtons buttonFlags)
+            {
+                return state.Gamepad.IsButtonDown(buttonFlags);
+            }
+
+            public bool IsButtonUp(short prevButtons, GamepadButtons buttonFlags)
+            {
+                return state.Gamepad.IsButtonUp(prevButtons,buttonFlags);
+            }
+
+
+
             public bool Dpad_Up_down { get { return state.Gamepad.IsButtonDown(GamepadButtons.Dpad_Up); } }
             public bool Dpad_Up_up { get { return state.Gamepad.IsButtonUp(buttons, GamepadButtons.Dpad_Up); } }
 

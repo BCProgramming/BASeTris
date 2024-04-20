@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BASeTris.Input;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,15 +15,20 @@ namespace BASeTris
     //That is a major overhaul of the game controller featureset; so I'll defer that to at least after the XMLTheme stuff is implemented.
     public class ControllerInputState
     {
+        public static IGamepadDriver _Driver = new XIWrapper_Driver();
         //tracks button state. Basically can be used to detect rising and falling edges of button presses.
         public EventHandler<ControllerButtonEventArgs> ButtonPressed;
         public EventHandler<ControllerButtonEventArgs> ButtonReleased;
-        public X.Gamepad Pad { get; set; } = null;
+        public IGamepad Pad { get; set; } = null;
 
         private HashSet<X.Gamepad.GamepadButtons> PressedButtons = new HashSet<X.Gamepad.GamepadButtons>();
 
         //checks button states and raises events if necessary.
-        public ControllerInputState(X.Gamepad pPad)
+
+
+
+
+        public ControllerInputState(IGamepad pPad)
         {
             Pad = pPad;
         }
@@ -55,7 +61,7 @@ namespace BASeTris
                 }
             }
         }
-        private bool GetButtonState(X.Gamepad pad, X.Gamepad.GamepadButtons button)
+        private bool GetButtonState(IGamepad pad, X.Gamepad.GamepadButtons button)
         {
             return (((short) pad.Buttons & (short) button) == (short) button);
         }

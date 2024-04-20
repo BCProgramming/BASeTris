@@ -89,6 +89,13 @@ namespace BASeTris.Theme.Block
         {
             return "tetris_2";
         }
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        {
+            base.ApplyTheme(Group, GameHandler, Field, Reason);
+            
+
+
+        }
     }
 
 

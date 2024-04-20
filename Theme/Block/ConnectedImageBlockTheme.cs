@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.CodeDom;
 using OpenTK.Graphics.ES11;
+using BASeTris.AssetManager;
 
 
 
@@ -48,17 +49,25 @@ namespace BASeTris.Theme.Block
         Dictionary<String, SKColor> ChosenNominoColours = new Dictionary<string, SKColor>();
         public override (GenericCachedData<SKColor, SKImage>.BlockTypeConstants, SKColor) GetBlockData(Nomino Group, NominoBlock block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
+
             GenericCachedData<SKColor, SKImage>.BlockTypeConstants blocktype = GenericCachedData<SKColor, SKImage>.BlockTypeConstants.Normal;
             SKColor useColor = SKColors.Red;
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
-            foreach (var iterate in Group)
+            var iterate = block;
+            //foreach (var iterate in Group)
             {
                 //Dictionary<SKColor, SKImage> Sourcedict = null;
                 LineSeriesBlock.CombiningTypes? chosenType = null;
-                if (iterate.Block is LineSeriesBlock lsb)
+                if (iterate is LineSeriesBlock lsb)
                 {
-                    chosenType = lsb.CombiningIndex;
+                    if (Group.Count > 3)
+                    {
+                        ;
+                    }
 
+                    chosenType = lsb.CombiningIndex;
+                    useColor = LineSeriesBlock.GetCombiningTypeColor(chosenType.Value);
+                    
                     if (lsb.Popping)
                     {
                         blocktype = CachedImageDataByColor.BlockTypeConstants.Pop;
@@ -82,6 +91,7 @@ namespace BASeTris.Theme.Block
                             }
                         }
                     }
+                    return (blocktype, useColor);
                 }
                 else
                 {
@@ -105,11 +115,11 @@ namespace BASeTris.Theme.Block
 
                     //chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));
                 }
-                if (chosenType != null) useColor = LineSeriesBlock.GetCombiningTypeColor(chosenType.Value);
+                
             }
             return (blocktype, useColor);
         }
-
+        //TODO: need to fix up the themes for various colours here. Fioxed blocks also stopped working.
         protected override void PrepareThemeData()
         {
             if (ThemeDataPrepared) return;
@@ -122,10 +132,22 @@ namespace BASeTris.Theme.Block
             var fieldbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_field");
             Red.Field[CardinalConnectionSet.ConnectedStyles.None] = fieldbitmap != null ? SKImage.FromBitmap(fieldbitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
 
+            var FixedBitmap= TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed");
+            Red.Fixed = new CardinalImageSet();
+            Red.Fixed[CardinalConnectionSet.ConnectedStyles.None] = FixedBitmap != null ? SKImage.FromBitmap(FixedBitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
+
+
+            var PopBitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_pop");
+
+            Red.Pop = new CardinalImageSet();
+
+            Red.Pop[CardinalConnectionSet.ConnectedStyles.None] = PopBitmap != null ? SKImage.FromBitmap(PopBitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
 
             var AllArrangements = EnumHelper.GetAllEnums<CardinalConnectionSet.ConnectedStyles>();
             String NormalBlockPrefix = GetImageKeyBase() + "_normal_block_connected";
             String FieldBlockPrefix = GetImageKeyBase() + "_field_block_connected";
+            String FixedBlockPrefix = GetImageKeyBase() + "_fixed_block_connected";
+            String PopBlockPrefix = GetImageKeyBase() + "_pop_block_connected";
             foreach (var checkflags in AllArrangements)
             {
                 String useSuffix = CardinalConnectionSet.GetSuffix(checkflags);
@@ -133,38 +155,41 @@ namespace BASeTris.Theme.Block
                 {
                     ProcessArrangement(NormalBlockPrefix, Red.Normal_, null, checkflags, useSuffix);
                     ProcessArrangement(FieldBlockPrefix, Red.Field_, Red.Normal_, checkflags, useSuffix);
+                    ProcessArrangement(FixedBlockPrefix, Red.Fixed_,null, checkflags, useSuffix);
+                    ProcessArrangement(PopBlockPrefix, Red.Pop_, null, checkflags, useSuffix);
 
                 }
             }
             ImageCache.NormalConnectedBlocks_Color.Add(SKColors.Red, Red.Normal);
-
+            
             //SNES_Red_Normal = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_normal_snes"));
-            Red.Fixed = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed"));
-            Red.Pop = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_pop"));
+            
+            //Red.Fixed = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed"));
+            //Red.Pop = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_pop"));
 
 
 
 
             Yellow.Normal = new CardinalImageSet(Red.Normal_, SKColors.Yellow);
             Yellow.Field = new CardinalImageSet(Red.Field_, SKColors.Yellow);
-            Yellow.Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Fixed, SKColors.Yellow);
-            Yellow.Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Pop, SKColors.Yellow);
+            Yellow.Fixed = new CardinalImageSet(Red.Fixed_, SKColors.Yellow);
+            Yellow.Pop = new CardinalImageSet(Red.Pop_, SKColors.Yellow); 
             Blue.Normal = new CardinalImageSet(Red.Normal_, SKColors.Cyan);
             Blue.Field = new CardinalImageSet(Red.Field_, SKColors.Cyan);
-            Blue.Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Fixed, SKColors.Cyan);
-            Blue.Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Pop, SKColors.Cyan);
+            Blue.Fixed = new CardinalImageSet(Red.Fixed_, SKColors.Cyan);
+            Blue.Pop = new CardinalImageSet(Red.Pop_, SKColors.Cyan);
             Green.Normal = new CardinalImageSet(Red.Normal_, SKColors.Green);
             Green.Field = new CardinalImageSet(Red.Field_, SKColors.Green);
-            Green.Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Fixed, SKColors.Green);
-            Green.Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Pop, SKColors.Green);
+            Green.Fixed = new CardinalImageSet(Red.Fixed_, SKColors.Green);
+            Green.Pop = new CardinalImageSet(Red.Pop_, SKColors.Green); 
             Magenta.Normal = new CardinalImageSet(Red.Normal_, SKColors.Magenta);
             Magenta.Field = new CardinalImageSet(Red.Field_, SKColors.Magenta);
-            Magenta.Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Fixed, SKColors.Magenta);
-            Magenta.Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Pop, SKColors.Magenta);
+            Magenta.Fixed = new CardinalImageSet(Red.Fixed_, SKColors.Magenta);
+            Magenta.Pop = new CardinalImageSet(Red.Pop_, SKColors.Magenta);
             Orange.Normal = new CardinalImageSet(Red.Normal_, SKColors.Orange);
             Orange.Field = new CardinalImageSet(Red.Field_, SKColors.Orange);
-            Orange.Fixed = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Fixed, SKColors.Orange);
-            Orange.Pop = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(Red.Pop, SKColors.Orange);
+            Orange.Fixed = new CardinalImageSet(Red.Fixed_, SKColors.Orange);
+            Orange.Pop = new CardinalImageSet(Red.Pop_, SKColors.Orange);
 
             ImageCache.NormalConnectedBlocks_Color = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
             {
@@ -186,22 +211,22 @@ namespace BASeTris.Theme.Block
             };
             ImageCache.FixedBlocks_Color = new Dictionary<SKColor, SKImage>()
             {
-                {SKColors.Red,Red.Fixed },
-                {SKColors.Yellow,Yellow.Fixed },
-                {SKColors.Blue,Blue.Fixed },
-                {SKColors.Green,Green.Fixed },
-                {SKColors.Magenta,Magenta.Fixed },
-                {SKColors.Orange,Orange.Fixed },
+                {SKColors.Red,Red.Fixed[0] },
+                {SKColors.Yellow,Yellow.Fixed[0] },
+                {SKColors.Blue,Blue.Fixed[0] },
+                {SKColors.Green,Green.Fixed[0] },
+                {SKColors.Magenta,Magenta.Fixed[0] },
+                {SKColors.Orange,Orange.Fixed[0] },
             };
 
             ImageCache.PopBlocks_Color = new Dictionary<SKColor, SKImage>()
             {
-                {SKColors.Red,Red.Pop },
-                {SKColors.Yellow,Yellow.Pop },
-                {SKColors.Blue,Blue.Pop },
-                {SKColors.Green,Green.Pop },
-                {SKColors.Magenta,Magenta.Pop },
-                {SKColors.Orange,Orange.Pop },
+                {SKColors.Red,Red.Pop[0] },
+                {SKColors.Yellow,Yellow.Pop[0] },
+                {SKColors.Blue,Blue.Pop[0] },
+                {SKColors.Green,Green.Pop[0] },
+                {SKColors.Magenta,Magenta.Pop[0] },
+                {SKColors.Orange,Orange.Pop[0] },
             };
 
 
@@ -230,7 +255,7 @@ namespace BASeTris.Theme.Block
                 }
             }
         }
-        private void ProcessArrangement(string BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet, CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix)
+        private void ProcessArrangement(string BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet,  CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix)
         {
             String sFindNormalImage = BlockPrefix + (useSuffix.Length > 0 ? "_" : "") + useSuffix;
 
@@ -243,8 +268,11 @@ namespace BASeTris.Theme.Block
                 }
                 else
                 {
-                    if (DefaultSet != null) Target[checkflags] = DefaultSet[checkflags];
-                    Target[checkflags] = Target[CardinalConnectionSet.ConnectedStyles.None];
+                    
+                        if (DefaultSet != null) Target[checkflags] = DefaultSet[checkflags];
+
+                        Target[checkflags] = Target[CardinalConnectionSet.ConnectedStyles.None];
+                    
                 }
             }
             finally
@@ -261,7 +289,7 @@ namespace BASeTris.Theme.Block
         public CardinalImageSetBlockData()
         {
         }
-        public CardinalImageSetBlockData(CardinalImageSet pNormal, CardinalImageSet pField, SKImage pFixed, SKImage pPop)
+        public CardinalImageSetBlockData(CardinalImageSet pNormal, CardinalImageSet pField, CardinalImageSet pFixed, CardinalImageSet pPop)
         {
             
             Normal = pNormal;
@@ -273,18 +301,21 @@ namespace BASeTris.Theme.Block
         public override CardinalConnectionSet<SKImage, SKColor> Normal { get => Normal_; set => Normal_ = (CardinalImageSet)value; }
         public CardinalImageSet Field_ { get; set; } = null;
         public override CardinalConnectionSet<SKImage, SKColor> Field { get => Field_; set =>Field_= (CardinalImageSet)value; }
-        public SKImage Fixed_ { get; set; } = null;
-        public override SKImage Fixed { get => Fixed_; set => Fixed_= value; }
-        public SKImage Pop_ { get; set; } = null;
-        public override SKImage Pop { get => Pop_; set => Pop_ = value; }
+
+        public CardinalImageSet Fixed_ { get; set; } = null;
+        public override CardinalConnectionSet<SKImage, SKColor> Fixed { get => Fixed_; set => Fixed_= (CardinalImageSet)value; }
+        //public SKImage Fixed_ { get; set; } = null;
+        //public override SKImage Fixed { get => Fixed_; set => Fixed_= value; }
+        public CardinalImageSet Pop_ { get; set; } = null;
+        public override CardinalConnectionSet<SKImage,SKColor> Pop { get => Pop_; set => Pop_ = (CardinalImageSet)value; }
     }
     public class CardinalBlockData<Key, CacheType>
     {
 
         public virtual CardinalConnectionSet<CacheType, Key> Normal { get; set; } = null;
         public virtual CardinalConnectionSet<CacheType, Key> Field { get; set; } = null;
-        public virtual CacheType Fixed { get; set; }
-        public virtual CacheType Pop { get; set; }
+        public virtual CardinalConnectionSet<CacheType,Key> Fixed { get; set; } = null;
+        public virtual CardinalConnectionSet<CacheType, Key> Pop { get; set; }
 
 
     }
@@ -329,7 +360,7 @@ namespace BASeTris.Theme.Block
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareThemeData();
-            if (Reason == ThemeApplicationReason.FieldSet)
+            if (Reason == ThemeApplicationReason.NewNomino)
             {
 
                 ;
@@ -338,7 +369,7 @@ namespace BASeTris.Theme.Block
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             foreach (var iterate in Group)
             {
-                CachedImageData<Key>.BlockTypeConstants blocktype = CachedImageData<Key>.BlockTypeConstants.Normal;
+                //CachedImageData<Key>.BlockTypeConstants blocktype = CachedImageData<Key>.BlockTypeConstants.Normal;
                 //Dictionary<SKColor, SKImage> Sourcedict = null;
                 LineSeriesBlock.CombiningTypes? chosenType = null;
 
@@ -357,7 +388,7 @@ namespace BASeTris.Theme.Block
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     }
 
-                    if (blocktype == CachedImageData<Key>.BlockTypeConstants.Normal && UseConnectedImages)
+                    if (btc == GenericCachedData<Key, DataType>.BlockTypeConstants.Normal && UseConnectedImages)
                     {
 
                         //determine the flags by checking the Nomino.
@@ -397,7 +428,7 @@ namespace BASeTris.Theme.Block
                         }
                         CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
 
-                        var useRotationImages = from c in useConnectionStyles select   ImageCache.GetConnectedBlocks(useKey)[c];
+                        var useRotationImages = from c in useConnectionStyles select  ImageCache.GetConnectedBlocks(useKey)[c];
                         var useImage = ImageCache.GetConnectedBlocks(useKey)[cs];
                         ibb._RotationImagesSK = useRotationImages.ToArray();//GetImageRotations(SKBitmap.FromImage(useImage));
                         //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
@@ -406,7 +437,7 @@ namespace BASeTris.Theme.Block
                     }
                     else
                     {
-                        ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock(blocktype, useKey) };
+                        ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock((GenericCachedData<Key, SKImage>.BlockTypeConstants)btc, useKey) };
                     }
 
                 }

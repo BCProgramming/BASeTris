@@ -25,6 +25,7 @@ namespace BASeTris.Blocks
 
 
         //This function seems to be busted up. :(
+        //Apr 20 2024, yeah this one still has issues. runaway recursion, it looks like.
         public bool IsSupported(Nomino Owner, int Row,int Column,TetrisField field, List<CascadingBlock> RecursionBlocks = null)
         {
             if (Fixed) return true;

@@ -14,6 +14,7 @@ namespace BASeTris.Theme.Block
     {
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
+            
             throw new NotImplementedException();
         }
 

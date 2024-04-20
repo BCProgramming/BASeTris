@@ -376,7 +376,7 @@ namespace BASeTris
             {
                 if (Game != null) Game.HandleGameKey(pOwner, k, TetrisGame.KeyInputSource.Input_HID);
             });
-            CIS = new ControllerInputState(X.Gamepad_1);
+            CIS = new ControllerInputState(ControllerInputState._Driver.Getgamepad(1));
             if (!NoController)
             {
                 CIS.ButtonPressed += CIS_ButtonPressed;

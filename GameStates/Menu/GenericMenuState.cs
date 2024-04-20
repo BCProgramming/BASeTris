@@ -281,6 +281,7 @@ namespace BASeTris.GameStates.Menu
                             var NewGameState = new GameplayGameState(pOwner, usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
                             //TransitionState ts = new TransitionState_Pixelate(pOwner.CurrentState, NewGameState, new TimeSpan(0, 0, 0, 0, 10000)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_None, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
                             var ts = TransitionState.GetRandomTransitionState(pOwner.CurrentState, NewGameState, TransitionState.StandardTransitionLength);
+                            Target.BackgroundMusicKey = null;
                             pOwner.CurrentState = ts;
                             igp.StartGame();
                         }

@@ -27,9 +27,6 @@ namespace BASeTris.Rendering
        
         public virtual void RenderStats(IStateOwner pOwner,object pRenderTarget,object Element,object ElementData)
         {
-
-
-
             this.RenderStats(pOwner, (TClassType)pRenderTarget, (TDrawType)Element, (TDataType)ElementData);
         }
     }
