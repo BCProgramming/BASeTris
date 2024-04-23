@@ -372,7 +372,7 @@ namespace BASeTris.GameStates.GameHandlers
                     {
                         isPopping = lsb.Popping;  //blocks that are popping shouldn't be resurrected.
                     }
-                    if (!isPopping && !cb.IsSupported(cb.Owner,Row,Column, state.PlayField, new[] { cb }.ToList()) && !AdditionalSkipBlocks.Contains(cb.Owner))
+                    if (!isPopping && !cb.IsSupported(cb.Owner,Row,Column, state.PlayField, new HashSet<CascadingBlock>(new[] { cb })) && !AdditionalSkipBlocks.Contains(cb.Owner))
                     {
                         //we initialize the list of recursion blocks to the block we are testing, since it cannot support itself.
                         //resurrect this block and other blocks that are in the same nomino.

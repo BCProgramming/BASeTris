@@ -26,16 +26,17 @@ namespace BASeTris.Blocks
 
         //This function seems to be busted up. :(
         //Apr 20 2024, yeah this one still has issues. runaway recursion, it looks like.
-        public bool IsSupported(Nomino Owner, int Row,int Column,TetrisField field, List<CascadingBlock> RecursionBlocks = null)
+        public bool IsSupported(Nomino Owner, int Row,int Column,TetrisField field, HashSet<CascadingBlock> RecursionBlocks = null)
         {
-            if (Fixed) return true;
+            if (Fixed) return true; //Fixed blocks are supported. By themselves, I guess.
+
             if (RecursionBlocks == null)
             {
-                RecursionBlocks = new List<CascadingBlock>() { };
+                RecursionBlocks = new HashSet<CascadingBlock>() { };
             }
             else
             {
-                
+                if (RecursionBlocks.Contains(this)) return false;
             }
             
             if (Row + 1 >= field.RowCount) return true; //block is at the bottom, so it is supported.
@@ -45,28 +46,31 @@ namespace BASeTris.Blocks
             CascadingBlock castcb = BlockBelow as CascadingBlock;
             if (castcb == null && BlockBelow != null && BlockBelow.Owner!=Owner)
                 return true; //there is a block below, but it is not a cascading block. We are supported by that block.
-
+            RecursionBlocks.Add(this); //add ourselves to the cascading list.
             if (BlockBelow is CascadingBlock cb)
             {
-                RecursionBlocks.Add(this); //add ourselves to the cascading list.
-                var UnderSupported =BlockBelow.Owner!=Owner && !(BlockBelow is LineSeriesBlock lsb && lsb.Popping) &&  cb.IsSupported(cb.Owner, Row + 1, Column, field, RecursionBlocks);
-                if (UnderSupported) return true; //the block below is a CascadingBlock but that block is supported.
-               
+                
+                if (BlockBelow.Owner != Owner) //the block below has to be part of a separate nomino or it doesn't count.
+                {
+                    var UnderSupported = !(BlockBelow is LineSeriesBlock lsb && lsb.Popping) && cb.IsSupported(cb.Owner, Row + 1, Column, field, RecursionBlocks);
+                    if (UnderSupported) return true; //the block below is a CascadingBlock but that block is supported.
+                }
             }
-
+            //We've now eliminated two possibilities: This block is sitting on the bottom of the field, or this block is on top of a block belonging to another piece that is supported.
+            //Now we need to go through the other pieces in our nomino and see if any of them are supported.
             if (Owner != null && Owner.Count > 1)
             {
-                //if we have an owner and it has more than one element, we must look through to see if there are any blocks in that nomino that are supported.
-                //search through our owner's Nominos...
+                //Of course, if we have no owner or that owner only has one element (which, presumably, must be us) than we can't do so.
                 foreach (var iterate in Owner)
                 {
+                    //skip if the block is either us, or one of the specified recursion blocks.
                     if (iterate.Block == ThisBlock) continue;
                     if (RecursionBlocks.Contains(iterate.Block)) continue;
                     //if (iterate.Block==this) continue;
                     //find the field position of this block.
                     int PosX = iterate.X + Owner.X;
                     int PosY = iterate.Y + Owner.Y;
-                    //grab the block at this position.
+                    //retrieve block from the field itself.
                     var fieldblock = field.Contents[PosY][PosX];
                     if (fieldblock == iterate.Block)
                     {
@@ -74,17 +78,18 @@ namespace BASeTris.Blocks
                         {
                             if (cb2.ConnectionIndex != this.ConnectionIndex) continue; //since the connection index is different, this block in our nomino cannot support us.
                                                                                        //otherwise, ask that block if it is supported.
+
                             var supportresult = cb2.IsSupported(cb2.Owner, PosY, PosX, field, RecursionBlocks);
                             if (supportresult) return true;
                         }
+                        else
+                        {
+                            //other block types support. Though, you wouldn't think they'd appear in the same game, we should account for the possibility.
+                            return true;
+                        }
                     }
-
                 }
             }
-
-
-
-
             return false;
         }
     }
@@ -101,7 +106,7 @@ namespace BASeTris.Blocks
         public class AdditionalCombineInfo
         {
             public CombiningTypes CombineType { get; set; }
-            public double CombineAddWeight { get; set; } //amount to combine. negative values mean that while this block is compatible, it will take more pills to actually "pop".
+            public double CombineAddWeight { get; set; } //amount to combine. negative values mean that while this block is compatible, it will take extra blocks in a series to actually "pop".
             public AdditionalCombineInfo(CombiningTypes pCombineType,double pCombineWeight)
             {
                 CombineType = pCombineType;
@@ -119,6 +124,7 @@ namespace BASeTris.Blocks
         }
         public static SKColor GetCombiningTypeColor(CombiningTypes src)
         {
+                //currently values outside the enum give a random color. We could be deterministic and have the same values give the same (random) color, but there is no need for that currently.
             return src switch
             {
                 CombiningTypes.Red => SKColors.Red,
@@ -139,7 +145,7 @@ namespace BASeTris.Blocks
         }
         
         public bool Popping { get; set; } = false;
-        public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row.
+        public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row. The maximum critical mass is used when a block is in a series.
         public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question. 
 
         public int ComboTracker { get; set; }
@@ -151,7 +157,7 @@ namespace BASeTris.Blocks
  
         
     }
-    //a "Master" block is a block that spawns as part of the level. eg. Dr. Mario Viruses or the flashing blocks in Tetris 2. The main difference is in behaviour.
+    //a "Master" block is a block that spawns as part of the level. eg. Dr. Mario Viruses or the fixed blocks in Tetris 2. The main difference is in behaviour.
     
     public class LineSeriesPrimaryBlock : LineSeriesBlock
     {

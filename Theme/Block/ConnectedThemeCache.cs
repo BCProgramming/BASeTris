@@ -2,6 +2,7 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,7 +60,7 @@ namespace BASeTris.Theme.Block
         }
         public abstract SKImage ApplyToDefault(Key src, SKImage StandardImage);
     }
-    public abstract class GenericCachedData<Key, DataTag>
+    public abstract class GenericCachedData
     {
         public enum BlockTypeConstants
         {
@@ -68,8 +69,13 @@ namespace BASeTris.Theme.Block
             Shiny,
             Pop
         }
+    }
+    public abstract class GenericCachedData<Key, DataTag>:GenericCachedData
+    {
+        
 
         public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> NormalConnectedBlocks_Color = new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>();
+        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> FixedConnectedBlocks_Color = new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>();
         public Dictionary<Key, DataTag> NormalBlocks_Color = new Dictionary<Key, DataTag>();
         public Dictionary<Key, DataTag> FixedBlocks_Color = new Dictionary<Key, DataTag>();
         public Dictionary<Key, DataTag> ShinyBlocks_Color = new Dictionary<Key, DataTag>();
@@ -84,8 +90,14 @@ namespace BASeTris.Theme.Block
             DefaultKey = pDefaultKey;
             ProcessFunc = pProcessFunc;
         }
-        public CardinalConnectionSet<DataTag, Key> GetConnectedBlocks(Key src)
+        public CardinalConnectionSet<DataTag, Key> GetFixedConnectedBlocks(Key src)
         {
+            return GetConnectedBlocks(FixedConnectedBlocks_Color, src);
+        }
+        public CardinalConnectionSet<DataTag, Key> GetNormalConnectedBlocks(Key src)
+        {
+            return GetConnectedBlocks(NormalConnectedBlocks_Color, src);
+            /*
             if (!NormalConnectedBlocks_Color.ContainsKey(src))
             {
                 //red must be added first!
@@ -93,7 +105,27 @@ namespace BASeTris.Theme.Block
                 CardinalConnectionSet<DataTag, Key> newSet = new CardinalConnectionSet<DataTag, Key>(redSet, src, ProcessFunc);
                 NormalConnectedBlocks_Color[src] = newSet;
             }
-            return NormalConnectedBlocks_Color[src];
+            return NormalConnectedBlocks_Color[src];*/
+        }
+        private CardinalConnectionSet<DataTag, Key> GetConnectedBlocks(Dictionary<Key, CardinalConnectionSet<DataTag, Key>> sourcedict, Key src)
+        {
+            if (!sourcedict.ContainsKey(src))
+            {
+                //red must be added first!
+                var redSet = sourcedict[DefaultKey];
+                CardinalConnectionSet<DataTag, Key> newSet = new CardinalConnectionSet<DataTag, Key>(redSet, src, ProcessFunc);
+                sourcedict[src] = newSet;
+            }
+            return sourcedict[src];
+        }
+        public CardinalConnectionSet<DataTag, Key> GetConnectedBlocksByType(Key src, BlockTypeConstants btc)
+        {
+
+            return btc switch
+            {
+                BlockTypeConstants.Fixed => GetFixedConnectedBlocks(src),
+                _ => GetNormalConnectedBlocks(src)
+            };
         }
         public DataTag GetNormalBlock(Key src)
         {

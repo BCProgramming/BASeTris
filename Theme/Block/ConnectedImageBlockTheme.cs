@@ -46,6 +46,35 @@ namespace BASeTris.Theme.Block
         {
             base.ImageCache = new CachedImageDataByColor();
         }
+        protected virtual GenericCachedData<SKColor, SKImage>.BlockTypeConstants GetGroupBlockType(Nomino Group)
+        {
+            return GenericCachedData<SKColor, SKImage>.BlockTypeConstants.Normal;
+        }
+        protected virtual SKColor GetGroupBlockColor(Nomino Group)
+        {
+            //I,O,T,S,Z,J,L
+            //{Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
+            //chosen color based on the type.
+            SKColor useColor = SKColors.Red;
+            if (Group is Tetromino_I) useColor = SKColors.Cyan;
+            else if (Group is Tetromino_O) useColor = SKColors.Yellow;
+            else if (Group is Tetromino_T) useColor = SKColors.Purple;
+            else if (Group is Tetromino_S) useColor = SKColors.Green;
+            else if (Group is Tetromino_Z) useColor = SKColors.Red;
+            else if (Group is Tetromino_J) useColor = SKColors.Navy;
+            else if (Group is Tetromino_L) useColor = SKColors.OrangeRed;
+            else
+            {
+                useColor = NNominoGenerator.GetNominoData<SKColor>(ChosenNominoColours, Group, () => RandomColor());
+            }
+            return useColor;
+        }
+        protected virtual (GenericCachedData<SKColor, SKImage>.BlockTypeConstants,SKColor) GetGroupBlockData(Nomino Group)
+        {
+
+            return (GetGroupBlockType(Group), GetGroupBlockColor(Group));
+
+        }
         Dictionary<String, SKColor> ChosenNominoColours = new Dictionary<string, SKColor>();
         public override (GenericCachedData<SKColor, SKImage>.BlockTypeConstants, SKColor) GetBlockData(Nomino Group, NominoBlock block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
@@ -54,9 +83,7 @@ namespace BASeTris.Theme.Block
             SKColor useColor = SKColors.Red;
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             var iterate = block;
-            //foreach (var iterate in Group)
             {
-                //Dictionary<SKColor, SKImage> Sourcedict = null;
                 LineSeriesBlock.CombiningTypes? chosenType = null;
                 if (iterate is LineSeriesBlock lsb)
                 {
@@ -95,23 +122,9 @@ namespace BASeTris.Theme.Block
                 }
                 else
                 {
-                    //I,O,T,S,Z,J,L
-                    //{Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
-                    //chosen color based on the type.
-                    if (Group is Tetromino_I) useColor = SKColors.Cyan;
-                    else if (Group is Tetromino_O) useColor = SKColors.Yellow;
-                    else if (Group is Tetromino_T) useColor = SKColors.Purple;
-                    else if (Group is Tetromino_S) useColor = SKColors.Green;
-                    else if (Group is Tetromino_Z) useColor = SKColors.Red;
-                    else if (Group is Tetromino_J) useColor = SKColors.Navy;
-                    else if (Group is Tetromino_L) useColor = SKColors.OrangeRed;
-                    else
-                    {
-                        useColor = NNominoGenerator.GetNominoData<SKColor>(ChosenNominoColours, Group, () => RandomColor());
-                    }
-                    //else useColor = SKColors.Gray;
 
-
+                    (blocktype,useColor) = GetGroupBlockData(Group);
+                   
 
                     //chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));
                 }
@@ -131,7 +144,10 @@ namespace BASeTris.Theme.Block
             Red.Field = new CardinalImageSet();
             var fieldbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_field");
             Red.Field[CardinalConnectionSet.ConnectedStyles.None] = fieldbitmap != null ? SKImage.FromBitmap(fieldbitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
-
+            if (this is SNESTetris2Theme)
+            {
+                ;
+            }
             var FixedBitmap= TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed");
             Red.Fixed = new CardinalImageSet();
             Red.Fixed[CardinalConnectionSet.ConnectedStyles.None] = FixedBitmap != null ? SKImage.FromBitmap(FixedBitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
@@ -161,7 +177,7 @@ namespace BASeTris.Theme.Block
                 }
             }
             ImageCache.NormalConnectedBlocks_Color.Add(SKColors.Red, Red.Normal);
-            
+            ImageCache.FixedConnectedBlocks_Color.Add(SKColors.Red, Red.Fixed);
             //SNES_Red_Normal = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("tetris_2_normal_snes"));
             
             //Red.Fixed = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed"));
@@ -200,6 +216,16 @@ namespace BASeTris.Theme.Block
                 {SKColors.Magenta,Magenta.Normal },
                 {SKColors.Orange,Orange.Normal },
             };
+            ImageCache.FixedConnectedBlocks_Color = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
+            {
+                {SKColors.Red,Red.Fixed },
+                {SKColors.Yellow,Yellow.Fixed },
+                {SKColors.Blue,Blue.Fixed },
+                {SKColors.Green,Green.Fixed },
+                {SKColors.Magenta,Magenta.Fixed },
+                {SKColors.Orange,Orange.Fixed },
+            };
+
             ImageCache.NormalBlocks_Color = new Dictionary<SKColor, SKImage>()
             {
                 {SKColors.Red,Red.Normal[0] },
@@ -357,6 +383,7 @@ namespace BASeTris.Theme.Block
             return (!VisuallyConnectOnlySameCombiningType || (BlockA is LineSeriesBlock lsbg && BlockB is LineSeriesBlock lsbb));
 
         }
+        
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             PrepareThemeData();
@@ -374,7 +401,7 @@ namespace BASeTris.Theme.Block
                 LineSeriesBlock.CombiningTypes? chosenType = null;
 
 
-                GenericCachedData<Key, DataType>.BlockTypeConstants btc;
+                GenericCachedData.BlockTypeConstants btc;
 
                 
                 Key useKey;
@@ -388,7 +415,7 @@ namespace BASeTris.Theme.Block
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     }
 
-                    if (btc == GenericCachedData<Key, DataType>.BlockTypeConstants.Normal && UseConnectedImages)
+                    if (btc == GenericCachedData.BlockTypeConstants.Normal || btc == GenericCachedData.BlockTypeConstants.Fixed && UseConnectedImages)
                     {
 
                         //determine the flags by checking the Nomino.
@@ -428,14 +455,14 @@ namespace BASeTris.Theme.Block
                         }
                         CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
 
-                        var useRotationImages = from c in useConnectionStyles select  ImageCache.GetConnectedBlocks(useKey)[c];
-                        var useImage = ImageCache.GetConnectedBlocks(useKey)[cs];
+                        var useRotationImages = from c in useConnectionStyles select  ImageCache.GetConnectedBlocksByType(useKey, btc)[c];
+                        var useImage = ImageCache.GetNormalConnectedBlocks(useKey)[cs];
                         ibb._RotationImagesSK = useRotationImages.ToArray();//GetImageRotations(SKBitmap.FromImage(useImage));
                         //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
 
 
                     }
-                    else
+                    else 
                     {
                         ibb._RotationImagesSK = new SKImage[] { ImageCache.GetBlock((GenericCachedData<Key, SKImage>.BlockTypeConstants)btc, useKey) };
                     }

@@ -92,10 +92,14 @@ namespace BASeTris.Theme.Block
         public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
             base.ApplyTheme(Group, GameHandler, Field, Reason);
-            
-
-
         }
+        protected override GenericCachedData.BlockTypeConstants GetGroupBlockType(Nomino Group) =>Group switch 
+            {
+                Tetromino_O => GenericCachedData.BlockTypeConstants.Fixed,
+                Tetromino_T => GenericCachedData.BlockTypeConstants.Fixed,
+                _ =>GenericCachedData.BlockTypeConstants.Normal
+            };
+        
     }
 
 
