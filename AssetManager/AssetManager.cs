@@ -2386,7 +2386,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                                 mcallback.ShowMessage("Loading image:" + loopfile.Name);
 
                                 MemoryStream streamread = new MemoryStream(File.ReadAllBytes(loopfile.FullName));
-
+                            if (basenameonly.IndexOf("XBOXSERIESX_DIAGRAM") > 0)
+                            {
+                                ;
+                            }
                                 if (AddImage(streamread, basenameonly))
                                     countaccum++;
                             }
@@ -2398,15 +2401,16 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                             var readfile = ZipFile.OpenRead(loopfile.FullName);
                             foreach (var loopentry in readfile.Entries)
                             {
-                                if (isFileSupported(loopentry.Name))
+                            if (isFileSupported(loopentry.Name))
+                            {
+                                
+                                //byte[] readbuffer = new byte[loopentry.Length];
+                                String basenameonly = Path.GetFileNameWithoutExtension(loopentry.Name).ToUpper();
+                                using (MemoryStream streamread = new MemoryStream())
+                                using (Stream s = loopentry.Open())
                                 {
-                                    byte[] readbuffer = new byte[loopentry.Length];
-
-                                    loopentry.Open().Read(readbuffer, 0, (int)loopentry.Length);
-                                    //MemoryStream streamread = new MemoryStream(new StreamReader(loopentry.InputStream));
-                                    MemoryStream streamread = new MemoryStream(readbuffer);
-                                    String basenameonly = Path.GetFileNameWithoutExtension(loopentry.Name).ToUpper();
-                                    
+                                    s.CopyTo(streamread);
+                                    streamread.Position = 0;
 
                                     if ((Path.GetExtension(loopentry.Name).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
                                     {
@@ -2417,10 +2421,12 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                                     }
                                     else
                                     {
+                                       
                                         if (AddImage(streamread, basenameonly))
                                             countaccum++;
                                     }
                                 }
+                            }
                             }
                     }
                 }
@@ -2466,7 +2472,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             Image loadedimage = Image.FromStream(streamread);
             streamread.Seek(startpos, SeekOrigin.Begin);
             SKBitmap readbitmap = SKBitmap.Decode(streamread);
-            
+            if (readbitmap == null)
+            {
+                readbitmap = SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(loadedimage));
+            }
             if (!loadedimages.ContainsKey(basenameonly))
             {
                 loadedimages.Add(basenameonly, loadedimage);
