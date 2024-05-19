@@ -148,6 +148,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
             {
                 using SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.Black };
                 using SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = Element.Bounds.Height / 4, Color = SKColors.White };
+                RenderHelpers.SetPaintBlur(textshadow);
                 DrawTextInformationSkia tTitle = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
                 DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow };
                 SKRect bnd = new SKRect();
@@ -442,11 +443,6 @@ namespace BASeTris.Rendering.Skia.MenuItems
             MenuTransitioner(() =>
             {
 
-
-
-
-
-
                 base.Render(pOwner, pRenderTarget, Source, Element);
                 var useFont = GetScaledFont(pOwner, Source.FontSize);
                 var MeasureText = TetrisGame.MeasureSKText(useFont.TypeFace, useFont.FontSize, Source.Text);
@@ -477,7 +473,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
                 ForePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
                 ShadePaint.Typeface = useFont.TypeFace;
                 ShadePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
-
+                RenderHelpers.SetPaintBlur(ShadePaint);
                 var useStyle = new DrawTextInformationSkia()
                 {
                     Text = Source.Text,

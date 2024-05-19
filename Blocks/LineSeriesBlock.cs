@@ -43,7 +43,7 @@ namespace BASeTris.Blocks
             var ThisBlock = field.Contents[Row][Column];
             var BlockBelow = field.Contents[Row + 1][Column];
             
-            CascadingBlock castcb = BlockBelow as CascadingBlock;
+            CascadingBlock? castcb = BlockBelow as CascadingBlock;
             if (castcb == null && BlockBelow != null && BlockBelow.Owner!=Owner)
                 return true; //there is a block below, but it is not a cascading block. We are supported by that block.
             RecursionBlocks.Add(this); //add ourselves to the cascading list.

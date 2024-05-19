@@ -48,15 +48,15 @@ namespace BASeTris.Rendering.Skia.GameStates
             
 
             String sDiagramKey = useData.DiagramImageKey;
-            SKBitmap ControllerImage = null;
+            SKImage ControllerImage = null;
             try
             {
                 if(sDiagramKey!=null && TetrisGame.Imageman.HasSKBitmap(sDiagramKey))
-                    ControllerImage = TetrisGame.Imageman.GetSKBitmap(sDiagramKey, 0.5f);
+                    ControllerImage = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(sDiagramKey.ToUpperInvariant()));
             }
             catch (Exception notfound)
             {
-                
+                ;
             }
             float usewidth = 300;
 
@@ -67,13 +67,20 @@ namespace BASeTris.Rendering.Skia.GameStates
                 SKPoint ControllerPos = new SKPoint((float)(300 * pOwner.ScaleFactor), (float)(100 * pOwner.ScaleFactor));
                 //SKPoint ControllerPos = new SKPoint(Element.Bounds.Left + Element.Bounds.Width / 2 - ControllerImage.Width / 2, Element.Bounds.Top + Element.Bounds.Height / 2 - ControllerImage.Height / 2);
                 var drawrect = new SKRect(ControllerPos.X, ControllerPos.Y, ControllerPos.X + DesiredSize.Width, ControllerPos.Y + DesiredSize.Height);
-                pRenderTarget.DrawBitmap(ControllerImage, drawrect);
+                pRenderTarget.DrawImage(ControllerImage, drawrect);
             }
             //first, we'll get all the gamepad buttons for the desired parts.
             SKPaint TextFore = new SKPaint() { Color = SKColors.Black, TextSize = (float)(24 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
             SKPaint TextBack = new SKPaint() { Color = SKColors.White, TextSize = (float)(24 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
             SKPaint TTextFore = new SKPaint() { Color = SKColors.Black, TextSize = (float)(48 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
             SKPaint TTextBack = new SKPaint() { Color = SKColors.White, TextSize = (float)(48 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
+
+
+            RenderHelpers.SetPaintBlur(TTextBack);
+            
+            
+
+
             DrawTextInformationSkia sktitle = new DrawTextInformationSkia();
             sktitle.CharacterHandler = new DrawCharacterHandlerSkia(new RotatingPositionCharacterPositionCalculatorSkia { Radius = 10});
             sktitle.ShadowPaint = TTextBack;

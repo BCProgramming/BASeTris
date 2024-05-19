@@ -15,6 +15,7 @@ using System.IO;
 using System.CodeDom;
 using OpenTK.Graphics.ES11;
 using BASeTris.AssetManager;
+using BASeCamp.Logging;
 
 
 
@@ -144,7 +145,7 @@ namespace BASeTris.Theme.Block
             Red.Field = new CardinalImageSet();
             var fieldbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_field");
             Red.Field[CardinalConnectionSet.ConnectedStyles.None] = fieldbitmap != null ? SKImage.FromBitmap(fieldbitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
-            if (this is SNESTetris2Theme)
+            if (this is TetrisDXTheme)
             {
                 ;
             }
@@ -159,11 +160,33 @@ namespace BASeTris.Theme.Block
 
             Red.Pop[CardinalConnectionSet.ConnectedStyles.None] = PopBitmap != null ? SKImage.FromBitmap(PopBitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
 
+            var allContexts = GetAllImageKeyContexts();
+            foreach (var additionalentry in allContexts)
+            {
+                String sConnectKey = GetImageKeyBase() + "_" + additionalentry + "_block_connected";
+                SKBitmap getbitmap = null;
+                try
+                {
+                    getbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_" + additionalentry)??fieldbitmap;
+                }
+                catch (Exception exr)
+                {
+                    DebugLogger.Log.WriteLine(exr.ToString());
+                    getbitmap = fieldbitmap; //default to thge field bitmap...
+                }
+                Red[additionalentry] = new CardinalImageSet();
+                Red[additionalentry][CardinalConnectionSet.ConnectedStyles.None] = getbitmap==null? Red.Normal[CardinalConnectionSet.ConnectedStyles.None]:SKImage.FromBitmap(getbitmap);
+                
+            }
+
+
+
             var AllArrangements = EnumHelper.GetAllEnums<CardinalConnectionSet.ConnectedStyles>();
             String NormalBlockPrefix = GetImageKeyBase() + "_normal_block_connected";
             String FieldBlockPrefix = GetImageKeyBase() + "_field_block_connected";
             String FixedBlockPrefix = GetImageKeyBase() + "_fixed_block_connected";
             String PopBlockPrefix = GetImageKeyBase() + "_pop_block_connected";
+            var AdditionalEntries = (from s in GetAllImageKeyContexts() select s + "_block_connected").ToList();
             foreach (var checkflags in AllArrangements)
             {
                 String useSuffix = CardinalConnectionSet.GetSuffix(checkflags);
@@ -173,6 +196,13 @@ namespace BASeTris.Theme.Block
                     ProcessArrangement(FieldBlockPrefix, Red.Field_, Red.Normal_, checkflags, useSuffix);
                     ProcessArrangement(FixedBlockPrefix, Red.Fixed_,null, checkflags, useSuffix);
                     ProcessArrangement(PopBlockPrefix, Red.Pop_, null, checkflags, useSuffix);
+                    //process the arrangements for the other entries.
+                    foreach (var additionalentry in allContexts)
+                    {
+                        String sConnectKey = GetImageKeyBase() + "_" + additionalentry + "_block_connected";
+                        ProcessArrangement(sConnectKey, (CardinalImageSet)Red[additionalentry], null, checkflags, useSuffix);
+                    }
+
 
                 }
             }
@@ -207,7 +237,35 @@ namespace BASeTris.Theme.Block
             Orange.Fixed = new CardinalImageSet(Red.Fixed_, SKColors.Orange);
             Orange.Pop = new CardinalImageSet(Red.Pop_, SKColors.Orange);
 
-            ImageCache.NormalConnectedBlocks_Color = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
+
+            //need to do the same for all additional contexts
+
+            foreach (var additionalentry in allContexts)
+            {
+                Yellow[additionalentry] = new CardinalImageSet(Red.RetrieveSet(additionalentry), SKColors.Yellow);
+                Blue[additionalentry] = new CardinalImageSet(Red.RetrieveSet(additionalentry), SKColors.Cyan);
+                Green[additionalentry] = new CardinalImageSet(Red.RetrieveSet(additionalentry), SKColors.Green);
+                Magenta[additionalentry] = new CardinalImageSet(Red.RetrieveSet(additionalentry), SKColors.Magenta);
+                Orange[additionalentry] = new CardinalImageSet(Red.RetrieveSet(additionalentry), SKColors.Orange);
+
+                //prep image cache. This corresponds to the later code blocks doing something similar for the standard/old types (normal, Pop, fixed, etc)
+                ImageCache[additionalentry] = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
+                {
+                    {SKColors.Red,Red[additionalentry] },
+                    {SKColors.Yellow,Yellow[additionalentry] },
+                    {SKColors.Blue,Blue[additionalentry] },
+                    {SKColors.Green,Green[additionalentry] },
+                    {SKColors.Magenta,Magenta[additionalentry] },
+                    {SKColors.Orange,Orange[additionalentry] },
+                };
+
+            }
+
+                
+            
+
+
+                ImageCache.NormalConnectedBlocks_Color = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
             {
                 {SKColors.Red,Red.Normal },
                 {SKColors.Yellow,Yellow.Normal },
@@ -281,15 +339,16 @@ namespace BASeTris.Theme.Block
                 }
             }
         }
-        private void ProcessArrangement(string BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet,  CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix)
+        private void ProcessArrangement(string BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet,  CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix,SKImage[] Compositors = null)
         {
             String sFindNormalImage = BlockPrefix + (useSuffix.Length > 0 ? "_" : "") + useSuffix;
-
+            
             try
             {
                 if (TetrisGame.Imageman.HasSKBitmap(sFindNormalImage))
                 {
                     var getimage = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(sFindNormalImage));
+                    //todo: implement compositors. If provided, we want to composite a randomly selected element from that array with the Bitmap we retrieved.
                     Target[checkflags] = getimage;
                 }
                 else
@@ -315,6 +374,9 @@ namespace BASeTris.Theme.Block
         public CardinalImageSetBlockData()
         {
         }
+
+        
+
         public CardinalImageSetBlockData(CardinalImageSet pNormal, CardinalImageSet pField, CardinalImageSet pFixed, CardinalImageSet pPop)
         {
             
@@ -323,25 +385,62 @@ namespace BASeTris.Theme.Block
             Fixed = pFixed;
             Pop = pPop;
         }
-        public CardinalImageSet Normal_ { get; set; } = null;
+        public new CardinalConnectionSet<SKImage, SKColor> this[String pIndex]
+        {
+            get
+            {
+                return ConnectionSetData?[pIndex];
+            }
+            set
+            {
+                ConnectionSetData[pIndex] = value;
+            }
+        }
+
+        public CardinalImageSet RetrieveSet(String pKey)
+        {
+            return ConnectionSetData?[pKey] as CardinalImageSet;
+        }
+        public void AssignSet(String pKey, CardinalImageSet value)
+        {
+            ConnectionSetData[pKey] = value;
+        }
+        //these are "helpers" more than anything, making it easier to get/set the most common sets from the dictionary via a property.
+        public CardinalImageSet Normal_ { get { return (CardinalImageSet)this["Normal"]; } set { this["Normal"] = value; } }
         public override CardinalConnectionSet<SKImage, SKColor> Normal { get => Normal_; set => Normal_ = (CardinalImageSet)value; }
-        public CardinalImageSet Field_ { get; set; } = null;
+
+        public CardinalImageSet Field_ { get { return (CardinalImageSet)this["Field"]; } set { this["Field"] = value; } }
+        //public CardinalImageSet Field_ { get; set; } = null;
         public override CardinalConnectionSet<SKImage, SKColor> Field { get => Field_; set =>Field_= (CardinalImageSet)value; }
 
-        public CardinalImageSet Fixed_ { get; set; } = null;
+        public CardinalImageSet Fixed_ { get { return (CardinalImageSet)this["Fixed"]; } set { this["Fixed"] = value; } } 
         public override CardinalConnectionSet<SKImage, SKColor> Fixed { get => Fixed_; set => Fixed_= (CardinalImageSet)value; }
         //public SKImage Fixed_ { get; set; } = null;
         //public override SKImage Fixed { get => Fixed_; set => Fixed_= value; }
-        public CardinalImageSet Pop_ { get; set; } = null;
+        public CardinalImageSet Pop_ { get { return (CardinalImageSet)this["Pop"]; } set { this["Pop"] = value; } } 
         public override CardinalConnectionSet<SKImage,SKColor> Pop { get => Pop_; set => Pop_ = (CardinalImageSet)value; }
     }
     public class CardinalBlockData<Key, CacheType>
     {
+        
+        protected Dictionary<String, CardinalConnectionSet<CacheType, Key>> ConnectionSetData = new Dictionary<string, CardinalConnectionSet<CacheType, Key>>();
 
-        public virtual CardinalConnectionSet<CacheType, Key> Normal { get; set; } = null;
-        public virtual CardinalConnectionSet<CacheType, Key> Field { get; set; } = null;
-        public virtual CardinalConnectionSet<CacheType,Key> Fixed { get; set; } = null;
-        public virtual CardinalConnectionSet<CacheType, Key> Pop { get; set; }
+        public virtual CardinalConnectionSet<CacheType, Key> Normal { get { return this["Normal"]; } set { this["Normal"] = value; } }
+        public virtual CardinalConnectionSet<CacheType, Key> Field { get { return this["Field"]; } set { this["Field"] = value; } }
+        public virtual CardinalConnectionSet<CacheType, Key> Fixed { get { return this["Fixed"]; } set { this["Fixed"] = value; } }
+        public virtual CardinalConnectionSet<CacheType, Key> Pop { get { return this["Pop"]; } set { this["Pop"] = value; } }
+
+        public virtual CardinalConnectionSet<CacheType, Key> this[String pIndex]
+        {
+            get
+            {
+                return ConnectionSetData?[pIndex];
+            }
+            set
+            {
+                ConnectionSetData[pIndex] = value;
+            }
+        }
 
 
     }
@@ -392,6 +491,7 @@ namespace BASeTris.Theme.Block
 
                 ;
             }
+            
             //---
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             foreach (var iterate in Group)
@@ -415,6 +515,9 @@ namespace BASeTris.Theme.Block
                         scb.DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
                     }
 
+
+                    
+                    
                     if (btc == GenericCachedData.BlockTypeConstants.Normal || btc == GenericCachedData.BlockTypeConstants.Fixed && UseConnectedImages)
                     {
 
@@ -454,9 +557,13 @@ namespace BASeTris.Theme.Block
                             }
                         }
                         CardinalConnectionSet.ConnectedStyles[] useConnectionStyles = CardinalConnectionSet.GetRotations(cs).Prepend(cs).ToArray();
+                        var sGetContext = GetImageKeyContext(iterate.Block);
 
-                        var useRotationImages = from c in useConnectionStyles select  ImageCache.GetConnectedBlocksByType(useKey, btc)[c];
-                        var useImage = ImageCache.GetNormalConnectedBlocks(useKey)[cs];
+                         
+                        var useRotationImages = (from c in useConnectionStyles select  ImageCache.GetConnectedBlocksByType(useKey, btc,sGetContext)[c]).ToArray();
+                        
+
+                        //var useImage = ImageCache.GetNormalConnectedBlocks(useKey)[cs];
                         ibb._RotationImagesSK = useRotationImages.ToArray();//GetImageRotations(SKBitmap.FromImage(useImage));
                         //ibb._RotationImagesSK = GetImageRotations(SKBitmap.FromImage(useImage));
 
@@ -484,6 +591,14 @@ namespace BASeTris.Theme.Block
         }
         protected abstract String GetImageKeyBase();
 
+        protected virtual String GetImageKeyContext(NominoBlock nb)
+        {
+            return String.Empty;
+        }
+        protected virtual String[] GetAllImageKeyContexts()
+        {
+            return new String[] { };
+        }
         protected abstract void PrepareThemeData();
         
     }

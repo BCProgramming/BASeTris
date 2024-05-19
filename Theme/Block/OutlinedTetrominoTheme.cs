@@ -11,7 +11,8 @@ using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
-    [HandlerTheme("Outlined", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    //This one ought to be removed. It's sort of outdone by the bitmap based Connected Block theme.
+    //[HandlerTheme("Outlined", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     [ThemeDescription("WIP.")]
     /// <summary>
     /// Theme which has tetrominoes be outlined rather than draw as distinct blocks.

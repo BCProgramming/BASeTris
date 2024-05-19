@@ -191,7 +191,6 @@ namespace BASeTris.Theme.Block
         public SKImage NorthWestEast { get; set; }
         public SKImage SouthWestEast { get; set; }
         */
-
         public void SetAll(Element Value)
         {
             

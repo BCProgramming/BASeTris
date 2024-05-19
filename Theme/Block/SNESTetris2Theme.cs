@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,7 @@ namespace BASeTris.Theme.Block
         {
             return "tetris_2_NES";
         }
+
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
@@ -100,6 +102,44 @@ namespace BASeTris.Theme.Block
                 _ =>GenericCachedData.BlockTypeConstants.Normal
             };
         
+    }
+    [HandlerTheme("Tetris DX", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [ThemeDescription("Tetris DX on the Game Boy")]
+    public class TetrisDXTheme : ConnectedImageBlockTheme
+    {
+        public override string Name => "Tetris DX";
+        protected override string GetImageKeyBase()
+        {
+            return "dx";
+        }
+        protected override string GetImageKeyContext(NominoBlock nb)
+        {
+            return nb.Owner switch
+            {
+                Tetromino_I _ => "mottle",
+                Tetromino_O _ => "bigdot",
+                Tetromino_J _ => "dx_hole",
+                Tetromino_L _ => "block",
+                Tetromino_T _ => "raised",
+                Tetromino_Z => "dot",
+                Tetromino_S => "bigdot",
+                _ => "block" //todo: select a type unique to the nomino, similar to other themes.
+
+
+            };
+        }
+        protected override string[] GetAllImageKeyContexts()
+        {
+            return new[] { "mottle", "bigdot", "block", "dot", "hole", "raised" };
+        }
+        public override void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        {
+            base.ApplyTheme(Group, GameHandler, Field, Reason);
+        }
+        protected override GenericCachedData.BlockTypeConstants GetGroupBlockType(Nomino Group) => Group switch
+        {
+            _ => GenericCachedData.BlockTypeConstants.Normal
+        };
     }
 
 

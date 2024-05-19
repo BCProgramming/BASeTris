@@ -10,6 +10,16 @@ namespace BASeTris.Rendering
 {
     public static class RenderHelpers
     {
+
+        public static void SetPaintBlur(SKPaint Target,float Sigma=4,float X = 2,float Y=2)
+        {
+            SKMaskFilter mask = SKMaskFilter.CreateBlur(SKBlurStyle.Solid, Sigma);
+            SKImageFilter ImageFilter = SKImageFilter.CreateBlur(X, Y);
+            Target.MaskFilter = mask;
+            Target.ImageFilter = ImageFilter;
+
+
+        }
         public static void GetHorizontalSizeData(float WindowHeight, float WindowWidth, out float FieldSize, out float StatSize)
         {
             FieldSize = WindowHeight * (332f / 641f);

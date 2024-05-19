@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -72,10 +73,62 @@ namespace BASeTris.Theme.Block
     }
     public abstract class GenericCachedData<Key, DataTag>:GenericCachedData
     {
-        
 
-        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> NormalConnectedBlocks_Color = new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>();
-        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> FixedConnectedBlocks_Color = new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>();
+
+        private Dictionary<String, Dictionary<Key, CardinalConnectionSet<DataTag, Key>>> ConnectedBlocks_Color = new Dictionary<string, Dictionary<Key, CardinalConnectionSet<DataTag, Key>>>();
+
+
+        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> this[String context]
+        {
+            get
+            {
+                return GetDictionaryFromContextString(context);
+            }
+            set
+            {
+                ConnectedBlocks_Color[context] = value;
+            }
+        }
+        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> GetDictionaryFromContextString(String pKey)
+        {
+            if (!ConnectedBlocks_Color.ContainsKey(pKey))
+                ConnectedBlocks_Color.Add(pKey, new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>());
+
+            return ConnectedBlocks_Color[pKey];
+
+
+        }
+
+        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> NormalConnectedBlocks_Color
+        {
+            get
+            {
+                return GetDictionaryFromContextString("Normal");
+                /*if(!ConnectedBlocks_Color.ContainsKey("Normal"))
+                    ConnectedBlocks_Color.Add("Normal",new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>());
+
+                return ConnectedBlocks_Color["Normal"];*/
+            }
+            set
+            {
+                ConnectedBlocks_Color["Normal"] = value;
+            }
+        }
+        public Dictionary<Key, CardinalConnectionSet<DataTag, Key>> FixedConnectedBlocks_Color
+        {
+            get
+            {
+                return GetDictionaryFromContextString("Fixed");
+                /*if (!ConnectedBlocks_Color.ContainsKey("Fixed"))
+                    ConnectedBlocks_Color.Add("Fixed", new Dictionary<Key, CardinalConnectionSet<DataTag, Key>>());
+
+                return ConnectedBlocks_Color["Fixed"];*/
+            }
+            set
+            {
+                ConnectedBlocks_Color["Fixed"] = value;
+            }
+        }
         public Dictionary<Key, DataTag> NormalBlocks_Color = new Dictionary<Key, DataTag>();
         public Dictionary<Key, DataTag> FixedBlocks_Color = new Dictionary<Key, DataTag>();
         public Dictionary<Key, DataTag> ShinyBlocks_Color = new Dictionary<Key, DataTag>();
@@ -118,14 +171,23 @@ namespace BASeTris.Theme.Block
             }
             return sourcedict[src];
         }
-        public CardinalConnectionSet<DataTag, Key> GetConnectedBlocksByType(Key src, BlockTypeConstants btc)
+        public CardinalConnectionSet<DataTag, Key> GetConnectedBlocksByType(Key src, BlockTypeConstants btc,String sContext = null)
         {
 
-            return btc switch
+            if (!String.IsNullOrEmpty(sContext))
             {
-                BlockTypeConstants.Fixed => GetFixedConnectedBlocks(src),
-                _ => GetNormalConnectedBlocks(src)
-            };
+                var useDictionary = GetConnectedBlocks(GetDictionaryFromContextString(sContext),src);
+                //var useDictionary = ConnectedBlocks_Color[sContext][src];
+                return useDictionary;
+            }
+            else
+            {
+                return btc switch
+                {
+                    BlockTypeConstants.Fixed => GetFixedConnectedBlocks(src),
+                    _ => GetNormalConnectedBlocks(src)
+                };
+            }
         }
         public DataTag GetNormalBlock(Key src)
         {
