@@ -140,12 +140,12 @@ namespace BASeTris.Theme.Block
             ThemeDataPrepared = true;
             //  TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(getimage, Input);
             Red.Normal = new CardinalImageSet();
-            Red.Normal[CardinalConnectionSet.ConnectedStyles.None] = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_normal"));
+            Red.Normal[CardinalConnectionSet.ConnectedStyles.None] = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_normal")?? TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase()));
             //"Field" reflects blocks that are part of the field, rather than active block groups.
             Red.Field = new CardinalImageSet();
             var fieldbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_field");
             Red.Field[CardinalConnectionSet.ConnectedStyles.None] = fieldbitmap != null ? SKImage.FromBitmap(fieldbitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
-            if (this is TetrisDXTheme)
+            if (this is TetrisDXTheme_Depr)
             {
                 ;
             }
@@ -182,7 +182,7 @@ namespace BASeTris.Theme.Block
 
 
             var AllArrangements = EnumHelper.GetAllEnums<CardinalConnectionSet.ConnectedStyles>();
-            String NormalBlockPrefix = GetImageKeyBase() + "_normal_block_connected";
+            String[] NormalBlockPrefix = new String[] { GetImageKeyBase() + "_normal_block_connected", GetImageKeyBase() + "_block_connected" };
             String FieldBlockPrefix = GetImageKeyBase() + "_field_block_connected";
             String FixedBlockPrefix = GetImageKeyBase() + "_fixed_block_connected";
             String PopBlockPrefix = GetImageKeyBase() + "_pop_block_connected";
@@ -319,7 +319,7 @@ namespace BASeTris.Theme.Block
         }
         public override void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field)
         {
-
+            //TODO: Random application should also consider custom context types, not just the blocktypeconstants.
             PrepareThemeData();
             var drawtype = RandomHelpers.Static.Select(new[] { CachedImageDataByColor.BlockTypeConstants.Fixed, CachedImageDataByColor.BlockTypeConstants.Normal, CachedImageDataByColor.BlockTypeConstants.Pop }, new float[] { 20, 60, 5 });
 
@@ -339,10 +339,14 @@ namespace BASeTris.Theme.Block
                 }
             }
         }
-        private void ProcessArrangement(string BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet,  CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix,SKImage[] Compositors = null)
+
+        private void ProcessArrangement(string[] BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet, CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix, SKImage[] Compositors = null)
         {
-            String sFindNormalImage = BlockPrefix + (useSuffix.Length > 0 ? "_" : "") + useSuffix;
-            
+            if (BlockPrefix == null) throw new ArgumentNullException("BlockPrefix");
+            if (BlockPrefix.Length == 0) throw new ArgumentException("BlockPrefix is empty array.");
+
+            String sFindNormalImage = BlockPrefix.First() + (useSuffix.Length > 0 ? "_" : "") + useSuffix;
+
             try
             {
                 if (TetrisGame.Imageman.HasSKBitmap(sFindNormalImage))
@@ -353,16 +357,31 @@ namespace BASeTris.Theme.Block
                 }
                 else
                 {
-                    
+                    if (BlockPrefix.Length == 1)//last prefix to process
+                    {
+
+
                         if (DefaultSet != null) Target[checkflags] = DefaultSet[checkflags];
 
                         Target[checkflags] = Target[CardinalConnectionSet.ConnectedStyles.None];
+                    }
+                    else
+                    {
+                        ProcessArrangement(BlockPrefix.Skip(1).ToArray(), Target, DefaultSet, checkflags, useSuffix, Compositors);
+                    }
                     
+
                 }
             }
             finally
             {
             }
+        }
+
+        private void ProcessArrangement(string BlockPrefix, CardinalImageSet Target, CardinalImageSet DefaultSet,  CardinalConnectionSet.ConnectedStyles checkflags, string useSuffix,SKImage[] Compositors = null)
+        {
+            ProcessArrangement(new String[] { BlockPrefix }, Target, DefaultSet, checkflags, useSuffix, Compositors);
+            return;
         }
 
 

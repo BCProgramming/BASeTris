@@ -207,6 +207,15 @@ namespace BASeTris.Theme.Block
         }
         public abstract DataTag GetBlockFromDictionary(Dictionary<Key, DataTag> Input, Key src);
 
+        public DataTag GetBlock(String pContext, Key color, CardinalConnectionSet.ConnectedStyles pConnectionStyle)
+        {
+            //GetBlock
+            return GetDictionaryFromContextString(pContext)[color][pConnectionStyle];
+        }
+        public DataTag GetBlock(String pContext, Key color)
+        {
+            return GetBlock(pContext, color, CardinalConnectionSet.ConnectedStyles.None);
+        }
         public DataTag GetBlock(BlockTypeConstants btc, Key color)
         {
             return GetBlockFromDictionary(GetDictionaryForType(btc), color);
