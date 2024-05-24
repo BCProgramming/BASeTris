@@ -63,7 +63,7 @@ namespace BASeTris
                 var attrib = (HandlerThemeAttribute)iteratetype.GetCustomAttribute(typeof(HandlerThemeAttribute));
                 if (attrib != null)
                 {
-                    if (attrib.HandlerType.Any((t) => t.IsAssignableFrom(HandlerType)))
+                    if (!attrib.Hidden && attrib.HandlerType.Any((t) => t.IsAssignableFrom(HandlerType)))
 
                     //if(attrib.HandlerType.Contains(HandlerType))
                     {

@@ -33,6 +33,7 @@ namespace BASeTris.GameStates.Menu
             var themetypes = Program.GetHandlerThemes(HandlerType);
             foreach(var themeiter in themetypes)
             {
+                
                 ConstructorInfo ci = themeiter.GetConstructor(new Type[] { });
                 if(ci!=null)
                 {

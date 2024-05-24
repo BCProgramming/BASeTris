@@ -48,7 +48,7 @@ namespace BASeTris.Theme.Block
         public static Dictionary<String,ConnectedStyles> StyleLookup = new Dictionary<String,ConnectedStyles>()
         {
             {"",ConnectedStyles.None},
-            {"M",ConnectedStyles.North},
+            {"N",ConnectedStyles.North},
             {"W",ConnectedStyles.West },
             {"E",ConnectedStyles.East},
             {"S",ConnectedStyles.South },

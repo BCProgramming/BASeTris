@@ -76,7 +76,7 @@ namespace BASeTris.Theme.Block
             return "dx_dot";
         }
     }
-    [HandlerTheme("Tetris DX Bigdot", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [HandlerTheme("Tetris DX Bigdot",HandlerThemeAttribute.HandlerThemeFlags.ThemeFlags_NonBrowsable ,typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     public class TetrisDX_BigDot : ConnectedImageBlockTheme
     {
         public override bool IsConnected(NominoBlock BlockA, NominoBlock BlockB)
@@ -89,7 +89,7 @@ namespace BASeTris.Theme.Block
             return "dx_bigdot";
         }
     }
-    [HandlerTheme("Tetris DX", typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
+    [HandlerTheme("Tetris DX",  typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
     [ThemeDescription("Tetris DX on the Game Boy")]
     public class TetrisDXTheme : CompositeBlockTheme
     {
