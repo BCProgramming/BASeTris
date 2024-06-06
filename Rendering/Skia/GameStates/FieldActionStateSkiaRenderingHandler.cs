@@ -28,7 +28,11 @@ namespace BASeTris.Rendering.Skia
         public void Render(IStateOwner pOwner, SKCanvas pRenderTarget, FieldLineActionGameState Source, GameStateSkiaDrawParameters Element)
         {
             var Bounds = Element.Bounds;
-            
+
+            var Margins = Source.PlayField.Theme.GetDisplayMargins().Scale(pOwner);
+
+            var InsetBounds = new SKRect(Bounds.Left + (float)Margins.LeftMargin, Bounds.Top + (float)Margins.TopMargin, Bounds.Right - (float)Margins.RightMargin, Bounds.Bottom - (float)Margins.BottomMargin);
+            Bounds = InsetBounds;
 
             float BlockWidth = Bounds.Width /   Source.PlayField.ColCount;
             float BlockHeight = Bounds.Height / Source.PlayField.VisibleRows; //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
@@ -49,8 +53,10 @@ namespace BASeTris.Rendering.Skia
                     NominoBlock[] RowData = iterate.Value;
                     for (int drawCol = 0; drawCol < RowData.Length; drawCol++)
                     {
-                        float YPos = (currentRow - Source.PlayField.HIDDENROWS_TOP) * BlockHeight;
-                        float XPos = drawCol * BlockWidth;
+                        float YPos = (float)Margins.TopMargin;
+                        float XPos = (float)Margins.LeftMargin;
+                        YPos +=  (currentRow - Source.PlayField.HIDDENROWS_TOP) * BlockHeight;
+                        XPos +=  drawCol * BlockWidth;
                         var TetBlock = RowData[drawCol];
                         if (TetBlock != null)
                         {

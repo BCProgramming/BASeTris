@@ -473,7 +473,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
                 ForePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
                 ShadePaint.Typeface = useFont.TypeFace;
                 ShadePaint.TextSize = (int)(Source.FontSize * pOwner.ScaleFactor);
-                RenderHelpers.SetPaintBlur(ShadePaint);
+                //RenderHelpers.SetPaintBlur(ShadePaint);
                 var useStyle = new DrawTextInformationSkia()
                 {
                     Text = Source.Text,

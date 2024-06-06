@@ -24,15 +24,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="EGB.ttf" />
     <None Remove="Enterprise.ttf" />
     <None Remove="LCD.ttf" />
     <None Remove="Pixel.ttf" />
+    <None Remove="pp.ttf" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="EGB.ttf" />
     <EmbeddedResource Include="Enterprise.ttf" />
     <EmbeddedResource Include="LCD.ttf" />
     <EmbeddedResource Include="Pixel.ttf" />
+    <EmbeddedResource Include="pp.ttf" />
   </ItemGroup>
 
   <ItemGroup>

@@ -354,7 +354,8 @@ namespace BASeTris.GameStates
                         else
                         {
                             //otherwise, this is a 'higher' layer, so set the current currbuild as the underlayer, then set currbuild to the current layer.
-                            BuildLayerbg.Data.UnderLayer = CurrBuild;
+                            BuildLayerbg.Underlayer = CurrBuild;
+                            
                             CurrBuild = BuildLayerbg;
                         }
 

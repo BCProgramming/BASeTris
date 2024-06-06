@@ -34,6 +34,7 @@ using System.Runtime.InteropServices;
 using OpenTK.Windowing.Common;
 using OpenTK.Mathematics;
 using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+using BASeCamp.Logging;
 namespace BASeTris
 {
     public class BASeTrisTK : GameWindow,IStateOwner,IGamePresenter
@@ -77,13 +78,36 @@ namespace BASeTris
         {
             return typeof(SKCanvas);
         }
+        private Thread SizeUpdaterThread = null;
+        private long LastSizeUpdateTickCount = 0;
+        private bool BlockDisplay = false;
         private void UpdateSize()
         {
             //this.Location = new Point(140);
             var makesize = new Size((int)(((float)DEFAULT_GAME_WIDTH + (float)DEFAULT_STAT_WIDTH) * ScaleFactor), (int)((float)DEFAULT_AREA_HEIGHT * ScaleFactor));
             Debug.Print($"Scale Size: Factor:{ScaleFactor} - {makesize.ToString()}");
             this.ClientSize = new OpenTK.Mathematics.Vector2i(makesize.Width,makesize.Height);
-            InitializeGraphics();
+            LastSizeUpdateTickCount = TetrisGame.GetTickCount();
+            BlockDisplay = true; 
+            if (SizeUpdaterThread == null)
+            {
+                SizeUpdaterThread = new Thread(() =>
+                {
+                    while (TetrisGame.GetTickCount() < LastSizeUpdateTickCount + 100)
+                    {
+                        Thread.Sleep(0);
+                    }
+                    _Present.EnqueueAction(() =>
+                    {
+                        InitializeGraphics();
+                        BlockDisplay = false;
+                    });
+                    SizeUpdaterThread = null;
+                });
+            }
+            SizeUpdaterThread.Start();
+
+            
             //this.renderTarget = CreateRenderTarget(this);
         }
         
@@ -140,9 +164,15 @@ namespace BASeTris
         {
             var oldcontext = this.context;
             var oldtarget = this.renderTarget;
-
+            
             this.context = GRContext.CreateGl(GlobalResources.OpenGLInterface); //GRContext.Create(GRBackend.OpenGL, GlobalResources.OpenGLInterface);
-            Debug.Assert(this.context.Handle != IntPtr.Zero);
+            if (this.context == null)
+            {
+                var GLError = GL.GetError();
+                Debug.Print($"InitializeGraphics failed: GL Error: {GLError.ToString()}");
+                Debug.Assert(this.context.Handle != IntPtr.Zero);
+            }
+            
             this.renderTarget = CreateRenderTarget(this);
             if (oldcontext != null) oldcontext.Dispose();
             if (oldtarget != null) oldtarget.Dispose();
@@ -362,7 +392,7 @@ namespace BASeTris
                 
                 GL.ClearColor(backColor);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-
+                if (BlockDisplay) return;
                 //SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType);
                 using (var surface = SKSurface.Create(this.context, this.renderTarget, GRSurfaceOrigin.BottomLeft, GlobalResources.DefaultColorType))
                 {

@@ -162,7 +162,7 @@ namespace BASeTris.AssetManager
             ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Pitch, pitch);
 
             ManagedBass.Bass.ChannelPlay(ActiveStream, true);
-
+            
             return this;
         }
 

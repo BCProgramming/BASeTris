@@ -60,8 +60,12 @@ namespace BASeTris
         private static string _datfolder = null;
         public static bool DJMode { get; set; } = true;
         static PrivateFontCollection pfc = new PrivateFontCollection();
+        public static FontFamily[] PixelFonts;
+        //public static FontFamily GBFont;
         public static FontFamily RetroFont;
         public static FontFamily LCDFont;
+        public static SKTypeface[] PixelFontSKs;
+        //public static SKTypeface GBFontSK;
         public static SKTypeface RetroFontSK;
         public static SKTypeface CreditFontSK;
         public static SKTypeface LCDFontSK;
@@ -223,16 +227,32 @@ namespace BASeTris
                 (from s in TetrisGame.GetSearchFolders() select Path.Combine(s, "Assets", "Audio")).Where((y) => Directory.Exists(y)).ToArray();
             var Driver = new BASSDriver();
             Soundman = new cNewSoundManager(Driver, AudioAssets);
+            
 
-            RetroFont = GetResourceFont("BASeTris.Pixel.ttf");
+            String[] sPixelFontNames = new[] { "BASeTris.Pixel.ttf", "BASeTris.EGB.ttf", "BASeTris.pp.ttf" };
+
+            //RetroFont = GetResourceFont("BASeTris.Pixel.ttf");
             LCDFont = GetResourceFont("BASeTris.LCD.ttf");
-            RetroFontSK = GetResourceFontSK("BASeTris.Pixel.ttf");
+            PixelFonts = sPixelFontNames.Select(GetResourceFont).ToArray();  
+            //GBFont = GetResourceFont("BASeTris.EGB.ttf");
+
+            RetroFont = PixelFonts[0]; 
+
+
+
+            PixelFontSKs = sPixelFontNames.Select(GetResourceFontSK).ToArray(); 
+            //GBFontSK = GetResourceFontSK("BASeTris.EGB.ttf");
+
+            RetroFontSK = PixelFontSKs[0];
             LCDFontSK = GetResourceFontSK("BASeTris.LCD.ttf");
             CreditFontSK = GetResourceFontSK("BASeTris.Enterprise.ttf");
             ArialFontSK = SKTypeface.FromFamilyName("Arial");
+
+
+
             //RetroFont = pfc.Families[0];
         }
-
+       
         private static SKPaint MeasureText = new SKPaint() { };
         public static SKRect MeasureSKText(SKTypeface pTypeFace, float pFontSize, String pText)
         {

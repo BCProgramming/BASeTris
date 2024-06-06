@@ -205,6 +205,8 @@ namespace BASeTris.GameStates.GameHandlers
             {
                 if (e.MenuElement == StartGameItem)
                 {
+                    ConstructState.BackgroundMusicKey = "";
+
                     ProceedFunc(OptionsData);
                 }
                 else if (OptionsData is ICustomPropertyPreparer cpp)

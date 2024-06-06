@@ -17,6 +17,7 @@ using BASeTris.Theme.Block;
 using System.Reflection;
 using System.Diagnostics;
 using BASeTris.GameStates.Menu;
+using BASeTris.BackgroundDrawers;
 
 namespace BASeTris
 {
@@ -102,7 +103,7 @@ namespace BASeTris
             {
                 if (flags.HasFlag(kvp.Key)) result |= kvp.Value;
             }
-
+            
             return result;
 
         }
@@ -180,6 +181,10 @@ namespace BASeTris
 
         public abstract void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
         public abstract void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field);
+        public virtual MarginInformation GetDisplayMargins()
+        {
+            return MarginInformation.Empty;
+        }
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler);
 
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
@@ -302,8 +307,44 @@ namespace BASeTris
             return new PlayFieldBackgroundInfo(ResultImage, UseTint);
         }
     }
+    public class MarginInformation
+    {
+        public static MarginInformation Empty = new MarginInformation();
+        public double LeftMargin { get; set; } = 0;
+        public double TopMargin { get; set; } = 0;
+        public double RightMargin { get; set; } = 0;
+        public double BottomMargin { get; set; } = 0;
+        public MarginInformation(double pLeft, double pTop, double pRight, double pBottom)
+        {
+            LeftMargin = pLeft;
+            TopMargin = pTop;
+            RightMargin = pRight;
+            BottomMargin = pBottom;
+        }
+        public MarginInformation(double pMargin) : this(pMargin, pMargin, pMargin, pMargin)
+        {
+        }
+        public MarginInformation()
+        {
+        }
+        public SKRect DoOffset(SKRect src)
+        {
+            return new SKRect(src.Left + (float)LeftMargin,
+                src.Top + (float)TopMargin,
+                src.Right - (float)RightMargin,
+                src.Bottom - (float)BottomMargin);
+        }
+        public MarginInformation Scale(IStateOwner pOwner)
+        {
+            var scalevalue = pOwner==null?1:pOwner.ScaleFactor;
+            return new MarginInformation((float)(LeftMargin * scalevalue),
+                (float)(TopMargin * scalevalue), (float)(RightMargin * scalevalue), (float)(BottomMargin * scalevalue));
+        }
+        
+    }
     public class PlayFieldBackgroundInfo
     {
+        public IBackground<StandardImageBackgroundDrawSkiaCapsule> SkiaBG { get; set; }
         public Image BackgroundImage;
         public Color TintColor = Color.Transparent;
         public PlayFieldBackgroundInfo(Image pBackgroundImage, Color pTintColor)

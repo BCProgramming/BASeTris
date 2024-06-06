@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using BASeCamp.Rendering;
 using BASeTris.AssetManager;
 using BASeTris.Blocks;
+using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.RenderElements;
 using SkiaSharp;
 
@@ -55,14 +56,14 @@ namespace BASeTris.Rendering.Skia
 
                 for (int drawRow = Element.HIDDENTOPROWS; drawRow < Element.ROWCOUNT; drawRow++)
                 {
-                    float YPos = (drawRow - Element.HIDDENTOPROWS) * BlockHeight;
+                    float YPos = Element.Bounds.Top + ((drawRow - Element.HIDDENTOPROWS) * BlockHeight);
                     var currRow = Source.Contents[drawRow];
 
 
             
                     for (int drawCol = 0; drawCol < Element.COLCOUNT; drawCol++)
                     {
-                        float XPos = drawCol * BlockWidth;
+                        float XPos = Element.Bounds.Left + (drawCol * BlockWidth);
                         var TetBlock = currRow[drawCol];
                         bool isAnim = false;
                         if (TetBlock != null)
@@ -107,9 +108,12 @@ namespace BASeTris.Rendering.Skia
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
+            var getbginfo = Source.Theme.GetDisplayMargins().Scale(pState);
+
+            var InsetBounds = new SKRect(Bounds.Left + (float)getbginfo.LeftMargin, Bounds.Top + (float)getbginfo.TopMargin, Bounds.Right - (float)getbginfo.RightMargin, Bounds.Bottom - (float)getbginfo.BottomMargin);
             //first how big is each block?
-            float BlockWidth = Bounds.Width / parms.COLCOUNT;
-            float BlockHeight = Bounds.Height / (parms.VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
+            float BlockWidth = InsetBounds.Width / parms.COLCOUNT;
+            float BlockHeight = InsetBounds.Height / (parms.VISIBLEROWS); //remember, we don't draw the top two rows- we start the drawing at row index 2, skipping 0 and 1 when drawing.
 
             
                 lock (Source)
@@ -168,13 +172,15 @@ namespace BASeTris.Rendering.Skia
 
                 }
             }
+
             
-            g.DrawImage(parms.FieldBitmap, new SKPoint(0, 0));
+
+            g.DrawImage(parms.FieldBitmap,InsetBounds);
             //g.DrawBitmap(parms.FieldBitmap,new SKPoint(0,0));
             
             if (hadAnimated)
             {
-                DrawFieldContents(pState, Source, parms, g, Bounds, true);
+                DrawFieldContents(pState, Source, parms, g, InsetBounds, true);
             }
 
 
@@ -189,9 +195,9 @@ namespace BASeTris.Rendering.Skia
 
                         using (SKAutoCanvasRestore restgroup = new SKAutoCanvasRestore(g))
                         {
-                            g.Translate(0, Source.OffsetPaint * BlockHeight);
-                            int BaseXPos = bg.X;
-                            int BaseYPos = bg.Y;
+                            g.Translate(InsetBounds.Left,InsetBounds.Top+ Source.OffsetPaint * BlockHeight);
+                            int BaseXPos =(int)(bg.X);
+                            int BaseYPos = (int)(bg.Y);
                             const float RotationTime = 150;
                             double useAngle = 0;
                             TimeSpan tsRotate = DateTime.Now - bg.GetLastRotation();
@@ -278,7 +284,7 @@ namespace BASeTris.Rendering.Skia
                             {
                             using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(g))
                             {
-                                g.Translate(0, Source.OffsetPaint * BlockHeight);
+                                g.Translate(InsetBounds.Left,InsetBounds.Top + Source.OffsetPaint * BlockHeight);
                                 foreach (var iterateblock in bg)
                                 {
 

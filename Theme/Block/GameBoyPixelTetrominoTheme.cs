@@ -1,5 +1,6 @@
 ﻿using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering.Skia.GameStates;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;
@@ -46,14 +47,39 @@ namespace BASeTris.Theme.Block
                 Tetromino_T _ => _Raised,
                 Tetromino_Z => _Dot,
                 Tetromino_S => _BigDot,
-                _ => _Block
+                _ => TetrisGame.Choose(GetAllThemes())
             };
         }
-
+        private Bitmap LightImage = null;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            throw new NotImplementedException();
+
+            if (LightImage == null)
+            {
+                //var borderbg = TetrisGame.Imageman.getLoadedImage("gb_border_image");
+                
+
+
+                LightImage = new Bitmap(250, 250);
+                using (Graphics drawdark = Graphics.FromImage(LightImage))
+                {
+                    drawdark.Clear(Color.PeachPuff);
+                    drawdark.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                    //drawdark.DrawImageUnscaled(borderbg, new Point(0, 0));
+                }
+            }
+            var buildBG = StandardTetrisGameStateSkiaRenderingHandler.CreateBackgroundFromImage(LightImage, Color.Transparent);
+
+            buildBG.Overlayer = null; //new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick", null, null, "gb_border_brick"));
+
+            var result = new PlayFieldBackgroundInfo(LightImage, Color.Transparent) {SkiaBG = buildBG };
+            return result;
         }
+        public override MarginInformation GetDisplayMargins()
+        {
+            return new MarginInformation(0 ); //new MarginInformation(16,0,16,0);
+        }
+
     }
 
     public abstract class GameBoyCompositionThemeBase : ConnectedImageBlockTheme
@@ -143,7 +169,7 @@ namespace BASeTris.Theme.Block
         private void GenerateThemeImages()
         {
             //to generate the Mottled images, we first create a set of possible 'mottlings'. these are 8x8 transparent images with random pixels coloured.
-            SKImage[] Mottlings = GenerateMottlings(16).ToArray();
+            SKImage[] Mottlings = GenerateMottlings(32).ToArray();
 
             foreach (var allconnect in CardinalConnectionSet.SuffixLookup.Keys)
             {

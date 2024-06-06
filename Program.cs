@@ -63,7 +63,7 @@ namespace BASeTris
                 var attrib = (HandlerThemeAttribute)iteratetype.GetCustomAttribute(typeof(HandlerThemeAttribute));
                 if (attrib != null)
                 {
-                    if (!attrib.Hidden && attrib.HandlerType.Any((t) => t.IsAssignableFrom(HandlerType)))
+                    if (!attrib.Flags.HasFlag(HandlerThemeAttribute.HandlerThemeFlags.ThemeFlags_NonBrowsable) && attrib.HandlerType.Any((t) => t.IsAssignableFrom(HandlerType)))
 
                     //if(attrib.HandlerType.Contains(HandlerType))
                     {
@@ -142,7 +142,7 @@ namespace BASeTris
                 null,
                 null);
 
-
+            
             if (RunMode == StartMode.Mode_WinForms)
             {
 

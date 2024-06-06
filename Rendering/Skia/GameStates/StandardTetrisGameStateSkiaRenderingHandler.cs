@@ -25,7 +25,7 @@ namespace BASeTris.Rendering.Skia.GameStates
     [RenderingHandler(typeof(GameplayGameState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class StandardTetrisGameStateSkiaRenderingHandler :   StandardStateRenderingHandler<SKCanvas,GameplayGameState,GameStateSkiaDrawParameters>
     {
-        private StandardImageBackgroundSkia _Background = null;
+        private IBackground<StandardImageBackgroundDrawSkiaCapsule> _Background = null;
         private NominoTheme CurrentTheme = null;
         public SKRect LastDrawStat = SKRect.Empty;
 
@@ -72,19 +72,52 @@ namespace BASeTris.Rendering.Skia.GameStates
         private void BuildBackground(GameplayGameState Self,SKRect Size)
         {
             var bgInfo = Self.PlayField.Theme.GetThemePlayFieldBackground(Self.PlayField,Self.GameHandler);
-            
-            _Background = new StandardImageBackgroundSkia();
-            Bitmap bmp = new Bitmap(ImageManager.ReduceImage(bgInfo.BackgroundImage,
-                new Size((int)(Size.Width + 0.5f), (int)(Size.Height + 0.5f))));
-            
-            SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
-            _Background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
-            if(bgInfo.TintColor!=Color.Transparent)
+
+
+            if (bgInfo.SkiaBG != null)
             {
-                _Background.Data.theFilter = SKColorMatrices.GetColourizer(bgInfo.TintColor.R, bgInfo.TintColor.G, bgInfo.TintColor.B, bgInfo.TintColor.A);
+                _Background = bgInfo.SkiaBG;
+            }
+            else
+            {
+
+                _Background = CreateBackgroundFromImage(bgInfo.BackgroundImage, bgInfo.TintColor);
+                /*
+                var _bg = new StandardImageBackgroundSkia();
+
+
+
+                Bitmap bmp = new Bitmap(bgInfo.BackgroundImage);
+                //Bitmap bmp = new Bitmap(ImageManager.ReduceImage(bgInfo.BackgroundImage,
+                //    new Size((int)(Size.Width + 0.5f), (int)(Size.Height + 0.5f))));
+
+                SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
+                _bg.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
+                if (bgInfo.TintColor != Color.Transparent)
+                {
+                    _bg.Data.theFilter = SKColorMatrices.GetColourizer(bgInfo.TintColor.R, bgInfo.TintColor.G, bgInfo.TintColor.B, bgInfo.TintColor.A);
+                }
+                _Background = (IBackground<SkiaBackgroundDrawData>)_bg;*/
             }
             Self.DoRefreshBackground = false;
         }
+        public static IBackground<StandardImageBackgroundDrawSkiaCapsule> CreateBackgroundFromImage(Image img, Color tint)
+        {
+            var _bg = new StandardImageBackgroundSkia();
+
+            Bitmap bmp = new Bitmap(img);
+            SKImage usebg = SkiaSharp.Views.Desktop.Extensions.ToSKImage(bmp);
+            _bg.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = usebg, Movement = new SKPoint(0, 0) };
+            if (tint != Color.Transparent)
+            {
+                _bg.Data.theFilter = SKColorMatrices.GetColourizer(tint.R, tint.G, tint.B, tint.A);
+            }
+            return (IBackground<StandardImageBackgroundDrawSkiaCapsule>)_bg;
+
+
+        }
+
+
         SKImage StatisticsBackground = null;
         //redraws the StatisticsBackground SKImage.
         public void GenerateStatisticsBackground(GameplayGameState Self,IStateOwner pOwner)
@@ -144,11 +177,16 @@ namespace BASeTris.Rendering.Skia.GameStates
             var PlayField = Source.PlayField;
             if (PlayField != null)
             {
+
+                var fielddata = Source.PlayField.Theme.GetThemePlayFieldBackground(Source.PlayField, pOwner.GetHandler());
+                var useBound = new SKRect(Element.Bounds.Left, Element.Bounds.Top ,
+                    Element.Bounds.Right, Element.Bounds.Bottom );
+
                 Object grabdata = RenderingProvider.Static.GetExtendedData(PlayField.GetType(), PlayField,
                     (o) =>
                         new TetrisFieldDrawSkiaParameters()
                         {
-                            Bounds = Element.Bounds,
+                            Bounds = useBound,
                             COLCOUNT = PlayField.ColCount,
                             ROWCOUNT = PlayField.RowCount,
                             HIDDENBOTTOMROWS = PlayField.HIDDENROWS_BOTTOM,
@@ -159,7 +197,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                         });
                 
                 TetrisFieldDrawSkiaParameters parameters = (TetrisFieldDrawSkiaParameters)grabdata;
-                parameters.LastFieldSave = parameters.Bounds;
+                parameters.LastFieldSave = parameters.Bounds = useBound;
+                 
                 //if (!Source.GameHandler.AllowFieldImageCache) parameters.FieldBitmap = null;
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
             }

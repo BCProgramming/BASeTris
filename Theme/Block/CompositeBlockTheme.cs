@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 
 namespace BASeTris.Theme.Block
@@ -28,7 +29,10 @@ namespace BASeTris.Theme.Block
         }
         public abstract NominoTheme[] GetAllThemes();
         public abstract NominoTheme GetGroupTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field);
-        
-        
+
+
+        protected Dictionary<String, NominoTheme> AppliedThemeByKeyDictionary = new Dictionary<string, NominoTheme>();
+
+
     }
 }

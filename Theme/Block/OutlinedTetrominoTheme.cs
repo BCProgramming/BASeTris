@@ -173,7 +173,7 @@ namespace BASeTris
                 if (BlockData[i].Block is StandardColouredBlock)
                 {
                     ((StandardColouredBlock)BlockData[i].Block).DisplayStyle = StandardColouredBlock.BlockStyle.Style_Custom;
-                    ((StandardColouredBlock)BlockData[i].Block)._RotationImagesSK =  (from p in GetImageRotations(BlockImages[i]) select SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(p))).ToArray();
+                    ((StandardColouredBlock)BlockData[i].Block)._RotationImagesSK =  (from p in GetImageRotations(BlockImages[0]) select SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(p))).ToArray();
                 }
             }
         }

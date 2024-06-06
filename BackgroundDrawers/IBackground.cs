@@ -45,15 +45,31 @@ namespace BASeTris.BackgroundDrawers
     public abstract class Background<T> : Background, IBackground<T> where T:BackgroundDrawData,new()
     {
         //public abstract void DrawProc(Graphics g, RectangleF Bounds);
+
+        public new Background<T> Underlayer { get { return (Background<T>)base.Underlayer; } set { base.Underlayer = value; } }
+
+        public new Background<T> Overlayer { get { return (Background<T>)base.Overlayer; } set { base.Overlayer = value; } }
+
+        //public override Background<T> Underlayer { get; set; } = null;
+        //public override Background<T> Overlayer { get; set; } = null; //a composite background: we will draw this one right after drawing this one.
         public T Data { get; set; }
     }
     public abstract class Background : IBackground
     {
+        public Background Underlayer { get; set; }
+
+        public Background Overlayer { get; set; }
+        IBackground IBackground.Underlayer { get => this.Underlayer; set => this.Underlayer= (Background)value; }
+        IBackground IBackground.Overlayer { get => this.Overlayer; set => this.Overlayer = (Background)value; }
+
         public abstract void FrameProc(IStateOwner pState);
-        
+
+       
     }
     public interface IBackground<T> : IBackground where T:BackgroundDrawData
     {
+
+        T Data { get; set; }
         /// <summary>
         /// Routine called to perform the drawing task. 
         /// </summary>
@@ -65,10 +81,13 @@ namespace BASeTris.BackgroundDrawers
         /// <summary>
         /// Called each Game "tick" to allow the background implementation to perform any necessary state changes.
         /// </summary>
-        
+
+
     }
     public interface IBackground
     {
+        IBackground Underlayer { get; set; }
+        IBackground Overlayer { get; set; }
         void FrameProc(IStateOwner pState);
     }
 
