@@ -165,13 +165,25 @@ namespace BASeTris.Rendering.Skia.Backgrounds
         {
             var X = Region.Left;
             var Y = Region.Top;
-            using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(Target))
+            using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(Target,true))
             {
+                
                 Target.ClipRect(Region);
+                
                 while (Y < Region.Bottom && X < Region.Right)
                 {
-
-                    Target.DrawBitmap(src, new SKPoint(X, Y));
+                    float  maxWidth = src.Width;
+                    float maxHeight = src.Height;
+                    if (Region.Right - X < src.Width)
+                    {
+                        maxWidth = Region.Right - X;
+                    }
+                    if (Region.Bottom - Y < src.Height)
+                    {
+                        maxHeight = Region.Bottom - Y;
+                    }
+                    Target.DrawBitmap(src, new SKRect(0, 0,maxWidth,maxHeight), new SKRect(X, Y, X+maxWidth, Y+maxHeight));
+                    
                     X += src.Width;
                     if (X > Region.Right)
                     {
@@ -187,7 +199,7 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             bool HasTopLeft = !String.IsNullOrEmpty(Source.BorderData.Top_Left_Corner);
             bool HasBottomLeft = !String.IsNullOrEmpty(Source.BorderData.Bottom_Left_Corner);
             SKBitmap TopLeft = Source.BorderData.TopLeftBitmap;
-            SKRect LeftSizeBound = new SKRect(0, HasTopLeft ? ScaleHelper(TopLeft.Height, pOwner.ScaleFactor) : 0, ScaleHelper(Source.BorderData.LeftBitmap.Width, pOwner.ScaleFactor) * 2, sbdd.Bounds.Height - (HasBottomLeft ? ScaleHelper(Source.BorderData.BottomLeftBitmap.Height, pOwner.ScaleFactor) : 0));
+            SKRect LeftSizeBound = new SKRect(0, HasTopLeft ? ScaleHelper(TopLeft.Height, pOwner.ScaleFactor) : 0, ScaleHelper(Source.BorderData.LeftBitmap.Width, pOwner.ScaleFactor), sbdd.Bounds.Height - (HasBottomLeft ? ScaleHelper(Source.BorderData.BottomLeftBitmap.Height, pOwner.ScaleFactor) : 0));
             return LeftSizeBound;
         }
         private SKRect GetRightSideBounds(IStateOwner pOwner, StandardImageBackgroundBorderSkia Source, SkiaBackgroundDrawData sbdd)
@@ -197,7 +209,7 @@ namespace BASeTris.Rendering.Skia.Backgrounds
 
             SKBitmap TopRight = Source.BorderData.TopRightBitmap;
             
-                SKRect RightSizeBound = new SKRect(sbdd.Bounds.Right - ScaleHelper(Source.BorderData.LeftBitmap.Width, pOwner.ScaleFactor) * 2,
+                SKRect RightSizeBound = new SKRect(sbdd.Bounds.Right - ScaleHelper(Source.BorderData.LeftBitmap.Width, pOwner.ScaleFactor) ,
 
                         HasTopRight ? ScaleHelper(TopRight.Height, pOwner.ScaleFactor) : 0,
                         sbdd.Bounds.Right, sbdd.Bounds.Height - (HasBottomRight ? ScaleHelper(Source.BorderData.BottomRightBitmap.Height, pOwner.ScaleFactor) : 0));

@@ -63,7 +63,7 @@ namespace BASeTris.GameStates
                 if (iterate.Block is LineSeriesBlock lsb)
                 {
                     lsb.CombiningIndex = TetrisGame.Choose(GetValidBlockCombiningTypes());
-                    lsb.ConnectionIndex = conIndex++;
+                    //lsb.ConnectionIndex = conIndex++;
                 }
             }
 

@@ -60,6 +60,7 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            if (FilterFunction == null) return;
             if (FilterFunction(pOwner, g))
                 PausedState.HandleGameKey(pOwner, g);
             //since we are "paused"

@@ -70,14 +70,14 @@ namespace BASeTris.Theme.Block
             }
             var buildBG = StandardTetrisGameStateSkiaRenderingHandler.CreateBackgroundFromImage(LightImage, Color.Transparent);
 
-            buildBG.Overlayer = null; //new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick", null, null, "gb_border_brick"));
+            buildBG.Overlayer = new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick_16", null, null, "gb_border_brick_16"));
 
             var result = new PlayFieldBackgroundInfo(LightImage, Color.Transparent) {SkiaBG = buildBG };
             return result;
         }
         public override MarginInformation GetDisplayMargins()
         {
-            return new MarginInformation(0 ); //new MarginInformation(16,0,16,0);
+            return new MarginInformation(16,0,16,0);
         }
 
     }
