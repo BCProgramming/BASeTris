@@ -6,6 +6,8 @@ using SkiaSharp;
 using BASeTris.Theme.Block;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Windows.Forms.VisualStyles;
+using System.Globalization;
 
 namespace BASeTris.BackgroundDrawers
 {
@@ -65,7 +67,27 @@ namespace BASeTris.BackgroundDrawers
     [BackgroundInformation(typeof(SKCanvas), "STANDARD")]
     public class StandardImageBackgroundBorderSkia : Background<StandardImageBackgroundDrawSkiaCapsule>
     {
+        public class BorderImageInfo
+        {
+            public String[] ImageKeys;
+            public SKBitmap[] ImageBitmaps;
+            public bool HasData { get { return ImageKeys != null && ImageKeys.Length > 0; } }
+            public BorderImageInfo(String[] pKeys)
+            {
 
+                ImageKeys = pKeys;
+                ImageBitmaps = new SKBitmap[ImageKeys.Length];
+                for (int i = 0; i < ImageKeys.Length; i++)
+                    if (TetrisGame.Imageman.HasSKBitmap(ImageKeys[i]))
+                    {
+                        ImageBitmaps[i] = TetrisGame.Imageman.GetSKBitmap(ImageKeys[i]);
+                    }
+            }
+            public BorderImageInfo(String pKey) : this(new[] { pKey })
+            {
+            }
+
+        }
         public class BorderImageKeyData
         {
             public enum BorderImagePartConstants
@@ -80,8 +102,21 @@ namespace BASeTris.BackgroundDrawers
                 BottomSide
             }
 
-            private String[] BorderImageKeys = new string[(int)BorderImagePartConstants.BottomSide+1];
-            private SKBitmap[] BorderImages = new SKBitmap[(int)BorderImagePartConstants.BottomSide+1];
+            private BorderImageInfo[] BorderImageData = new BorderImageInfo[(int)BorderImagePartConstants.BottomSide + 1];
+
+
+            //private String[] BorderImageKeys = new string[(int)BorderImagePartConstants.BottomSide+1];
+            //private SKBitmap[] BorderImages = new SKBitmap[(int)BorderImagePartConstants.BottomSide+1];
+
+
+            private BorderImageInfo GetPart(BorderImagePartConstants part)
+            {
+                return BorderImageData[(int)part];
+            }
+            private void SetPart(BorderImagePartConstants part, BorderImageInfo value)
+            {
+                BorderImageData[(int)part] = value;
+            }
 
             private T GetPartElement<T>(T[] source, BorderImagePartConstants part)
             {
@@ -92,76 +127,63 @@ namespace BASeTris.BackgroundDrawers
                 source[(int)part] = value;
             }
 
-            public String GetPartKey(BorderImagePartConstants part)
-            {
-                return GetPartElement(BorderImageKeys, part);
-            }
-            public void SetPartKey(BorderImagePartConstants part, String pValue)
-            {
-                SetPartElement(BorderImageKeys, part, pValue);
-            }
+            
 
-            public SKBitmap GetPartImage(BorderImagePartConstants part)
-            {
-                return GetPartElement(BorderImages, part);
-            }
-            public void SetPartImage(BorderImagePartConstants part, SKBitmap pValue)
-            {
-                SetPartElement(BorderImages, part, pValue);
-            }
-            public String Top_Left_Corner { get { return GetPartKey(BorderImagePartConstants.TopLeftCorner); } set { SetPartKey(BorderImagePartConstants.TopLeftCorner, value); } }
-            public String Top_Right_Corner { get { return GetPartKey(BorderImagePartConstants.TopRightCorner); } set { SetPartKey(BorderImagePartConstants.TopRightCorner, value); } }
-            public String Bottom_Left_Corner { get { return GetPartKey(BorderImagePartConstants.BottomLeftCorner); } set { SetPartKey(BorderImagePartConstants.BottomLeftCorner, value); } }
-            public String Bottom_Right_Corner { get { return GetPartKey(BorderImagePartConstants.BottomRightCorner); } set { SetPartKey(BorderImagePartConstants.BottomRightCorner, value); } }
+            
+            public BorderImageInfo Top_Left_Corner { get { return GetPart(BorderImagePartConstants.TopLeftCorner); } set { SetPart(BorderImagePartConstants.TopLeftCorner, value); } }
+            public BorderImageInfo Top_Right_Corner { get { return GetPart(BorderImagePartConstants.TopRightCorner); } set { SetPart(BorderImagePartConstants.TopRightCorner, value); } }
+            public BorderImageInfo Bottom_Left_Corner { get { return GetPart(BorderImagePartConstants.BottomLeftCorner); } set { SetPart(BorderImagePartConstants.BottomLeftCorner, value); } }
+            public BorderImageInfo Bottom_Right_Corner { get { return GetPart(BorderImagePartConstants.BottomRightCorner); } set { SetPart(BorderImagePartConstants.BottomRightCorner, value); } }
 
-            public String Left { get { return GetPartKey(BorderImagePartConstants.LeftSide); } set { SetPartKey(BorderImagePartConstants.LeftSide, value); } }
-            public String Top { get { return GetPartKey(BorderImagePartConstants.TopSide); } set { SetPartKey(BorderImagePartConstants.TopSide, value); } }
-            public String Bottom { get { return GetPartKey(BorderImagePartConstants.BottomSide); } set { SetPartKey(BorderImagePartConstants.BottomSide, value); } }
-            public String Right { get { return GetPartKey(BorderImagePartConstants.RightSide); } set { SetPartKey(BorderImagePartConstants.RightSide, value); } }
+            public BorderImageInfo Left { get { return GetPart(BorderImagePartConstants.LeftSide); } set { SetPart(BorderImagePartConstants.LeftSide, value); } }
+            public BorderImageInfo Top { get { return GetPart(BorderImagePartConstants.TopSide); } set { SetPart(BorderImagePartConstants.TopSide, value); } }
+            public BorderImageInfo Bottom { get { return GetPart(BorderImagePartConstants.BottomSide); } set { SetPart(BorderImagePartConstants.BottomSide, value); } }
+            public BorderImageInfo Right { get { return GetPart(BorderImagePartConstants.RightSide); } set { SetPart(BorderImagePartConstants.RightSide, value); } }
 
 
-            public SKBitmap TopLeftBitmap { get { return GetPartImage(BorderImagePartConstants.TopLeftCorner); } }
+            public SKBitmap TopLeftBitmap { get { return Top_Left_Corner.ImageBitmaps.FirstOrDefault(); } }
 
-            public SKBitmap TopRightBitmap { get { return GetPartImage(BorderImagePartConstants.TopRightCorner); } }
-            public SKBitmap BottomLeftBitmap { get { return GetPartImage(BorderImagePartConstants.BottomLeftCorner); } }
+            public SKBitmap TopRightBitmap { get { return Top_Right_Corner.ImageBitmaps.FirstOrDefault(); } }
+            public SKBitmap BottomLeftBitmap { get { return Bottom_Left_Corner.ImageBitmaps.FirstOrDefault(); } }
 
-            public SKBitmap BottomRightBitmap { get { return GetPartImage(BorderImagePartConstants.BottomRightCorner); } }
+            public SKBitmap BottomRightBitmap { get { return Bottom_Right_Corner.ImageBitmaps.FirstOrDefault(); } }
 
 
-            public SKBitmap LeftBitmap { get { return GetPartImage(BorderImagePartConstants.LeftSide); } }
-            public SKBitmap TopBitmap { get { return GetPartImage(BorderImagePartConstants.TopSide); } }
-            public SKBitmap RightBitmap { get { return GetPartImage(BorderImagePartConstants.RightSide); } }
+            public SKBitmap LeftBitmap { get { return Left.ImageBitmaps.FirstOrDefault(); } }
+            public SKBitmap TopBitmap { get { return Top.ImageBitmaps.FirstOrDefault(); } }
+            public SKBitmap RightBitmap { get { return Right.ImageBitmaps.FirstOrDefault(); } }
 
-            public SKBitmap BottomBitmap { get { return GetPartImage(BorderImagePartConstants.BottomSide); } }
+            public SKBitmap BottomBitmap { get { return Bottom.ImageBitmaps.FirstOrDefault(); } }
 
             public BorderImageKeyData(String pCorners, String pLeft, String pTop, String pBottom, String pRight) : this(pCorners, pCorners, pCorners, pCorners, pLeft, pTop, pBottom, pRight)
             {
             }
-            private void PreparePartImages()
+            /*private void PreparePartImages()
             {
                 foreach (BorderImagePartConstants part in Enum.GetValues(typeof(BorderImagePartConstants)))
                 {
-                    String sGetKey = GetPartKey(part);
+                    
+                    var sGetInfo = GetPart(part);
                     if (!String.IsNullOrEmpty(sGetKey))
                     {
                         if (TetrisGame.Imageman.HasSKBitmap(sGetKey))
-                            SetPartImage(part, TetrisGame.Imageman.GetSKBitmap(sGetKey));
+                            AddPartImage(part, TetrisGame.Imageman.GetSKBitmap(sGetKey));
                     }
                 }
 
 
-            }
+            }*/
             public BorderImageKeyData(String pTopLeft, String pTopRight, String pBottomLeft, String pBottomRight, String pLeft, String pTop, String pBottom, String pRight)
             {
-                Top_Left_Corner = pTopLeft;
-                Top_Right_Corner = pTopRight;
-                Bottom_Left_Corner = pBottomLeft;
-                Bottom_Right_Corner = pBottomRight;
-                Left = pLeft;
-                Top = pTop;
-                Right = pRight;
-                Bottom = pBottom;
-                PreparePartImages();
+
+                Top_Left_Corner = new BorderImageInfo(pTopLeft);
+                Top_Right_Corner = new BorderImageInfo(pTopRight);
+                Bottom_Left_Corner = new BorderImageInfo(pBottomLeft);
+                Bottom_Right_Corner = new BorderImageInfo(pBottomRight);
+                Left = new BorderImageInfo(pLeft);
+                Top = new BorderImageInfo(pTop);
+                Right = new BorderImageInfo(pRight);
+                Bottom = new BorderImageInfo(pBottom);
             }
         }
         public BorderImageKeyData BorderData { get; set; } = null;

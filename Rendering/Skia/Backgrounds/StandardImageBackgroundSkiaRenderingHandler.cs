@@ -64,10 +64,10 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             SkiaBackgroundDrawData sbdd = Element as SkiaBackgroundDrawData;
             PreparePaints(Source,pOwner,sbdd);
             
-            bool HasTopLeft = !String.IsNullOrEmpty(Source.BorderData.Top_Left_Corner);
-            bool HasTopRight = !String.IsNullOrEmpty(Source.BorderData.Top_Right_Corner);
-            bool HasBottomRight = !String.IsNullOrEmpty(Source.BorderData.Bottom_Right_Corner);
-            bool HasBottomLeft = !String.IsNullOrEmpty(Source.BorderData.Bottom_Left_Corner);
+            bool HasTopLeft = Source.BorderData.Top_Left_Corner.HasData;
+            bool HasTopRight = Source.BorderData.Top_Right_Corner.HasData;
+            bool HasBottomRight = Source.BorderData.Bottom_Right_Corner.HasData;
+            bool HasBottomLeft = Source.BorderData.Bottom_Left_Corner.HasData;
 
             SKBitmap TopLeft = Source.BorderData.TopLeftBitmap;
             SKBitmap TopRight = Source.BorderData.TopRightBitmap;
@@ -112,7 +112,7 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             }
 
             //the sides.
-            if (!String.IsNullOrEmpty(Source.BorderData.Left))
+            if (Source.BorderData.Left.HasData)
             {
 
 
@@ -120,7 +120,7 @@ namespace BASeTris.Rendering.Skia.Backgrounds
                 {
                     SKRect LeftSizeBound = GetLeftSideBounds(pOwner, Source, sbdd); //new SKRect(0, HasTopLeft ? ScaleHelper(TopLeft.Height, pOwner.ScaleFactor) : 0, ScaleHelper(Source.BorderData.LeftBitmap.Width, pOwner.ScaleFactor)*2, sbdd.Bounds.Height - (HasBottomLeft ? ScaleHelper(Source.BorderData.BottomLeftBitmap.Height, pOwner.ScaleFactor) : 0));
                                                                                     //pRenderTarget.DrawRect(LeftSizeBound, new SKPaint() { Color = SKColors.Blue,Style = SKPaintStyle.Stroke, StrokeWidth = 0.5f });
-                    PaintTile(leftBitmap, pRenderTarget, LeftSizeBound);
+                    PaintTile(pOwner,Source.BorderData.Left, pRenderTarget, LeftSizeBound);
                 }
                 //alternative: paint the images ourselves to create a repeating pattern?
                 //not sure how the tile stuff works, can't get it to do what I want here.
@@ -145,12 +145,12 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             }
 
 
-            if (!String.IsNullOrEmpty(Source.BorderData.Right))
+            if (Source.BorderData.Right.HasData)
             {
                 using (var rightBitmap = ScaleBitmap(Source.BorderData.RightBitmap, pOwner.ScaleFactor))
                 {
                     SKRect RightSizeBound = GetRightSideBounds(pOwner, Source, sbdd);
-                    PaintTile(rightBitmap, pRenderTarget, RightSizeBound);
+                    PaintTile(pOwner,Source.BorderData.Right, pRenderTarget, RightSizeBound);
                 }
                 /*
                 using (SKAutoCanvasRestore r = new SKAutoCanvasRestore(pRenderTarget))
@@ -161,51 +161,70 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             }
 
         }
-        private void PaintTile(SKBitmap src, SKCanvas Target, SKRect Region)
+        private void PaintTile(IStateOwner pOwner, StandardImageBackgroundBorderSkia.BorderImageInfo srcinfo, SKCanvas Target, SKRect Region)
         {
             var X = Region.Left;
             var Y = Region.Top;
-            using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(Target,true))
+            int CurrentIndex = 0;
+            //ScaleBitmap(Source.BorderData.RightBitmap, pOwner.ScaleFactor)
+            SKBitmap useBitmap = srcinfo.ImageBitmaps.FirstOrDefault();
+            if (useBitmap == null) return;
+            var srcset = srcinfo.ImageBitmaps.Select((s) => ScaleBitmap(s, pOwner.ScaleFactor)).ToArray();
+            try
             {
-                
-                Target.ClipRect(Region);
-                
-                while (Y < Region.Bottom && X < Region.Right)
+                using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(Target, true))
                 {
-                    float  maxWidth = src.Width;
-                    float maxHeight = src.Height;
-                    if (Region.Right - X < src.Width)
+
+                    Target.ClipRect(Region);
+
+                    while (Y < Region.Bottom && X < Region.Right)
                     {
-                        maxWidth = Region.Right - X;
-                    }
-                    if (Region.Bottom - Y < src.Height)
-                    {
-                        maxHeight = Region.Bottom - Y;
-                    }
-                    Target.DrawBitmap(src, new SKRect(0, 0,maxWidth,maxHeight), new SKRect(X, Y, X+maxWidth, Y+maxHeight));
-                    
-                    X += src.Width;
-                    if (X > Region.Right)
-                    {
-                        X = Region.Left;
-                        Y += src.Height;
+                        var src = srcset[CurrentIndex];
+                        float maxWidth = src.Width;
+                        float maxHeight = src.Height;
+                        if (Region.Right - X < src.Width)
+                        {
+                            maxWidth = Region.Right - X;
+                        }
+                        if (Region.Bottom - Y < src.Height)
+                        {
+                            maxHeight = Region.Bottom - Y;
+                        }
+                        Target.DrawBitmap(src, new SKRect(0, 0, maxWidth, maxHeight), new SKRect(X, Y, X + maxWidth, Y + maxHeight));
+
+                        X += src.Width;
+                        if (X > Region.Right)
+                        {
+                            X = Region.Left;
+                            Y += src.Height;
+                        }
+                        CurrentIndex = (CurrentIndex + 1) % srcinfo.ImageBitmaps.Length;
                     }
                 }
             }
+            finally
+            {
+                //dispose all the bitmaps needed.
+                foreach (var disposeit in srcset)
+                {
+                    disposeit.Dispose();
+                }
+            }
+            
         }
 
         private SKRect GetLeftSideBounds(IStateOwner pOwner,StandardImageBackgroundBorderSkia Source,SkiaBackgroundDrawData sbdd)
         {
-            bool HasTopLeft = !String.IsNullOrEmpty(Source.BorderData.Top_Left_Corner);
-            bool HasBottomLeft = !String.IsNullOrEmpty(Source.BorderData.Bottom_Left_Corner);
+            bool HasTopLeft = Source.BorderData.Top_Left_Corner.HasData;
+            bool HasBottomLeft = Source.BorderData.Bottom_Left_Corner.HasData;
             SKBitmap TopLeft = Source.BorderData.TopLeftBitmap;
             SKRect LeftSizeBound = new SKRect(0, HasTopLeft ? ScaleHelper(TopLeft.Height, pOwner.ScaleFactor) : 0, ScaleHelper(Source.BorderData.LeftBitmap.Width, pOwner.ScaleFactor), sbdd.Bounds.Height - (HasBottomLeft ? ScaleHelper(Source.BorderData.BottomLeftBitmap.Height, pOwner.ScaleFactor) : 0));
             return LeftSizeBound;
         }
         private SKRect GetRightSideBounds(IStateOwner pOwner, StandardImageBackgroundBorderSkia Source, SkiaBackgroundDrawData sbdd)
         {
-            bool HasTopRight = !String.IsNullOrEmpty(Source.BorderData.Top_Right_Corner);
-            bool HasBottomRight = !String.IsNullOrEmpty(Source.BorderData.Bottom_Right_Corner);
+            bool HasTopRight = Source.BorderData.Top_Right_Corner.HasData;
+            bool HasBottomRight = Source.BorderData.Bottom_Right_Corner.HasData;
 
             SKBitmap TopRight = Source.BorderData.TopRightBitmap;
             
@@ -220,8 +239,8 @@ namespace BASeTris.Rendering.Skia.Backgrounds
 
         private SKRect GetTopSideBounds(IStateOwner pOwner, StandardImageBackgroundBorderSkia Source, SkiaBackgroundDrawData sbdd)
         {
-            bool HasTopRight = !String.IsNullOrEmpty(Source.BorderData.Top_Right_Corner);
-            bool HasTopLeft = !String.IsNullOrEmpty(Source.BorderData.Top_Left_Corner);
+            bool HasTopRight = Source.BorderData.Top_Right_Corner.HasData;
+            bool HasTopLeft = Source.BorderData.Top_Left_Corner.HasData;
             SKBitmap TopBitmap = Source.BorderData.TopBitmap;
             SKBitmap TopRight = Source.BorderData.TopRightBitmap;
             SKBitmap TopLeft = Source.BorderData.TopLeftBitmap;
@@ -257,19 +276,19 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             if (LastScalePreparedPaint != pOwner.ScaleFactor)
             {
                 LastScalePreparedPaint = pOwner.ScaleFactor;
-                if (!String.IsNullOrEmpty(Source.BorderData.Left))
+                if (Source.BorderData.Left.HasData)
                 {
                     LeftPaint = CreateSidePaint(Source.BorderData.LeftBitmap, pOwner,GetLeftSideBounds(pOwner,Source,sdbb));
                 }
-                if (!String.IsNullOrEmpty(Source.BorderData.Right))
+                if (Source.BorderData.Right.HasData)
                 {
                     RightPaint = CreateSidePaint(Source.BorderData.RightBitmap, pOwner);
                 }
-                if (!String.IsNullOrEmpty(Source.BorderData.Top))
+                if (Source.BorderData.Top.HasData)
                 {
                     TopPaint = CreateSidePaint(Source.BorderData.TopBitmap, pOwner);
                 }
-                if (!String.IsNullOrEmpty(Source.BorderData.Bottom))
+                if (Source.BorderData.Bottom.HasData)
                 {
                     BottomPaint = CreateSidePaint(Source.BorderData.BottomBitmap, pOwner);
                 }

@@ -67,9 +67,10 @@ namespace BASeTris
         public const int DEFAULT_GAME_WIDTH = 520;
         public const int DEFAULT_STAT_WIDTH = (int)405.6;
         public const int DEFAULT_AREA_HEIGHT = (int)1007.5;
+        private SkiaRenderAssistant _RenderAssist = new SkiaRenderAssistant();
 
-        private BCRect _LastDrawBounds;
-        public BCRect LastDrawBounds {  get { return _LastDrawBounds; } }
+        
+        public BCRect LastDrawBounds {  get { return _RenderAssist.LastDrawBounds; } }
         public BASeTrisTK(int Width, int Height) : base(new GameWindowSettings() { }, new NativeWindowSettings() {  Flags = ContextFlags.Default | ContextFlags.Debug, Profile = ContextProfile.Core, Vsync = VSyncMode.Adaptive,Size = new OpenTK.Mathematics.Vector2i((int)(Width),(int)(Height)) })
         {
             
@@ -405,45 +406,19 @@ namespace BASeTris
                     canvas.Flush();
                     //canvas.Clear(SKColors.Brown);
                     var info = this.renderTarget;
-                    
-                    if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Full)
-                    {
-                        canvas.Clear(SKColors.Pink);
-                        var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), CurrentGameState.GetType(), typeof(GameStateSkiaDrawParameters));
-                        if (renderer != null)
-                        {
-                            if (renderer is IStateRenderingHandler staterender)
-                            {
-                                canvas.Save();
-                                var FullRect = new SKRect(0, 0, ClientSize.X, ClientSize.Y);
-                                canvas.ClipRect(FullRect);
-                                staterender.Render(this, canvas, CurrentGameState,
-                                    new GameStateSkiaDrawParameters(FullRect));
-                                //canvas.DrawLine(new SKPoint(0, 0), new SKPoint(ClientSize.Width, ClientSize.Height), new SKPaint() { Color = SKColors.Black });
-                                canvas.Restore();
-                                _LastDrawBounds = FullRect;
-                               
-                            }
-                        }
-                    }
-                    else if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
-                    {
-                        SKRect LastDraw;
-                        //StandardTetrisGameStateSkiaRenderingHandler.PaintPartitionedState(this, CurrentGameState, canvas, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)),out LastDraw,out _);
-                        //_LastDrawBounds = LastDraw;
-                        PaintPartitionedState(CurrentGameState, canvas);
-                    }
+                    _RenderAssist.PaintStateSkia(this, CurrentGameState, ClientSize, canvas);
+                    //PaintStateSkia(CurrentGameState, canvas);
                     if (FPSPaint == null)
                     {
                         FPSPaint = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = (int)(12 * ScaleFactor), Color = SKColors.Black };
-                        FPSShadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize =(int)(12*ScaleFactor), Color = SKColors.White };
+                        FPSShadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = (int)(12 * ScaleFactor), Color = SKColors.White };
                     }
                     SKRect FPSBound = new SKRect();
                     double Framerate = (1 / e.Time);
                     String sVersion;
                     String sFPS = String.Format("{0:0.0} FPS", Framerate);
                     FPSPaint.MeasureText(sFPS, ref FPSBound);
-                    var FPSPosition = new SKPoint(ClientSize.X - (FPSBound.Width ), ClientSize.Y - (FPSBound.Height/2 ));
+                    var FPSPosition = new SKPoint(ClientSize.X - (FPSBound.Width), ClientSize.Y - (FPSBound.Height / 2));
                     //FPSPosition = new SKPoint(50, 50);
 
                     var asm = typeof(AssemblyInfo).Assembly;
@@ -454,7 +429,7 @@ namespace BASeTris
                     if (sHash != null)
                     {
                         sDisplayVersion += " - " + sHash;
-                        
+
                     }
                     canvas.DrawText(sDisplayVersion, new SKPoint(12, FPSPosition.Y), FPSShadow);
                     canvas.DrawText(sDisplayVersion, new SKPoint(9, FPSPosition.Y - 3), FPSPaint);
@@ -483,7 +458,39 @@ namespace BASeTris
             }
         }
 
-        private void PaintPartitionedState(GameState PaintState, SKCanvas canvas)
+        /*private void PaintStateSkia(GameState CurrentGameState, SKCanvas canvas)
+        {
+            if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Full)
+            {
+                canvas.Clear(SKColors.Pink);
+                var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), CurrentGameState.GetType(), typeof(GameStateSkiaDrawParameters));
+                if (renderer != null)
+                {
+                    if (renderer is IStateRenderingHandler staterender)
+                    {
+                        canvas.Save();
+                        var FullRect = new SKRect(0, 0, ClientSize.X, ClientSize.Y);
+                        canvas.ClipRect(FullRect);
+                        staterender.Render(this, canvas, CurrentGameState,
+                            new GameStateSkiaDrawParameters(FullRect));
+                        //canvas.DrawLine(new SKPoint(0, 0), new SKPoint(ClientSize.Width, ClientSize.Height), new SKPaint() { Color = SKColors.Black });
+                        canvas.Restore();
+                        _LastDrawBounds = FullRect;
+
+                    }
+                }
+            }
+            else if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+            {
+                SKRect LastDraw;
+                //StandardTetrisGameStateSkiaRenderingHandler.PaintPartitionedState(this, CurrentGameState, canvas, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)),out LastDraw,out _);
+                //_LastDrawBounds = LastDraw;
+                PaintPartitionedState(CurrentGameState, canvas);
+            }
+        }*/
+        
+
+        /*private void PaintPartitionedState(GameState PaintState, SKCanvas canvas)
         {
             RenderHelpers.GetHorizontalSizeData(ClientSize.Y, ClientSize.X, out float FieldWidth, out float StatWidth);
             var renderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), PaintState.GetType(), typeof(GameStateSkiaDrawParameters));
@@ -516,7 +523,7 @@ namespace BASeTris
             {
                 ;
             }
-        }
+        }*/
 
         SKPaint FPSPaint = null;
         SKPaint FPSShadow = null;

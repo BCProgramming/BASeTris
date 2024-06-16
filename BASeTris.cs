@@ -109,6 +109,7 @@ namespace BASeTris
             get { return picTetrisField.ClientRectangle; }
         }
 
+        public bool ForceSkiaUsage = true;
         public static readonly double DefaultWidth = 643d;
         public static readonly double DefaultHeight = 734d;
 
@@ -117,10 +118,10 @@ namespace BASeTris
             if (InvokeRequired) Invoke((MethodInvoker)(() => SetDisplayMode(pMode)));
             if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
             {
-                if (picFullSize.Visible == (pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
-                picFullSize.Visible = pMode == GameState.DisplayMode.Full;
-                picTetrisField.Visible = pMode == GameState.DisplayMode.Partitioned;
-                picStatistics.Visible = pMode == GameState.DisplayMode.Partitioned;
+                if (picFullSize.Visible == (ForceSkiaUsage || pMode == GameState.DisplayMode.Full)) return; //if full size visibility matches the passed state being full, we are already in that state.
+                picFullSize.Visible = ForceSkiaUsage || pMode == GameState.DisplayMode.Full;
+                picTetrisField.Visible = !ForceSkiaUsage && pMode == GameState.DisplayMode.Partitioned;
+                picStatistics.Visible = !ForceSkiaUsage && pMode == GameState.DisplayMode.Partitioned;
             }
             else
             {
@@ -205,7 +206,7 @@ namespace BASeTris
                 FrameTimer.Start();
                 if (ActiveRenderMode == RendererMode.Renderer_GDIPlus)
                 {
-                    if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
+                    if (!ForceSkiaUsage && _Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Partitioned)
                     {
 
                         picTetrisField.Invalidate();
@@ -213,7 +214,7 @@ namespace BASeTris
                         picStatistics.Invalidate();
                         picStatistics.Refresh();
                     }
-                    else if (_Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+                    else if (ForceSkiaUsage || _Present.Game.CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
                     {
                         picFullSize.Invalidate();
                         picFullSize.Refresh();
@@ -226,9 +227,24 @@ namespace BASeTris
             }));
         }
 
+        private Object SkiaLock = new object();
+        private SKBitmap SkiaCanvasBitmap = null;
+        private SKCanvas SkiaCanvas = null;
+        private Size LastSize;
+        private void RecreateSkiaObjects()
+        {
+            lock (SkiaLock)
+            {
+                SkiaBitmap.Dispose();
+                SkiaCanvas.Dispose();
+                SkiaCanvasBitmap = new SKBitmap(picFullSize.ClientSize.Width, picFullSize.ClientSize.Width);
+                SkiaCanvas = new SKCanvas(SkiaCanvasBitmap);
+            }
 
-        
-        
+        }
+
+
+        private SkiaRenderAssistant SkiaAssist = new SkiaRenderAssistant();
 
         static Random rgen = new Random();
 
@@ -236,13 +252,28 @@ namespace BASeTris
         {
             
             if (_Present.Game == null) return;
-            if (CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
+            if ( CurrentState.SupportedDisplayMode == GameState.DisplayMode.Full)
             {
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                
-                _Present.Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
+                if (ForceSkiaUsage)
+                {
+                    if (LastSize != picFullSize.Size)
+                    {
+                        RecreateSkiaObjects();
+                    }
+                    SkiaCanvas.Clear();
+                    SkiaAssist.PaintStateSkia(this, CurrentState, new OpenTK.Mathematics.Vector2i((int)picFullSize.Width, (int)picFullSize.Height), SkiaCanvas);
+                    using (var skiaconverted = SkiaSharp.Views.Desktop.Extensions.ToBitmap(SkiaBitmap))
+                    {
+                        e.Graphics.DrawImageUnscaled(skiaconverted, new Point(0, 0));
+                    }
+                }
+                else
+                {
+                    _Present.Game.DrawProc(e.Graphics, new RectangleF(picFullSize.ClientRectangle.Left, picFullSize.ClientRectangle.Top, picFullSize.ClientRectangle.Width, picFullSize.ClientRectangle.Height));
+                }
             }
         }
 
@@ -281,9 +312,10 @@ namespace BASeTris
             useBounds = new RectangleF(picTetrisField.ClientRectangle.Left, picTetrisField.ClientRectangle.Top, picTetrisField.ClientRectangle.Width, picTetrisField.ClientRectangle.Height);
             _Present.Game.DrawProc(e.Graphics, useBounds);
             _LastDrawBounds = useBounds;
+            
         }
        
-     
+        
 
 
         private void picStatistics_Paint(object sender, PaintEventArgs e)
