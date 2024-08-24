@@ -39,7 +39,7 @@ namespace BASeTris.AI
                 {
                     var keypress = PressKeyQueue.Dequeue();
                     if (keypress != GameState.GameKeys.GameKey_Null)
-                        _Owner.EnqueueAction(() => { _Owner.CurrentState.HandleGameKey(_Owner, keypress); });
+                        _Owner.EnqueueAction(() => { _Owner.CurrentState.HandleGameKey(_Owner, keypress);return false; });
                 }
                 else
                 {

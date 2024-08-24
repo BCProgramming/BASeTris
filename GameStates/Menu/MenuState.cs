@@ -301,6 +301,7 @@ namespace BASeTris.GameStates.Menu
                     {
                         TetrisGame.Soundman.StopMusic();
                     }
+                    return false;
 
                 });
             }

@@ -19,6 +19,9 @@ using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.Adapters;
 using static BASeTris.CanFitResults;
+using System.Xml.Linq;
+using BASeCamp.Elementizer;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BASeTris
 {
@@ -49,13 +52,179 @@ namespace BASeTris
         public event EventHandler<OnThemeChangeEventArgs> OnThemeChangeEvent;
         public event EventHandler<OnNewLineRowScroll> OnNewLineScroll;
         Dictionary<int, Dictionary<Color, TextureBrush>> HotLineTextures = new Dictionary<int, Dictionary<Color, TextureBrush>>();
-
-        //used (or will be used...) by Tetris Attack mode.
-
-
-
-        public float OffsetPaint { get; set; } //offset paint, this is in "blocks" and should be  >=0 and <1.
+        private NominoTheme _Theme = null;
         
+
+        //public TetrominoTheme Theme = new NESTetrominoTheme();
+        //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
+        private List<Nomino> ActiveBlockGroups = new List<Nomino>();
+
+
+        public XElement SaveField(String pNodeName="Field")
+        {
+            //this is not done by having TetrisField implement IXmlPersistable because
+            //it only saves some aspects of the state. The rest relies on the Field having been appropriately initialized anyway.
+
+            XElement ResultNode = new XElement(pNodeName,
+                new XAttribute("RowCount", RowCount),
+                new XAttribute("ColCount", ColCount),
+                new XAttribute("VisibleRows", _VisibleRows),
+                new XAttribute("HiddenTopRows", _HiddenRowsTop),
+                new XAttribute("HiddenBottomRows", _HiddenRowsBottom));
+
+
+            Dictionary<Nomino, int> OwnerDictionary = new Dictionary<Nomino, int>();
+            List<XElement> BlockElements = new List<XElement>();
+            int OwnerIndexCount = 0;
+            for (int r = 0; r < RowCount; r++)
+            {
+                for (int c = 0; c < ColCount; c++)
+                {
+                    if (Contents[r][c] != null)
+                    {
+                        var thisblock = Contents[r][c];
+                        if (thisblock != null)
+                        {
+                            int OwnerIndex = 0;
+
+                            if (thisblock.Owner != null)
+                            {
+                                XElement blockElement = new XElement("Block"); //we don't need to serialize the actual block if there is an owner.
+                                blockElement.Add(new XAttribute("Row", r));
+                                blockElement.Add(new XAttribute("Column", c));
+                                //if the owner is not in the dictionary, add it
+                                if (!OwnerDictionary.ContainsKey(thisblock.Owner))
+                                {
+                                    OwnerDictionary.Add(thisblock.Owner, OwnerIndexCount);
+                                    OwnerIndex = OwnerIndexCount++;
+                                }
+                                else
+                                {
+                                    OwnerIndex = OwnerDictionary[thisblock.Owner];
+                                }
+                                blockElement.Add(new XAttribute("OwnerIndex", OwnerIndex));
+                                var BlockIndex = thisblock.Owner.IndexOf(thisblock.Owner.FindEntry(thisblock));
+                                blockElement.Add(new XAttribute("OwnerBlockIndex", BlockIndex));
+                                BlockElements.Add(blockElement);
+                            }
+                            else
+                            {
+                                XElement blockElement = new XElement("Block");
+                                XElement blockElementInner =  StandardHelper.SaveElement(thisblock,"BlockData", null,true);
+                                blockElement.Add(blockElementInner);
+                                blockElement.Add(new XAttribute("NoOwner", true));
+                                BlockElements.Add(blockElement);
+                            }
+                        }
+
+                    }
+                }
+            }
+            List<Nomino> OwnerList = OwnerDictionary.OrderBy((d) => d.Value).Select((d) => d.Key).ToList();
+            XElement OwnerListElement = StandardHelper.SaveList<Nomino>(OwnerList,"Owners",null, true);
+
+            ResultNode.Add(OwnerListElement);
+            XElement BlockElementsRoot = new XElement("BlockElements", BlockElements);
+            ResultNode.Add(BlockElementsRoot);
+
+            XElement ActiveGroupElement = StandardHelper.SaveList<Nomino>(ActiveBlockGroups, "ActiveGroups", null, true);
+            ResultNode.Add(ActiveGroupElement);
+
+            //another element we will save: the current queue for the blocks!
+
+            
+
+
+            return ResultNode;
+        }
+        public void RestoreField(XElement src)
+        {
+            //reverse of SaveField, of course.
+
+            
+            RowCount = src.GetAttributeInt("RowCount");
+            ColCount = src.GetAttributeInt("ColCount");
+            _VisibleRows = src.GetAttributeInt("VisibleRows");
+            _HiddenRowsTop = src.GetAttributeInt("HiddenTopRows");
+            _HiddenRowsBottom = src.GetAttributeInt("HiddenButtonRows");
+
+            List<Nomino> OwnerList = src.ReadList<Nomino>("Owners", null, null);
+
+            List<Nomino> ActiveList = src.ReadList<Nomino>("ActiveGroups", null, null);
+
+            foreach (var iterate in ActiveList)
+            {
+                Theme.ApplyTheme(iterate, Handler, this, NominoTheme.ThemeApplicationReason.NewNomino);
+            }
+            foreach (var iterate in OwnerList)
+            {
+                Theme.ApplyTheme(iterate, Handler, this, NominoTheme.ThemeApplicationReason.FieldSet);
+            }
+            ActiveBlockGroups = ActiveList;
+            var newContents = new NominoBlock[RowCount][];
+
+            for (int r = 0; r < RowCount; r++)
+            {
+                newContents[r] = new NominoBlock[ColCount];
+            }
+
+            //now we can go through the block elements.
+            foreach (XElement iterateblockelement in src.Element("BlockElements").Elements("Block"))
+            {
+                int currRow = iterateblockelement.GetAttributeInt("Row");
+                int currCol = iterateblockelement.GetAttributeInt("Column");
+
+
+                //if there is no owner,
+                if (iterateblockelement.GetAttributeBool("NoOwner", false))
+                {
+                    var innerelement = iterateblockelement.Element("BlockData");
+                    var buildMino = StandardHelper.ReadElement<NominoBlock>(innerelement, null);
+
+                    var Dummino = new Nomino() { };
+                    Dummino.AddBlock(new Point[] { new Point(0, 0) }, buildMino);
+
+                    Theme.ApplyTheme(Dummino, _Handler, this, NominoTheme.ThemeApplicationReason.Normal);
+                    //set this field content item directly.
+                    newContents[currRow][currCol] = buildMino;
+
+                }
+                else
+                {
+                    int OwnerIndex = iterateblockelement.GetAttributeInt("OwnerIndex");
+                    int OwnerBlockIndex = iterateblockelement.GetAttributeInt("OwnerBlockIndex");
+                    newContents[currRow][currCol] = OwnerList[OwnerIndex].GetBlockData()[OwnerBlockIndex].Block;
+                }
+
+
+            }
+
+            FieldContents = newContents;
+            //new XAttribute("RowCount", RowCount),
+            //    new XAttribute("ColCount", ColCount),
+            //    new XAttribute("VisibleRows", _VisibleRows),
+            //    new XAttribute("HiddenTopRows", _HiddenRowsTop),
+            //    new XAttribute("HiddenBottomRows", _HiddenRowsBottom));
+
+
+
+
+        }
+        public float OffsetPaint { get; set; } //offset paint, this is in "blocks" and should be  >=0 and <1.
+
+        private IBlockGameCustomizationHandler _Handler = null;
+        public IBlockGameCustomizationHandler Handler { get { return _Handler; } }
+
+        private int _VisibleRows = DEFAULT_VISIBLEROWS;
+        private int _HiddenRowsTop = DEFAULT_TOPHIDDENROWS;
+        private int _HiddenRowsBottom = DEFAULT_BOTTOMHIDDENROWS;
+        public int RowCount { get; set; } = DEFAULT_ROWCOUNT;
+        public int ColCount { get; set; } = DEFAULT_COLCOUNT;
+
+        public int VisibleRows { get { return _VisibleRows; } set { _VisibleRows = value; RecalcRows(); } }
+        public int HIDDENROWS_TOP { get { return _HiddenRowsTop; } set { _HiddenRowsTop = value; RecalcRows(); } }
+        public int HIDDENROWS_BOTTOM { get { return _HiddenRowsBottom; } set { _HiddenRowsBottom = value; RecalcRows(); } }
+
 
         public TextureBrush GetHotLineTexture(int pHeight, Color pColor)
         {
@@ -115,7 +284,7 @@ namespace BASeTris
         }
 
       
-        private NominoTheme _Theme = null;
+       
 
 
         public NominoTheme Theme
@@ -132,9 +301,7 @@ namespace BASeTris
             }
         }
 
-        //public TetrominoTheme Theme = new NESTetrominoTheme();
-        //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
-        private List<Nomino> ActiveBlockGroups = new List<Nomino>();
+      
 
         public IList<Nomino> GetActiveBlockGroups() => ActiveBlockGroups;
        
@@ -143,15 +310,7 @@ namespace BASeTris
         public const int DEFAULT_TOPHIDDENROWS = 2;
         public const int DEFAULT_BOTTOMHIDDENROWS = 0;
         public const int DEFAULT_VISIBLEROWS = 20; //20;
-        private int _VisibleRows = DEFAULT_VISIBLEROWS;
-        private int _HiddenRowsTop = DEFAULT_TOPHIDDENROWS;
-        private int _HiddenRowsBottom = DEFAULT_BOTTOMHIDDENROWS;
-        public int RowCount { get; set; } = DEFAULT_ROWCOUNT;
-        public int ColCount { get; set; } = DEFAULT_COLCOUNT;
 
-        public int VisibleRows { get { return _VisibleRows; } set { _VisibleRows = value; RecalcRows(); } }
-        public int HIDDENROWS_TOP { get { return _HiddenRowsTop; } set { _HiddenRowsTop = value; RecalcRows(); } } 
-        public int HIDDENROWS_BOTTOM { get { return _HiddenRowsBottom; } set { _HiddenRowsBottom = value;RecalcRows(); } } 
 
         private void RecalcRows()
         {
@@ -161,7 +320,17 @@ namespace BASeTris
         //const int COLCOUNT = 20;
         Random rg = new Random();
 
-     
+
+        public int Level
+        {
+            get { return (Handler == null ? 0 : (Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0); }
+        }
+
+        public int LineCount
+        {
+            get { return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
+        }
+
 
         public IList<Nomino> BlockGroups
         {
@@ -283,16 +452,7 @@ namespace BASeTris
             }
 
         }
-        private IBlockGameCustomizationHandler _Handler = null;
-        public IBlockGameCustomizationHandler Handler {  get { return _Handler; } }
 
-        public int Level {
-            get { return (Handler == null ? 0 : (Handler.Statistics is TetrisStatistics ts) ? ts.Level : 0); } }
-
-        public int LineCount
-        {
-            get {  return (Handler.Statistics is TetrisStatistics ts) ? ts.LineCount : 0; }
-        }
 
         public TetrisField(NominoTheme theme, IBlockGameCustomizationHandler Handler, int pRowCount = DEFAULT_ROWCOUNT,int pColCount = DEFAULT_COLCOUNT,int pHiddenRowCount=2,int pHiddenRowCountBottom = 0)
         {

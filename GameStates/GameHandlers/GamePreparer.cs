@@ -2,6 +2,9 @@
 using BASeTris.BackgroundDrawers;
 using BASeTris.Choosers;
 using BASeTris.GameStates.Menu;
+using BASeTris.Rendering;
+using BASeTris.Rendering.Skia;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -195,12 +198,34 @@ namespace BASeTris.GameStates.GameHandlers
                 MenuStateMenuItem mitem = ConstructItem(OptionsData, reviewprop.Item1, reviewprop.Item2, CurrentPropertyValue);
                 BuildItems.Add(mitem);
             }
-
+            
             MenuStateTextMenuItem StartGameItem = new MenuStateTextMenuItem() { Text = "Start Game" };
+            MenuStateTextMenuItem ResumeSuspendedGame = new MenuStateTextMenuItem() { Text = "Resume Suspended Game" };
+
+
+
+
 
             BuildItems.Insert(0,StartGameItem);
+
+            String sSuspendedFile = TetrisGame.GetSuspendedGamePath(OptionsData.HandlerType);
+            if (!String.IsNullOrEmpty(sSuspendedFile) && File.Exists(sSuspendedFile))
+            {
+                ResumeSuspendedGame.Text = $"Resume Suspended Game {new FileInfo(sSuspendedFile).LastWriteTime.ToString("MM/dd/yyyy hh:mm:ss}")}";
+                BuildItems.Add(ResumeSuspendedGame);
+
+
+            }
+
+
+
+
             MenuState ConstructState = MenuState.CreateMenu(pOwner, pHeader, ReversionState, bg, sCancelText,int.MaxValue,BuildItems.ToArray());
             ConstructState.BackgroundMusicKey = OptionsData.BackgroundMusic;
+
+            
+
+
             ConstructState.MenuItemActivated += (o, e) =>
             {
                 if (e.MenuElement == StartGameItem)
@@ -208,6 +233,52 @@ namespace BASeTris.GameStates.GameHandlers
                     ConstructState.BackgroundMusicKey = "";
 
                     ProceedFunc(OptionsData);
+                }
+                else if (e.MenuElement == ResumeSuspendedGame)
+                {
+                    if (!File.Exists(sSuspendedFile))
+                    {
+                        ConstructState.MenuElements.Remove(ResumeSuspendedGame);
+                    }
+                    var loadedDoc = XDocument.Load(sSuspendedFile);
+                    if (loadedDoc == null)
+                    {
+                        ConstructState.MenuElements.Remove(ResumeSuspendedGame);
+                    }
+
+                    ConstructState.BackgroundMusicKey = "";
+                    ProceedFunc(OptionsData);
+                    Func<bool> RestoreSuspendedGameProc = null;
+                    RestoreSuspendedGameProc = () =>
+                    {
+                        //first frame it calls this routine, and we will load in the suspended game.
+                        if (pOwner.CurrentState is GameplayGameState gpgs)
+                        {
+
+                            gpgs.RestoreState(loadedDoc.Root);
+
+                            //foreach(var iterate in gpgs.PlayField.Contents
+
+
+
+
+                            RenderingProvider.Static.ClearExtendedData(gpgs.PlayField.GetType(), gpgs.PlayField);
+                            gpgs.ReapplyTheme();
+                            return false;
+                        }
+                        else
+                        {
+                            //if it is not,
+                            //pOwner.EnqueueAction(RestoreSuspendedGameProc);
+                            return true;
+                        }
+
+
+
+                    };
+
+
+                    pOwner.EnqueueAction(RestoreSuspendedGameProc);
                 }
                 else if (OptionsData is ICustomPropertyPreparer cpp)
                 {

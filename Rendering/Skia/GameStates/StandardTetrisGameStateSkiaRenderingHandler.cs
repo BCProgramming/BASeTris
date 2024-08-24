@@ -112,6 +112,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 _bg.Data.theFilter = SKColorMatrices.GetColourizer(tint.R, tint.G, tint.B, tint.A);
             }
+            _bg.Data.Scale = -1;
             return (IBackground<StandardImageBackgroundDrawSkiaCapsule>)_bg;
 
 

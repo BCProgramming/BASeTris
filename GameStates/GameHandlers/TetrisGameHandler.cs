@@ -36,7 +36,7 @@ namespace BASeTris.GameStates.GameHandlers
         private Choosers.BlockGroupChooser _Chooser;
         public bool AllowFieldImageCache { get { return true; } }
         public TetrisStatistics Statistics { get; private set; } = new TetrisStatistics();
-        BaseStatistics IBlockGameCustomizationHandler.Statistics {  get { return this.Statistics; } }
+        BaseStatistics IBlockGameCustomizationHandler.Statistics {  get { return this.Statistics; } set { this.Statistics = (TetrisStatistics)value; } }
 
         public virtual FieldCustomizationInfo GetFieldInfo()
         {

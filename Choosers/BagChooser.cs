@@ -13,7 +13,7 @@ namespace BASeTris.Choosers
         Queue<Func<Nomino>> WorkQueue = new Queue<Func<Nomino>>();
 
 
-        public static IEnumerable<T> Shuffle<T>(Random rgen, IEnumerable<T> Shufflethese)
+        public static IEnumerable<T> Shuffle<T>(IRandomizer rgen, IEnumerable<T> Shufflethese)
         {
             var sl = new SortedList<float, T>();
             foreach (T iterate in Shufflethese)

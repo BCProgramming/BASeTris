@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
+using BASeCamp.Logging;
 using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
@@ -93,7 +95,7 @@ namespace BASeTris.GameStates
             (PauseGamePlayerState as GameplayGameState).Flags = GameplayGameState.GameplayStateFlags.Paused;
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new StandardNominoAI(this);
-            PausePlayerAI.ScoringRules.StupidFactor = 0.75f;
+            PausePlayerAI.ScoringRules.StupidFactor = 1f;
             //PausePlayerAI.ScoringRules.Moronic = true;
             
             //PauseGamePresenter.ai = PausePlayerAI;
@@ -113,20 +115,7 @@ namespace BASeTris.GameStates
             var HighScoresItem = new MenuStateHighScoreItem(pOwner, this, FontSrc) { Text = "High Scores", TipText = "View high scores" };
             var ControlsOption = new MenuStateTextMenuItem() { Text = "Controls", TipText = "Display control settings." };
             //var HighScoresItem = new MenuStateTextMenuItem() { Text = "High Scores",TipText="View high scores" };
-            MenuItemActivated += (o, e) =>
-            {
-                if (e.MenuElement == ResumeOption)
-                    ResumeGame(pOwner);
-                else if (e.MenuElement == ControlsOption)
-                {
-                    
-                        var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
-                        pOwner.CurrentState = ControlsState;
-                        ActivatedItem = null;
-                    
-                }
-                
-            };
+          
             
             ResumeOption.FontFace = FontSrc.FontFamily.Name;
             ResumeOption.FontSize = FontSrc.Size;
@@ -151,7 +140,17 @@ namespace BASeTris.GameStates
 
             this.MenuItemActivated += (o, a) =>
             {
-                if (a.MenuElement == ThemeItem)
+                if (a.MenuElement == ResumeOption)
+                    ResumeGame(pOwner);
+                else if (a.MenuElement == ControlsOption)
+                {
+
+                    var ControlsState = new ControlSettingsViewState(pOwner.CurrentState, pOwner.Settings, ControlSettingsViewState.ControllerSettingType.Gamepad);
+                    pOwner.CurrentState = ControlsState;
+                    ActivatedItem = null;
+
+                }
+                else if (a.MenuElement == ThemeItem)
                 {
 
                     a.CancelActivation = true;
@@ -189,6 +188,24 @@ namespace BASeTris.GameStates
             
             ExitItem.OnOptionConfirmed += (a, b) =>
             {
+                //testing: save a suspension of this game.
+                if (PausedState is GameplayGameState ggs)
+                {
+                    if (false && pOwner.GetElapsedTime().TotalMinutes > 5)
+                    {
+                        DebugLogger.Log.WriteLine("Game is being quit, after more than a minute. Saving game state.");
+                        XElement result = ggs.SaveState(pOwner,"Field");
+                        //save suspended game.
+                        String SuspendedGameFilename = TetrisGame.GetSuspendedGamePath(pOwner.GetHandler().GetType());
+                        TetrisGame.EnsurePath(SuspendedGameFilename);
+                        result.Save(SuspendedGameFilename);
+                    }
+                    else 
+                    {
+                        DebugLogger.Log.WriteLine("Game is being quit, but was played for less than a minute. Current Game will not be suspended.");
+                    }
+
+                }
                 
                 if (pOwner is Form f)
                 {
@@ -306,14 +323,14 @@ namespace BASeTris.GameStates
             playing2?.UnPause();
             playing2?.setVolume(1.0f);
         }
-        Queue<Action> QueuedOwnerActions = new Queue<Action>();
+        Queue<Func<bool>> QueuedOwnerActions = new Queue<Func<bool>>();
         public void SetDisplayMode(DisplayMode pMode)
         {
             //throw new NotImplementedException();
             
         }
 
-        public void EnqueueAction(Action pAction)
+        public void EnqueueAction(Func<bool> pAction)
         {
             lock (QueuedOwnerActions)
             {

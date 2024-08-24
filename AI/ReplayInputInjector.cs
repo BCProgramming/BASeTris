@@ -28,7 +28,7 @@ namespace BASeTris.AI
                     DataQueue.TryDequeue(out _);
                     //push it!
                     Debug.Print($"Enqueueing playback action: {result.Elapsed} > {Elapsed}, Key={result.GameKey}");
-                    _Owner.EnqueueAction(() => { _Owner.CurrentState.HandleGameKey(_Owner, result.GameKey); });
+                    _Owner.EnqueueAction(() => { _Owner.CurrentState.HandleGameKey(_Owner, result.GameKey); return false; });
                 }
                 Thread.Sleep(0);
 

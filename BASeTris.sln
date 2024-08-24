@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elementizer", "..\XMLSerial
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCRenderingAdapter", "..\BCRenderingAdapter\BCRenderingAdapter\BCRenderingAdapter.csproj", "{E7C2CA46-4AAB-4966-B251-02B68E3AA0F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BASeTris", "..\BASeTris\BASeTris.csproj", "{8A76F57F-1DB8-4E0B-855D-087678A52A0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BASeTris", "BASeTris.csproj", "{8A76F57F-1DB8-4E0B-855D-087678A52A0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

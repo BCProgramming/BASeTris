@@ -18,7 +18,7 @@ namespace BASeTris
     {
         void SetDisplayMode(GameState.DisplayMode pMode);
         GameState CurrentState { get; set; }
-        void EnqueueAction(Action pAction);
+        void EnqueueAction(Func<bool> pAction);
         Rectangle GameArea { get; }
         void Feedback(float Strength, int Length);
 
@@ -27,6 +27,7 @@ namespace BASeTris
         void SetScale(double pScale);
         event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         //DateTime GameStartTime { get; set; }
+        
         Stopwatch GameTime { get; set; }
         TimeSpan FinalGameTime { get; }
         //DateTime LastPausedTime { get; set; }
@@ -63,7 +64,10 @@ namespace BASeTris
 
         BCRect LastDrawBounds { get; }
 
-
+        void AcceptCallback(GamePresenterCallbackCapsule pCapsule);
+    }
+    public abstract class GamePresenterCallbackCapsule
+    {
     }
     
     public class BeforeGameStateChangeEventArgs : CancelEventArgs

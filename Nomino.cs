@@ -20,10 +20,13 @@ using BASeTris.Rendering.Skia;
 using BASeTris.Blocks;
 using SkiaSharp;
 using BASeTris.Settings;
+using BASeCamp.Elementizer;
+using System.Xml.Linq;
+using System.Reflection;
 
 namespace BASeTris
 {
-    public class Nomino : IEnumerable<NominoElement>
+    public class Nomino : IEnumerable<NominoElement>, IXmlPersistable
     {
         [Flags]
         public enum NominoControlFlags
@@ -51,11 +54,88 @@ namespace BASeTris
         private int _Y = 0;
         public int Y { get { return _Y; } set{ _Y = value; } }
         public bool NoGhost { get; set; } = false;
+        private int XMin, XMax, YMin, YMax;
+        private Rectangle _GroupExtents = Rectangle.Empty;
+        public TimeSpan LastFall = TimeSpan.Zero;
+        public float HighestHeightValue = 0;
+        public bool AllowRotationAnimations { get; set; } = true;
+        private DateTime LastRotationCall = DateTime.MinValue;
+        protected List<NominoElement> BlockData = new List<NominoElement>();
+        private Dictionary<NominoBlock, NominoElement> _DataLookup = null;
         public void SetY(IStateOwner pOwner,int Value)
         {
             if(pOwner!=null) LastFall = pOwner.GetElapsedTime();
             Y = Value;
         }
+
+        //serialization of Nominoes is (primarily, as I write this) intended for the purpose of being able to suspend/resume games in some fashion, which requires saving all game state to disk.
+        public XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            //simple properties get added as attributes....
+            XElement CreateNode = new XElement(pNodeName,
+                
+                new XAttribute("CanRotate",CanRotate),
+                new XAttribute("Controllable",Controllable),
+                new XAttribute("PlaceSound",PlaceSound),
+                new XAttribute("MoveSound",MoveSound),
+                new XAttribute("FallSpeed",FallSpeed),
+                new XAttribute("InitialY",InitialY),
+                new XAttribute("X",X),
+                new XAttribute("Y",_Y),
+                new XAttribute("NoGhost",NoGhost),
+                new XAttribute("XMin",XMin),
+                new XAttribute("XMax",XMax),
+                new XAttribute("YMin",YMin),
+                new XAttribute("YMax",YMax),
+                new XAttribute("LastFall",LastFall.Ticks),
+                new XAttribute("HighestHeightValue",HighestHeightValue),
+                new XAttribute("AllowRotationAnimations",AllowRotationAnimations)
+                
+
+
+
+                );
+            //_DataLookup isn't needed, will be generated automatically.
+            //BlockData we do need to serialize.
+            XElement BlockDataElement = StandardHelper.SaveList<NominoElement>(BlockData, "BlockData", PersistenceData, false);
+            CreateNode.Add(BlockDataElement);
+
+            return CreateNode;
+        }
+        public Nomino(XElement src, object pContext)
+        {
+            CanRotate = src.GetAttributeBool("CanRotate");
+            Controllable = src.GetAttributeBool("Controllable");
+            PlaceSound = src.GetAttributeBool("PlaceSound");
+            MoveSound = src.GetAttributeBool("MoveSound");
+            FallSpeed = src.GetAttributeInt("FallSpeed");
+            InitialY = src.GetAttributeInt("InitialY");
+            X = src.GetAttributeInt("X");
+            _Y = src.GetAttributeInt("Y");
+            NoGhost = src.GetAttributeBool("NoGhost");
+            XMin = src.GetAttributeInt("XMin");
+            XMax = src.GetAttributeInt("XMax");
+            YMin = src.GetAttributeInt("YMin");
+            YMax = src.GetAttributeInt("YMax");
+            var lastfallticks = src.GetAttributeLong("LastFall");
+            LastFall = TimeSpan.FromTicks(lastfallticks);
+            HighestHeightValue = src.GetAttributeInt("HighestHeightValue");
+            AllowRotationAnimations = src.GetAttributeBool("AllowRotationAnimations");
+
+
+            XElement BlockDataElement = src.Element("BlockData");
+            var readList = StandardHelper.ReadList<NominoElement>(BlockDataElement, pContext);
+            foreach (var iterate in readList)
+            {
+                iterate.Block.Owner = this;
+            }
+            BlockData = readList; 
+
+
+
+        }
+
+
         /// <summary>
         /// For Nomino's with non-adjacent parts, this returns a set for each Nomino "island".
         /// </summary>
@@ -117,11 +197,7 @@ namespace BASeTris
                 }
             }
         }
-        private int XMin, XMax, YMin, YMax;
-        private Rectangle _GroupExtents = Rectangle.Empty;
-        public TimeSpan LastFall = TimeSpan.Zero;
-        public float HighestHeightValue = 0;
-        public bool AllowRotationAnimations { get; set; } = true;
+        
         public float GetHeightTranslation(IStateOwner pOwner,float BlockHeight)
         {
             if (!pOwner.CurrentState.GamePlayActive)
@@ -140,8 +216,6 @@ namespace BASeTris
             get { return _GroupExtents; }
         }
 
-        protected List<NominoElement> BlockData = new List<NominoElement>();
-        private Dictionary<NominoBlock, NominoElement> _DataLookup = null;
 
         public NominoElement ElementFromBlock(NominoBlock src)
         {
@@ -174,7 +248,7 @@ namespace BASeTris
             }
         }
 
-        private DateTime LastRotationCall = DateTime.MinValue;
+        
         
         /// <summary>
         /// called repeatedly for active groups, normally at a rate determined by the current level.
@@ -480,10 +554,47 @@ namespace BASeTris
         {
             return (float) Math.Sqrt(Math.Pow(PointB.X - PointA.X, 2) + Math.Pow(PointB.Y - PointA.Y, 2));
         }
+
+        
     }
 
-    public class NominoElement
+    public class NominoElement:IXmlPersistable
     {
+        //each rotationmodule
+        public int RotationModulo = 0;
+
+        public NominoBlock Block;
+
+
+        public NominoElement()
+        {
+        }
+        public NominoElement(XElement src, Object pPersistenceData)
+        {
+            //deserialize!
+            RotationModulo = src.GetAttributeInt("RotationModulo");
+            var PositionElement = src.Element("Positions");
+            var BlockElement = src.Element("Block");
+            var BlockTypeStr = src.GetAttributeString("BlockType");
+            Type BlockType = StandardHelper.ClassFinder(BlockTypeStr);
+            Positions = (Point[])StandardHelper.ReadArray<Point>(PositionElement,pPersistenceData);
+
+            ConstructorInfo ciBuildBlock = BlockType.GetConstructor(new Type[] { typeof(XElement), typeof(Object) });
+            if (ciBuildBlock != null)
+            {
+                Block = (NominoBlock)ciBuildBlock.Invoke(new Object[] { BlockElement, pPersistenceData });
+            }
+
+
+
+        }
+        public XElement GetXmlData(String pNodeName, Object pPersistenceData)
+        {
+
+            XElement buildresult = new XElement(pNodeName, new XAttribute("RotationModulo", RotationModulo), StandardHelper.SaveArray(Positions,"Positions",pPersistenceData),   Block.GetXmlData("Block", pPersistenceData),new XAttribute("BlockType",Block.GetType().Name));
+            return buildresult;
+
+        }
         //Represents a single block within a group. the RotationPoints represent the positions this specific block will rotate/change to when rotated.
         public static int sMod(int A, int B)
         {
@@ -526,10 +637,7 @@ namespace BASeTris
         }
 
         
-        //each rotationmodule
-        public int RotationModulo = 0;
-
-        public NominoBlock Block;
+        
 
         public NominoElement(Point Point, Size AreaSize, NominoBlock pBlock)
         {

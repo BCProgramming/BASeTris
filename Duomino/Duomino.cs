@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 
 namespace BASeTris.Duomino
@@ -61,6 +62,10 @@ namespace BASeTris.Duomino
             base.SpecialName = "Pill";
             base.SetBlockOwner();
             base.RecalcExtents();
+        }
+        public Duomino(XElement src, object pContext) : base(src, pContext)
+        {
+            //somewhat problematic as we would not have initialized the BlockFunc routine. We'll need to deal with this later.
         }
         public Duomino() : this((i) => new LineSeriesBlock()
         {

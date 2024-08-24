@@ -73,6 +73,8 @@ namespace BASeTris.GameStates
             {
                 Target.Block.BeforeDraw = (tbdp) =>
                 {
+                    //TODO: we should figure a way to abstract this such that different clear actions can have their own set of information. At the same time though I guess the renderers would need access to it somehow too... Perhaps some sort of RenderingModifier tag property that the renderer
+                    //can access with these bits of extra data?
                     tbdp.FillPercent = (float)useClear;
                 };
             }

@@ -31,11 +31,15 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using BASeTris.AI;
 using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+using BASeTris.Choosers;
 
 namespace BASeTris
 {
     public class TetrisGame : IStateOwner
     {
+
+        [DllImport("kernel32")]
+        extern static UInt64 GetTickCount64();
         [DllImport("kernel32.dll")]
         public static extern uint GetTickCount();
         public enum KeyInputSource
@@ -53,7 +57,7 @@ namespace BASeTris
 
         //public static AudioThemeManager AudioThemeMan;
         //the  "stateless" randomizer below is intended for stuff that "doesn't matter" for deterministic stuff like replays. It shouldn't be used by, for example, choosers, but it should be used by stuff like drawing randomization, or choices made for drawing and themes and stuff.
-        public static Random StatelessRandomizer = new Random();
+        public static IRandomizer StatelessRandomizer = RandomHelpers.Construct();
         public static bool PortableMode = false;
         private GameState CurrentGameState = null;
         private IStateOwner GameOwner = null;
@@ -115,9 +119,10 @@ namespace BASeTris
 
         public TimeSpan GetElapsedTime()
         {
-            return GameTime.Elapsed;
+            return GameTime.Elapsed + GameTimeOffset;
 
         }
+        public TimeSpan GameTimeOffset { get; set; } = TimeSpan.Zero; //for 'loaded' games, we want to start the time at the saved time, so we will set this to add that timespan to GetElapsedTime when called.
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange;
         public static Image StandardTiledTetrisBackground
         {
@@ -367,7 +372,7 @@ namespace BASeTris
             }
         }
 
-        public void EnqueueAction(Action pAction)
+        public void EnqueueAction(Func<bool> pAction)
         {
             GameOwner.EnqueueAction(pAction);
         }
@@ -484,7 +489,7 @@ namespace BASeTris
         }
 
         
-        public static T Choose<T>(IEnumerable<T> ChooseArray,Random rgen = null)
+        public static T Choose<T>(IEnumerable<T> ChooseArray,IRandomizer rgen = null)
         {
             if (rgen == null) rgen = TetrisGame.StatelessRandomizer;
             SortedList<double, T> sorttest = new SortedList<double, T>();
@@ -640,7 +645,17 @@ namespace BASeTris
                 }
             }
         }
-
+        public static String GetSuspendedGamePath(Type HandlerType)
+        {
+            String SuspendedGameFilename = Path.Combine(TetrisGame.AppDataFolder, "Suspend", HandlerType.Name + ".suspend");
+            return SuspendedGameFilename;
+        }
+        public static void EnsurePath(String sPath)
+        {
+            if (Path.Exists(sPath) || File.Exists(sPath)) return;
+            String sDirectoryName = Path.GetDirectoryName(sPath);
+            Directory.CreateDirectory(sDirectoryName);
+        }
         public static String FancyNumber(int number)
         {
             String sNumber = number.ToString().Trim();

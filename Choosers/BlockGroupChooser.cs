@@ -14,7 +14,7 @@ namespace BASeTris.Choosers
         /// 
 
         protected Func<Nomino>[] _Available;
-        public Random rgen = null;
+        public IRandomizer rgen = null;
         /// <summary>
         /// Action delegate that is called that can make additional changes to chosen Nomino's.
         /// used by things like the Dr.Mario handler to change the colours of the blocks in the pill.
@@ -23,7 +23,7 @@ namespace BASeTris.Choosers
         private BlockGroupChooser(Func<Nomino>[] pAvailable)
         {
             _Available = pAvailable;
-            rgen = new Random();
+            rgen = RandomHelpers.Construct();
         }
 
         public virtual void Dispose()
@@ -33,7 +33,7 @@ namespace BASeTris.Choosers
         public BlockGroupChooser(Func<Nomino>[] pAvailable, int Seed)
         {
             _Available = pAvailable;
-            rgen = new Random(Seed);
+            rgen = RandomHelpers.Construct(Seed);
         }
 
         public IEnumerable<Nomino> GetEnumerator()

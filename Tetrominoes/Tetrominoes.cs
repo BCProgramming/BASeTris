@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace BASeTris.Tetrominoes
 {
@@ -18,6 +19,9 @@ namespace BASeTris.Tetrominoes
             base.SetBlockOwner();
             RecalcExtents();
         }
+        public Tetromino_I(XElement src, object pContext) : base(src, pContext)
+        {
+        }
     }
 
     public class Tetromino_J : Tetromino
@@ -28,6 +32,9 @@ namespace BASeTris.Tetrominoes
             this.SpecialName = "J Tetromino";
             base.SetBlockOwner();
             RecalcExtents();
+        }
+        public Tetromino_J(XElement src, object pContext) : base(src, pContext)
+        {
         }
     }
 
@@ -40,6 +47,9 @@ namespace BASeTris.Tetrominoes
             base.SetBlockOwner();
             RecalcExtents();
         }
+        public Tetromino_L(XElement src, object pContext) : base(src, pContext)
+        {
+        }
     }
 
     public class Tetromino_O : Tetromino
@@ -51,6 +61,9 @@ namespace BASeTris.Tetrominoes
             base.SetBlockOwner();
             RecalcExtents();
         }
+        public Tetromino_O(XElement src, object pContext) : base(src, pContext)
+        {
+        }
     }
 
     public class Tetromino_S : Tetromino
@@ -61,6 +74,9 @@ namespace BASeTris.Tetrominoes
             this.SpecialName = "S Tetromino";
             base.SetBlockOwner();
             RecalcExtents();
+        }
+        public Tetromino_S(XElement src, object pContext) : base(src, pContext)
+        {
         }
     }
 
@@ -74,6 +90,9 @@ namespace BASeTris.Tetrominoes
             base.SetBlockOwner();
             RecalcExtents();
         }
+        public Tetromino_T(XElement src, object pContext) : base(src, pContext)
+        {
+        }
     }
 
     public class Tetromino_Z : Tetromino
@@ -84,6 +103,9 @@ namespace BASeTris.Tetrominoes
             this.SpecialName = "Z Tetromino";
             base.SetBlockOwner();
             RecalcExtents();
+        }
+        public Tetromino_Z(XElement src, object pContext) : base(src, pContext)
+        {
         }
     }
 
@@ -102,6 +124,9 @@ namespace BASeTris.Tetrominoes
             base.SetBlockOwner();
             RecalcExtents();
         }
+        public Tetromino_Y(XElement src, object pContext) : base(src, pContext)
+        {
+        }
     }
 
 
@@ -116,6 +141,9 @@ namespace BASeTris.Tetrominoes
             base.SetBlockOwner();
             RecalcExtents();
         }
+        public Tetromino_G(XElement src, object pContext) : base(src, pContext)
+        {
+        }
     }
 
     public class Tetromino_F : Tetromino
@@ -128,6 +156,9 @@ namespace BASeTris.Tetrominoes
                 lsbc.ConnectionIndex = 1;
             base.SetBlockOwner();
             RecalcExtents();
+        }
+        public Tetromino_F(XElement src, object pContext) : base(src, pContext)
+        {
         }
     }
 

@@ -40,6 +40,7 @@ namespace BASeTris.GameStates
             pOwner.EnqueueAction(() =>
             {
                 pOwner.CurrentState = RevertState;
+                return false;
             });
             //throw new NotImplementedException();
         }
@@ -63,6 +64,7 @@ namespace BASeTris.GameStates
                 pOwner.EnqueueAction(() =>
                 {
                     pOwner.CurrentState = RevertState;
+                    return false;
                 });
             }
         }
@@ -80,6 +82,7 @@ namespace BASeTris.GameStates
                 pOwner.EnqueueAction(() =>
                 {
                     pOwner.CurrentState = RevertState;
+                    return false;
                 });
             }
         }

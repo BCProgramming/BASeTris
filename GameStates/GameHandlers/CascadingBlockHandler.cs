@@ -38,8 +38,8 @@ namespace BASeTris.GameStates.GameHandlers
         public abstract String GetName();
 
         public bool LevelCompleteWhenMasterCountZero = true;
-        public STATT Statistics { get; private set; } = new STATT();
-        BaseStatistics IBlockGameCustomizationHandler.Statistics { get { return this.Statistics; } }
+        public STATT Statistics { get; set; } = new STATT();
+        BaseStatistics IBlockGameCustomizationHandler.Statistics { get { return this.Statistics; } set { this.Statistics = (STATT)value; } }
         public bool AllowFieldImageCache { get { return false; } }
         public OPTT GameOptions { get; } = new OPTT() { AllowWallKicks = false };
 

@@ -580,9 +580,9 @@ namespace BASeTris
             Flag_None = 0,
             Flag_Randomize = 1
         }
-        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,Random rgen = null)
+        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,IRandomizer rgen = null)
         {
-            rgen = rgen ?? new Random();
+            rgen = rgen ?? RandomHelpers.Construct();
             if (CurrentBuild == null) //Starting case, we make two blocks, then recursively call to add to it if needed.
             {
                 
@@ -647,6 +647,9 @@ namespace BASeTris
         
         public static Nomino CreateColumnNomino(int size,Func<NominoBlock> generateblockfunc)
         {
+            //For Columns, we are able to "exploit" the design of the BlockGroups, whereby "rotations" are actually just generalized.
+            ////Instead of setting rotation positions such that they actually rotate, we just have them move positions within the column. We can also have only three states, and "rotate" 
+            //goes between them. 
             List<NominoElement> items = new List<NominoElement>();
             var rotpoints = Enumerable.Range(0, size).Select((w) => new Point(0, w)).ToArray();
             for (int y = 0; y < size; y++)

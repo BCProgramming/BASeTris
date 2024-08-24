@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using BASeTris.Blocks;
 using BASeTris.Choosers;
 
@@ -94,6 +95,12 @@ namespace BASeTris.Tetrominoes
         {
             BlockGroupChooser Chooser = new WeightedChooser(StandardTetrominoFunctions, StandardTetrominoWeights,pSeed);
             return Chooser;
+        }
+        public Tetromino()
+        {
+        }
+        public Tetromino(XElement src, object pContext) : base(src, pContext)
+        {
         }
     }
 }

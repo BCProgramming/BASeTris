@@ -1,6 +1,8 @@
-﻿using System;
+﻿using BASeTris.Choosers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,9 +10,20 @@ namespace BASeTris
 {
     public class RandomHelpers
     {
-        public Random def_rgen = new Random();
+        public static IRandomizer Construct()
+        {
+            return new DotNetRandomizer();
+        }
+        public static IRandomizer Construct(int seed)
+        {
+            return new DotNetRandomizer(seed);
+
+        }
+
+
+        public IRandomizer def_rgen = Construct();
         public static RandomHelpers Static = new RandomHelpers();
-        public T[] Choose<T>(IEnumerable<T> ChooseArray, int numselect,Random rgen = null)
+        public T[] Choose<T>(IEnumerable<T> ChooseArray, int numselect, Random rgen = null)
         {
             if (rgen == null) rgen = new Random();
             T[] returnarray = new T[numselect];
@@ -27,9 +40,9 @@ namespace BASeTris
             }
             return returnarray;
         }
-        public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese,Random rgen)
+        public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese, IRandomizer rgen)
         {
-            if (rgen == null) rgen = new Random();
+            if (rgen == null) rgen = RandomHelpers.Construct();
             var sl = new SortedList<float, T>();
             foreach (T iterate in Shufflethese)
             {
@@ -47,7 +60,6 @@ namespace BASeTris
                     }
                 }
             }
-            Random rg = new Random();
 
             return sl.Select(iterator => iterator.Value);
         }
@@ -58,7 +70,7 @@ namespace BASeTris
             return Select(items, Probabilities, def_rgen);
         }
 
-        public T Select<T>(T[] items, float[] Probabilities, Random rgen)
+        public T Select<T>(T[] items, float[] Probabilities, IRandomizer rgen)
         {
             float[] sumulator = null;
             return Select(items, Probabilities, rgen, ref sumulator);
@@ -69,7 +81,7 @@ namespace BASeTris
             return Select(items, Probabilities, def_rgen, ref sumulations);
         }
 
-        public T Select<T>(T[] items, float[] Probabilities, Random rgen, ref float[] sumulations)
+        public T Select<T>(T[] items, float[] Probabilities, IRandomizer rgen, ref float[] sumulations)
         {
             //first, sum all the probabilities; unless a cached value is being given to us.
             //we do this manually because we will also build a corresponding list of the sums up to that element.
@@ -107,6 +119,88 @@ namespace BASeTris
 
 
     }
+
+
+    public interface IRandomizer
+    {
+        double NextDouble();
+        int Next(int Max);
+        int Next(int MinValue, int MaxValue);
+
+        int Next();
+    }
+
+
+    public abstract class BaseRandomizer : IRandomizer
+    {
+        protected ulong bytesprocessed = 0; //keep track of the current state.
+
+
+        public BaseRandomizer() { }
+
+        
+
+        public virtual double NextDouble()
+        {
+            var bytes = new Byte[8];
+            GetBytes(bytes);
+            // Step 2: bit-shift 11 and 53 based on double's mantissa bits
+            var ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
+            Double d = ul / (Double)(1UL << 53);
+            return d;
+
+        }
+        public virtual int Next()
+        {
+            byte[] target = new byte[sizeof(int)];
+            GetBytes(target);
+
+            return BitConverter.ToInt32(target);
+        }
+        public virtual int Next(int MinValue, int MaxValue)
+        {
+            return (int)(NextDouble() * (double)(MaxValue-MinValue)) + MinValue;
+        }
+        public virtual int Next(int Max)
+        {
+            return (int)(NextDouble() * (double)Max);
+        }
+
+        public void GetBytes(byte[] target)
+        {
+            InternalGetBytes(target);
+            bytesprocessed += (ulong)target.Length;
+        }
+        protected abstract void InternalGetBytes(byte[] target);
+
+    }
+  
+
+    public class DotNetRandomizer : BaseRandomizer
+    {
+        Random _Impl = null;
+        int Seed;
+        public DotNetRandomizer():this(Environment.TickCount)
+        {
+        }
+        public DotNetRandomizer(int pSeed)
+
+        {
+            Seed = pSeed;
+            _Impl = new Random(Seed);
+        }
+
+        protected override void InternalGetBytes(byte[] src)
+        {
+            _Impl.NextBytes(src);
+            
+            
+        }
+        
+
+    }
+
+   
 
 
 

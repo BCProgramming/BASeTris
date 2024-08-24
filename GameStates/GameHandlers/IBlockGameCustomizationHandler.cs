@@ -34,7 +34,7 @@ namespace BASeTris.GameStates.GameHandlers
         IBlockGameCustomizationHandler NewInstance();
         NominoTheme DefaultTheme { get; }
         void PrepareField(GameplayGameState state, IStateOwner pOwner); //prepare field for a new game. (or level or whatever- basically depends on the type of game)
-        BaseStatistics Statistics { get; }
+        BaseStatistics Statistics { get; set; }
         Nomino[] GetNominos();
         GameOptions GameOptions { get; }
 

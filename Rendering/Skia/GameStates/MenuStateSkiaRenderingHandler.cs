@@ -34,6 +34,9 @@ namespace BASeTris.Rendering.Skia.GameStates
     public class MenuStateSkiaRenderingHandler : AbstractMenuStateSkiaRenderingHandler<MenuState>
     {
     }
+    public class MenuStateBackgroundCallbackCapsule : GamePresenterCallbackCapsule
+    {
+    }
 
     public abstract class AbstractMenuStateSkiaRenderingHandler<TSourceType> : StandardStateRenderingHandler<SKCanvas, TSourceType, GameStateSkiaDrawParameters> where TSourceType : MenuState
     {
@@ -183,6 +186,11 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
             }
+            //raise the MenuBackgroundDraw Capsule, if our owner is a presenter
+            if (pOwner is IGamePresenter gp)
+            {
+                gp.AcceptCallback(new MenuStateBackgroundCallbackCapsule());
+            }
 
             if (CursorBitmap == null)
             {
@@ -204,7 +212,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
             
-        
+            
         
 
 

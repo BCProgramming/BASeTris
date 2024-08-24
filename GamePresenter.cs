@@ -88,8 +88,8 @@ namespace BASeTris
             }
         }
 
-        public ConcurrentQueue<Action> ProcThreadActions { get; set; } = new ConcurrentQueue<Action>();
-        public void EnqueueAction(Action pAction)
+        public ConcurrentQueue<Func<bool>> ProcThreadActions { get; set; } = new ConcurrentQueue<Func<bool>>();
+        public void EnqueueAction(Func<bool> pAction)
         {
             ProcThreadActions.Enqueue(pAction);
         }
@@ -218,13 +218,22 @@ namespace BASeTris
         }
         public void RunNextThreadAction()
         {
-            while (!ProcThreadActions.IsEmpty)
+            Queue<Func<bool>> ReAddItems = new Queue<Func<bool>>();
+            lock (ProcThreadActions)
             {
-                if (ProcThreadActions.TryDequeue(out Action pResult))
+                while (!ProcThreadActions.IsEmpty)
                 {
-                    pResult();
+                    if (ProcThreadActions.TryDequeue(out Func<bool> pResult))
+                    {
+                        if (pResult())
+                        {
+                            ReAddItems.Enqueue(pResult);
+                        }
+                    }
                 }
             }
+            foreach (var readditem in ReAddItems)
+                ProcThreadActions.Enqueue(readditem);
         
         }
         private GameState LastFrameState = null;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using BASeCamp.Elementizer;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Rendering.Adapters;
@@ -10,7 +12,7 @@ using BASeTris.Tetrominoes;
 
 namespace BASeTris
 {
-    public abstract class BaseStatistics
+    public abstract class BaseStatistics:IXmlPersistable
     {
         public virtual Dictionary<String, String> GetDisplayStatistics(IStateOwner pOwner,GameplayGameState Source)
         {
@@ -60,10 +62,31 @@ namespace BASeTris
         {
             this.Score += AddScore;
         }
+        public BaseStatistics()
+        {
+        }
+        public BaseStatistics(XElement pSourceData, Object pContextData)
+        {
+            Score = pSourceData.GetAttributeInt("Score");
+            TotalGameTime = TimeSpan.FromTicks(pSourceData.GetAttributeLong("TotalGameTime"));
+            var ReadReachTimes = ((long[])pSourceData.ReadArray<long>("LevelTimes", new long[] { }))   .Select((L) => TimeSpan.FromTicks(L));
+            LevelReachTimes = ReadReachTimes.ToArray();
+        }
+        public virtual XElement GetXmlData(String pNodeName, Object pContextData)
+        {
+            XElement ResultNode = new XElement(pNodeName, new XAttribute("Score", Score), new XAttribute("TotalGameTime", TotalGameTime.Ticks));
+            XElement LevelReachTimesElement = StandardHelper.SaveArray(LevelTimes.Select((L)=>L.Ticks).ToArray(), "LevelTimes", pContextData);
+            ResultNode.Add(LevelReachTimesElement);
+            return ResultNode;
+        }
+
+
     }
 
+    
 
-        
+
+
 
 
 
@@ -78,9 +101,21 @@ namespace BASeTris
             //implement that into the handler first for us to access here!.
             return stats;
         }
+        public DrMarioStatistics(XElement src, Object pContext) : base(src, pContext)
+        {
+        }
+        public DrMarioStatistics()
+        {
+        }
     }
     public class TetrisAttackStatistics : BaseStatistics
     {
+        public TetrisAttackStatistics(XElement src, Object pContext) : base(src, pContext)
+        {
+        }
+        public TetrisAttackStatistics()
+        {
+        }
     }
     public class ColumnsStatistics : BaseStatistics
     {
@@ -93,10 +128,21 @@ namespace BASeTris
             //implement that into the handler first for us to access here!.
             return stats;
         }
+        public ColumnsStatistics(XElement src, Object pContext) : base(src, pContext)
+        {
+        }
+        public ColumnsStatistics()
+        {
+        }
     }
     public class Tetris2Statistics :BaseStatistics
     {
-
+        public Tetris2Statistics(XElement src, Object pContext) : base(src, pContext)
+        {
+        }
+        public Tetris2Statistics()
+        {
+        }
     }
     public class TetrisStatistics:BaseStatistics
     {
@@ -108,6 +154,27 @@ namespace BASeTris
             public int LineCount { get; set; }
 
 
+        }
+
+        public TetrisStatistics()
+        {
+        }
+        public TetrisStatistics(XElement pSource, Object pContext)
+        {
+
+        }
+        public XElement GetXmlData(String pNodeName, Object pContext)
+        {
+            XElement result = base.GetXmlData(pNodeName, pContext);
+            
+            XElement PieceCountElement = StandardHelper.SaveDictionary<Type,int>(PieceCounts, "PieceCounts",pContext);
+            XElement PieceCountExtendedElement = StandardHelper.SaveDictionary<String, int>(PieceCountsExtended, "PieceCountsExtended", pContext);
+            XElement LineCountElement = StandardHelper.SaveDictionary<Type, int>(LineCounts, "LineCounts", pContext);
+            XElement LineCountElementExtended = StandardHelper.SaveDictionary<String, int>(LineCountsExtended, "LineCountExtended", pContext);
+
+            result.Add(PieceCountElement, PieceCountExtendedElement, LineCountElement, LineCountElementExtended);
+
+            return result;
         }
         private String GetExKey(String StrRep, Dictionary<String, int> SourceDictionary)
         {

@@ -60,7 +60,11 @@ namespace BASeTris
             get
             {
                 return _Present.GameSettings;
+                
             }
+        }
+        public void AcceptCallback(GamePresenterCallbackCapsule pCapsule)
+        {
         }
         public AudioThemeManager AudioThemeMan { get { return _Present.AudioThemeMan; } set { _Present.AudioThemeMan = value; } }
 
@@ -430,7 +434,7 @@ namespace BASeTris
         private BCRect _LastDrawBounds;
         public BCRect LastDrawBounds => _LastDrawBounds;
 
-        public void EnqueueAction(Action pAction)
+        public void EnqueueAction(Func<bool> pAction)
         {
             _Present.EnqueueAction(pAction);
         }

@@ -35,9 +35,12 @@ using OpenTK.Windowing.Common;
 using OpenTK.Mathematics;
 using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 using BASeCamp.Logging;
+using System.Collections.Concurrent;
+using BASeTris.AssetManager;
+using BASeTris.Rendering.FrameBufferEffects;
 namespace BASeTris
 {
-    public class BASeTrisTK : GameWindow,IStateOwner,IGamePresenter
+    public class BASeTrisTK : GameWindow,IStateOwner,IGamePresenter, IBufferMultiHistoryProvider<SKImage>
     {
         
         GameState.DisplayMode CurrentDisplayMode = GameState.DisplayMode.Partitioned;
@@ -102,6 +105,7 @@ namespace BASeTris
                     {
                         InitializeGraphics();
                         BlockDisplay = false;
+                        return false;
                     });
                     SizeUpdaterThread = null;
                 });
@@ -441,6 +445,38 @@ namespace BASeTris
                         RenderingProvider.Static.DrawElement(this, canvas, r, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.X, ClientSize.Y)));
                         return r.DoRender();
                     });
+
+
+                    //if (_BufferEffect == null) _BufferEffect = new GhostlyFrameBufferEffect(this);
+
+                    bool IsEffectFrame = _BufferEffect!=null && _BufferEffect.IsEffectFrame(TetrisGame.GetTickCount());
+                    SKImage NewSnapShot = null;
+                        
+                    
+
+                    
+                    //now, render previous frames.
+                    int CurrentFrame = 0;
+                    if (_BufferEffect!=null && _BufferEffect.NumGhostedFrames > 0 && FrameCount>0)
+                    {
+                        if (_BufferEffect.InitializationRequired()) _BufferEffect.Initialize();
+                        lock (_BufferEffect.GhostObjectLock)
+                        {
+                            foreach (var iterate in GetFrames().Reverse())
+                            {
+                                canvas.DrawImage(iterate, new SKRect(0, 0, ClientSize.X, ClientSize.Y), _BufferEffect.PaintItem(CurrentFrame));
+
+                            }
+                        }
+                        CurrentFrame++;
+                    }
+                    if (IsEffectFrame)
+                        NewSnapShot = surface.Snapshot();
+                    if (IsEffectFrame && _BufferEffect!=null)
+                    {
+                        EFBQueue.AddFrame(NewSnapShot, TetrisGame.GetTickCount());
+                        //_BufferEffect.AddFrame(NewSnapShot,TetrisGame.GetTickCount()); //note, as long as the start alpha is low on the ghost paints, adding the snapshot after drawing them can give a wacky dream effect.
+                    }
                     //RenderingProvider.Static.DrawElement(this, canvas, _Present.Game.CurrentState, new GameStateSkiaDrawParameters(new SKRect(0, 0, ClientSize.Width, ClientSize.Height)));
                     //canvas.Flush();
                 }
@@ -457,7 +493,55 @@ namespace BASeTris
                 
             }
         }
-
+        private GhostlyFrameBufferEffect _BufferEffect = null;
+       /* long FrameTickDelay = 5;
+        ulong LastGhostFrameTick = 0;
+        Object GhostObjectLock = new object();
+        int GhostAlphaPaintCount = 0;
+        SKPaint[] GhostAlphaPaint = null;
+        private void PrepareAlphaPaints()
+        {
+            lock (GhostObjectLock)
+            {
+                if(GhostAlphaPaint!=null) foreach (var iteratepaint in GhostAlphaPaint)
+                {
+                    //if (iteratepaint != null) iteratepaint.Dispose();
+                }
+                GhostAlphaPaint = new SKPaint[NumGhostedFrames];
+                for (int i = 0; i < NumGhostedFrames; i++)
+                {
+                    float UseAlpha = GhostStartAlpha+((GhostStartAlpha - GhostEndAlpha) / (float)NumGhostedFrames) * (float)i;
+                    SKPaint BuildAlphaPaint = new SKPaint() { ColorFilter = SKColorMatrices.GetFader(UseAlpha) };
+                    GhostAlphaPaint[i] = BuildAlphaPaint;
+                }
+            }
+            GhostAlphaPaintCount = NumGhostedFrames;
+        }
+        const float GhostStartAlpha = .9f;
+        const float GhostEndAlpha = .9f;
+        private void AddFrame(SKImage SurfaceSnapshot)
+        {
+            if (NumGhostedFrames > 0)
+            {
+                SKImage grabimage = SurfaceSnapshot;
+                lock (PreviousFrames)
+                {
+                    PreviousFrames.Enqueue(grabimage);
+                }
+                while (PreviousFrames.Count > NumGhostedFrames)
+                {
+                    SKImage getevicted = null;
+                    PreviousFrames.TryDequeue(out getevicted);
+                    if (grabimage == getevicted)
+                    {
+                        ;
+                    }
+                    getevicted.Dispose();
+                }
+            }
+        }
+        public int NumGhostedFrames = 0; //experimental. This probably needs to be changed to be based on time instead of a specific count of frames. 0=disabled.
+        ConcurrentQueue<SKImage> PreviousFrames = new ConcurrentQueue<SKImage>();*/
         /*private void PaintStateSkia(GameState CurrentGameState, SKCanvas canvas)
         {
             if (CurrentGameState.SupportedDisplayMode == GameState.DisplayMode.Full)
@@ -538,7 +622,7 @@ namespace BASeTris
             set { _Present.Game.CurrentState = value; }
         }
 
-        public void EnqueueAction(Action pAction)
+        public void EnqueueAction(Func<bool> pAction)
         {
             _Present.EnqueueAction(pAction);
         }
@@ -607,5 +691,29 @@ namespace BASeTris
         {
             return _Present;
         }
+        public IEnumerable<SKImage> GetFrames()
+        {
+            return EFBQueue.Frames;
+            
+        }
+
+        public SKImage GetLastFrame()
+        {
+            return EFBQueue.Frames.Last();
+        }
+        public int FrameCount { get { return EFBQueue.FrameCount; } }
+        
+
+        public ulong LastFrameTick { get { return EFBQueue.LastFrameTick; } set { EFBQueue.LastFrameTick = value; } }
+
+        FrameBufferRecorderQueue<SKImage> EFBQueue = new FrameBufferRecorderQueue<SKImage>();
+
+        FrameBufferRecorderQueue<SKImage> EFBBackgroundQueue = new FrameBufferRecorderQueue<SKImage>();
+
+
+        public void AcceptCallback(GamePresenterCallbackCapsule pCapsule)
+        {
+        }
+
     }
 }

@@ -177,7 +177,7 @@ namespace BASeTris.GameStates
                    
                     foreach (var iterate in AfterClear)
                     {
-                        pOwner.EnqueueAction(iterate);
+                        pOwner.EnqueueAction(()=> { iterate(); return false; });
                     }
                     if (pOwner.CurrentState is GameplayGameState stgs2)
                     {
@@ -556,7 +556,7 @@ namespace BASeTris.GameStates
             }
 
             ClearBlockList = new Queue<Point>();
-            foreach (var choosernd in BagChooser.Shuffle(new Random(), AllBlockPositions))
+            foreach (var choosernd in BagChooser.Shuffle(RandomHelpers.Construct(), AllBlockPositions))
             {
                 ClearBlockList.Enqueue(choosernd);
             }
@@ -625,7 +625,7 @@ namespace BASeTris.GameStates
                     pOwner.CurrentState = _BaseState;
                     foreach (var iterate in AfterClear)
                     {
-                        pOwner.EnqueueAction(iterate);
+                        pOwner.EnqueueAction(()=> { iterate(); return false; });
                     }
                 }
                 else

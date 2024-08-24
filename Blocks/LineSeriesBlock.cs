@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Xml.Linq;
+using BASeCamp.Elementizer;
+using System.Runtime.CompilerServices;
 namespace BASeTris.Blocks
 {
     public class CascadingBlock :StandardColouredBlock
@@ -16,6 +18,8 @@ namespace BASeTris.Blocks
         //normally, all blocks connect to each other in a nomino, if one is supported, they all are.
         //ConnectionIndex can be used so that only blocks that have the same connectionIndex actually support each other.
         //Should also be used to "split" nominoes that would separate into different pieces.
+
+
         
         public override char GetCharacterRepresentation()
         {
@@ -23,7 +27,19 @@ namespace BASeTris.Blocks
         }
         public virtual bool Fixed { get; set; } = false;
 
-
+        public override XElement GetXmlData(string pNodeName, object pPersistenceData)
+        {
+            var result  = base.GetXmlData(pNodeName, pPersistenceData);
+            result.Add(new XAttribute(nameof(ConnectionIndex), ConnectionIndex));
+            return result;
+        }
+        public CascadingBlock(XElement src, Object pPersistenceData)
+        {
+            ConnectionIndex = src.GetAttributeInt(nameof(ConnectionIndex));
+        }
+        public CascadingBlock()
+        {
+        }
         //This function seems to be busted up. :(
         //Apr 20 2024, yeah this one still has issues. runaway recursion, it looks like.
         public bool IsSupported(Nomino Owner, int Row,int Column,TetrisField field, HashSet<CascadingBlock> RecursionBlocks = null)
@@ -103,16 +119,59 @@ namespace BASeTris.Blocks
         //encapsulates data regarding additional combining types which can interact with this block.
         //(technically I guess it could have the actual combining index of the block too, which would make for some weird stuff!)
         
-        public class AdditionalCombineInfo
+        public class AdditionalCombineInfo : IXmlPersistable
         {
             public CombiningTypes CombineType { get; set; }
             public double CombineAddWeight { get; set; } //amount to combine. negative values mean that while this block is compatible, it will take extra blocks in a series to actually "pop".
+
+
             public AdditionalCombineInfo(CombiningTypes pCombineType,double pCombineWeight)
             {
                 CombineType = pCombineType;
                 CombineAddWeight = pCombineWeight;
             }
+            public AdditionalCombineInfo(XElement src, Object pPersistenceData)
+            {
+                CombineType = (CombiningTypes)src.GetAttributeInt("CombineType", 0);
+                CombineAddWeight = src.GetAttributeDouble("CombineAddWeight");
+            }
+            public XElement GetXmlData(String pNodeName, Object pPersistenceData)
+            {
+                XElement result = new XElement(pNodeName, new XAttribute("CombineType", (int)CombineType),
+                    new XAttribute("CombineAddWeight", CombineAddWeight));
+
+                return result;
+            }
+
+
         }
+
+
+
+        public bool Popping { get; set; } = false;
+        public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row. The maximum critical mass is used when a block is in a series.
+        public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question. 
+
+        public int ComboTracker { get; set; }
+        public List<AdditionalCombineInfo> AdditionalCombinations { get; private set; } = new List<AdditionalCombineInfo>();
+
+        //while part of a Nomino, items that are part of different sets will remain joined as expected. However when the nomino comes to 'rest' the sets are separated and any set that 
+        //can still freely fall will be split out to new Active Groups.
+        public int NominoSet { get; set; } = 0;
+
+
+        public LineSeriesBlock(XElement src, Object pPersistenceData)
+        {
+
+
+        }
+        public override XElement GetXmlData(string pNodeName, object pPersistenceData)
+        {
+            var result = base.GetXmlData(pNodeName, pPersistenceData);
+            return base.GetXmlData(pNodeName, pPersistenceData);
+        }
+
+
         public enum CombiningTypes
         {
             Blue,
@@ -143,17 +202,12 @@ namespace BASeTris.Blocks
         {
             return CombiningIndex.ToString()[0];    
         }
+      
+
+        public LineSeriesBlock()
+        {
+        }
         
-        public bool Popping { get; set; } = false;
-        public int CriticalMass { get; set; } = 4; //'Critical mass' or number that need to be in a row. The maximum critical mass is used when a block is in a series.
-        public CombiningTypes CombiningIndex { get; set; } //this is more or less the "color" of the block in question. 
-
-        public int ComboTracker { get; set; }
-        public List<AdditionalCombineInfo> AdditionalCombinations { get; private set; } = new List<AdditionalCombineInfo>();
-
-        //while part of a Nomino, items that are part of different sets will remain joined as expected. However when the nomino comes to 'rest' the sets are separated and any set that 
-        //can still freely fall will be split out to new Active Groups.
-        public int NominoSet { get; set; } = 0; 
  
         
     }
@@ -167,13 +221,29 @@ namespace BASeTris.Blocks
         {
            
         }
+     
+        public LineSeriesPrimaryBlock(XElement src, Object pContext) : base(src, pContext)
+        {
+        }
+        
     }
+
+
+
+
     /// <summary>
     /// exactly the same as LineSeriesPrimaryBlock, however this has special logic in the cascading game type where
     /// destroying one will destroy all other lineseriesprimaryblocks of the same.
     /// </summary>
     public class LineSeriesPrimaryShinyBlock : LineSeriesPrimaryBlock
     {
+        public LineSeriesPrimaryShinyBlock()
+        {
+        }
+        public LineSeriesPrimaryShinyBlock(XElement src, Object pContext):base(src,pContext)
+        {
 
+        }
     }
 }
+

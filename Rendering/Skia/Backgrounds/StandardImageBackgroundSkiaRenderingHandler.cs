@@ -38,9 +38,15 @@ namespace BASeTris.Rendering.Skia.Backgrounds
                 lastBounds = sbb.Bounds;
                 using (SKAutoCanvasRestore sr = new SKAutoCanvasRestore(pRenderTarget, true))
                 {
-                    
-                    pRenderTarget.Scale((float)(Source.Data.Scale));
-                    pRenderTarget.DrawRect(sbb.Bounds, Capsule.BackgroundBrush);
+                    if (Source.Data.Scale == 0)
+                    {
+                        pRenderTarget.DrawBitmap(Capsule.BackgroundBitmap, sbb.Bounds);
+                    }
+                    else
+                    {
+                        pRenderTarget.Scale((float)(Source.Data.Scale));
+                        pRenderTarget.DrawRect(sbb.Bounds, Capsule.BackgroundBrush);
+                    }
                 }
             }
 

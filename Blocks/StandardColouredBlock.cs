@@ -6,11 +6,13 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using System.Xml.Schema;
 using BaseTris;
 using BASeTris.AssetManager;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.RenderElements;
+using BASeCamp.Elementizer;
 using SkiaSharp;
 
 namespace BASeTris.Blocks
@@ -37,9 +39,44 @@ namespace BASeTris.Blocks
         }
 
         internal SKImage[] _RotationImagesSK = null;
-        internal ImageAttributes[] useAttributes; //array of Attributes to apply to the image when drawing. Same indexing as above.
+        [Obsolete]
+        internal ImageAttributes[] useAttributes = null; //array of Attributes to apply to the image when drawing. Same indexing as above.
         //internal Func<ImageBlock, Image> SpecialImageFunction = RotationFunc;
         internal Func<ImageBlock, SKImage> SpecialImageFunctionSK = RotationFuncSK;
+
+
+        public ImageBlock() : base()
+        {
+        }
+        public override XElement GetXmlData(String pNodeName, Object pPersistenceData)
+        {
+            //get the XElement from the base class.
+            XElement useResult = base.GetXmlData(pNodeName, pPersistenceData);
+            //add our data here.
+            useResult.Add(new XAttribute(nameof(DoRotateTransform), DoRotateTransform));
+
+            //This might not be needed and of course can use up lots of space. The idea would be that the visual theme, applied after, would initialize all of this.
+
+            //var ImageElement = BASeCamp.Elementizer.StandardHelper.SaveArray(_RotationImages, nameof(_RotationImages), pPersistenceData);
+            //useResult.Add(ImageElement); //note that since SKImage array is our "primary" we will need to do a conversion when we try to pull this in and convert the array into SKImage instead.
+
+            //we cannot persist the attributes, but those are pretty much unused now.
+
+            //SpecialImageFunctionSK is another fly in the ointment. For now we'll just have it default to RotationFunkSK. It should be fine as long as a theme is applied after loading.
+            return useResult;
+
+
+        }
+        public ImageBlock(XElement src, Object pContext):base(src,pContext)
+        {
+            DoRotateTransform = src.GetAttributeBool(nameof(DoRotateTransform));
+            //_RotationImages = (Image[])src.ReadArray<Image>(nameof(_RotationImages), null, pContext);
+            //_RotationImagesSK = _RotationImages.Select((d) => SkiaSharp.Views.Desktop.Extensions.ToSKImage(new Bitmap(d))).ToArray();
+
+
+
+        }
+
         private static Image RotationFunc(ImageBlock ib)
         {
 
@@ -75,7 +112,7 @@ namespace BASeTris.Blocks
             Style_Pixeled_Outline,
             Style_Grain,
             Style_Custom,
-                Style_Custom_NoColorize
+            Style_Custom_NoColorize
         }
 
         public Image GummyBitmap = null;
@@ -102,6 +139,20 @@ namespace BASeTris.Blocks
         private static Dictionary<ColouredBlockGummyIndexData, Image> GummyBitmaps = new Dictionary<ColouredBlockGummyIndexData, Image>();
 
         internal int CurrentImageHash = 0;
+
+        public override XElement GetXmlData(string pNodeName, object pPersistenceData)
+        {
+            var result = base.GetXmlData(pNodeName, pPersistenceData);
+            DisplayStyle = BlockStyle.Style_Chisel; //a default one. This should all be handled by a theme.... we won't even save the "gummy bitmap".
+            return result;
+        }
+        public StandardColouredBlock():base()
+        {
+        }
+        public StandardColouredBlock(XElement src, Object pPersistenceData) : base(src, pPersistenceData)
+        {
+            //no special logic....
+        }
 
         internal class ColouredBlockGummyIndexData
         {

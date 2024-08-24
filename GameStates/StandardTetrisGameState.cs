@@ -32,6 +32,9 @@ using BASeTris.Theme;
 using BASeTris.Particles;
 using System.Security.Cryptography;
 using static System.Windows.Forms.AxHost;
+using System.Xml.Linq;
+using BASeCamp.Elementizer;
+using System.Reflection;
 
 namespace BASeTris.GameStates
 {
@@ -65,7 +68,81 @@ namespace BASeTris.GameStates
         {
             overrideChooser = value;
         }
+        //savefield and restorefield are present here as "wrappers" which staple the next queue and Hold Blocks on as well.
+        public XElement SaveState(IStateOwner pOwner,String pNodeName)
+        {
+            var resultnode = PlayField.SaveField();
 
+            resultnode.Add(new XAttribute("GameTime", pOwner.GameTime.ElapsedTicks));
+            //we want to save the statistics and the hold blocks and nextblocks, HoldStackSize, etc.
+            XElement StatElement = this.GameStats.GetXmlData("Stats", null);
+            resultnode.Add(StatElement);
+            XElement NextBlocksElement = null;
+            XElement HoldBlocksElement = null;
+            if (NextBlocks.Count > 0)
+            {
+                NextBlocksElement = StandardHelper.SaveArray(NextBlocks.ToArray(), "NextBlocks", null);
+            }
+            else
+            {
+                //leave it as null.
+            }
+            if (HoldBlocks.Count > 0)
+            {
+                HoldBlocksElement = StandardHelper.SaveArray(HoldBlocks.ToArray(), "HoldBlocks", null);
+            }
+            else
+            {
+
+            }
+
+            
+            resultnode.Add(new XAttribute("StatType",this.GameStats.GetType().FullName));
+            if (NextBlocksElement != null) resultnode.Add(NextBlocksElement);
+            if (HoldBlocksElement != null) resultnode.Add(HoldBlocksElement);
+
+
+
+            return resultnode;
+        }
+
+        public void RestoreState(IStateOwner pOwner,XElement src)
+        {
+            String StatisticsType = src.GetAttributeString("StatType", "");
+            Type StatTypeBuild = Type.GetType(StatisticsType);
+            var ci = StatTypeBuild.GetConstructor(new Type[] { typeof(XElement), typeof(Object) });
+            this.GameHandler.Statistics = (BaseStatistics) ci.Invoke(new object[] { src, null });
+
+            long gtimeticks = src.GetAttributeLong("GameTime", 0);
+
+            //we would need to set the stopwatch elapsed time.
+            if (pOwner is IGamePresenter igp)
+            {
+                igp.GetPresenter().Game.GameTimeOffset = TimeSpan.FromTicks(gtimeticks);
+            }
+
+            XElement NextBlocksElement = src.Element("NextBlocks");
+
+            if (NextBlocksElement != null)
+            {
+                NextBlocks = new Queue<Nomino>((IEnumerable<Nomino>)src.ReadArray<Nomino>("NextBlocks", null, null));
+            }
+
+            XElement HoldBlocksElement = src.Element("HoldBlocks");
+
+            if (HoldBlocksElement != null)
+            {
+                HoldBlocks = new Queue<Nomino>((IEnumerable<Nomino>)src.ReadArray<Nomino>("HoldBlocks", null, null));
+                    
+            }
+            
+
+
+            PlayField.RestoreField(src);
+
+            
+
+        }
         public override bool GamePlayActive { get { return true; } }
 
         //given a value, translates from an unscaled horizontal coordinate in the default width to the appropriate size of the playing field based on the presented bounds.
@@ -144,20 +221,23 @@ namespace BASeTris.GameStates
             PlayField.BlockGroupSet += PlayField_BlockGroupSet;
             PlayField.SetStandardHotLines();
         }
-
+        public void ReapplyTheme()
+        {
+            ImageManager.Reset();
+            f_RedrawStatusBitmap = true;
+            StatisticsBackground = null;
+            f_RedrawTetrominoImages = true;
+            foreach (var refreshgroup in PlayField.BlockGroups)
+            {
+                PlayField.Theme.ApplyTheme(refreshgroup, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Theme_Changed);
+            }
+        }
         private void PlayField_OnThemeChangeEvent(object sender, OnThemeChangeEventArgs e)
         {
             lock (LockTetImageRedraw)
             {
-
-                ImageManager.Reset();
-                f_RedrawStatusBitmap = true;
-                StatisticsBackground = null;
-                f_RedrawTetrominoImages = true;
-                foreach (var refreshgroup in PlayField.BlockGroups)
-                {
-                    PlayField.Theme.ApplyTheme(refreshgroup, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Theme_Changed);
-                }
+                ReapplyTheme();
+                
             }
         }
 
@@ -483,7 +563,7 @@ namespace BASeTris.GameStates
                 pOwner.GameTime.Stop();
                 GameHandler.Statistics.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
-                pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); });
+                pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); return false; });
             }
 
             if (PlayField.BlockGroups.Count == 0 && !SpawnWait && !pOwner.CurrentState.GameProcSuspended && !NoTetrominoSpawn)
@@ -495,6 +575,7 @@ namespace BASeTris.GameStates
                     
                     SpawnNewTetromino(pOwner);
                     SpawnWait = false;
+                    return false;
                 });
             }
         }

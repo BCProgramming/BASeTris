@@ -58,7 +58,7 @@ namespace BASeTris.Theme.Block
 
         private Dictionary<int, SKColor[]> StoredRandomColorSets = new Dictionary<int, SKColor[]>();
 
-        public SKColor[] GetRandomLevelColorSet(int pLevel,Random rgen)
+        public SKColor[] GetRandomLevelColorSet(int pLevel,IRandomizer rgen)
         {
 
             if (!StoredRandomColorSets.ContainsKey(pLevel))
@@ -68,11 +68,11 @@ namespace BASeTris.Theme.Block
             return StoredRandomColorSets[pLevel];
 
         }
-        public SKColor[] GetRandomColorSet(Random rgen)
+        public SKColor[] GetRandomColorSet(IRandomizer rgen)
         {
             return new SKColor[] { RandomColor(rgen), RandomColor(rgen), SKColors.Black, RandomColor(rgen) };
         }
-        private SKColor RandomColor(Random rgen)
+        private SKColor RandomColor(IRandomizer rgen)
         {
             return new SKColor((byte)rgen.Next(255), (byte)rgen.Next(255), (byte)rgen.Next(255));
         }

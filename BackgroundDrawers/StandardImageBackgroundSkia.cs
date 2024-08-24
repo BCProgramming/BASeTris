@@ -19,6 +19,20 @@ namespace BASeTris.BackgroundDrawers
             get { return _BackgroundImage; }
 
         }
+        private SKImage LastBitmapCachedFor = null;
+        private SKBitmap LastBitmapCache = null;
+        public SKBitmap BackgroundBitmap
+        {
+            get {
+                if (LastBitmapCache == null || LastBitmapCachedFor != _BackgroundImage)
+                {
+                    LastBitmapCache = SKBitmap.FromImage(_BackgroundImage);
+                    LastBitmapCachedFor = _BackgroundImage;
+                }
+                return LastBitmapCache;
+            
+            }
+        }
         public double Scale { get; set; } = 1f;
         public SKPoint CurrOrigin { get; set; } = SKPoint.Empty;
         public float CurrAngle { get; set; } = 0;
@@ -71,16 +85,19 @@ namespace BASeTris.BackgroundDrawers
         {
             public String[] ImageKeys;
             public SKBitmap[] ImageBitmaps;
-            public bool HasData { get { return ImageKeys != null && ImageKeys.Length > 0; } }
+            public bool HasData { get { return ImageKeys != null && ImageKeys.Length > 0 && !ImageKeys.All((d) => d == null); } }
             public BorderImageInfo(String[] pKeys)
             {
 
                 ImageKeys = pKeys;
                 ImageBitmaps = new SKBitmap[ImageKeys.Length];
                 for (int i = 0; i < ImageKeys.Length; i++)
-                    if (TetrisGame.Imageman.HasSKBitmap(ImageKeys[i]))
+                    if (ImageKeys[i] != null)
                     {
-                        ImageBitmaps[i] = TetrisGame.Imageman.GetSKBitmap(ImageKeys[i]);
+                        if (TetrisGame.Imageman.HasSKBitmap(ImageKeys[i]))
+                        {
+                            ImageBitmaps[i] = TetrisGame.Imageman.GetSKBitmap(ImageKeys[i]);
+                        }
                     }
             }
             public BorderImageInfo(String pKey) : this(new[] { pKey })
