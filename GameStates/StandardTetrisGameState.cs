@@ -35,6 +35,7 @@ using static System.Windows.Forms.AxHost;
 using System.Xml.Linq;
 using BASeCamp.Elementizer;
 using System.Reflection;
+using System.IO.Compression;
 
 namespace BASeTris.GameStates
 {
@@ -68,6 +69,23 @@ namespace BASeTris.GameStates
         {
             overrideChooser = value;
         }
+
+        public void SaveStateToFile(IStateOwner pOwner)
+        {
+            XElement result = SaveState(pOwner, "Field");
+            //save suspended game.
+            String SuspendedGameFilename = TetrisGame.GetSuspendedGamePath(pOwner.GetHandler().GetType());
+            TetrisGame.EnsurePath(SuspendedGameFilename);
+            using (var strm = new FileStream(SuspendedGameFilename, new FileStreamOptions() { Mode = FileMode.Create, Access = FileAccess.Write }))
+            {
+                using (var gstream = new GZipStream(strm, CompressionMode.Compress))
+                {
+                    result.Save(gstream);
+                }
+            }
+        }
+
+
         //savefield and restorefield are present here as "wrappers" which staple the next queue and Hold Blocks on as well.
         public XElement SaveState(IStateOwner pOwner,String pNodeName)
         {
@@ -95,7 +113,7 @@ namespace BASeTris.GameStates
             {
 
             }
-
+            resultnode.Add(new XAttribute("ChooserType", GameHandler.GetChooser(pOwner).GetType().Name));
             
             resultnode.Add(new XAttribute("StatType",this.GameStats.GetType().FullName));
             if (NextBlocksElement != null) resultnode.Add(NextBlocksElement);
@@ -105,11 +123,24 @@ namespace BASeTris.GameStates
 
             return resultnode;
         }
-
+        
         public void RestoreState(IStateOwner pOwner,XElement src)
         {
             String StatisticsType = src.GetAttributeString("StatType", "");
+            String ChooserTypeName = src.GetAttributeString("ChooserType", null);
             Type StatTypeBuild = Type.GetType(StatisticsType);
+
+            if (ChooserTypeName != null) //load chooser if specified.
+            {
+                Type ChooserTypeBuild = BlockGroupChooser.ChooserTypeFromString(ChooserTypeName);
+                if (pOwner.GetHandler() is IGameHandlerChooserInitializer ighci)
+                {
+                    var SelectedChooser = ighci.CreateSupportedChooser(ChooserTypeBuild);
+                    overrideChooser = SelectedChooser;
+                }
+
+
+            }
             var ci = StatTypeBuild.GetConstructor(new Type[] { typeof(XElement), typeof(Object) });
             this.GameHandler.Statistics = (BaseStatistics) ci.Invoke(new object[] { src, null });
 
@@ -136,7 +167,12 @@ namespace BASeTris.GameStates
                     
             }
             
+            //now, while we save the chooser and the nextblocks, we don't actually save/restore the state of the random number generator, so, strictly speaking, the next blocks that get generated after loading
+            //won't be "predictable" versus what they would have been originally.
 
+            //I figure this is fine- the size of the queue will tend to make it so that can't realistically be abused even if somebody really wanted to.
+
+            //if we really wanted to address that we could have it generate when suspending and fill up the queue. That only works if the game is being torn down anyway though.
 
             PlayField.RestoreField(src);
 
@@ -294,12 +330,7 @@ namespace BASeTris.GameStates
         public SKBitmap GetTetrominoSKBitmap(IStateOwner pOwner,Nomino nom)
         {
             return ImageManager.GetTetrominoSKBitmap(pOwner, nom);
-            /*String GetKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
-            if (!NominoSKBitmaps.ContainsKey(GetKey))
-            {
-                return AddTetrominoBitmapSK(pOwner, nom);
-            }
-            return GetTetrominoSKBitmap(GetKey);*/
+          
         }
         public SKBitmap GetTetrominoSKBitmap(Type sType)
         {
@@ -310,26 +341,7 @@ namespace BASeTris.GameStates
         public SKBitmap GetTetrominoSKBitmap(String Source)
         {
             return ImageManager.GetTetrominoSKBitmap(Source);
-            /*if (NominoSKBitmaps == null) NominoSKBitmaps = new Dictionary<String, List<SKBitmap>>();
-            if (!NominoSKBitmaps.ContainsKey(Source))
-            {
-                if (NominoImages != null && NominoImages.ContainsKey(Source))
-                {
-                    NominoSKBitmaps.Add(Source, new List<SKBitmap>());
-                    foreach (var copyGDI in NominoImages[Source])
-                    {
-                        NominoSKBitmaps[Source].Add(SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(copyGDI)));
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-
-            }
-
-            return TetrisGame.Choose(NominoSKBitmaps[Source]);
-            */
+         
         }
 
         public bool HasTetrominoSKBitmaps() => ImageManager.HasTetrominoSKBitmaps();
@@ -341,59 +353,26 @@ namespace BASeTris.GameStates
         public Image AddTetrominoImage(IStateOwner pOwner,Nomino Source)
         {
             return ImageManager.AddTetrominoImage(pOwner, Source);
-            /*
-            String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
-            float useSize = 18 * (float)pOwner.ScaleFactor;
-            SizeF useTetSize = new SizeF(useSize, useSize);
-
-
-            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
-
-            Image buildBitmap = TetrisGame.OutLineImage(Source.GetImage(useTetSize));
-            if (!NominoImages.ContainsKey(sAddKey))
-                NominoImages.Add(sAddKey, new List<Image>() { buildBitmap });
-
-
-            return buildBitmap;
-            */
+         
         }
         public SKBitmap AddTetrominoBitmapSK(IStateOwner pOwner, Nomino Source)
         {
             return ImageManager.AddTetrominoBitmapSK(pOwner, Source);
-            /*String sAddKey = PlayField.Theme.GetNominoKey(Source, GameHandler, PlayField);
-            float useSize = 18 * (float)pOwner.ScaleFactor;
-            SKSize useTetSize = new SKSize(useSize, useSize);
-
-
-            PlayField.Theme.ApplyTheme(Source, GameHandler, PlayField, NominoTheme.ThemeApplicationReason.Normal);
-
-            SKBitmap buildBitmap = TetrisGame.OutlineImageSK(Source.GetImageSK(useTetSize));
-            if (!NominoSKBitmaps.ContainsKey(sAddKey))
-                NominoSKBitmaps.Add(sAddKey, new List<SKBitmap>() { buildBitmap });
-
-
-            return buildBitmap;*/
+            
         }
         public Image GetTetrominoImage(IStateOwner pOwner,Nomino nom)
         {
             return ImageManager.GetTetrominoImage(pOwner, nom);   
-            /*String sKey = PlayField.Theme.GetNominoKey(nom, GameHandler, PlayField);
-            if(!NominoImages.ContainsKey(sKey))
-            {
-                return AddTetrominoImage(pOwner, nom);
-            }
-            return GetTetrominoImage(sKey);*/
+            
         }
         public Image GetTetrominoImage(Type pType)
         {
             return ImageManager.GetTetrominoImage(pType);
-            /*String sKey = PlayField.Theme.GetNominoTypeKey(pType, GameHandler, PlayField);
-            return GetTetrominoImage(sKey);*/
+            
         }
         public Image GetTetrominoImage(String TetrominoType)
         {
             return ImageManager.GetTetrominoImage(TetrominoType);
-            //return TetrisGame.Choose(NominoImages[TetrominoType]);
         }
         public SKBitmap[] GetTetrominoSKBitmaps() => ImageManager.GetTetrominoSKBitmaps();
         public Image[] GetTetronimoImages() => ImageManager.GetTetronimoImages();
@@ -554,7 +533,7 @@ namespace BASeTris.GameStates
 
             var currmusic = Sounds.GetPlayingMusic_Active();
             //if(currmusic!=null)
-            //    currmusic.Pitch = TetrisGame.rgen.Next(2) - 1;
+            //    currmusic.Pitch = TetrisGame.StatelessRandomizer.Next(2) - 1;
             if (GameOvered)
             {
                 //For testing: write out the replay data as a sequence of little images.

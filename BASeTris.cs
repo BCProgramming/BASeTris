@@ -48,6 +48,11 @@ namespace BASeTris
     {
         private GamePresenter _Present;
         //delegate the BeforeGameStateChange event...
+        public GameplayRecord GameRecorder
+        {
+            get => _Present.Game.GameRecorder;
+            set => _Present.Game.GameRecorder = value;
+        }
         public GamePresenter GetPresenter() => _Present;
         public event EventHandler<GameClosingEventArgs> GameClosing;
         public event EventHandler<BeforeGameStateChangeEventArgs> BeforeGameStateChange

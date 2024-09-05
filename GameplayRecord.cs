@@ -2,6 +2,7 @@
 using BASeTris.GameStates.GameHandlers;
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -96,7 +97,26 @@ namespace BASeTris
         {
             return new XElement(pNodeName,InitialData.GetXmlData("InitialState",pContext), (from f in Elements orderby f.Elapsed ascending select f.GetXmlData("Element", null)));
         }
+        public void SaveRecordedGame(Type HandlerType)
+        {
 
+
+
+
+        }
+        public void SaveToFile(String sFilePath)
+        {
+            XDocument xdoc = new XDocument(GetXmlData("Record", null));
+            using (var gzout = new GZipStream(new FileStream(sFilePath, FileMode.Create), CompressionMode.Compress))
+            {
+                xdoc.Save(gzout);
+            }
+        }
+        //possibly questionable constructor, little but much in terms of work being done in the initializer thingie
+        public GameplayRecord(String sFilePath):this(XDocument.Load(new GZipStream(new FileStream(sFilePath,FileMode.Open),CompressionMode.Decompress)).Root,null)
+        {
+
+        }
     }
     public class GameplayRecordElement:IXmlPersistable
     {

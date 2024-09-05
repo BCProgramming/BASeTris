@@ -22,6 +22,7 @@ namespace BASeTris
         Rectangle GameArea { get; }
         void Feedback(float Strength, int Length);
 
+        GameplayRecord GameRecorder { get; set; }
         AudioThemeManager AudioThemeMan { get; set; }
         double ScaleFactor { get; }
         void SetScale(double pScale);

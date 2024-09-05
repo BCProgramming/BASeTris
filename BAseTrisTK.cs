@@ -50,6 +50,11 @@ namespace BASeTris
         SKSurface SkiaSurface = null;
         SKCanvas _Canvas = null;
         public event EventHandler<GameClosingEventArgs> GameClosing;
+        public GameplayRecord GameRecorder
+        {
+            get => _Present.Game.GameRecorder;
+            set => _Present.Game.GameRecorder = value;
+        }
         private void FireGameClosing()
         {
             GameClosing?.Invoke(this, new GameClosingEventArgs(this));
@@ -348,6 +353,7 @@ namespace BASeTris
         private FrameEventArgs? LastFrameData = null;
         private FrameEventArgs? CurrentFrameData = null;
         private IBlockGameCustomizationHandler HandlerTitleSet = null;
+        private String sDisplayVersion = null,sDisplayHash = null;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             
@@ -427,13 +433,16 @@ namespace BASeTris
 
                     var asm = typeof(AssemblyInfo).Assembly;
                     var attrs = asm.GetCustomAttributes<AssemblyMetadataAttribute>();
-                    String sDisplayVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
-                    String sHash = attrs.FirstOrDefault(a => a.Key == "GitHash")?.Value;
-
-                    if (sHash != null)
+                    if (sDisplayVersion == null)
                     {
-                        sDisplayVersion += " - " + sHash;
+                        sDisplayVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
+                        sDisplayHash = attrs.FirstOrDefault(a => a.Key == "GitHash")?.Value;
 
+                        if (sDisplayHash != null)
+                        {
+                            sDisplayVersion += " - " + sDisplayHash;
+
+                        }
                     }
                     canvas.DrawText(sDisplayVersion, new SKPoint(12, FPSPosition.Y), FPSShadow);
                     canvas.DrawText(sDisplayVersion, new SKPoint(9, FPSPosition.Y - 3), FPSPaint);

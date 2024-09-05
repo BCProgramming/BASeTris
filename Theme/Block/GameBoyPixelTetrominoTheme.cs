@@ -70,7 +70,7 @@ namespace BASeTris.Theme.Block
             }
             var buildBG = StandardTetrisGameStateSkiaRenderingHandler.CreateBackgroundFromImage(LightImage, Color.Transparent);
 
-            buildBG.Overlayer = new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick_16", null, null, "gb_border_brick_16"));
+            buildBG.Overlayer = new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick_16", "gb_border_brick_16", "gb_border_brick_16", "gb_border_brick_16"));
 
             var result = new PlayFieldBackgroundInfo(LightImage, Color.Transparent) {SkiaBG = buildBG };
             return result;

@@ -8,6 +8,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -200,7 +201,7 @@ namespace BASeTris.GameStates.GameHandlers
             }
             
             MenuStateTextMenuItem StartGameItem = new MenuStateTextMenuItem() { Text = "Start Game" };
-            MenuStateTextMenuItem ResumeSuspendedGame = new MenuStateTextMenuItem() { Text = "Resume Suspended Game" };
+            MenuStateTextMenuItem ResumeSuspendedGame = new MenuStateTextMenuItem() { Text = "Resume Game" };
 
 
 
@@ -211,7 +212,7 @@ namespace BASeTris.GameStates.GameHandlers
             String sSuspendedFile = TetrisGame.GetSuspendedGamePath(OptionsData.HandlerType);
             if (!String.IsNullOrEmpty(sSuspendedFile) && File.Exists(sSuspendedFile))
             {
-                ResumeSuspendedGame.Text = $"Resume Suspended Game {new FileInfo(sSuspendedFile).LastWriteTime.ToString("MM/dd/yyyy hh:mm:ss}")}";
+                ResumeSuspendedGame.Text = $"Resume Game ({new FileInfo(sSuspendedFile).LastWriteTime.ToString("MM/dd/yy hh:mm}")})";
                 BuildItems.Add(ResumeSuspendedGame);
 
 
@@ -240,7 +241,16 @@ namespace BASeTris.GameStates.GameHandlers
                     {
                         ConstructState.MenuElements.Remove(ResumeSuspendedGame);
                     }
-                    var loadedDoc = XDocument.Load(sSuspendedFile);
+
+                    XDocument? loadedDoc = null;
+
+                    using (FileStream strm = new FileStream(sSuspendedFile, FileMode.Open, FileAccess.Read))
+                    {
+
+                        using (GZipStream gstream = new GZipStream(strm, CompressionMode.Decompress))
+
+                            loadedDoc = XDocument.Load(gstream);
+                    }
                     if (loadedDoc == null)
                     {
                         ConstructState.MenuElements.Remove(ResumeSuspendedGame);
@@ -255,7 +265,7 @@ namespace BASeTris.GameStates.GameHandlers
                         if (pOwner.CurrentState is GameplayGameState gpgs)
                         {
 
-                            gpgs.RestoreState(loadedDoc.Root);
+                            gpgs.RestoreState(pOwner,loadedDoc.Root);
 
                             //foreach(var iterate in gpgs.PlayField.Contents
 

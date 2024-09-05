@@ -645,6 +645,11 @@ namespace BASeTris
                 }
             }
         }
+        public static String GetReplayDataPath(Type HandlerType)
+        {
+            String sUsePath = Path.Combine(TetrisGame.AppDataFolder, "Replay", HandlerType.Name);
+            return Path.Combine(sUsePath, DateTime.Now.ToString("MM-dd-yyyy-hh-mm-ss.btreplay"));
+        }
         public static String GetSuspendedGamePath(Type HandlerType)
         {
             String SuspendedGameFilename = Path.Combine(TetrisGame.AppDataFolder, "Suspend", HandlerType.Name + ".suspend");

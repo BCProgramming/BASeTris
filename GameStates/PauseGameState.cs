@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO.Compression;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -30,7 +32,7 @@ namespace BASeTris.GameStates
 
 
         #region IStateOwner implementations. 
-
+        
         //Remember these are for the "Fake" Game Owner so the inner Standard State thinks it is playing a game but we are just letting it run and painting it's playfield!
         public GameState CurrentState
         {
@@ -40,7 +42,12 @@ namespace BASeTris.GameStates
             }
         }
         public event EventHandler<GameClosingEventArgs> GameClosing;
+
         
+        public GameplayRecord GameRecorder
+        {
+            get;set;
+        }
         //GameArea is the full pause screen area, so it's the same as our owner.
         public Rectangle GameArea => PauseOwner.GameArea;
 
@@ -93,6 +100,8 @@ namespace BASeTris.GameStates
             
             PauseGamePlayerState = new GameplayGameState(pOwner, pPausedState.GameHandler.NewInstance(), null,new SilentSoundManager(TetrisGame.Soundman),null);
             (PauseGamePlayerState as GameplayGameState).Flags = GameplayGameState.GameplayStateFlags.Paused;
+            //GameRecorder = new GameplayRecord(new GamePreparerOptions(
+            GameRecorder = null; // new GameplayRecord(pOwner.GetHandler().PrepInstance); //we could assign this, but it's not really needed.
             //PauseGamePresenter = new GamePresenter(this);
             PausePlayerAI = new StandardNominoAI(this);
             PausePlayerAI.ScoringRules.StupidFactor = 1f;
@@ -191,14 +200,15 @@ namespace BASeTris.GameStates
                 //testing: save a suspension of this game.
                 if (PausedState is GameplayGameState ggs)
                 {
-                    if (false && pOwner.GetElapsedTime().TotalMinutes > 5)
+                    if (true || pOwner.GetElapsedTime().TotalMinutes > 2) //TODO: maybe we collate multiple suspended games? Do we keep track of when we loaded from a suspended game? etc.
                     {
                         DebugLogger.Log.WriteLine("Game is being quit, after more than a minute. Saving game state.");
-                        XElement result = ggs.SaveState(pOwner,"Field");
-                        //save suspended game.
-                        String SuspendedGameFilename = TetrisGame.GetSuspendedGamePath(pOwner.GetHandler().GetType());
-                        TetrisGame.EnsurePath(SuspendedGameFilename);
-                        result.Save(SuspendedGameFilename);
+                        ggs.SaveStateToFile(pOwner);
+
+                        //also save the replay info.
+                        
+                        
+
                     }
                     else 
                     {
