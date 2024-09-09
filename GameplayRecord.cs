@@ -21,6 +21,7 @@ namespace BASeTris
         public GameplayInitialStateData InitialData = null;
         //be sourced from it's own separate random instance.
 
+        //in addition to game keys, should we also record every nomino that comes from the chooser? Should the choosers themselves be in some way responsible for that tracking?
         
         List<GameplayRecordElement> Elements = null;
         public int EntryCount { get { return Elements.Count; } }
@@ -34,6 +35,7 @@ namespace BASeTris
         {
             var xelem = SourceData.Element("InitialState");
             InitialData = new GameplayInitialStateData(xelem, pContext);
+            Elements = new List<GameplayRecordElement>();
             foreach (var iterate in SourceData.Elements("Element"))
             {
                 GameplayRecordElement loadelement = new GameplayRecordElement(iterate, pContext);

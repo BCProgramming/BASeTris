@@ -43,7 +43,7 @@ namespace BASeTris.Choosers
         }
 
 
-        internal override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             float[] useWeight = (from p in _Available select LookupRoutine(p)).ToArray();
             return RandomHelpers.Static.Select(_Available, useWeight,base.rgen)();

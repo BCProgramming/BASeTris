@@ -144,7 +144,16 @@ namespace BASeTris.GameStates.GameHandlers
                 XAttribute findattribute = Src.Attribute(iterateprop.Item1.Name);
                 if (findattribute != null)
                 {
-                    iterateprop.Item1.SetValue(this, Convert.ChangeType(iterateprop.Item1.Name, iterateprop.Item1.PropertyType));
+
+                    if (iterateprop.Item1.PropertyType is Type)
+                    {
+                        Type useType = StandardHelper.ClassFinder(findattribute.Value);
+                        iterateprop.Item1.SetValue(this, useType);
+                    }
+                    else
+                    {
+                        iterateprop.Item1.SetValue(this, Convert.ChangeType(findattribute.Value, iterateprop.Item1.PropertyType));
+                    }
                 }
             }
 
@@ -397,7 +406,7 @@ namespace BASeTris.GameStates.GameHandlers
         public override XElement GetXmlData(String pNodeName, Object pContext)
         {
             var xresult = base.GetXmlData(pNodeName, pContext);
-            xresult.Add(new XAttribute("StartingLevel", StartingLevel));
+        //    xresult.Add(new XAttribute("StartingLevel", StartingLevel));
             return xresult;
         }
         protected virtual bool IsDefault()

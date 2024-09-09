@@ -69,7 +69,7 @@ namespace BASeTris.Choosers.AIChoosers
         protected ConcurrentQueue<Nomino> WorkQueue = new ConcurrentQueue<Nomino>();
         public abstract Nomino PerformGetNext();
 
-        internal override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             if (AIWorker == null)
             {

@@ -21,7 +21,7 @@ namespace BASeTris.Choosers
         public SingleFunctionChooser(Func<Nomino> pAvailable,int pSeed) : base(new Func<Nomino>[] { pAvailable },pSeed) //seed is not used here.
         {
         }
-        internal override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             return _Available[0]();
         }

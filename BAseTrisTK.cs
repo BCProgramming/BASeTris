@@ -69,7 +69,9 @@ namespace BASeTris
 
             
             //todo: diagnose issues with Intel graphics
-            return new GRBackendRenderTarget(Window.ClientSize.X, Window.ClientSize.Y, 2, 8, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
+            //we need fallback "sets" of samples and stencil values, I suspect, possibly also the ColorType options.
+            //Should additionally be something that can be configured, too.
+            return new GRBackendRenderTarget(Window.ClientSize.X, Window.ClientSize.Y, 1, 8, new GRGlFramebufferInfo((uint)framebuffer, GlobalResources.DefaultColorType.ToGlSizedFormat())  );
            
         }
         public const int DEFAULT_GAME_WIDTH = 520;

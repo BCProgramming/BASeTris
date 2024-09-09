@@ -44,7 +44,7 @@ namespace BASeTris.GameStates
         public event EventHandler<GameClosingEventArgs> GameClosing;
 
         
-        public GameplayRecord GameRecorder
+        public GameplayRecord GameRecorder  //paused state doesn't care about recording the fake inputs.
         {
             get;set;
         }

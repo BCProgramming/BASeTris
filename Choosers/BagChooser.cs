@@ -37,7 +37,7 @@ namespace BASeTris.Choosers
             }
         }
 
-        internal override Nomino GetNext()
+        protected override Nomino GetNext()
         {
             if (WorkQueue.Count == 0) RefillQueue();
             return WorkQueue.Dequeue()();
