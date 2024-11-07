@@ -14,6 +14,7 @@ namespace BASeTris.GameStates.Menu
 
         bool IsActivated = false;
         bool Confirmation = false;
+        public override bool Activatable { get => true; }
         public event EventHandler<MenuStateMenuItemActivatedEventArgs> OnOptionConfirmed;
         protected String GetConfirmString()
         {

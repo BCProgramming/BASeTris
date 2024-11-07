@@ -203,6 +203,9 @@ namespace BASeTris.Rendering.Skia.GameStates
                 //if (!Source.GameHandler.AllowFieldImageCache) parameters.FieldBitmap = null;
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
             }
+            //draw GameObjects.
+
+
             var particledrawer = RenderingProvider.Static.GetHandler(typeof(List<BaseParticle>), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters));
             Element.Offset = new Adapters.BCPoint(0, PlayField.OffsetPaint);
             if(Source.TopParticles!=null && Source.TopParticles.Count > 0)

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,7 +27,7 @@ namespace BASeTris.GameStates.Menu
         public int Index { get; set; }
         public SkiaSharp.SKRect Bounds = SkiaSharp.SKRect.Empty;
         public MenuStateMenuItem.StateMenuItemState DrawState = MenuStateMenuItem.StateMenuItemState.State_Normal;
-        public MenuStateMenuItemSkiaDrawData(SkiaSharp.SKRect pBounds, MenuStateMenuItem.StateMenuItemState pDrawState,int pIndex)
+        public MenuStateMenuItemSkiaDrawData(SkiaSharp.SKRect pBounds, MenuStateMenuItem.StateMenuItemState pDrawState, int pIndex)
         {
             Index = pIndex;
             Bounds = pBounds;
@@ -43,7 +44,7 @@ namespace BASeTris.GameStates.Menu
         public Object Tag { get; set; }
         public string Label { get; set; } = "";
 
-
+        public virtual bool Activatable { get { return true; } } //a non-activatable item will accept certain gamekeys, but not those used to interact with the menu.
         public enum StateMenuItemState
         {
             State_Normal,
@@ -180,6 +181,7 @@ namespace BASeTris.GameStates.Menu
         public String FontFace { get; set; }
         public float FontSize { get; set; }
 
+        
         public AdditionalMenuFlags MenuFlags { get; set; } = AdditionalMenuFlags.MenuFlags_None;
         private BCColor _ForeColor;
         private BCColor _BackColor = Color.Transparent;

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -206,9 +207,31 @@ namespace BASeTris.Rendering
             return Groups.Values.Select((s) => s.ToArray()).ToArray();
 
         }
+        //corner XML layouts. These (can) be used to generate a bitmap to draw in the corners.
+
+        private static readonly String Lower_Left_CollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <TetrominoCollage Rows=""6"" Columns=""6"">
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""0"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""3"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""3"" X=""4"" Y=""2"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""0"" X=""2"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""2"" Y=""2"" />
+</TetrominoCollage>";
+
+        private static readonly String Lower_Right_CollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <TetrominoCollage Rows = ""6"" Columns=""6"">
+    <Tetromino Scale = ""1"" Type=""S"" Rotation=""1"" X=""-1"" Y=""0"" />
+    <Tetromino Scale = ""1"" Type=""Z"" Rotation=""2"" X=""3"" Y=""3"" />
+    <Tetromino Scale = ""1"" Type=""T"" Rotation=""4"" X=""1"" Y=""4"" />
+    <Tetromino Scale = ""1"" Type=""I"" Rotation=""1"" X=""-2"" Y=""2"" />
+    <Tetromino Scale = ""1"" Type=""L"" Rotation=""2"" X=""1"" Y=""2"" />
+  </TetrominoCollage>
+";
+
+
 
         private static readonly String BackgroundCollageXML2 =
-        @"<?xml version=""1.0"" encoding=""utf-8""?>
+        @" <?xml version=""1.0"" encoding=""utf-8""?>
   <TetrominoCollage Rows=""8"" Columns=""8"">
     <Tetromino Type=""J"" Rotation=""3"" X=""2"" Y=""4"" />
     <Tetromino Type=""I"" Rotation=""4"" X=""-2"" Y=""3"" />

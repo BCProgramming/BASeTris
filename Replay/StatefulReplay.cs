@@ -17,6 +17,7 @@ namespace BASeTris.Replay
     /// A 'stateful' replay records the state of the game board. This records board state paired with elapsed time when changes occur.
     /// Current suggestion: Create a state for the board when a block group is "solidified", and after rows are cleared.
     /// </summary>
+    [Obsolete] //Probably obsolete, replaced with GameplayRecord...
     public class StatefulReplay : IXmlPersistable
     {
         //Replay Data is indexed by Elapsed Time. Usually, there is only one

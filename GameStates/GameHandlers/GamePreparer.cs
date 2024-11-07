@@ -109,6 +109,8 @@ namespace BASeTris.GameStates.GameHandlers
     //this class is persistable so that the settings can be saved. Specifically (at the time of me writing this, anyway) for the purpose of recording the initial state information for replays.
     public abstract class GamePreparerOptions : IXmlPersistable, ICustomPropertyPreparer
     {
+
+        public virtual Type CustomPreparerStateType { get { return null; } } 
         [GamePreparerCustomItem("Seed")]
         public int RandomSeed { get; set; } = Environment.TickCount;
         public Type HandlerType { get; set; }
@@ -191,16 +193,37 @@ namespace BASeTris.GameStates.GameHandlers
             }
 
         }
-        public static MenuState ConstructPreparationState(IStateOwner pOwner,String pHeader,GameState ReversionState,IBackground bg,String sCancelText, GamePreparerOptions OptionsData,Action<GamePreparerOptions> ProceedFunc)
+        public static GameState ConstructPreparationState(IStateOwner pOwner,String pHeader,GameState ReversionState,IBackground bg,String sCancelText, GamePreparerOptions OptionsData,Action<GamePreparerOptions> ProceedFunc)
         {
             //precondition: any loading/initialization on the GamePreparerOptions instance has been done.
             //task: create a MenuState that has menu items for each property in the definition of the given class that has a GamePreparer Attribute.
             //This should include appropriate handling of menu changes such that the values are assigned to the information class as values are changed.
             //we are not responsible for adding any additional menu items, such as elements to return to the previous menu, or to proceed. Those should be dealt with by the caller. 
 
-            List<MenuStateMenuItem> BuildItems = new List<MenuStateMenuItem>();
-           
+            if (OptionsData.CustomPreparerStateType != null)
+            {
+                //if specified, we will want to construct the specified type. It should adhere to a particular constructor.
+                if (!OptionsData.CustomPreparerStateType.IsAssignableTo(typeof(GameState)))
+                {
+                    throw new ArgumentException($"CustomPreparerProperty of type {OptionsData.CustomPreparerStateType.GetType().Name} is not a GameState.");
+                }
+                var useConstructor = OptionsData.CustomPreparerStateType.GetConstructor(new Type[] { typeof(GameState), typeof(IBackground), typeof(GamePreparerOptions), typeof(Action<GamePreparerOptions>) });
+                if (useConstructor != null)
+                {
+                    var resultstate = (GameState)useConstructor.Invoke(new Object[] { ReversionState, bg, OptionsData, ProceedFunc });
+                    return resultstate;
+                }
+                else
+                {
+                    throw new ArgumentException($"CustomPreparerProperty of type {OptionsData.CustomPreparerStateType.GetType().Name} does not have required constructor.");
+                }
 
+            }
+
+
+            List<MenuStateMenuItem> BuildItems = new List<MenuStateMenuItem>();
+
+            
 
             foreach (var reviewprop in GetPreparerProperties(OptionsData.GetType()))
             {
@@ -472,9 +495,9 @@ namespace BASeTris.GameStates.GameHandlers
 
         private int _MaximumNominoSize = 4;
         [GamePreparerNumericProperty("Maximum Nomino Size", 3, 100, 1)]
-        public int MaximumNominoSize { get { return _MinimumNominoSize; } set 
+        public int MaximumNominoSize { get { return _MaximumNominoSize; } set 
             { 
-                _MinimumNominoSize = value;
+                _MaximumNominoSize = value;
                 var minmenu = GetMenuFromPropertyName("MinimumNominoSize") as MenuStateSliderOption;
                 if (minmenu != null)
                 {

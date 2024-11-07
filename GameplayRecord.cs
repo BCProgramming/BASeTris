@@ -1,4 +1,5 @@
 ﻿using BASeCamp.Elementizer;
+using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace BASeTris
         //in addition to game keys, should we also record every nomino that comes from the chooser? Should the choosers themselves be in some way responsible for that tracking?
         
         List<GameplayRecordElement> Elements = null;
+        public List<Nomino> GeneratedMinos = null;
         public int EntryCount { get { return Elements.Count; } }
         public Predicate<GameKeys> IsRecordableKey = IsRecordableKey_Default;
         private static GameKeys[] DefaultRejected = new[] { GameKeys.GameKey_Pause };
@@ -99,23 +101,71 @@ namespace BASeTris
         {
             return new XElement(pNodeName,InitialData.GetXmlData("InitialState",pContext), (from f in Elements orderby f.Elapsed ascending select f.GetXmlData("Element", null)));
         }
-        public void SaveRecordedGame(Type HandlerType)
+        public void SaveRecordedGame(IStateOwner pOwner,Type HandlerType)
         {
+            //saves a new recorded game file.
 
 
 
 
         }
-        public void SaveToFile(String sFilePath)
+        //savetofile and readfromfile go beyond the constructor and GetXmlData information, and also include the list of all chooser generated minos.
+        public void SaveToFile(IStateOwner pOwner,String sFilePath,List<Nomino> GeneratedChooserMinos)
         {
-            XDocument xdoc = new XDocument(GetXmlData("Record", null));
+            var generatedNominoElement = StandardHelper.SaveList(GeneratedChooserMinos, "ChooserGenerated", null, true);
+            var Mainrecord = GetXmlData("Record", null);
+            Mainrecord.Add(generatedNominoElement);
+            XDocument xdoc = new XDocument(Mainrecord);
             using (var gzout = new GZipStream(new FileStream(sFilePath, FileMode.Create), CompressionMode.Compress))
             {
                 xdoc.Save(gzout);
             }
         }
+
+
+        public static GameplayRecord ReadFromFile(IStateOwner pOwner, String sFilePath, out List<Nomino> GeneratedChooserMinos)
+        {
+            XDocument xdoc = null;
+
+            using (var readstream = LoadDataStream(sFilePath))
+            {
+                xdoc = XDocument.Load(readstream);
+            }
+
+            //we can hydrate a new Gameplayrecord from the root node. Then we can check for ChooserGenerated element.
+            GameplayRecord gpr = new GameplayRecord(xdoc.Root, null);
+
+            var ChooserGeneratedElement = xdoc.Root.Element("ChooserGenerated");
+
+            if (ChooserGeneratedElement != null)
+            {
+                GeneratedChooserMinos = StandardHelper.ReadList<Nomino>(ChooserGeneratedElement, null);
+            }
+            else
+            {
+                GeneratedChooserMinos = new List<Nomino>(); //empty list
+            }
+
+            return gpr;
+        }
+        private static StreamReader LoadDataStream(String sFileName)
+        {
+            String sCheckText = "<?xml";
+            bool isPlain = true;
+            //for non Gzip, first characters will be "<?xml"
+            using (StreamReader sr = new StreamReader(new FileStream(sFileName, FileMode.Open)))
+            {
+                char[] Target = new char[sCheckText.Length];
+                sr.ReadBlock(Target, 0, sCheckText.Length);
+                String sCheck = new string(Target);
+                isPlain = sCheck.StartsWith(sCheckText);
+                
+            }
+            return isPlain ? new StreamReader(new FileStream(sFileName, FileMode.Open)) : new StreamReader(new GZipStream(new FileStream(sFileName, FileMode.Open), CompressionMode.Decompress));
+
+        }
         //possibly questionable constructor, little but much in terms of work being done in the initializer thingie
-        public GameplayRecord(String sFilePath):this(XDocument.Load(new GZipStream(new FileStream(sFilePath,FileMode.Open),CompressionMode.Decompress)).Root,null)
+        public GameplayRecord(String sFilePath):this(XDocument.Load(LoadDataStream(sFilePath)).Root,null)
         {
 
         }

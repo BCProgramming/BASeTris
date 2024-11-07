@@ -1,4 +1,5 @@
 ﻿using BASeTris.Blocks;
+using BASeTris.Rendering.Adapters;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -370,10 +371,42 @@ namespace BASeTris
                 } },
                 {'O',
                 new int[][]{
+                    new int []{0,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{0,1,0 },
+                } },
+                {'P',
+                new int[][]{
                     new int []{1,1,1 },
                     new int []{1,0,1 },
+                    new int []{1,1,1 },
+                    new int []{1,0,0 },
+                    new int []{1,0,0 },
+                } },
+                {'Q',
+                new int[][]{
+                    new int []{0,1,0 },
                     new int []{1,0,1 },
                     new int []{1,0,1 },
+                    new int []{1,1,1 },
+                    new int []{0,1,1 },
+                } },
+                {'R',
+                new int[][]{
+                    new int []{1,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
+                {'S',
+                new int[][]{
+                    new int []{1,1,1 },
+                    new int []{1,0,0 },
+                    new int []{1,1,1 },
+                    new int []{0,0,1 },
                     new int []{1,1,1 },
                 } },
                 {'T',
@@ -384,6 +417,38 @@ namespace BASeTris
                     new int []{0,1,0 },
                     new int []{0,1,0 },
                 } },
+                {'U',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,1,1 },
+                } },
+                {'V',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{0,1,0 },
+                } },
+                {'W',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{1,1,1 },
+                    new int []{1,0,1 },
+                } },
+                {'X',
+                new int[][]{
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                    new int []{0,1,0 },
+                    new int []{1,0,1 },
+                    new int []{1,0,1 },
+                } },
                 {'Y',
                 new int[][]{
                     new int []{1,1,1 },
@@ -392,14 +457,14 @@ namespace BASeTris
                     new int []{0,1,0 },
                     new int []{0,1,0 },
                 } },
-                {'R',
+                {'Z',
                 new int[][]{
-                    new int []{1,1,0 },
-                    new int []{1,0,1 },
-                    new int []{1,1,0 },
-                    new int []{1,0,1 },
-                    new int []{1,0,1 },
-                } },
+                    new int []{1,1,1 },
+                    new int []{0,0,1 },
+                    new int []{0,1,0 },
+                    new int []{1,0,0 },
+                    new int []{1,1,1 },
+                } }
 
         };
         public static IEnumerable<NominoPoint> FromLetter(String src)
@@ -470,6 +535,85 @@ namespace BASeTris
 
 
             }
+        }
+        public static IEnumerable<List<NominoPoint>> FilterHolePieces(IEnumerable<List<NominoPoint>> Input)
+        {
+
+            return Input.Where((s) => !IsHolePiece(s));
+
+        }
+        public static bool IsHolePiece(List<NominoPoint> TestItem)
+        {
+            if (TestItem.Count <= 6) return false; //need at least 7 blocks to even form a hole
+            //a "hole piece" is a piece where there is an enclosed hole. These might be undesirable.
+            //first iterate through each position to build a HashSet of tuples.
+            //while we are at it store max and min coordinates.
+            HashSet<(int x, int y)> Occupied = new HashSet<(int x, int y)>();
+            BCPointI MaxPos = BCPointI.MinValue;
+            BCPointI MinPos = BCPointI.MaxValue;
+            foreach (var position in TestItem)
+            {
+                Occupied.Add((position.X, position.Y));
+                if (MaxPos.X < position.X) MaxPos.X = position.X;
+                if (MaxPos.Y < position.Y) MaxPos.Y = position.Y;
+                if (MinPos.X > position.X) MinPos.X = position.X;
+                if (MinPos.Y > position.Y) MinPos.Y = position.Y;
+            }
+            HashSet<(int x, int y)> ProcessPos = new HashSet<(int x, int y)>();
+            bool HoleTest = false;
+            for (int x = MinPos.X; x <= MaxPos.X; x++)
+            {
+                for (int y = MinPos.Y; y <= MaxPos.Y; y++)
+                {
+                    HoleTest = (IsHolePosition((x, y), Occupied, ProcessPos, MinPos, MaxPos));
+                    if (HoleTest) return true;
+                        
+                }
+            }
+            return false;
+
+
+        }
+        private static bool IsHolePosition((int x, int y) Coordinates, HashSet<(int x, int y)> NominoSpots, HashSet<(int x, int y)> Processpositions,BCPointI MinPos,BCPointI MaxPos, HashSet<(int x, int y)> IgnorePositions = null )
+        {
+            IgnorePositions = IgnorePositions ?? new HashSet<(int x, int y)>();
+            //a hole position is a position that:
+            //= is surrounded on all four sides not present in processedpositions by either occupied coordinates, or by empty positions that are a hole position.
+            //any blank position at the edge of the minimum/maximum positions is not a hole position.
+
+            if (NominoSpots.Contains(Coordinates)) return false;
+            //check if we're on the edge.
+            if (Coordinates.x == MinPos.X || Coordinates.y == MinPos.Y || Coordinates.x == MaxPos.X || Coordinates.y == MaxPos.Y)
+            {
+                Processpositions.Add(Coordinates);
+                return false;
+            }
+            else
+            {
+                (int x, int y)[] OffsetsArray = new (int x, int y)[] { (-1, 0), (0, 1), (1, 0), (0, -1) };
+                
+
+                IgnorePositions.Add(Coordinates);
+
+                foreach (var checkoffset in OffsetsArray)
+                {
+                    
+                    var CheckCoordinate = (Coordinates.x + checkoffset.x, Coordinates.y + checkoffset.y);
+                    if (IgnorePositions.Contains(CheckCoordinate)) continue; //disregard to prevent recursion.
+                    if (NominoSpots.Contains(CheckCoordinate)) continue; //if this is a block in the mino, the also continue.
+                    //at this point we know this coordinate is not occupied. Check if it can reach the edge of the Mino.
+                    if (!IsHolePosition(CheckCoordinate, NominoSpots, Processpositions, MinPos, MaxPos, IgnorePositions)) return false;
+                    
+
+                }
+
+
+
+            }
+
+
+            return true;
+
         }
         public static IEnumerable<List<NominoPoint>> FilterPieces(IEnumerable<List<NominoPoint>> Input)
         {
@@ -569,10 +713,11 @@ namespace BASeTris
             return buildresult;
         }
         private static Dictionary<String, List<NominoPoint>> CachedRotationResults = new Dictionary<string, List<NominoPoint>>();
-        public static List<NominoPoint> GetPiece(int BlockCount)
+
+        public static List<NominoPoint>? GetPiece(int BlockCount,IRandomizer rgen)
         {
             
-            return FilterRotations(FilterPieces(GetPieces(BlockCount, null, NominoPieceGenerationFlags.Flag_Randomize)),CachedRotationResults).FirstOrDefault();
+            return FilterRotations(FilterPieces(GetPieces(BlockCount,NominoPieceGenerationFlags.Flag_Randomize,rgen)),CachedRotationResults).FirstOrDefault();
         }
         [Flags]
         public enum NominoPieceGenerationFlags
@@ -580,14 +725,91 @@ namespace BASeTris
             Flag_None = 0,
             Flag_Randomize = 1
         }
-        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,IRandomizer rgen = null)
+
+
+        //"New" mini generation code.
+        // To generate all piece of size N:
+        // Take all peices of Size N-1.
+        // For all block positions, add a block to every free square adjacent to that piece.
+        // This is the generated Mino. If a duplicate piece has not already been generated (based on the rotation hash checks we already have), than it is a valid result.
+        // Mino if size 1 is the end case, of course.
+
+        //The selection can be randomized of course by randomizing the selection of the block to add onto and which of the available adjacent cells to add.
+
+        //TODO: we can have a sequence number that dictates a specific Nomino, 
+        public static IEnumerable<List<NominoPoint>> GetPieces(int BlockCount, NominoPieceGenerationFlags GenerationFlags = NominoPieceGenerationFlags.Flag_None, IRandomizer? rgen = null)
+        {
+            if (BlockCount == 1)
+            {
+                //End case. block count of 1 is just, well, one block.
+                yield return new List<NominoPoint>() { new NominoPoint(0, 0, null) };
+            }
+            else
+            {
+                //for all other counts, grab all pieces from the N-1...
+                var LowerSet = FilterRotations(GetPieces(BlockCount - 1, GenerationFlags, rgen), null);
+
+                foreach (var Npiece in LowerSet)
+                {
+                    //first let's create a HashSet of the x/y tuples.
+                    HashSet<(int, int)> Positions = new HashSet<(int, int)>();
+                    foreach (var block in Npiece)
+                    {
+                        Positions.Add((block.X, block.Y));
+                    }
+                    //now, iterate through each block in the piece.
+                    (int x, int y)[] OffsetsArray = new (int x, int y)[] { (-1, 0), (0, 1), (1, 0), (0, -1) };
+
+                    var iteratelist = (GenerationFlags == NominoPieceGenerationFlags.Flag_Randomize) ?RandomHelpers.Static.Shuffle(Npiece, rgen): Npiece;
+                    foreach (var block in iteratelist)
+                    {
+                        //if set to randomize, randomize the offset order for this block's sub piece choices.
+                        if (GenerationFlags == NominoPieceGenerationFlags.Flag_Randomize) OffsetsArray = RandomHelpers.Static.Shuffle(OffsetsArray, rgen).ToArray();
+                        foreach (var offsetuse in OffsetsArray)
+                        {
+                            int useX = block.X + offsetuse.x;
+                            int useY = block.Y + offsetuse.y;
+                            //check if this coordinate is in the Positions hash
+                            if (!Positions.Contains((useX, useY)))
+                            {
+                                NominoPoint Append = new NominoPoint(useX, useY);
+                                //yield the lowerset with this point stapled on.
+                                yield return Npiece.Concat(new[] { Append }).ToList();
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        
+
+
+        //--a revised Nomino Builder Algorithm--
+        //-Basic algorithm is similar to the Logo approach of the existing GetPieces method.
+        //-we need two new things. First is a way of dictating that we are to branch in multiple directions from a particular position.
+        //-the other aspect is that we either need a way of indicating "how much" that part should branch (how many blocks for each one). If we only do half for each or by roughly three, then we won't be able to generate "all possibilities". 
+
+        //we'd still be better off, arguably, than the previous implementation, however.
+
+        //alternative idea:
+        //If there is more than 1 block left to generate, in addition to generating as it does now in one direction, also recursively generate
+
+
+
+        //This algorithm has a flaw, in that it won't be able to generate "branched" pieces. For example, the T piece in Tetris would not be generated through this.
+        //Adding this capability is beyond the details of this algorithm, however, so we'd need to effectively reimplement this routine.
+        //Effectively we'd need a way to indicate multiple directions for the same path. I'd suggest a new "3" place value which indicate that, so 23132 would mean to move Right, then branch both Forward (1) and right from that position recursively.
+
+
+        public static IEnumerable<List<NominoPoint>> GetPieces_Snake(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,IRandomizer rgen = null)
         {
             rgen = rgen ?? RandomHelpers.Construct();
             if (CurrentBuild == null) //Starting case, we make two blocks, then recursively call to add to it if needed.
             {
                 
                 CurrentBuild = new List<NominoPoint>() {new NominoPoint(0, 0), new NominoPoint(1, 0) }; //create first two blocks
-                var subreturn = GetPieces(BlockCount - 2, CurrentBuild,GenerationFlags); //-2 since we added two blocks.
+                var subreturn = GetPieces_Snake(BlockCount - 2, CurrentBuild,GenerationFlags); //-2 since we added two blocks.
                 foreach (var yieldit in subreturn)
                 {
                     yield return yieldit;
@@ -632,7 +854,7 @@ namespace BASeTris
                         DirectionLists[index].Add(MoveList[index]);
                         if (BlockCount - 1 > 0)
                         {
-                            var Currresult = GetPieces(BlockCount - 1, DirectionLists[index],GenerationFlags);
+                            var Currresult = GetPieces_Snake(BlockCount - 1, DirectionLists[index],GenerationFlags);
                             foreach (var iterate in Currresult)
                                 yield return iterate;
                         }

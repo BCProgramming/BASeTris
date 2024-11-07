@@ -90,6 +90,9 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                 }
             }
+            //we don't want the menu items to be larger than the visible area. That would be annoying, ask me how I know.
+            //max out the width to 80% of the bounds.
+            MaxWidth = Math.Min(MaxWidth, Element.Bounds.Width*.8f);
             //we draw each item at the maximum size.
             SKPoint ItemSize = new SKPoint(MaxWidth, MaxHeight);
             CurrentY += (float)(pOwner.ScaleFactor * 5);

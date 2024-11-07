@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -23,6 +24,7 @@ namespace BASeTris.GameStates.Menu
         public double MinimumValue { get; set; } = 0;
         public double MaximumValue { get; set; } = 100;
         public double ChangeSize { get; set; } = 1;
+        public override bool Activatable => false;
 
         public double LargeDetentCount { get; set; } = 4;
         public double SmallDetent { get; set; } = 5;
@@ -52,7 +54,7 @@ namespace BASeTris.GameStates.Menu
         }
         public override void ProcessGameKey(IStateOwner pStateOwner, GameState.GameKeys pKey)
         {
-            if (Activated)
+            if (true || Activated)
             {
                 if (pKey == GameState.GameKeys.GameKey_Left)
                 {

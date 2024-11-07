@@ -85,27 +85,47 @@ namespace BASeTris
         {
             return Math.Round((Math.Pow(Phi, n) - Math.Pow(phi, n)) / Math.Sqrt(5), 2);
         }
-
+        
         private static void MultiMinoTest()
         {
-            var firstresult = NNominoGenerator.GetPieces(6, null).ToList();
-            var result = NNominoGenerator.FilterPieces(firstresult).ToList();
+           
+                var result =  NNominoGenerator.FilterPieces(NNominoGenerator.GetPieces(8,NominoPieceGenerationFlags.Flag_Randomize,  null)).ToList();
+            //var result = NNominoGenerator.FilterPieces(firstresult).ToList();
             StringBuilder sbreport = new StringBuilder();
             int CurrentCount = 1;
-            foreach (var iterate in result)
-            {
-                String str = NNominoGenerator.GetDirectionString(iterate);
-                String strrep = NNominoGenerator.StringRepresentation(iterate);
-                sbreport.AppendLine("N-omino " + CurrentCount);
-                sbreport.AppendLine("");
-                sbreport.AppendLine(strrep);
-                CurrentCount++;
+           
+                using (StreamWriter sw = new StreamWriter(new FileStream("T:\\NominoOut.txt", FileMode.Create)))
+                {
+                foreach (var iterate in result)
+                    {
+                        
 
-            }
-            String strresult = sbreport.ToString();
+                        String str = NNominoGenerator.GetDirectionString(iterate);
+                        String strrep = NNominoGenerator.StringRepresentation(iterate);
+                           sw.WriteLine("N-omino " + CurrentCount);
+                           sw.WriteLine("");
+                           sw.WriteLine(strrep);
+                    if (strrep.StartsWith(HolePiece))
+                    {
+                        ;
+                    }
+                           var isHole = NNominoGenerator.IsHolePiece(iterate);
+                            sw.WriteLine("isHole:" + isHole);
+                    if (isHole)
+                    {
+                        ;
+                    }
+                        CurrentCount++;
+
+                    }
+                }
+            
+            //String strresult = sbreport.ToString();
             //System.IO.File.WriteAllText("T:\\NominoOut.txt", strresult);
         }
-
+        private static String HolePiece = @"###
+# #
+###";
 
         /// <summary>
         /// The main entry point for the application.
@@ -150,6 +170,8 @@ namespace BASeTris
             }
             else
             {
+                //MultiMinoTest();
+                //return;
                 /*var testresult = SNESTetrominoTheme.GetUnsetImage(0, 'T');
                 SkiaSharp.Views.Desktop.Extensions.ToBitmap(testresult).Save("T:\\T_SNES_UNSET.PNG");
                 var unsetTest = SNESTetrominoTheme.GetUnsetImage(0, 'Z');

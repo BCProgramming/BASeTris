@@ -85,4 +85,7 @@ namespace BASeTris.GameStates
             //throw new NotImplementedException();
         }
     }
+
+    //Other actions possible:
+    //one which causes a "brick breaking" type effect. Another that creates debris of the block, both utilizing new particles or some sort of game object for the purpose of display, of course.
 }

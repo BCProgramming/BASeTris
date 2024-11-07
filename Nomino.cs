@@ -344,6 +344,15 @@ namespace BASeTris
         public SKBitmap GetImageSK(SKSize BlockSize)
         {
             RecalcExtents();
+            //note: BlockSize will actually scale smaller based on the height or width being greater than 5 blocks.
+
+            int MaxSize = Math.Max(this.Max((e) => e.X), this.Max((e) => e.Y));
+            if (MaxSize > 5)
+            {
+                float sUseSize = BlockSize.Width * ((float)4 / (float)MaxSize);
+                BlockSize = new SKSize(sUseSize, sUseSize);
+            }
+
             Size BitmapSize = new Size((int)BlockSize.Width * (_GroupExtents.Width + 1), (int)BlockSize.Height * (_GroupExtents.Height + 1));
             SKImageInfo info = new SKImageInfo(BitmapSize.Width,BitmapSize.Height,SKColorType.Rgba8888, SKAlphaType.Premul);
             SKBitmap BuiltRepresentation = new SKBitmap(info,SKBitmapAllocFlags.ZeroPixels);

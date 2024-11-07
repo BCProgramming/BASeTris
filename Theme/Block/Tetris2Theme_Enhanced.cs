@@ -14,6 +14,7 @@ using SkiaSharp;
 
 namespace BASeTris.Theme.Block
 {
+    //The Gemstomes and Tetris2 "Enhanced" Themes are both frankly ugly as hell.
     [HandlerTheme("GemStones", typeof(ColumnsGameHandler))]
     [ThemeDescription("Gemstones")]
     public class GemStoneTheme : Tetris2Theme_Enhanced

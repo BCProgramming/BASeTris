@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using BASeTris.Rendering.Adapters;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace BASeTris.BackgroundDrawers
 {
-    public interface IVectorMutator
+    public interface IVectorMutator<T>
     {
-        SKPoint Mutate(SKPoint src);
+        T Mutate(T src);
     }
-
-    public abstract class VectorMutatorBase : IVectorMutator
+    
+    public abstract class VectorMutatorBase<T> : IVectorMutator<T>
     {
         public int MinTickDelay { get; set; } = 0; //0 is default, called every time.
         protected uint LastTick { get; set; } = 0;
-        public SKPoint Mutate(SKPoint src)
+        public T Mutate(T src)
         {
             if (LastTick + MinTickDelay < TetrisGame.GetTickCount())
             {
@@ -26,7 +27,7 @@ namespace BASeTris.BackgroundDrawers
             }
             return src;
         }
-        public abstract SKPoint DoMutate(SKPoint src);
+        public abstract T DoMutate(T src);
 
         public VectorMutatorBase(int pTickDelay)
         {
@@ -37,31 +38,35 @@ namespace BASeTris.BackgroundDrawers
         }
 
     }
-    public class RandomVectorMutator : VectorMutatorBase
+
+    
+
+
+    public class RandomVectorMutator : VectorMutatorBase<BCPoint>
     {
         public RandomVectorMutator(int TicksBetween) : base(TicksBetween)
         {
         }
-        public override SKPoint DoMutate(SKPoint src)
+        public override BCPoint DoMutate(BCPoint src)
         {
             var len = src.Length;
             var Angle = TetrisGame.StatelessRandomizer.NextDouble() * 2 * Math.PI;
             return new SKPoint((float)(Math.Sin(Angle) * len), ((float)(Math.Cos(Angle) * len)));
         }
     }
-    public class SpeedChangeVectorMutator : VectorMutatorBase
+    public class SpeedChangeVectorMutator : VectorMutatorBase<BCPoint>
     {
         public float AccelerationChangePercent { get; set; } = .1f;
         public SpeedChangeVectorMutator(float pChangePercent)
         {
             AccelerationChangePercent = pChangePercent;
         }
-        public override SKPoint DoMutate(SKPoint src)
+        public override BCPoint DoMutate(BCPoint src)
         {
-            return new SKPoint(src.X * (1 + AccelerationChangePercent), src.Y * (1 + AccelerationChangePercent));
+            return new BCPoint(src.X * (1 + AccelerationChangePercent), src.Y * (1 + AccelerationChangePercent));
         }
     }
-    public class AcceleratingVectorMutator : VectorMutatorBase
+    public class AcceleratingVectorMutator : VectorMutatorBase<BCPoint>
     {
         SKPoint? InitialVector;
         uint TotalAccelerationTime;
@@ -74,7 +79,7 @@ namespace BASeTris.BackgroundDrawers
             TotalAccelerationPercentage = pAccelerationChangePercent;
         }
 
-        public override SKPoint DoMutate(SKPoint src)
+        public override BCPoint DoMutate(BCPoint src)
         {
             var CurrentTick = TetrisGame.GetTickCount();
             if (InitialVector == null)
@@ -92,17 +97,17 @@ namespace BASeTris.BackgroundDrawers
 
         }
     }
-    public class CompositeVectorMutator : VectorMutatorBase
+    public class CompositeVectorMutator : VectorMutatorBase<BCPoint>
     {
-        private VectorMutatorBase[] Mutators = null;
+        private VectorMutatorBase<BCPoint>[] Mutators = null;
         int CurrentMutator = 0;
         uint TransitionTickTime = 1000;
         uint MutatorStableTime = 5000;
         uint LastTransitionStartTime = 0;
         uint LastStableStartTime = 0;
         bool CallMutatorWhenStable = false;
-        SKPoint LastMutatorPoint;
-        SKPoint TransitionStart, TransitionEnd;
+        BCPoint LastMutatorPoint;
+        BCPoint TransitionStart, TransitionEnd;
         double StartAngle, EndAngle;
         
         CompositeState CurrentState;
@@ -118,7 +123,7 @@ namespace BASeTris.BackgroundDrawers
             Transitioning
         }
         //not implying transitioning individuals are not stable!
-        public CompositeVectorMutator(params VectorMutatorBase[] pMutators)
+        public CompositeVectorMutator(params VectorMutatorBase<BCPoint>[] pMutators)
         {
             base.MinTickDelay = 0;
             Mutators = pMutators;
@@ -131,7 +136,7 @@ namespace BASeTris.BackgroundDrawers
                 return TetrisGame.StatelessRandomizer.Next(Mutators.Length);
             
         }
-        public override SKPoint DoMutate(SKPoint src)
+        public override BCPoint DoMutate(BCPoint src)
         {
             var CurrentTickTime = TetrisGame.GetTickCount();
             if (LastStableStartTime == 0) { LastStableStartTime = TetrisGame.GetTickCount(); CurrentState = CompositeState.Stable; LastMutatorPoint = Mutators[CurrentMutator].DoMutate(src); }
@@ -178,7 +183,7 @@ namespace BASeTris.BackgroundDrawers
 
                         //SKPoint TransitionalVector = new SKPoint((float)Math.Sin(UseAngle) * TransitionStart.Length, (float)Math.Cos(UseAngle) * TransitionStart.Length);
                         var Diff = TransitionEnd - TransitionStart;
-                        SKPoint TransitionalVector = TransitionStart + new SKPoint(Diff.X * TimePercent, Diff.Y * TimePercent);
+                        BCPoint TransitionalVector = TransitionStart + new BCPoint(Diff.X * TimePercent, Diff.Y * TimePercent);
                         return TransitionalVector;
                     }
 

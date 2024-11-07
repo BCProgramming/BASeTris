@@ -561,6 +561,7 @@ namespace BASeTris.GameStates
                                 data.SaveTo(writer);
                             }
                         }
+                        ResultState.ActivatedItem = null;
                     }
 
                     pOwner.CurrentState = MenuState.CreateOutroState(pOwner, DesignOptionsMenuState);
@@ -568,6 +569,8 @@ namespace BASeTris.GameStates
                 else
                 {
                     LoadSlotAction((int)(b.MenuElement.Tag));
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, DesignOptionsMenuState); //fix: save slots act weird because the menu wasn't closing and the items were getting activated.
+                    ResultState.ActivatedItem = null;
 
                 }
 

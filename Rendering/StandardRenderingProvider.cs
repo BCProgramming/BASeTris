@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BASeCamp.Elementizer;
 using BASeCamp.Rendering.Interfaces;
 
 namespace BASeTris.Rendering
@@ -28,6 +29,25 @@ namespace BASeTris.Rendering
         public virtual void RenderStats(IStateOwner pOwner,object pRenderTarget,object Element,object ElementData)
         {
             this.RenderStats(pOwner, (TClassType)pRenderTarget, (TDrawType)Element, (TDataType)ElementData);
+        }
+
+        public void RenderGameObjects(IStateOwner pOwner, object pRenderTarget, object Element, object ElementData)
+        {
+            this.RenderGameObjects(pOwner, (TClassType)pRenderTarget, (TDrawType)Element, (TDataType)Element);
+        }
+        public void RenderGameObjects(IStateOwner pOwner, TClassType pRenderTarget, TDrawType Source, TDataType Element)
+        {
+            //base helper routine, renders the game objects. I mean, that's in the name, I suppose.
+
+            foreach (var drawobject in Source.AllGameObjects())
+            {
+                //May need to generate a Data Element for the drawobject here. Might be able to share the same instance between calls depending on the contents... we need an actual GameObject implemented before this can be used.
+                //Might be fine with the GameState Draw Parameters, though.
+                RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, drawobject, Element);
+            }
+
+
+            
         }
     }
 

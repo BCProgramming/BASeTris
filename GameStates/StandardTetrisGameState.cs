@@ -93,17 +93,16 @@ namespace BASeTris.GameStates
 
             //For saving and restoring the state, this is less important. However, we will want this for replay data for a game that was resumed.
             //we will save all the generated nominos, and then force them onto the chooser when we are resumed.
-            var generatedNominoElement = StandardHelper.SaveList(ChooserValue.AllGeneratedNominos, "ChooserGenerated", null, true);
-
+            
 
 
             var resultnode = PlayField.SaveField();
-            var ReplayNode = pOwner.GameRecorder.GetXmlData("ReplayInputs", null); //we record the current replay inputs that were saved.
+            
             resultnode.Add(new XAttribute("GameTime", pOwner.GameTime.ElapsedTicks));
             //we want to save the statistics and the hold blocks and nextblocks, HoldStackSize, etc.
             XElement StatElement = this.GameStats.GetXmlData("Stats", null);
             resultnode.Add(StatElement);
-            resultnode.Add(generatedNominoElement);
+            //resultnode.Add(generatedNominoElement);
             XElement NextBlocksElement = null;
             XElement HoldBlocksElement = null;
             if (NextBlocks.Count > 0)
@@ -128,7 +127,7 @@ namespace BASeTris.GameStates
             if (NextBlocksElement != null) resultnode.Add(NextBlocksElement);
             if (HoldBlocksElement != null) resultnode.Add(HoldBlocksElement);
 
-            resultnode.Add(ReplayNode);
+            //resultnode.Add(ReplayNode);
 
             return resultnode;
         }
@@ -575,7 +574,10 @@ namespace BASeTris.GameStates
                 pOwner.GameTime.Stop();
                 GameHandler.Statistics.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
-                pOwner.EnqueueAction(() => { pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); return false; });
+                pOwner.EnqueueAction(() => {
+                    //TODO: Save the replay information for this game with a generated name.
+                    pOwner.GameRecorder.SaveRecordedGame(pOwner,pOwner.GetHandler().GetType());
+                    pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); return false; });
             }
 
             if (PlayField.BlockGroups.Count == 0 && !SpawnWait && !pOwner.CurrentState.GameProcSuspended && !NoTetrominoSpawn)

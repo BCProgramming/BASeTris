@@ -218,10 +218,45 @@ namespace BASeTris.Rendering.Skia
     }
 
 
+    public abstract class ListRenderingHandlerBase<T> : StandardRenderingHandler<SKCanvas, List<T>, GameStateSkiaDrawParameters>
+    {
+        static Dictionary<Type, BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner>> CacheRenderProviders = new Dictionary<Type, BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner>>();
+        protected BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner> GetProvider(Type forType)
+        {
+            if (!CacheRenderProviders.ContainsKey(forType))
+            {
+                var getrenderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), forType, typeof(GameStateSkiaDrawParameters));
+                if (getrenderer != null)
+                    CacheRenderProviders.Add(forType, getrenderer);
+
+            }
+            return CacheRenderProviders[forType];
+        }
+        public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, List<T> Source, GameStateSkiaDrawParameters Element)
+        {
+            if (Source.Count > 0)
+            {
+            }
+            //var translated = BaseParticleRenderingSkiaHandler.TranslatePosition(pOwner, pRenderTarget, Element.Offset, Element);
+            foreach (var iterate in Source)
+            {
+                if (iterate == null) continue;
+                //retrieve rendering handler.
+                var Grabrenderer = GetProvider(iterate.GetType());
+                Grabrenderer.Render(pOwner, pRenderTarget, iterate, Element);
+            }
+            if (pOwner.CurrentState.GameProcSuspended)
+            {
+                ;
+            }
+        }
+    }
+
+
     //[RenderingHandler(typeof(TetrisBlock), typeof(Graphics), typeof(TetrisBlockDrawParameters))]
     //public class TetrisBlockGDIRenderingHandler : StandardRenderingHandler<Graphics, TetrisBlock, TetrisBlockDrawParameters>
     [RenderingHandler(typeof(List<BaseParticle>), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class ParticleRenderingSkiaHandler : StandardRenderingHandler<SKCanvas , List<BaseParticle>, GameStateSkiaDrawParameters>
+    public class ParticleRenderingSkiaHandler :   ListRenderingHandlerBase<BaseParticle>   //StandardRenderingHandler<SKCanvas , List<BaseParticle>, GameStateSkiaDrawParameters>
     {
         public void UpdateParticles(IStateOwner pOwner,List<BaseParticle> Source)
         {
@@ -242,38 +277,10 @@ namespace BASeTris.Rendering.Skia
 
             }
         }
-        static Dictionary<Type, BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner>> ParticleRenderProviders = new Dictionary<Type, BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner>>();
-        private BASeCamp.Rendering.Interfaces.IRenderingHandler<IStateOwner> GetProvider(Type forType)
-        {
-            if(!ParticleRenderProviders.ContainsKey(forType))
-            {
-                var getrenderer = RenderingProvider.Static.GetHandler(typeof(SKCanvas), forType, typeof(GameStateSkiaDrawParameters));
-                if (getrenderer != null)
-                    ParticleRenderProviders.Add(forType, getrenderer);
-
-            }
-            return ParticleRenderProviders[forType];
-        }
+       
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, List<BaseParticle> Source, GameStateSkiaDrawParameters Element)
         {
-            if (Source.Count > 0)
-            {
-                //Debug.Print("Rendering Particle Set of " + Source.Count.ToString());
-                //Debug.Print("Trace:" + new StackTrace().ToString());
-            }
-            //var translated = BaseParticleRenderingSkiaHandler.TranslatePosition(pOwner, pRenderTarget, Element.Offset, Element);
-            foreach (var iterate in Source)
-            {
-                //retrieve rendering handler.
-                var Grabrenderer = GetProvider(iterate.GetType());
-                Grabrenderer.Render(pOwner, pRenderTarget, iterate, Element);
-               
-
-            }
-            if(pOwner.CurrentState.GameProcSuspended)
-            {
-                ;
-            }
+            base.Render(pOwner, pRenderTarget, Source, Element);
             
             UpdateParticles(pOwner,Source);
             

@@ -79,7 +79,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     String StatText = "" + RenderLines[i].PieceCount;  //PieceCounts[i];
                     SKRect StatTextSize = new SKRect();
                     BlackBrush.MeasureText(StatText, ref StatTextSize);
-                    SKPoint TextPos = new SKPoint(useXPos + (int)(100d * Factor*SizeScale), BaseCoordinate.Y + StatTextSize.Height);
+                    SKPoint TextPos = new SKPoint(useXPos + (int)(130d * Factor*SizeScale), BaseCoordinate.Y + StatTextSize.Height);
                     //SizeF StatTextSize = g.MeasureString(StatText, standardFont);
                     SKBitmap TetrominoImage =  currentTet is Type?Source.GetTetrominoSKBitmap((Type)currentTet):Source.GetTetrominoSKBitmap(pOwner,(String)currentTet);
 
@@ -94,9 +94,9 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     currYPos += 40d * Factor;// DrawRect.Height*1.1f;
 
-                    if (currYPos > Bounds.Bottom)
+                    if (currYPos > Bounds.Bottom-50f*pOwner.ScaleFactor)
                     {
-                        useXPos += (float)((4 * pOwner.ScaleFactor) + StatTextSize.Width + 5 + DrawRect.Width);
+                        useXPos += (float)((4 * pOwner.ScaleFactor) + StatTextSize.Width + (20*pOwner.ScaleFactor) + DrawRect.Width);
                         currYPos = StartYPos;
 
 

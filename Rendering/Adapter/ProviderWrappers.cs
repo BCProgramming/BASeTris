@@ -26,6 +26,8 @@ namespace BASeTris.Rendering.Adapters
         public Point Point { get { if (_Point == null) _Point = new Point((int)_X, (int)_Y); return _Point.Value; } }
         public float X {  get { return _X; } set { _X = value; _SKPoint = null;_PointF = null;_Point = null; } }
         public float Y {  get { return _Y; }  set { _Y = value; _SKPoint = null; _PointF = null; _Point = null; } }
+
+        public float Length { get { return this.SKPoint.Length; } }
         public BCPoint(SKPoint Source)
         {
             _X = Source.X;
@@ -95,6 +97,8 @@ namespace BASeTris.Rendering.Adapters
 
     public struct BCPointI
     {
+        public static BCPointI MaxValue = new BCPointI(int.MaxValue, int.MaxValue);
+        public static BCPointI MinValue = new BCPointI(int.MinValue, int.MinValue);
         private SKPointI Main;
         public int X { get { return Main.X; } set { Main.X = value; } }
         public int Y { get { return Main.Y; } set { Main.Y = value; } }

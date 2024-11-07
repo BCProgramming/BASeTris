@@ -15,15 +15,33 @@ using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
-using BASeTris.GameStates;
 using BASeTris.Blocks;
 using BASeTris.Tetrominoes;
 using System.Collections.Concurrent;
+using BASeTris.Rendering.Adapters;
+using BASeTris.GameStates.GameObjects;
 
 namespace BASeTris
 {
     public abstract class GameState
     {
+
+        private List<GameObject> GameObjects = new List<GameObject>();
+
+        public void AddGameObject(GameObject Item)
+        {
+            lock(GameObjects)
+                GameObjects.Add(Item);
+        }
+        public void RemoveGameObject(GameObject Item)
+        {
+            lock (GameObjects)
+                GameObjects.Remove(Item);
+        }
+        public IEnumerable<GameObject> AllGameObjects()
+        {
+            return GameObjects.AsReadOnly();
+        }
         private ConcurrentDictionary<String, Object> CustomStateProperties = new ConcurrentDictionary<string, object>();
 
         public Object GetCustomProperty(String pKey)
@@ -125,4 +143,6 @@ namespace BASeTris
         public virtual bool AllowUserGameKey(GameKeys key) { return true; }
 
     }
+  
+  
 }

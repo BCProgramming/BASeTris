@@ -13,10 +13,11 @@ namespace BASeTris.Choosers
         {
             _Available = new Func<Nomino>[] { ChooserFunction };
             BlockCount = pBlockCount;
+            rgen = new DotNetRandomizer(pSeed);
         }
         public Nomino ChooserFunction()
         {
-            var newpiece = NNominoGenerator.GetPiece(BlockCount);
+            var newpiece = NNominoGenerator.GetPiece(BlockCount,this.rgen);
             var buildNomino = NNominoGenerator.CreateNomino(newpiece);
             return buildNomino;
         }

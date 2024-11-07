@@ -363,7 +363,8 @@ namespace BASeTris.GameStates.Menu
             //Other game keys we pass on to the currently selected item itself for additional handling.
             bool triggered = false;
             var OriginalIndex = SelectedIndex;
-            if(g==GameKeys.GameKey_Down)
+
+            if (g==GameKeys.GameKey_Down)
             {
                 if (ActivatedItem != null)
                 {
@@ -398,25 +399,39 @@ namespace BASeTris.GameStates.Menu
 
             if(g==GameKeys.GameKey_RotateCW || g==GameKeys.GameKey_MenuActivate || g==GameKeys.GameKey_Pause)
             {
+                //if there's no activated item, we will allow the current selected item to accept a gamekey.
+                
+
                 if (ActivatedItem != null)
                 {
                     TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
                     ActivatedItem.OnDeactivated(pOwner);
                     ActivatedItem = null;
+                    triggered = true;
                 }
                 else
                 {
 
                     //Activate the currently selected item.
+                    
                     var currentitem = MenuElements[SelectedIndex];
-                    TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
-                    ActivatedItem = currentitem;
-                    var args = new MenuStateMenuItemActivatedEventArgs(currentitem, pOwner);
-                    MenuItemActivated?.Invoke(this, args);
-                    if (!args.CancelActivation) 
-                        currentitem.OnActivated(pOwner);
+                    if (currentitem.Activatable)
+                    {
+                        TetrisGame.Soundman.PlaySound(pOwner.AudioThemeMan.MenuItemActivated.Key, pOwner.Settings.std.EffectVolume);
+                        ActivatedItem = currentitem;
+                        var args = new MenuStateMenuItemActivatedEventArgs(currentitem, pOwner);
+                        MenuItemActivated?.Invoke(this, args);
+                        if (!args.CancelActivation)
+                            currentitem.OnActivated(pOwner);
+                        triggered = true;
+                    }
+                    else
+                    {
+                        triggered = false;
+                    }
+                    
                 }
-                triggered = true;
+                
             }
 
             else if (OriginalIndex != SelectedIndex)

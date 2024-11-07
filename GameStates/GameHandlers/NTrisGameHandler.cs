@@ -86,8 +86,8 @@ namespace BASeTris.GameStates.GameHandlers
         }
         public Nomino NTrisChooserFunction()
         {
-            int chooseSize = TetrisGame.StatelessRandomizer.Next(_NTrisPreparer.MinimumNominoSize, _NTrisPreparer.MaximumNominoSize + 1);
-            var newpiece = NNominoGenerator.GetPiece(chooseSize);
+            int chooseSize = _Chooser.rgen.Next(_NTrisPreparer.MinimumNominoSize, _NTrisPreparer.MaximumNominoSize + 1);
+            var newpiece = NNominoGenerator.GetPiece(chooseSize, _Chooser.rgen);
             var buildNomino = NNominoGenerator.CreateNomino(newpiece);
             return buildNomino;
         }

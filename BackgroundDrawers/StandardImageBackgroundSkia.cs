@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
 using System.Globalization;
+using BASeTris.Rendering.Adapters;
 
 namespace BASeTris.BackgroundDrawers
 {
@@ -41,7 +42,7 @@ namespace BASeTris.BackgroundDrawers
         public SKColorFilter theFilter = null;
         public SKPaint BackgroundBrush = null;
         public SKImageFilter PrimaryFilter = null;
-        public IVectorMutator VelocityMutator { get; set; } = new CompositeVectorMutator(new RandomVectorMutator(0)) {AdvanceType = CompositeVectorMutator.MutatorAdvancementType.Random };  //= new RandomVectorMutator(2000);
+        public IVectorMutator<BCPoint> VelocityMutator { get; set; } = new CompositeVectorMutator(new RandomVectorMutator(0)) {AdvanceType = CompositeVectorMutator.MutatorAdvancementType.Random };  //= new RandomVectorMutator(2000);
         //public Func<SKPoint,SKPoint> ChangeVelocityFunction = null;
 
         
