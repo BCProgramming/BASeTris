@@ -99,7 +99,10 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     foreach (var renderblock in CurrentElement.GetBlockData())
                     {
-
+                        if (renderblock.Y + CurrentElement.Y == 0)
+                        {
+                            ;
+                        }
                         SKPoint Location = new SKPoint(EditArea.Left + (float)(NominoBlockSize.Width) * (float)(renderblock.X + CurrentElement.X), EditArea.Top + (float)NominoBlockSize.Height * (float)(renderblock.Y + CurrentElement.Y));
                         SKRect BlockBound = new SKRect(Location.X, Location.Y, (float)(Location.X + NominoBlockSize.Width), (float)(Location.Y + NominoBlockSize.Height));
                         using (SKAutoCanvasRestore restore = new SKAutoCanvasRestore(pRenderTarget))

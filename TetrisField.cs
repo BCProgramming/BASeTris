@@ -59,7 +59,6 @@ namespace BASeTris
         //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
         private List<Nomino> ActiveBlockGroups = new List<Nomino>();
 
-
         public XElement SaveField(String pNodeName="Field")
         {
             //this is not done by having TetrisField implement IXmlPersistable because

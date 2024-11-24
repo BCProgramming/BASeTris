@@ -312,7 +312,10 @@ namespace BASeTris.Rendering.Skia.GameStates
                 ImageFilter = ImageFilter,
                 Color = new SKColor(0, 0, 0, 200),
                 MaskFilter = mask,
+                //BlendMode=SKBlendMode.DstOut
+                
             };
+            
             Target.DrawBitmap(Source, SKPoint.Empty, paint);
 
         }
@@ -395,24 +398,24 @@ namespace BASeTris.Rendering.Skia.GameStates
 
         }
     }
-
-
-    //TransitionState_BlockBuild 
     [RenderingHandler(typeof(TransitionState_BlockRandom), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
-    public class TransitionState_BlockRandomSkiaRenderingHandler : TransitioningStateSkiaRenderingHandler
+    public class TransitionState_BlockRandomSkiaRenderingHandler : TransitionState_BlockSkiaRenderingHandler
     {
-        
-        public TransitionState_BlockRandomSkiaRenderingHandler()
+        protected override List<SKRect> BuildRectangleList(List<SKRect> Source, GameStateSkiaDrawParameters Element)
         {
-            
-           // TransitionType = TransitionTypeConstants.TransitType_Dual;
+            return RandomHelpers.Static.Shuffle(Source, null).ToList();
         }
-        private List<SKRect> ShuffleBuild(List<SKRect> Source)
-            {
+    }
+    [RenderingHandler(typeof(TransitionState_BlockRandomColumnBuild), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public class TransitionState_BlockColumnBuildSkiaRenderingHandler : TransitionState_BlockSkiaRenderingHandler
+    {
+        //alternative sorts: for center-out/in styles we could sort by the distance each rect is to the center of the Bounds,
+        protected override List<SKRect> BuildRectangleList(List<SKRect> Source, GameStateSkiaDrawParameters Element)
+        {
             List<SKRect> Result = new List<SKRect>();
 
             //separate by columns.
-            Dictionary<int,List<SKRect>> ColumnSets = new Dictionary<int,List<SKRect>>();
+            Dictionary<int, List<SKRect>> ColumnSets = new Dictionary<int, List<SKRect>>();
             foreach (var iterate in Source)
             {
                 int Columnindex = (int)(iterate.Left / iterate.Width);
@@ -444,20 +447,37 @@ namespace BASeTris.Rendering.Skia.GameStates
 
 
 
-            }
+        }
+    }
+
+
+
+    //TransitionState_BlockBuild 
+
+    //[RenderingHandler(typeof(TransitionState_Block), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
+    public abstract class TransitionState_BlockSkiaRenderingHandler : TransitioningStateSkiaRenderingHandler
+    {
+        
+        public TransitionState_BlockSkiaRenderingHandler()
+        {
+            
+           // TransitionType = TransitionTypeConstants.TransitType_Dual;
+        }
+        protected abstract List<SKRect> BuildRectangleList(List<SKRect> Source, GameStateSkiaDrawParameters Element); //virtual call that provides the actual ordering of the blocks to be displayed.
+        
         public override void RenderTransition(IStateOwner pOwner, SKCanvas Target, SKBitmap Previous, SKBitmap Next, TransitionState Source, GameStateSkiaDrawParameters Element)
         {
             using (SKAutoCanvasRestore restore = new SKAutoCanvasRestore(Target))
             {
                 Target.DrawBitmap(Previous, new SKPoint(0, 0));
             }
-            if (Source is TransitionState_BlockRandom tsb)
+            if (Source is TransitionState_Block tsb)
             {
                 List<SKRect> BlockList = new List<SKRect>();
-                if (tsb.ShuffledBlocks == null)
+                if (tsb.OrderedBlocks == null)
                 {
                     //initialize. First create a full list of all the "blocks" we want to draw.
-                    for (int x = 0; x < Element.Bounds.Width; x+=tsb.BlockSize)
+                    for (int x = 0; x < Element.Bounds.Width; x += tsb.BlockSize)
                     {
                         for (int y = 0; y < Element.Bounds.Height; y += tsb.BlockSize)
                         {
@@ -466,20 +486,25 @@ namespace BASeTris.Rendering.Skia.GameStates
                         }
                     }
 
-                    //with the blocks added, shuffle it and assign it to the state.
+
+                    //with the blocks added, call the virtual call to determine the order we want them to be used for transitioning.
                     //var shuffled = (from t in RandomHelpers.Static.Shuffle(BlockList, new Random()) orderby t.Top,TetrisGame.StatelessRandomizer.NextDouble() select t).ToArray();
-                    var shuffled = ShuffleBuild(BlockList);
-                    tsb.ShuffledBlocks = shuffled.ToList();
+                    var shuffled = BuildRectangleList(BlockList, Element);
+                    tsb.OrderedBlocks = shuffled.ToList();
 
                 }
                 SKPaint Fill = new SKPaint() { Color = SKColors.Black };
                 Fill.IsStroke = false;
-                int NumDraw = (int)(tsb.TransitionPercentage * tsb.ShuffledBlocks.Count);
-                if (NumDraw > tsb.ShuffledBlocks.Count - 1) NumDraw = tsb.ShuffledBlocks.Count - 1;
+                int NumDraw = (int)(tsb.TransitionPercentage * tsb.OrderedBlocks.Count);
+                if (NumDraw > tsb.OrderedBlocks.Count - 1) NumDraw = tsb.OrderedBlocks.Count - 1;
                 for (int drawindex = 0; drawindex < NumDraw; drawindex++)
                 {
-                    Target.DrawBitmap(Next, tsb.ShuffledBlocks[drawindex], tsb.ShuffledBlocks[drawindex]);
+                    Target.DrawBitmap(Next, tsb.OrderedBlocks[drawindex], tsb.OrderedBlocks[drawindex]);
                 }
+            }
+            else
+            {
+                ;
             }
             //RenderingProvider.Static.DrawElement(pOwner, Target, Source.BG, new SkiaBackgroundDrawData(Element.Bounds));
             

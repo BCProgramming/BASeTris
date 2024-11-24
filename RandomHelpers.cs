@@ -23,9 +23,9 @@ namespace BASeTris
 
         public IRandomizer def_rgen = Construct();
         public static RandomHelpers Static = new RandomHelpers();
-        public T[] Choose<T>(IEnumerable<T> ChooseArray, int numselect, Random rgen = null)
+        public T[] Choose<T>(IEnumerable<T> ChooseArray, int numselect, IRandomizer? rgen = null)
         {
-            if (rgen == null) rgen = new Random();
+            if (rgen == null) rgen = RandomHelpers.Construct();
             T[] returnarray = new T[numselect];
             SortedList<double, T> sorttest = new SortedList<double, T>();
             foreach (T loopvalue in ChooseArray)
@@ -40,10 +40,15 @@ namespace BASeTris
             }
             return returnarray;
         }
-        public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese, IRandomizer rgen)
+        public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese, IRandomizer? rgen)
         {
             if (rgen == null) rgen = RandomHelpers.Construct();
-            var sl = new SortedList<float, T>();
+            return Shufflethese.OrderBy((a) => rgen.Next());
+        }
+        /*public IEnumerable<T> Shuffle<T>(IEnumerable<T> Shufflethese, IRandomizer? rgen)
+        {
+            if (rgen == null) rgen = RandomHelpers.Construct();
+            var sl = new SortedList<int, T>();
             foreach (T iterate in Shufflethese)
             {
                 bool AddError = true;
@@ -51,8 +56,7 @@ namespace BASeTris
                 {
                     try
                     {
-                        sl.Add((float)rgen.NextDouble(), iterate);
-                        AddError = false;
+                        sl.Add(rgen.Next(int.MinValue,int.MaxValue), iterate);
                     }
                     catch (Exception exr)
                     {
@@ -60,9 +64,8 @@ namespace BASeTris
                     }
                 }
             }
-
             return sl.Select(iterator => iterator.Value);
-        }
+        }*/
 
 
         public T Select<T>(T[] items, float[] Probabilities)

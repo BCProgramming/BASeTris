@@ -75,14 +75,14 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             bool HasBottomRight = Source.BorderData.Bottom_Right_Corner.HasData;
             bool HasBottomLeft = Source.BorderData.Bottom_Left_Corner.HasData;
 
-            SKBitmap TopLeft = Source.BorderData.TopLeftBitmap;
+            /*SKBitmap TopLeft = Source.BorderData.TopLeftBitmap;
             SKBitmap TopRight = Source.BorderData.TopRightBitmap;
             SKBitmap BottomLeft = Source.BorderData.BottomLeftBitmap;
             SKBitmap BottomRight = Source.BorderData.BottomRightBitmap;
             SKBitmap Left = Source.BorderData.LeftBitmap;
             SKBitmap Right = Source.BorderData.RightBitmap;
             SKBitmap Top = Source.BorderData.TopBitmap;
-            SKBitmap Bottom = Source.BorderData.BottomBitmap;
+            SKBitmap Bottom = Source.BorderData.BottomBitmap;*/
 
             if (HasTopLeft)
             {
@@ -175,7 +175,11 @@ namespace BASeTris.Rendering.Skia.Backgrounds
             //ScaleBitmap(Source.BorderData.RightBitmap, pOwner.ScaleFactor)
             SKBitmap useBitmap = srcinfo.ImageBitmaps.FirstOrDefault();
             if (useBitmap == null) return;
-            var srcset = srcinfo.ImageBitmaps.Select((s) => ScaleBitmap(s, pOwner.ScaleFactor)).ToArray();
+
+            //determine desired scale based on the region size and the source bitmap size.
+
+
+            var srcset = srcinfo.ImageBitmaps.Select((s) => ScaleBitmap(s, Region)).ToArray();
             try
             {
                 using (SKAutoCanvasRestore rest = new SKAutoCanvasRestore(Target, true))
@@ -301,6 +305,15 @@ namespace BASeTris.Rendering.Skia.Backgrounds
 
 
             }
+        }
+        private SKBitmap ScaleBitmap(SKBitmap src, SKRect region)
+        {
+            double XScale = (double)region.Width / (double)src.Width;
+            double YScale = (double)region.Height / (double)src.Height;
+            return ScaleBitmap(src, Math.Min(XScale, YScale));
+
+
+
         }
 
         private SKBitmap ScaleBitmap(SKBitmap src, double ScaleFactor)

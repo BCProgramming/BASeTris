@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using XInput.Wrapper;
 
 namespace BASeTris.Rendering
 {
@@ -207,6 +208,66 @@ namespace BASeTris.Rendering
             return Groups.Values.Select((s) => s.ToArray()).ToArray();
 
         }
+
+
+        private static String fullFieldBackgroundXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <TetrominoCollage Rows=""20"" Columns=""11"">	<Tetromino Scale=""1"" Type=""L"" Rotation=""2"" X=""5"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""3"" X=""4"" Y=""12"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""7"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""2"" X=""5"" Y=""13"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""2"" X=""5"" Y=""16"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""3"" X=""5"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""-1"" X=""-1"" Y=""10"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""3"" X=""2"" Y=""18"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""8"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""2"" X=""9"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""6"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""2"" X=""8"" Y=""13"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""2"" X=""1"" Y=""12"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""2"" X=""4"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""0"" X=""0"" Y=""14"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""3"" X=""6"" Y=""11"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""0"" X=""8"" Y=""18"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""2"" X=""3"" Y=""-2"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""3"" X=""3"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""0"" X=""2"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""1"" X=""-2"" Y=""16"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""3"" X=""9"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""1"" X=""9"" Y=""10"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""1"" X=""-1"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""3"" X=""1"" Y=""2"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""3"" X=""6"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""0"" X=""3"" Y=""10"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""8"" Y=""15"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""2"" X=""7"" Y=""8"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""2"" X=""3"" Y=""16"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""0"" X=""1"" Y=""13"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""0"" X=""7"" Y=""2"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""4"" X=""5"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""5"" Y=""12"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""2"" X=""3"" Y=""2"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""0"" X=""8"" Y=""11"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""0"" X=""1"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""2"" X=""3"" Y=""7"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""0"" X=""0"" Y=""9"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""3"" X=""-1"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""1"" X=""-1"" Y=""16"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""2"" X=""3"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""8"" Y=""12"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""3"" X=""5"" Y=""9"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""2"" X=""8"" Y=""17"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""1"" Y=""15"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""8"" Y=""7"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""5"" Y=""15"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""1"" Y=""10"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""1"" X=""2"" Y=""13"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""2"" X=""4"" Y=""17"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""-1"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""0"" X=""0"" Y=""7"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""1"" X=""1"" Y=""7"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""1"" X=""7"" Y=""5"" /></TetrominoCollage>";
+
+
         //corner XML layouts. These (can) be used to generate a bitmap to draw in the corners.
 
         private static readonly String Lower_Left_CollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -268,7 +329,52 @@ namespace BASeTris.Rendering
 <Tetromino Type=""J"" Rotation=""3"" X=""5"" Y=""3"" />
 <Tetromino Type=""Z"" Rotation=""1"" X=""3"" Y=""1"" />
 <Tetromino Type=""L"" Rotation=""0"" X=""3"" Y=""3"" />
+</TetrominoCollage>",
+            
+            @"<?xml version=""1.0"" encoding=""utf-8""?>
+<TetrominoCollage Rows=""6"" Columns=""6"">
+    <Tetromino Type=""I"" Rotation=""0"" X=""5"" Y=""3"" />
+    <Tetromino Type=""Z"" Rotation=""1"" X=""2"" Y=""3"" />
+    <Tetromino  Type=""S"" Rotation=""0"" X=""1"" Y=""0"" />
+    <Tetromino Type=""I"" Rotation=""0"" X=""-1"" Y=""3"" />
+    <Tetromino Type=""L"" Rotation=""3"" X=""4"" Y=""-1"" />
+    <Tetromino Type=""L"" Rotation=""3"" X=""4"" Y=""5"" />
+    <Tetromino Type=""Z"" Rotation=""0"" X=""-2"" Y=""2"" />
+    <Tetromino Type=""Z"" Rotation=""0"" X=""4"" Y=""2"" />
+    <Tetromino Type=""T"" Rotation=""0"" X=""1"" Y=""2"" />
+    <Tetromino Type=""Z"" Rotation=""1"" X=""2"" Y=""0"" />
+    <Tetromino Type=""T"" Rotation=""2"" X=""0"" Y=""4"" />
+    <Tetromino Type=""T"" Rotation=""2"" X=""0"" Y=""-2"" />
+    <Tetromino Type=""L"" Rotation=""1"" X=""-1"" Y=""0"" />
 </TetrominoCollage>"
+,@"<?xml version=""1.0"" encoding=""utf-8""?>
+<TetrominoCollage Rows=""8"" Columns=""8""> <Tetromino Scale=""1"" Type=""T"" Rotation=""0"" X=""6"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""3"" Y=""-1"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""2"" X=""3"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""0"" X=""-2"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""0"" Y=""7"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""0"" Y=""-1"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""1"" Y=""6"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""1"" Y=""-2"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""-2"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""2"" X=""6"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""4"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""2"" X=""1"" Y=""4"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""1"" X=""2"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""2"" X=""1"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""-1"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""7"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""2"" X=""5"" Y=""2"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""0"" X=""2"" Y=""2"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""-1"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""0"" X=""4"" Y=""1"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""4"" X=""3"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""O"" Rotation=""0"" X=""6"" Y=""0"" />
+</TetrominoCollage>"
+
+
+
+
 
         };
         public static SKBitmap GetBackgroundCollage(NominoTheme _theme,int BlockSize = 500)

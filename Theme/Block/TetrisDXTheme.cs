@@ -129,10 +129,21 @@ namespace BASeTris.Theme.Block
                 _ => _Block
             };
         }
-
+        private static Image LightImage = null;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_1"], Color.Yellow);
+
+            if (LightImage == null)
+            {
+                LightImage = new Bitmap(250, 500);
+                using (Graphics drawdark = Graphics.FromImage(LightImage))
+                {
+                    drawdark.Clear(Color.LightGreen);
+                }
+            }
+
+
+            return new PlayFieldBackgroundInfo(LightImage, Color.Yellow);
         }
     }
 

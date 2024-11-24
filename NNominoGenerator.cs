@@ -915,6 +915,17 @@ namespace BASeTris
         }
 
 
+        //related concept: "backpacking" pieces onto a set size grid.
+        //A recursive algorithm might work here. We can start with an algorithm that accepts all possible Minos that it wants to tile.
+
+        //Take a piece- (at random perhaps?) and try to place place it in each unoccupied position at a random location on the grid where it fits.
+        //If it doesn't fit, try each rotation. if it still doesn't fit try a different piece, and start over searching. If we fail to find a place to position any available piece at any possible rotation, we have failed.
+        //If it does fit, we now create a a copy of the field, and recursively call to try to fill in the rest of the field the same way.
+        //If the recursive call succeeds, we're done and have a tiled representation that fills the grid.
+        //otherwise, we go back to step one and proceed with choosing another position, rotation, or piece.
+        
+
+
 
     }
 }

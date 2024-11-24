@@ -250,14 +250,26 @@ namespace BASeTris.GameStates
         {
         }
     }
-    //this one has blocks "build up" from the bottom randomly.
-    public class TransitionState_BlockRandom : TransitionState
+    public class TransitionState_BlockRandom : TransitionState_Block
+    {
+        public TransitionState_BlockRandom(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
+        {
+        }
+    }
+    public class TransitionState_BlockRandomColumnBuild : TransitionState_Block
+    {
+        public TransitionState_BlockRandomColumnBuild(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
+        {
+        }
+    }
+    
+    public abstract class TransitionState_Block : TransitionState
         {
         public int BlockSize = 32;
-        public List<SKRect> ShuffledBlocks { get; set; } = null;//data initialized on first frame draw, which is when we get information about the canvas and bounds.
+        public List<SKRect> OrderedBlocks { get; set; } = null;//data initialized on first frame draw, which is when we get information about the canvas and bounds.
         public int RandomSeed { get; private set; }
 
-        public TransitionState_BlockRandom(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
+        public TransitionState_Block(GameState pPrevState, GameState pNextState, TimeSpan pTransitionLength) : base(pPrevState, pNextState, pTransitionLength)
         {
             RandomSeed = (int)TetrisGame.GetTickCount();
             

@@ -80,8 +80,12 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
             else
             {
+                
+                
 
                 _Background = CreateBackgroundFromImage(bgInfo.BackgroundImage, bgInfo.TintColor);
+                _Background.Data.Scale = Math.Min((float)Size.Width / (float)bgInfo.BackgroundImage.Width, (float)Size.Height / (float)bgInfo.BackgroundImage.Height);
+                
                 /*
                 var _bg = new StandardImageBackgroundSkia();
 
@@ -99,6 +103,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 }
                 _Background = (IBackground<SkiaBackgroundDrawData>)_bg;*/
             }
+            _Background.Data.Movement = new SKPoint(2, 2);
             Self.DoRefreshBackground = false;
         }
         public static IBackground<StandardImageBackgroundDrawSkiaCapsule> CreateBackgroundFromImage(Image img, Color tint)

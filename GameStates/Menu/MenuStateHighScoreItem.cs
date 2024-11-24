@@ -36,7 +36,8 @@ namespace BASeTris.GameStates.Menu
             //TransitionState tstateBlocks = new TransitionState_Melt(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, Size=1,SnapshotSettings=TransitionState.SnapshotConstants.Snapshot_Both };
 
             //TransitionState tstateBlocks = new TransitionState_Pixelate(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous,SnapshotSettings=TransitionState.SnapshotConstants.Snapshot_Both };
-            TransitionState tstateBlocks = new TransitionState_Blur(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+            TransitionState tstateBlocks = new TransitionState_BlockRandom(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+            //TransitionState tstateBlocks = new TransitionState_Blur(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 1750)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_Previous, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
             //TransitionState tstate = TransitionState.GetTransitionState(pOwner.CurrentState, scorestate, new TimeSpan(0, 0, 0, 0, 500));
             //tstateblack.GameProcDelegationMode = tstateA.GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_None;
 

@@ -492,9 +492,9 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         {
             //Height:-3.56765739215024,Row:0.627171085947044,Hole:-0.717625853214083,Bumpiness:-0.49091002708371,Crevasse:-0.40348813763272
             //Bump:-0.46105559660822,Height:-2.87825892656684,Hole:-0.631400211245207,Row:0.680445781380349   
-            public double AggregateHeightScore { get; set; } = -3.56765739215024; //- 0.610066d;
-            public double RowScore { get; set; } = 0.680445781380349; // 0.760666d;
-            public double HoleScore { get; set; } = -0.717625853214083; //- 0.55663d;
+            public double AggregateHeightScore { get; set; } = - 0.610066d;
+            public double RowScore { get; set; } = 0.760666d;
+            public double HoleScore { get; set; } = -0.55663d;
             public double BumpinessScore { get; set; } = -0.49091002708371;
 
             public double CrevasseScore { get; set; } = -0.40348813763272;

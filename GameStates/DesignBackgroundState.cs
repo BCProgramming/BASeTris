@@ -52,13 +52,75 @@ namespace BASeTris.GameStates
 
             Collage = new TetrominoCollageRenderer(DesignRows, DesignColumns, 500, 500, 0, DisplayedDesignerTheme, SKColors.Transparent);
         }
-        public void RandomizeLayer(int MinimumSize, int MaximumSize)
-        {
-            int chosensize = TetrisGame.StatelessRandomizer.Next((MaximumSize - MinimumSize)) + MinimumSize;
-            _DesignColumns = _DesignRows = chosensize;
-            DesignNominoes = new List<Nomino>();
-            RecreateFakeHandler();
 
+        public Thread RandomizerThread = null;
+
+        public void RandomizeLayer(int MinimumSize, int MaximumSize,Action CompletionAction = null)
+        {
+
+
+            if (RandomizerThread != null)
+            {
+                RandomizerThread = null;
+                return;
+            }
+            RandomizerThread = new Thread(() =>
+            {
+                //NOTE to self: issue found where it seems to not place anything in the top row. Investigate
+                IRandomizer rgen = RandomHelpers.Construct();
+                int chosensize = TetrisGame.StatelessRandomizer.Next((MaximumSize - MinimumSize)) + MinimumSize;
+                chosensize = 8;
+                _DesignColumns = 11;  _DesignRows = 20;
+                DesignNominoes = new List<Nomino>();
+                RecreateFakeHandler();
+
+                bool[][] PositionData = new bool[_DesignRows][];
+                for (int r = 0; r < _DesignRows; r++)
+                {
+                    PositionData[r] = new bool[_DesignColumns];
+                }
+                try
+                MinoTileGenerator mtg = new MinoTileGenerator();
+                {
+                    var BuildMinos = mtg.Generate(PositionData, null, DesignBackgroundState.TetrominoTypes.Select<Type, Func<Nomino>>((t) => new Func<Nomino>(() => (Nomino)Activator.CreateInstance(t, new object[] { null }))).ToArray(), null, null, (newlist) =>
+                    {
+
+                        try
+                        {
+
+                            foreach (var iterate in newlist)
+                            {
+                                DisplayedDesignerTheme.ApplyTheme(iterate, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
+                            }
+                            DesignNominoes = newlist;
+                            Thread.Sleep(1);
+
+                        }
+                        catch (Exception exr)
+                        {
+                            ;
+                        }
+                        return RandomizerThread == null;
+                    }); ;
+                    if (BuildMinos != null)
+                    {
+                        DesignNominoes = BuildMinos.ToList();
+                        foreach (var iterate in DesignNominoes)
+                        {
+                            DisplayedDesignerTheme.ApplyTheme(iterate, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
+                        }
+                    }
+                }
+                catch (Exception exr)
+                {
+                }
+                if (CompletionAction != null) CompletionAction();
+                RandomizerThread = null;
+                //DesignNominoes = BuildMinos.ToList();
+            });
+            RandomizerThread.Start();
+            return;
+            /*
             HashSet<Point> UsedPositions = new HashSet<Point>();
 
 
@@ -90,7 +152,7 @@ namespace BASeTris.GameStates
 
 
 
-            }
+            }*/
 
             foreach (var iterate in DesignNominoes)
             {
@@ -262,7 +324,7 @@ namespace BASeTris.GameStates
             MenuStateTextMenuItem SaveDesign = new MenuStateTextMenuItem() { Text = "Save Design", TipText = "Save Current Design" };
             MenuStateTextMenuItem TestDesign = new MenuStateTextMenuItem() { Text = "Test Design", TipText = "Test Design" };
             MenuStateTextMenuItem LoadDesign = new MenuStateTextMenuItem() { Text = "Load Design", TipText = "Load Design" };
-            MenuStateTextMenuItem RandomizeItem = new MenuStateTextMenuItem() { Text = "Randomize", TipText = "Randomize this Layer's arrangement" };
+            MenuStateTextMenuItem RandomizeItem = new MenuStateTextMenuItem() { Text = CurrentLayer.RandomizerThread==null?"Randomize":"Cancel Randomize", TipText = "Randomize this Layer's arrangement" };
             MenuStateTextMenuItem NextLayer = new MenuStateTextMenuItem() { Text = "Next Layer", TipText = "Edit the next layer. Creates a new layer if needed." };
             MenuStateTextMenuItem PrevLayer = new MenuStateTextMenuItem() { Text = "Previous Layer", TipText = "Edit the previous layer" };
             MenuStateTextMenuItem LayerOptions = new MenuStateTextMenuItem() { Text = "Layer Options", TipText = "Edit Layer Properties" };
@@ -417,6 +479,8 @@ namespace BASeTris.GameStates
                 }
                 else if (e.MenuElement == RandomizeItem)
                 {
+                    RandomizeItem.Text = "Cancel Randomization";
+                    RandomizeItem.TipText = "Cancel Randomization";
                     CurrentLayer.RandomizeLayer(4, 16);
                     IsDirty = true;
                     DesignOptionsMenuState.ActivatedItem = null;
