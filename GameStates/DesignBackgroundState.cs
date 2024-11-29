@@ -79,8 +79,8 @@ namespace BASeTris.GameStates
                 {
                     PositionData[r] = new bool[_DesignColumns];
                 }
-                try
                 MinoTileGenerator mtg = new MinoTileGenerator();
+                try
                 {
                     var BuildMinos = mtg.Generate(PositionData, null, DesignBackgroundState.TetrominoTypes.Select<Type, Func<Nomino>>((t) => new Func<Nomino>(() => (Nomino)Activator.CreateInstance(t, new object[] { null }))).ToArray(), null, null, (newlist) =>
                     {
