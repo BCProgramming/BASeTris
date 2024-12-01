@@ -185,6 +185,15 @@ namespace BASeTris
         {
             return MarginInformation.Empty;
         }
+        private PlayFieldBackgroundInfo _Cached;
+        protected PlayFieldBackgroundInfo HandleBGCache(Func<PlayFieldBackgroundInfo> Generator)
+        {
+            if (_Cached == null)
+            {
+                _Cached = Generator();
+            }
+            return _Cached;
+        }
         public abstract PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler);
 
         protected Dictionary<String, Image> _Cache = new Dictionary<string, Image>();
@@ -383,7 +392,10 @@ namespace BASeTris
         
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background",0.5f],Color.Transparent);
+            return HandleBGCache(() =>
+            {
+                return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent);
+            });
         }
         public StandardTetrominoTheme():this(StandardColouredBlock.BlockStyle.Style_Shine)
         {

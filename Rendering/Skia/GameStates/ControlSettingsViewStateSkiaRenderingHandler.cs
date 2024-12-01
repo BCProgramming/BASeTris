@@ -99,7 +99,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             pRenderTarget.DrawTextSK(sktitle);
 
             GameState.GameKeys[] retrievekeys = (GameState.GameKeys[])Enum.GetValues(typeof(GameState.GameKeys)); //  new GameState.GameKeys[] { GameState.GameKeys.GameKey_RotateCW, GameState.GameKeys.GameKey_RotateCCW, GameState.GameKeys.GameKey_Drop, GameState.GameKeys.GameKey_Hold };
-            Dictionary<GameState.GameKeys, (List<int>, List<int>)> keybuttonlookup = GetKeyLookup(retrievekeys, pOwner.Settings);
+            Dictionary<GameState.GameKeys, (List<int>, List<int>)> keybuttonlookup = AssetHelper.GetKeyLookup(retrievekeys, pOwner.Settings);
             float ButtonStartX = (float)(270 * pOwner.ScaleFactor);
             float StartY = (float)(350 * pOwner.ScaleFactor);
             float StartX = (float)(250 * pOwner.ScaleFactor);
@@ -172,19 +172,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             
 
         }
-        public static Dictionary<GameState.GameKeys, (List<int>, List<int>)> GetKeyLookup(GameState.GameKeys[] keys,SettingsManager settingsSource)
-        {
-            Dictionary<GameState.GameKeys, (List<int>, List<int>)> result = new Dictionary<GameState.GameKeys, (List<int>, List<int>)>();
-            foreach (var iterate in keys)
-            {
-                var gotentries = settingsSource.GetGamePadButtonFromGameKey(iterate);
-                var gotkeyboardentries = settingsSource.GetKeyBoardKeyFromGameKey(iterate);
-                result.Add(iterate, (gotentries, gotkeyboardentries));
-
-            }
-            return result;
-
-        }
+        
         public override void RenderStats(IStateOwner pOwner, SKCanvas pRenderTarget, ControlSettingsViewState Source, GameStateSkiaDrawParameters Element)
         {
             throw new NotImplementedException();

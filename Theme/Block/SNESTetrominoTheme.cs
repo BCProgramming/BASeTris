@@ -469,7 +469,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
 
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent);
+            return HandleBGCache(()=>new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent));
         }
     }
 }

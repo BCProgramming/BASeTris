@@ -48,10 +48,10 @@ namespace BASeTris.AI
             {
                 for (int x = -5; x < Source[0].Length + 5; x++)
                 {
-                    if(rules.StupidFactor<1)
+                    /*if(rules.StupidFactor<1)
                     {
                         if (TetrisGame.StatelessRandomizer.NextDouble() < rules.StupidFactor) continue;
-                    }
+                    }*/
                     Nomino cloneFor = new Nomino(bg);
                     foreach (var resetblock in cloneFor)
                     {
@@ -229,13 +229,16 @@ namespace BASeTris.AI
             //move the Nomino by the specified offset...
 
             _SourceGroup.RecalcExtents();
-            /*
+            
             if(_SourceGroup.GroupExtents.Left+_SourceGroup.X+XOffset < 0 || _SourceGroup.GroupExtents.Right+XOffset+_SourceGroup.X > _BoardState[0].Length)
             {
                 InvalidState = true; //nothing else to do- this is an invalid state as the move puts us "off" the board.
             }
-            else*/
+            else
             {
+
+
+
                 //get our board state...
                 try
                 {
@@ -471,7 +474,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
         public abstract class BoardScoringRuleData
         {
-            public bool Moronic { get; set; } = false;
+            public bool Moronic { get; set; } = true;
             public float StupidFactor { get; set; } = 1.0f;
         }
         public class MasterBlockScoringRuleData : BoardScoringRuleData
@@ -492,10 +495,10 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         {
             //Height:-3.56765739215024,Row:0.627171085947044,Hole:-0.717625853214083,Bumpiness:-0.49091002708371,Crevasse:-0.40348813763272
             //Bump:-0.46105559660822,Height:-2.87825892656684,Hole:-0.631400211245207,Row:0.680445781380349   
-            public double AggregateHeightScore { get; set; } = - 0.610066d;
+            public double AggregateHeightScore { get; set; } = - 0.510066;
             public double RowScore { get; set; } = 0.760666d;
-            public double HoleScore { get; set; } = -0.55663d;
-            public double BumpinessScore { get; set; } = -0.49091002708371;
+            public double HoleScore { get; set; } = -0.35663d;
+            public double BumpinessScore { get; set; } = -0.184483;
 
             public double CrevasseScore { get; set; } = -0.40348813763272;
             public override string ToString()

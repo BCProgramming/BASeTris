@@ -151,15 +151,18 @@ namespace BASeTris.Theme
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            if (DarkImage == null)
+            return HandleBGCache(() =>
             {
-                DarkImage = new Bitmap(250, 500);
-                using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                if (DarkImage == null)
                 {
-                    drawdark.Clear(Color.FromArgb(10, 10, 10));
+                    DarkImage = new Bitmap(250, 500);
+                    using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                    {
+                        drawdark.Clear(Color.FromArgb(10, 10, 10));
+                    }
                 }
-            }
-            return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+                return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+            });
         }
     }
 }

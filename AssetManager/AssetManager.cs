@@ -34,15 +34,40 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using BASeCamp.Logging;
-
+using BASeTris.Input;
+using BASeTris.Rendering;
+using BASeTris.Settings;
 using OpenTK.Input;
 using SkiaSharp;
 using XInput.Wrapper;
+using static System.Windows.Forms.AxHost;
 using static BASeTris.AssetManager.cNewSoundManager;
 using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 namespace BASeTris.AssetManager
 {
+
+    public class GameKeyImageData<T>
+    {
+        //function given a Gamekey, gives back the T[] elements (probably SKBitmap) that are bound to it.
+        private Func<GameState.GameKeys, T[]> GetGamepadButtonElements;
+        private Func<GameState.GameKeys, T[]> GetKeyboardButtonElements;
+        public GameKeyImageData(Func<GameState.GameKeys, T[]> pGamepadFunc, Func<GameState.GameKeys, T[]> pKeyboardFunc)
+        {
+        }
+        public T[] GetGamepadBindingsForButton(GameState.GameKeys gkey)
+        {
+            return GetGamepadButtonElements(gkey);
+        }
+        public T[] GetGamepadBindingsForKeyboardKey(GameState.GameKeys gkey)
+        {
+            return GetKeyboardButtonElements(gkey);
+        }
+
+
+    }
+
+
     public class ControllerImageDataInformation
     {
         public String ControllerName { get; set; }
@@ -120,6 +145,80 @@ X.Gamepad.GamepadButtons.RightStick
         public static ControllerImageDataInformation XBoxOneImageKeydata = new ControllerImageDataInformation("XBox One", "XBoxOne_Diagram", "XBoxOne_Diagram_Simple", (from b in Buttonset select b.Replace("XBoxSeriesX", "XBoxOne")).ToArray());
 
         public static ControllerImageDataInformation XBox360ImageKeydata = new ControllerImageDataInformation("XBox 360", "xbox_360_diagram", null, (from b in Buttonset select b.Replace("XBoxSeriesX", "360")).ToArray());
+
+
+        
+
+        public static Dictionary<GameState.GameKeys, (List<int>, List<int>)> GetKeyLookup(GameState.GameKeys[] keys, SettingsManager settingsSource)
+        {
+            Dictionary<GameState.GameKeys, (List<int>, List<int>)> result = new Dictionary<GameState.GameKeys, (List<int>, List<int>)>();
+            foreach (var iterate in keys)
+            {
+                var gotentries = settingsSource.GetGamePadButtonFromGameKey(iterate);
+                var gotkeyboardentries = settingsSource.GetKeyBoardKeyFromGameKey(iterate);
+                result.Add(iterate, (gotentries, gotkeyboardentries));
+
+            }
+            return result;
+
+        }
+
+
+        public static IEnumerable<GameKeyBindInfo<SKImage>> RetrieveBindingImages(SettingsManager Source,ControllerImageDataInformation ControllerData)
+        {
+            GameState.GameKeys[] retrievekeys = (GameState.GameKeys[])Enum.GetValues(typeof(GameState.GameKeys));
+            var keybuttonlookup = GetKeyLookup(retrievekeys, Source);
+            foreach (var kvp in keybuttonlookup)
+            {
+
+                //Key is the gamekey. Item1 is a list of the image keys for the gamepad; Item2 is a list of the imagekeys for the keyboard.
+
+                float MaxHeight = 25;
+                if (kvp.Value.Item1 == null) continue;
+                String sKey = kvp.Key.ToString();
+
+                if (sKey.StartsWith("gamekey_", StringComparison.OrdinalIgnoreCase))
+                    sKey = sKey.Substring(8);
+                List<SKImage> ButtonImages = new List<SKImage>();
+                if (kvp.Value.Item1 != null)
+                {
+                    foreach (var button in kvp.Value.Item1)
+                    {
+                        //now, get the image key...
+                        String getkey = ControllerData.ButtonImageKeys[(XInput.Wrapper.X.Gamepad.GamepadButtons)button];
+
+                        if (getkey != null)
+                        {
+                            var retrievedimage = TetrisGame.Imageman.GetSKBitmap(getkey);
+
+                            if (retrievedimage != null)
+                            {
+                                ButtonImages.Add(SKImage.FromBitmap(retrievedimage));
+                                //pRenderTarget.DrawBitmap(retrievedimage, new SKRect(CurrentX, CurrentY, CurrentX + retrievedimage.Width * .66f, CurrentY + retrievedimage.Height * .66f));
+                            }
+                        }
+                    }
+                }
+                List<SKImage> KeyboardImages = new List<SKImage>();
+                if (kvp.Value.Item2 != null)
+                {
+                    //draw keyboard keys...
+                    
+                    foreach (var key in kvp.Value.Item2)
+                    {
+                        SKBitmap keybitmap = AssetHelper.GetSKBitmapForKeyboardKey((OpenTK.Windowing.GraphicsLibraryFramework.Keys)key);
+                        KeyboardImages.Add(SKImage.FromBitmap(keybitmap));
+                    
+                    
+                    }
+                }
+                yield return new GameKeyBindInfo<SKImage>(kvp.Key, ButtonImages.ToArray(), KeyboardImages.ToArray());
+
+            }
+
+
+
+        }
 
 
         public static Dictionary<String, ControllerImageDataInformation> ControllerImageData = new Dictionary<string, ControllerImageDataInformation>()
@@ -2989,4 +3088,29 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return cmPicture;
         }
     }
+
+
+    public class GameKeyBindingImageData
+    {
+
+        public GameState.GameKeys GameKey { get; init; }
+        
+    }
+
+
+    public class GameKeyBindInfo<T>
+    {
+        public GameState.GameKeys Key { get; init; }
+        public T[] PadButtonElements { get; init; }
+        public T[] KeyboardElements { get; init; }
+        public GameKeyBindInfo(GameState.GameKeys pKey, T[] pButtonElements, T[] pKeyboardElements)
+        {
+            Key = pKey;
+            PadButtonElements = pButtonElements;
+            KeyboardElements = pKeyboardElements;
+        }
+    }
+
+    
+
 }

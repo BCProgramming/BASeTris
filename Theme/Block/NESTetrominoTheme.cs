@@ -44,15 +44,18 @@ namespace BASeTris.Theme.Block
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            if (DarkImage == null)
+            return HandleBGCache(() =>
             {
-                DarkImage = new Bitmap(250, 500);
-                using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                if (DarkImage == null)
                 {
-                    drawdark.Clear(Color.FromArgb(10, 10, 10));
+                    DarkImage = new Bitmap(250, 500);
+                    using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                    {
+                        drawdark.Clear(Color.FromArgb(10, 10, 10));
+                    }
                 }
-            }
-            return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+                return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+            });
         }
         SKColor[][] LevelColorSets = new SKColor[][] { Level0Colors, Level1Colors, Level2Colors, Level3Colors, Level4Colors, Level5Colors, Level6Colors, Level7Colors, Level8Colors, Level9Colors };
 

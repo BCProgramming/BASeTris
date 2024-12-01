@@ -8,6 +8,7 @@ using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 // TODO Although ClickOnce is supported on .NET 5+, apps do not have access to the System.Deployment.Application namespace. For more details see https://github.com/dotnet/deployment-tools/issues/27 and https://github.com/dotnet/deployment-tools/issues/53.
 using System.Diagnostics.Eventing.Reader;
@@ -275,6 +276,13 @@ namespace BASeTris.GameStates
         public override DisplayMode SupportedDisplayMode => DisplayMode.Full;
         public int SelectedIndex { get { return CurrentLayer.SelectedIndex; } set { CurrentLayer.SelectedIndex = value; } }
         bool flInitialized = false;
+
+        //the drawing code is responsible for filling this information in when it paints.
+
+        public SKRect? BoxBound { get; set; }
+        public ConcurrentDictionary<(int, int), Nomino> PositionalMapping = new ConcurrentDictionary<(int, int), Nomino>();
+
+
 
         public XElement GetXmlData(string pNodeName, object PersistenceData)
         {

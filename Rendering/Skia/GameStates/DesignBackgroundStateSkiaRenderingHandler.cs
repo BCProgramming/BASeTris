@@ -1,4 +1,5 @@
 ﻿using BASeCamp.Rendering;
+using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates;
 using SkiaSharp;
@@ -13,7 +14,32 @@ namespace BASeTris.Rendering.Skia.GameStates
     [RenderingHandler(typeof(DesignBackgroundState), typeof(SKCanvas), typeof(GameStateSkiaDrawParameters))]
     public class DesignBackgroundStateSkiaRenderingHandler : StandardStateRenderingHandler<SKCanvas, DesignBackgroundState, GameStateSkiaDrawParameters>
     {
-        
+
+        Dictionary<GameState.GameKeys, GameKeyBindInfo<SKImage>> GameKeyBitmapData = null;
+        private void PrepareControllerButtonImages(IStateOwner pOwner)
+        {
+            if (GameKeyBitmapData != null) return;
+            GameKeyBitmapData = new Dictionary<GameState.GameKeys, GameKeyBindInfo<SKImage>>();
+            //AssetHelper.XBoxSeriesXImageKeyData
+            foreach (var result in AssetHelper.RetrieveBindingImages(pOwner.Settings, AssetHelper.XBoxSeriesXImageKeyData))
+            {
+                GameKeyBitmapData.Add(result.Key, result);
+            }
+            SKPaint TextFore = new SKPaint() { Color = SKColors.Black, TextSize = (float)(12 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
+            SKPaint TextBack = new SKPaint() { Color = SKColors.White, TextSize = (float)(12 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
+            SKPaint TTextFore = new SKPaint() { Color = SKColors.Black, TextSize = (float)(12 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
+            SKPaint TTextBack = new SKPaint() { Color = SKColors.White, TextSize = (float)(12 * pOwner.ScaleFactor), Typeface = TetrisGame.RetroFontSK };
+            skkey = new DrawTextInformationSkia();
+            skkey.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia() { Height=2f*(float)pOwner.ScaleFactor});
+            skkey.ShadowPaint = TTextBack;
+            skkey.ForegroundPaint = TTextFore;
+            skkey.BackgroundPaint = new SKPaint() { Color = SKColors.Transparent };
+
+            skkey.ScalePercentage = 1;
+            skkey.DrawFont = new Adapters.SKFontInfo(TetrisGame.RetroFontSK, (float)(12 * pOwner.ScaleFactor));
+            
+        }
+        private DrawTextInformationSkia skkey = null;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, DesignBackgroundState Source, GameStateSkiaDrawParameters Element)
         {
             //throw new NotImplementedException();
@@ -21,8 +47,10 @@ namespace BASeTris.Rendering.Skia.GameStates
             //stuff we want to render:
 
             //background:
-
-           
+            PrepareControllerButtonImages(pOwner); //prep the button images. We want to have "help" displayed, to indicate the keys.
+                                                   //Since I keep forgetting myself and there's literally no documentation this would seem prudent....
+            
+            //we are responsible for filling in the Source's BoxBound as well as PositionalMapping.
             
             if (Source.BG == null)
             {
@@ -96,7 +124,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                     }
                     var CurrentElement = duplicated[index];
 
-
+                    
                     foreach (var renderblock in CurrentElement.GetBlockData())
                     {
                         if (renderblock.Y + CurrentElement.Y == 0)
@@ -123,6 +151,70 @@ namespace BASeTris.Rendering.Skia.GameStates
             //we want to render the controls along the bottom, too. Since we can map controls to bitmaps, may as well right?
             //also it would look sort a professional? Maybe.
 
+            var NextNominoButtonImages = GameKeyBitmapData[GameState.GameKeys.GameKey_DesignerNextNomino].PadButtonElements;
+
+            GameState.GameKeys[] DrawHelpKeys = new GameState.GameKeys[]{
+                GameState.GameKeys.GameKey_DesignerNextNomino,
+                GameState.GameKeys.GameKey_DesignerPrevNomino,
+                GameState.GameKeys.GameKey_DesignerChangeNomino,
+                GameState.GameKeys.Gamekey_DesignerDeleteNomino,
+
+                };
+            float ButtonSize = 25f * (float)pOwner.ScaleFactor;
+            bool HorizontalStack = true;
+            float StartX, StartY;
+            if (HorizontalStack)
+            {
+                StartX = Bounds.Left + 50f * (float)pOwner.ScaleFactor;
+                StartY = Bounds.Bottom - (ButtonSize*3); //* (float)pOwner.ScaleFactor;
+            }
+            else
+            {
+                StartX = Bounds.Left + 50f * (float)pOwner.ScaleFactor;
+                StartY = Bounds.Top + 120f * (float)pOwner.ScaleFactor;
+            }
+            float CurrentX = StartX;
+            float CurrentY = StartY;
+            
+            foreach (GameState.GameKeys drawkey in DrawHelpKeys)
+            {
+                bool RenderedButtonImage = false;
+
+                var getPadImageData = GameKeyBitmapData.ContainsKey(drawkey)?GameKeyBitmapData[drawkey].PadButtonElements:Array.Empty<SKImage>();
+                var getKeyImageData = GameKeyBitmapData.ContainsKey(drawkey)?GameKeyBitmapData[drawkey].KeyboardElements: Array.Empty<SKImage>();
+                foreach (var DrawButton in getPadImageData.Concat(getKeyImageData))
+                {
+                    RenderedButtonImage = true;
+                    pRenderTarget.DrawImage(DrawButton, new SKRect(CurrentX, CurrentY, CurrentX + ButtonSize, CurrentY + ButtonSize));
+                    CurrentX += ButtonSize * 1.1f;
+                    
+                }
+                
+
+                //SKRect titlebound = new SKRect();
+                //TTextFore.MeasureText(skkey.Text, ref titlebound);
+                skkey.Text = GameState.GetGameKeyFriendlyName(drawkey).Replace("(BG Design)","");
+                skkey.Position = new SKPoint(CurrentX, CurrentY + ButtonSize);
+                SKRect TextBound = new SKRect();
+                skkey.ForegroundPaint.MeasureText(skkey.Text, ref TextBound);
+
+                if(RenderedButtonImage)
+                    pRenderTarget.DrawTextSK(skkey);
+
+                if (HorizontalStack)
+                {
+                    CurrentX += ButtonSize * 1.1f + TextBound.Width;
+                    if (CurrentX > Bounds.Right) CurrentX = StartX;
+                }
+                else
+                {
+                    CurrentY += ButtonSize * 1.1f;
+                    CurrentX = StartX;
+                }
+
+                
+                
+            }
 
 
 

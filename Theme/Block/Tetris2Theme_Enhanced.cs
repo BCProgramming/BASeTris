@@ -656,7 +656,7 @@ namespace BASeTris.Theme.Block
 
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent);
+            return HandleBGCache(()=>new PlayFieldBackgroundInfo(TetrisGame.Imageman["background", 0.5f], Color.Transparent));
         }
         public enum BCT
         {

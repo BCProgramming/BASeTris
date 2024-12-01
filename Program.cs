@@ -17,6 +17,7 @@ using BASeTris.Blocks;
 using BASeTris.Choosers;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Tetrominoes;
+using Microsoft.VisualBasic;
 using OpenTK;
 using OpenTK.Input;
 using static BASeTris.NNominoGenerator;
@@ -133,7 +134,6 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-
             //Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
 
             //var testresult = MakeTester.GetContiguousSets();
@@ -192,6 +192,62 @@ namespace BASeTris
                 Debug.Print($"Starting BTTK: {DesiredWidth},{DesiredHeight}");
                 new BASeTrisTK((int)(DesiredWidth*1.5f), (int)(DesiredHeight*1.5f)).Run();
             }
+        }
+
+        private static NominoBlock bb()
+        {
+            return new StandardColouredBlock();
+        }
+        static void TestAI()
+        {
+            //use StandardNominoAI to evaluate a known board state.
+            NominoBlock[][] TestState = new NominoBlock[][] {
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,bb(),null,null,bb(),null,null,null,null },
+                new NominoBlock[]{null,null,bb(),bb(),bb(),bb(),bb(),null,null,null },
+                new NominoBlock[]{null,null,bb(),bb(),bb(),bb(),bb(),null,bb(),bb() },
+                new NominoBlock[]{null,null,bb(),bb(),bb(),bb(),bb(),null,bb(),bb() },
+                new NominoBlock[]{bb(),null,bb(),bb(),bb(),bb(),bb(),null,bb(),bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(), bb(),bb(),bb(),null,bb(),bb() },
+                new NominoBlock[]{bb(),bb(),null,bb(),bb(),bb(),bb(),null,bb(),bb() }
+
+
+            };
+            var IMino = new Tetromino_I();
+            StoredBoardState.TetrisScoringRuleData scorer = new StoredBoardState.TetrisScoringRuleData();
+
+            //Get test results for I Mino. Best place should be in the "well" of empty space!
+            var PossibleBoardResults = StandardNominoAI.GetPossibleResults(TestState, IMino, scorer);
+
+            //these are all the possible results for the board. Now, rank by the score.
+
+            var RankedResults = PossibleBoardResults.OrderByDescending((w) => w.GetScore(typeof(StandardTetrisHandler), scorer));
+
+            var TopResult = RankedResults.First();
+
+
+            //Added: Do test of T Tetromino, it should get slotted to the left.
+
+
+            //known board state.
+
+
+
+
         }
     }
 }

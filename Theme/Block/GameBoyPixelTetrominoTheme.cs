@@ -51,29 +51,32 @@ namespace BASeTris.Theme.Block
             };
         }
         private Bitmap LightImage = null;
+        private PlayFieldBackgroundInfo _Cached = null;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
 
-            if (LightImage == null)
+            return HandleBGCache(() =>
             {
-                //var borderbg = TetrisGame.Imageman.getLoadedImage("gb_border_image");
-                
-
-
-                LightImage = new Bitmap(250, 250);
-                using (Graphics drawdark = Graphics.FromImage(LightImage))
+                if (LightImage == null)
                 {
-                    drawdark.Clear(Color.PeachPuff);
-                    drawdark.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                    //drawdark.DrawImageUnscaled(borderbg, new Point(0, 0));
+                    //var borderbg = TetrisGame.Imageman.getLoadedImage("gb_border_image");
+
+
+
+                    LightImage = new Bitmap(250, 250);
+                    using (Graphics drawdark = Graphics.FromImage(LightImage))
+                    {
+                        drawdark.Clear(Color.PeachPuff);
+                        drawdark.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                        //drawdark.DrawImageUnscaled(borderbg, new Point(0, 0));
+                    }
                 }
-            }
-            var buildBG = StandardTetrisGameStateSkiaRenderingHandler.CreateBackgroundFromImage(LightImage, Color.Transparent);
+                var buildBG = StandardTetrisGameStateSkiaRenderingHandler.CreateBackgroundFromImage(LightImage, Color.Transparent);
 
-            buildBG.Overlayer = new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick_16", "gb_border_brick_16", "gb_border_brick_16", "gb_border_brick_16"));
+                buildBG.Overlayer = new BackgroundDrawers.StandardImageBackgroundBorderSkia(new BackgroundDrawers.StandardImageBackgroundBorderSkia.BorderImageKeyData(null, "gb_border_brick_16", "gb_border_brick_16", "gb_border_brick_16", "gb_border_brick_16"));
 
-            var result = new PlayFieldBackgroundInfo(LightImage, Color.Transparent) {SkiaBG = buildBG };
-            return result;
+                return new PlayFieldBackgroundInfo(LightImage, Color.Transparent) { SkiaBG = buildBG };
+            });
         }
         public override MarginInformation GetDisplayMargins()
         {
@@ -90,18 +93,22 @@ namespace BASeTris.Theme.Block
             return SKColors.LightGreen;
         }
         private Bitmap LightImage = null;
+        
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-
-            if (LightImage == null)
+            return HandleBGCache(() =>
             {
-                LightImage = new Bitmap(250, 500);
-                using (Graphics drawdark = Graphics.FromImage(LightImage))
+                if (LightImage == null)
                 {
-                    drawdark.Clear(Color.PeachPuff);
+                    LightImage = new Bitmap(250, 500);
+                    using (Graphics drawdark = Graphics.FromImage(LightImage))
+                    {
+                        drawdark.Clear(Color.PeachPuff);
+                    }
                 }
-            }
-            return new PlayFieldBackgroundInfo(LightImage, Color.Transparent);
+                return new PlayFieldBackgroundInfo(LightImage, Color.Transparent);
+            });
+            
         }
     }
     public class GameBoyBigDotTheme : GameBoyCompositionThemeBase

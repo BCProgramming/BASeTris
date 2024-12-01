@@ -125,11 +125,14 @@ namespace BASeTris.AI
             ////double d = -.184483;
             //double d = -.384483;
             double CreviceScore = (Rules.CrevasseScore * (double)Crevice);
-            return (Rules.AggregateHeightScore * (double)Aggregate) +
+
+            var ScoreResult = (Rules.AggregateHeightScore * (double)Aggregate) +
                    (Rules.RowScore * (double)Rows) +
                    (Rules.HoleScore * (double)Holes) +
-                   (Rules.BumpinessScore * (double)Bumpy) +
-                    CreviceScore;
+                   (Rules.BumpinessScore * (double)Bumpy);
+
+            return ScoreResult;
+
 
         }
     }

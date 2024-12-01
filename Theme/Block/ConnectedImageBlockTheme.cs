@@ -604,9 +604,11 @@ namespace BASeTris.Theme.Block
         }
         protected bool VisuallyConnectOnlySameCombiningType = false;
         protected bool UseConnectedImages = true;
+        
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_4", 0.5f], Color.Transparent);
+
+            return base.HandleBGCache(() => new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_4", 0.5f], Color.Transparent));
         }
         protected abstract String GetImageKeyBase();
 

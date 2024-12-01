@@ -32,9 +32,10 @@ namespace BASeTris.Theme.Block
             return "Tetris_3";
         }
         Bitmap DarkImage;
+        
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_5", 0.5f], Color.Transparent);
+            return HandleBGCache(()=>new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_5", 0.5f], Color.Transparent));
         }
     }
     [HandlerTheme("Tengen Tetris", typeof(Tetris2Handler), typeof(DrMarioHandler), typeof(StandardTetrisHandler), typeof(NTrisGameHandler))]
@@ -49,7 +50,8 @@ namespace BASeTris.Theme.Block
         Bitmap DarkImage;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_5", 0.5f], Color.Transparent);
+            return HandleBGCache(()=> new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_5", 0.5f], Color.Transparent));
+            
         }
     }
 
@@ -66,17 +68,24 @@ namespace BASeTris.Theme.Block
         }
 
         Bitmap DarkImage;
+        
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            if (DarkImage == null)
+
+            return HandleBGCache(() =>
             {
-                DarkImage = new Bitmap(250, 500);
-                using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                if (DarkImage == null)
                 {
-                    drawdark.Clear(Color.FromArgb(10, 10, 10));
+                    DarkImage = new Bitmap(250, 500);
+                    using (Graphics drawdark = Graphics.FromImage(DarkImage))
+                    {
+                        drawdark.Clear(Color.FromArgb(10, 10, 10));
+                    }
                 }
-            }
-            return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+                return new PlayFieldBackgroundInfo(DarkImage, Color.Transparent);
+            });
+        
+
         }
     }
 

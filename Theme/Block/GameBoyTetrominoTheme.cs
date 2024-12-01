@@ -143,16 +143,20 @@ namespace BASeTris
         private Bitmap LightImage = null;
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            
-            if (LightImage == null)
+            return HandleBGCache(() =>
             {
-                LightImage = new Bitmap(250, 500);
-                using (Graphics drawdark = Graphics.FromImage(LightImage))
+
+                if (LightImage == null)
                 {
-                    drawdark.Clear(Color.PeachPuff);
+                    LightImage = new Bitmap(250, 500);
+                    using (Graphics drawdark = Graphics.FromImage(LightImage))
+                    {
+                        drawdark.Clear(Color.PeachPuff);
+                    }
                 }
-            }
-            return new PlayFieldBackgroundInfo(LightImage, Color.Transparent);
+                return new PlayFieldBackgroundInfo(LightImage, Color.Transparent);
+            });
+
         }
 
         protected Image GetRightCap(int Level)

@@ -19,6 +19,7 @@ using SkiaSharp;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
 using BASeTris.Particles;
+using BASeCamp.Logging;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
@@ -204,9 +205,10 @@ namespace BASeTris.Rendering.Skia.GameStates
                 
                 TetrisFieldDrawSkiaParameters parameters = (TetrisFieldDrawSkiaParameters)grabdata;
                 parameters.LastFieldSave = parameters.Bounds = useBound;
-                 
+
                 //if (!Source.GameHandler.AllowFieldImageCache) parameters.FieldBitmap = null;
                 RenderingProvider.Static.DrawElement(pOwner,pRenderTarget,PlayField,parameters);
+                
             }
             //draw GameObjects.
 
