@@ -1,4 +1,5 @@
 ﻿using BASeTris.Blocks;
+using ManagedBass;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace BASeTris.AI
             return countlines;
         }
 
-        public static int GetHeight(NominoBlock[][] _BoardState, int column)
+        public static int OldGetHeight(NominoBlock[][] _BoardState, int column)
         {
             int Heightfound = _BoardState.Length;
             for (int i = _BoardState.Length - 1; i > 0; i--)
@@ -34,7 +35,20 @@ namespace BASeTris.AI
 
             return _BoardState.Length - Heightfound;
         }
+        public static int GetHeight(NominoBlock[][] _BoardState, int column)
+        {
+            int Heightfound = _BoardState.Length;
+            for (int i = 0; i <= _BoardState.Length-1; i++)
+            {
+                if (_BoardState[i][column] != null)
+                {
+                    Heightfound = i;
+                    break;
+                }
+            }
 
+            return _BoardState.Length - (Heightfound-1);
+        }
         public static int CountColumnHoles(NominoBlock[][] _BoardState, int column)
         {
             int FoundSinceFilled = 0;
@@ -93,13 +107,13 @@ namespace BASeTris.AI
             const int MinimumCrevasseHeight = 2;
             //a 'crevasse' is any place where the highest block is at least 3 blocks below the highest block in adjacent columns. The score is calculated as 1 plus the adjacent height above 3
             //convert each column into a number representing the highest block.
-            int[] Heights = (from p in Enumerable.Range(0, _BoardState[0].Length - 1) select GetHeight(_BoardState,p)).ToArray();
+            int[] Heights = (from p in Enumerable.Range(0, _BoardState[0].Length) select GetHeight(_BoardState,p)).ToArray();
             int accumScore = 0;
-            for (int i = 1; i < Heights.Length - 2; i++)
+            for (int i = 1; i < Heights.Length - 1; i++)
             {
                 int PrevHeight = Heights[i - 1];
                 int CurrHeight = Heights[i];
-                int NextHeight = Heights[i + 1];
+                int NextHeight = i==Heights.Length-1?CurrHeight:Heights[i + 1];
                 int CreviceScore = (Math.Max(0, (Math.Abs(CurrHeight - PrevHeight) - MinimumCrevasseHeight))) + Math.Max(0, (Math.Abs(CurrHeight - NextHeight) - MinimumCrevasseHeight));
                 accumScore += CreviceScore;
 
@@ -112,12 +126,14 @@ namespace BASeTris.AI
 
         public double CalculateScore(BoardScoringRuleData Data, StoredBoardState state)
         {
+            //for some reason, t he AI is loving to put pieces on the far right for seemingly no reason on occasion. It's unclear what is causing it but somehow the score evaluation is getting confused.
             var Rules = Data as TetrisScoringRuleData;
-            int Rows = GetCompletedLines(state.State);
-            int Aggregate = GetAggregateHeight(state.State);
-            int Holes = GetHoles(state.State);
-            int Bumpy = GetBumpiness(state.State);
-            int Crevice = GetCrevasses(state.State);
+            var EvaluateState = state.State;
+            int Rows = GetCompletedLines(EvaluateState);
+            int Aggregate = GetAggregateHeight(EvaluateState); //we subtract the lines here so that the added height for clearing a line doesn't cause it to tip over to be considered "bad"
+            int Holes = GetHoles(EvaluateState);
+            int Bumpy = GetBumpiness(EvaluateState);
+            int Crevice = GetCrevasses(EvaluateState);
             //Debug.Print("Rows=" + Rows + " Aggregate=" + Aggregate + " Holes=" + Holes + " Bumps=" + Bumpy);
             //double a = -0.610066f;
             //double b = 0.760666;
@@ -129,7 +145,8 @@ namespace BASeTris.AI
             var ScoreResult = (Rules.AggregateHeightScore * (double)Aggregate) +
                    (Rules.RowScore * (double)Rows) +
                    (Rules.HoleScore * (double)Holes) +
-                   (Rules.BumpinessScore * (double)Bumpy);
+                   (Rules.BumpinessScore * (double)Bumpy) + 
+                   (Rules.CrevasseScore * (double)Crevice);
 
             return ScoreResult;
 

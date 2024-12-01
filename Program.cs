@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -134,6 +135,8 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
+            //TestAI();
+            //return;
             //Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
 
             //var testresult = MakeTester.GetContiguousSets();
@@ -200,8 +203,38 @@ namespace BASeTris
         }
         static void TestAI()
         {
+            //TODO: this sort of testing stuff should be part of some sort of unit tests, I'd say, certain layouts have to score worse, after all, and we want to verify that remains true even after changing the AI Scoring rules.
+            NominoBlock[][] TState = new NominoBlock[][] {
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,bb(),null,null,null,null },
+                new NominoBlock[]{null,null,null,bb(),bb(),bb(),bb(),null,null,null },
+                new NominoBlock[]{null,null,null,bb(),bb(),bb(),bb(),null,bb(),bb() },
+                new NominoBlock[]{null,null,null,bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{bb(),null,null,bb(),bb(),bb(),bb(),null,bb(),bb() },
+                new NominoBlock[]{bb(),bb(),null,bb(), bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{bb(),bb(),null,bb(),bb(),bb(),bb(),null,bb(),bb() }
+
+
+            };
+
+
+
             //use StandardNominoAI to evaluate a known board state.
-            NominoBlock[][] TestState = new NominoBlock[][] {
+            NominoBlock[][] WellState = new NominoBlock[][] {
                 new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
                 new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
                 new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
@@ -227,18 +260,243 @@ namespace BASeTris
 
 
             };
+
+            NominoBlock[][] BadIPlacement = new NominoBlock[][] {
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,bb(),null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,bb(),null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,bb(),bb(),null,bb(),null,null,null,null,bb() },
+                new NominoBlock[]{null,bb(),bb(),null,bb(),null,null,null,null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),null },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),null,bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),null,bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() }
+
+
+            };
+
+
+            NominoBlock[][] BetterIPlacement = new NominoBlock[][] {
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{bb(),null,bb(),null,null,null,null,null,null,bb() },
+                new NominoBlock[]{bb(),null,bb(),null,null,null,null,null,null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),null,bb(),null,null,null,null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),null,bb(),null,null,null,null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),null },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),null,bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),null,bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() }
+
+
+            };
+
+
+
+
+            /*
+         #
+         #
+         #
+         #
+  #      #
+  #      #
+ ##  #   #
+ ##  #   #
+######### 
+######## #
+ #########
+ #########
+ ## ######
+ #########
+ #########
+             
+             */
+
+
+
+            NominoBlock[][] BadPlacement2 = new NominoBlock[][] {
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),null,null,bb(),null,null,null,bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),null,bb(),bb(),bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),null,bb(),null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(), bb(),null }
+
+
+            };
+
+             NominoBlock[][] BetterPlacement2 = new NominoBlock[][] {
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,null },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,null,null,null,bb() },
+                new NominoBlock[]{null,null,null,null,null,null,bb(),null,null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),null,null,bb(),bb(),null,null,bb() },
+                new NominoBlock[]{null,bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(),null,bb() },
+                new NominoBlock[]{bb(),bb(),bb(),bb(),bb(),bb(),bb(),bb(), bb(),null }
+
+
+            };
+
+            /* Bad Placement 2
+         #
+         #
+         #
+         #
+         #
+         #
+         #
+         #
+###  #   #
+ ##### ###
+###### # #
+######### 
+             
+             
+             */
+
+            /* Better Placement 2
+         
+         
+         
+         
+         #
+         #
+         #
+      #  #
+###  ##  #
+ #########
+######## #
+#########              
+             
+             */
+
+
+
+
             var IMino = new Tetromino_I();
+            var TMino = new Tetromino_T();
+            var TMino2 = new Tetromino_T();
+            var LMino = new Tetromino_L();
             StoredBoardState.TetrisScoringRuleData scorer = new StoredBoardState.TetrisScoringRuleData();
 
+            //BetterIPlacement should give a better score.
+
+            var BadPlacement = new StoredBoardState(BadPlacement2, null, 0, 0);
+            var BetterPlacement = new StoredBoardState(BetterPlacement2, null, 0, 0);
+
+
+            var BadScore = BadPlacement.GetScore(typeof(StandardTetrisHandler), scorer);
+            var BetterScore = BetterPlacement.GetScore(typeof(StandardTetrisHandler), scorer);
+
+
+
+            return;
+            var bestfutureresults = StandardNominoAI.GetDepthScoreResultConsideringNextQueue(TState, TMino, new Nomino[] { TMino, IMino }, (y) => y.GetScore(typeof(StandardTetrisHandler), scorer));
+
+            int PositionDisplay = 0;
+            foreach (var iterate in bestfutureresults.OrderByDescending((w)=>w.Item1))
+            {
+                PositionDisplay++;
+                DebugLogger.Log.WriteLine("Result #" + PositionDisplay + "Immediate Score:" + iterate.Item2.GetScore(typeof(StandardTetrisHandler), scorer) + " Future Score:" + iterate.Item1);
+                DebugLogger.Log.WriteLine(iterate.Item2.GetBoardString());
+            }
+
+            /*
+
             //Get test results for I Mino. Best place should be in the "well" of empty space!
-            var PossibleBoardResults = StandardNominoAI.GetPossibleResults(TestState, IMino, scorer);
-
+            var PossibleBoardResultsI = StandardNominoAI.GetPossibleResults(TestState, IMino);
             //these are all the possible results for the board. Now, rank by the score.
+            var RankedResultsI = PossibleBoardResultsI.OrderByDescending((w) => w.GetScore(typeof(StandardTetrisHandler), scorer));
+            var TopResultPieceI = RankedResultsI.First();
+            int DisplayPos = 1;
 
-            var RankedResults = PossibleBoardResults.OrderByDescending((w) => w.GetScore(typeof(StandardTetrisHandler), scorer));
+            //var clearlines = StandardNominoAI.ClearFilledRows(TopResultPieceI.State);
 
-            var TopResult = RankedResults.First();
 
+            DebugLogger.Log.WriteLine("I Piece #1 result:");
+            DebugLogger.Log.WriteLine(TopResultPieceI.GetBoardString());
+            DebugLogger.Log.WriteLine("With cleared Rows:");
+            //DebugLogger.Log.WriteLine(new StoredBoardState(clearlines, null, 0, 0).GetBoardString());
+            */
+            /*
+            foreach (var iterate in RankedResultsI)
+            {
+                if (!iterate.InvalidState)
+                {
+                    DebugLogger.Log.WriteLine("I Piece ranked result #" + DisplayPos + " With Score:" + iterate.GetScore(typeof(StandardTetrisHandler), scorer));
+                    DebugLogger.Log.WriteLine("X Offset:" + iterate.XOffset + " Rotation:" + iterate.RotationCount);
+                    DebugLogger.Log.WriteLine(iterate.GetBoardString());
+                }
+
+            }*/
+            
+            //DebugLogger.Log.WriteLine("I Piece placement result:\n" + TopResultPieceI.GetBoardString());
+
+
+            //var TMino = new Tetromino_T();
+
+            //var PossibleBoardResultsT = StandardNominoAI.GetPossibleResults(TestState, TMino, scorer);
+
+            //var RankedResultsT = PossibleBoardResultsT.OrderByDescending((w) => w.GetScore(typeof(StandardTetrisHandler), scorer));
+
+            //var TopResultPieceT = RankedResultsT.First();
 
             //Added: Do test of T Tetromino, it should get slotted to the left.
 

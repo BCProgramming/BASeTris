@@ -31,7 +31,7 @@ namespace BASeTris.AI
             //the meat and potatoes...
             while (AIProcessing)
             {
-                Thread.Sleep(25);
+                Thread.Sleep(10);
                 //if there are keys to press, we do NOT evaluate the AI Action Frame...
                 //if  there are keys to press, press the next one in the queue. We only do ONE per frame though- the idea is that
                 //the AI should at least pretend to be sort of human in it's limitations.

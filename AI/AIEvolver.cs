@@ -199,7 +199,7 @@ namespace BASeTris.AI
                 var nextNomino = bgc.RetrieveNext();
                 ChosenNominos.Add(nextNomino);
                 //Debug.Print("Processing new Nomino:" + nextNomino.SpecialName);
-                var PossibleBoardResults = StandardNominoAI.GetPossibleResults(Contents, nextNomino,scoredata);
+                var PossibleBoardResults = StandardNominoAI.GetPossibleResults(Contents, nextNomino);
                 //score each one based on the scoring rules.
                 var BestScore = (from p in PossibleBoardResults orderby p.GetScore(typeof(GameStates.GameHandlers.StandardTetrisHandler), scoredata) descending select p).FirstOrDefault();
 

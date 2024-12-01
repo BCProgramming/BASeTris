@@ -10,6 +10,8 @@ using BASeTris.GameStates;
 using BASeTris.Blocks;
 using BASeTris.GameStates.GameHandlers;
 using System.Reflection;
+using BASeCamp.Logging;
+using System.Collections.Concurrent;
 
 namespace BASeTris.AI
 {
@@ -40,14 +42,16 @@ namespace BASeTris.AI
 
             return Copied;
         }
-
-        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg, StoredBoardState.BoardScoringRuleData rules)
+        //retrieves all possible positions of the given Mino as they could be placed on the board.
+        public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
             for (int useRotation = 0; useRotation < 4; useRotation++)
             {
                 for (int x = -5; x < Source[0].Length + 5; x++)
                 {
+
+
                     /*if(rules.StupidFactor<1)
                     {
                         if (TetrisGame.StatelessRandomizer.NextDouble() < rules.StupidFactor) continue;
@@ -66,7 +70,17 @@ namespace BASeTris.AI
             }
         }
 
-        private Dictionary<Type, StoredBoardState.BoardScoringRuleData> HandlerRuleDataDictionary = new Dictionary<Type, StoredBoardState.BoardScoringRuleData>();
+        public static IEnumerable<(double, StoredBoardState)> GetDepthScoreResultConsideringNextQueue(NominoBlock[][] InitialState, Nomino CurrentMino, Nomino[] NextQueue, Func<StoredBoardState, double> ScorerFunc,bool UseThreading=false)
+        {
+            DepthSearchHelper dsh = new DepthSearchHelper();
+            return dsh.GetDepthScoreResultConsideringNextQueue(InitialState, CurrentMino, NextQueue, ScorerFunc, UseThreading);
+
+        }
+
+
+
+
+    private Dictionary<Type, StoredBoardState.BoardScoringRuleData> HandlerRuleDataDictionary = new Dictionary<Type, StoredBoardState.BoardScoringRuleData>();
         public StoredBoardState.BoardScoringRuleData ScoringRules { get
             {
                 Type HandlerType = null;
@@ -81,16 +95,18 @@ namespace BASeTris.AI
 
                 if(HandlerType!=null)
                 {
-
-                    if (!HandlerRuleDataDictionary.ContainsKey(HandlerType))
+                    lock (HandlerRuleDataDictionary)
                     {
-
-                        var foundattrib = HandlerType.GetCustomAttributes(typeof(GameScoringHandlerAttribute));
-                        foreach (var iterate in foundattrib)
+                        if (!HandlerRuleDataDictionary.ContainsKey(HandlerType))
                         {
-                            if (iterate is GameScoringHandlerAttribute gsh)
+
+                            var foundattrib = HandlerType.GetCustomAttributes(typeof(GameScoringHandlerAttribute));
+                            foreach (var iterate in foundattrib)
                             {
-                                HandlerRuleDataDictionary.Add(HandlerType, (StoredBoardState.BoardScoringRuleData)Activator.CreateInstance(gsh.RuleDataType));
+                                if (iterate is GameScoringHandlerAttribute gsh)
+                                {
+                                    HandlerRuleDataDictionary.Add(HandlerType, (StoredBoardState.BoardScoringRuleData)Activator.CreateInstance(gsh.RuleDataType));
+                                }
                             }
                         }
                     }
@@ -99,6 +115,7 @@ namespace BASeTris.AI
                 return null;
             }
         }
+        Nomino LastProcessPiece = null;
         public override void AIActionFrame()
         {
             //do our hard thinking here.
@@ -114,10 +131,18 @@ namespace BASeTris.AI
                     //todo: we want to copy the playfield for our inspection here... we'll want to see what happens based on moving the blockgroup left or right up to each side and dropping it and evaluate the result to select the ideal
                     //then slap those keys into the queue.
                     Nomino ActiveGroup = stdState.PlayField.BlockGroups[0];
-                    var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup,ScoringRules).ToList();
-                    
+                    if (ActiveGroup == LastProcessPiece) return; // we don't want to recalculate when we already processed the place to put a piece. Also, that could cause oddities.
+                    PressKeyQueue.Clear(); // if this is not the same piece as last time, it's a new one. We don't want to have any additional buttons left over to be pressed too.
+                    LastProcessPiece = ActiveGroup; 
+                    Nomino[] NextPieces = stdState.NextBlocks.Take(2).ToArray(); //more t han one processes too slow :(
+
+                    //var PossibleStates = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup).ToList();
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    var PossibleStates = GetDepthScoreResultConsideringNextQueue(stdState.PlayField.Contents, ActiveGroup, NextPieces, (s) => s.GetScore(stdState.GameHandler.GetType(), ScoringRules),true).ToList();
+                    DebugLogger.Log.WriteLine("Processed Depth Search:" + sw.Elapsed.ToString());
                     Debug.Print("Found " + PossibleStates.Count + " possible states...");
-                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.StatelessRandomizer.Next()):  PossibleStates.OrderByDescending((w) => w.GetScore(stdState.GameHandler.GetType(), ScoringRules))).ToList();
+                    var Sorted = (ScoringRules.Moronic?PossibleStates.OrderByDescending((w)=>TetrisGame.StatelessRandomizer.Next()):  PossibleStates.OrderByDescending((w) => w.Item1)).Select((d)=>d.Item2).ToList();   //w.GetScore(stdState.GameHandler.GetType(), ScoringRules))
 
                     //var Scores = (from p in PossibleStates orderby p.GetScore(ScoringRules) descending select new Tuple<StoredBoardState, double>(p, p.GetScore(ScoringRules))).ToArray();
                     /*foreach (var writedebug in Scores)
@@ -167,8 +192,139 @@ namespace BASeTris.AI
                 }
             }
 
-            for (int i = 0; i < 5; i++) PressKeyQueue.Enqueue(GameState.GameKeys.GameKey_Null);
+            for (int i = 0; i < 15; i++) PressKeyQueue.Enqueue(GameState.GameKeys.GameKey_Null);
             PressKeyQueue.Enqueue(GameState.GameKeys.GameKey_Drop);
+        }
+    }
+
+    public class DepthSearchHelper
+    {
+
+        private List<Thread> WorkerThreads = null;
+        private ConcurrentQueue<Func<(double, StoredBoardState)>> FuncCallQueue = null;
+        private const int WORKER_THREADS = 4;
+        private int ActiveWorkers = 0;
+        ConcurrentBag<(double, StoredBoardState)> WorkerResults = new ConcurrentBag<(double, StoredBoardState)>();
+        private void QueueWorker()
+        {
+            while (!FuncCallQueue.IsEmpty)
+            {
+                if (FuncCallQueue.TryDequeue(out var callitem))
+                {
+                    var Callresult = callitem();
+                    WorkerResults.Add(Callresult);
+                }
+            }
+            ActiveWorkers--;
+        }
+        public IEnumerable<(double, StoredBoardState)> GetDepthScoreResultConsideringNextQueue(NominoBlock[][] InitialState, Nomino CurrentMino, Nomino[] NextQueue, Func<StoredBoardState, double> ScorerFunc, bool UseThreading = false)
+        {
+            //Where GetPossibleResults gives all possible results for the next board state,
+            //this one builds upon it, instead returning an enumerable tuple where Item1 is the top score for this move at the end of the provided "Next" queue pieces.
+            //this also means we don't care about the score UNTIL that many pieces are used.
+
+            //First, we start with the Possible Results of the next piece.
+            IEnumerable<StoredBoardState> NextMoves = StandardNominoAI.GetPossibleResults(InitialState, CurrentMino);
+            //if no next queue, we just give back the next moves with the high score attached.
+            if (NextQueue == null || NextQueue.Length == 0)
+            {
+                foreach (var yieldval in NextMoves.Select((r) => (ScorerFunc(r), r)))
+                {
+                    yield return yieldval;
+                }
+                yield break;
+            }
+            //our task now is to find the highest score after processing all the Next Queue for each of these board states.
+            else
+            {
+                Func<StoredBoardState, (double, StoredBoardState)> CheckMoveFunction = (s) =>
+                {
+                    var useNextState = ClearFilledRows(s.State);
+
+
+                    //recursively call this function, passing in the first element of the nextqueue as the current mino, and the rest of the next queue as the next queue.
+                    var Subresults = GetDepthScoreResultConsideringNextQueue(useNextState, NextQueue.First(), NextQueue.Skip(1).ToArray(), ScorerFunc);
+                    //the top of these subresults is our result for this item.
+                    var ChosenEndResult = Subresults.OrderByDescending((e) => e.Item1).FirstOrDefault();
+                    return (ChosenEndResult.Item1, s);
+                };
+
+
+                //TODO: we need to make this stuff work async or with multiple threads
+                if (!UseThreading)
+                {
+                    foreach (var checkmove in NextMoves)
+                    {
+                        //something we can't forget here: The board state we have actually doesn't have the cleared lines. We want to remove those like the game will, so that good places to put future pieces that get revealed by cleared lines
+                        //are properly accounted for.
+                       
+                        //this is the end score, return this score, but the current nextmove.
+
+                        yield return CheckMoveFunction(checkmove);
+                    }
+                }
+                else
+                {
+                    FuncCallQueue = new ConcurrentQueue<Func<(double, StoredBoardState)>>();
+                    foreach (var checkmove in NextMoves)
+                    {
+                        FuncCallQueue.Enqueue(() => CheckMoveFunction(checkmove));
+                    }
+                    WorkerThreads = new List<Thread>();
+                    //with them all enqueued we can spin up the workers, then wait for the work queue to empty.
+                    for (int i = 0; i < WORKER_THREADS; i++)
+                    {
+                        Thread WThread = new Thread(QueueWorker);
+                        WorkerThreads.Add(WThread);
+                        ActiveWorkers++;
+                        WThread.Start();
+                    }
+                    while (!FuncCallQueue.IsEmpty && ActiveWorkers > 0)
+                    {
+                        //wait for the function call queue to empty out and for all the workers to complete.
+                        Thread.Sleep(5);
+                    }
+                    foreach (var workerresult in WorkerResults)
+                    {
+                        yield return workerresult;
+                    }
+                   
+                }
+            }
+
+
+        }
+        public static NominoBlock[][] ClearFilledRows(NominoBlock[][] BoardState)
+        {
+            NominoBlock[][] Result = new NominoBlock[BoardState.Length][];
+            int CurrentRow = BoardState.Length - 1; //start at the bottom.
+
+            for (int CheckRow = BoardState.Length - 1; CheckRow >= 0; CheckRow--)
+            {
+                Result[CurrentRow] = new NominoBlock[BoardState[CheckRow].Length];
+                if (!BoardState[CheckRow].All((b) => b != null))
+                {
+
+                    //they aren't all filled, so not a row. we can fill CurrentRow with this row and decrement it.
+                    for (int c = 0; c < BoardState[CheckRow].Length - 1; c++)
+                    {
+                        Result[CurrentRow][c] = BoardState[CheckRow][c] != null ? new StandardColouredBlock() : null;
+                    }
+                    CurrentRow--;
+
+                }
+
+
+            }
+            while (CurrentRow >= 0)
+            {
+                Result[CurrentRow] = Enumerable.Repeat<NominoBlock>(null, BoardState[0].Length).ToArray();
+                CurrentRow--;
+            }
+            return Result;
+
+
+
         }
     }
 
@@ -216,6 +372,7 @@ namespace BASeTris.AI
             RowCount = InitialState.GetUpperBound(0);
             ColCount = InitialState[0].GetUpperBound(0);
             _BoardState = StandardNominoAI.DuplicateField(InitialState);
+            if (pGroup == null) return;
             _SourceGroup = new Nomino(pGroup);
             XOffset = pXOffset;
             RotationCount = pRotationCount;
@@ -230,11 +387,11 @@ namespace BASeTris.AI
 
             _SourceGroup.RecalcExtents();
             
-            if(_SourceGroup.GroupExtents.Left+_SourceGroup.X+XOffset < 0 || _SourceGroup.GroupExtents.Right+XOffset+_SourceGroup.X > _BoardState[0].Length)
-            {
-                InvalidState = true; //nothing else to do- this is an invalid state as the move puts us "off" the board.
-            }
-            else
+            //if(_SourceGroup.GroupExtents.Left+_SourceGroup.X+XOffset < 0 || _SourceGroup.GroupExtents.Right+XOffset+_SourceGroup.X > _BoardState[0].Length)
+            //{
+            //    InvalidState = true; //nothing else to do- this is an invalid state as the move puts us "off" the board.
+            //}
+            //else
             {
 
 
@@ -242,7 +399,16 @@ namespace BASeTris.AI
                 //get our board state...
                 try
                 {
-                    DropBlock(_SourceGroup, ref _BoardState, pXOffset);
+                    var dbreturn = DropBlock(_SourceGroup, ref _BoardState, pXOffset);
+                    if (!dbreturn)
+                    {
+                        InvalidState = true;
+                        return;
+                    }
+                    else
+                    {
+                        ;
+                    }
                 }
                 catch (Exception exx)
                 {
@@ -402,8 +568,8 @@ d = -0.184483
 
 a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
-
-        private void DropBlock(Nomino Source, ref NominoBlock[][] FieldState, int XOffset)
+        //returns true if successful, false if the piece didn't fit.
+        private bool DropBlock(Nomino Source, ref NominoBlock[][] FieldState, int XOffset)
         {
             bool result = true;
             int YOffset = 0;
@@ -426,12 +592,12 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
                     break;
                 }
             }
-
+            if (dropLength == 0) return false;
             foreach (var iterate in Duplicator)
             {
                 int Row = iterate.Y + Duplicator.Y;
                 int Col = iterate.X + Duplicator.X + XOffset;
-                if (Row > RowCount - 1 || Col > ColCount - 1 || Row < 0 || Col < 0)
+                if (Row > RowCount  || Col > ColCount  || Row < 0 || Col < 0)
                 {
 
                 }
@@ -441,6 +607,8 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
                     FieldState[Row][Col] = iterate.Block;
                 }
             }
+            return true;
+            
         }
 
         private bool CanFit(Nomino Source, NominoBlock[][] Field, int Y, int X)
@@ -474,7 +642,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
         }
         public abstract class BoardScoringRuleData
         {
-            public bool Moronic { get; set; } = true;
+            public bool Moronic { get; set; } = false;
             public float StupidFactor { get; set; } = 1.0f;
         }
         public class MasterBlockScoringRuleData : BoardScoringRuleData
@@ -507,6 +675,41 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             }
             
             
+        }
+
+        public class DepthSearchInfo
+        {
+            public List<DepthSearchInfo> Children { get; set; }
+            public StoredBoardState CurrentState { get; set; }
+
+
+            
+            public bool IsFinalMove { get { return Children == null || Children.Count == 0; } }
+
+            public IEnumerable<DepthSearchInfo> GetYoungest()
+            {
+                if (IsFinalMove)
+                {
+                    yield return this;
+                }
+                else
+                {
+                    foreach (var iterate in Children)
+                    {
+                        foreach (var child in iterate.GetYoungest())
+                        {
+                            yield return child;
+                        }
+                    }
+                }
+            }
+            public void PopulateChildren(Nomino NextBlock)
+            {
+                //populates the children of this node, using "NextBlock" to evaluate the next move.
+                //The Mino position shouldn't matter: realistically, we only need it for the current piece, but we are using this to evaluate where to put that piece, not how to move later pieces.
+                Children = StandardNominoAI.GetPossibleResults(CurrentState._BoardState, NextBlock).Select((r) => new DepthSearchInfo() { CurrentState = r }).ToList();
+            }
+
         }
     }
 }
