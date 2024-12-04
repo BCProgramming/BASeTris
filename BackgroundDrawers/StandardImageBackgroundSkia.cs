@@ -34,6 +34,7 @@ namespace BASeTris.BackgroundDrawers
             
             }
         }
+        public bool StretchStatic { get; set; } = false; //if set, will simply draw the bitmap filling the background area.
         public double Scale { get; set; } = 1f;
         public SKPoint CurrOrigin { get; set; } = SKPoint.Empty;
         public float CurrAngle { get; set; } = 0;

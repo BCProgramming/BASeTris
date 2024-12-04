@@ -303,7 +303,7 @@ namespace BASeTris
         {
             LastMousePosition = e.Position;
             if (_Present.UserInputDisabled) return;
-            if (_Present.Game.CurrentState is IMouseInputState imis)
+            if (_Present.Game.CurrentState is IMouseInputState imis && _Present.ai==null)
             {
                 imis.MouseMove(this,new BCPoint(e.Position.X, e.Position.Y));
             }

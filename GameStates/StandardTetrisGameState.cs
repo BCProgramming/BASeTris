@@ -526,14 +526,15 @@ namespace BASeTris.GameStates
             {
                 if (GameOptions.MusicEnabled)
                 {
+                    var useSettings = pOwner.Settings.GetSettings(pOwner.GetHandler().Name);
                     iActiveSoundObject musicplay = null;
-                    if(pOwner.Settings.std.MusicOption =="<RANDOM>")
+                    if(useSettings .MusicOption =="<RANDOM>")
                     {
-                        musicplay = Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, pOwner.Settings.std.MusicVolume, true);
+                        musicplay = Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, useSettings.MusicVolume, true);
                     }
                     else
                     {
-                        musicplay = Sounds.PlayMusic(pOwner.Settings.std.MusicOption, pOwner.Settings.std.MusicVolume, true);
+                        musicplay = Sounds.PlayMusic(pOwner.Settings.std.MusicOption, useSettings.MusicVolume, true);
                     }
 
                     
@@ -1414,6 +1415,7 @@ namespace BASeTris.GameStates
             {
                 var BlockWidth = gp.LastDrawBounds.Width / PlayField.ColCount;
                 int CursorColumn = (int)(Position.X / BlockWidth);
+                
                 lock (PlayField.BlockGroups)
                 {
                     foreach (var active in PlayField.BlockGroups)

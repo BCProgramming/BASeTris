@@ -354,6 +354,7 @@ namespace BASeTris
     public class PlayFieldBackgroundInfo
     {
         public IBackground<StandardImageBackgroundDrawSkiaCapsule> SkiaBG { get; set; }
+        public bool FullStatic { get; set; } = false;
         public Image BackgroundImage;
         public Color TintColor = Color.Transparent;
         public PlayFieldBackgroundInfo(Image pBackgroundImage, Color pTintColor)

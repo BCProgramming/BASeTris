@@ -9,6 +9,7 @@ using BASeTris.Tetrominoes;
 using BASeTris.Choosers;
 using BASeTris.Rendering.Adapters;
 using SkiaSharp;
+using System.Diagnostics.Eventing.Reader;
 
 namespace BASeTris.GameStates.GameHandlers
 {
@@ -266,18 +267,24 @@ namespace BASeTris.GameStates.GameHandlers
         public static IBlockGameCustomizationHandler GetHandler(this IStateOwner pOwner)
         {
             IBlockGameCustomizationHandler result = null;
-            if(pOwner.CurrentState is GameplayGameState ggs)
+            if (pOwner.CurrentState is GameplayGameState ggs)
             {
                 result = ggs.GameHandler;
             }
-            else if(pOwner.CurrentState is ICompositeState<GameplayGameState> css)
+            else if (pOwner.CurrentState is ICompositeState<GameplayGameState> css)
             {
                 result = css.GetComposite().GameHandler;
+            }
+            else if (pOwner.CurrentState is TransitionState ts)
+            {
+                if (ts.NextState is GameplayGameState ggns) return ggns.GameHandler;
+                if (ts.PreviousState is GameplayGameState ggps) return ggps.GameHandler;
             }
             else
             {
                 if (LastHandlers.ContainsKey(pOwner)) return LastHandlers[pOwner];
             }
+            
             LastHandlers[pOwner] = result;
 
             return result;

@@ -70,6 +70,7 @@ namespace BASeTris.Choosers
             AllGeneratedNominos.Add(result);
             return result;
         }
+     
         public static Type ChooserTypeFromString(String strName)
         {
             if (strName == "Default") return typeof(BagChooser);

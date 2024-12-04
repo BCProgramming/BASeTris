@@ -26,7 +26,7 @@ namespace BASeTris.Choosers.AIChoosers
         //so, we basically give the worst possible options, and base our next choice on that worst possible option being used in the most effective way.
         private StoredBoardState BestCaseScenario = null;
 
-
+        
         public override Nomino PerformGetNext()
         {
             //First, we need to see what we CAN choose from.

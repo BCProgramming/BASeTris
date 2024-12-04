@@ -91,5 +91,6 @@ namespace BASeTris.Choosers.AIChoosers
 
             return getresult;
         }
+   
     }
 }

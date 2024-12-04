@@ -1,10 +1,4 @@
 ﻿using BASeTris.Blocks;
-using ManagedBass;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static BASeTris.AI.StoredBoardState;
 
 namespace BASeTris.AI
@@ -123,7 +117,7 @@ namespace BASeTris.AI
             return accumScore;
 
         }
-
+        //new board scoring: We want to also detect edge "spears", where there's a big line of blocks in the sides. We want to discourage the AI from putting I pieces there.
         public double CalculateScore(BoardScoringRuleData Data, StoredBoardState state)
         {
             //for some reason, t he AI is loving to put pieces on the far right for seemingly no reason on occasion. It's unclear what is causing it but somehow the score evaluation is getting confused.

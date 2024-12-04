@@ -85,7 +85,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 
 
                 _Background = CreateBackgroundFromImage(bgInfo.BackgroundImage, bgInfo.TintColor);
-                _Background.Data.Scale = Math.Min((float)Size.Width / (float)bgInfo.BackgroundImage.Width, (float)Size.Height / (float)bgInfo.BackgroundImage.Height);
+                _Background.Data.Scale =  bgInfo.FullStatic?0:Math.Min((float)Size.Width / (float)bgInfo.BackgroundImage.Width, (float)Size.Height / (float)bgInfo.BackgroundImage.Height);
                 
                 /*
                 var _bg = new StandardImageBackgroundSkia();
@@ -104,7 +104,8 @@ namespace BASeTris.Rendering.Skia.GameStates
                 }
                 _Background = (IBackground<SkiaBackgroundDrawData>)_bg;*/
             }
-            _Background.Data.Movement = new SKPoint(2, 2);
+            _Background.Data.Movement = new SKPoint(0, 0); //Backgrounds can animate, works OK, but we don't do it usually.
+            //_Background.Data.CurrAngle = (float)(TetrisGame.StatelessRandomizer.NextDouble() * 360);
             Self.DoRefreshBackground = false;
         }
         public static IBackground<StandardImageBackgroundDrawSkiaCapsule> CreateBackgroundFromImage(Image img, Color tint)

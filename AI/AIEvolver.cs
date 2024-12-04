@@ -152,10 +152,10 @@ namespace BASeTris.AI
 
             }
 
-
+            Debug.Print("Winner:" + BestScorer.ToString());
 
         }
-        public static double RunMultipleSimulations(StoredBoardState.TetrisScoringRuleData scoredata, int BoardWidth = 20, int BoardHeight = 22,int NumSimulations=10)
+        public static double RunMultipleSimulations(StoredBoardState.TetrisScoringRuleData scoredata, int BoardWidth = 10, int BoardHeight = 22,int NumSimulations=10)
         {
             Debug.Print("Running multiple simulations with specified Score Information:");
             List<double> AllScores = new List<double>();
@@ -166,6 +166,7 @@ namespace BASeTris.AI
                 var CurrentSimResult = RunSimulation(scoredata, BoardWidth, BoardHeight);
                 AllScores.Add(CurrentSimResult);
             }
+
             //give back average of all simulations.
             return AllScores.Average();
         }
@@ -177,7 +178,7 @@ namespace BASeTris.AI
             Debug.Print($"--------Running Simulation " + scoredata.ToString() + "-----");
                 
             //create the chooser.
-            BlockGroupChooser bgc = new BagChooser(Tetromino.StandardTetrominoFunctions,Environment.TickCount);
+            QueueableChooserWrapper bgc =  new QueueableChooserWrapper(new BagChooser(Tetromino.StandardTetrominoFunctions,Environment.TickCount+Thread.CurrentThread.ManagedThreadId));
             List<Nomino> ChosenNominos = new List<Nomino>();
            
 
@@ -186,6 +187,7 @@ namespace BASeTris.AI
             {
                 Contents[row] = new NominoBlock[TetrisField.DEFAULT_COLCOUNT];
             }
+            int reallinecount = 0;
             int Placedpieces = 0;
             int rowsFinished = 9;
             bool GameEnded = false;
@@ -198,12 +200,15 @@ namespace BASeTris.AI
                 //get the next Nomino.
                 var nextNomino = bgc.RetrieveNext();
                 ChosenNominos.Add(nextNomino);
+
+                //var NextQueueConsiderationItems = StandardNominoAI.GetDepthScoreResultConsideringNextQueue(Contents, nextNomino, new[] { bgc.Peek() },(sb)=>sb.GetScore(typeof(GameStates.GameHandlers.StandardTetrisHandler), scoredata), true);
+
                 //Debug.Print("Processing new Nomino:" + nextNomino.SpecialName);
                 var PossibleBoardResults = StandardNominoAI.GetPossibleResults(Contents, nextNomino);
                 //score each one based on the scoring rules.
                 var BestScore = (from p in PossibleBoardResults orderby p.GetScore(typeof(GameStates.GameHandlers.StandardTetrisHandler), scoredata) descending select p).FirstOrDefault();
 
-                if(BestScore!=null)
+                if (BestScore != null)
                 {
                     // we go with the best scoring value of course.
                     Contents = BestScore.State;
@@ -213,17 +218,25 @@ namespace BASeTris.AI
                     //Debug.Print("\n\n" + NewStateString);
                     Placedpieces++;
                 }
-
-                int RemoveLines = RemoveFinishedRows(ref Contents);
-                rowsFinished += (RemoveLines*RemoveLines); //square it, reason is to give higher scores for AI that manages to land more multi-line clears.
-                //if the top line has a block than we will consider it Game Ended.
-                if (Contents[0].Any((r) => r != null))
+                else
                 {
+                    //if no result was retrieved- there were no scores to choose from. No possible moves is a Game over.
                     GameEnded = true;
                 }
+                if (!GameEnded)
+                {
+                    int RemoveLines = RemoveFinishedRows(ref Contents);
+                    reallinecount++;
+                    rowsFinished += (RemoveLines * RemoveLines); //square it, reason is to give higher scores for AI that manages to land more multi-line clears.
+                                                                 //if the top line has a block than we will consider it Game Ended.
+                    if (Contents[0].Any((r) => r != null))
+                    {
+                        GameEnded = true;
+                    }
+                }
             }
-            //Debug.Print("Final Score:" +rowsFinished + Placedpieces);
-            //Debug.Print($"----------------Completed Simulation Bumpiness:{scoredata.BumpinessScore}, Height:{scoredata.AggregateHeightScore}, Hole:{scoredata.HoleScore}, Row:{scoredata.RowScore} --------");
+            
+            Debug.Print($"----------------Completed Simulation Bumpiness:{scoredata.BumpinessScore}, Height:{scoredata.AggregateHeightScore}, Hole:{scoredata.HoleScore}, Row:{scoredata.RowScore} --------\nScores:" + rowsFinished + " " + Placedpieces);
             return rowsFinished + Placedpieces; //return score for this simulation.
 
         }

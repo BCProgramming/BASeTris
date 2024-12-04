@@ -981,7 +981,12 @@ namespace BASeTris.Theme.Block
         
         public override PlayFieldBackgroundInfo GetThemePlayFieldBackground(TetrisField Field, IBlockGameCustomizationHandler GameHandler)
         {
-            return HandleBGCache(() => new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_3", 0.5f], Color.Transparent));
+            return HandleBGCache(() =>
+            {
+                var newbg = new PlayFieldBackgroundInfo(TetrisGame.Imageman["background_3", 0.5f], Color.Transparent) {FullStatic = true };
+                return newbg;
+                }
+            );
         }
         public override bool IsAnimated(NominoBlock block)
         {

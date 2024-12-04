@@ -38,6 +38,12 @@ namespace BASeTris.Rendering.Skia.Backgrounds
                 lastBounds = sbb.Bounds;
                 using (SKAutoCanvasRestore sr = new SKAutoCanvasRestore(pRenderTarget, true))
                 {
+                    if (Source.Data.CurrAngle != 0)
+                    {
+                        pRenderTarget.RotateDegrees(Source.Data.CurrAngle); 
+                    }
+
+
                     if (Source.Data.Scale == 0)
                     {
                         pRenderTarget.DrawBitmap(Capsule.BackgroundBitmap, sbb.Bounds);

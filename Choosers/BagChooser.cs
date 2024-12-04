@@ -27,7 +27,7 @@ namespace BASeTris.Choosers
         public BagChooser(Func<Nomino>[] SelectionFunctions, int Seed) : base(SelectionFunctions,Seed)
         {
         }
-
+       
         private void RefillQueue()
         {
             var Shuffled = Shuffle(rgen, _Available).ToArray();

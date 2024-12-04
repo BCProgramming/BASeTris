@@ -444,6 +444,28 @@ namespace BASeTris
 
             var BadScore = BadPlacement.GetScore(typeof(StandardTetrisHandler), scorer);
             var BetterScore = BetterPlacement.GetScore(typeof(StandardTetrisHandler), scorer);
+            //TODO: instead of using this separate routine, we should have some sort of special testing gamestate available for it. Then we can do stuff like visually "watch" the training process or something.
+            var DepthData = new DepthSearchInfo(null, BetterPlacement, new Nomino[] { TMino, LMino, IMino,TMino2 },(y) => y.GetScore(typeof(StandardTetrisHandler),scorer),true);
+            while (DepthSearchInfo.WorkersActive)
+            {
+                Thread.Sleep(50);
+            }
+            ;
+
+            //done, get the leaf nodes.
+
+            var EvaluatedBranch = DepthData.GetLeafNodes().OrderByDescending((d) => d.GetScore()).FirstOrDefault();
+
+            var BadScoreDepth = StandardNominoAI.GetDepthScoreResultConsideringNextQueue(BadPlacement.State, TMino, new[] { LMino }, (y) => y.GetScore(typeof(StandardTetrisHandler), scorer));
+            var BetterScoreDepth = StandardNominoAI.GetDepthScoreResultConsideringNextQueue(BetterPlacement.State, TMino, new[] { LMino }, (y) => y.GetScore(typeof(StandardTetrisHandler), scorer));
+
+
+            var BadIPlacementTest1 = new StoredBoardState(StringToBlocks(QuestionableIPlacement1), null, 0, 0);
+            var BetterIPlacementTest1 = new StoredBoardState(StringToBlocks(BetterIPlacement1), null, 0, 0);
+
+
+            var BadIScore = BadIPlacementTest1.GetScore(typeof(StandardTetrisHandler), scorer);
+            var BetterIScore = BetterIPlacementTest1.GetScore(typeof(StandardTetrisHandler), scorer);
 
 
 
@@ -507,5 +529,72 @@ namespace BASeTris
 
 
         }
+        private static NominoBlock?[][] StringToBlocks(String input)
+        {
+            String[] Lines = input.Split('\n');
+            NominoBlock?[][] Result = new NominoBlock[Lines.Length][];
+            for (int i = 0; i < Lines.Length; i++)
+            {
+                Result[i] = Lines[i].Replace("\r","").Select((c) => c == '#' ? new StandardColouredBlock() : null).ToArray();
+            }
+
+            return Result;
+
+
+
+
+        }
+
+        private static String QuestionableIPlacement1 =
+
+@"          
+          
+          
+         #
+         #
+         #
+         #
+         #
+###  #  ##
+ #########
+######### 
+##### ## #
+ #########
+ #########
+ #########
+##### ####
+## #######
+## #######
+####### ##
+### ######
+## ###### 
+######## #";
+
+        private static String BetterIPlacement1 =
+
+@"          
+          
+          
+          
+          
+          
+          
+####     #
+###  #  ##
+ #########
+######### 
+##### ## #
+ #########
+ #########
+ #########
+##### ####
+## #######
+## #######
+####### ##
+### ######
+## ###### 
+######## #";
+
+
     }
 }
