@@ -87,7 +87,7 @@ namespace BASeTris.Theme.Block
 
     public abstract class GameBoyCompositionThemeBase : ConnectedImageBlockTheme
     {
-        protected override SKColor GetGroupBlockColor(Nomino Group)
+        protected override BlockColorInformation GetGroupBlockColor(Nomino Group)
         {
 
             return SKColors.LightGreen;

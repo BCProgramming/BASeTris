@@ -15,6 +15,8 @@ using System.Collections.Concurrent;
 using static BASeTris.AI.StoredBoardState;
 using static System.Formats.Asn1.AsnWriter;
 using static System.Windows.Forms.LinkLabel;
+using OpenTK.Graphics.ES11;
+using OpenTK.Graphics.OpenGL;
 
 namespace BASeTris.AI
 {
@@ -46,6 +48,7 @@ namespace BASeTris.AI
             return Copied;
         }
         //retrieves all possible positions of the given Mino as they could be placed on the board.
+        
         public static IEnumerable<StoredBoardState> GetPossibleResults(NominoBlock[][] Source, Nomino bg)
         {
             //Debug.Print("Calculating possible results:" + Source.Sum((u)=>u.Count((y)=>y!=null)) + " Non null entries.");
@@ -145,16 +148,59 @@ namespace BASeTris.AI
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
 
-
+                    bool DoDepthSearch =  (stdState.PlayField.GetHighestPoint() < (int)(stdState.PlayField.RowCount * .75f) || ActiveGroup.FallSpeed > 25);
                     //TODO: instead of using this separate routine, we should have some sort of special testing gamestate available for it. Then we can do stuff like visually "watch" the training process or something.
 
-                      var DepthData = new DepthSearchInfo(null, new StoredBoardState(stdState.PlayField.Contents,null,0,0), new[] { ActiveGroup }.Concat(stdState.NextBlocks.Take(2)).ToArray()  ,(y) => y.GetScore(stdState.GameHandler.GetType(),ScoringRules),true);
-                    while (DepthSearchInfo.WorkersActive)
+                    if (DoDepthSearch)
                     {
-                Thread.Sleep(50);
-                    }
-                    var BestBranch = DepthData.GetLeafNodes().OrderByDescending((d) => d.GetScore()).FirstOrDefault();
 
+
+                        var DepthData = new DepthSearchInfo(null, new StoredBoardState(stdState.PlayField.Contents, null, 0, 0), new[] { ActiveGroup }.Concat(stdState.NextBlocks.Take(2)).ToArray(), (y) => y.GetScore(stdState.GameHandler.GetType(), ScoringRules), true);
+                        while (DepthSearchInfo.WorkersActive)
+                        {
+                            Thread.Sleep(50);
+                        }
+                        var BestBranch = DepthData.GetLeafNodes().OrderByDescending((d) => d.GetScore()).FirstOrDefault();
+                          var ChosenMove = BestBranch.SearchParents((p) =>
+                    {
+                        return (p.GetDepth()==1);
+                    });
+
+                         var maximumValue = ChosenMove.CurrentState;
+                    if (maximumValue != null)
+                    {
+                        Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(stdState.GameHandler.GetType(), ScoringRules));
+                        Debug.Print("What it will look like\n" + maximumValue.GetBoardString());
+                        Debug.Print("------");
+
+                        //int randomint = TetrisGame.rgen.Next(Scores.Length);
+                        //int randomint2 = TetrisGame.rgen.Next(Scores.Length);
+                        //StoredBoardState FirstState = Scores[randomint2].Item1;
+                        ;
+                        PushButtonInputs(ChosenMove.CurrentState);
+                    }
+
+                    }
+                    else
+                    {
+                        DebugLogger.Log.WriteLine("Blocks are high and falling fast! using faster codepath.");
+                        var CheckImmediate = GetPossibleResults(stdState.PlayField.Contents, ActiveGroup);
+
+                        var maximumValue = CheckImmediate.OrderByDescending((d) => d.GetScore(stdState.GameHandler.GetType(), ScoringRules)).FirstOrDefault();
+                         if (maximumValue != null)
+                    {
+                        Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(stdState.GameHandler.GetType(), ScoringRules));
+                        Debug.Print("What it will look like\n" + maximumValue.GetBoardString());
+                        Debug.Print("------");
+
+                        //int randomint = TetrisGame.rgen.Next(Scores.Length);
+                        //int randomint2 = TetrisGame.rgen.Next(Scores.Length);
+                        //StoredBoardState FirstState = Scores[randomint2].Item1;
+                        ;
+                        PushButtonInputs(maximumValue);
+                    }
+
+                    }
                     /*
 
                     var PossibleStates = GetDepthScoreResultConsideringNextQueue(stdState.PlayField.Contents, ActiveGroup, NextPieces, (s) => s.GetScore(stdState.GameHandler.GetType(), ScoringRules), true).ToList();
@@ -170,24 +216,9 @@ namespace BASeTris.AI
                         Debug.Print("------");
                     }*/
 
-                    var ChosenMove = BestBranch.SearchParents((p) =>
-                    {
-                        return (p.GetDepth()==1);
-                    });
+                  
 
-                    var maximumValue = ChosenMove.CurrentState;
-                    if (maximumValue != null)
-                    {
-                        Debug.Print("Best Move: Move " + maximumValue.XOffset + ", Rotate " + maximumValue.RotationCount + " To get score " + maximumValue.GetScore(stdState.GameHandler.GetType(), ScoringRules));
-                        Debug.Print("What it will look like\n" + maximumValue.GetBoardString());
-                        Debug.Print("------");
-
-                        //int randomint = TetrisGame.rgen.Next(Scores.Length);
-                        //int randomint2 = TetrisGame.rgen.Next(Scores.Length);
-                        //StoredBoardState FirstState = Scores[randomint2].Item1;
-                        ;
-                        PushButtonInputs(ChosenMove.CurrentState);
-                    }
+                   
                     //if(maximumValue!=null)
                     //{
                     //    PushButtonInputs(maximumValue);
@@ -373,15 +404,16 @@ namespace BASeTris.AI
         public int RotationCount; //CW rotation count.
         public bool InvalidState = false;
 
-        public String GetBoardString()
+
+        public static String GetBoardString(NominoBlock[][] Board)
         {
             StringBuilder sb = new StringBuilder();
 
-            for (int r = 0; r < State.Length; r++)
+            for (int r = 0; r < Board.Length; r++)
             {
-                for (int c = 0; c < State[r].Length; c++)
+                for (int c = 0; c < Board[r].Length; c++)
                 {
-                    if (State[r][c] == null)
+                    if (Board[r][c] == null)
                     {
                         sb.Append(" ");
                     }
@@ -395,6 +427,11 @@ namespace BASeTris.AI
             }
 
             return sb.ToString();
+        }
+
+        public String GetBoardString()
+        {
+            return GetBoardString(_BoardState);
         }
         public int RowCount { get; private set; }
         public int ColCount { get; private set; }
@@ -667,7 +704,7 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
        
         static List<Thread> WorkerThreads = new List<Thread>();
         static ConcurrentQueue<Action> DepthSearchActionQueue = new ConcurrentQueue<Action>();
-        const int NUM_WORKER_THREADS = 6;
+        const int NUM_WORKER_THREADS = 8;
         static void ChildWorkThread(object parameter)
         {
             DebugLogger.Log.WriteLine("DepthSearch Worker Thread Started");
@@ -686,7 +723,24 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
             }
         }
 
+        private static ConcurrentDictionary<(String, String), List<StoredBoardState>> BoardResultCache = new ConcurrentDictionary<(string, string), List<StoredBoardState>>();
 
+        //cache should keep track of only one set of states...
+        private static List<StoredBoardState> GetCachedResult(NominoBlock[][] BoardState, Nomino Piece, out String BoardStateKey, out String NominoKey)
+        {
+            BoardStateKey = StoredBoardState.GetBoardString(BoardState);
+            NominoKey = NNominoGenerator.StringRepresentation(NNominoGenerator.GetNominoPoints(Piece));
+            if (BoardResultCache.ContainsKey((BoardStateKey, NominoKey))) return BoardResultCache[(BoardStateKey, NominoKey)];
+
+            return null;
+        }
+        private static void AddCachedResult(String sBoardKey,String sNominoKey,List<StoredBoardState> Result)
+        {
+
+            BoardResultCache[(sBoardKey, sNominoKey)] = Result;
+
+
+        }
 
         public Nomino[] RemainingPieces { get; set; } = null;
         public DepthSearchInfo(DepthSearchInfo pParent, StoredBoardState InitialBoard, Span<Nomino> PlacePieces, Func<StoredBoardState, double> ScorerFunc, bool AllowThreading = false)
@@ -703,15 +757,25 @@ a+AggregateHeight+b*completelines+c*holes+d*bumpiness*/
 
                 Action ProcessTask = () =>
                 {
-                    //get all possible board states...
+                    //first, we'll check the cache for results first.
+                    string bskey = null;
+                    string nkey = null;
+                    //var CachedResult = null;  GetCachedResult(CurrentState._BoardState, PlacedPiece, out bskey, out nkey);
+                    //if (CachedResult != null)
+                    //{
+                    //    ;
+                    //}
+                        //add in a cache, we want to store the possible results we got previously for a particular piece, with a specific board state.
+                        //get all possible board states...
                     var ChildResults = StandardNominoAI.GetPossibleResults(CurrentState._BoardState, PlacedPiece);
-                    
+
                     //now we must create child DeptSearchInfos for each one.
                     foreach (var childprocess in ChildResults)
                     {
                         DepthSearchInfo childInfo = new DepthSearchInfo(this, childprocess, RemainingPieces, ScorerFunc);
                         Children.Add(childInfo);
                     }
+                    AddCachedResult(bskey, nkey, Children.Select((c) => c.CurrentState).ToList());
                     
                 };
                 if (AllowThreading)

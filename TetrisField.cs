@@ -58,7 +58,18 @@ namespace BASeTris
         //public TetrominoTheme Theme = new NESTetrominoTheme();
         //public TetrominoTheme Theme = new GameBoyTetrominoTheme();
         private List<Nomino> ActiveBlockGroups = new List<Nomino>();
+        public int GetHighestPoint()
+        {
+            for (int i = 0; i < Contents.Length; i++)
+            {
+                if (Contents[i].Any((d) => d != null))
+                {
+                    return RowCount - i;
+                }
+            }
+            return RowCount;
 
+        }
         public XElement SaveField(String pNodeName="Field")
         {
             //this is not done by having TetrisField implement IXmlPersistable because

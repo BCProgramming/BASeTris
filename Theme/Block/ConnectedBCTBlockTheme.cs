@@ -58,7 +58,7 @@ namespace BASeTris.Theme.Block
             throw new NotImplementedException();
         }
 
-        public override NESTetrominoTheme.NESBlockTypes RandomChoice()
+        public override NESTetrominoTheme.NESBlockTypes RandomColorChoice()
         {
             throw new NotImplementedException();
         }

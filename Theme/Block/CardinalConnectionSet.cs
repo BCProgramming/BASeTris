@@ -165,7 +165,7 @@ namespace BASeTris.Theme.Block
         }
     }
     
-    public class CardinalImageSet : CardinalConnectionSet<SKImage, SKColor>
+    public class CardinalImageSet : CardinalConnectionSet<SKImage, BlockColorInformation>
     {
         public CardinalImageSet()
         {
@@ -175,7 +175,7 @@ namespace BASeTris.Theme.Block
         }
         public static CardinalConnectionSet GetImageSet(CardinalImageSet Source, SKColor Colorize)
         {
-            return new CardinalConnectionSet<SKImage, SKColor>(Source, Colorize, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c));
+            return new CardinalConnectionSet<SKImage, BlockColorInformation>(Source, Colorize, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c));
         }
     }
 

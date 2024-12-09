@@ -16,26 +16,77 @@ using System.CodeDom;
 using OpenTK.Graphics.ES11;
 using BASeTris.AssetManager;
 using BASeCamp.Logging;
+using OpenTK.Graphics.ES20;
 
 
 
 namespace BASeTris.Theme.Block
 {
+    public class BlockColorInformation
+        {
+            public SKColor? SolidColor = null;
+            public Dictionary<SKColor, SKColor> ColorMapping = null;
+            public BlockColorInformation(SKColor pSolidColor)
+            {
+                SolidColor = pSolidColor;
+            }
+            public BlockColorInformation(Dictionary<SKColor, SKColor> Mapping)
+            {
+                ColorMapping = Mapping;
+            }
+            public static implicit operator SKColor(BlockColorInformation src)
+            {
+                return src.SolidColor.GetValueOrDefault();
+            }
+            public static implicit operator BlockColorInformation(SKColor src)
+            {
+                return new BlockColorInformation(src);
+            }
+        public override int GetHashCode()
+        {
+            return SolidColor.GetHashCode();
+        }
+        public override string ToString()
+        {
+            return "BlockColorInfo:" + SolidColor.ToString();
+        }
+        private bool DictionaryEquals<TKey, TValue>(Dictionary<TKey, TValue> FirstDict, Dictionary<TKey, TValue> SecondDict)
+        {
+            if (FirstDict == null && SecondDict == null) return true;
+            if (FirstDict == null ^ SecondDict == null) return false; //one is null, one is not.
+            //both are non null!
 
+            foreach (var kvpFirst in FirstDict)
+            {
+                if (!SecondDict.ContainsKey(kvpFirst.Key)) return false; //key in first dict not present in second.
+                if (!SecondDict[kvpFirst.Key].Equals(kvpFirst.Value)) return false; //key in first dict is a different value in second.
+            }
+            return true;
 
-    public abstract class ConnectedImageBlockTheme : ConnectedImageLineSeriesBlockThemeBase<SKColor, SKImage>
+        }
+        public override bool Equals(object? obj)
+        {
+            if (obj is BlockColorInformation bci) return this.SolidColor == bci.SolidColor && DictionaryEquals(this.ColorMapping, bci.ColorMapping);
+            return base.Equals(obj);
+        }
+    }
+
+    public abstract class ConnectedImageBlockTheme : ConnectedImageLineSeriesBlockThemeBase<BlockColorInformation, SKImage>
     {
+        
+
+        //new feature "concept". some way to do a color filter replacement, like palettes, instead of forcing colorization with a single color.
         protected CardinalImageSetBlockData Red = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Yellow = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Blue = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Green = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Magenta = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Orange = new CardinalImageSetBlockData();
-        public override SKColor RandomChoice()
+        public override BlockColorInformation RandomColorChoice()
         {
             return new SKColor((byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255));
         }
-        public override SKImage GetBlock(GenericCachedData<SKColor, SKImage>.BlockTypeConstants btc, SKColor chosen)
+        public override SKImage GetBlock(GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants btc, BlockColorInformation chosen)
         {
             return ImageCache.GetBlock(btc, chosen);
         }
@@ -45,13 +96,13 @@ namespace BASeTris.Theme.Block
         }
         public ConnectedImageBlockTheme()
         {
-            base.ImageCache = new CachedImageDataByColor();
+            base.ImageCache = new CachedImageDataByBlockInformation();
         }
-        protected virtual GenericCachedData<SKColor, SKImage>.BlockTypeConstants GetGroupBlockType(Nomino Group)
+        protected virtual GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants GetGroupBlockType(Nomino Group)
         {
-            return GenericCachedData<SKColor, SKImage>.BlockTypeConstants.Normal;
+            return GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants.Normal;
         }
-        protected virtual SKColor GetGroupBlockColor(Nomino Group)
+        protected virtual BlockColorInformation GetGroupBlockColor(Nomino Group)
         {
             //I,O,T,S,Z,J,L
             //{Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
@@ -70,14 +121,14 @@ namespace BASeTris.Theme.Block
             }
             return useColor;
         }
-        protected virtual (GenericCachedData<SKColor, SKImage>.BlockTypeConstants,SKColor) GetGroupBlockData(Nomino Group)
+        protected virtual (GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants,BlockColorInformation) GetGroupBlockData(Nomino Group)
         {
 
             return (GetGroupBlockType(Group), GetGroupBlockColor(Group));
 
         }
         Dictionary<String, SKColor> ChosenNominoColours = new Dictionary<string, SKColor>();
-        public override (GenericCachedData<SKColor, SKImage>.BlockTypeConstants, SKColor) GetBlockData(Nomino Group, NominoBlock block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
+        public override (GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants, BlockColorInformation) GetBlockData(Nomino Group, NominoBlock block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason)
         {
 
             GenericCachedData<SKColor, SKImage>.BlockTypeConstants blocktype = GenericCachedData<SKColor, SKImage>.BlockTypeConstants.Normal;
@@ -249,7 +300,7 @@ namespace BASeTris.Theme.Block
                 Orange[additionalentry] = new CardinalImageSet(Red.RetrieveSet(additionalentry), SKColors.Orange);
 
                 //prep image cache. This corresponds to the later code blocks doing something similar for the standard/old types (normal, Pop, fixed, etc)
-                ImageCache[additionalentry] = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
+                ImageCache[additionalentry] = new Dictionary<BlockColorInformation, CardinalConnectionSet<SKImage, BlockColorInformation>>()
                 {
                     {SKColors.Red,Red[additionalentry] },
                     {SKColors.Yellow,Yellow[additionalentry] },
@@ -265,7 +316,7 @@ namespace BASeTris.Theme.Block
             
 
 
-                ImageCache.NormalConnectedBlocks_Color = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
+                ImageCache.NormalConnectedBlocks_Color = new Dictionary<BlockColorInformation, CardinalConnectionSet<SKImage, BlockColorInformation>>()
             {
                 {SKColors.Red,Red.Normal },
                 {SKColors.Yellow,Yellow.Normal },
@@ -274,7 +325,7 @@ namespace BASeTris.Theme.Block
                 {SKColors.Magenta,Magenta.Normal },
                 {SKColors.Orange,Orange.Normal },
             };
-            ImageCache.FixedConnectedBlocks_Color = new Dictionary<SKColor, CardinalConnectionSet<SKImage, SKColor>>()
+            ImageCache.FixedConnectedBlocks_Color = new Dictionary<BlockColorInformation, CardinalConnectionSet<SKImage, BlockColorInformation>>()
             {
                 {SKColors.Red,Red.Fixed },
                 {SKColors.Yellow,Yellow.Fixed },
@@ -284,7 +335,7 @@ namespace BASeTris.Theme.Block
                 {SKColors.Orange,Orange.Fixed },
             };
 
-            ImageCache.NormalBlocks_Color = new Dictionary<SKColor, SKImage>()
+            ImageCache.NormalBlocks_Color = new Dictionary<BlockColorInformation, SKImage>()
             {
                 {SKColors.Red,Red.Normal[0] },
                 {SKColors.Yellow,Yellow.Normal[0] },
@@ -293,7 +344,7 @@ namespace BASeTris.Theme.Block
                 {SKColors.Magenta,Magenta.Normal[0] },
                 {SKColors.Orange,Orange.Normal[0] },
             };
-            ImageCache.FixedBlocks_Color = new Dictionary<SKColor, SKImage>()
+            ImageCache.FixedBlocks_Color = new Dictionary<BlockColorInformation, SKImage>()
             {
                 {SKColors.Red,Red.Fixed[0] },
                 {SKColors.Yellow,Yellow.Fixed[0] },
@@ -303,7 +354,7 @@ namespace BASeTris.Theme.Block
                 {SKColors.Orange,Orange.Fixed[0] },
             };
 
-            ImageCache.PopBlocks_Color = new Dictionary<SKColor, SKImage>()
+            ImageCache.PopBlocks_Color = new Dictionary<BlockColorInformation, SKImage>()
             {
                 {SKColors.Red,Red.Pop[0] },
                 {SKColors.Yellow,Yellow.Pop[0] },
@@ -325,7 +376,7 @@ namespace BASeTris.Theme.Block
 
             foreach (var iterate in Group)
             {
-                var chosenColor = RandomChoice();     //  new SKColor((byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255));
+                var chosenColor = RandomColorChoice();     //  new SKColor((byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255));
 
 
                 if (iterate.Block is ImageBlock ibb)
@@ -387,7 +438,7 @@ namespace BASeTris.Theme.Block
 
     }
 
-    public class CardinalImageSetBlockData : CardinalBlockData<SKColor,SKImage>
+    public class CardinalImageSetBlockData : CardinalBlockData<BlockColorInformation,SKImage>
     {
 
         public CardinalImageSetBlockData()
@@ -404,7 +455,7 @@ namespace BASeTris.Theme.Block
             Fixed = pFixed;
             Pop = pPop;
         }
-        public new CardinalConnectionSet<SKImage, SKColor> this[String pIndex]
+        public new CardinalConnectionSet<SKImage, BlockColorInformation> this[String pIndex]
         {
             get
             {
@@ -426,18 +477,18 @@ namespace BASeTris.Theme.Block
         }
         //these are "helpers" more than anything, making it easier to get/set the most common sets from the dictionary via a property.
         public CardinalImageSet Normal_ { get { return (CardinalImageSet)this["Normal"]; } set { this["Normal"] = value; } }
-        public override CardinalConnectionSet<SKImage, SKColor> Normal { get => Normal_; set => Normal_ = (CardinalImageSet)value; }
+        public override CardinalConnectionSet<SKImage, BlockColorInformation> Normal { get => Normal_; set => Normal_ = (CardinalImageSet)value; }
 
         public CardinalImageSet Field_ { get { return (CardinalImageSet)this["Field"]; } set { this["Field"] = value; } }
         //public CardinalImageSet Field_ { get; set; } = null;
-        public override CardinalConnectionSet<SKImage, SKColor> Field { get => Field_; set =>Field_= (CardinalImageSet)value; }
+        public override CardinalConnectionSet<SKImage, BlockColorInformation> Field { get => Field_; set =>Field_= (CardinalImageSet)value; }
 
         public CardinalImageSet Fixed_ { get { return (CardinalImageSet)this["Fixed"]; } set { this["Fixed"] = value; } } 
-        public override CardinalConnectionSet<SKImage, SKColor> Fixed { get => Fixed_; set => Fixed_= (CardinalImageSet)value; }
+        public override CardinalConnectionSet<SKImage, BlockColorInformation> Fixed { get => Fixed_; set => Fixed_= (CardinalImageSet)value; }
         //public SKImage Fixed_ { get; set; } = null;
         //public override SKImage Fixed { get => Fixed_; set => Fixed_= value; }
         public CardinalImageSet Pop_ { get { return (CardinalImageSet)this["Pop"]; } set { this["Pop"] = value; } } 
-        public override CardinalConnectionSet<SKImage,SKColor> Pop { get => Pop_; set => Pop_ = (CardinalImageSet)value; }
+        public override CardinalConnectionSet<SKImage,BlockColorInformation> Pop { get => Pop_; set => Pop_ = (CardinalImageSet)value; }
     }
     public class CardinalBlockData<Key, CacheType>
     {
@@ -483,7 +534,7 @@ namespace BASeTris.Theme.Block
 
         public override string Name => "ConnectedBlockTheme";
 
-        public abstract Key RandomChoice();
+        public abstract Key RandomColorChoice();
         public abstract DataType GetBlock(GenericCachedData<Key, DataType>.BlockTypeConstants btc, Key chosen);
 
         public abstract (GenericCachedData<Key, DataType>.BlockTypeConstants, Key) GetBlockData(Nomino Group, NominoBlock block, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);

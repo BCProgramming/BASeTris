@@ -41,7 +41,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 //PieceCounts = new int[] { 0, 0, 0, 0, 0, 0, 0 };
             }
             
-            var DesiredFontPixelHeight = 22d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
+            var DesiredFontPixelHeight = 32d; //  PixelsToPoints((int)(Bounds.Height * (30d / 644d)));
             var SizeScale = (float)(DEFAULT_TETRIS_TETROMINO_COUNT / (float)Math.Min(Math.Max(DEFAULT_TETRIS_TETROMINO_COUNT, RenderLines.Count), MAXIMUM_TETROMINO_STATUS_ROWS)); 
             //the original design had sizing based on the main tetrominoes, however we won't shrink the scaling beyond that amount, instead, it should be "small enough" that we can instead create a second column.
             float DesiredFontSize = SizeScale*((float)(DesiredFontPixelHeight * pOwner.ScaleFactor));
@@ -89,8 +89,26 @@ namespace BASeTris.Rendering.Skia.GameStates
 
                     g.DrawBitmap(TetrominoImage, DrawRect, null);
 
-                    g.DrawTextSK(StatText, new SKPoint((float)(Bounds.Left + TextPos.X + 4* pOwner.ScaleFactor), (float)(Bounds.Top + TextPos.Y + 4* pOwner.ScaleFactor)), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
-                    g.DrawTextSK(StatText, TextPos, standardFont, SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
+
+                    TextPos = new SKPoint(useXPos + (int)(130d * Factor*SizeScale), DrawRect.Top + DrawRect.Height);
+
+                    DrawTextInformationSkia dtis = new DrawTextInformationSkia();
+
+
+                     dtis.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia() { Height=2f*(float)pOwner.ScaleFactor});
+                    dtis.ShadowPaint = WhiteBrush;
+                    dtis.ForegroundPaint = BlackBrush;
+                    dtis.BackgroundPaint = new SKPaint() { Color = SKColors.Transparent };
+                    dtis.Text = StatText;
+                    dtis.ScalePercentage = 1;
+                    dtis.DrawFont = new Adapters.SKFontInfo(standardFont, (float)(DesiredFontSize));  //standardFont;
+                    dtis.Position = TextPos;
+                    g.DrawTextSK(dtis);
+                   
+
+
+                    //g.DrawTextSK(StatText, new SKPoint((float)(Bounds.Left + TextPos.X + 4* pOwner.ScaleFactor), (float)(Bounds.Top + TextPos.Y + 4* pOwner.ScaleFactor)), standardFont, SKColors.White, DesiredFontSize, pOwner.ScaleFactor);
+                    //g.DrawTextSK(StatText, TextPos, standardFont,  SKColors.Black, DesiredFontSize, pOwner.ScaleFactor);
 
                     currYPos += 40d * Factor;// DrawRect.Height*1.1f;
 

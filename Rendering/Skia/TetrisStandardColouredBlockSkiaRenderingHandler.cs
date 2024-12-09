@@ -134,6 +134,35 @@ namespace BASeTris.Rendering.Skia
                 NormalizedA,    0f,    0f,    1f, 0f};
             return mat;
         }
+        public static SKImage RemapImageColors(SKImage Source, Dictionary<SKColor, SKColor> TargetData)
+        {
+            //Naive implementation, we do the remapping ourself. 
+
+            SKImageInfo ski = new SKImageInfo(Source.Width, Source.Height, Source.ColorType, Source.AlphaType, Source.ColorSpace);
+            SKPixmap skp = Source.PeekPixels();
+            SKBitmap newbitmap = new SKBitmap(ski);
+
+         
+                
+                for (int x = 0; x < Source.Width; x++)
+                {
+                    for (int y = 0; y < Source.Height; y++)
+                    {
+                        SKColor SourceColor = skp.GetPixelColor(x, y);
+                        SKColor TargetColor = SourceColor;
+                        if (TargetData.ContainsKey(SourceColor)) TargetColor = TargetData[SourceColor];
+                        newbitmap.SetPixel(x, y, TargetColor);          
+                    }
+                }
+
+
+            return SKImage.FromBitmap(newbitmap);
+            
+
+
+
+        }
+     
         public static SKImage RecolorImage(SKImage Source, SKColor Target)
         {
             SKCanvas c;

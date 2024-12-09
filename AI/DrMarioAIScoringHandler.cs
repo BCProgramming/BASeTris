@@ -43,11 +43,13 @@ namespace BASeTris.AI
                         }
                         if (currentType == null)
                         {
+                            //reset the current type as it's not been initialized yet.
                             currentType = lsb.CombiningIndex;
+                            CurrentRun = 0;
                         }
                         if (currentType == lsb.CombiningIndex)
                         {
-
+                            //if same combining index, add one to the score.
                             CurrentRun++;
                         }
                         else if (currentType != lsb.CombiningIndex)
@@ -59,6 +61,11 @@ namespace BASeTris.AI
                             MasterCount = 0;
                             currentType = lsb.CombiningIndex;
                         }
+                    }
+                    else if(state.State[r][c]!=null && state.State[r][c] is not LineSeriesBlock)
+                    {
+                        //reset the counter, it's some other block. Not sure why a non line series block would be here, but let's not discount that we might add something weird for this in the future.
+                        
                     }
 
 

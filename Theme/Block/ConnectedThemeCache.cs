@@ -43,6 +43,25 @@ namespace BASeTris.Theme.Block
             return recolored;
         }
     }
+    public class CachedImageDataByBlockInformation : CachedImageData<BlockColorInformation>
+    {
+        public CachedImageDataByBlockInformation() : base(SKColors.Red, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c))
+        {
+        }
+        public override SKImage ApplyToDefault(BlockColorInformation src, SKImage StandardImage)
+        {
+            //TODO: need to also support the color remapping dictionary, not just the colorization!
+            //applies the given color to the default.
+            if (src.ColorMapping != null)
+            {
+                var remapped = TetrisStandardColouredBlockSkiaRenderingHandler.RemapImageColors(StandardImage, src.ColorMapping);
+                return remapped;
+            }
+
+            var recolored = TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(StandardImage, src);
+            return recolored;
+        }
+    }
 
     public abstract class CachedImageData<Key> : GenericCachedData<Key, SKImage>
     {
