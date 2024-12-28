@@ -57,6 +57,10 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            if (g == GameKeys.GameKey_Pause)
+            {
+                _ReturnState.HandleGameKey(pOwner, g); //repause
+            }
             //throw new NotImplementedException();
         }
 

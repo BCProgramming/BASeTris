@@ -34,6 +34,7 @@ namespace BASeTris.Rendering.Skia.GameStates
         private SKPaint SecondsPaint = null;
         private SKPaint MSPaint = null;
         private SKPaint MSPaintBG = null;
+        private SKPaint SecondsPaintShadow = null;
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, UnpauseDelayGameState Source, GameStateSkiaDrawParameters Element)
         {
 
@@ -59,16 +60,17 @@ namespace BASeTris.Rendering.Skia.GameStates
             }
 
             double SecondsLeft = Math.Round(Source.timeremaining.TotalSeconds, 1);
-            String sSecondsLeft = Source.timeremaining.ToString("%s");
+            String sSecondsLeft = String.Format("{0:0.0}", Source.timeremaining.TotalSeconds); // .ToString("%s");
             double Millis = (double)Source.timeremaining.Milliseconds / 1000d; //millis in percent. We will use this to animate the unpause time left.
             Millis = Math.Min(Millis, Source.lastMillis);
             float useSize = (float)(64f * (1 - (Millis)))*(float)pOwner.ScaleFactor;
             float FullSize = 1.33f*(float)(64f) * (float)pOwner.ScaleFactor;
             
             var CurrentColor = SKColors.White;
-            if(SecondsPaint==null)
+            if (SecondsPaint == null)
             {
                 SecondsPaint = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = useSize, Color = CurrentColor };
+                SecondsPaintShadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = useSize, Color = SKColors.Gray };
                 MSPaint = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = (float)(13*pOwner.ScaleFactor), Color = SKColors.Yellow };
                 MSPaintBG = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = MSPaint.TextSize, Color = SKColors.Navy };
             }
@@ -150,7 +152,13 @@ namespace BASeTris.Rendering.Skia.GameStates
                 LastPaintMSPositions.Dequeue();
             //this arc drawing doesn't work, for some reason.
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), false, new SKPaint() { StrokeWidth = 0.05f, Color = SKColors.Yellow, Style = SKPaintStyle.Stroke, IsStroke = true,StrokeCap = SKStrokeCap.Square,StrokeMiter = 0 });
-            g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
+
+            /*DrawTextInformationSkia dtis = new DrawTextInformationSkia() { CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia() { Height = (int)(Millis/100f) }),ForegroundPaint = SecondsPaint,ShadowPaint=SecondsPaintShadow };
+            dtis.Text = sSecondsLeft;
+            dtis.Position = new  SKPoint(DrawPosition.X,DrawPosition.Y-;
+            dtis.DrawFont = new Adapters.SKFontInfo(SecondsPaint.Typeface, SecondsPaint.TextSize);
+            g.DrawTextSK(dtis);*/
+            //g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
             Source.lastMillis = Millis;
         }
         private Queue<(double,SKPoint)> LastPaintMSPositions = new Queue<(double,SKPoint)>();
