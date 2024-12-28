@@ -85,8 +85,8 @@ namespace BASeTris.Rendering.Skia.MenuItems
         {
 
 
-          
 
+            if (Source is MenuStateTextMenuItem mstmi && mstmi.Text.Trim() == "") {; }
                 var SelectionNomino = GetSelectionNomino(Source);
                 Source.LastBounds = Element.Bounds;
                 //draw a selection thingie

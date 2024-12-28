@@ -224,7 +224,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 if (MenuStateSkiaRenderingHandler.CursorBitmap == null)
                 {
-                    MenuStateSkiaRenderingHandler.CursorBitmap = TetrisGame.Imageman.GetSKBitmap("cursor");
+                    MenuStateSkiaRenderingHandler.CursorBitmap = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("cursor"));
                     /*var CursorImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new System.Drawing.Bitmap(TetrisGame.Imageman["cursor"]));
 
                     SKImageInfo CursorInfo = new SKImageInfo(CursorImage.Width, CursorImage.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
@@ -238,7 +238,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 }
 
                 var lmove = Source.MouseInputData.LastMouseMovementPosition;
-                pRenderTarget.DrawBitmap(MenuStateSkiaRenderingHandler.CursorBitmap,new SKRect(lmove.X, lmove.Y, lmove.X+64, lmove.Y+64), null);
+                pRenderTarget.DrawImage(MenuStateSkiaRenderingHandler.CursorBitmap,new SKRect(lmove.X, lmove.Y, lmove.X+64, lmove.Y+64), null);
 
             }
 

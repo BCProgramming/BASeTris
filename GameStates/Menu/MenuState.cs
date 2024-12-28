@@ -52,7 +52,12 @@ namespace BASeTris.GameStates.Menu
         public event EventHandler<MenuStateMenuItemSelectedEventArgs> MenuItemDeselected;
 
         public String BackgroundMusicKey = null;
-
+        public static void SetTextMenuItemDefault(IStateOwner pOwner,MenuStateTextMenuItem item)
+        {
+            var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
+            item.FontFace = FontSrc.FontFamily.Name;
+            item.FontSize = FontSrc.Size;
+        }
         public MouseStateAggregate MouseInputData { get; private set; } = new MouseStateAggregate();
         public static MenuState CreateMenu(IStateOwner pOwner, String pHeaderText, GameState ReversionState, IBackground usebg, String sCancelText, int PerPageItems = int.MaxValue, params MenuStateMenuItem[] Items)
         {

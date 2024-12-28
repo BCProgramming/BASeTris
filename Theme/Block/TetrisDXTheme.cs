@@ -180,7 +180,7 @@ namespace BASeTris.Theme.Block
         {
             base.ApplyTheme(Group, GameHandler, Field, Reason);
         }
-        protected override GenericCachedData.BlockTypeConstants GetGroupBlockType(Nomino Group) => Group switch
+        protected override GenericCachedData.BlockTypeConstants GetGroupBlockType(IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason,Nomino Group) => Group switch
         {
             _ => GenericCachedData.BlockTypeConstants.Normal
         };

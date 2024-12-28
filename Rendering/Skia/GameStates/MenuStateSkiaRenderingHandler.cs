@@ -4,6 +4,7 @@ using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering.Adapters;
 using BASeTris.Rendering.Skia.MenuItems;
+using BASeTris.Theme.Block;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -40,11 +41,48 @@ namespace BASeTris.Rendering.Skia.GameStates
 
     public abstract class AbstractMenuStateSkiaRenderingHandler<TSourceType> : StandardStateRenderingHandler<SKCanvas, TSourceType, GameStateSkiaDrawParameters> where TSourceType : MenuState
     {
+        private static SKImage[] Corners = null;
+        private static SimpleBlockTheme sbt = new SimpleBlockTheme() { AdjacentConnection = true, Christmas=true,ForceGray = true };
         
+        private void LoadCorners()
+        {
+            Corners = new SKImage[]{
+            SKImage.FromBitmap(TetrominoCollageRenderer.GetCornerDisplayBitmap_UpperLeft(sbt, 16)),
+            SKImage.FromBitmap(TetrominoCollageRenderer.GetCornerDisplayBitmap_UpperRight(sbt, 16)),
+            SKImage.FromBitmap(TetrominoCollageRenderer.GetCornerDisplayBitmap_LowerLeft(sbt, 16)),
+            SKImage.FromBitmap(TetrominoCollageRenderer.GetCornerDisplayBitmap_LowerRight(sbt, 16))
+                };
+        }
+        private void DrawCorners(IStateOwner pOwner, SKCanvas pRenderTarget, TSourceType Source, GameStateSkiaDrawParameters Element)
+        {
+            SKRect[] Targets = new SKRect[4];
+
+            Targets[0] = new SKRect(0, 0, (float)(Corners[0].Width * pOwner.ScaleFactor),(float)( Corners[0].Height * pOwner.ScaleFactor));
+            Targets[1] = new SKRect((float)(Element.Bounds.Right - Corners[1].Width * pOwner.ScaleFactor), 0, (float)(Element.Bounds.Right), (float)(Corners[1].Height * pOwner.ScaleFactor));
+            
+            Targets[2] = new SKRect((float)(Element.Bounds.Right - Corners[1].Width * pOwner.ScaleFactor), 
+                (float)(Element.Bounds.Bottom - Corners[2].Height * pOwner.ScaleFactor)
+                , (float)(Element.Bounds.Right), Element.Bounds.Bottom);
+
+
+            Targets[3] = new SKRect(0, (float)(Element.Bounds.Bottom - Corners[3].Height * pOwner.ScaleFactor), (float)(Corners[3].Width * pOwner.ScaleFactor),Element.Bounds.Bottom);
+
+
+            for (int i = 0; i <= 3; i++)
+            {
+
+                pRenderTarget.DrawImage(Corners[i], Targets[i]);
+            }
+
+
+        }
         public override void Render(IStateOwner pOwner, SKCanvas pRenderTarget, TSourceType Source, GameStateSkiaDrawParameters Element)
         {
 
-
+            if (Corners == null)
+            {
+                LoadCorners();
+            }
             Source.Rendered = true;
 
             //draw the header text,
@@ -64,6 +102,8 @@ namespace BASeTris.Rendering.Skia.GameStates
             {
                 RenderingProvider.Static.DrawElement(pOwner, pRenderTarget, Source.BG, new SkiaBackgroundDrawData(Bounds));
             }
+
+            DrawCorners(pOwner,pRenderTarget,Source,Element);
             int CurrentIndex = Source.StartItemOffset;
             float CurrentY = DrawHeader(pOwner, Source, g, Bounds);
             float MaxHeight = 0, MaxWidth = 0;
@@ -197,7 +237,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             if (CursorBitmap == null)
             {
-                CursorBitmap = TetrisGame.Imageman.GetSKBitmap("cursor");
+                CursorBitmap = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap("cursor"));
                 /*var CursorImage = SkiaSharp.Views.Desktop.Extensions.ToSKImage(new System.Drawing.Bitmap(TetrisGame.Imageman["cursor"]));
                 
                 SKImageInfo CursorInfo = new SKImageInfo(CursorImage.Width, CursorImage.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
@@ -211,7 +251,7 @@ namespace BASeTris.Rendering.Skia.GameStates
                 
             }
             if (Source.MouseInputData.MouseActive)
-                g.DrawBitmap(CursorBitmap, Source.MouseInputData.LastMouseMovementPosition, null);
+                g.DrawImage(CursorBitmap, Source.MouseInputData.LastMouseMovementPosition, null);
 
 
             
@@ -223,7 +263,7 @@ namespace BASeTris.Rendering.Skia.GameStates
 
         }
         static SKPaint GrayBG = new SKPaint() { Color = SKColors.LightGreen, BlendMode = SKBlendMode.HardLight };
-        public static SKBitmap CursorBitmap = null;
+        public static SKImage CursorBitmap = null;
         protected SKFontInfo GetScaledHeaderFont(IStateOwner pOwner, TSourceType Source)
         {
             return MenuStateTextMenuItemSkiaRenderer.GetScaledFont(pOwner, Source.HeaderTypeSize);

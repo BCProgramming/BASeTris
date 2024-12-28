@@ -187,30 +187,7 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
         private static Dictionary<BlockColors, SKBitmap> CachedUnsetImages = new Dictionary<BlockColors, SKBitmap>();
         private static Dictionary<BlockColors, SKBitmap> CachedSetImages = new Dictionary<BlockColors, SKBitmap>();
 
-        private static Dictionary<BlockColors, Image> CachedUnsetImages_GDI = new Dictionary<BlockColors, Image>();
-        private static Dictionary<BlockColors, Image> CachedSetImages_GDI = new Dictionary<BlockColors, Image>();
-
-
-        public static Image GetSetImageGDI(BlockColors source)
-        {
-            if(!CachedSetImages_GDI.ContainsKey(source))
-            {
-                var SKresult = GetSetImage(source);
-                CachedSetImages_GDI.Add(source, SkiaSharp.Views.Desktop.Extensions.ToBitmap(SKresult));
-                
-            }
-            return CachedSetImages_GDI[source];
-        }
-        public static Image GetUnsetImageGDI(BlockColors source)
-        {
-            if (!CachedUnsetImages_GDI.ContainsKey(source))
-            {
-                var SKresult = GetUnsetImage(source);
-                CachedUnsetImages_GDI.Add(source, SkiaSharp.Views.Desktop.Extensions.ToBitmap(SKresult));
-
-            }
-            return CachedUnsetImages_GDI[source];
-        }
+     
         public static SKBitmap GetSetImage(BlockColors source)
         {
             if(!CachedSetImages.ContainsKey(source))
@@ -241,16 +218,6 @@ new BlockColors(new BCColor(255,222,255),new BCColor(255,255,255),new BCColor(25
         {
             BlockColors usebc = GetBlockColors(LevelNumber, TetrominoType);
             return GetSetImage(usebc);
-        }
-        public static Image GetUnsetImageGDI(int LevelNumber, char TetrominoType)
-        {
-            BlockColors usebc = GetBlockColors(LevelNumber, TetrominoType);
-            return GetUnsetImageGDI(usebc);
-        }
-        public static Image GetSetImageGDI(int LevelNumber,char TetrominoType)
-        {
-            BlockColors usebc = GetBlockColors(LevelNumber, TetrominoType);
-            return GetSetImageGDI(usebc);
         }
 
         static String TetOrder = "TJZOSLI";

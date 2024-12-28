@@ -63,27 +63,27 @@ namespace BASeTris.GameStates.GameHandlers
     /// <summary>
     /// represents an option that will be represented via a multichoice option menu item.
     /// </summary>
-    public class GamePreparerOptionSetPropertyAttribute : GamePreparerPropertyAttribute
+    public class PreparerOptionSetPropertyAttribute : GamePreparerPropertyAttribute
     {
         public String[] Options { get; protected set; }
-        public GamePreparerOptionSetPropertyAttribute(String pLabel,String[] ValidOptions):base(pLabel)
+        public PreparerOptionSetPropertyAttribute(String pLabel,String[] ValidOptions):base(pLabel)
         {
             Options = ValidOptions;
         }
-        protected GamePreparerOptionSetPropertyAttribute(String pLabel):base(pLabel)
+        protected PreparerOptionSetPropertyAttribute(String pLabel):base(pLabel)
         {
         }
     }
     //implies ICustomPropertyPreparer implementation on the containing class.
-    public class GamePreparerCustomItemAttribute : GamePreparerPropertyAttribute
+    public class PreparerCustomItemAttribute : GamePreparerPropertyAttribute
     {
-        public GamePreparerCustomItemAttribute(String pLabel) : base(pLabel)
+        public PreparerCustomItemAttribute(String pLabel) : base(pLabel)
         {
         }
     }
     public interface ICustomPropertyPreparer : IXmlPersistable
     {
-        MenuStateMenuItem CreateItem(PropertyInfo Target, GamePreparerOptions Element);
+        MenuStateMenuItem CreateItem(PropertyInfo Target, PreparerOptions Element);
         bool ItemActivated(MenuStateMenuItemActivatedEventArgs msmiargs);
 
     }
@@ -99,22 +99,13 @@ namespace BASeTris.GameStates.GameHandlers
             ChangeSize = pChangeSize;
         }
     }
-
-
-    /// <summary>
-    /// A Game Preparer is a class that holds information used to start a game; primarily, options. Consider Dr.Mario: before you start a game, it has the option screen for speed, starting level, and music. That is the sort of thing we are going for with these.
-    /// Additionally, instead of requiring a bunch of custom work to create unique game states for each one, we instead have this setup where there is a data class that tags it's properties and those get utilized by a generic routine that can handle any instance.
-    /// Another aspect is that some settings could be "unfair" and should be separate high score lists. This is facilitated by allowing classes to return a string for a high score key suffix. (the "default" settings should give back an empty string)
-    /// </summary>
-    //this class is persistable so that the settings can be saved. Specifically (at the time of me writing this, anyway) for the purpose of recording the initial state information for replays.
-    public abstract class GamePreparerOptions : IXmlPersistable, ICustomPropertyPreparer
+    //Preparers are when we want to construct a "menu" that manipulates a 'preparerproperties' instance automatically. This was originally just a GamePreparer but got abstracted out so we could re-use it for Themes.
+    public abstract class PreparerOptions : IXmlPersistable, ICustomPropertyPreparer
     {
-
+        public virtual String BackgroundMusic { get; }
         public virtual Type CustomPreparerStateType { get { return null; } } 
-        [GamePreparerCustomItem("Seed")]
-        public int RandomSeed { get; set; } = Environment.TickCount;
         public Type HandlerType { get; set; }
-        protected Dictionary<PropertyInfo, MenuStateMenuItem> MenuPropertyValues = new Dictionary<PropertyInfo, MenuStateMenuItem>();
+         protected Dictionary<PropertyInfo, MenuStateMenuItem> MenuPropertyValues = new Dictionary<PropertyInfo, MenuStateMenuItem>();
         protected Dictionary<String, PropertyInfo> PropertiesbyName = new Dictionary<string, PropertyInfo>();
         protected MenuStateMenuItem GetMenuFromPropertyName(String sName)
         {
@@ -128,9 +119,12 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return null;
         }
-        public virtual String BackgroundMusic { get; }
-        public abstract String HighScoreCategorySuffix();
-        public GamePreparerOptions(XElement Src, Object pData)
+
+        public PreparerOptions(Type CustomizationHandlerType)
+        {
+            HandlerType = CustomizationHandlerType;
+        }
+           public PreparerOptions(XElement Src, Object pData)
         {
             //need to interpret provided node to get back data saved by GetXmlData.
             String sHandlerType = Src.GetAttributeString("HandlerType", null);
@@ -140,7 +134,7 @@ namespace BASeTris.GameStates.GameHandlers
                 HandlerType = Type.GetType(sHandlerType, false);
             }
             
-            RandomSeed = Src.GetAttributeInt("Seed", Environment.TickCount);
+            
             foreach (var iterateprop in GetPreparerProperties(this.GetType()))
             {
                 XAttribute findattribute = Src.Attribute(iterateprop.Item1.Name);
@@ -161,11 +155,11 @@ namespace BASeTris.GameStates.GameHandlers
 
 
         }
-        public virtual XElement GetXmlData(String pNodeName, Object pContext)
+          public virtual XElement GetXmlData(String pNodeName, Object pContext)
         {
             XElement result = new XElement(pNodeName, new XAttribute("HandlerType", HandlerType.AssemblyQualifiedName));
 
-            result.Add(new XAttribute("Seed", RandomSeed));
+            
 
             foreach (var iterateprop in GetPreparerProperties(this.GetType()))
             {
@@ -176,11 +170,7 @@ namespace BASeTris.GameStates.GameHandlers
             return result;
 
         }
-        public GamePreparerOptions(Type CustomizationHandlerType)
-        {
-            HandlerType = CustomizationHandlerType;
-        }
-        private static IEnumerable<(PropertyInfo, GamePreparerPropertyAttribute)> GetPreparerProperties(Type PreparerType)
+        protected static IEnumerable<(PropertyInfo, GamePreparerPropertyAttribute)> GetPreparerProperties(Type PreparerType)
         {
             var SourceProperties = PreparerType.GetProperties();
             foreach (var checkproperty in SourceProperties)
@@ -193,21 +183,22 @@ namespace BASeTris.GameStates.GameHandlers
             }
 
         }
-        public static GameState ConstructPreparationState(IStateOwner pOwner,String pHeader,GameState ReversionState,IBackground bg,String sCancelText, GamePreparerOptions OptionsData,Action<GamePreparerOptions> ProceedFunc)
-        {
-            //precondition: any loading/initialization on the GamePreparerOptions instance has been done.
-            //task: create a MenuState that has menu items for each property in the definition of the given class that has a GamePreparer Attribute.
-            //This should include appropriate handling of menu changes such that the values are assigned to the information class as values are changed.
-            //we are not responsible for adding any additional menu items, such as elements to return to the previous menu, or to proceed. Those should be dealt with by the caller. 
 
-            if (OptionsData.CustomPreparerStateType != null)
-            {
+        public abstract MenuStateMenuItem CreateItem(PropertyInfo Target, PreparerOptions Element);
+        
+
+        public abstract bool ItemActivated(MenuStateMenuItemActivatedEventArgs msmiargs);
+        
+        public static GameState ConstructPreparationState<PREPSTATE>(IStateOwner pOwner, String pHeader, GameState ReversionState, IBackground bg, String sCancelText, PREPSTATE OptionsData, Action<PREPSTATE> ProceedFunc) where PREPSTATE:PreparerOptions
+        {
+             if (OptionsData.CustomPreparerStateType != null)
+             {
                 //if specified, we will want to construct the specified type. It should adhere to a particular constructor.
                 if (!OptionsData.CustomPreparerStateType.IsAssignableTo(typeof(GameState)))
                 {
                     throw new ArgumentException($"CustomPreparerProperty of type {OptionsData.CustomPreparerStateType.GetType().Name} is not a GameState.");
                 }
-                var useConstructor = OptionsData.CustomPreparerStateType.GetConstructor(new Type[] { typeof(GameState), typeof(IBackground), typeof(GamePreparerOptions), typeof(Action<GamePreparerOptions>) });
+                var useConstructor = OptionsData.CustomPreparerStateType.GetConstructor(new Type[] { typeof(GameState), typeof(IBackground), typeof(PREPSTATE), typeof(Action<PREPSTATE>) });
                 if (useConstructor != null)
                 {
                     var resultstate = (GameState)useConstructor.Invoke(new Object[] { ReversionState, bg, OptionsData, ProceedFunc });
@@ -218,10 +209,10 @@ namespace BASeTris.GameStates.GameHandlers
                     throw new ArgumentException($"CustomPreparerProperty of type {OptionsData.CustomPreparerStateType.GetType().Name} does not have required constructor.");
                 }
 
-            }
+             }
 
 
-            List<MenuStateMenuItem> BuildItems = new List<MenuStateMenuItem>();
+             List<MenuStateMenuItem> BuildItems = new List<MenuStateMenuItem>();
 
             
 
@@ -231,29 +222,9 @@ namespace BASeTris.GameStates.GameHandlers
                 MenuStateMenuItem mitem = ConstructItem(OptionsData, reviewprop.Item1, reviewprop.Item2, CurrentPropertyValue);
                 BuildItems.Add(mitem);
             }
-            
-            MenuStateTextMenuItem StartGameItem = new MenuStateTextMenuItem() { Text = "Start Game" };
-            MenuStateTextMenuItem ResumeSuspendedGame = new MenuStateTextMenuItem() { Text = "Resume Game" };
 
 
-
-
-
-            BuildItems.Insert(0,StartGameItem);
-
-            String sSuspendedFile = TetrisGame.GetSuspendedGamePath(OptionsData.HandlerType);
-            if (!String.IsNullOrEmpty(sSuspendedFile) && File.Exists(sSuspendedFile))
-            {
-                ResumeSuspendedGame.Text = $"Resume Game ({new FileInfo(sSuspendedFile).LastWriteTime.ToString("MM/dd/yy hh:mm}")})";
-                BuildItems.Add(ResumeSuspendedGame);
-
-
-            }
-
-
-
-
-            MenuState ConstructState = MenuState.CreateMenu(pOwner, pHeader, ReversionState, bg, sCancelText,int.MaxValue,BuildItems.ToArray());
+             MenuState ConstructState = MenuState.CreateMenu(pOwner, pHeader, ReversionState, bg, sCancelText,int.MaxValue,BuildItems.ToArray());
             ConstructState.BackgroundMusicKey = OptionsData.BackgroundMusic;
 
             
@@ -261,7 +232,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             ConstructState.MenuItemActivated += (o, e) =>
             {
-                if (e.MenuElement == StartGameItem)
+               /* if (e.MenuElement == StartGameItem)
                 {
                     ConstructState.BackgroundMusicKey = "";
 
@@ -322,20 +293,24 @@ namespace BASeTris.GameStates.GameHandlers
 
                     pOwner.EnqueueAction(RestoreSuspendedGameProc);
                 }
-                else if (OptionsData is ICustomPropertyPreparer cpp)
+                else*/
+                if (OptionsData is ICustomPropertyPreparer cpp)
                 {
                     cpp.ItemActivated(e);
                 }
                 
             };
             return ConstructState;
+
+
         }
 
-        private static MenuStateMenuItem ConstructItem(GamePreparerOptions preparer, PropertyInfo prop, GamePreparerPropertyAttribute src,Object CurrentValue)
+
+        protected static MenuStateMenuItem ConstructItem(PreparerOptions preparer, PropertyInfo prop, GamePreparerPropertyAttribute src,Object CurrentValue)
         {
             MenuStateMenuItem ResultValue = null;
             preparer.PropertiesbyName.Add(prop.Name, prop);
-            if (src is GamePreparerOptionSetPropertyAttribute gpos)
+            if (src is PreparerOptionSetPropertyAttribute gpos)
             {
                 int StartIndex = Array.FindIndex(gpos.Options, (a) => String.Equals(CurrentValue.ToString(), a, StringComparison.OrdinalIgnoreCase));
                 MultiOptionManagerList<String> ManagerList = new MultiOptionManagerList<string>(gpos.Options, StartIndex);
@@ -364,7 +339,7 @@ namespace BASeTris.GameStates.GameHandlers
                 MenuStateLabelMenuItem labelitem = new MenuStateLabelMenuItem() { Text = Convert.ToString(CurrentValue) };
                 ResultValue = labelitem;
             }
-            else if (src is GamePreparerCustomItemAttribute gpci)
+            else if (src is PreparerCustomItemAttribute gpci)
             {
                 if (preparer is ICustomPropertyPreparer icpp)
                 {
@@ -378,7 +353,157 @@ namespace BASeTris.GameStates.GameHandlers
             return ResultValue;
 
         }
-        public virtual bool ItemActivated(MenuStateMenuItemActivatedEventArgs msmi)
+
+
+
+    }
+
+
+    /// <summary>
+    /// A Game Preparer is a class that holds information used to start a game; primarily, options. Consider Dr.Mario: before you start a game, it has the option screen for speed, starting level, and music. That is the sort of thing we are going for with these.
+    /// Additionally, instead of requiring a bunch of custom work to create unique game states for each one, we instead have this setup where there is a data class that tags it's properties and those get utilized by a generic routine that can handle any instance.
+    /// Another aspect is that some settings could be "unfair" and should be separate high score lists. This is facilitated by allowing classes to return a string for a high score key suffix. (the "default" settings should give back an empty string)
+    /// </summary>
+    //this class is persistable so that the settings can be saved. Specifically (at the time of me writing this, anyway) for the purpose of recording the initial state information for replays.
+    public abstract class GamePreparerOptions : PreparerOptions
+    {
+
+        
+        [PreparerCustomItem("Seed")]
+        public int RandomSeed { get; set; } = Environment.TickCount;
+        
+       
+        
+        public abstract String HighScoreCategorySuffix();
+
+        public override XElement GetXmlData(string pNodeName, object pContext)
+        {
+            var resultnode = base.GetXmlData(pNodeName, pContext);
+            resultnode.Add(new XAttribute("Seed", RandomSeed));
+            return resultnode;
+        }
+        public GamePreparerOptions(XElement src, Object pData) : base(src, pData)
+        {
+            RandomSeed = src.GetAttributeInt("Seed", Environment.TickCount);
+        }
+        public GamePreparerOptions(Type CustomizationHandlerType):base(CustomizationHandlerType)
+        {
+            HandlerType = CustomizationHandlerType;
+        }
+        
+        public static GameState ConstructPreparationState(IStateOwner pOwner,String pHeader,GameState ReversionState,IBackground bg,String sCancelText, GamePreparerOptions OptionsData,Action<GamePreparerOptions> ProceedFunc)
+        {
+            //this needs refactored somewhat to have shared code in the make PreparerOptions, and only GameHandler specific preparation stuff in here.
+
+            //precondition: any loading/initialization on the GamePreparerOptions instance has been done.
+            //task: create a MenuState that has menu items for each property in the definition of the given class that has a GamePreparer Attribute.
+            //This should include appropriate handling of menu changes such that the values are assigned to the information class as values are changed.
+            //we are not responsible for adding any additional menu items, such as elements to return to the previous menu, or to proceed. Those should be dealt with by the caller. 
+
+
+            var ConstructState = PreparerOptions.ConstructPreparationState<GamePreparerOptions>(pOwner, pHeader, ReversionState, bg, sCancelText, OptionsData, ProceedFunc);
+            
+            //Game handler specific
+            //----------------------------
+            
+            MenuStateTextMenuItem StartGameItem = new MenuStateTextMenuItem() { Text = "Start Game",TipText = "Start the Game" };
+            MenuStateTextMenuItem ResumeSuspendedGame = new MenuStateTextMenuItem() { Text = "Resume Game", TipText = "Resume Suspended Game"};
+
+            //since our start and resume items are being added after we've already constructed the state, we need to prepare their font info.
+
+            MenuState.SetTextMenuItemDefault(pOwner, StartGameItem);
+            MenuState.SetTextMenuItemDefault(pOwner, ResumeSuspendedGame);
+
+
+            if (ConstructState is MenuState ms) //possible it's a custom non-menu type, in which case, well, it's on it's own to add Start Game and Resume Game Options, I guess!
+            {
+
+
+                ms.MenuElements.Insert(0, StartGameItem);
+
+                String sSuspendedFile = TetrisGame.GetSuspendedGamePath(OptionsData.HandlerType);
+                if (!String.IsNullOrEmpty(sSuspendedFile) && File.Exists(sSuspendedFile))
+                {
+                    ResumeSuspendedGame.Text = $"Resume Game ({new FileInfo(sSuspendedFile).LastWriteTime.ToString("MM/dd/yy hh:mm}")})";
+                    ms.MenuElements.Add(ResumeSuspendedGame);
+
+
+                }
+
+
+
+                //add handling for the menu element.
+
+                ms.MenuItemActivated += (o, e) =>
+                {
+                    if (e.MenuElement == StartGameItem)
+                    {
+                        ms.BackgroundMusicKey = "";
+
+                        ProceedFunc(OptionsData);
+                    }
+                    else if (e.MenuElement == ResumeSuspendedGame)
+                    {
+                        if (!File.Exists(sSuspendedFile))
+                        {
+                            ms.MenuElements.Remove(ResumeSuspendedGame);
+                        }
+
+                        XDocument? loadedDoc = null;
+
+                        using (FileStream strm = new FileStream(sSuspendedFile, FileMode.Open, FileAccess.Read))
+                        {
+
+                            using (GZipStream gstream = new GZipStream(strm, CompressionMode.Decompress))
+
+                                loadedDoc = XDocument.Load(gstream);
+                        }
+                        if (loadedDoc == null)
+                        {
+                            ms.MenuElements.Remove(ResumeSuspendedGame);
+                        }
+
+                        ms.BackgroundMusicKey = "";
+                        ProceedFunc(OptionsData);
+                        Func<bool> RestoreSuspendedGameProc = null;
+                        RestoreSuspendedGameProc = () =>
+                        {
+                            //first frame it calls this routine, and we will load in the suspended game.
+                            if (pOwner.CurrentState is GameplayGameState gpgs)
+                            {
+
+                                gpgs.RestoreState(pOwner, loadedDoc.Root);
+
+                                //foreach(var iterate in gpgs.PlayField.Contents
+
+
+
+
+                                RenderingProvider.Static.ClearExtendedData(gpgs.PlayField.GetType(), gpgs.PlayField);
+                                gpgs.ReapplyTheme();
+                                return false;
+                            }
+                            else
+                            {
+                                //if it is not,
+                                //pOwner.EnqueueAction(RestoreSuspendedGameProc);
+                                return true;
+                            }
+
+
+
+                        };
+
+
+                        pOwner.EnqueueAction(RestoreSuspendedGameProc);
+                    }
+                };
+            }
+            return ConstructState;
+        }
+
+        
+        public override bool ItemActivated(MenuStateMenuItemActivatedEventArgs msmi)
         {
             if (msmi.MenuElement == SeedItem)
             {
@@ -391,7 +516,7 @@ namespace BASeTris.GameStates.GameHandlers
             return false;
         }
         private MenuStateTextMenuItem  SeedItem = null;
-        public virtual MenuStateMenuItem CreateItem(PropertyInfo Target, GamePreparerOptions Element)
+        public override MenuStateMenuItem CreateItem(PropertyInfo Target, PreparerOptions Element)
         {
             if (Target.Name == "RandomSeed")
             {
@@ -452,7 +577,7 @@ namespace BASeTris.GameStates.GameHandlers
             yield break;
         }
 
-        public override MenuStateMenuItem CreateItem(PropertyInfo Target, GamePreparerOptions Element)
+        public override MenuStateMenuItem CreateItem(PropertyInfo Target, PreparerOptions Element)
         {
             var result = base.CreateItem(Target, Element);
             if (result != null) return result;
@@ -474,7 +599,7 @@ namespace BASeTris.GameStates.GameHandlers
 
         }
 
-        [GamePreparerCustomItem("Chooser")]
+        [PreparerCustomItem("Chooser")]
         public Type Chooser { get; set; }
 
     }
@@ -541,7 +666,7 @@ namespace BASeTris.GameStates.GameHandlers
         public double StartingLevel { get; set; }
 
 
-        [GamePreparerOptionSetProperty("Speed", new String[] { "Low", "Med", "Hi" })]
+        [PreparerOptionSetProperty("Speed", new String[] { "Low", "Med", "Hi" })]
         public String Speed { get; set; } = "Low";
 
         public CascadingBlockPreparer(Type Initializer) : base(Initializer)

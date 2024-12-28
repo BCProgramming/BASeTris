@@ -45,7 +45,8 @@ namespace BASeTris.Theme.Block
     }
     public class CachedImageDataByBlockInformation : CachedImageData<BlockColorInformation>
     {
-        public CachedImageDataByBlockInformation() : base(SKColors.Red, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c))
+        
+        public CachedImageDataByBlockInformation() : base(SKColors.Red, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.ProcessBlockImageInfo(i, c))
         {
         }
         public override SKImage ApplyToDefault(BlockColorInformation src, SKImage StandardImage)

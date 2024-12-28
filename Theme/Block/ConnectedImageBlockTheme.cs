@@ -34,6 +34,7 @@ namespace BASeTris.Theme.Block
             {
                 ColorMapping = Mapping;
             }
+        
             public static implicit operator SKColor(BlockColorInformation src)
             {
                 return src.SolidColor.GetValueOrDefault();
@@ -44,7 +45,12 @@ namespace BASeTris.Theme.Block
             }
         public override int GetHashCode()
         {
-            return SolidColor.GetHashCode();
+            int HashCodeResult = 0;
+            if (SolidColor != null)
+                HashCodeResult = SolidColor.GetHashCode();
+            if (ColorMapping != null) HashCodeResult ^= ColorMapping.GetHashCode();
+
+            return HashCodeResult;
         }
         public override string ToString()
         {
@@ -82,6 +88,67 @@ namespace BASeTris.Theme.Block
         protected CardinalImageSetBlockData Green = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Magenta = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Orange = new CardinalImageSetBlockData();
+
+        protected virtual SKColor[] GetStandardColors()
+        {
+            return null;
+        }
+        
+        protected static Dictionary<SKColor, SKColor> GetColorShiftDictionary(SKColor[] StandardColors,int count)
+        {
+        
+            Dictionary<SKColor, SKColor> Result = new Dictionary<SKColor, SKColor>();
+            var Shifted = GetShiftedColors(StandardColors,count);
+            for (int i = 0; i < StandardColors.Length; i++)
+            {
+                Result[StandardColors[i]] = Shifted[i];
+            }
+            return Result;
+
+        }
+
+        protected static Dictionary<SKColor, SKColor>[] GetAllColorShiftDictionaries(SKColor[] SourceColors)
+        {
+            Dictionary<SKColor, SKColor>[] buildresult = new Dictionary<SKColor, SKColor>[SourceColors.Length];
+
+            for (int i = 0; i < SourceColors.Length; i++)
+            {
+                buildresult[i] = GetColorShiftDictionary(SourceColors, i);
+            }
+            return buildresult;
+         
+        }
+
+        protected Dictionary<SKColor, SKColor> GetColorShiftDictionary(int count)
+        {
+            return GetColorShiftDictionary(GetStandardColors(), count);
+
+        }
+        protected static SKColor[] GetShiftedColors(SKColor[] src,int count)
+        {
+            return ShiftArray(src, count);
+        }
+
+        protected SKColor[] GetShiftedColors(int count)
+        {
+            return GetShiftedColors(GetStandardColors(), count);
+        }
+
+
+        private static T[] ShiftArray<T>(T[] input, int count)
+        {
+            T[] result = new T[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                result[(i + count) % input.Length] = input[i];
+            }
+
+            return result;
+
+        }
+
+
+
         public override BlockColorInformation RandomColorChoice()
         {
             return new SKColor((byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255), (byte)TetrisGame.StatelessRandomizer.Next(255));
@@ -98,11 +165,12 @@ namespace BASeTris.Theme.Block
         {
             base.ImageCache = new CachedImageDataByBlockInformation();
         }
-        protected virtual GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants GetGroupBlockType(Nomino Group)
+        protected virtual GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants GetGroupBlockType(IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason,Nomino Group)
         {
             return GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants.Normal;
         }
-        protected virtual BlockColorInformation GetGroupBlockColor(Nomino Group)
+        protected static SKColor[] StandardTetrominoColors = new SKColor[] { SKColors.Cyan, SKColors.Yellow, SKColors.Purple, SKColors.Green, SKColors.Green, SKColors.Red, SKColors.Navy, SKColors.OrangeRed };
+        protected virtual BlockColorInformation GetGroupBlockColor(IBlockGameCustomizationHandler GameHandler,TetrisField Field,ThemeApplicationReason Reason,  Nomino Group)
         {
             //I,O,T,S,Z,J,L
             //{Color.Cyan, Color.Yellow, Color.Purple, Color.Green, Color.Red, Color.Blue, Color.OrangeRed};
@@ -121,10 +189,10 @@ namespace BASeTris.Theme.Block
             }
             return useColor;
         }
-        protected virtual (GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants,BlockColorInformation) GetGroupBlockData(Nomino Group)
+        protected virtual (GenericCachedData<BlockColorInformation, SKImage>.BlockTypeConstants,BlockColorInformation) GetGroupBlockData(IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason,Nomino Group)
         {
 
-            return (GetGroupBlockType(Group), GetGroupBlockColor(Group));
+            return (GetGroupBlockType(GameHandler,Field,Reason,Group), GetGroupBlockColor(GameHandler,Field,Reason,Group));
 
         }
         Dictionary<String, SKColor> ChosenNominoColours = new Dictionary<string, SKColor>();
@@ -132,7 +200,7 @@ namespace BASeTris.Theme.Block
         {
 
             GenericCachedData<SKColor, SKImage>.BlockTypeConstants blocktype = GenericCachedData<SKColor, SKImage>.BlockTypeConstants.Normal;
-            SKColor useColor = SKColors.Red;
+            BlockColorInformation useColor = SKColors.Red;
             Dictionary<Point, NominoElement> GroupElements = (from g in Group select g).ToDictionary((ne) => new Point(ne.BaseX(), ne.BaseY()));
             var iterate = block;
             {
@@ -175,7 +243,7 @@ namespace BASeTris.Theme.Block
                 else
                 {
 
-                    (blocktype,useColor) = GetGroupBlockData(Group);
+                    (blocktype,useColor) = GetGroupBlockData(GameHandler,Field,Reason,Group);
                    
 
                     //chosenType = TetrisGame.Choose<LineSeriesBlock.CombiningTypes>((LineSeriesBlock.CombiningTypes[])Enum.GetValues(typeof(LineSeriesBlock.CombiningTypes)));

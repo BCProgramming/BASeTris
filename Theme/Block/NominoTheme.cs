@@ -508,6 +508,25 @@ namespace BASeTris
         }
     }
 
+    //per-class property data for initialization. This maps somewhat to the Game Preparer stuff, but for themes.
+    public abstract class NominoThemeInitializationData
+    {
+    }
+
+    public class ThemeInitializationAttribute : Attribute
+    {
+        Type InitializationDataType { get; init; }
+        public ThemeInitializationAttribute(Type InitializationType)
+        {
+            if (!InitializationType.IsAssignableTo(typeof(NominoThemeInitializationData)))
+            {
+                throw new ArgumentException("ThemeInitializationAttribute type " + InitializationType.Name + " Is not a NominoThemeInitializationData Derived class");
+            }
+            InitializationDataType = InitializationType;
+        }
+    }
+
+
     //Cyan I
     //Yellow O
     //Purple T

@@ -185,19 +185,31 @@ namespace BASeTris.GameStates.Menu
         
     }
 
-    public class OptionsMenuSettingsSelectorState: MenuState
+    public class OptionsMenuSettingsSelectorState: PagedMenuOptionsState
     {
         private GameState _OriginalState;
         private String _Category;
-        public OptionsMenuSettingsSelectorState(IBackground background, IStateOwner pOwner, GameState OriginalState,String pCategory=null) : base(background)
+        
+        public OptionsMenuSettingsSelectorState(IBackground background, IStateOwner pOwner, GameState OriginalState,String pCategory=null) : base(pOwner,background,OriginalState,null,"Options")
         {
             _OriginalState = OriginalState;
             _Category = pCategory;
-            PopulateOptions(pOwner);
-        }
+            var ChosenOptions = PopulateOptions(pOwner);
 
-        private void PopulateOptions(IStateOwner pOwner)
+            //if (ChosenOptions.Count > 9)
+            //{
+                PartitionMenuItems(pOwner, ChosenOptions);
+            //}
+            //else
+            //{
+            //    MenuElements = ChosenOptions;
+            //}
+        }
+        protected Dictionary<MenuStateTextMenuItem, KeyValuePair<String, StandardSettings>> setlookup;
+        private List<MenuStateMenuItem> PopulateOptions(IStateOwner pOwner)
         {
+            
+            var ReturnItems = new List<MenuStateMenuItem>();
             int DesiredFontPixelHeight = (int)(pOwner.GameArea.Height * (23d / 644d));
             Font standardFont = TetrisGame.GetRetroFont(12, pOwner.ScaleFactor);
             Font ItemFont = TetrisGame.GetRetroFont(12, pOwner.ScaleFactor);
@@ -235,7 +247,7 @@ namespace BASeTris.GameStates.Menu
             
 
             var useDictionary = pOwner.Settings.AllSettings;
-            Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>> setlookup = new Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>>();
+            setlookup = new Dictionary<MenuStateTextMenuItem, KeyValuePair<String,StandardSettings>>();
             
             foreach (var iterateset in useDictionary)
             {
@@ -247,7 +259,7 @@ namespace BASeTris.GameStates.Menu
                     MenuStateTextMenuItem submenuitem = new MenuStateTextMenuItem() { Text = iterateset.Key };
                     submenuitem.FontFace = ItemFont.FontFamily.Name;
                     submenuitem.FontSize = ItemFont.Size;
-                    MenuElements.Add(submenuitem);
+                    ReturnItems.Add(submenuitem);
                     setlookup.Add(submenuitem, iterateset);
                 }
             }
@@ -263,7 +275,7 @@ namespace BASeTris.GameStates.Menu
                         MenuStateTextMenuItem submenuitem = new MenuStateTextMenuItem() { Text = iterate.Key,TipText="View Handler Category" };
                         submenuitem.FontFace = ItemFont.FontFamily.Name;
                         submenuitem.FontSize = ItemFont.Size;
-                        MenuElements.Add(submenuitem);
+                        ReturnItems.Add(submenuitem);
                         CategoryItems.Add(submenuitem, iterate.Key);
                     }
                 }
@@ -281,6 +293,7 @@ namespace BASeTris.GameStates.Menu
                     pOwner.CurrentState = MenuState.CreateOutroState(pOwner, _OriginalState);
                     //pOwner.CurrentState = _OriginalState;
                 }
+                
                 else
                 {
                     
@@ -294,16 +307,21 @@ namespace BASeTris.GameStates.Menu
                     }
                     else
                     {
-                        var getkvp = setlookup[selecteditem];
-                        OptionsMenuState oms = new OptionsMenuState(this._BG, pOwner, this, getkvp.Key, getkvp.Value);
-                        pOwner.CurrentState = oms;
-                        this.ActivatedItem = null;
+                        if (setlookup.ContainsKey(selecteditem))
+                        {
+                            var getkvp = setlookup[selecteditem];
+                            OptionsMenuState oms = new OptionsMenuState(this._BG, pOwner, this, getkvp.Key, getkvp.Value);
+                            pOwner.CurrentState = oms;
+                            this.ActivatedItem = null;
+                        }
                     }
                 }
             };
             ReturnItem.FontFace = ItemFont.FontFamily.Name;
             ReturnItem.FontSize =  ItemFont.Size;
-            MenuElements.Add(ReturnItem);
+            ReturnItems.Add(ReturnItem);
+
+            return ReturnItems;
 
 
         }

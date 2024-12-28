@@ -5,6 +5,7 @@ using BASeCamp.Rendering;
 using BASeTris.Rendering.RenderElements;
 using BASeTris.Blocks;
 using SkiaSharp;
+using BASeTris.Theme.Block;
 //using SkiaSharp.Views.Desktop;
 
 namespace BASeTris.Rendering.Skia
@@ -161,6 +162,21 @@ namespace BASeTris.Rendering.Skia
 
 
 
+        }
+        public static SKImage ProcessBlockImageInfo(SKImage Source, BlockColorInformation data)
+        {
+            SKImage OperatingResult = null;
+            if (data.ColorMapping != null)
+            {
+                OperatingResult = RemapImageColors(Source, data.ColorMapping);
+            }
+
+            if(data.SolidColor!=null)
+            {
+               return RecolorImage(OperatingResult??Source, (data.SolidColor)??SKColors.Red);
+            }
+            return OperatingResult;
+            
         }
      
         public static SKImage RecolorImage(SKImage Source, SKColor Target)

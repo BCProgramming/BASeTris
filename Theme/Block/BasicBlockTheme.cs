@@ -23,20 +23,20 @@ namespace BASeTris.Theme.Block
         }
     }
 
-    [HandlerTheme("Simple Style",typeof(StandardTetrisHandler))]
+    [HandlerTheme("Simple Style", typeof(StandardTetrisHandler))]
     [ThemeDescription("Basic Blocks. BPS NES Tetris")]
-    public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP,SimpleBlockTheme.BasicBlockTypes>
+    public class SimpleBlockTheme : CustomPixelTheme<SimpleBlockTheme.BBP, SimpleBlockTheme.BasicBlockTypes>
     {
         public bool AdjacentConnection = false;
-        public override String Name { get { return "Simple"; }  }
+        public override String Name { get { return "Simple"; } }
         public enum BBP
         {
-            Transparent,Glint,Center,Shade,DoubleShade
+            Transparent, Glint, Center, Shade, DoubleShade
         }
         [Flags]
         public enum BasicBlockTypes
         {
-            Basic=0,
+            Basic = 0,
             BasicTop = 1,
             BasicRight = 2,
             BasicBottom = 4,
@@ -46,7 +46,7 @@ namespace BASeTris.Theme.Block
             BasicBottomLeft = 64,
             BasicTopLeft = 128
         }
-        
+
         //Block with no other blocks adjacent to it.
         private static BBP[][] BasicBlock = new BBP[][]
 {
@@ -109,7 +109,7 @@ namespace BASeTris.Theme.Block
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent},
             new []{BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade, BBP.Shade} };
-        
+
         private static BBP[][] RightShaded = new BBP[][]
 {
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade},
@@ -170,7 +170,7 @@ namespace BASeTris.Theme.Block
             new []{BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Transparent, BBP.Shade } };
         public static BasicBlockTypes RotateBlockTypeCW(BasicBlockTypes pInput)
         {
-            
+
             BasicBlockTypes result = BasicBlockTypes.Basic;
             if (pInput.HasFlag(BasicBlockTypes.BasicTop)) result |= BasicBlockTypes.BasicRight;
             if (pInput.HasFlag(BasicBlockTypes.BasicRight)) result |= BasicBlockTypes.BasicBottom;
@@ -189,6 +189,19 @@ namespace BASeTris.Theme.Block
                 //new SKColor[]{SKColors.White,SKColors.Pink,SKColors.Purple,SKColors.DarkViolet}
 
             };
+
+        public SKColor[] GrayedColor = new SKColor[]{SKColors.White,new SKColor(117,117,117),SKColors.Black,SKColors.Black
+            };
+
+
+        public SKColor[] GreenColors = new SKColor[] { SKColors.Lime, SKColors.Green, SKColors.DarkGreen, SKColors.Black };
+        public SKColor[] RedColors = new SKColor[] { SKColors.Pink, SKColors.Red, SKColors.DarkRed, SKColors.Black };
+
+        public bool ForceGray { get; set; } = false;
+
+
+        public bool Christmas { get; set; } = false;
+
         public SimpleBlockTheme()
         {
             LevelColors = LevelColors.Concat(from c in new SKColor[] { SKColors.Orange, SKColors.Purple, SKColors.Plum, SKColors.Gray, SKColors.DarkGray, SKColors.DarkCyan, SKColors.Goldenrod, SKColors.Brown } select GenerateColorSet(c)).ToArray();
@@ -218,6 +231,13 @@ namespace BASeTris.Theme.Block
                 case BBP.Center:
                 case BBP.Shade:
                 case BBP.DoubleShade:
+
+                    if (Christmas)
+                    {
+                        return (Element.GetHashCode() % 2 == 1 ? RedColors : GreenColors)[((int)PixelType) - 1];
+                    }
+
+                    if (ForceGray) return GrayedColor[((int)PixelType) - 1];
                     return LevelColors[LevelField][((int)PixelType) - 1];
             }
             return SKColors.Black;

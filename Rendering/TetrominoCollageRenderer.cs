@@ -270,25 +270,41 @@ namespace BASeTris.Rendering
 
         //corner XML layouts. These (can) be used to generate a bitmap to draw in the corners.
 
-        private static readonly String Lower_Left_CollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        private static readonly String[] Lower_Left_CollageXML = new[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
   <TetrominoCollage Rows=""6"" Columns=""6"">
     <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""0"" Y=""4"" />
     <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""3"" Y=""0"" />
     <Tetromino Scale=""1"" Type=""T"" Rotation=""3"" X=""4"" Y=""2"" />
     <Tetromino Scale=""1"" Type=""I"" Rotation=""0"" X=""2"" Y=""4"" />
     <Tetromino Scale=""1"" Type=""L"" Rotation=""1"" X=""2"" Y=""2"" />
-</TetrominoCollage>";
+</TetrominoCollage>" };
 
-        private static readonly String Lower_Right_CollageXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        private static readonly String[] Lower_Right_CollageXML = new[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
   <TetrominoCollage Rows = ""6"" Columns=""6"">
     <Tetromino Scale = ""1"" Type=""S"" Rotation=""1"" X=""-1"" Y=""0"" />
     <Tetromino Scale = ""1"" Type=""Z"" Rotation=""2"" X=""3"" Y=""3"" />
     <Tetromino Scale = ""1"" Type=""T"" Rotation=""4"" X=""1"" Y=""4"" />
     <Tetromino Scale = ""1"" Type=""I"" Rotation=""1"" X=""-2"" Y=""2"" />
     <Tetromino Scale = ""1"" Type=""L"" Rotation=""2"" X=""1"" Y=""2"" />
-  </TetrominoCollage>
-";
+  </TetrominoCollage>" };
 
+        private static readonly String[] Upper_Left_CollageXML = new[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <TetrominoCollage Rows = ""6"" Columns=""6"">
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""2"" X=""3"" Y=""-1"" />
+    <Tetromino Scale=""1"" Type=""Z"" Rotation=""1"" X=""1"" Y=""1"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""0"" Y=""1"" />
+    <Tetromino Scale=""1"" Type=""L"" Rotation=""2"" X=""0"" Y=""-1"" />
+    <Tetromino Scale=""1"" Type=""J"" Rotation=""1"" X=""-1"" Y=""3"" />
+  </TetrominoCollage>" };
+
+                private static readonly String[] Upper_Right_CollageXML = new[] { @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <TetrominoCollage Rows = ""6"" Columns=""6"">
+    <Tetromino Scale=""1"" Type=""T"" Rotation=""3"" X=""4"" Y=""1"" />
+    <Tetromino Scale=""1"" Type=""I"" Rotation=""0"" X=""0"" Y=""-1"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""1"" X=""3"" Y=""3"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""0"" X=""3"" Y=""0"" />
+    <Tetromino Scale=""1"" Type=""S"" Rotation=""1"" X=""1"" Y=""1"" />
+  </TetrominoCollage>" };
 
 
         private static readonly String BackgroundCollageXML2 =
@@ -377,31 +393,64 @@ namespace BASeTris.Rendering
 
 
         };
-        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,int BlockSize = 500)
+
+        public static SKBitmap GetCornerDisplayBitmap_UpperLeft(NominoTheme _theme, int BlockSize = 500)
+        {
+            return GetCollageBitmap(Upper_Left_CollageXML, _theme, BlockSize,SKColors.Transparent);
+        }
+        public static SKBitmap GetCornerDisplayBitmap_UpperRight(NominoTheme _theme, int BlockSize = 500)
+        {
+            return GetCollageBitmap(Upper_Right_CollageXML, _theme, BlockSize,SKColors.Transparent);
+        }
+        public static SKBitmap GetCornerDisplayBitmap_LowerLeft(NominoTheme _theme, int BlockSize = 500)
+        {
+            return GetCollageBitmap(Lower_Left_CollageXML, _theme, BlockSize,SKColors.Transparent);
+        }
+        public static SKBitmap GetCornerDisplayBitmap_LowerRight(NominoTheme _theme, int BlockSize = 500)
+        {
+            return GetCollageBitmap(Lower_Right_CollageXML, _theme, BlockSize,SKColors.Transparent);
+        }
+        public static SKBitmap GetCollageBitmap(String[] sXMLStrings,NominoTheme _theme, int BlockSize = 500,SKColor? background = null)
+        {
+            return GetCollageBitmap(TetrisGame.Choose(sXMLStrings), _theme, BlockSize,background);
+        }
+        public static SKBitmap GetCollageBitmap(String sXMLString,NominoTheme _theme, int BlockSize = 500,SKColor? background = null)
+        {
+            XElement RootNode;
+            Nomino[][] AddBlocks = GroupNominos(LoadTetrominoCollageFromXMLString(sXMLString, out RootNode));
+            int Cols = RootNode.GetAttributeInt("Columns", 6);
+            int Rows = RootNode.GetAttributeInt("Rows", 6);
+            return GetBackgroundCollage(_theme, (Nomino[][])AddBlocks,Rows, Cols,BlockSize,background);
+        }
+
+
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,int BlockSize = 500,SKColor? background = null)
         {
             XElement RootNode;
             Nomino[][] AddBlocks = GroupNominos(LoadTetrominoCollageFromXMLString(TetrisGame.Choose(DefaultBackgroundCollageXML), out RootNode));
             int Cols = RootNode.GetAttributeInt("Columns", 6);
             int Rows = RootNode.GetAttributeInt("Rows", 6);
 
-            return GetBackgroundCollage(_theme, (Nomino[][])AddBlocks,Rows, Cols,BlockSize);
+            return GetBackgroundCollage(_theme, (Nomino[][])AddBlocks,Rows, Cols,BlockSize,background);
         }
-        public static SKBitmap GetBackgroundCollage(NominoTheme _theme, Nomino[] Contents,int RowCount,int ColumnCount)
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme, Nomino[] Contents,int RowCount,int ColumnCount,SKColor? background = null)
         {
             var Grouped = GroupNominos(Contents);
-            return GetBackgroundCollage(_theme, Grouped, RowCount, ColumnCount);
+            return GetBackgroundCollage(_theme, Grouped, RowCount, ColumnCount,100,background);
         }
-        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,Nomino[][] Contents,int RowCount,int ColumnCount,int BlockSize = 100)
+        
+        private static SKColor blackcolor = SKColors.Black;
+        public static SKBitmap GetBackgroundCollage(NominoTheme _theme,Nomino[][] Contents,int RowCount,int ColumnCount,int BlockSize = 100,SKColor? background = null)
         {
 
-         
+            background = background ?? SKColors.Black;
             XElement RootNode = null;
             Nomino[][] AddBlocks = Contents;
 
             int generatedlevel = TetrisGame.StatelessRandomizer.Next(0, 21);
             int Cols = ColumnCount;
             int Rows = RowCount;
-            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(Cols, Rows, BlockSize, BlockSize, generatedlevel, _theme, SKColors.Black);
+            TetrominoCollageRenderer tcr = new TetrominoCollageRenderer(Cols, Rows, BlockSize, BlockSize, generatedlevel, _theme, background.Value);
 
             //Nomino[][] AddBlocks = new Nomino[][] { new Nomino[] { IBlock, IBlock2 }, new Nomino[] { TBlock1, TBlock2, TBlock3 }, new Nomino[] { SBlock }, new Nomino[] { LBlock1, LBlock2 }, new Nomino[] { JBlock1, JBlock2 }, new Nomino[] { ZBlock1 }, new Nomino[] { LBlock3 } };
             bool doRandomize = TetrisGame.StatelessRandomizer.NextDouble() > 0.5;
