@@ -28,7 +28,7 @@ namespace BASeTris.Input
     public abstract class GamepadDriverBase<IGAMEPAD> : IGamepadDriver<IGAMEPAD>,IGamepadDriver where IGAMEPAD : IGamepad
     {
 
-        public new abstract IGAMEPAD Getgamepad(int index);
+        public abstract IGAMEPAD Getgamepad(int index);
         IGamepad IGamepadDriver.Getgamepad(int index)
         {
             return this.Getgamepad(index);

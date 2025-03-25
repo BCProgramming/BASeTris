@@ -308,6 +308,9 @@ namespace BASeTris.Rendering.Skia.GameStates
             sktext.DrawFont = useHeaderFont;
             sktext.Position = new SKPoint(UseX, UseY);
             
+            
+
+
             try
             {
                 Target.DrawTextSK(sktext);

@@ -27,8 +27,11 @@ namespace BASeTris.AI
                 {
                     DataQueue.TryDequeue(out _);
                     //push it!
-                    Debug.Print($"Enqueueing playback action: {result.Elapsed} > {Elapsed}, Key={result.GameKey}");
-                    _Owner.EnqueueAction(() => { _Owner.CurrentState.HandleGameKey(_Owner, result.GameKey); return false; });
+                    if (result is GameplayRecordKeyPressElement gpr)
+                    {
+                        Debug.Print($"Enqueueing playback action: {result.Elapsed} > {Elapsed}, Key={gpr.GameKey}");
+                        _Owner.EnqueueAction(() => { _Owner.CurrentState.HandleGameKey(_Owner, gpr.GameKey); return false; });
+                    }
                 }
                 Thread.Sleep(0);
 

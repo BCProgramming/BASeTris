@@ -25,12 +25,12 @@ using static BASeTris.NNominoGenerator;
 
 namespace BASeTris
 {
-    static class Program
+    static partial class Program
     {
 
         private const int SPI_GETWORKAREA = 48;
-        [DllImport("user32.dll", EntryPoint = "SystemParametersInfoA")]
-        private static extern int SystemParametersInfo(int uAction, IntPtr uParam, ref RECT lpvParam, int fuWinIni);
+        [LibraryImport("user32.dll", EntryPoint = "SystemParametersInfoA")]
+        private static partial int SystemParametersInfo(int uAction, IntPtr uParam, ref RECT lpvParam, int fuWinIni);
         [StructLayout(LayoutKind.Sequential)]
         private struct RECT
         {

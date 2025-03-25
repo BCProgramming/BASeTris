@@ -163,7 +163,7 @@ namespace BASeTris
         {
 
         }
-        public XElement GetXmlData(String pNodeName, Object pContext)
+        public override XElement GetXmlData(String pNodeName, Object pContext)
         {
             XElement result = base.GetXmlData(pNodeName, pContext);
             

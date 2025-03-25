@@ -241,7 +241,7 @@ namespace BASeTris.GameStates.GameHandlers
                 yield return (previouslyyielded = createBlock);
             }
         }
-        public ExtendedCustomizationHandlerResult HandleGameKey(GameplayGameState state, IStateOwner pOwner, GameState.GameKeys g)
+        ExtendedCustomizationHandlerResult IExtendedGameCustomizationHandler.HandleGameKey(GameplayGameState state, IStateOwner pOwner, GameState.GameKeys g)
         {
             if (state.PlayField.GetActiveBlockGroups().Count() > 1 || !(pOwner.CurrentState is GameplayGameState))
             {

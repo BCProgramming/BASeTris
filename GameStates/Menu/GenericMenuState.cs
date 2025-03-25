@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BASeTris.GameStates.Menu
 {
@@ -180,13 +181,17 @@ namespace BASeTris.GameStates.Menu
             //Target.MenuElements.Add(testslider);
         }
     }
-
-    public class NewGameMenuPopulator : IMenuPopulator
+    public class HandlerSelectionPopulator : IMenuPopulator
     {
         private GameState RevertState = null;
         String DesiredCategory = null;
-        public NewGameMenuPopulator(GameState ReversionState,String Category = null)
+        public delegate bool HandlerPredicate(Type HandlerType);
+        public delegate void HandlerAction(GenericMenuState Target, IStateOwner pOwner, IBlockGameCustomizationHandler useHandler);
+        protected HandlerAction HandlerChosenAction = null;
+        protected HandlerPredicate AllowHandler = null;
+        public HandlerSelectionPopulator(GameState ReversionState,String Category = null,HandlerAction pHandlerChosenAction = null)
         {
+            HandlerChosenAction = pHandlerChosenAction;
             RevertState = ReversionState;
             DesiredCategory = Category;
         }
@@ -197,16 +202,16 @@ namespace BASeTris.GameStates.Menu
                 Target.StateHeader = "Select Game Type";
             else
                 Target.StateHeader = "Game Type - " + DesiredCategory;
-            {
-            }
+            
             Dictionary<String, List<Type>> FoundHandlerCategories = new Dictionary<string, List<Type>>();
             //var NewGameItem = new MenuStateTextMenuItem() { Text = "New Game" };
             List<MenuStateMenuItem> AllItems = new List<MenuStateMenuItem>();
             List<MenuStateMenuItem> CategoryItems = new List<MenuStateMenuItem>();
             Dictionary<MenuStateMenuItem, IBlockGameCustomizationHandler> HandlerLookup = new Dictionary<MenuStateMenuItem, IBlockGameCustomizationHandler>();
-            var BackItem = new MenuStateTextMenuItem() { Text = "Back to Main" };
+            var BackItem = new MenuStateTextMenuItem() { Text = "Back" };
             foreach(var iterate in Program.GetGameHandlers())
             {
+                
                 var FindAttribute = iterate.GetCustomAttribute(typeof(HandlerMenuCategoryAttribute), true) as HandlerMenuCategoryAttribute;
                 var FindTipAttribute = iterate.GetCustomAttribute(typeof(HandlerTipTextAttribute), false) as HandlerTipTextAttribute;
                 //if Category is null, we only want to show the items that have no category.
@@ -243,10 +248,17 @@ namespace BASeTris.GameStates.Menu
                 ConstructorInfo ci = iterate.GetConstructor(new Type[] { });
                 if(ci!=null)
                 {
-                    IBlockGameCustomizationHandler handler = (IBlockGameCustomizationHandler)ci.Invoke(new object[] { });
-                    MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name,TipText = (FindTipAttribute?.TipText)??"" };
-                    HandlerLookup.Add(builditem, handler);
-                    AllItems.Add(builditem);
+                    if (AllowHandler != null && !AllowHandler(iterate))
+                    {
+                        ;
+                    }
+                    else
+                    {
+                        IBlockGameCustomizationHandler handler = (IBlockGameCustomizationHandler)ci.Invoke(new object[] { });
+                        MenuStateTextMenuItem builditem = new MenuStateTextMenuItem() { Text = handler.Name, TipText = (FindTipAttribute?.TipText) ?? "" };
+                        HandlerLookup.Add(builditem, handler);
+                        AllItems.Add(builditem);
+                    }
                 }
             }
             if (DesiredCategory == null)
@@ -270,8 +282,11 @@ namespace BASeTris.GameStates.Menu
             {
                 if (HandlerLookup.ContainsKey(e.MenuElement))
                 {
-                    IBlockGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
 
+
+                    IBlockGameCustomizationHandler usehandler = HandlerLookup[e.MenuElement];
+                    HandlerChosenAction(Target,pOwner, usehandler);
+                    /*
                     var StartGameFunc = () =>
                     {
                         if (pOwner is IGamePresenter igp)
@@ -307,10 +322,11 @@ namespace BASeTris.GameStates.Menu
                     {
                         StartGameFunc();
                     }
+                    */
                 }
                 else if (CategoryItems.Contains(e.MenuElement))
                 {
-                    GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target,(String)(((MenuStateTextMenuItem)e.MenuElement).Tag)));
+                    GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new HandlerSelectionPopulator(Target,(String)(((MenuStateTextMenuItem)e.MenuElement).Tag),HandlerChosenAction));
                     pOwner.CurrentState = MenuState.CreateOutroState(pOwner,gms);
                     Target.ActivatedItem = null;
 
@@ -343,6 +359,53 @@ namespace BASeTris.GameStates.Menu
 
         }
     }
+    
+    public class NewGameMenuPopulator : HandlerSelectionPopulator
+    {
+        public NewGameMenuPopulator(GameState ReversionState, String Category = null) : base(ReversionState, Category)
+        {
+            //for a new game when an item is selected we want to start a new game. Well, I suppose that ought to be obvious.
+            base.HandlerChosenAction = (Target, pOwner, usehandler) =>
+            {
+                var StartGameFunc = () =>
+                    {
+                        if (pOwner is IGamePresenter igp)
+                        {
+
+
+                            var NewGameState = new GameplayGameState(pOwner, usehandler, null, TetrisGame.Soundman, Target.PrimaryMenu);
+                            //TransitionState ts = new TransitionState_Pixelate(pOwner.CurrentState, NewGameState, new TimeSpan(0, 0, 0, 0, 10000)) { GameProcDelegationMode = TransitionState.DelegateProcConstants.Delegate_None, SnapshotSettings = TransitionState.SnapshotConstants.Snapshot_Both };
+                            var ts = TransitionState.GetRandomTransitionState(pOwner.CurrentState, NewGameState, TransitionState.StandardTransitionLength);
+                            Target.BackgroundMusicKey = null;
+                            pOwner.CurrentState = ts;
+                            igp.StartGame();
+                        }
+                    };
+                GamePreparerAttribute gpa = GamePreparerAttribute.HasPreparerAttribute(usehandler.GetType());
+                if (usehandler is IPreparableGame ipg && gpa != null)
+                {
+                    //we want to create a submenu for the options; the starting function should call the initialization function on usehandler and then call StartGameFunc.
+                    GamePreparerOptions InitializeOption = (GamePreparerOptions)Activator.CreateInstance(gpa.PreparerOptionsType, new[] { usehandler.GetType() });
+                    var createstate = GamePreparerOptions.ConstructPreparationState(pOwner, usehandler.Name, Target, Target.BG, "Return", InitializeOption, (gpo) =>
+                    {
+                        ipg.SetPrepData(InitializeOption);
+                        StartGameFunc();
+                    });
+                    Target.ActivatedItem = null;
+
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, createstate);
+
+
+                }
+                else
+                {
+                    StartGameFunc();
+                }
+            };
+        }
+    }
+
+    
 
 
     public class OptionsMenuPopulator : IMenuPopulator

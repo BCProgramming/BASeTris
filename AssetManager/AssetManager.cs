@@ -3002,22 +3002,22 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
     /// <summary>
     /// Used to retrieve key state info
     /// </summary>
-    public class KeyboardInfo
+    public partial class KeyboardInfo
     {
         private KeyboardInfo()
         {
         }
 
-        [DllImport("user32.dll")]
-        public static extern Int16 GetAsyncKeyState(int vKey);
+        [LibraryImport("user32.dll")]
+        public static partial Int16 GetAsyncKeyState(int vKey);
 
         public static bool IsPressed(Keys key)
         {
             return GetAsyncKeyState((int) key) < 0;
         }
 
-        [DllImport("user32")]
-        private static extern short GetKeyState(int vKey);
+        [LibraryImport("user32")]
+        private static partial short GetKeyState(int vKey);
 
         public static KeyStateInfo GetKeyState(Keys key)
         {

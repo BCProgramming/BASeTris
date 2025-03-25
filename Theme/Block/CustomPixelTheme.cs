@@ -12,6 +12,7 @@ using BASeTris.GameStates.GameHandlers;
 
 namespace BASeTris.Theme.Block
 {
+    
     /// <summary>
     /// used for implementing a tetromino theme which works via "pixel mapping" And provides the image cache for each appropriate combination.
     /// T: Type for representing each Pixel
@@ -35,7 +36,7 @@ namespace BASeTris.Theme.Block
                 Animated = pAnimated;
             }
         }*/
-        [Flags]
+       /* [Flags]
         public enum AdjacentBlockFlags
         {
             None = 0,
@@ -47,7 +48,7 @@ namespace BASeTris.Theme.Block
             TopRight = 32,
             BottomLeft = 64,
             BottomRight=128
-        }
+        }*/
         public enum AdjacentBlockFlagResultTypes
         {
             Cardinal = 1,
@@ -138,6 +139,7 @@ namespace BASeTris.Theme.Block
         {
             get
             {
+                
                 if (_BlockTypeDictionary == null)
                     _BlockTypeDictionary = GetBlockTypeDictionary();
                 return _BlockTypeDictionary;

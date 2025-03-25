@@ -3,6 +3,7 @@ using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
@@ -22,7 +23,10 @@ namespace BASeTris
         public GameplayInitialStateData InitialData = null;
         //be sourced from it's own separate random instance.
 
-        //in addition to game keys, should we also record every nomino that comes from the chooser? Should the choosers themselves be in some way responsible for that tracking?
+        //in addition to game keys, We need to have a record of all the Minos that were generated (in the case of game types that have choosers- eg Tetris Attack doesn't)
+
+        //further, some game types need to add additional data- for example, Dr.Mario generates a new field for each level, so we'd need to have those sorts of actions generate a record and add it, and we also
+        //will need to have this class delegate processing of actions to the game handler.
         
         List<GameplayRecordElement> Elements = null;
         public List<Nomino> GeneratedMinos = null;
@@ -38,11 +42,22 @@ namespace BASeTris
             var xelem = SourceData.Element("InitialState");
             InitialData = new GameplayInitialStateData(xelem, pContext);
             Elements = new List<GameplayRecordElement>();
-            foreach (var iterate in SourceData.Elements("Element"))
+
+            var readlisting = SourceData.ReadList<GameplayRecordElement>("Element");
+            Elements.AddRange(readlisting);
+            /*foreach (var iterate in SourceData.Elements("Element"))
             {
-                GameplayRecordElement loadelement = new GameplayRecordElement(iterate, pContext);
+                //String sGetType = iterate.GetAttributeString("Type", "");
+                
+
+                if (!String.IsNullOrWhiteSpace(sGetType))
+                {
+                    
+                }
+
+                GameplayRecordElement loadelement = new GameplayRecordKeyPressElement(iterate, pContext);
                 Elements.Add(loadelement);
-            }
+            }*/
             
         }
         //for testing purposes. Just random inputs with random delay.
@@ -80,7 +95,7 @@ namespace BASeTris
         {
             if (IsRecordableKey(key))
             {
-                var gree = new GameplayRecordElement(Elapsed, key);
+                var gree = new GameplayRecordKeyPressElement(Elapsed, key);
                 if (Elements == null) Elements = new List<GameplayRecordElement>();
                 Elements.Add(gree);
                 return gree;
@@ -104,8 +119,60 @@ namespace BASeTris
         public void SaveRecordedGame(IStateOwner pOwner,Type HandlerType)
         {
             //saves a new recorded game file.
+            //we want to save by type. We need to generate an appropriate path to save this to that includes it.
+            String sAppFolder = TetrisGame.AppDataFolder;
+            // add /Replay/Handler/<name>.btreplay and we'll generate a filename.
+            String sTargetFile = Path.Combine(sAppFolder,"Replay",HandlerType.Name,DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss-ffffff") + ".bcreplay");
+
+            GameplayGameState usegameplaystate = null!;
+            List<Nomino> GeneratedMinos = new List<Nomino>();
+            if (pOwner.CurrentState is GameplayGameState) usegameplaystate = pOwner.CurrentState as GameplayGameState;
+            if (pOwner.CurrentState is ICompositeState<GameplayGameState>) usegameplaystate = (pOwner.CurrentState as ICompositeState<GameplayGameState>)?.GetComposite()!;
+            if (usegameplaystate != null)
+            {
+                var usechooser = usegameplaystate.GetChooser(pOwner);
+                if (usechooser != null)
+                {
+                    GeneratedMinos = usechooser.AllGeneratedNominos;
+                }
+            }
+            SaveToFile(pOwner, sTargetFile, GeneratedMinos);
+
+        }
+        /// <summary>
+        /// read all the Replays for a given Handler type, returning an enumeration of the GameplayRecords that were deserialized.
+        /// </summary>
+        /// <param name="HandlerType"></param>
+        /// <returns></returns>
+        public static IEnumerable<GameplayRecord> GetHandlerReplays(Type HandlerType)
+        {
+             String sAppFolder = TetrisGame.AppDataFolder;
+            // add /Replay/Handler/<name>.btreplay and we'll generate a filename.
+            String sSourceDirectory =Path.Combine(sAppFolder,"Replay",HandlerType.Name);
+
+            //get all .bcreplay files in the directory.
+            if (Directory.Exists(sSourceDirectory))
+            {
+                DirectoryInfo di = new DirectoryInfo(sSourceDirectory);
+                foreach (var replayfile in di.EnumerateFiles("*.bcreplay"))
+                {
+                        GameplayRecord loaded = null;
+                        try
+                        {
+                            loaded = new GameplayRecord(replayfile.FullName);
+                        }
+                        catch(Exception exr)
+                        {
+                        Trace.WriteLine($"Exception while loading a Gameplayrecord from file {replayfile.FullName}\n{exr.ToString()}"); 
+                            ; //swallow errors purely because we don't want to stop enumerating....
+                        }
+                        yield return loaded;
+                    
+                    
+                }
 
 
+            }
 
 
         }
@@ -116,6 +183,12 @@ namespace BASeTris
             var Mainrecord = GetXmlData("Record", null);
             Mainrecord.Add(generatedNominoElement);
             XDocument xdoc = new XDocument(Mainrecord);
+            String sFileDir = Path.GetDirectoryName(sFilePath);
+            if (!Directory.Exists(sFileDir))
+            {
+                Directory.CreateDirectory(sFileDir);
+            }
+
             using (var gzout = new GZipStream(new FileStream(sFilePath, FileMode.Create), CompressionMode.Compress))
             {
                 xdoc.Save(gzout);
@@ -170,21 +243,42 @@ namespace BASeTris
 
         }
     }
-    public class GameplayRecordElement:IXmlPersistable
+
+    
+    public class GameplayRecordElement : IXmlPersistable
     {
         public TimeSpan Elapsed { get; set; }
-        public GameState.GameKeys GameKey { get; set; }
-        public GameplayRecordElement(TimeSpan pElapsed, GameState.GameKeys pKey)
+        public GameplayRecordElement(TimeSpan pElapsed)
         {
             Elapsed = pElapsed;
-            GameKey = pKey;
         }
         public GameplayRecordElement(XElement SourceData, Object pContext)
         {
             Elapsed = TimeSpan.FromTicks(SourceData.GetAttributeLong("Elapsed",0));
+        }
+
+        public virtual XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+            
+            return new XElement(pNodeName);
+            //throw new NotImplementedException();
+        }
+    }
+    public class GameplayRecordKeyPressElement:GameplayRecordElement
+    {
+        
+        public GameState.GameKeys GameKey { get; set; }
+        public GameplayRecordKeyPressElement(TimeSpan pElapsed, GameState.GameKeys pKey):base(pElapsed)
+        {
+            
+            GameKey = pKey;
+        }
+        public GameplayRecordKeyPressElement(XElement SourceData, Object pContext):base(SourceData,pContext)
+        {
+            
             GameKey = (GameState.GameKeys)SourceData.GetAttributeInt("Key",0);
         }
-        public XElement GetXmlData(String pNodeName, Object pContext)
+        public override XElement GetXmlData(String pNodeName, Object pContext)
         {
             return new XElement(pNodeName, new XAttribute("Elapsed", Elapsed.Ticks), new XAttribute("Key", (int)GameKey));
         }

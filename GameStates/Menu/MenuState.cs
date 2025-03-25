@@ -148,6 +148,7 @@ namespace BASeTris.GameStates.Menu
 
         public String StateHeader { get; set; }
 
+        public String SubHeader { get; set; }
         public String FooterText { get; set; } = "";
         //public BCPoint LastMouseMovement { get; set; }
 
