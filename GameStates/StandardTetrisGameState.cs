@@ -527,7 +527,7 @@ namespace BASeTris.GameStates
                 if (GameOptions.MusicEnabled)
                 {
                     var useSettings = pOwner.Settings.GetSettings(pOwner.GetHandler().Name);
-                    iActiveSoundObject musicplay = null;
+                    IActiveSound musicplay = null;
                     if(useSettings .MusicOption =="<RANDOM>")
                     {
                         musicplay = Sounds.PlayMusic(pOwner.AudioThemeMan.BackgroundMusic.Key, useSettings.MusicVolume, true);
@@ -681,7 +681,7 @@ namespace BASeTris.GameStates
             {
                 RefillBlockQueue(pOwner);
             }
-
+            nextget.RecalcExtents();
             nextget.X = (int) (((float) PlayField.ColCount / 2) - ((float) nextget.GroupExtents.Width / 2));
             nextget.SetY(null,0);
             if (GameStats is TetrisStatistics ts)

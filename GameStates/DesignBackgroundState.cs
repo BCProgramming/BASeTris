@@ -341,7 +341,7 @@ namespace BASeTris.GameStates
             MusicVolume.ValueChanged += (oa, ob) =>
             {
                 if (DesignMusic != null)
-                    DesignMusic.setVolume((float)ob.Value);
+                    DesignMusic.SetVolume((float)ob.Value);
             };
 
             MenuStateDisplayThemeMenuItem ChangeThemeItem = new MenuStateDisplayThemeMenuItem(pOwner, typeof(StandardTetrisHandler),CurrentLayer.DisplayedDesignerTheme.GetType());
@@ -673,7 +673,7 @@ namespace BASeTris.GameStates
             DisplayedDesignerTheme.ApplyTheme(EditNomino, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
         }
         private bool _defaultBG = true;
-        iActiveSoundObject DesignMusic = null;
+        IActiveSound DesignMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
             if (!flInitialized)

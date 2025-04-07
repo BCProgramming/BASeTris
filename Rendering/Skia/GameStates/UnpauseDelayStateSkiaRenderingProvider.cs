@@ -140,16 +140,20 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             }
 
-            if (false)
+            else 
             {
                 g.DrawText(useMS, new SKPoint((float)XPosition + (float)(2 * pOwner.ScaleFactor), (float)YPosition + (float)(2 * pOwner.ScaleFactor)), MSPaintBG);
                 g.DrawText(useMS, PosPaint, MSPaint);
             }
           
+            if(LastPaintMSPositions.Any())
+                while ((Millis*1000)-LastPaintMSPositions.Peek().Item1 < 200)
+                    LastPaintMSPositions.Dequeue();
 
             LastPaintMSPositions.Enqueue((Millis*1000,  PosPaint));
-            while ((Millis*1000)-LastPaintMSPositions.Peek().Item1 > 200)
-                LastPaintMSPositions.Dequeue();
+
+            
+            
             //this arc drawing doesn't work, for some reason.
             //g.DrawArc(SecondBound, 0, (float)(360 * (1 - Millis)), false, new SKPaint() { StrokeWidth = 0.05f, Color = SKColors.Yellow, Style = SKPaintStyle.Stroke, IsStroke = true,StrokeCap = SKStrokeCap.Square,StrokeMiter = 0 });
 
@@ -158,7 +162,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             dtis.Position = new  SKPoint(DrawPosition.X,DrawPosition.Y-;
             dtis.DrawFont = new Adapters.SKFontInfo(SecondsPaint.Typeface, SecondsPaint.TextSize);
             g.DrawTextSK(dtis);*/
-            //g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
+            g.DrawText(sSecondsLeft, DrawPosition, SecondsPaint);
             Source.lastMillis = Millis;
         }
         private Queue<(double,SKPoint)> LastPaintMSPositions = new Queue<(double,SKPoint)>();

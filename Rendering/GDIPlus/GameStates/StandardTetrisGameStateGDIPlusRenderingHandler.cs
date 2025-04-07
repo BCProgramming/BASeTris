@@ -182,7 +182,7 @@ namespace BASeTris.Rendering.GDIPlus
                         Image DisplayBox = TetrisGame.Imageman["display_box"];
                         //draw it at 40,420. (Scaled).
                         float ScaleDiff = 0;
-                        iActiveSoundObject PlayingMusic;
+                        IActiveSound PlayingMusic;
                         if ((PlayingMusic = TetrisGame.Soundman.GetPlayingMusic_Active()) != null)
                             Source.StoredLevels.Enqueue(PlayingMusic.Level);
 

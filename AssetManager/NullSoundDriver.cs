@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BASeTris.AssetManager
 {
-    public class NullSound : iSoundEngineDriver
+    public class NullSound : ISoundEngineDriver
     {
         #region iSoundEngineDriver implementation
         public event OnSoundStopDelegate OnSoundStop;
@@ -25,12 +25,12 @@ namespace BASeTris.AssetManager
 
         }
 
-        public iSoundSourceObject LoadSound(byte[] data, String sName, string fileextension)
+        public ISoundSource LoadSound(byte[] data, String sName, string fileextension)
         {
             return new NullSoundObject(sName);
         }
 
-        public iSoundSourceObject LoadSound(string filename)
+        public ISoundSource LoadSound(string filename)
         {
             return new NullSoundObject(filename);
         }
@@ -56,7 +56,7 @@ namespace BASeTris.AssetManager
         }
 
         #endregion
-        public class NullSoundObject : iSoundSourceObject, iActiveSoundObject
+        public class NullSoundObject : ISoundSource, IActiveSound
         {
             string nullsoundfile = "";
 
@@ -67,13 +67,13 @@ namespace BASeTris.AssetManager
 
 
             }
-            public iActiveSoundObject Play(bool playlooped)
+            public IActiveSound Play(bool playlooped)
             {
                 return this;
             }
 
 
-            public iActiveSoundObject Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f)
+            public IActiveSound Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f)
             {
                 return this;
             }
@@ -83,7 +83,7 @@ namespace BASeTris.AssetManager
             public float Progress { get { return 0; } }
             public float Tempo { get { return 1.0f; } set { } }
             public float Pitch { get { return 1.0f; } set { } }
-            public iSoundSourceObject Source
+            public ISoundSource Source
             {
                 get { return this; }
             }
@@ -133,7 +133,7 @@ namespace BASeTris.AssetManager
 
             public float Level { get { return 1.0f; } set { } }
 
-            public void setVolume(float volumeset)
+            public void SetVolume(float volumeset)
             {
                 //
             }

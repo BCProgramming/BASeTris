@@ -318,7 +318,7 @@ namespace BASeTris.GameStates
 
             var playing = TetrisGame.Soundman.GetPlayingMusic_Active();
             playing?.UnPause();
-            playing?.setVolume(0.5f);
+            playing?.SetVolume(0.5f);
             PausePlayerAI.AbortAI();
 
 
@@ -331,7 +331,7 @@ namespace BASeTris.GameStates
             var playing2 = TetrisGame.Soundman.GetPlayingMusic_Active();
             pOwner.GameTime.Start();
             playing2?.UnPause();
-            playing2?.setVolume(1.0f);
+            playing2?.SetVolume(1.0f);
         }
         Queue<Func<bool>> QueuedOwnerActions = new Queue<Func<bool>>();
         public void SetDisplayMode(DisplayMode pMode)

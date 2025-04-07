@@ -332,7 +332,7 @@ namespace BASeTris.GameStates
 
         private Stopwatch ElapsedWatcher = null;
        
-        iActiveSoundObject CreditSong = null;
+        IActiveSound CreditSong = null;
         public override void GameProc(IStateOwner pOwner)
         {
             if (BG != null) BG.FrameProc(pOwner);

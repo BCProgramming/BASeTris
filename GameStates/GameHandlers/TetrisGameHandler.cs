@@ -325,7 +325,7 @@ namespace BASeTris.GameStates.GameHandlers
                 state.f_RedrawStatusBitmap = true;
             }
             var pitchuse = HotLines.Any()?(float)(Math.Sin(HotLines.Sum((h) => h.Multiplier)) * 15):0; 
-            List<iActiveSoundObject> instanceSounds = new List<iActiveSoundObject>();
+            List<IActiveSound> instanceSounds = new List<IActiveSound>();
             AudioHandlerPlayDetails deets =
                 new AudioHandlerPlayDetails() { Volume = pOwner.Settings.std.EffectVolume * 2, Pitch = pitchuse, Tempo = 1 };
             if (rowsfound > 0 && rowsfound < 4)

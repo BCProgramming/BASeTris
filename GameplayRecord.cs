@@ -1,4 +1,5 @@
 ﻿using BASeCamp.Elementizer;
+using BASeTris.Blocks;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
 using System;
@@ -37,14 +38,35 @@ namespace BASeTris
         {
             return !DefaultRejected.Any((a) => a == input);
         }
+        
         public GameplayRecord(XElement SourceData, Object pContext):this()
         {
             var xelem = SourceData.Element("InitialState");
             InitialData = new GameplayInitialStateData(xelem, pContext);
             Elements = new List<GameplayRecordElement>();
 
-            var readlisting = SourceData.ReadList<GameplayRecordElement>("Element");
-            Elements.AddRange(readlisting);
+            var ElementNodes = SourceData.Elements("Element");
+
+            foreach (var readElement in ElementNodes)
+            {
+                //does it have a type?
+                String sType = readElement.GetAttributeString("Type", null);
+                GameplayRecordElement AddElement = null;
+                Type LoadType = typeof(GameplayRecordKeyPressElement);
+                if (sType != null)
+                {
+                    LoadType = StandardHelper.ClassFinder(sType)??LoadType;
+                        
+                }
+                ImageBlock? ib = null;
+                var result = (ib?.IsAnimated ?? false);
+                
+                AddElement = (GameplayRecordElement)StandardHelper.ReadElement(LoadType, readElement, pContext);
+                
+                Elements.Add(AddElement);
+            }
+
+
             /*foreach (var iterate in SourceData.Elements("Element"))
             {
                 //String sGetType = iterate.GetAttributeString("Type", "");
@@ -118,6 +140,7 @@ namespace BASeTris
         }
         public void SaveRecordedGame(IStateOwner pOwner,Type HandlerType)
         {
+            if (Elements.Count == 0) return; //if no elements (keypress, or otherwise) than no reason to save this replay.
             //saves a new recorded game file.
             //we want to save by type. We need to generate an appropriate path to save this to that includes it.
             String sAppFolder = TetrisGame.AppDataFolder;
@@ -146,7 +169,25 @@ namespace BASeTris
         /// <returns></returns>
         public static IEnumerable<GameplayRecord> GetHandlerReplays(Type HandlerType)
         {
-             String sAppFolder = TetrisGame.AppDataFolder;
+            foreach (String sFile in GetHandlerReplayFiles(HandlerType))
+            {
+                        GameplayRecord loaded = null;
+                        try
+                        {
+                            loaded = new GameplayRecord(sFile);
+                        }
+                        catch(Exception exr)
+                        {
+                        Trace.WriteLine($"Exception while loading a Gameplayrecord from file {sFile}\n{exr.ToString()}"); 
+                            ; //swallow errors purely because we don't want to stop enumerating....
+                        }
+                        yield return loaded;
+            }
+        }
+
+        public static IEnumerable<String> GetHandlerReplayFiles(Type HandlerType)
+        {
+            String sAppFolder = TetrisGame.AppDataFolder;
             // add /Replay/Handler/<name>.btreplay and we'll generate a filename.
             String sSourceDirectory =Path.Combine(sAppFolder,"Replay",HandlerType.Name);
 
@@ -156,26 +197,11 @@ namespace BASeTris
                 DirectoryInfo di = new DirectoryInfo(sSourceDirectory);
                 foreach (var replayfile in di.EnumerateFiles("*.bcreplay"))
                 {
-                        GameplayRecord loaded = null;
-                        try
-                        {
-                            loaded = new GameplayRecord(replayfile.FullName);
-                        }
-                        catch(Exception exr)
-                        {
-                        Trace.WriteLine($"Exception while loading a Gameplayrecord from file {replayfile.FullName}\n{exr.ToString()}"); 
-                            ; //swallow errors purely because we don't want to stop enumerating....
-                        }
-                        yield return loaded;
-                    
-                    
+                    yield return replayfile.FullName;
                 }
-
-
             }
-
-
         }
+
         //savetofile and readfromfile go beyond the constructor and GetXmlData information, and also include the list of all chooser generated minos.
         public void SaveToFile(IStateOwner pOwner,String sFilePath,List<Nomino> GeneratedChooserMinos)
         {
@@ -213,6 +239,10 @@ namespace BASeTris
             if (ChooserGeneratedElement != null)
             {
                 GeneratedChooserMinos = StandardHelper.ReadList<Nomino>(ChooserGeneratedElement, null);
+                foreach (var iterate in GeneratedChooserMinos)
+                {
+                    iterate.SetRotation(0);
+                }
             }
             else
             {

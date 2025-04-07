@@ -22,7 +22,7 @@ namespace BASeTris.GameStates.GameHandlers.HandlerStates
             OriginalState = pState;
         }
        
-        private AssetManager.iActiveSoundObject CompletionMusic = null;
+        private AssetManager.IActiveSound CompletionMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
             if (CompletionMusic == null)

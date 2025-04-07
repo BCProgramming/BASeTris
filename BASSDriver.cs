@@ -9,7 +9,224 @@ using System.Text;
 
 namespace BASeTris.AssetManager
 {
-    public class BASSSound : iSoundSourceObject, iActiveSoundObject, IDisposable
+    public class BASSLoadedSound : ISoundSource
+    {
+        Func<int> NewStream = null;
+        public bool SingleStream = false;
+        List<BASSPlayingSound> PlayingSounds = new List<BASSPlayingSound>();
+        public BASSLoadedSound(Func<int> pNewStream)
+        {
+            NewStream = pNewStream;
+        }
+        public IActiveSound Play(bool playlooped)
+        {
+            return Play(playlooped, 1.0f);
+        }
+        static bool _noFx = false;
+        public IActiveSound Play(bool playlooped, float volume, float tempo = 1, float pitch = 0)
+        {
+            int ActiveStream = 0, maketempostream = 0;
+            if (SingleStream && PlayingSounds.Any())
+            {
+                var sPlaying = PlayingSounds.First();
+                ActiveStream = sPlaying._soundStream;
+                maketempostream = sPlaying._tempoStream;
+            }
+            else
+            {
+                //remove all finished entries.
+                var FinishedItems = PlayingSounds.Where((s) => s.Finished);
+                foreach (var disposeit in FinishedItems)
+                {
+                    disposeit.Dispose();
+                }
+
+                PlayingSounds.RemoveAll((s) => s.Finished);
+
+                ActiveStream = NewStream();
+                if (ActiveStream == 0) return null;
+
+
+                //create a tempostream if needed.
+
+                if (!_noFx)
+                {
+                    try
+                    {
+                        maketempostream = ManagedBass.Fx.BassFx.TempoCreate(ActiveStream, ManagedBass.BassFlags.FxFreeSource);
+                    }
+                    catch (DllNotFoundException exx)
+                    {
+                        _noFx = true;
+                        //grrr...
+                        //oh well. Seems like BASS.NET ignores the call if it doesn't understand the tempo stuff.
+                        maketempostream = 0;
+                    }
+                }
+            }
+            var playstream = () => maketempostream == 0 ? ActiveStream : maketempostream;
+
+            ManagedBass.Bass.ChannelSetAttribute(playstream(),ManagedBass.ChannelAttribute.Volume , volume);
+            
+
+
+
+            if (playlooped) ManagedBass.Bass.ChannelFlags(playstream(), ManagedBass.BassFlags.Loop, ManagedBass.BassFlags.Loop);
+
+            //ManagedBass.Bass.ChannelSetSync(ActiveStream, ManagedBass.SyncFlags.End |  ManagedBass.SyncFlags.Onetime, 0, soundstopproc, IntPtr.Zero);
+            ManagedBass.Bass.ChannelSetAttribute(maketempostream, ManagedBass.ChannelAttribute.Tempo, tempo);
+            ManagedBass.Bass.ChannelSetAttribute(maketempostream, ManagedBass.ChannelAttribute.Pitch, pitch);
+
+            var playresult = ManagedBass.Bass.ChannelPlay(playstream(), true);
+            
+            var PlaySoundEntry = new BASSPlayingSound(this,ActiveStream,maketempostream);
+            PlayingSounds.Add(PlaySoundEntry);
+            
+            return PlaySoundEntry;
+        }
+    }
+    public class BASSPlayingSound : IActiveSound,IDisposable
+    {
+
+        internal readonly int _soundStream;
+        internal readonly int _tempoStream;
+        public BASSLoadedSound SoundSource { get; init; }
+        public BASSPlayingSound(BASSLoadedSound pSoundSource,int hStream,int TempoStream)
+        {
+            _soundStream = hStream;
+            _tempoStream = TempoStream;
+            SoundSource = pSoundSource;
+            //TODO: create stream handle here.
+        }
+        public int ActiveStream
+        {
+            get { return _tempoStream != 0 ? _tempoStream : _soundStream; }
+        }
+        private bool _disposed;
+        ~BASSPlayingSound()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            ManagedBass.Bass.StreamFree(_soundStream);
+            //if we have an unmanaged block, free it now.
+            /*if (_UnmanagedBlock != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_UnmanagedBlock);
+            }*/
+        }
+
+
+
+        public bool Finished
+        {
+            get { return ManagedBass.Bass.ChannelGetPosition(ActiveStream) >= ManagedBass.Bass.ChannelGetLength(ActiveStream); }
+        }
+
+
+        public bool Paused { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public float Progress
+        {
+            get
+            {
+                // return ManagedBass.Bass.StreamGetFilePosition(SoundStream, BASSStreamFilePosition.BASS_FILEPOS_CURRENT);
+                return ManagedBass.Bass.ChannelGetPosition(ActiveStream) / ((float) ManagedBass.Bass.ChannelGetLength(ActiveStream));
+            }
+        }
+
+        public float Level
+        {
+            get
+            {
+                int levelresult = ManagedBass.Bass.ChannelGetLevel(ActiveStream);
+                int left = LoWord(levelresult); // the left level
+                int right = HighWord(levelresult); // the right level
+                return 32767f / ((left + (float) right) / 2);
+            }
+        }
+
+        public ISoundSource Source => SoundSource;
+
+
+        public void Stop()
+        {
+            ManagedBass.Bass.ChannelStop(ActiveStream);
+        }
+
+        public void Pause()
+        {
+            ManagedBass.Bass.ChannelPause(ActiveStream);
+        }
+
+        public void UnPause()
+        {
+            ManagedBass.Bass.ChannelPlay(ActiveStream, false);
+        }
+
+        public float Tempo
+        {
+            get
+            {
+                float result = 0;
+                ManagedBass.Bass.ChannelGetAttribute(_tempoStream,ManagedBass.ChannelAttribute.Tempo, out result);
+                if (result == 0)
+                    ManagedBass.Bass.ChannelGetAttribute(ActiveStream, ManagedBass.ChannelAttribute.MusicSpeed, out result);
+                return result;
+            }
+            set
+            {
+                Debug.Print("Setting Tempo of Channel ID" + _soundStream + " (Tempo ID#" + _tempoStream + ")to " + value);
+                ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Tempo, value);
+
+
+                
+                // ManagedBass.Bass.ChannelSetAttribute(ActiveStream, BASSAttribute.BASS_ATTRIB_MUSIC_SPEED, CalculatedValue);
+            }
+        }
+        public float Pitch
+        {
+            get
+            {
+                float result = 0;
+                ManagedBass.Bass.ChannelGetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Pitch, out result);
+                if (result == 0)
+                    ManagedBass.Bass.ChannelGetAttribute(ActiveStream, ManagedBass.ChannelAttribute.Pitch, out result);
+                return result;
+            }
+            set
+            {
+                Debug.Print("Setting Pitch of Channel ID " + _soundStream + " (Tempo ID#" + _tempoStream + ") to " + value);
+                ManagedBass.Bass.ChannelSetAttribute(_tempoStream, ManagedBass.ChannelAttribute.Pitch, value);
+                
+            }
+        }
+       
+
+        public void SetVolume(float volumeset)
+        {
+            ManagedBass.Bass.ChannelSetAttribute(ActiveStream, ManagedBass.ChannelAttribute.MusicVolumeChannel, volumeset);
+        }
+
+        public int HighWord(int Source)
+        {
+            return Source >> 16;
+        }
+        public int LoWord(int Source)
+        {
+            return Source & 0xFFFF;
+        }
+
+    }
+
+
+    //Older implementation, which had both the active and source implementation in the same class. Was separated later to allow multiple playing sounds of the same source.
+    //This was pulled from BASeBlock at some point.
+
+    public class BASSSound : ISoundSource, IActiveSound, IDisposable
     {
         //TODO: more SYNCPROC events...
         public delegate void BASS_SoundStoppedFunc(BASSSound sourcesound);
@@ -25,7 +242,7 @@ namespace BASeTris.AssetManager
         private bool _paused = false;
         private IntPtr _UnmanagedBlock = IntPtr.Zero;
 
-        public iSoundSourceObject Source
+        public ISoundSource Source
         {
             get { return this; }
         }
@@ -131,16 +348,16 @@ namespace BASeTris.AssetManager
 
         #region iSoundSourceObject Members
 
-        public float getLength()
+       /* public float getLength()
         {
             var len = ManagedBass.Bass.ChannelGetLength(ActiveStream,ManagedBass.PositionFlags.Bytes);
             float result = (float) ManagedBass.Bass.ChannelBytes2Seconds(ActiveStream, len);
             return result;
             //QWORD len = BASS_ChannelGetLength(channel, BASS_POS_BYTE); // the length in bytes
             //double time = BASS_ChannelBytes2Seconds(channel, len); // the length in seconds
-        }
+        }*/
 
-        public iActiveSoundObject Play(bool playlooped)
+        public IActiveSound Play(bool playlooped)
         {
             //ManagedBass.Bass.SetVolume(1.0f);
 
@@ -152,7 +369,7 @@ namespace BASeTris.AssetManager
             InvokeSoundStopped();
         }
 
-        public iActiveSoundObject Play(bool playlooped, float volume,float tempo = 1f,float pitch = 0f)
+        public IActiveSound Play(bool playlooped, float volume,float tempo = 1f,float pitch = 0f)
         {
             ManagedBass.Bass.ChannelSetAttribute(ActiveStream,ManagedBass.ChannelAttribute.Volume , volume);
             
@@ -244,7 +461,7 @@ namespace BASeTris.AssetManager
             }
         }
 
-        public void setVolume(float volumeset)
+        public void SetVolume(float volumeset)
         {
             ManagedBass.Bass.ChannelSetAttribute(ActiveStream, ManagedBass.ChannelAttribute.MusicVolumeChannel, volumeset);
         }
@@ -252,7 +469,7 @@ namespace BASeTris.AssetManager
         #endregion
     }
 
-    class BASSDriver : iSoundEngineDriver
+    class BASSDriver : ISoundEngineDriver
     {
         public static string DrvName = "NBASS";
 
@@ -388,27 +605,26 @@ namespace BASeTris.AssetManager
 
         public event OnSoundPlayDelegate OnSoundPlay;
 
-        public void FireSoundPlay(iActiveSoundObject soundPlayed)
+        public void FireSoundPlay(IActiveSound soundPlayed)
         {
             OnSoundPlayDelegate temp = OnSoundPlay;
             if (temp != null)
                 temp(soundPlayed);
         }
 
-        public void FireSoundStop(iActiveSoundObject soundStopped)
+        public void FireSoundStop(IActiveSound soundStopped)
         {
             OnSoundStopDelegate temp = OnSoundStop;
             if (temp != null)
                 temp(soundStopped);
         }
 
-        public iSoundSourceObject LoadSound(Stream fromstream)
+        public ISoundSource LoadSound(Stream fromstream)
         {
             //int stmake = ManagedBass.Bass.StreamCreateFile(
             return null;
         }
-
-        public iSoundSourceObject LoadSound(byte[] data, string sName, string fileextension)
+        private int GetStreamForData(byte[] data, string sName, String fileextension)
         {
             String extension = fileextension;
             if (extension.Equals(".xm", StringComparison.OrdinalIgnoreCase))
@@ -430,21 +646,38 @@ namespace BASeTris.AssetManager
             {
                 stmake = ManagedBass.Bass.CreateStream(data, 0, 0,ManagedBass.BassFlags.Decode);
             }
-
-            if (stmake != 0)
+            return stmake;
+        }
+        const bool UseDeluxeSound = true;
+        public ISoundSource LoadSound(byte[] data, string sName, string fileextension)
+        {
+            if (!UseDeluxeSound)
             {
-                //create the BASSSound object; we need to give it the unManagedPointer, so that it will be able to properly free that resource when it is destructed.
-                BASSSound returnsound = new BASSSound(stmake);
-                returnsound.BASS_SoundStopped += BasssoundStop;
-                return returnsound;
-            }
+                var stmake = GetStreamForData(data, sName, fileextension);
 
+                if (stmake != 0)
+                {
+                    //create the BASSSound object; we need to give it the unManagedPointer, so that it will be able to properly free that resource when it is destructed.
+                    BASSSound returnsound = new BASSSound(stmake);
+                    returnsound.BASS_SoundStopped += BasssoundStop;
+                    return returnsound;
+                }
+            }
+            else
+            {
+
+                BASSLoadedSound bls = new BASSLoadedSound(() => GetStreamForData(data, sName, fileextension));
+                //todo: Sound stop event?
+                return bls;
+
+
+            }
             return null;
         }
 
-        public iSoundSourceObject LoadSound(string filename)
+        public int GetStreamForFile(String sFilename)
         {
-            String extension = Path.GetExtension(filename);
+            String extension = Path.GetExtension(sFilename);
             if (extension.Equals(".xm", StringComparison.OrdinalIgnoreCase))
             {
                 Debug.Print("xm file...");
@@ -454,20 +687,33 @@ namespace BASeTris.AssetManager
 
             if (new[] {".xm", ".it", ".mod"}.Contains(extension.ToLower()))
             {
-                stmake = ManagedBass.Bass.MusicLoad(filename, 0, 0);
+                stmake = ManagedBass.Bass.MusicLoad(sFilename, 0, 0);
             }
             else
             {
-                stmake = ManagedBass.Bass.CreateStream(filename, 0, 0, ManagedBass.BassFlags.Decode);
+                stmake = ManagedBass.Bass.CreateStream(sFilename, 0, 0, ManagedBass.BassFlags.Decode);
             }
+            return stmake;
+        }
 
-            if (stmake != 0)
+        public ISoundSource LoadSound(string filename)
+        {
+            if (!UseDeluxeSound)
             {
-                BASSSound returnsound = new BASSSound(stmake);
-                returnsound.BASS_SoundStopped += BasssoundStop;
-                return returnsound;
-            }
+                int stmake = GetStreamForFile(filename);
 
+                if (stmake != 0)
+                {
+                    BASSSound returnsound = new BASSSound(stmake);
+                    returnsound.BASS_SoundStopped += BasssoundStop;
+                    return returnsound;
+                }
+            }
+            else
+            {
+                BASSLoadedSound loadsound = new BASSLoadedSound(() => GetStreamForFile(filename));
+                return loadsound;
+            }
             return null;
         }
 

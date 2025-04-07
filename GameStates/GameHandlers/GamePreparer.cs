@@ -141,7 +141,7 @@ namespace BASeTris.GameStates.GameHandlers
                 if (findattribute != null)
                 {
 
-                    if (iterateprop.Item1.PropertyType is Type)
+                    if (iterateprop.Item1.PropertyType is Type t && !t.IsPrimitive)
                     {
                         Type useType = StandardHelper.ClassFinder(findattribute.Value);
                         iterateprop.Item1.SetValue(this, useType);

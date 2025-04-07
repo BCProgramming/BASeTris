@@ -419,13 +419,13 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         {
             _Composite = pComposite;
         }
-        public iSoundSourceObject GetPlayingMusic()
+        public ISoundSource GetPlayingMusic()
         {
             return null;
             //return _Composite.GetPlayingMusic();
         }
 
-        public iActiveSoundObject GetPlayingMusic_Active()
+        public IActiveSound GetPlayingMusic_Active()
         {
             return null;
             //return _Composite.GetPlayingMusic_Active();
@@ -441,56 +441,56 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             _Composite.PauseMusic();
         }
 
-        public iActiveSoundObject PlayMusic()
+        public IActiveSound PlayMusic()
         {
             //we never play music
             return null;
         }
 
-        public iActiveSoundObject PlayMusic(string key, float volume, bool loop)
+        public IActiveSound PlayMusic(string key, float volume, bool loop)
         {
             return null;
         }
 
-        public iActiveSoundObject PlayMusic(string[] key, MultiMusicPlayMode mplaymode)
+        public IActiveSound PlayMusic(string[] key, MultiMusicPlayMode mplaymode)
         {
             return null;
         }
 
-        public iActiveSoundObject PlayMusic(string[] key, MultiMusicPlayMode mplaymode, out iSoundSourceObject[] ssources)
+        public IActiveSound PlayMusic(string[] key, MultiMusicPlayMode mplaymode, out ISoundSource[] ssources)
         {
             ssources = null;
             return null;
         }
 
-        public iActiveSoundObject PlaySound(string key, bool playlooped)
+        public IActiveSound PlaySound(string key, bool playlooped)
         {
             return null;
         }
 
-        public iActiveSoundObject PlaySound(string key)
+        public IActiveSound PlaySound(string key)
         {
             return null;
         }
 
-        public iActiveSoundObject PlaySound(string key, float volume)
+        public IActiveSound PlaySound(string key, float volume)
         {
             return null;
         }
 
-        public iActiveSoundObject PlaySoundRnd(string key, float Volume)
+        public IActiveSound PlaySoundRnd(string key, float Volume)
         {
             return null;
         }
-        public iActiveSoundObject PlaySound(String key, bool playlooped, float volume)
+        public IActiveSound PlaySound(String key, bool playlooped, float volume)
         {
             return null;
         }
-        public iActiveSoundObject PlaySound(String key, AudioHandlerPlayDetails pDetails)
+        public IActiveSound PlaySound(String key, AudioHandlerPlayDetails pDetails)
         {
             return null;
         }
-        public iActiveSoundObject PlayMusic(String key, AudioHandlerPlayDetails pDetails)
+        public IActiveSound PlayMusic(String key, AudioHandlerPlayDetails pDetails)
         {
             return null;
         }
@@ -503,16 +503,16 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
     public class cNewSoundManager : IDisposable,IAudioHandler
     {
         // public event Action<iSoundSourceObject, String> SoundStopped;
-        private iSoundEngineDriver mDriver;
+        private ISoundEngineDriver mDriver;
 
-        public iSoundEngineDriver Driver
+        public ISoundEngineDriver Driver
         {
             get { return mDriver; }
         }
 
-        private Dictionary<String, iSoundSourceObject> mSoundSources = new Dictionary<string, iSoundSourceObject>();
-        private List<iActiveSoundObject> PlayingSounds = new List<iActiveSoundObject>();
-        private iActiveSoundObject _mPlayingMusic;
+        private Dictionary<String, ISoundSource> mSoundSources = new Dictionary<string, ISoundSource>();
+        private List<IActiveSound> PlayingSounds = new List<IActiveSound>();
+        private IActiveSound _mPlayingMusic;
 
 
         private static iManagerCallback _callback = new Nullcallback();
@@ -525,7 +525,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         //private iActiveSoundObject mPlayingMusic { set { _mPlayingMusic = value; } get { return _mPlayingMusic; } }
 
-        private iActiveSoundObject mPlayingMusic
+        private IActiveSound mPlayingMusic
         {
             set
             {
@@ -541,7 +541,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             get { return _mPlayingMusic; }
         }
 
-        protected String getKeyForSound(iSoundSourceObject sourceobject)
+        protected String getKeyForSound(ISoundSource sourceobject)
         {
             foreach (String key in mSoundSources.Keys)
             {
@@ -554,7 +554,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return "";
         }
 
-        private iSoundSourceObject mPlayingMusicSource;
+        private ISoundSource mPlayingMusicSource;
         public String scurrentPlayingMusic = "";
 
         private iManagerCallback mCallback = new Nullcallback();
@@ -567,12 +567,12 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
          }
          */
 
-        public Dictionary<String, iSoundSourceObject> SoundSources
+        public Dictionary<String, ISoundSource> SoundSources
         {
             get { return mSoundSources; }
         }
 
-        protected cNewSoundManager(iSoundEngineDriver sounddriver)
+        protected cNewSoundManager(ISoundEngineDriver sounddriver)
             : this(sounddriver, new Nullcallback())
         {
         }
@@ -583,22 +583,22 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             //mDriver=null;
         }
 
-        public iSoundSourceObject GetPlayingMusic()
+        public ISoundSource GetPlayingMusic()
         {
             return mPlayingMusicSource;
         }
 
-        public void SetPlayingMusic(iActiveSoundObject revertmusic)
+        public void SetPlayingMusic(IActiveSound revertmusic)
         {
-            mPlayingMusicSource = revertmusic as iSoundSourceObject;
+            mPlayingMusicSource = revertmusic as ISoundSource;
         }
 
-        public iActiveSoundObject GetPlayingMusic_Active()
+        public IActiveSound GetPlayingMusic_Active()
         {
             return mPlayingMusic;
         }
 
-        protected cNewSoundManager(iSoundEngineDriver sounddriver, iManagerCallback mancallback)
+        protected cNewSoundManager(ISoundEngineDriver sounddriver, iManagerCallback mancallback)
         {
             mDriver = sounddriver;
             mCallback = mancallback;
@@ -612,15 +612,15 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         /// QueuedSoundManager: implements iActiveSoundObject and iSoundSourceObject, and wraps a queue of the driver-provided implementations
         /// of those types. Hooks into the driver classes soundstopped event, and plays the next in the queue.
         /// </summary>
-        public class QueuedSoundManager : iActiveSoundObject, iSoundSourceObject
+        public class QueuedSoundManager : IActiveSound, ISoundSource
         {
-            private Queue<iSoundSourceObject> mSoundQueue = new Queue<iSoundSourceObject>();
+            private Queue<ISoundSource> mSoundQueue = new Queue<ISoundSource>();
             private MultiMusicPlayMode mmpmode = MultiMusicPlayMode.MultiMusic_Random;
             private bool mPlayLooped = false;
-            private iActiveSoundObject PlayingSound;
-            private iSoundSourceObject PlayingSource;
+            private IActiveSound PlayingSound;
+            private ISoundSource PlayingSource;
 
-            public Queue<iSoundSourceObject> SoundQueue
+            public Queue<ISoundSource> SoundQueue
             {
                 get { return mSoundQueue; }
                 set { mSoundQueue = value; }
@@ -650,7 +650,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
             private float _useTempo = -1;
             private float _usePitch = int.MinValue;
-            public iSoundSourceObject Source
+            public ISoundSource Source
             {
                 get { return this; }
             }
@@ -689,19 +689,19 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
             }
 
-            private iSoundEngineDriver driverobj = null;
+            private ISoundEngineDriver driverobj = null;
 
 
-            public QueuedSoundManager(cNewSoundManager csound, IEnumerable<string> keys, iSoundEngineDriver sdriver, bool pplaylooped)
+            public QueuedSoundManager(cNewSoundManager csound, IEnumerable<string> keys, ISoundEngineDriver sdriver, bool pplaylooped)
             {
                 driverobj = sdriver;
-                SoundQueue = new Queue<iSoundSourceObject>();
+                SoundQueue = new Queue<ISoundSource>();
                 PlayLooped = pplaylooped;
                 foreach (String loadkey in keys)
                 {
                     try
                     {
-                        iSoundSourceObject sourceobj = csound.GetSoundRnd(loadkey);
+                        ISoundSource sourceobj = csound.GetSoundRnd(loadkey);
                         if (sourceobj != null)
                         {
                             if (PlayingSource == null)
@@ -724,7 +724,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 sdriver.OnSoundStop += new OnSoundStopDelegate(sdriver_OnSoundStop);
             }
 
-            public float getLength()
+            /*public float getLength()
             {
                 float returnvalue = 0;
                 foreach (var loopitem in SoundQueue)
@@ -733,7 +733,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
 
                 return returnvalue;
-            }
+            }*/
 
             public void Pause()
             {
@@ -753,7 +753,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 sdriver_OnSoundStop(PlayingSound);
             }
 
-            public iActiveSoundObject Play(bool pPlayLooped)
+            public IActiveSound Play(bool pPlayLooped)
             {
                 //PlayLooped = pPlayLooped;
                 return Play(pPlayLooped, 1.0f);
@@ -770,12 +770,12 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
                 if (PlayingSound != null) PlayingSound.Stop();
                 //PlayingSource=null;
-                playedqueue = new Queue<iSoundSourceObject>();
+                playedqueue = new Queue<ISoundSource>();
             }
 
-            Queue<iSoundSourceObject> playedqueue = new Queue<iSoundSourceObject>();
+            Queue<ISoundSource> playedqueue = new Queue<ISoundSource>();
 
-            void sdriver_OnSoundStop(iActiveSoundObject objstop)
+            void sdriver_OnSoundStop(IActiveSound objstop)
             {
                 String stoppedkey = TetrisGame.Soundman.getKeyForSound(objstop.Source);
                 Debug.Print("QueuedSoundManager detected stop of " + stoppedkey);
@@ -810,7 +810,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     //if the queue has elements...
                     if (SoundQueue.Any())
                     {
-                        iSoundSourceObject playit = null;
+                        ISoundSource playit = null;
                         //pop the top one off. Set PlayingSound.
                         if (mmpmode == MultiMusicPlayMode.MultiMusic_Order)
                         {
@@ -827,7 +827,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                             //remove the selected element...
                             Listeq.RemoveAt(randomindex);
                             //create a new queue from the list...
-                            SoundQueue = new Queue<iSoundSourceObject>(Listeq);
+                            SoundQueue = new Queue<ISoundSource>(Listeq);
                         }
 
                         String getname = TetrisGame.Soundman.getKeyForSound(playit);
@@ -840,7 +840,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
             }
 
-            void sdriver_OnSoundStopOld(iActiveSoundObject objstop)
+            void sdriver_OnSoundStopOld(IActiveSound objstop)
             {
                 //throw new NotImplementedException();
                 if (objstop == PlayingSound)
@@ -896,7 +896,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                             //remove the selected element...
                             Listeq.RemoveAt(randomindex);
                             //create a new queue from the list...
-                            SoundQueue = new Queue<iSoundSourceObject>(Listeq);
+                            SoundQueue = new Queue<ISoundSource>(Listeq);
                             playedqueue.Enqueue(grabbeditem);
 
                             PlayingSource = grabbeditem;
@@ -931,9 +931,9 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
             }
 
-            public void setVolume(float volumeset)
+            public void SetVolume(float volumeset)
             {
-                PlayingSound.setVolume(volumeset);
+                PlayingSound.SetVolume(volumeset);
             }
 
             #endregion
@@ -944,27 +944,27 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
             #region iActiveSoundObject Members
 
-            bool iActiveSoundObject.Finished
+            bool IActiveSound.Finished
             {
                 get { return driverobj != null; }
             }
 
-            void iActiveSoundObject.Stop()
+            void IActiveSound.Stop()
             {
                 this.Stop();
             }
 
-            void iActiveSoundObject.Pause()
+            void IActiveSound.Pause()
             {
                 Pause();
             }
 
-            void iActiveSoundObject.UnPause()
+            void IActiveSound.UnPause()
             {
                 UnPause();
             }
 
-            bool iActiveSoundObject.Paused
+            bool IActiveSound.Paused
             {
                 get { return PlayingSound.Paused; }
                 set { PlayingSound.Paused = value; }
@@ -974,7 +974,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
             #region iSoundSourceObject Members
 
-            public iActiveSoundObject Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f)
+            public IActiveSound Play(bool playlooped, float volume, float tempo = 1f, float pitch = 0f)
             {
                 //PlayLooped = pPlayLooped;
                 if (PlayingSound != null && PlayingSound.Paused)
@@ -1001,14 +1001,14 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         //sounds can be queued, just like music :D
         //private List<Queue<iSoundSourceObject>> QueuedSounds = new List<Queue<iSoundSourceObject>>();
 
-        void mDriver_OnSoundPlay(iActiveSoundObject objplay)
+        void mDriver_OnSoundPlay(IActiveSound objplay)
         {
             PlayingSounds.Add(objplay);
         }
 
         //When the sound driver indicates a sound stopped, we need to do some special processing for the case
         //where we were told to play a series of sounds.
-        void mDriver_OnSoundStop(iActiveSoundObject objstop)
+        void mDriver_OnSoundStop(IActiveSound objstop)
         {
             /*
             iSoundSourceObject sourceobj = objstop.Source;
@@ -1036,35 +1036,35 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             */
         }
 
-        public cNewSoundManager(iSoundEngineDriver sounddriver, String[] SoundFilePaths)
+        public cNewSoundManager(ISoundEngineDriver sounddriver, String[] SoundFilePaths)
             : this(sounddriver, SoundFilePaths, new Nullcallback())
         {
         }
 
-        public cNewSoundManager(iSoundEngineDriver sounddriver, String[] SoundFilePaths, iManagerCallback mancallback)
+        public cNewSoundManager(ISoundEngineDriver sounddriver, String[] SoundFilePaths, iManagerCallback mancallback)
             : this(sounddriver, mancallback)
         {
             mCallback = mancallback;
             LoadSounds(SoundFilePaths);
         }
 
-        public cNewSoundManager(iSoundEngineDriver sounddriver, DirectoryInfo[] DirsUse)
+        public cNewSoundManager(ISoundEngineDriver sounddriver, DirectoryInfo[] DirsUse)
             : this(sounddriver, DirsUse, new Nullcallback())
         {
         }
 
-        public cNewSoundManager(iSoundEngineDriver sounddriver, DirectoryInfo[] DirsUse, iManagerCallback mancallback)
+        public cNewSoundManager(ISoundEngineDriver sounddriver, DirectoryInfo[] DirsUse, iManagerCallback mancallback)
             : this(sounddriver, mancallback)
         {
             mCallback = mancallback;
             LoadSounds(DirsUse);
         }
 
-        public cNewSoundManager(iSoundEngineDriver sounddriver, String SoundFilePath) : this(sounddriver, SoundFilePath, new Nullcallback())
+        public cNewSoundManager(ISoundEngineDriver sounddriver, String SoundFilePath) : this(sounddriver, SoundFilePath, new Nullcallback())
         {
         }
 
-        public cNewSoundManager(iSoundEngineDriver sounddriver, String SoundFilePath, iManagerCallback mancallback)
+        public cNewSoundManager(ISoundEngineDriver sounddriver, String SoundFilePath, iManagerCallback mancallback)
             : this(sounddriver, mancallback)
         {
             LoadSounds(SoundFilePath);
@@ -1137,7 +1137,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return (from p in acquiredkeys select p.Value).ToArray();
         }
 
-        public iSoundSourceObject GetSound(String key)
+        public ISoundSource GetSound(String key)
         {
             if (key.Contains("|"))
             {
@@ -1182,7 +1182,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return gotkeys[randomindex];
         }
 
-        public iSoundSourceObject GetSoundRnd(String key)
+        public ISoundSource GetSoundRnd(String key)
         {
             //gets a random sound; for example, if key="TALLYMUSIC", and we have the following:
             //"TALLYMUSIC"
@@ -1298,7 +1298,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         {
             // mCallback.ShowMessage("Loading Sound:" + filename);
 
-            iSoundSourceObject ss = mDriver.LoadSound(filename);
+            ISoundSource ss = mDriver.LoadSound(filename);
             string usekey = Path.GetFileNameWithoutExtension(filename).ToUpper();
             return AddSound(filename, usekey);
         }
@@ -1314,7 +1314,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             ProcessSoundFile(ref filename);
             usekey = usekey.ToUpper();
             mCallback.ShowMessage("Loading Sound:" + filename + " as " + usekey);
-            iSoundSourceObject ss = mDriver.LoadSound(filename);
+            ISoundSource ss = mDriver.LoadSound(filename);
             //string usekey = Path.GetFileNameWithoutExtension(filename).ToUpper();
 
             if (mSoundSources.ContainsKey(usekey))
@@ -1330,43 +1330,43 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return usekey;
         }
 
-        public iActiveSoundObject PlaySoundRnd(String key, float Volume)
+        public IActiveSound PlaySoundRnd(String key, float Volume)
         {
-            iSoundSourceObject grabbed = GetSoundRnd(key);
+            ISoundSource grabbed = GetSoundRnd(key);
             return grabbed.Play(false, Volume);
         }
 
-        public iActiveSoundObject PlaySound(String key, bool playlooped)
+        public IActiveSound PlaySound(String key, bool playlooped)
         {
-            iSoundSourceObject grabbed = GetSound(key);
+            ISoundSource grabbed = GetSound(key);
             return grabbed.Play(playlooped);
         }
-        public iActiveSoundObject PlaySound(String key,bool playlooped,float volume)
+        public IActiveSound PlaySound(String key,bool playlooped,float volume)
         {
             
-                iSoundSourceObject grabbed = GetSound(key);
+                ISoundSource grabbed = GetSound(key);
                 return grabbed.Play(playlooped,volume);
             
         }
-        public iActiveSoundObject PlaySound(String key, AudioHandlerPlayDetails pDetails)
+        public IActiveSound PlaySound(String key, AudioHandlerPlayDetails pDetails)
         {
-            iSoundSourceObject grabbed = GetSound(key);
+            ISoundSource grabbed = GetSound(key);
             return grabbed.Play(false, pDetails.Volume, pDetails.Tempo, pDetails.Pitch);
 
 
         }
         //TODO: add PlaySound() that supports array if String[] for key.
         //will use QueuedSounds list.
-        public iActiveSoundObject PlaySound(String key)
+        public IActiveSound PlaySound(String key)
         {
             if (key == null) return null;
-            iSoundSourceObject grabbed = GetSound(key);
+            ISoundSource grabbed = GetSound(key);
             return grabbed.Play(false);
         }
 
-        public iActiveSoundObject PlaySound(String key, float volume)
+        public IActiveSound PlaySound(String key, float volume)
         {
-            iSoundSourceObject grabbed = GetSound(key);
+            ISoundSource grabbed = GetSound(key);
             
             var result = grabbed.Play(false,volume);
             return result;
@@ -1391,23 +1391,23 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         /// <param name="key">array of Sound keys to play.</param>
         /// <param name="mplaymode">Play mode of the set. </param>
         /// <returns>first sound being played.</returns>
-        public iActiveSoundObject PlayMusic(String[] key, MultiMusicPlayMode mplaymode)
+        public IActiveSound PlayMusic(String[] key, MultiMusicPlayMode mplaymode)
         {
-            iSoundSourceObject[] outret;
+            ISoundSource[] outret;
             return PlayMusic(key, mplaymode, out outret);
         }
 
-        public iActiveSoundObject PlayMusic(String[] key, MultiMusicPlayMode mplaymode, out iSoundSourceObject[] ssources)
+        public IActiveSound PlayMusic(String[] key, MultiMusicPlayMode mplaymode, out ISoundSource[] ssources)
         {
             //stop any playing sounds.
             //QueuedMusic = new Queue<iSoundSourceObject>();
-            ssources = new iSoundSourceObject[key.Length];
+            ssources = new ISoundSource[key.Length];
             for (int i = 0; i < ssources.Length; i++)
             {
                 ssources[i] = GetSound(key[i]);
             }
 
-            iActiveSoundObject retobj = PlayMusic(String.Join("|", key), 1.0f, true);
+            IActiveSound retobj = PlayMusic(String.Join("|", key), 1.0f, true);
             if (retobj is QueuedSoundManager)
             {
                 (retobj as QueuedSoundManager).PlayMode = mplaymode;
@@ -1426,12 +1426,12 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         }
 
 
-        public iActiveSoundObject PlayMusic(String key)
+        public IActiveSound PlayMusic(String key)
         {
             return PlayMusic(key, 1.0f, true);
         }
 
-        public iActiveSoundObject PlayMusic(String key, bool loop)
+        public IActiveSound PlayMusic(String key, bool loop)
         {
             return PlayMusic(key, 0, loop);
         }
@@ -1439,10 +1439,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         private class ActiveMusicData
         {
             public string Name;
-            public iActiveSoundObject ActiveSound { get; set; }
-            public iSoundSourceObject Source { get; set; }
+            public IActiveSound ActiveSound { get; set; }
+            public ISoundSource Source { get; set; }
 
-            public ActiveMusicData(String pName, iActiveSoundObject pActiveSound, iSoundSourceObject pSource)
+            public ActiveMusicData(String pName, IActiveSound pActiveSound, ISoundSource pSource)
             {
                 ActiveSound = pActiveSound;
                 Source = pSource;
@@ -1457,7 +1457,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         /// </summary>
         private class TemporaryMusicData : ActiveMusicData, IComparable<TemporaryMusicData>
         {
-            public TemporaryMusicData(String pName, iActiveSoundObject pActiveSound, iSoundSourceObject pSource) : base(pName, pActiveSound, pSource)
+            public TemporaryMusicData(String pName, IActiveSound pActiveSound, ISoundSource pSource) : base(pName, pActiveSound, pSource)
             {
             }
 
@@ -1473,7 +1473,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         private String OriginalSoundName; //allocated when TemporaryMusicData is empty when music is pushed.
 
-        private iSoundSourceObject OriginalSoundObject = null;
+        private ISoundSource OriginalSoundObject = null;
 
         //private SortedList<TemporaryMusicData, TemporaryMusicData> TempMusicData = new SortedList<TemporaryMusicData, TemporaryMusicData>();
         private Dictionary<String, TemporaryMusicData> TempMusicData = new Dictionary<string, TemporaryMusicData>();
@@ -1483,7 +1483,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         /// stops music played with the PlayTemporaryMusic function.
         /// </summary>
         /// <param name="MusicName"></param>
-        public iActiveSoundObject StopTemporaryMusic(String MusicName)
+        public IActiveSound StopTemporaryMusic(String MusicName)
         {
             MusicName = MusicName.ToUpper();
             if (!TempMusicData.Any()) return mPlayingMusic; //no elements in Temporary Music Dictionary, so nothing to stop.
@@ -1500,7 +1500,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         /// Plays "temporary" music; for example the music from a power up.
         /// </summary>
         /// <param name="MusicName"></param>
-        public iActiveSoundObject PlayTemporaryMusic(String MusicName, float volume, bool loop)
+        public IActiveSound PlayTemporaryMusic(String MusicName, float volume, bool loop)
         {
             MusicName = MusicName.ToUpper();
             //the idea is simple, we want to allow for the following:
@@ -1546,7 +1546,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return incrementData;
         }
 
-        private iActiveSoundObject PlayMax(float volume, bool loop)
+        private IActiveSound PlayMax(float volume, bool loop)
         {
             //now, find the one with the maximum occurences.
 
@@ -1672,13 +1672,13 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         {
             Debug.Print("setting mPlayingMusic volume to " + amount);
             if (mPlayingMusic != null)
-                mPlayingMusic.setVolume(amount);
+                mPlayingMusic.SetVolume(amount);
         }
-        public iActiveSoundObject PlayMusic(String key, float volume, bool loop)
+        public IActiveSound PlayMusic(String key, float volume, bool loop)
         {
             return PlayMusic(key, new AudioHandlerPlayDetails() { Volume = volume, Playlooped = loop });
         }
-        public iActiveSoundObject PlayMusic(String key, AudioHandlerPlayDetails pDetails)
+        public IActiveSound PlayMusic(String key, AudioHandlerPlayDetails pDetails)
         {
             Debug.Print(new StackTrace().ToString());
             if (mPlayingMusicSource is QueuedSoundManager)
@@ -1687,7 +1687,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 Debug.Print("queued");
             }
 
-            iSoundSourceObject getsource = null;
+            ISoundSource getsource = null;
             if (key.Contains("|"))
             {
                 getsource = new QueuedSoundManager(this, key.Split('|'), mDriver, pDetails.Playlooped);
@@ -1712,16 +1712,16 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             TempMusicData = new Dictionary<string, TemporaryMusicData>();
 
 
-            iActiveSoundObject soundobj = getsource.Play(pDetails.Playlooped, pDetails.Volume,pDetails.Tempo,pDetails.Pitch);
+            IActiveSound soundobj = getsource.Play(pDetails.Playlooped, pDetails.Volume,pDetails.Tempo,pDetails.Pitch);
             mPlayingMusicSource = getsource;
             mPlayingMusic = soundobj;
             scurrentPlayingMusic = key;
             return soundobj;
         }
 
-        private iSoundSourceObject GrabSound(string key)
+        private ISoundSource GrabSound(string key)
         {
-            iSoundSourceObject getsource;
+            ISoundSource getsource;
             if (File.Exists(key))
             {
                 getsource = mDriver.LoadSound(key);
@@ -1742,7 +1742,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             }
         }
 
-        public iActiveSoundObject PlayMusic()
+        public IActiveSound PlayMusic()
         {
             if (mPlayingMusic != null)
                 mPlayingMusic.UnPause();
@@ -1823,7 +1823,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     mCallback.ShowMessage("Loading Sound:" + loopfile.Name);
                     String usefilename = loopfile.FullName;
                     //ProcessSoundFile(ref usefilename);
-                    iSoundSourceObject ss = mDriver.LoadSound(usefilename);
+                    ISoundSource ss = mDriver.LoadSound(usefilename);
                     //use loopfile.Fullname for the key.
                     String usekey = Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper();
                     if (!mSoundSources.ContainsKey(usekey))

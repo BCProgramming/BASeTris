@@ -160,11 +160,13 @@ namespace BASeTris
                 GameHandler = (IBlockGameCustomizationHandler)Activator.CreateInstance(desiredHandlerType);
                 //set the initial options to the ones we saved.
                 GameHandler.PrepInstance = gpo.GameplayRecord.InitialData.InitialOptions;
-
+                
                 this.UserInputDisabled = true; //disable user-capable inputs, only take from the injector.
                 this.ai = new ReplayInputInjector(_Owner,gpo.GameplayRecord.GetPlayQueue());
-
-                return new GameplayGameState(_Owner, GameHandler, null, TetrisGame.Soundman, null);
+                
+                var gsm = new GameplayGameState(_Owner, GameHandler, null, TetrisGame.Soundman, null);
+                gsm.SetChooser(new Choosers.GeneratedChooser(gpo.GeneratedMinos));
+                return gsm;
 
 
             };
@@ -450,6 +452,8 @@ namespace BASeTris
     {
         public SettingsManager Settings { get; set; } = null;
         public GameplayRecord GameplayRecord { get; set; } = null;
+
+        public IList<Nomino> GeneratedMinos { get; set; } = null;
 
     }
     //Presenter has a list of RenderTags. after drawing everything, each rendertag is also called with the RenderObject as the source element. It does this until the DoRender delegate returns false. At that point the RenderTag is removed from the list.

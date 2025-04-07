@@ -82,7 +82,7 @@ namespace BASeTris.GameStates.Menu
             var BGDesign = new MenuStateTextMenuItem() { Text = "Design", TipText = "Background Designer. Why does this exist?" };
             var CrappyThemeTestthing = new MenuStateTextMenuItem() { Text = "Theme shit", TipText = "Crappy item for testing new theme menu. ignore me" };
             var ExitItem = new ConfirmedTextMenuItem() { Text = "Quit",TipText="Quit to DOS. Haha, just kidding." };
-            var TestReplay = new ConfirmedTextMenuItem() { Text = "Replay Test", TipText = "Test Replays" };
+            var Replays = new MenuStateTextMenuItem() { Text = "Replays", TipText = "Show Replays" };
             var TestTextEdit = new MenuStateTextInputMenuItem() { Text = "EDITABLE!", TipText = "Test Editing text.", Label="Editable Item"};
 
 
@@ -108,7 +108,13 @@ namespace BASeTris.GameStates.Menu
 
             Target.MenuItemActivated += (o, e) =>
             {
-                if (e.MenuElement == NewGameItem)
+                if (e.MenuElement == Replays)
+                {
+                    GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new ReplayMenuPopulator(Target));
+                    pOwner.CurrentState = MenuState.CreateOutroState(pOwner, pOwner.CurrentState, gms);
+                    Target.ActivatedItem = null;
+                }
+                else if (e.MenuElement == NewGameItem)
                 {
                     GenericMenuState gms = new GenericMenuState(Target.BG, pOwner, new NewGameMenuPopulator(Target));
                     pOwner.CurrentState = MenuState.CreateOutroState(pOwner, pOwner.CurrentState, gms);
@@ -151,7 +157,7 @@ namespace BASeTris.GameStates.Menu
                     pOwner.CurrentState = MenuState.CreateOutroState(pOwner, themestate);
                     Target.ActivatedItem = null;
                 }
-                else if (e.MenuElement == TestReplay)
+                /*else if (e.MenuElement == TestReplay)
                 {
                     if (pOwner is IGamePresenter igp)
                     {
@@ -161,7 +167,7 @@ namespace BASeTris.GameStates.Menu
                     }
 
 
-                }
+                }*/
 
 
 
@@ -172,7 +178,7 @@ namespace BASeTris.GameStates.Menu
             
             Target.HeaderTypeface = FontSrc.FontFamily.Name;
             Target.HeaderTypeSize = (float)(28f*pOwner.ScaleFactor);
-            foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,Controls,RealHighScoresItem, BGDesign, ExitItem})
+            foreach(var iterate in new [] { NewGameItem,OptionsItem,scaleitem,Controls,RealHighScoresItem, BGDesign,Replays, ExitItem})
             {
                 iterate.FontFace = FontSrc.FontFamily.Name;
                 iterate.FontSize = FontSrc.Size;
@@ -196,7 +202,7 @@ namespace BASeTris.GameStates.Menu
             DesiredCategory = Category;
         }
 
-        public void PopulateMenu(GenericMenuState Target, IStateOwner pOwner)
+        public virtual void PopulateMenu(GenericMenuState Target, IStateOwner pOwner)
         {
             if (DesiredCategory == null)
                 Target.StateHeader = "Select Game Type";
@@ -359,7 +365,81 @@ namespace BASeTris.GameStates.Menu
 
         }
     }
+    public class ReplayMenuPopulator : HandlerSelectionPopulator
+    {
+        
+        private class ReplayMenuItem
+        {
+            public String Text;
+            public String FullPath;
+            public ReplayMenuItem(String pText, String pFullPath)
+            {
+                Text = pText;
+                FullPath = pFullPath;
+            }
+            public override string ToString()
+            {
+                return Text;
+            }
+        }
+        protected Dictionary<Type, List<String>> TypeReplayFiles = new Dictionary<Type, List<string>>();
+       
+        public ReplayMenuPopulator(GameState ReversionState, String Category = null) : base(ReversionState, Category)
+        {
+            var allHandlers = Program.GetGameHandlers();
+            foreach (var iterateHandler in allHandlers)
+            {
+                List<String> Replays = GameplayRecord.GetHandlerReplayFiles(iterateHandler).ToList();
+                if(Replays.Count>0)
+                    TypeReplayFiles.Add(iterateHandler, Replays);
+            }
+
+            base.AllowHandler = (h) =>
+            {
+                return TypeReplayFiles.ContainsKey(h);
+            };
+
+            base.HandlerChosenAction = (Target, pOwner, useHandler) =>
+            {
+                //when a handler is chosen, we want to show a list of the replays to choose from.
+
+                //we use the SimpleMenuPopulator here, using a Tuple for the objects.
+
+
+                var BuildList = TypeReplayFiles[useHandler.GetType()].Select((r) => new ReplayMenuItem(Path.GetFileNameWithoutExtension(r), r));
+
+                List<Object> ObjectList = new List<object>(BuildList);
+
+
+                GenericMenuState SubReplayListing = new GenericMenuState(Target.BG, pOwner, new SimpleMenuPopulator(Target, ObjectList, (o) =>
+                {
+                    //load the replay data, and then play the replay...
+                    ReplayMenuItem rmi = o as ReplayMenuItem;
+                    GameplayRecord gpr = GameplayRecord.ReadFromFile(pOwner,rmi.FullPath,out var _GeneratedMinos);
+                    if (pOwner is IGamePresenter igp)
+                    {
+
+                        var statefunc = igp.GetPresenter().ReplayStateCreator(new GameReplayOptions() { Settings = pOwner.Settings, GameplayRecord = gpr,GeneratedMinos = _GeneratedMinos });
+                        pOwner.CurrentState = statefunc();
+                        Target.ActivatedItem = null;
+                    }
+
+
+                }));
+                SubReplayListing.StateHeader = "Replays - " + useHandler.Name;
+
+                pOwner.CurrentState = SubReplayListing;
+                Target.ActivatedItem = null;
+
+                
+
+            };
+        }
+        
+    }
+
     
+
     public class NewGameMenuPopulator : HandlerSelectionPopulator
     {
         public NewGameMenuPopulator(GameState ReversionState, String Category = null) : base(ReversionState, Category)
@@ -405,9 +485,61 @@ namespace BASeTris.GameStates.Menu
         }
     }
 
-    
 
 
+    public class SimpleMenuPopulator : IMenuPopulator
+    {
+        private List<Object> MenuItems = new List<object>();
+        private Dictionary<MenuStateMenuItem, Object> ItemObjects = new Dictionary<MenuStateMenuItem, object>();
+        Action<Object> ItemChosen = null;
+        private GameState ReversionState = null;
+        public SimpleMenuPopulator(GameState pReversionState, List<Object> Items,Action<Object> OnSelectedItem)
+        {
+            ReversionState = pReversionState;
+            ItemChosen = OnSelectedItem;
+            MenuItems.AddRange(Items);
+            
+        }
+        public void PopulateMenu(GenericMenuState Target, IStateOwner pOwner)
+        {
+
+            var kvpset = MenuItems.Select((i) => (new MenuStateTextMenuItem() { Text = i.ToString() }, i));
+            var ReturnItem = new MenuStateTextMenuItem() { Text = "Return" };
+            var FontSrc = TetrisGame.GetRetroFont(20, 1.0f);
+
+            ReturnItem.FontFace = FontSrc.FontFamily.Name;
+            ReturnItem.FontSize = FontSrc.Size;
+
+            foreach (var k in kvpset)
+            {
+                k.Item1.FontFace = FontSrc.FontFamily.Name;
+                k.Item1.FontSize = FontSrc.Size;
+
+
+                ItemObjects.Add(k.Item1, k.Item2);
+                Target.MenuElements.Add(k.Item1);
+
+            }
+            Target.MenuElements.Add(ReturnItem);
+
+            Target.MenuItemActivated += (o, e) =>
+                {
+                    if (e.MenuElement == ReturnItem)
+                    {
+                        e.Owner.CurrentState = ReversionState;
+                    }
+                    else
+                    {
+                        if (ItemObjects.ContainsKey(e.MenuElement))
+                        {
+                            ItemChosen(ItemObjects[e.MenuElement]);
+                        }
+                    }
+                };
+
+        }
+
+    }
     public class OptionsMenuPopulator : IMenuPopulator
     {
         //right now a copy of the title menu...

@@ -159,17 +159,38 @@ namespace BASeTris
         public TetrisStatistics()
         {
         }
-        public TetrisStatistics(XElement pSource, Object pContext)
+        public TetrisStatistics(XElement pSource, Object pContext):base(pSource,pContext)
         {
+
+            XElement PieceCountElement = pSource.Element("PieceCounts");
+            XElement PieceCountExtendedElement = pSource.Element("PieceCountsExtended");
+            XElement LineCountElement = pSource.Element("LineCounts");
+            XElement LineCountExtendedElement = pSource.Element("LineCountExtended");
+
+            Dictionary<String,int> PieceCountElementData = StandardHelper.ReadDictionary<string, int>(PieceCountElement, pContext);
+            Dictionary<String, int> LineCountElementData = StandardHelper.ReadDictionary<string, int>(LineCountElement, pContext);
+            //convert the String type names to Types and recreate the PieceCounts Dictionary.
+            PieceCounts = new Dictionary<Type, int>(from d in PieceCountElementData select new KeyValuePair<Type, int>(StandardHelper.ClassFinder(d.Key), d.Value));
+            LineCounts = new Dictionary<Type, int>(from d in LineCountElementData select new KeyValuePair<Type, int>(StandardHelper.ClassFinder(d.Key), d.Value));
+            PieceCountsExtended = StandardHelper.ReadDictionary<string, int>(PieceCountExtendedElement, pContext);
+            LineCountsExtended = StandardHelper.ReadDictionary<string, int>(LineCountExtendedElement, pContext);
+            
+            
+
+            
+
 
         }
         public override XElement GetXmlData(String pNodeName, Object pContext)
         {
             XElement result = base.GetXmlData(pNodeName, pContext);
-            
-            XElement PieceCountElement = StandardHelper.SaveDictionary<Type,int>(PieceCounts, "PieceCounts",pContext);
+
+            Dictionary<String, int> PieceCountElementData = new Dictionary<string, int>(from d in PieceCounts select new KeyValuePair<string, int>(d.Key.FullName, d.Value));
+            Dictionary<string, int> LineCountElementData = new Dictionary<string, int>(from d in LineCounts select new KeyValuePair<string, int>(d.Key.FullName, d.Value));
+
+            XElement PieceCountElement = StandardHelper.SaveDictionary<string,int>(PieceCountElementData, "PieceCounts",pContext);
             XElement PieceCountExtendedElement = StandardHelper.SaveDictionary<String, int>(PieceCountsExtended, "PieceCountsExtended", pContext);
-            XElement LineCountElement = StandardHelper.SaveDictionary<Type, int>(LineCounts, "LineCounts", pContext);
+            XElement LineCountElement = StandardHelper.SaveDictionary<string, int>(LineCountElementData, "LineCounts", pContext);
             XElement LineCountElementExtended = StandardHelper.SaveDictionary<String, int>(LineCountsExtended, "LineCountExtended", pContext);
 
             result.Add(PieceCountElement, PieceCountExtendedElement, LineCountElement, LineCountElementExtended);
