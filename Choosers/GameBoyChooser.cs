@@ -18,10 +18,10 @@ namespace BASeTris.Choosers
             roll = 6 * _Available.Length - 3;
         }
 
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
             id = (id + (rgen.Next(roll) / 5) + 1) % _Available.Length;
-            return _Available[id]();
+            return _Available[id];
         }
     }
 }

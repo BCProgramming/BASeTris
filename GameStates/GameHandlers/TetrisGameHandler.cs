@@ -137,7 +137,7 @@ namespace BASeTris.GameStates.GameHandlers
             int useSeed = PrepInstance != null ? PrepInstance.RandomSeed : Environment.TickCount;
             if (DesiredChooserType == typeof(BagChooser))
             {
-                BagChooser bc = new BagChooser(Tetromino.StandardTetrominoFunctions,useSeed);
+                BagChooser bc = new BagChooser(Tetromino.StandardTetrominoFunctions,useSeed,5);
                 
                 return bc;
             }

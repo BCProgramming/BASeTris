@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -91,6 +92,15 @@ namespace BASeTris.Rendering.Adapters
         public static bool operator !=(BCPoint first, BCPoint other)
         {
             return first.X != other.X || first.Y != other.Y;
+        }
+        public override bool Equals([NotNullWhen(true)] object? obj)
+        {
+            
+            return this == ((BCPoint)obj);
+        }
+        public override int GetHashCode()
+        {
+            return _SKPoint.GetHashCode();
         }
     }
 

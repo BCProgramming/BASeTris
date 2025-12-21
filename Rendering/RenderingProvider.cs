@@ -23,7 +23,7 @@ namespace BASeTris.Rendering
 {
    public class RenderingProvider : BASeCamp.Rendering.RenderingProvider<IStateOwner>
     {
-        public static RenderingProvider Static = new RenderingProvider();
+        public new static RenderingProvider Static = new RenderingProvider();
         public void DrawStateStats(IStateOwner pOwner, Object Target, Object Element, Object ElementData)
         {
             var Handler = GetHandler(Target.GetType(), Element.GetType(), ElementData.GetType());

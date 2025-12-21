@@ -17,13 +17,13 @@ namespace BASeTris.Choosers
             WeightFunction = pWeightFunction;
 
         }
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
 
             float[] BuildWeights = (from i in Choosers select WeightFunction(i)).ToArray();
 
             var resultvalue = RandomHelpers.Static.Select(Choosers, BuildWeights,this.rgen);
-            return resultvalue.RetrieveNext();
+            return resultvalue.GetNextFunc();
             
 
         }

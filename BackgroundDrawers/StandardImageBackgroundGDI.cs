@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿#nullable enable
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using BASeTris.AssetManager;
@@ -58,8 +59,8 @@ namespace BASeTris.BackgroundDrawers
     public class StandardImageBackgroundDrawGDICapsule : BackgroundDrawData
     {
 
-        public Image _BackgroundImage = null;
-        public Image BackgroundImage
+        public Image? _BackgroundImage = null;
+        public Image? BackgroundImage
         {
             get { return _BackgroundImage; }
             set
@@ -73,8 +74,8 @@ namespace BASeTris.BackgroundDrawers
         public float CurrAngle { get; set; } = 0;
         public float AngleSpeed { get; set; } = 0;
         public PointF Movement { get; set; } = new PointF(0, 0);
-        public ImageAttributes theAttributes = null;
-        public TextureBrush BackgroundBrush = null;
+        public ImageAttributes? theAttributes = null;
+        public TextureBrush? BackgroundBrush = null;
 
         public void ResetState()
         {

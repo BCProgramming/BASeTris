@@ -189,7 +189,7 @@ namespace BASeTris
             return HSLColor.RotateHue(Source, useRotation);
 
         }
-        public static void DrawText(Graphics g, Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition, float ShadowXOffset = 5, float ShadowYOffset = 5, StringFormat sf = null)
+        public static void DrawText(Graphics g, Font UseFont, String sText, Brush ForegroundBrush, Brush ShadowBrush, float XPosition, float YPosition, float ShadowXOffset = 5, float ShadowYOffset = 5, StringFormat? sf = null)
         {
             g.DrawText(new DrawTextInformationGDI()
             {
@@ -489,7 +489,7 @@ namespace BASeTris
         }
 
         
-        public static T Choose<T>(IEnumerable<T> ChooseArray,IRandomizer rgen = null)
+        public static T Choose<T>(IEnumerable<T> ChooseArray,IRandomizer? rgen = null)
         {
             if (rgen == null) rgen = TetrisGame.StatelessRandomizer;
             SortedList<double, T> sorttest = new SortedList<double, T>();
@@ -508,17 +508,7 @@ namespace BASeTris
             return sorttest.First().Value;
         }
 
-        public static Image ApplyImageAttributes(Image applyto, ImageAttributes applyattribs)
-        {
-            Image newimage = new Bitmap(applyto.Width, applyto.Height);
-            using (Graphics usegraph = Graphics.FromImage(newimage))
-            {
-                usegraph.DrawImage(applyto, new Rectangle(0, 0, applyto.Width, applyto.Height), 0, 0, applyto.Width, applyto.Height, GraphicsUnit.Pixel, applyattribs);
-            }
-
-
-            return newimage;
-        }
+     
 
         private static List<DeletionHelper> QueuedDeletions = new List<DeletionHelper>();
 
@@ -672,7 +662,7 @@ namespace BASeTris
                 sEnder = "th";
             return sNumber + sEnder;
         }
-        public static Dictionary<String, List<SKBitmap>> GetTetrominoBitmapsSK(SKRect Bounds, NominoTheme UseTheme, IBlockGameCustomizationHandler handler,TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<String, List<SKBitmap>> GetTetrominoBitmapsSK(SKRect Bounds, NominoTheme UseTheme, IBlockGameCustomizationHandler handler,TetrisField? PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<String, List<SKBitmap>> TetrominoImages = new Dictionary<String, List<SKBitmap>>();
             float useSize = 18 * ScaleFactor;
@@ -705,7 +695,7 @@ namespace BASeTris
             return Result.ToArray();
 
         }
-        public static Dictionary<String, List<Image>> GetTetrominoBitmaps(RectangleF Bounds, NominoTheme UseTheme,IBlockGameCustomizationHandler Handler, TetrisField PlayField = null, float ScaleFactor = 1)
+        public static Dictionary<String, List<Image>> GetTetrominoBitmaps(RectangleF Bounds, NominoTheme UseTheme,IBlockGameCustomizationHandler Handler, TetrisField? PlayField = null, float ScaleFactor = 1)
         {
             Dictionary<String, List<Image>> TetrominoImages = new Dictionary<String, List<Image>>();
             float useSize = 18 * ScaleFactor;

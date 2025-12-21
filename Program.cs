@@ -128,13 +128,29 @@ namespace BASeTris
         private static String HolePiece = @"###
 # #
 ###";
+        private static String radixvalues = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private static string to_base(int number, int radix)
+        {
+            return new string(to_base_internal(number, radix).Reverse().ToArray());
+        }
 
+        private static IEnumerable<char> to_base_internal(int number, int radix)
+        {
+            while (number > 0)
+            {
+                yield return radixvalues[number % radix];
+                number = number / radix;
+            }
+        }
+       
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+           
+           
             //TestAI();
             //return;
             //Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());
@@ -529,7 +545,7 @@ namespace BASeTris
 
 
         }
-        private static NominoBlock?[][] StringToBlocks(String input)
+        private static NominoBlock[][] StringToBlocks(String input)
         {
             String[] Lines = input.Split('\n');
             NominoBlock?[][] Result = new NominoBlock[Lines.Length][];

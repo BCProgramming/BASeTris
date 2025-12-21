@@ -15,10 +15,10 @@ namespace BASeTris.Choosers
         }
 
 
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
             int RandomIndex = rgen.Next(_Available.Length);
-            return _Available[RandomIndex]();
+            return _Available[RandomIndex];
         }
     }
     [ChooserCompatibility(typeof(StandardTetrisHandler))]
@@ -30,11 +30,11 @@ namespace BASeTris.Choosers
         }
 
 
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
             if (currentindex == _Available.Length) currentindex = 0;
             
-            return _Available[currentindex++]();
+            return _Available[currentindex++];
             
         }
     }

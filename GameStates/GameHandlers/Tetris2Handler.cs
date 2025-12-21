@@ -56,7 +56,7 @@ namespace BASeTris.GameStates.GameHandlers
     [HandlerOptionsMenu(typeof(Tetris2OptionsHandler))]
     [HandlerMenuCategory("Tetris 2")]
     [HandlerTipText("Tetris 2")]
-    public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>,IGameHandlerChooserInitializer
+    public class Tetris2Handler : CascadingPopBlockGameHandler<Tetris2Statistics, Tetris2GameOptions>,IGameHandlerChooserInitializer,IReplayInputAcceptor
     {
         private BlockGroupChooser _Chooser = null;
         private String CurrentChooserValue = "Default";
@@ -133,11 +133,20 @@ namespace BASeTris.GameStates.GameHandlers
             //likely will need to have stats and stuff abstracted to each Handler.
             state.PlayField.Reset();
 
+            //too paths here: if we have a queue of Fieldstates that is not empty, we want to use the next one. Otherwise, we want to generate it.
+            //However... we want this to be shared between the cascading block elements, so may need to refactor things tad....
+
             LineSeriesGameFieldInitializerParameters _InitParams = new LineSeriesGameFieldInitializerParameters(Level, GetValidPrimaryCombiningTypes()) { DoShinyBlocks = true,GetCriticalMassFunc = (a)=>3 };
 
             LineSeriesGameFieldInitializer fieldinit = new LineSeriesGameFieldInitializer(this, _InitParams);
             fieldinit.Initialize(state.PlayField);
             PrimaryBlockCount = state.PlayField.AllContents().Count((y) => y != null);
+
+            //save a replay injected tag with the field state.
+            GameplayRecordFieldStateElement StateElement = new GameplayRecordFieldStateElement(state.PlayField);
+            //inject into Replay
+
+            pOwner.GameRecorder.AddRecord(StateElement);
 
             DrMarioVirusAppearanceState appearstate = new DrMarioVirusAppearanceState(state);
             pOwner.CurrentState = appearstate;
@@ -172,6 +181,15 @@ namespace BASeTris.GameStates.GameHandlers
                 return frc;
             }
             return null;
+        }
+        Queue<GameplayRecordFieldStateElement> LevelFieldStates = null;
+        public void AcceptElement(GameplayRecordElement Element)
+        {
+            if(LevelFieldStates==null) LevelFieldStates =  new Queue<GameplayRecordFieldStateElement>(); 
+            if (Element is GameplayRecordFieldStateElement fs)
+            {
+                LevelFieldStates.Enqueue(fs);
+            }
         }
     }
 }

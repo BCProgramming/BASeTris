@@ -11,9 +11,12 @@ namespace BASeTris.BackgroundDrawers
         public class CompositeData
         {
             public IBackground Background { get; init; }
-
+            public CompositeData(IBackground bg)
+            {
+                Background = bg;
+            }
         }
-        public CompositeData[] Backgrounds = null;
+        public CompositeData[] Backgrounds;
         public CompositeDrawData(params CompositeData[] pBackgrounds)
         {
             Backgrounds = pBackgrounds;

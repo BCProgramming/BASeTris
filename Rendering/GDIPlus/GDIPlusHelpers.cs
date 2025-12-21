@@ -107,5 +107,16 @@ namespace BASeTris.Rendering.GDIPlus
 
             return result;
         }
+           public static Image ApplyImageAttributes(Image applyto, ImageAttributes applyattribs)
+        {
+            Image newimage = new Bitmap(applyto.Width, applyto.Height);
+            using (Graphics usegraph = Graphics.FromImage(newimage))
+            {
+                usegraph.DrawImage(applyto, new Rectangle(0, 0, applyto.Width, applyto.Height), 0, 0, applyto.Width, applyto.Height, GraphicsUnit.Pixel, applyattribs);
+            }
+
+
+            return newimage;
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace BASeTris.Choosers.AIChoosers
         {
             if (AIWorker != null)
             {
-                AIWorker.Abort();
+                AIWorker.Interrupt();
                 AIWorker = null;
             }
         }
@@ -61,6 +61,9 @@ namespace BASeTris.Choosers.AIChoosers
             catch (ThreadAbortException tae)
             {
             }
+            catch (ThreadInterruptedException)
+            {
+            }
         }
 
 
@@ -69,7 +72,7 @@ namespace BASeTris.Choosers.AIChoosers
         protected ConcurrentQueue<Nomino> WorkQueue = new ConcurrentQueue<Nomino>();
         public abstract Nomino PerformGetNext();
 
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
             if (AIWorker == null)
             {
@@ -89,7 +92,7 @@ namespace BASeTris.Choosers.AIChoosers
                 Thread.Sleep(15);
             }
 
-            return getresult;
+            return ()=>getresult;
         }
    
     }

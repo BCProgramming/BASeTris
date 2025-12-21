@@ -70,7 +70,7 @@ namespace BASeTris.GameStates.GameHandlers
                 FieldColumns = 7
             };
         }
-
+        protected BlockGroupChooser _Chooser { get; set; }
         public BlockGroupChooser CreateSupportedChooser(Type DesiredChooserType)
         {
             int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
@@ -80,8 +80,12 @@ namespace BASeTris.GameStates.GameHandlers
 
         public override BlockGroupChooser GetChooser(IStateOwner pOwner)
         {
+            if (_Chooser == null)
+            {
             int useSeed = PrepInstance == null ? Environment.TickCount : PrepInstance.RandomSeed;
-            return new SingleFunctionChooser(() => new Duomino.Duomino((a) => new Blocks.LineSeriesBlock() { BlockColor = Color.Yellow, Popping = true }) { NoGhost = true, FallSpeed = 0, Y = 6, Flags = Nomino.NominoControlFlags.ControlFlags_DropMove | Nomino.NominoControlFlags.ControlFlags_NoClip },useSeed) ;
+            _Chooser = new SingleFunctionChooser(() => new Duomino.Duomino((a) => new Blocks.LineSeriesBlock() { BlockColor = Color.Yellow, Popping = true }) { NoGhost = true, FallSpeed = 0, Y = 6, Flags = Nomino.NominoControlFlags.ControlFlags_DropMove | Nomino.NominoControlFlags.ControlFlags_NoClip },useSeed) ;    
+            }
+            return _Chooser;
         }
        
         public override GameOverStatistics GetGameOverStatistics(GameplayGameState state, IStateOwner pOwner)
@@ -123,7 +127,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             
             for (int i = 0; i < 3; i++)
-                state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewColumn(pOwner,state, state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
+                state.PlayField.Contents[state.PlayField.RowCount - 1 - i] = GenerateNewRow(pOwner,state, state.PlayField, state.PlayField.RowCount - 1 - i,state.PlayField.ColCount).ToArray();
 
             
         }
@@ -155,7 +159,7 @@ namespace BASeTris.GameStates.GameHandlers
 
             else if (pOwner is IGamePresenter gp)
             {
-                PercentageMove = Math.Max(0.0009d,(1d / 1100d) * ((1d / 60d) / gp.FrameTime)*((double)(Math.Max(1d,(double)BlockPopCount)/10)));
+                PercentageMove = Math.Max(0.0009d,(1d / 1100d) * ((1d / 60d) / gp.FrameTime)*((double)(Math.Max(1d,(double)BlockPopCount)/100)));
             }
             //PercentageMove = 0;
             state.PlayField.OffsetPaint = state.PlayField.OffsetPaint - (float)PercentageMove;
@@ -183,7 +187,7 @@ namespace BASeTris.GameStates.GameHandlers
                     Array.Copy(state.PlayField.Contents[r + 1], state.PlayField.Contents[r], state.PlayField.ColCount);
 
                 }
-                var arraynew = GenerateNewColumn(pOwner,state,state.PlayField, state.PlayField.Contents.Length - 1, state.PlayField.ColCount).ToArray();
+                var arraynew = GenerateNewRow(pOwner,state,state.PlayField, state.PlayField.Contents.Length - 1, state.PlayField.ColCount).ToArray();
 
                 Array.Copy(arraynew, state.PlayField.Contents[state.PlayField.Contents.Length - 1], state.PlayField.ColCount);
                 //move all ActiveGroups -1...
@@ -210,7 +214,7 @@ namespace BASeTris.GameStates.GameHandlers
         {
             return (from y in AllowedTetrisAttackSpawns select (LineSeriesBlock.CombiningTypes)y).ToArray();
         }
-        private IEnumerable<NominoBlock> GenerateNewColumn(IStateOwner pOwner,GameplayGameState state,TetrisField pf,int row,int Count)
+        private IEnumerable<NominoBlock> GenerateNewRow(IStateOwner pOwner,GameplayGameState state,TetrisField pf,int row,int Count)
         {
             
             NominoBlock previouslyyielded = null;

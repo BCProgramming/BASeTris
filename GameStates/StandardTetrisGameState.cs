@@ -172,9 +172,9 @@ namespace BASeTris.GameStates
             }
 
 
-
+            var statisticselement = src.Element("Stats");
             var ci = StatTypeBuild.GetConstructor(new Type[] { typeof(XElement), typeof(Object) });
-            this.GameHandler.Statistics = (BaseStatistics) ci.Invoke(new object[] { src, null });
+            this.GameHandler.Statistics = (BaseStatistics) ci.Invoke(new object[] { statisticselement, null });
 
             long gtimeticks = src.GetAttributeLong("GameTime", 0);
 
@@ -468,7 +468,7 @@ namespace BASeTris.GameStates
         }
         internal bool FieldPrepared = false;
         internal bool FirstRun = false;
-        private StatefulReplay ReplayData = null;
+        //private StatefulReplay ReplayData = null;
        
         private void HandleActiveGroups(IStateOwner pOwner,bool ForceFall = false)
         {
@@ -521,7 +521,7 @@ namespace BASeTris.GameStates
         }
         public override void GameProc(IStateOwner pOwner)
         {
-            if(ReplayData==null) ReplayData = new StatefulReplay();
+            //if(ReplayData==null) ReplayData = new StatefulReplay();
             if (!FirstRun)
             {
                 if (GameOptions.MusicEnabled)
@@ -576,8 +576,9 @@ namespace BASeTris.GameStates
                 GameHandler.Statistics.TotalGameTime = pOwner.FinalGameTime;
                 NextAngleOffset = 0;
                 pOwner.EnqueueAction(() => {
+                    
                     //TODO: Save the replay information for this game with a generated name.
-                    pOwner.GameRecorder.SaveRecordedGame(pOwner,pOwner.GetHandler().GetType());
+                    pOwner?.GameRecorder.SaveRecordedGame(pOwner,pOwner.GetHandler().GetType());
                     pOwner.CurrentState = new GameOverGameState(this,GameHandler.GetGameOverStatistics(this,pOwner)); return false; });
             }
 

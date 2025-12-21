@@ -869,7 +869,7 @@ namespace BASeTris.GameStates.GameHandlers
         }
         //retrieve all blocks adjacent to the one provided, and adjacent to that one, and so on, that pass the test function.
 
-        private IEnumerable<AdjacentResultInfo> GetAdjacent(int Row,int Column,GameplayGameState state, IStateOwner pOwner, Predicate<NominoBlock> TestFunction,HashSet<Point> RecurseList= null)
+        private IEnumerable<AdjacentResultInfo> GetAdjacent(int Row,int Column,GameplayGameState state, IStateOwner pOwner, Predicate<NominoBlock> TestFunction,HashSet<Point>? RecurseList= null)
         {
             if (RecurseList == null) RecurseList = new HashSet<Point>();
             if (RecurseList.Contains(new Point(Column, Row))) yield break;
@@ -1103,6 +1103,11 @@ namespace BASeTris.GameStates.GameHandlers
 
         GameOptions IBlockGameCustomizationHandler.GameOptions => this.GameOptions;
 
+        //work to do here: we need to handle replays. This requires that we:
+        //1. Be able to save the new field state we construct, and slap it into the current replay data via a manual recording element
+        //2. Be able to somehow retrieve said replay packet that was part of data being replayed.
+
+        //1 is pretty straightforward; 2 we'll need to interoperate with customizations.
         public virtual void PrepareField(GameplayGameState state, IStateOwner pOwner)
         {
             //likely will need to have stats and stuff abstracted to each Handler.

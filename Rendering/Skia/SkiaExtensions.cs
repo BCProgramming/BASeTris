@@ -154,6 +154,9 @@ void main() {
         public static void DrawTextSK(this SKCanvas Target, String pText, SKPoint Position, SKTypeface typeface, SKColor Color, float DesiredSize, double ScaleFactor)
         {
             var rBytes = UTF8Encoding.Default.GetBytes(pText.ToCharArray());
+
+            var makefont = new SKFont(TetrisGame.RetroFontSK, (float)(DesiredSize * ScaleFactor));
+
             using (SKPaint skp = new SKPaint())
             {
                 skp.Color = Color;
@@ -166,7 +169,7 @@ void main() {
                 skp.SubpixelText = true;
                 Target.DrawText(rBytes, Position.X, Position.Y, skp);
             }
-
+            
             //SkiaCanvas.DrawText(UTF8Encoding.Default.GetBytes("testing".ToCharArray()), 67, 67, skp);
 
 

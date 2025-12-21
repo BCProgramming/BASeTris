@@ -195,7 +195,7 @@ namespace BASeTris.GameStates.Menu
         public delegate void HandlerAction(GenericMenuState Target, IStateOwner pOwner, IBlockGameCustomizationHandler useHandler);
         protected HandlerAction HandlerChosenAction = null;
         protected HandlerPredicate AllowHandler = null;
-        public HandlerSelectionPopulator(GameState ReversionState,String Category = null,HandlerAction pHandlerChosenAction = null)
+        public HandlerSelectionPopulator(GameState ReversionState,String? Category = null,HandlerAction? pHandlerChosenAction = null)
         {
             HandlerChosenAction = pHandlerChosenAction;
             RevertState = ReversionState;
@@ -384,7 +384,7 @@ namespace BASeTris.GameStates.Menu
         }
         protected Dictionary<Type, List<String>> TypeReplayFiles = new Dictionary<Type, List<string>>();
        
-        public ReplayMenuPopulator(GameState ReversionState, String Category = null) : base(ReversionState, Category)
+        public ReplayMenuPopulator(GameState ReversionState, String? Category = null) : base(ReversionState, Category)
         {
             var allHandlers = Program.GetGameHandlers();
             foreach (var iterateHandler in allHandlers)
@@ -442,7 +442,7 @@ namespace BASeTris.GameStates.Menu
 
     public class NewGameMenuPopulator : HandlerSelectionPopulator
     {
-        public NewGameMenuPopulator(GameState ReversionState, String Category = null) : base(ReversionState, Category)
+        public NewGameMenuPopulator(GameState ReversionState, String? Category = null) : base(ReversionState, Category)
         {
             //for a new game when an item is selected we want to start a new game. Well, I suppose that ought to be obvious.
             base.HandlerChosenAction = (Target, pOwner, usehandler) =>

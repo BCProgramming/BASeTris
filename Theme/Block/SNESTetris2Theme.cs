@@ -56,6 +56,7 @@ namespace BASeTris.Theme.Block
 
       
         public override string Name => "Tetris 3 SNES";
+        public bool LevelColorShift = false;
         protected override string GetImageKeyBase()
         {
             return "Tetris_3";
@@ -73,24 +74,29 @@ namespace BASeTris.Theme.Block
 
             // return base.GetGroupBlockColor(GameHandler, Field, Reason, Group);
 
-            //base is standard Mino colors for tetris.
-            if (ColorShifts == null) ColorShifts = GetAllColorShiftDictionaries(StandardColors);
-
-           
-                var getresult = base.GetGroupBlockColor(GameHandler,Field,Reason,Group);
-            var usereplacement = ColorShifts[Field.Level % ColorShifts.Length];
-                return new BlockColorInformation(getresult.SolidColor.Value) { ColorMapping = usereplacement};
-
-            if (false || Group is Tetromino_T)
+            if (LevelColorShift)
             {
-                var result = base.GetGroupBlockColor(GameHandler,Field,Reason,Group);
-                ShiftColorReplacement.SolidColor = result.SolidColor;
-                return new BlockColorInformation(result.SolidColor.Value) { ColorMapping = ShiftColorReplacement.ColorMapping };
+                //base is standard Mino colors for tetris.
+                if (ColorShifts == null) ColorShifts = GetAllColorShiftDictionaries(StandardColors);
 
+
+                var getresult = base.GetGroupBlockColor(GameHandler, Field, Reason, Group);
+                var usereplacement = ColorShifts[Field.Level % ColorShifts.Length];
+                return new BlockColorInformation(getresult.SolidColor.Value) { ColorMapping = usereplacement };
             }
             else
             {
-                return base.GetGroupBlockColor(GameHandler,Field,Reason,Group);
+                if (false || Group is Tetromino_T)
+                {
+                    var result = base.GetGroupBlockColor(GameHandler, Field, Reason, Group);
+                    ShiftColorReplacement.SolidColor = result.SolidColor;
+                    return new BlockColorInformation(result.SolidColor.Value) { ColorMapping = ShiftColorReplacement.ColorMapping };
+
+                }
+                else
+                {
+                    return base.GetGroupBlockColor(GameHandler, Field, Reason, Group);
+                }
             }
            
         }

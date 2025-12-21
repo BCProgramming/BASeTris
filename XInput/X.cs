@@ -33,7 +33,7 @@ namespace XInput.Wrapper
 
         #region // Polling Loop /////////////////////////////////////////////////////////////////////////////
 
-        public static void StartPolling(Gamepad slot0, Gamepad slot1 = null, Gamepad slot2 = null, Gamepad slot3 = null)
+        public static void StartPolling(Gamepad slot0, Gamepad? slot1 = null, Gamepad? slot2 = null, Gamepad? slot3 = null)
         {
             List<Gamepad> updateSlots = new List<Gamepad>();
             updateSlots.Add(slot0);
@@ -384,7 +384,7 @@ namespace XInput.Wrapper
 
 
             public event EventHandler ConnectionChanged;
-            protected virtual void __OnConnectionChanged(object o)
+            protected virtual void __OnConnectionChanged(object? o)
             {
                 EventHandler pceh = ConnectionChanged;
                 pceh?.Invoke(this, EventArgs.Empty);
@@ -399,7 +399,7 @@ namespace XInput.Wrapper
             }
 
             public event EventHandler StateChanged;
-            protected virtual void __OnStateChanged(object o)
+            protected virtual void __OnStateChanged(object? o)
             {
                 EventHandler pceh = StateChanged;
                 pceh?.Invoke(this, EventArgs.Empty);
@@ -414,7 +414,7 @@ namespace XInput.Wrapper
             }
 
             public event EventHandler KeyDown;
-            protected virtual void __OnKeyDown(object o)
+            protected virtual void __OnKeyDown(object? o)
             {
                 EventHandler pceh = KeyDown;
                 pceh?.Invoke(this, EventArgs.Empty);

@@ -179,7 +179,7 @@ namespace BASeTris
             //return base.GetNominoKey(Group, GameHandler, Field);
         }
 
-        public abstract void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field, ThemeApplicationReason Reason);
+        public abstract void ApplyTheme(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField? Field, ThemeApplicationReason Reason);
         public abstract void ApplyRandom(Nomino Group, IBlockGameCustomizationHandler GameHandler, TetrisField Field);
         public virtual MarginInformation GetDisplayMargins()
         {
@@ -228,7 +228,7 @@ namespace BASeTris
         {
             return pKey + "(" + pSize.Width + "," + pSize.Height + ")[" + pColor.R + "," + pColor.G + "," + pColor.B + "]";
         }
-        public static NominoTheme GetNewThemeInstanceByName(String sThemeName,Type HandlerType=null)
+        public static NominoTheme GetNewThemeInstanceByName(String sThemeName,Type? HandlerType=null)
         {
             //given a Theme name, finds the Theme with that name and returns a new instance of that NominoTheme.
             foreach (Type t in Program.DITypes[typeof(NominoTheme)].ManagedTypes)

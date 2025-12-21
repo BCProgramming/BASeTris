@@ -91,7 +91,7 @@ namespace BASeTris.Rendering.Skia.GameStates
             double YOffset = SecondBound.Top + SecondBound.Height / 2;
             double CircleRadius = (SecondBound.Width / 2 * 5) * (1 - Millis);
 
-            using (SKPath path = new SKPath() {    FillType = SKPathFillType.Winding, Convexity = SKPathConvexity.Concave })
+            using (SKPath path = new SKPath() {    FillType = SKPathFillType.Winding })
             {
                 
 

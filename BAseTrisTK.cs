@@ -211,7 +211,7 @@ namespace BASeTris
         {
             FireGameClosing();
             if (_Present.GameThread != null)
-                _Present.GameThread.Abort();
+                _Present.GameThread.Interrupt();
             if (_Present.InputThread != null)
             {
                 //_Present.InputThread.Abort();

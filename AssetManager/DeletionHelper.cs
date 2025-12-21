@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -33,7 +34,7 @@ namespace BASeTris.AssetManager
             IntPtr hTemplateFile
         );
 
-        SafeFileHandle FileHandle = null;
+        SafeFileHandle? FileHandle = null;
 
         public DeletionHelperAPI(String FileOrFolder)
         {
@@ -97,7 +98,7 @@ namespace BASeTris.AssetManager
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern bool MoveFileEx(
             string lpExistingFileName,
-            string lpNewFileName,
+            string? lpNewFileName,
             MoveFileFlags dwFlags);
 
         public static void QueueDeletion(String FileOrDir)

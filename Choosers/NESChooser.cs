@@ -29,7 +29,7 @@ namespace BASeTris.Choosers
             roll = _Available.Length + 1;
         }
 
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
             int id = rgen.Next(roll);
             if (id == prev || id == _Available.Length)
@@ -38,7 +38,7 @@ namespace BASeTris.Choosers
             }
 
             prev = id;
-            return _Available.ElementAt(id)();
+            return _Available.ElementAt(id);
         }
     }
 }

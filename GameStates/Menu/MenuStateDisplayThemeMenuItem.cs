@@ -29,7 +29,6 @@ namespace BASeTris.GameStates.Menu
 
         public static IEnumerable<MenuStateThemeSelection> GetThemeSelectionsForHandler(Type HandlerType)
         {
-
             var themetypes = Program.GetHandlerThemes(HandlerType);
             foreach(var themeiter in themetypes)
             {

@@ -206,7 +206,7 @@ namespace BASeTris
 
             if (GameThread != null)
             {
-                GameThread.Abort();
+                GameThread.Interrupt();
                 GameThread = null;
             }
             if (option == GameHandlingConstants.Handle_GameThread)
@@ -214,7 +214,7 @@ namespace BASeTris
                 GameThread = new Thread(GameProc);
                 GameThread.Start();
             }
-            if (InputThread != null) InputThread.Abort();
+            if (InputThread != null) InputThread.Interrupt();
             InputThread = new Thread(GamepadInputThread);
             InputThread.Start();
         }
@@ -241,29 +241,36 @@ namespace BASeTris
         private GameState LastFrameState = null;
         private void GameProc()
         {
-            while (true)
+            try
             {
-                if (GameThreadPaused)
+                while (true)
                 {
-                    Thread.Sleep(250);
+                    if (GameThreadPaused)
+                    {
+                        Thread.Sleep(250);
+                    }
+
+
+                    RunNextThreadAction();
+
+                    if (LastFrameState != Game.CurrentState)
+                    {
+                        _Owner.SetDisplayMode(Game.CurrentState.SupportedDisplayMode);
+                    }
+
+                    if (Game.CurrentState != null && !Game.CurrentState.GameProcSuspended)
+                    {
+                        Game.GameProc();
+                    }
+
+                    _Presenter.Present();
+
+                    Thread.Sleep(0);
                 }
-
-
-                RunNextThreadAction();
-
-                if (LastFrameState != Game.CurrentState)
-                {
-                    _Owner.SetDisplayMode(Game.CurrentState.SupportedDisplayMode);
-                }
-
-                if (Game.CurrentState != null && !Game.CurrentState.GameProcSuspended)
-                {
-                    Game.GameProc();
-                }
-
-                _Presenter.Present();
-
-                //Thread.Sleep(1);
+            }
+            catch (ThreadInterruptedException tie)
+            {
+                //if the thread was interrupted we exit out, it was done to get us to abort.
             }
         }
         private bool CheckButtonState(XInput.Wrapper.X.Gamepad.GamepadButtons button, bool flUpState)
@@ -342,9 +349,12 @@ namespace BASeTris
                     CIS.CheckState();
                 }
             }
-            catch(ThreadAbortException)
+            catch (ThreadAbortException)
             {
                 return;
+            }
+            catch (ThreadInterruptedException)
+            {
             }
         }
         

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -192,11 +193,11 @@ namespace BASeTris
             SetScale(1.33333d);
 
         }
-        SKBitmap SkiaBitmap = null;
+        SKBitmap? SkiaBitmap = null;
         
         
         bool XPolling = false;
-        Nomino testBG = null;
+        Nomino? testBG = null;
 
         public void StartGame()
         {
@@ -237,8 +238,8 @@ namespace BASeTris
         }
 
         private Object SkiaLock = new object();
-        private SKBitmap SkiaCanvasBitmap = null;
-        private SKCanvas SkiaCanvas = null;
+        private SKBitmap? SkiaCanvasBitmap = null;
+        private SKCanvas? SkiaCanvas = null;
         private Size LastSize;
         private void RecreateSkiaObjects()
         {
@@ -373,7 +374,7 @@ namespace BASeTris
             {
                 if (_Present.Game.CurrentState is GameplayGameState)
                 {
-                    GameplayGameState gs = _Present.Game.CurrentState as GameplayGameState;
+                    GameplayGameState? gs = _Present.Game.CurrentState as GameplayGameState;
                     NominoBlock[][] inserts = new NominoBlock[4][];
                     for (int i = 0; i < inserts.Length; i++)
                     {
@@ -415,10 +416,10 @@ namespace BASeTris
         private void BASeTris_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (_Present.GameThread != null)
-                _Present.GameThread.Abort();
+                _Present.GameThread.Interrupt();
             if (_Present.InputThread != null)
             {
-                _Present.InputThread.Abort();
+                _Present.InputThread.Interrupt();
             }
 
             if (X.IsAvailable)

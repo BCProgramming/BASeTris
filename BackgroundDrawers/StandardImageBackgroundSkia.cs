@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Drawing;
 using BASeTris.AssetManager;
 using BASeTris.Rendering;
@@ -14,15 +15,15 @@ namespace BASeTris.BackgroundDrawers
 {
     public class StandardImageBackgroundDrawSkiaCapsule : BackgroundDrawData
     {
-        public SKImage _BackgroundImage = null;
-        public SKImage BackgroundImage
+        public SKImage? _BackgroundImage = null;
+        public SKImage? BackgroundImage
         {
             get { return _BackgroundImage; }
 
         }
-        private SKImage LastBitmapCachedFor = null;
-        private SKBitmap LastBitmapCache = null;
-        public SKBitmap BackgroundBitmap
+        private SKImage? LastBitmapCachedFor = null;
+        private SKBitmap? LastBitmapCache = null;
+        public SKBitmap? BackgroundBitmap
         {
             get {
                 if (LastBitmapCache == null || LastBitmapCachedFor != _BackgroundImage)
@@ -40,9 +41,9 @@ namespace BASeTris.BackgroundDrawers
         public float CurrAngle { get; set; } = 0;
         public float AngleSpeed { get; set; } = 0;
         public SKPoint Movement { get; set; } = new SKPoint(0, 0);
-        public SKColorFilter theFilter = null;
-        public SKPaint BackgroundBrush = null;
-        public SKImageFilter PrimaryFilter = null;
+        public SKColorFilter? theFilter = null;
+        public SKPaint? BackgroundBrush = null;
+        public SKImageFilter? PrimaryFilter = null;
         public IVectorMutator<BCPoint> VelocityMutator { get; set; } = new CompositeVectorMutator(new RandomVectorMutator(0)) {AdvanceType = CompositeVectorMutator.MutatorAdvancementType.Random };  //= new RandomVectorMutator(2000);
         //public Func<SKPoint,SKPoint> ChangeVelocityFunction = null;
 
@@ -50,7 +51,7 @@ namespace BASeTris.BackgroundDrawers
         public void ResetState(SKRect DrawBounds)
         {
             if (_BackgroundImage == null) return;
-            SKImageFilter PreTileFilter = null;
+            SKImageFilter PreTileFilter ;
             if (theFilter != null)
             {
                 SKImageFilter si = SKImageFilter.CreateColorFilter(theFilter);
@@ -205,7 +206,7 @@ namespace BASeTris.BackgroundDrawers
                 Bottom = new BorderImageInfo(pBottom);
             }
         }
-        public BorderImageKeyData BorderData { get; set; } = null;
+        public BorderImageKeyData? BorderData { get; set; } = null;
         public StandardImageBackgroundBorderSkia(BorderImageKeyData pBorderData)
         {
             BorderData = pBorderData;
@@ -261,7 +262,7 @@ namespace BASeTris.BackgroundDrawers
         {
             return GetImageBackground(pImage, pMovement, null);
         }
-        public static StandardImageBackgroundSkia GetImageBackground(SKImage pImage, SKPoint pMovement, SKColorFilter filter)
+        public static StandardImageBackgroundSkia GetImageBackground(SKImage pImage, SKPoint pMovement, SKColorFilter? filter)
         {
             var _background = new StandardImageBackgroundSkia();
             _background.Data = new StandardImageBackgroundDrawSkiaCapsule() { _BackgroundImage = pImage, Movement = pMovement };
@@ -277,7 +278,7 @@ namespace BASeTris.BackgroundDrawers
 
             
             var useImage = TetrisGame.Imageman["block_arrangement"];
-            SKImage usebg = null;
+            SKImage usebg;
             if (true || TetrisGame.StatelessRandomizer.NextDouble() > 0.5)
             {
                 NominoTheme chosen = TetrisGame.Choose<Func<NominoTheme>>(NominoTheme.GetVisualizationThemes())();

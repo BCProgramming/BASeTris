@@ -1,8 +1,11 @@
-﻿using System;
+﻿using ManagedBass;
+using ManagedBass.Fx;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -66,6 +69,10 @@ namespace BASeTris.AssetManager
             }
             var playstream = () => maketempostream == 0 ? ActiveStream : maketempostream;
 
+        
+            
+
+
             ManagedBass.Bass.ChannelSetAttribute(playstream(),ManagedBass.ChannelAttribute.Volume , volume);
             
 
@@ -76,8 +83,26 @@ namespace BASeTris.AssetManager
             //ManagedBass.Bass.ChannelSetSync(ActiveStream, ManagedBass.SyncFlags.End |  ManagedBass.SyncFlags.Onetime, 0, soundstopproc, IntPtr.Zero);
             ManagedBass.Bass.ChannelSetAttribute(maketempostream, ManagedBass.ChannelAttribute.Tempo, tempo);
             ManagedBass.Bass.ChannelSetAttribute(maketempostream, ManagedBass.ChannelAttribute.Pitch, pitch);
+            
+
+            /*ManagedBass.Fx.EchoEffect ee = new EchoEffect();
+
+            
+
+            ee.ManyEchoes();
+            ee.ApplyOn(playstream());
+            int effectresult =  ManagedBass.Bass.ChannelSetFX(playstream(), EffectType.Echo, 10);
+            if (effectresult == 0)
+            {
+                var lastbass = Bass.LastError;
+                ;
+            }*/
+
+
 
             var playresult = ManagedBass.Bass.ChannelPlay(playstream(), true);
+
+            
             
             var PlaySoundEntry = new BASSPlayingSound(this,ActiveStream,maketempostream);
             PlayingSounds.Add(PlaySoundEntry);
@@ -127,7 +152,22 @@ namespace BASeTris.AssetManager
         }
 
 
-        public bool Paused { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool
+            Paused
+            {
+                get { return (ManagedBass.Bass.ChannelIsActive(ActiveStream) == ManagedBass.PlaybackState.Paused); }
+                set
+                {
+                    if (value)
+                    {
+                        ManagedBass.Bass.ChannelPause(ActiveStream);
+                    }
+                    else
+                    {
+                        ManagedBass.Bass.ChannelPlay(ActiveStream, false);
+                    }
+                }
+            }
 
         public float Progress
         {

@@ -1,4 +1,5 @@
-﻿using BASeCamp.Elementizer;
+﻿#nullable enable
+using BASeCamp.Elementizer;
 using BASeTris.AssetManager;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.GameHandlers;
@@ -47,16 +48,16 @@ namespace BASeTris.GameStates
         public NominoTheme DisplayedDesignerTheme = new SNESTetrominoTheme();
         public int DesignColumns { get { return _DesignColumns; } set { _DesignColumns = value; RecreateFakeHandler(); } }
         public int DesignRows { get { return _DesignRows; } set { _DesignRows = value; RecreateFakeHandler(); } }
-        public TetrominoCollageRenderer Collage { get; set; } = null;
+        public TetrominoCollageRenderer? Collage { get; set; }
         private void RecreateFakeHandler()
         {
 
             Collage = new TetrominoCollageRenderer(DesignRows, DesignColumns, 500, 500, 0, DisplayedDesignerTheme, SKColors.Transparent);
         }
 
-        public Thread RandomizerThread = null;
+        public Thread? RandomizerThread = null;
 
-        public void RandomizeLayer(int MinimumSize, int MaximumSize,Action CompletionAction = null)
+        public void RandomizeLayer(int MinimumSize, int MaximumSize,Action? CompletionAction = null)
         {
 
 
@@ -83,7 +84,7 @@ namespace BASeTris.GameStates
                 MinoTileGenerator mtg = new MinoTileGenerator();
                 try
                 {
-                    var BuildMinos = mtg.Generate(PositionData, null, DesignBackgroundState.TetrominoTypes.Select<Type, Func<Nomino>>((t) => new Func<Nomino>(() => (Nomino)Activator.CreateInstance(t, new object[] { null }))).ToArray(), null, null, (newlist) =>
+                    var BuildMinos = mtg.Generate(PositionData, null, DesignBackgroundState.TetrominoTypes.Select<Type, Func<Nomino?>>((t) => new Func<Nomino?>(() => (Nomino?)Activator.CreateInstance(t, new object?[] { null }))).ToArray(), null, null, (newlist) =>
                     {
 
                         try
@@ -306,13 +307,13 @@ namespace BASeTris.GameStates
                 if (!IsSelectionValid()) return null;
                 else { return DesignNominoes[SelectedIndex]; }
             } }
-        private MenuState DesignOptionsMenuState = null;
+        private MenuState? DesignOptionsMenuState = null;
         private TetrominoCollageRenderer Collage { get { return CurrentLayer.Collage; } set { CurrentLayer.Collage = value; } }
         //private NominoTheme DisplayedDesignerTheme = new SNESTetrominoTheme();
 
       
 
-        public DesignBackgroundState(IStateOwner pOwner,GameState pRevert,IBackground usebg = null)
+        public DesignBackgroundState(IStateOwner pOwner,GameState pRevert,IBackground? usebg = null)
         {
             DesignOptionsMenuState  = new MenuState(_BG);
             var FontSrc = TetrisGame.GetRetroFont(14, pOwner.ScaleFactor);
@@ -411,7 +412,7 @@ namespace BASeTris.GameStates
                 {
                     //go through all of our layers in REVERSE order.
 
-                    StandardImageBackgroundSkia CurrBuild = null;
+                    StandardImageBackgroundSkia? CurrBuild = null;
 
                     foreach (var layer in this.Layers.Reverse())
                     {
@@ -624,8 +625,8 @@ namespace BASeTris.GameStates
                     using (var getbitmap = CurrentLayer.GetLayerBitmap())
                     {
                         String sTargetFile = Path.Combine(TetrisGame.AppDataFolder, "LayerExport", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss-ffffff") + ".png");
-                        String sDirectory = Path.GetDirectoryName(sTargetFile);
-                        if (!Directory.Exists(sDirectory)) Directory.CreateDirectory(sDirectory);
+                        String? sDirectory = Path.GetDirectoryName(sTargetFile);
+                        if (sDirectory!=null && !Directory.Exists(sDirectory)) Directory.CreateDirectory(sDirectory);
                         using (var data = getbitmap.Encode(SKEncodedImageFormat.Png, 80))
                         {
                             using (var writer = new FileStream(sTargetFile, FileMode.Create))
@@ -673,7 +674,7 @@ namespace BASeTris.GameStates
             DisplayedDesignerTheme.ApplyTheme(EditNomino, Collage.DummyHandler, Collage.Field, NominoTheme.ThemeApplicationReason.Normal);
         }
         private bool _defaultBG = true;
-        IActiveSound DesignMusic = null;
+        IActiveSound? DesignMusic = null;
         public override void GameProc(IStateOwner pOwner)
         {
             if (!flInitialized)
@@ -802,7 +803,7 @@ namespace BASeTris.GameStates
                     var Current = SelectedNomino;
 
                     var FindNext = Current==null?typeof(Tetromino_I): TetrisGame.Successor(TetrominoTypes, Current.GetType());
-                    Nomino ConstructNext = (Nomino)Activator.CreateInstance(FindNext,new Object[] { null });
+                    Nomino? ConstructNext = (Nomino?)Activator.CreateInstance(FindNext,new object?[] { null });
                     ConstructNext.X = Current==null?0:Current.X;
                     ConstructNext.Y = Current == null ? 0 : Current.Y;
                     ApplyTheme(ConstructNext);

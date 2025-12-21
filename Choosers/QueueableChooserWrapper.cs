@@ -13,16 +13,16 @@ namespace BASeTris.Choosers
 
         public int WaitListSize { get; set; } = 50;
 
-        public Queue<Nomino> GeneratedQueue = new Queue<Nomino>();
+        public Queue<Func<Nomino>> GeneratedQueue = new Queue<Func<Nomino>>();
 
-        public Nomino Peek()
+        /*public Nomino Peek()
         {
             return GeneratedQueue.Peek();
-        }
-        public Queue<Nomino> GetQueue()
+        }*/
+        /*public Queue<Nomino> GetQueue()
         {
             return GeneratedQueue;
-        }
+        }*/
         public QueueableChooserWrapper(BlockGroupChooser pComposite) : base(null, 0)
         {
         }
@@ -30,11 +30,11 @@ namespace BASeTris.Choosers
         {
             while (GeneratedQueue.Count < WaitListSize)
             {
-                var compositeresult = Composite.RetrieveNext();
+                var compositeresult = Composite.GetNextFunc();
                 GeneratedQueue.Enqueue(compositeresult);
             }
         }
-        protected override Nomino GetNext()
+        internal override Func<Nomino> GetNextFunc()
         {
             FillQueue();
             return GeneratedQueue.Dequeue();

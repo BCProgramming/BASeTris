@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -13,7 +14,7 @@ namespace BASeTris.AI
     {
         protected IStateOwner _Owner;
         private bool DetachAI = false;
-        private Thread AIThread = null;
+        private Thread? AIThread = null;
         protected Queue<GameState.GameKeys> PressKeyQueue = new Queue<GameState.GameKeys>();
 
         protected BaseAI(IStateOwner pOwner)

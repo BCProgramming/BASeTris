@@ -1,6 +1,8 @@
 ﻿using BASeTris.Choosers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -203,7 +205,86 @@ namespace BASeTris
 
     }
 
-   
+    public class ItemBag<T>
+    {
+       /* private class ItemBagElement<E>
+        {
+            public E Element { get; init; }
+            public bool Permanent { get; init; }
+            public ItemBagElement(E pElement, bool pPermanent)
+            {
+                Element = pElement;
+                Permanent = pPermanent;
+            }
+        }*/
+
+        private T[] InitialItems;
+        private T[] Items;
+        private bool[] Retrieved;
+        public Action<ItemBag<T>> BagEmptyAction = null;
+        public ItemBag(IEnumerable<T> pItems)
+        {
+            InitialItems = Items = pItems.ToArray();
+            Retrieved = new bool[Items.Length];
+        }
+
+        public T Take(IRandomizer rgen)
+        {
+            //get non-retrieved indices.
+            List<int> available = new List<int>();
+            for (int i = 0; i < Items.Length; i++)
+            {
+                if (!Retrieved[i]) available.Add(i);
+            }
+            //if none available, then all are available and we "reset".
+            if (available.Count == 0)
+            {
+                available = Enumerable.Range(0, Retrieved.Length).ToList();
+                this.Reset();
+                BagEmptyAction?.Invoke(this);
+            }
+
+            //select a random index from the available.
+
+            var selectedindex = RandomHelpers.Static.Choose(available, 1, rgen)[0];
+
+            Retrieved[selectedindex] = true;
+            return Items[selectedindex];
+
+
+        }
+        public void Reset()
+        {
+            //reset will reset to how the "bag" was originally.
+            Items = InitialItems;
+            
+            Retrieved = Enumerable.Repeat<bool>(false,Items.Length).ToArray();
+        }
+        public void Add(T Item)
+        {
+            Array.Resize(ref Items, Items.Length+1);
+            Array.Resize(ref Retrieved, Retrieved.Length + 1);
+            Items[Items.Length - 1] = Item;
+            Retrieved[Retrieved.Length - 1] = false;
+        }
+
+    }
+
+    public class BagUnitTest
+    {
+        public void Test()
+        {
+                 ItemBag<int> bagtest = new ItemBag<int>(Enumerable.Range(1, 10));
+            var rx = new DotNetRandomizer();
+            bagtest.BagEmptyAction = (a) => Debug.Print("Bag emptied!");
+
+            for (int i = 0; i < 50; i++)
+            {
+                Debug.Print(bagtest.Take(rx).ToString());
+            }
+            ;
+        }
+    }
 
 
 

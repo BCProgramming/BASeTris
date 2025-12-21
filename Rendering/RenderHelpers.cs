@@ -44,6 +44,8 @@ namespace BASeTris.Rendering
         public static Color MixColor(Color ColorA, Color ColorB)
         {
             return MixColor(ColorA, ColorB, 0.5f);
+            
+            
         }
 
         public static T ClampValue<T>(T Value, T min, T max) where T : IComparable

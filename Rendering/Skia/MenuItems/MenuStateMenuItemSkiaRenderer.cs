@@ -333,7 +333,7 @@ namespace BASeTris.Rendering.Skia.MenuItems
 
         private void FillPoly(SKCanvas Target, SKPoint[] array, SKPaint fill)
         {
-            using (SKPath skp = new SKPath() { FillType = SKPathFillType.Winding,  Convexity = SKPathConvexity.Concave })
+            using (SKPath skp = new SKPath() { FillType = SKPathFillType.Winding})
             {
                 skp.MoveTo(array.First());
                 for (var index = 1; index < array.Length; index++)

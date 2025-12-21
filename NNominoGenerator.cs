@@ -18,14 +18,14 @@ namespace BASeTris
             public NominoElement Source;
             public int  X;
             public int Y;
-            public NominoPoint(int pX, int pY, NominoElement pSource = null)
+            public NominoPoint(int pX, int pY, NominoElement? pSource = null)
             {
                 X = pX;
                 Y = pY;
                 Source = pSource;
                     
             }
-            public static NominoPoint Create(int pX, int pY,NominoElement pSource = null)
+            public static NominoPoint Create(int pX, int pY,NominoElement? pSource = null)
             {
                 return new NominoPoint(pX, pY,pSource);
             }
@@ -33,7 +33,7 @@ namespace BASeTris
             {
                 return X + (Y + (((X + 1) / 2) * ((X + 1) / 2))); //bijective algorithm...
             }
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj is NominoPoint np)
                     return Equals(np);
@@ -218,7 +218,7 @@ namespace BASeTris
                 }
             }
         }
-        public static String StringRepresentation(List<NominoPoint> Points)
+        public static String StringRepresentation(List<NominoPoint> Points,bool IgnoreBlockData = false)
         {
             int MinX = int.MaxValue, MaxX = int.MinValue;
             int MinY = int.MaxValue, MaxY = int.MinValue;
@@ -241,7 +241,7 @@ namespace BASeTris
                     {
                         var getPoint = Points.First((p) => (p.X == xcoord && p.Y == ycoord));
                         sb.Append("#");
-                        if (getPoint.Source != null && getPoint.Source.Block is LineSeriesBlock lsb)
+                        if (getPoint.Source != null && getPoint.Source.Block is LineSeriesBlock lsb && !IgnoreBlockData)
                         {
                             sb.Append("(" + lsb.CombiningIndex + ")");
                         }
@@ -574,7 +574,7 @@ namespace BASeTris
 
 
         }
-        private static bool IsHolePosition((int x, int y) Coordinates, HashSet<(int x, int y)> NominoSpots, HashSet<(int x, int y)> Processpositions,BCPointI MinPos,BCPointI MaxPos, HashSet<(int x, int y)> IgnorePositions = null )
+        private static bool IsHolePosition((int x, int y) Coordinates, HashSet<(int x, int y)> NominoSpots, HashSet<(int x, int y)> Processpositions,BCPointI MinPos,BCPointI MaxPos, HashSet<(int x, int y)>? IgnorePositions = null )
         {
             IgnorePositions = IgnorePositions ?? new HashSet<(int x, int y)>();
             //a hole position is a position that:
@@ -641,22 +641,22 @@ namespace BASeTris
         }
         //the "String Representation" is an effective Hash. Of course the Hash only applies to one rotation, so really, a particular Point Set has three Hashes. One Hash can easily be used for any indexing, but testing against the Hash needs to check all three.
         //or rather: if we handle this in the "generator" that creates tetrominoes, it can simply keep track of those it has already generated, and their three hashes. If it tries to give back one that has a hash that matches any of them, it can just give back the original instead.
-        private static String[] GetHashPointSet(List<NominoPoint> input)
+        private static String[] GetHashPointSet(List<NominoPoint> input,bool IgnoreBlockData = false)
         {
 
             var inputCW = RotateCW(input);
             var inputCW2 = RotateCW(inputCW);
             var inputCW3 = RotateCW(inputCW2);
 
-            return (from j in new[] { inputCW, inputCW2, inputCW3 } select StringRepresentation(j)).ToArray();
+            return (from j in new[] { inputCW, inputCW2, inputCW3 } select StringRepresentation(j,IgnoreBlockData)).ToArray();
         }
-        private static String GetStringForNomino(Nomino src)
+        public static String GetStringForNomino(Nomino src,bool IgnoreBlockData = false)
         {
-            return StringRepresentation(GetNominoPoints(src));
+            return StringRepresentation(GetNominoPoints(src),IgnoreBlockData);
         }
-        private static String[] GetStringsForNomino(Nomino src)
+        public static String[] GetStringsForNomino(Nomino src,bool IgnoreBlockData = false)
         {
-            return GetHashPointSet(GetNominoPoints(src));
+            return GetHashPointSet(GetNominoPoints(src),IgnoreBlockData);
 
         }
         public static String[] GetOtherRotationStrings(List<NominoPoint> Source)
@@ -802,7 +802,7 @@ namespace BASeTris
         //Effectively we'd need a way to indicate multiple directions for the same path. I'd suggest a new "3" place value which indicate that, so 23132 would mean to move Right, then branch both Forward (1) and right from that position recursively.
 
 
-        public static IEnumerable<List<NominoPoint>> GetPieces_Snake(int BlockCount,List<NominoPoint> CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,IRandomizer rgen = null)
+        public static IEnumerable<List<NominoPoint>> GetPieces_Snake(int BlockCount,List<NominoPoint>? CurrentBuild = null,NominoPieceGenerationFlags  GenerationFlags = NominoPieceGenerationFlags.Flag_None,IRandomizer? rgen = null)
         {
             rgen = rgen ?? RandomHelpers.Construct();
             if (CurrentBuild == null) //Starting case, we make two blocks, then recursively call to add to it if needed.

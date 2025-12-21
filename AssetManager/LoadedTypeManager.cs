@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -191,7 +192,7 @@ public interface iManagerCallback
 
         public static VersionInfo GetApplicationVersion()
         {
-            Version ourappver = Assembly.GetCallingAssembly().GetName().Version;
+            Version ourappver = (Assembly.GetCallingAssembly()?.GetName()?.Version)??new Version();
             int mMajor = ourappver.Major;
             int mMinor = ourappver.Minor;
             int mRevision = ourappver.Revision;
@@ -304,7 +305,7 @@ public interface iManagerCallback
                 throw new ArgumentNullException("Failed to resolve assembly named " + _VersionOf);
             }
 
-            VersionInfo actualver = testassembly.GetName().Version;
+            VersionInfo actualver = (testassembly.GetName()?.Version)??new VersionInfo(0,0,0,0);
             if (actualver >= vi)
                 return true;
             else
@@ -319,13 +320,17 @@ public interface iManagerCallback
         {
             foreach (var iterate in typecheck.GetCustomAttributes(typeof(RequiredVersionAttribute), true))
             {
-                RequiredVersionAttribute rva = iterate as RequiredVersionAttribute;
+                RequiredVersionAttribute? rva = iterate as RequiredVersionAttribute;
                 try
                 {
                     if (!rva.SupportsVersion())
                         return false;
                 }
-                catch (ArgumentNullException exx)
+                catch (NullReferenceException)
+                {
+                    return false;
+                }
+                catch (ArgumentNullException)
                 {
                     return false;
                 }
@@ -371,7 +376,7 @@ public interface iManagerCallback
 
         public delegate void TypeManagerLoadProgressCallback(float pprogress);
 
-        private LoadedTypeManager.TypeManagerInspectTypeCallback inspectioncallback = null;
+        private LoadedTypeManager.TypeManagerInspectTypeCallback? inspectioncallback = null;
         public Dictionary<Type, LoadedTypeManager> loadeddata;
         private Assembly[] useassemblies;
 
@@ -385,10 +390,12 @@ public interface iManagerCallback
         public MultiTypeManager(IEnumerable<Assembly> lookassemblies, IEnumerable<Type> typesload,
             iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
             TypeManagerLoadProgressCallback pprog, IEnumerable<Assembly> preloadedassemblies)
-            : this(lookassemblies, typesload, pcallback, TestAssembly, pprog, null, preloadedassemblies)
+            : this(lookassemblies, typesload, pcallback, TestAssembly, pprog,  Default_TypeManagerInspectTypeCallback, preloadedassemblies)
         {
         }
-
+        public static void Default_TypeManagerInspectTypeCallback(Type inspectingType)
+        {
+        }
         public MultiTypeManager(IEnumerable<Assembly> lookassemblies, IEnumerable<Type> typesload,
             iManagerCallback pcallback, AssemblyLoadTestFunction TestAssembly,
             TypeManagerLoadProgressCallback pprog,
@@ -447,7 +454,7 @@ public interface iManagerCallback
                     pcallback.ShowMessage("Inspecting Assembly:" + loopassembly.GetName().Name);
                     //iterate through each type...
                     currprogress += assemblyprogressincrement;
-                    Type[] typesiterate;
+                    Type[]? typesiterate;
                     try
                     {
                         typesiterate = loopassembly.GetTypes();
@@ -457,8 +464,9 @@ public interface iManagerCallback
                         pcallback.ShowMessage
                         ("ReflectionTypeLoadException occured;" + rtle.StackTrace +
                          " InnerExceptions:");
-                        foreach (Exception loopexception in rtle.LoaderExceptions)
+                        foreach (Exception? loopexception in rtle.LoaderExceptions)
                         {
+                            if (loopexception == null) continue;
                             pcallback.ShowMessage
                             ("RTLE Loader Exception:" + loopexception.Message + " Source:" +
                              loopexception.Source + "stack Trace:" + loopexception.StackTrace);
@@ -533,7 +541,7 @@ public interface iManagerCallback
                 if (!loadeddata.ContainsKey(index))
                 {
                     //add it...
-                    loadeddata.Add(index, new LoadedTypeManager(useassemblies, index, null));
+                    loadeddata.Add(index, new LoadedTypeManager(useassemblies, index, new Nullcallback()));
                     //throw new ApplicationException("Type " + index.FullName + " not enumerated...");
                 }
 
@@ -558,7 +566,7 @@ public interface iManagerCallback
                         FileInfo loopfile in
                         new DirectoryInfo(loopfolder).GetFiles("*.dll", SearchOption.TopDirectoryOnly))
                     {
-                        Assembly testassembly = null;
+                        Assembly? testassembly = null;
                         try
                         {
                             if (loopfile.FullName.EndsWith("DragonAdapter.dll", StringComparison.OrdinalIgnoreCase))
@@ -601,7 +609,10 @@ public interface iManagerCallback
 
         private List<Type> _ManagedTypes = new List<Type>();
 
-        public TypeManagerInspectTypeCallback inspectioncallback = null;
+        public TypeManagerInspectTypeCallback inspectioncallback = Default_TypeManagerInspectTypeCallback;
+
+
+
 
         //called for each type.
         private iManagerCallback mcallback = new Nullcallback();
@@ -699,9 +710,11 @@ public interface iManagerCallback
 
         }
         */
-
+        public static void Default_TypeManagerInspectTypeCallback(Type inspectingType)
+        {
+        }
         public LoadedTypeManager(Assembly[] lookassemblies, Type lookfor, iManagerCallback pcallback)
-            : this(lookassemblies, lookfor, null, pcallback)
+            : this(lookassemblies, lookfor, new String[] { }, pcallback)
         {
         }
 
@@ -725,7 +738,7 @@ public interface iManagerCallback
 
         public LoadedTypeManager(Assembly[] lookassemblies, Type lookfor, IEnumerable<string> ignoreassemblynames,
             iManagerCallback pcallback)
-            : this(lookassemblies, lookfor, ignoreassemblynames, pcallback, null)
+            : this(lookassemblies, lookfor, ignoreassemblynames, pcallback, Default_TypeManagerInspectTypeCallback)
         {
         }
 
@@ -766,7 +779,7 @@ public interface iManagerCallback
                 {
                     foreach (FileInfo dllfile in loopfolder.GetFiles("*.dll", SearchOption.TopDirectoryOnly))
                     {
-                        Assembly LoadAssembly = null;
+                        Assembly? LoadAssembly = null;
                         //attempt to load this as an assembly...
                         try
                         {
@@ -868,7 +881,7 @@ public interface iManagerCallback
 
         private void LoadTypes(Assembly[] useassemblies)
         {
-            LoadTypes(useassemblies, null);
+            LoadTypes(useassemblies, new String[] { });
         }
 
         private void LoadTypes(IEnumerable<Assembly> useassemblies, IEnumerable<string> ignoreassemblies)
@@ -907,8 +920,9 @@ public interface iManagerCallback
                         mcallback.ShowMessage
                         ("ReflectionTypeLoadException occured;" + rtle.StackTrace +
                          " InnerExceptions:");
-                        foreach (Exception loopexception in rtle.LoaderExceptions)
+                        foreach (Exception? loopexception in rtle.LoaderExceptions)
                         {
+                            if (loopexception == null) continue;
                             mcallback.ShowMessage
                             ("RTLE Loader Exception:" + loopexception.Message + " Source:" +
                              loopexception.Source + "stack Trace:" + loopexception.StackTrace);
@@ -917,8 +931,9 @@ public interface iManagerCallback
                         mcallback.ShowMessage("End of RTLE Loader Exceptions");
 
                         //continue enumerating.. we could see some of them...
-                        foreach (Type looptype in rtle.Types)
+                        foreach (Type? looptype in rtle.Types)
                         {
+                            if (looptype == null) continue;
                             CountInFile += CheckType(looptype) ? 1 : 0;
                         }
                     }

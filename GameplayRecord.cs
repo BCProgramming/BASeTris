@@ -26,8 +26,11 @@ namespace BASeTris
 
         //in addition to game keys, We need to have a record of all the Minos that were generated (in the case of game types that have choosers- eg Tetris Attack doesn't)
 
-        //further, some game types need to add additional data- for example, Dr.Mario generates a new field for each level, so we'd need to have those sorts of actions generate a record and add it, and we also
-        //will need to have this class delegate processing of actions to the game handler.
+        //game types that need to do additional processing at certain times should create (and handle) appropriate GameplayRecords.
+        //
+        //Tetris Attack, for example, should record when it constructs a new row at the bottom; and then handle that GameplayRecord when replaying, forgoing it's own processing if it is in a replay.
+        //Same for other types, Dr. Mario should record when it creates a new level for example and the contents of such, and instead of generating a level it uses the gameplay record that was provided.
+
         
         List<GameplayRecordElement> Elements = null;
         public List<Nomino> GeneratedMinos = null;
@@ -123,6 +126,11 @@ namespace BASeTris
                 return gree;
             }
             return null;
+        }
+        public void AddRecord(GameplayRecordElement e)
+        {
+            if (Elements == null) Elements = new List<GameplayRecordElement>();
+            Elements.Add(e);
         }
 
         public Queue<GameplayRecordElement> GetPlayQueue()
@@ -274,7 +282,30 @@ namespace BASeTris
         }
     }
 
-    
+    public class GameplayRecordFieldStateElement : GameplayRecordElement
+    {
+        //we store the field data internally as the XElement data.
+        //we force a timespan of zero here, this is so they will always be delivered to the gamestate immediately when the replay starts, then it can construct all the needed data structures
+        //to retrieve the stored field state as needed for each level.
+        public XElement FieldData = null;
+        public GameplayRecordFieldStateElement(TetrisField FieldContent) : base(TimeSpan.Zero)
+        {
+            FieldData = FieldContent.SaveField("Field");
+        }
+        public GameplayRecordFieldStateElement(XElement SourceData, object pContext) : base(SourceData, pContext)
+        {
+            //FieldData is the XElement named Field...
+            XElement fStateElement = SourceData.Element("Field");
+            FieldData = fStateElement;
+        }
+        public override XElement GetXmlData(string pNodeName, object PersistenceData)
+        {
+
+            var BuildElement = base.GetXmlData("FieldState", PersistenceData);
+            BuildElement.Add(FieldData);
+            return BuildElement;
+        }
+    }
     public class GameplayRecordElement : IXmlPersistable
     {
         public TimeSpan Elapsed { get; set; }
@@ -284,73 +315,78 @@ namespace BASeTris
         }
         public GameplayRecordElement(XElement SourceData, Object pContext)
         {
-            Elapsed = TimeSpan.FromTicks(SourceData.GetAttributeLong("Elapsed",0));
+            Elapsed = TimeSpan.FromTicks(SourceData.GetAttributeLong("Elapsed", 0));
         }
 
         public virtual XElement GetXmlData(string pNodeName, object PersistenceData)
         {
-            
+
             return new XElement(pNodeName);
             //throw new NotImplementedException();
         }
+
+        //a element that records the field state. This is designed for use in cases such as Dr.Mario or Tetris 2 for storing what each generated level consists of.
+
     }
-    public class GameplayRecordKeyPressElement:GameplayRecordElement
-    {
-        
-        public GameState.GameKeys GameKey { get; set; }
-        public GameplayRecordKeyPressElement(TimeSpan pElapsed, GameState.GameKeys pKey):base(pElapsed)
+
+        public class GameplayRecordKeyPressElement : GameplayRecordElement
         {
-            
-            GameKey = pKey;
-        }
-        public GameplayRecordKeyPressElement(XElement SourceData, Object pContext):base(SourceData,pContext)
-        {
-            
-            GameKey = (GameState.GameKeys)SourceData.GetAttributeInt("Key",0);
-        }
-        public override XElement GetXmlData(String pNodeName, Object pContext)
-        {
-            return new XElement(pNodeName, new XAttribute("Elapsed", Elapsed.Ticks), new XAttribute("Key", (int)GameKey));
-        }
-    }
-    
-    public class GameplayInitialStateData:IXmlPersistable
-    {
-        public GamePreparerOptions InitialOptions { get; set; } = null;
-        public GameplayInitialStateData(XElement SourceData, Object pContext) 
-        {
-            String PreparerTypeName = SourceData.GetAttributeString("PreparerType", null);
-            if (PreparerTypeName != null)
+
+            public GameState.GameKeys GameKey { get; set; }
+            public GameplayRecordKeyPressElement(TimeSpan pElapsed, GameState.GameKeys pKey) : base(pElapsed)
             {
-                Type prepareType = Type.GetType(PreparerTypeName, false);
-                if (prepareType != null)
+
+                GameKey = pKey;
+            }
+            public GameplayRecordKeyPressElement(XElement SourceData, Object pContext) : base(SourceData, pContext)
+            {
+
+                GameKey = (GameState.GameKeys)SourceData.GetAttributeInt("Key", 0);
+            }
+            public override XElement GetXmlData(String pNodeName, Object pContext)
+            {
+                return new XElement(pNodeName, new XAttribute("Elapsed", Elapsed.Ticks), new XAttribute("Key", (int)GameKey));
+            }
+        }
+
+        public class GameplayInitialStateData : IXmlPersistable
+        {
+            public GamePreparerOptions InitialOptions { get; set; } = null;
+            public GameplayInitialStateData(XElement SourceData, Object pContext)
+            {
+                String PreparerTypeName = SourceData.GetAttributeString("PreparerType", null);
+                if (PreparerTypeName != null)
                 {
-                    ConstructorInfo PersistableConstructor = prepareType.GetConstructor(new Type[] { typeof(XElement), typeof(Object) });
-                    XElement PreparerOptions = SourceData.Element("PreparerOptions");
-                    InitialOptions = (GamePreparerOptions)PersistableConstructor.Invoke(new object[] { PreparerOptions, pContext });
+                    Type prepareType = Type.GetType(PreparerTypeName, false);
+                    if (prepareType != null)
+                    {
+                        ConstructorInfo PersistableConstructor = prepareType.GetConstructor(new Type[] { typeof(XElement), typeof(Object) });
+                        XElement PreparerOptions = SourceData.Element("PreparerOptions");
+                        InitialOptions = (GamePreparerOptions)PersistableConstructor.Invoke(new object[] { PreparerOptions, pContext });
+
+                    }
+
 
                 }
 
 
             }
 
+            public GameplayInitialStateData()
+            {
+            }
 
-        }
+
+            public virtual XElement GetXmlData(string pNodeName, object PersistenceData)
+            {
+                XElement xresult = new XElement(pNodeName);
+
+                xresult.Add(new XAttribute("PreparerType", InitialOptions.GetType().AssemblyQualifiedName));
+                XElement InitialOptionsElement = InitialOptions.GetXmlData("PreparerOptions", PersistenceData);
+                xresult.Add(InitialOptionsElement);
+
+                return xresult;
+            }
         
-        public GameplayInitialStateData()
-        {
         }
-
-
-        public virtual XElement GetXmlData(string pNodeName, object PersistenceData)
-        {
-            XElement xresult = new XElement(pNodeName);
-
-            xresult.Add(new XAttribute("PreparerType", InitialOptions.GetType().AssemblyQualifiedName));
-            XElement InitialOptionsElement = InitialOptions.GetXmlData("PreparerOptions", PersistenceData);
-            xresult.Add(InitialOptionsElement);
-
-            return xresult;
-        }
-    }
 }

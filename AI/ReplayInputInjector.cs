@@ -23,7 +23,7 @@ namespace BASeTris.AI
             while (DataQueue!=null && DataQueue.Any() && AIProcessing)
             {
                 //peek at the top of the Queue
-                DataQueue.TryPeek(out GameplayRecordElement result);
+                _ = DataQueue.TryPeek(out GameplayRecordElement? result);
 
                 var Elapsed = _Owner.GetElapsedTime();
                 //if the games elapsed time is larger than the elapsed time of the element

@@ -1,4 +1,6 @@
-﻿/*
+﻿
+#nullable enable
+/*
  * BASeCamp BASeBlock
 Copyright (c) 2011, Michael Burgwin
 All rights reserved.
@@ -12,35 +14,20 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using BASeCamp.Logging;
+using BASeTris.Rendering.GDIPlus;
+using BASeTris.Settings;
+using SkiaSharp;
 using System.ComponentModel;
-using System.Data.SqlTypes;
 using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Imaging;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
 using System.Reflection.BASeCamp;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 using System.Windows.Forms.Design;
-using BASeCamp.Logging;
-using BASeTris.Input;
-using BASeTris.Rendering;
-using BASeTris.Settings;
-using OpenTK.Input;
-using SkiaSharp;
 using XInput.Wrapper;
-using static System.Windows.Forms.AxHost;
 using static BASeTris.AssetManager.cNewSoundManager;
 using TKKey = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
@@ -71,7 +58,7 @@ namespace BASeTris.AssetManager
     public class ControllerImageDataInformation
     {
         public String ControllerName { get; set; }
-        public Dictionary<X.Gamepad.GamepadButtons, String> ButtonImageKeys = null;
+        public Dictionary<X.Gamepad.GamepadButtons, String>? ButtonImageKeys = null;
         public String DiagramImageKey { get; private set; }
         public String SimpleDiagramImageKey { get; private set; }
 
@@ -93,7 +80,7 @@ X.Gamepad.GamepadButtons.Dpad_Left,
 X.Gamepad.GamepadButtons.LeftStick,
 X.Gamepad.GamepadButtons.RightStick
             };
-        public ControllerImageDataInformation(String pName, String DiagramKey, String SimpleDiagramKey, params String[] OrderedButtonKeys)
+        public ControllerImageDataInformation(String pName, String DiagramKey, String? SimpleDiagramKey, params String[] OrderedButtonKeys)
         {
             this.ControllerName = pName;
 
@@ -147,7 +134,7 @@ X.Gamepad.GamepadButtons.RightStick
         public static ControllerImageDataInformation XBox360ImageKeydata = new ControllerImageDataInformation("XBox 360", "xbox_360_diagram", null, (from b in Buttonset select b.Replace("XBoxSeriesX", "360")).ToArray());
 
 
-        
+
 
         public static Dictionary<GameState.GameKeys, (List<int>, List<int>)> GetKeyLookup(GameState.GameKeys[] keys, SettingsManager settingsSource)
         {
@@ -164,7 +151,7 @@ X.Gamepad.GamepadButtons.RightStick
         }
 
 
-        public static IEnumerable<GameKeyBindInfo<SKImage>> RetrieveBindingImages(SettingsManager Source,ControllerImageDataInformation ControllerData)
+        public static IEnumerable<GameKeyBindInfo<SKImage>> RetrieveBindingImages(SettingsManager Source, ControllerImageDataInformation ControllerData)
         {
             GameState.GameKeys[] retrievekeys = (GameState.GameKeys[])Enum.GetValues(typeof(GameState.GameKeys));
             var keybuttonlookup = GetKeyLookup(retrievekeys, Source);
@@ -185,7 +172,7 @@ X.Gamepad.GamepadButtons.RightStick
                     foreach (var button in kvp.Value.Item1)
                     {
                         //now, get the image key...
-                        String getkey = ControllerData.ButtonImageKeys[(XInput.Wrapper.X.Gamepad.GamepadButtons)button];
+                        String? getkey = ControllerData?.ButtonImageKeys?[(XInput.Wrapper.X.Gamepad.GamepadButtons)button];
 
                         if (getkey != null)
                         {
@@ -203,13 +190,13 @@ X.Gamepad.GamepadButtons.RightStick
                 if (kvp.Value.Item2 != null)
                 {
                     //draw keyboard keys...
-                    
+
                     foreach (var key in kvp.Value.Item2)
                     {
                         SKBitmap keybitmap = AssetHelper.GetSKBitmapForKeyboardKey((OpenTK.Windowing.GraphicsLibraryFramework.Keys)key);
                         KeyboardImages.Add(SKImage.FromBitmap(keybitmap));
-                    
-                    
+
+
                     }
                 }
                 yield return new GameKeyBindInfo<SKImage>(kvp.Key, ButtonImages.ToArray(), KeyboardImages.ToArray());
@@ -267,7 +254,7 @@ X.Gamepad.GamepadButtons.RightStick
 
         private static Dictionary<TKKey, String> KeyboardKeyDisplaytext = new Dictionary<TKKey, string>()
         {
-            
+
             { TKKey.LeftAlt,"Alt" },
             { TKKey.RightAlt,"Alt" },
             { TKKey.Down,"↓" },
@@ -290,26 +277,27 @@ X.Gamepad.GamepadButtons.RightStick
 
         };
 
-        private static SKBitmap DrawKeyboardKey(TKKey k)
+        private static SKBitmap? DrawKeyboardKey(TKKey k)
         {
-            String sDrawText = null;
+            String? sDrawText = null;
             if (KeyboardKeyDisplaytext.ContainsKey(k)) sDrawText = KeyboardKeyDisplaytext[k];
             else sDrawText = Enum.GetName(typeof(TKKey), k);
             var keytype = GetKeyboardKeyType(k);
             String sBlankKey = "Blank_Black_" + keytype.ToString();
             //retrieve the key blank SKBitmap.
-            SKBitmap BlankKey = TetrisGame.Imageman.GetSKBitmap(sBlankKey);
-            SKPaint DrawKeyPaint = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial"),TextSize=BlankKey.Height*.66f, Color = SKColors.White };
+            SKBitmap? BlankKey = TetrisGame.Imageman.GetSKBitmap(sBlankKey);
+            if (BlankKey == null) return null;
+            SKPaint DrawKeyPaint = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial"), TextSize = BlankKey.Height * .66f, Color = SKColors.White };
             SKBitmap GenerateKeyBitmap = new SKBitmap(BlankKey.Width, BlankKey.Height);
             using (SKCanvas skc = new SKCanvas(GenerateKeyBitmap))
             {
-                
-                
+
+
                 //draw the blank
                 skc.DrawBitmap(BlankKey, new SKPoint(0, 0));
                 SKRect sbound = new SKRect();
                 DrawKeyPaint.MeasureText(sDrawText, ref sbound);
-                while (sbound.Width > BlankKey.Width*.5f || sbound.Height > BlankKey.Height*.5f)
+                while (sbound.Width > BlankKey.Width * .5f || sbound.Height > BlankKey.Height * .5f)
                 {
                     DrawKeyPaint.TextSize -= 2;
                     DrawKeyPaint.MeasureText(sDrawText, ref sbound);
@@ -325,7 +313,7 @@ X.Gamepad.GamepadButtons.RightStick
 
 
         }
-        public static SKBitmap GetSKBitmapForKeyboardKey(TKKey k)
+        public static SKBitmap? GetSKBitmapForKeyboardKey(TKKey k)
         {
             if (k == TKKey.Escape)
             {
@@ -335,7 +323,7 @@ X.Gamepad.GamepadButtons.RightStick
             if (!TetrisGame.Imageman.HasSKBitmap(sGenKey))
             {
                 //we need to generate a keyboard key.
-                SKBitmap GeneratedKey = DrawKeyboardKey(k);
+                SKBitmap? GeneratedKey = DrawKeyboardKey(k);
                 TetrisGame.Imageman.AddImage(sGenKey, SkiaSharp.Views.Desktop.Extensions.ToBitmap(GeneratedKey));
 
             }
@@ -346,7 +334,7 @@ X.Gamepad.GamepadButtons.RightStick
         }
         public static String ImageKeyForKeyboardKey(TKKey k)
         {
-            String sPrefix = null;
+            String? sPrefix;
             if (ImageKeyKeyPrefixes.ContainsKey(k))
                 sPrefix = ImageKeyKeyPrefixes[k];
             else
@@ -359,7 +347,7 @@ X.Gamepad.GamepadButtons.RightStick
             return sFindKey;
         }
 
-public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button, ControllerImageDataInformation Source)
+        public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button, ControllerImageDataInformation Source)
         {
             if (Source.ButtonImageKeys.ContainsKey(button))
             {
@@ -375,14 +363,14 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         }
         public static IEnumerable<(String, StreamReader)> GetZipContents(String sZipPath, Predicate<String> FileNameFilterFunc)
         {
-            
+
 
             var zf = ZipFile.OpenRead(sZipPath);
             foreach (var ze in zf.Entries)
             {
                 //if (ze.IsDirectory)
                 //{
-                    //skip directories
+                //skip directories
                 //}
                 //else 
                 {
@@ -411,10 +399,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
     /// represents and manipulates a sound object that is in use/playing.
     /// </summary>
 
-    
+
     public class SilentSoundManager : IAudioHandler
     {
-        private IAudioHandler _Composite = null;
+        private IAudioHandler? _Composite = null;
         public SilentSoundManager(IAudioHandler pComposite)
         {
             _Composite = pComposite;
@@ -433,33 +421,35 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         public void PauseMusic()
         {
-            _Composite.PauseMusic(); 
+            if(_Composite!=null)
+            _Composite.PauseMusic();
         }
 
         public void PauseMusic(bool pausestate)
         {
+            if(_Composite!=null)
             _Composite.PauseMusic();
         }
 
-        public IActiveSound PlayMusic()
+        public IActiveSound? PlayMusic()
         {
             //we never play music
             return null;
         }
 
-        public IActiveSound PlayMusic(string key, float volume, bool loop)
+        public IActiveSound? PlayMusic(string key, float volume, bool loop)
         {
             return null;
         }
 
-        public IActiveSound PlayMusic(string[] key, MultiMusicPlayMode mplaymode)
+        public IActiveSound? PlayMusic(string[] key, MultiMusicPlayMode mplaymode)
         {
             return null;
         }
 
-        public IActiveSound PlayMusic(string[] key, MultiMusicPlayMode mplaymode, out ISoundSource[] ssources)
+        public IActiveSound? PlayMusic(string[] key, MultiMusicPlayMode mplaymode, out ISoundSource[] ssources)
         {
-            ssources = null;
+            ssources = new ISoundSource[] { };
             return null;
         }
 
@@ -500,7 +490,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         }
     }
 
-    public class cNewSoundManager : IDisposable,IAudioHandler
+    public class cNewSoundManager : IDisposable, IAudioHandler
     {
         // public event Action<iSoundSourceObject, String> SoundStopped;
         private ISoundEngineDriver mDriver;
@@ -512,7 +502,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         private Dictionary<String, ISoundSource> mSoundSources = new Dictionary<string, ISoundSource>();
         private List<IActiveSound> PlayingSounds = new List<IActiveSound>();
-        private IActiveSound _mPlayingMusic;
+        private IActiveSound? _mPlayingMusic;
 
 
         private static iManagerCallback _callback = new Nullcallback();
@@ -525,7 +515,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         //private iActiveSoundObject mPlayingMusic { set { _mPlayingMusic = value; } get { return _mPlayingMusic; } }
 
-        private IActiveSound mPlayingMusic
+        private IActiveSound? mPlayingMusic
         {
             set
             {
@@ -677,7 +667,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 set
                 {
                     _usePitch = value;
-                    if (PlayingSound != null) 
+                    if (PlayingSound != null)
                         PlayingSound.Pitch = _usePitch;
                 }
                 get
@@ -689,7 +679,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
             }
 
-            private ISoundEngineDriver driverobj = null;
+            private ISoundEngineDriver? driverobj = null;
 
 
             public QueuedSoundManager(cNewSoundManager csound, IEnumerable<string> keys, ISoundEngineDriver sdriver, bool pplaylooped)
@@ -801,8 +791,9 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                         }
                         else
                         {
+                            if(driverobj!=null)
                             //if we aren't set to loop, we're done.
-                            driverobj.OnSoundStop -= sdriver_OnSoundStop;
+                                driverobj.OnSoundStop -= sdriver_OnSoundStop;
                         }
                     }
 
@@ -810,7 +801,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     //if the queue has elements...
                     if (SoundQueue.Any())
                     {
-                        ISoundSource playit = null;
+                        ISoundSource? playit = null;
                         //pop the top one off. Set PlayingSound.
                         if (mmpmode == MultiMusicPlayMode.MultiMusic_Order)
                         {
@@ -835,7 +826,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                         PlayingSource = playit;
                         PlayingSound = PlayingSource.Play(false);
                         if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
-                        if(_usePitch != int.MinValue) PlayingSound.Pitch = _usePitch;
+                        if (_usePitch != int.MinValue) PlayingSound.Pitch = _usePitch;
                     }
                 }
             }
@@ -983,7 +974,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
                 else
                 {
-                    PlayingSound = PlayingSource.Play(false, volume,tempo,pitch); //the looping argument is ignored...
+                    PlayingSound = PlayingSource.Play(false, volume, tempo, pitch); //the looping argument is ignored...
                     //if (_useTempo > 0) PlayingSound.Tempo = _useTempo;
                     //if (_usePitch != int.MinValue) PlayingSound.Pitch = _usePitch;
                 }
@@ -1167,7 +1158,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             //special code: allow in form of sound1:sound2:sound3 to choose one of those three randomly.
             if (keyprefix.Contains(":"))
             {
-                String[] splitopt = keyprefix.Split(new char[] {':'}, StringSplitOptions.RemoveEmptyEntries);
+                String[] splitopt = keyprefix.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                 //choose a random index.
                 int randomidex = TetrisGame.StatelessRandomizer.Next(splitopt.Length);
                 keyprefix = splitopt[randomidex];
@@ -1175,8 +1166,8 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
 
             String[] gotkeys = (from w in mSoundSources.Keys
-                where w.ToUpper().StartsWith(keyprefix.ToUpper())
-                select w).ToArray();
+                                where w.ToUpper().StartsWith(keyprefix.ToUpper())
+                                select w).ToArray();
             if (gotkeys.Length == 0) return "";
             int randomindex = TetrisGame.StatelessRandomizer.Next(0, gotkeys.Length);
             return gotkeys[randomindex];
@@ -1341,12 +1332,12 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             ISoundSource grabbed = GetSound(key);
             return grabbed.Play(playlooped);
         }
-        public IActiveSound PlaySound(String key,bool playlooped,float volume)
+        public IActiveSound PlaySound(String key, bool playlooped, float volume)
         {
-            
-                ISoundSource grabbed = GetSound(key);
-                return grabbed.Play(playlooped,volume);
-            
+
+            ISoundSource grabbed = GetSound(key);
+            return grabbed.Play(playlooped, volume);
+
         }
         public IActiveSound PlaySound(String key, AudioHandlerPlayDetails pDetails)
         {
@@ -1367,8 +1358,8 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         public IActiveSound PlaySound(String key, float volume)
         {
             ISoundSource grabbed = GetSound(key);
-            
-            var result = grabbed.Play(false,volume);
+
+            var result = grabbed.Play(false, volume);
             return result;
         }
 
@@ -1439,10 +1430,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         private class ActiveMusicData
         {
             public string Name;
-            public IActiveSound ActiveSound { get; set; }
+            public IActiveSound? ActiveSound { get; set; }
             public ISoundSource Source { get; set; }
 
-            public ActiveMusicData(String pName, IActiveSound pActiveSound, ISoundSource pSource)
+            public ActiveMusicData(String pName, IActiveSound? pActiveSound, ISoundSource pSource)
             {
                 ActiveSound = pActiveSound;
                 Source = pSource;
@@ -1457,7 +1448,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         /// </summary>
         private class TemporaryMusicData : ActiveMusicData, IComparable<TemporaryMusicData>
         {
-            public TemporaryMusicData(String pName, IActiveSound pActiveSound, ISoundSource pSource) : base(pName, pActiveSound, pSource)
+            public TemporaryMusicData(String pName, IActiveSound? pActiveSound, ISoundSource pSource) : base(pName, pActiveSound, pSource)
             {
             }
 
@@ -1473,7 +1464,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         private String OriginalSoundName; //allocated when TemporaryMusicData is empty when music is pushed.
 
-        private ISoundSource OriginalSoundObject = null;
+        private ISoundSource OriginalSoundObject;
 
         //private SortedList<TemporaryMusicData, TemporaryMusicData> TempMusicData = new SortedList<TemporaryMusicData, TemporaryMusicData>();
         private Dictionary<String, TemporaryMusicData> TempMusicData = new Dictionary<string, TemporaryMusicData>();
@@ -1562,7 +1553,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             }
 
             int currentmax = int.MinValue;
-            TemporaryMusicData tmduse = null;
+            TemporaryMusicData? tmduse = null;
             foreach (var iterate in TempMusicData)
             {
                 if (iterate.Value.Occurences > currentmax)
@@ -1683,11 +1674,11 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             Debug.Print(new StackTrace().ToString());
             if (mPlayingMusicSource is QueuedSoundManager)
             {
-                ((QueuedSoundManager) mPlayingMusicSource).Stop();
+                ((QueuedSoundManager)mPlayingMusicSource).Stop();
                 Debug.Print("queued");
             }
 
-            ISoundSource getsource = null;
+            ISoundSource getsource;
             if (key.Contains("|"))
             {
                 getsource = new QueuedSoundManager(this, key.Split('|'), mDriver, pDetails.Playlooped);
@@ -1712,7 +1703,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             TempMusicData = new Dictionary<string, TemporaryMusicData>();
 
 
-            IActiveSound soundobj = getsource.Play(pDetails.Playlooped, pDetails.Volume,pDetails.Tempo,pDetails.Pitch);
+            IActiveSound soundobj = getsource.Play(pDetails.Playlooped, pDetails.Volume, pDetails.Tempo, pDetails.Pitch);
             mPlayingMusicSource = getsource;
             mPlayingMusic = soundobj;
             scurrentPlayingMusic = key;
@@ -1897,25 +1888,25 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             //the actual Image object was stored (because no match was found in the imagemanager, presumably)
         }
 
-        public Image ActualImage;
+        public Image? ActualImage;
 
 
         public SerializableImage(Image pActualImage)
         {
             ActualImage = pActualImage;
         }
-        
+
         public SerializableImage(SerializationInfo information, StreamingContext context)
         {
-            ImageSerializationMode modetype = (ImageSerializationMode) information.GetInt32(SerialImageModeName);
+            ImageSerializationMode modetype = (ImageSerializationMode)information.GetInt32(SerialImageModeName);
 
             ActualImage = modetype switch
             {
                 ImageSerializationMode.Serialize_Null => null,
-                ImageSerializationMode.Serialize_String => TetrisGame.Imageman.getLoadedImage(information.GetString(SerialImageDataName)),
-                ImageSerializationMode.Serialize_ImageData => (Image)information.GetValue(SerialImageDataName, typeof(Image)),
-                _ =>throw new ArgumentOutOfRangeException(nameof(modetype), $"unexpected modetype {modetype}")
-                
+                ImageSerializationMode.Serialize_String => TetrisGame.Imageman.getLoadedImage(information.GetString(SerialImageDataName)!),
+                ImageSerializationMode.Serialize_ImageData => (Image?)information.GetValue(SerialImageDataName, typeof(Image)),
+                _ => throw new ArgumentOutOfRangeException(nameof(modetype), $"unexpected modetype {modetype}")
+
             };
             ///////
             switch (modetype)
@@ -1927,10 +1918,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     ActualImage = TetrisGame.Imageman.getLoadedImage(information.GetString(SerialImageDataName));
                     break;
                 case ImageSerializationMode.Serialize_ImageData:
-                    ActualImage = (Image) information.GetValue(SerialImageDataName, typeof(Image));
+                    ActualImage = (Image?)information.GetValue(SerialImageDataName, typeof(Image));
                     break;
             }
-            
+
         }
 
         #region ISerializable Members
@@ -1941,19 +1932,19 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             if (ActualImage == null)
             {
                 //null... so, write... well, not much, really.
-                info.AddValue(SerialImageModeName, (Int32) ImageSerializationMode.Serialize_Null);
+                info.AddValue(SerialImageModeName, (Int32)ImageSerializationMode.Serialize_Null);
             }
             else
             {
                 String foundkey = TetrisGame.Imageman.FindImage(ActualImage);
                 if (foundkey != "")
                 {
-                    info.AddValue(SerialImageModeName, (int) ImageSerializationMode.Serialize_String);
+                    info.AddValue(SerialImageModeName, (int)ImageSerializationMode.Serialize_String);
                     info.AddValue(SerialImageDataName, foundkey);
                 }
                 else
                 {
-                    info.AddValue(SerialImageModeName, (int) ImageSerializationMode.Serialize_ImageData);
+                    info.AddValue(SerialImageModeName, (int)ImageSerializationMode.Serialize_ImageData);
                     info.AddValue(SerialImageDataName, ActualImage);
                 }
             }
@@ -1970,7 +1961,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         public delegate Stream NameToStreamFunc(String filename, FileMode OpenMode);
 
         private iManagerCallback mcallback = new Nullcallback();
-        public NameToStreamFunc NameToStream = null;
+        public NameToStreamFunc? NameToStream = null;
         private Dictionary<String, Image> loadedimages = new Dictionary<String, Image>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, Icon> loadedicons = new Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<String, MemoryStream> loadedIconStreams = new Dictionary<string, MemoryStream>(StringComparer.OrdinalIgnoreCase);
@@ -1981,13 +1972,13 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
 
         }
-        public SKBitmap GetSKBitmap(String man_key,float reductionfactor = 1)
+        public SKBitmap? GetSKBitmap(String man_key, float reductionfactor = 1)
         {
-            String sFindKey = man_key + (reductionfactor==1?"":reductionfactor.ToString());
+            String sFindKey = man_key + (reductionfactor == 1 ? "" : reductionfactor.ToString());
 
             if (!SkiaImages.ContainsKey(sFindKey))
             {
-                Image findkey = this[man_key, reductionfactor];
+                Image? findkey = this[man_key, reductionfactor];
                 if (findkey == null)
                 {
                     DebugLogger.Log.WriteLine($"unable to locate key:{findkey}; returning null");
@@ -1996,19 +1987,19 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 SkiaImages.Add(sFindKey, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(new Bitmap(findkey)));
             }
             return SkiaImages[sFindKey];
-           
+
 
             //return SkiaImages[man_key];
-                
 
-            
+
+
         }
-        
-        public Image this[String man_key,float reductionFactor=1]
+
+        public Image? this[String man_key, float reductionFactor = 1]
         {
             get
             {
-                Image resultImage = null;
+                Image? resultImage = null;
                 man_key = man_key.ToUpper();
                 //return loadedimages[man_key];
                 if (loadedimages.ContainsKey(man_key))
@@ -2017,9 +2008,9 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     resultImage = getLoadedIcon(man_key, new Size(16, 16)).ToBitmap();
                 else
                     //log to imagelookup.log file.
-                    mcallback.FlagError("Lookup of Image " + man_key + " Failed.", null);
+                    mcallback.FlagError("Lookup of Image " + man_key + " Failed.", new KeyNotFoundException());
 
-                if(resultImage!=null && reductionFactor!=1)
+                if (resultImage != null && reductionFactor != 1)
                 {
                     Size TargetSize = new Size((int)((float)resultImage.Width * reductionFactor), (int)((float)resultImage.Height * reductionFactor));
                     resultImage = ReduceImage(resultImage, TargetSize);
@@ -2034,14 +2025,14 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             Bitmap Result = new Bitmap(TargetSize.Width, TargetSize.Height);
             using (Graphics g = Graphics.FromImage(Result))
             {
-                g.DrawImage(Source,new Rectangle(0,0,TargetSize.Width,TargetSize.Height));
+                g.DrawImage(Source, new Rectangle(0, 0, TargetSize.Width, TargetSize.Height));
             }
             return Result;
 
         }
         public static SKBitmap ReduceImageSK(SKBitmap Input, SKSizeI TargetSize)
         {
-            SKImageInfo skinfo = new SKImageInfo(TargetSize.Width,TargetSize.Height);
+            SKImageInfo skinfo = new SKImageInfo(TargetSize.Width, TargetSize.Height);
             SKBitmap BuildImage = new SKBitmap(skinfo, SKBitmapAllocFlags.ZeroPixels);
             using (SKCanvas useG = new SKCanvas(BuildImage))
             {
@@ -2133,7 +2124,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return AddFromFile(filename, null);
         }
 
-        public String AddFromFile(String filename, String Usekey)
+        public String AddFromFile(String filename, String? Usekey)
         {
             FileStream readimagestream = new FileStream(filename, FileMode.Open);
             Image readimage = Image.FromStream(readimagestream);
@@ -2146,7 +2137,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         public static bool isFileSupported(String filename)
         {
-            String[] goodext = new string[] {".BMP", ".PNG", ".JPG", ".GIF", ".GZI", ".ICO"};
+            String[] goodext = new string[] { ".BMP", ".PNG", ".JPG", ".GIF", ".GZI", ".ICO" };
             foreach (string currext in goodext)
             {
                 if (Path.GetExtension(filename).ToUpper().Equals(currext))
@@ -2257,16 +2248,16 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         public Image getImageRandom(String Prefix)
         {
             Image[] choosefrom = (from m in loadedimages
-                where m.Key.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)
-                select m.Value).ToArray();
+                                  where m.Key.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)
+                                  select m.Value).ToArray();
 
             if (choosefrom.Length > 0)
                 return TetrisGame.Choose(choosefrom);
             else
-                return TetrisGame.Imageman.getLoadedImage(Prefix);
+                return getLoadedImage(Prefix);
         }
 
-        public Image getLoadedImage(String searchindex,float Reduction = 1)
+        public Image getLoadedImage(String searchindex, float Reduction = 1)
         {
             String index = searchindex.ToUpper();
             if (loadedimages.ContainsKey(index)) return loadedimages[index.ToUpper()];
@@ -2287,10 +2278,10 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 if (!loadedimages.ContainsKey(paramvalue)) throw new KeyNotFoundException("Key \"" + paramvalue + "\" not found.");
                 //Image acquiredimage = loadedimages[paramvalue];
                 Image acquiredimage = getLoadedImage(paramvalue);
-                Image changedimage = (Image) new Bitmap(acquiredimage);
+                Image changedimage = (Image)new Bitmap(acquiredimage);
 
                 //commandcode could have parameters- check for parens.
-                String[] parameters = null;
+                String[]? parameters = null;
                 int paramcount = 0;
                 if (commandcode.Contains("("))
                 {
@@ -2303,7 +2294,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
                     String argumentstring = commandcode.Substring(startparen + 1, endparen - startparen - 1);
 
-                    parameters = argumentstring.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                    parameters = argumentstring.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     //
 
                     paramcount = parameters.Length;
@@ -2360,9 +2351,9 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                         ColorMatrix usematrix = ColorMatrices.GetColourizer(reduse, greenuse, blueuse, alphause);
                         ImageAttributes applyattributes = new ImageAttributes();
                         applyattributes.SetColorMatrix(usematrix);
-                        changedimage = TetrisGame.ApplyImageAttributes(changedimage, applyattributes);
+                        changedimage = GDIPlusHelpers.ApplyImageAttributes(changedimage, applyattributes);
 
-                        if(Reduction!=1)
+                        if (Reduction != 1)
                         {
                             Size targetsize = new Size((int)((float)changedimage.Width * Reduction), (int)((float)changedimage.Height * Reduction));
                             changedimage = ReduceImage(changedimage, targetsize);
@@ -2406,7 +2397,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             return 0;
         }
         */
-       
+
 
         /// <summary>
         /// Reads a Zip File Image pack. Each image file is added or replaced in our set of images, using the base filename as the key.
@@ -2418,12 +2409,12 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             if (!File.Exists(sFileName)) throw new FileNotFoundException(sFileName);
             //open the ZipFile. we let Exceptions bubble up to the calling method.
             var zf = ZipFile.OpenRead(sFileName);
-            String[] validExtensions = new string[] {"*.png", "*.ico"};
+            String[] validExtensions = new string[] { "*.png", "*.ico" };
             //go through each entry.
             int totalcount = 0;
             foreach (var entry in zf.Entries)
             {
-                
+
                 //get the extension...
                 String Extensionget = entry.Name.Substring(entry.Name.LastIndexOf(".", System.StringComparison.OrdinalIgnoreCase));
 
@@ -2434,7 +2425,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     byte[] buff = new byte[entry.Length];
                     entry.Open().Read(buff, 0, (int)entry.Length);
                     ms.Write(buff, 0, (int)entry.Length);
-                   
+
                     ms.Seek(0, SeekOrigin.Begin);
 
                     int lastdirsep = entry.Name.LastIndexOf(Path.DirectorySeparatorChar);
@@ -2456,83 +2447,105 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             foreach (String currpath in (from p in paths where Directory.Exists(p) select p))
             {
                 mcallback.ShowMessage("Loading compatible images in " + currpath);
-                DirectoryInfo currentdir = null;
-              
-                    try
-                    {
-                        currentdir = new DirectoryInfo(currpath);
-                    }
-                    catch
-                    {
-                        Debug.Print("Error retrieving path:" + currpath);
-                    }
+                DirectoryInfo currentdir;
+
+                try
+                {
+                    currentdir = new DirectoryInfo(currpath);
+
 
                     //iterate through each file, loading the images that are valid.
                     foreach (FileInfo loopfile in currentdir.GetFiles("*", SearchOption.AllDirectories))
                     {
-                        if (isFileSupported(loopfile.FullName))
-                        {
-                            String basenameonly = Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper();
-                            if (Path.GetExtension(loopfile.FullName).Equals(".ico", StringComparison.OrdinalIgnoreCase))
-                            {
-                                MemoryStream streamread = new MemoryStream(File.ReadAllBytes(loopfile.FullName));
-                                Icon geticon = new Icon(streamread, 16, 16);
-                                loadedicons.Add(basenameonly, geticon);
-                                countaccum++;
-                            }
-                            else
-                            {
-                                mcallback.ShowMessage("Loading image:" + loopfile.Name);
-
-                                MemoryStream streamread = new MemoryStream(File.ReadAllBytes(loopfile.FullName));
-                            if (basenameonly.IndexOf("XBOXSERIESX_DIAGRAM") > 0)
-                            {
-                                ;
-                            }
-                                if (AddImage(streamread, basenameonly))
-                                    countaccum++;
-                            }
-                        }
-
-                        else if(loopfile.Extension.Equals(".zip",StringComparison.OrdinalIgnoreCase))
-                        {
-                            //if this is a zipfile, then we read the contents of the zipfile and get all the applicable entries that have image file extensions, and add them using AddImage...
-                            var readfile = ZipFile.OpenRead(loopfile.FullName);
-                            foreach (var loopentry in readfile.Entries)
-                            {
-                            if (isFileSupported(loopentry.Name))
-                            {
-                                
-                                //byte[] readbuffer = new byte[loopentry.Length];
-                                String basenameonly = Path.GetFileNameWithoutExtension(loopentry.Name).ToUpper();
-                                using (MemoryStream streamread = new MemoryStream())
-                                using (Stream s = loopentry.Open())
-                                {
-                                    s.CopyTo(streamread);
-                                    streamread.Position = 0;
-
-                                    if ((Path.GetExtension(loopentry.Name).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
-                                    {
-                                        //icon file, so add to our icon list.
-                                        Icon geticon = new Icon(streamread, 16, 16);
-                                        loadedicons.Add(basenameonly, geticon);
-                                        countaccum++;
-                                    }
-                                    else
-                                    {
-                                       
-                                        if (AddImage(streamread, basenameonly))
-                                            countaccum++;
-                                    }
-                                }
-                            }
-                            }
+                        countaccum = ProcessFile(countaccum, loopfile);
                     }
+                }
+                catch
+                {
+                    Debug.Print("Error retrieving path:" + currpath);
                 }
             }
             ImagePrepped = true;
             return countaccum;
-            
+
+        }
+
+        private int ProcessFile(int countaccum, FileInfo loopfile)
+        {
+            if (isFileSupported(loopfile.FullName))
+            {
+                countaccum = ProcessRaw(countaccum, loopfile);
+            }
+
+            else if (loopfile.Extension.Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                countaccum = ProcessZip(countaccum, loopfile);
+            }
+
+            return countaccum;
+        }
+
+        private int ProcessRaw(int countaccum, FileInfo loopfile)
+        {
+            String basenameonly = Path.GetFileNameWithoutExtension(loopfile.FullName).ToUpper();
+            if (Path.GetExtension(loopfile.FullName).Equals(".ico", StringComparison.OrdinalIgnoreCase))
+            {
+                MemoryStream streamread = new MemoryStream(File.ReadAllBytes(loopfile.FullName));
+                Icon geticon = new Icon(streamread, 16, 16);
+                loadedicons.Add(basenameonly, geticon);
+                countaccum++;
+            }
+            else
+            {
+                mcallback.ShowMessage("Loading image:" + loopfile.Name);
+
+                MemoryStream streamread = new MemoryStream(File.ReadAllBytes(loopfile.FullName));
+                if (basenameonly.IndexOf("XBOXSERIESX_DIAGRAM") > 0)
+                {
+                    ;
+                }
+                if (AddImage(streamread, basenameonly))
+                    countaccum++;
+            }
+
+            return countaccum;
+        }
+
+        private int ProcessZip(int countaccum, FileInfo loopfile)
+        {
+            //if this is a zipfile, then we read the contents of the zipfile and get all the applicable entries that have image file extensions, and add them using AddImage...
+            var readfile = ZipFile.OpenRead(loopfile.FullName);
+            foreach (var loopentry in readfile.Entries)
+            {
+                if (isFileSupported(loopentry.Name))
+                {
+
+                    //byte[] readbuffer = new byte[loopentry.Length];
+                    String basenameonly = Path.GetFileNameWithoutExtension(loopentry.Name).ToUpper();
+                    using (MemoryStream streamread = new MemoryStream())
+                    using (Stream s = loopentry.Open())
+                    {
+                        s.CopyTo(streamread);
+                        streamread.Position = 0;
+
+                        if ((Path.GetExtension(loopentry.Name).Equals(".ico", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            //icon file, so add to our icon list.
+                            Icon geticon = new Icon(streamread, 16, 16);
+                            loadedicons.Add(basenameonly, geticon);
+                            countaccum++;
+                        }
+                        else
+                        {
+
+                            if (AddImage(streamread, basenameonly))
+                                countaccum++;
+                        }
+                    }
+                }
+            }
+
+            return countaccum;
         }
 
         /// <summary>
@@ -2583,7 +2596,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             {
                 Debug.Print("image already loaded with key " + basenameonly);
             }
-            if(!SkiaImages.ContainsKey(basenameonly))
+            if (!SkiaImages.ContainsKey(basenameonly))
             {
                 SkiaImages.Add(basenameonly, readbitmap);
             }
@@ -2648,7 +2661,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             if (provider != null)
             {
                 // This service is in charge of popping our ListBox.
-                IWindowsFormsEditorService service1 = ((IWindowsFormsEditorService) provider.GetService(typeof(IWindowsFormsEditorService)));
+                IWindowsFormsEditorService? service1 = ((IWindowsFormsEditorService?)provider.GetService(typeof(IWindowsFormsEditorService)));
 
                 if (service1 != null)
                 {
@@ -2661,7 +2674,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
                     if (list.SelectedIndices.Count == 1)
                     {
-                        value = list.SelectedItem.ToString();
+                        value = list.SelectedItem!.ToString()!;
                     }
 
                     // Close the list control after selection.
@@ -2695,15 +2708,15 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
             });
         }
         public static SKColorFilter GetColourizer(float red, float green, float blue, float alpha)
-            {
+        {
 
-                float[] buildmat = new float[]
-                {
+            float[] buildmat = new float[]
+            {
                     red, 0f, 0f, 0, 0,
                     0f, green, 0, 0, 0,
                     0f, 0f, blue, 0, 0,
                     0,     0,     0,     alpha, 0
-                };
+            };
             return SKColorFilter.CreateColorMatrix(buildmat);
         }
         public static SKColorFilter GetBlackener()
@@ -2772,7 +2785,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                     new float[] {0, 0, 0, 1, 0},
                     new float[] {0, 0, 0, 0, 1}
                 });
-            
+
         }
 
         public static float[][] GetIdentity()
@@ -2883,7 +2896,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         public string ToRGBString()
         {
-            Color color = (Color) this;
+            Color color = (Color)this;
             return String.Format("R: {0:#0.##} G: {1:#0.##} B: {2:#0.##}", color.R, color.G, color.B);
         }
 
@@ -2907,7 +2920,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
                 }
             }
 
-            return Color.FromArgb((int) (255 * r), (int) (255 * g), (int) (255 * b));
+            return Color.FromArgb((int)(255 * r), (int)(255 * g), (int)(255 * b));
         }
 
         private static double GetColorComponent(double temp1, double temp2, double temp3)
@@ -2955,7 +2968,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         public void SetRGB(int red, int green, int blue)
         {
-            HSLColor hslColor = (HSLColor) Color.FromArgb(red, green, blue);
+            HSLColor hslColor = (HSLColor)Color.FromArgb(red, green, blue);
             this._hue = hslColor._hue;
             this._saturation = hslColor._saturation;
             this._luminosity = hslColor._luminosity;
@@ -3013,7 +3026,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         public static bool IsPressed(Keys key)
         {
-            return GetAsyncKeyState((int) key) < 0;
+            return GetAsyncKeyState((int)key) < 0;
         }
 
         [LibraryImport("user32")]
@@ -3021,7 +3034,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
 
         public static KeyStateInfo GetKeyState(Keys key)
         {
-            short keyState = GetKeyState((int) key);
+            short keyState = GetKeyState((int)key);
             byte[] bits = BitConverter.GetBytes(keyState);
             bool toggled = bits[0] == 1, pressed = bits[1] == 1;
             return new KeyStateInfo(key, pressed, toggled);
@@ -3094,7 +3107,7 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
     {
 
         public GameState.GameKeys GameKey { get; init; }
-        
+
     }
 
 
@@ -3111,6 +3124,6 @@ public static String ImageKeyForControllerButton(X.Gamepad.GamepadButtons button
         }
     }
 
-    
+
 
 }

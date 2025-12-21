@@ -592,7 +592,7 @@ namespace BASeTris
             return Result;
         }
        
-        public CanFitResults CanFit(Nomino bg, int X, int Y,bool SkipActiveChecks,Nomino[] AdditionalIgnores = null)
+        public CanFitResults CanFit(Nomino bg, int X, int Y,bool SkipActiveChecks,Nomino[]? AdditionalIgnores = null)
         {
             Dictionary<Point, Nomino> GroupData = new Dictionary<Point, Nomino>();
             HashSet<Point> ActiveBlocks = new HashSet<Point>();
