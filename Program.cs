@@ -149,8 +149,8 @@ namespace BASeTris
         [STAThread]
         static void Main()
         {
-           
-           
+
+            
             //TestAI();
             //return;
             //Nomino MakeTester = new Tetromino_Y((a) => new LineSeriesBlock());

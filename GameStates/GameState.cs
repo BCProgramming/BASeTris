@@ -1,4 +1,14 @@
-﻿using System;
+﻿using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
+using BASeTris.Blocks;
+using BASeTris.Choosers;
+using BASeTris.FieldInitializers;
+using BASeTris.GameStates.GameObjects;
+using BASeTris.Rendering.Adapters;
+using BASeCamp.StateLib;
+using BASeTris.Tetrominoes;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
@@ -11,63 +21,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using BASeTris.AssetManager;
-using BASeTris.BackgroundDrawers;
-using BASeTris.Choosers;
-using BASeTris.FieldInitializers;
-using BASeTris.Blocks;
-using BASeTris.Tetrominoes;
-using System.Collections.Concurrent;
-using BASeTris.Rendering.Adapters;
-using BASeTris.GameStates.GameObjects;
+
 
 namespace BASeTris
 {
-    public abstract class GameState
+    //derives from more generic GameState. intent is for the "generic" one to be part of some sort of BCGameLib, then it could be shared between projects.
+    public abstract class GameState:BaseGameState<IStateOwner,GameState.GameKeys,GameObject>
     {
-
-        private List<GameObject> GameObjects = new List<GameObject>();
-
-        public void AddGameObject(GameObject Item)
-        {
-            lock(GameObjects)
-                GameObjects.Add(Item);
-        }
-        public void RemoveGameObject(GameObject Item)
-        {
-            lock (GameObjects)
-                GameObjects.Remove(Item);
-        }
-        public IEnumerable<GameObject> AllGameObjects()
-        {
-            return GameObjects.AsReadOnly();
-        }
-        private ConcurrentDictionary<String, Object> CustomStateProperties = new ConcurrentDictionary<string, object>();
-
-        public Object GetCustomProperty(String pKey)
-        {
-            return CustomStateProperties?[pKey];
-        }
-        public bool HasCustomProperty(String pKey)
-        {
-            return CustomStateProperties.ContainsKey(pKey);
-        }
-        public void SetCustomProperty(String pKey, Object Value)
-        {
-            CustomStateProperties[pKey] = Value;
-        }
-        public virtual bool GameProcSuspended { get; set; } = false;
-        /// <summary>
-        /// Indicates whether this GameState allows active play. This is used to determine certain actions such as movement interpolation.
-        /// </summary>
-        public virtual bool GamePlayActive { get { return false; } }
         public enum DisplayMode
         {
             Partitioned,
             Full
         }
 
-        public enum GameKeys
+          public enum GameKeys
         {
             GameKey_Null,
             GameKey_RotateCW,
@@ -91,7 +58,25 @@ namespace BASeTris
             GameKey_DesignerChangeNomino,
             Gamekey_DesignerDeleteNomino
         }
-        private static Dictionary<GameKeys, String> FriendlyNames = new Dictionary<GameKeys, string>()
+        private static Dictionary<GameKeys, String> GameKeyAbbreviations = new Dictionary<GameKeys, string>()
+        {
+            {GameKeys.GameKey_RotateCW,"CW_" },
+            {GameKeys.GameKey_RotateCCW,"CCW" },
+            {GameKeys.GameKey_Down,"DWN" },
+            {GameKeys.GameKey_Hold,"HLD" },
+            {GameKeys.GameKey_Drop,"DRP" },
+            {GameKeys.GameKey_Left,"LFT" },
+            {GameKeys.GameKey_Right,"RGT" },
+        };
+        public static String GetGameKeyAbbreviation(GameKeys g)
+        {
+            if (GameKeyAbbreviations.ContainsKey(g)) return GameKeyAbbreviations[g];
+            return "???";
+        }
+        public virtual DisplayMode SupportedDisplayMode { get; }
+        protected override Dictionary<GameState.GameKeys, string> GetFriendlyKeyNames()
+        {
+            return new Dictionary<GameKeys, string>()
         {
             { GameKeys.GameKey_Null,"NULL"},
 {GameKeys.GameKey_RotateCW,"Rotate Clockwise"},
@@ -115,34 +100,11 @@ namespace BASeTris
             { GameKeys.GameKey_DesignerPrevNomino,"Previous Nomino (BG Design)"},
             { GameKeys.Gamekey_DesignerDeleteNomino,"Delete Nomino (BG Design)"}
         };
-        public static String GetGameKeyFriendlyName(GameKeys src)
-        {
-            return FriendlyNames[src];
         }
-        public virtual DisplayMode SupportedDisplayMode { get; }
-        /*[Obsolete("Use Rendering Providers")]
-        public abstract void DrawStats(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
-        public abstract void GameProc(IStateOwner pOwner);
-
-        //Obbsolete("Use Rendering Providers")]
-        /*public abstract void DrawProc(IStateOwner pOwner, Graphics g, RectangleF Bounds);*/
-        public abstract void HandleGameKey(IStateOwner pOwner, GameKeys g);
-
-        //[Obsolete("This method will be removed eventually... the rendering adapters are where this sort of behaviour should be.")]
-        //public abstract void DrawForegroundEffect(IStateOwner pOwner, Graphics g, RectangleF Bounds);
-
-        protected IBackground _BG;
-        public IBackground BG { get => _BG;
-            set { _BG = value; } }
-
-        /// <summary>
-        /// called to validate a user-initiated key, and whether it is allowed. A good example is that when there is a replay in progress, only the pause key should be allowed by the gameplay state.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public virtual bool AllowUserGameKey(GameKeys key) { return true; }
-
     }
+
+
+
   
   
 }

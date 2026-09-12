@@ -22,6 +22,15 @@ namespace BASeTris
 
         Thread DASRepeatThread = null;
 
+        public IEnumerable<GameState.GameKeys> GetPressedKeys()
+        {
+            if (KeyData.Any((a) => a.Value.LastKeyDown > DateTime.MinValue))
+                {
+                ;
+            }
+            //return the keys that are pressed in the order they were pressed.
+            return KeyData.OrderByDescending((ks)=>ks.Value.LastKeyDown).Where((k) => k.Value.IsPressed()).Select((kk) => kk.Key);
+        }
         private void DASThread()
         {
             //we exit out of here if no keys are pressed.

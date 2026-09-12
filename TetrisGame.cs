@@ -117,8 +117,12 @@ namespace BASeTris
         private TimeSpan _FinalGameTime = TimeSpan.MinValue;
         public TimeSpan FinalGameTime { get { return _FinalGameTime; } set { _FinalGameTime = value; } }
 
+
+        
+
         public TimeSpan GetElapsedTime()
         {
+            
             return GameTime.Elapsed + GameTimeOffset;
 
         }
@@ -467,6 +471,7 @@ namespace BASeTris
         //GameplayRecord GameKeyRecorder = new GameplayRecord();
         public void HandleGameKey(IStateOwner pOwner, GameState.GameKeys g, KeyInputSource pSource)
         {
+            var elapsedusage = GetElapsedTime();// record the elapsed time at the start of the routine. There is a strange desync issue that happens and it's unclear what is causing it. (is it the recording itself that is flawed and being replayed correctly, or is it recorded correctly, but replayed poorly?
             if (pSource == KeyInputSource.Input_Keyboard && CurrentGameState is IDirectKeyboardInputState && (CurrentGameState as IDirectKeyboardInputState).AllowDirectKeyboardInput()) return; //do nothing if it supports that interface.
             if (pSource == KeyInputSource.Input_HID && CurrentGameState is IDirectGamepadInputState && (CurrentGameState as IDirectGamepadInputState).AllowDirectGamepadInput()) return;
             if (GameRecorder != null && CurrentState is GameplayGameState)
@@ -477,7 +482,7 @@ namespace BASeTris
                     if (gp != null && gp.ai is ReplayInputInjector)
                         return;
                 }
-                GameRecorder.AddKeyRecord(GetElapsedTime(), g);
+                GameRecorder.AddKeyRecord(pOwner,elapsedusage, g);
             }
             CurrentGameState.HandleGameKey(pOwner, g);
         }

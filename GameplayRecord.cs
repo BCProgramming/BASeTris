@@ -1,4 +1,5 @@
 ﻿using BASeCamp.Elementizer;
+using BASeCamp.Logging;
 using BASeTris.Blocks;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
@@ -31,6 +32,8 @@ namespace BASeTris
         //Tetris Attack, for example, should record when it constructs a new row at the bottom; and then handle that GameplayRecord when replaying, forgoing it's own processing if it is in a replay.
         //Same for other types, Dr. Mario should record when it creates a new level for example and the contents of such, and instead of generating a level it uses the gameplay record that was provided.
 
+        //blacklisted game types are states that are blacklisted from recording keys when they are active.
+        HashSet<Type> BlackListedGameTypes = new HashSet<Type>(new Type[] { typeof(FieldActionGameState) }); 
         
         List<GameplayRecordElement> Elements = null;
         public List<Nomino> GeneratedMinos = null;
@@ -86,7 +89,7 @@ namespace BASeTris
             
         }
         //for testing purposes. Just random inputs with random delay.
-        public static GameplayRecord GetDrunkRecording(TimeSpan TotalLength)
+        public static GameplayRecord GetDrunkRecording(IStateOwner pOwner,TimeSpan TotalLength)
         {
             GameplayRecord DrunkResult = new GameplayRecord();
             TimeSpan CurrentTime = TimeSpan.Zero;
@@ -98,7 +101,7 @@ namespace BASeTris
                 var ChooseKey = TetrisGame.Choose(new GameKeys[] { GameKeys.GameKey_Left, GameKeys.GameKey_Right, GameKeys.GameKey_RotateCCW, GameKeys.GameKey_RotateCW,GameKeys.GameKey_Drop }, TetrisGame.StatelessRandomizer);
                 //GameplayRecordElement gre = new GameplayRecordElement(CurrentTime += Delta, ChooseKey);
 
-                DrunkResult.AddKeyRecord(CurrentTime+=Delta, ChooseKey);
+                DrunkResult.AddKeyRecord(null,CurrentTime+=Delta, ChooseKey);
 
             }
             DrunkResult.InitialData = new GameplayInitialStateData() { InitialOptions = new StandardTetrisPreparer(null)};
@@ -116,7 +119,7 @@ namespace BASeTris
             Elements = new List<GameplayRecordElement>();
             InitialData = new GameplayInitialStateData() { InitialOptions = gpo };
         }
-        public GameplayRecordElement AddKeyRecord(TimeSpan Elapsed, GameState.GameKeys key)
+        public GameplayRecordElement AddKeyRecord(IStateOwner pOwner,TimeSpan Elapsed, GameState.GameKeys key)
         {
             if (IsRecordableKey(key))
             {
@@ -237,10 +240,36 @@ namespace BASeTris
             using (var readstream = LoadDataStream(sFilePath))
             {
                 xdoc = XDocument.Load(readstream);
+                //debug: resave to test location.
+                //xdoc.Save("T:\\testload.xml");
             }
 
             //we can hydrate a new Gameplayrecord from the root node. Then we can check for ChooserGenerated element.
             GameplayRecord gpr = new GameplayRecord(xdoc.Root, null);
+
+            var sortelapsed = gpr.Elements.OrderBy((e) => e.Elapsed);
+            GameplayRecordElement prev = null;
+            (GameplayRecordElement, GameplayRecordElement) ClosestPair = (null,null);
+            foreach(var iterateitem in sortelapsed)
+            {
+                if (prev != null)
+                {
+                    var offset = Math.Abs((prev.Elapsed - iterateitem.Elapsed).Ticks);
+                    if (ClosestPair.Item1 != null)
+                    {
+                        var closest = Math.Abs((ClosestPair.Item1.Elapsed - ClosestPair.Item2.Elapsed).Ticks);
+                        if (closest > offset)
+                            ClosestPair = (prev, iterateitem);
+                    }
+                    else
+                    {
+                        ClosestPair = (prev, iterateitem);
+                    }
+                }
+                prev = iterateitem;
+            }
+            //~3:40 has a problem 
+            DebugLogger.Log.WriteLine("Smallest offset:" + ClosestPair.Item1.Elapsed.Ticks + " to " + ClosestPair.Item2.Elapsed.Ticks);
 
             var ChooserGeneratedElement = xdoc.Root.Element("ChooserGenerated");
 
@@ -284,24 +313,29 @@ namespace BASeTris
 
     public class GameplayRecordFieldStateElement : GameplayRecordElement
     {
+        //This is used to store field data "checkpoints" that can be used to validate a replay.
+        //Or, I suppose, the replay implementation(s).
         //we store the field data internally as the XElement data.
         //we force a timespan of zero here, this is so they will always be delivered to the gamestate immediately when the replay starts, then it can construct all the needed data structures
         //to retrieve the stored field state as needed for each level.
         public XElement FieldData = null;
-        public GameplayRecordFieldStateElement(TetrisField FieldContent) : base(TimeSpan.Zero)
+        public TimeSpan TrueElapsed = TimeSpan.MinValue;
+        public GameplayRecordFieldStateElement(TimeSpan ElapsedTime,TetrisField FieldContent) : base(TimeSpan.Zero)
         {
+            TrueElapsed = ElapsedTime;
             FieldData = FieldContent.SaveField("Field");
         }
         public GameplayRecordFieldStateElement(XElement SourceData, object pContext) : base(SourceData, pContext)
         {
             //FieldData is the XElement named Field...
+            TrueElapsed = TimeSpan.FromTicks(SourceData.GetAttributeLong("TrueElapsed", 0));
             XElement fStateElement = SourceData.Element("Field");
             FieldData = fStateElement;
         }
         public override XElement GetXmlData(string pNodeName, object PersistenceData)
         {
-
             var BuildElement = base.GetXmlData("FieldState", PersistenceData);
+            BuildElement.Add(new XAttribute("TrueElapsed", TrueElapsed.Ticks));
             BuildElement.Add(FieldData);
             return BuildElement;
         }

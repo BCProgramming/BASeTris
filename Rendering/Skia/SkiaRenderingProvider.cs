@@ -20,7 +20,7 @@ namespace BASeTris.Rendering.Skia
         public SkiaSharp.SKCanvas g;
         public SkiaSharp.SKRect region;
         public SkiaSharp.SKPaint OverrideBrush = null;
-        public SkiaSharp.SKMatrix ApplyAttributes = SkiaSharp.SKMatrix.CreateIdentity();
+        public SkiaSharp.SKMatrix[] ApplyAttributes = new[] { SkiaSharp.SKMatrix.CreateIdentity() };
         public SkiaSharp.SKColorFilter ColorFilter = null;
         //public SettingsManager Settings = null;
         public TetrisBlockDrawSkiaParameters(SkiaSharp.SKCanvas pG, SkiaSharp.SKRect pRegion, Nomino pGroupOwner, SettingsManager pSettings) : base(pGroupOwner, pSettings)
@@ -30,4 +30,5 @@ namespace BASeTris.Rendering.Skia
             region = pRegion;
         }
     }
+    
 }

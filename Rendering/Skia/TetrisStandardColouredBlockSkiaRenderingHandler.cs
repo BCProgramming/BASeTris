@@ -142,9 +142,6 @@ namespace BASeTris.Rendering.Skia
             SKImageInfo ski = new SKImageInfo(Source.Width, Source.Height, Source.ColorType, Source.AlphaType, Source.ColorSpace);
             SKPixmap skp = Source.PeekPixels();
             SKBitmap newbitmap = new SKBitmap(ski);
-
-         
-                
                 for (int x = 0; x < Source.Width; x++)
                 {
                     for (int y = 0; y < Source.Height; y++)
@@ -155,14 +152,9 @@ namespace BASeTris.Rendering.Skia
                         newbitmap.SetPixel(x, y, TargetColor);          
                     }
                 }
-
-
             return SKImage.FromBitmap(newbitmap);
-            
-
-
-
         }
+
         public static SKImage ProcessBlockImageInfo(SKImage Source, BlockColorInformation data)
         {
             SKImage OperatingResult = null;

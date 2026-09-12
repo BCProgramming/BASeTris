@@ -160,12 +160,12 @@ namespace BASeTris
                 GameHandler = (IBlockGameCustomizationHandler)Activator.CreateInstance(desiredHandlerType);
                 //set the initial options to the ones we saved.
                 GameHandler.PrepInstance = gpo.GameplayRecord.InitialData.InitialOptions;
-                
                 this.UserInputDisabled = true; //disable user-capable inputs, only take from the injector.
-                this.ai = new ReplayInputInjector(_Owner,gpo.GameplayRecord.GetPlayQueue());
-                
                 var gsm = new GameplayGameState(_Owner, GameHandler, null, TetrisGame.Soundman, null);
                 gsm.SetChooser(new Choosers.GeneratedChooser(gpo.GeneratedMinos));
+                this.ai = new ReplayInputInjector(_Owner,gpo.GameplayRecord.GetPlayQueue());
+                
+                
                 return gsm;
 
 
@@ -264,7 +264,7 @@ namespace BASeTris
                     }
 
                     _Presenter.Present();
-
+                    RunNextThreadAction(); // we do this again before sleeping, just to make sure we drain things in a timely fashion
                     Thread.Sleep(0);
                 }
             }

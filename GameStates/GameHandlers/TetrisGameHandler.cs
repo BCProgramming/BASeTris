@@ -1,4 +1,5 @@
 ﻿using BASeCamp.BASeScores;
+using BASeCamp.Logging;
 using BASeTris.AI;
 using BASeTris.AssetManager;
 using BASeTris.Choosers;
@@ -26,7 +27,7 @@ namespace BASeTris.GameStates.GameHandlers
     [HandlerMenuCategory("Tetris")]
     [HandlerTipText("Standard Tetris")]
     [GamePreparer(typeof(StandardTetrisPreparer))]
-    public class StandardTetrisHandler : IBlockGameCustomizationHandler,IGameHandlerChooserInitializer,IPreparableGame
+    public class StandardTetrisHandler : IBlockGameCustomizationHandler,IGameHandlerChooserInitializer,IPreparableGame,IReplayInputAcceptor
     {
         public bool ProgressiveMode = false;
         public virtual String Name { get { return "Tetris"; } }
@@ -412,18 +413,124 @@ namespace BASeTris.GameStates.GameHandlers
 
             PlayField.HasChanged |= rowsfound > 0;
 
+            //define an action for processing the field change.
+
+            Action ProcessFieldChange = new Action(() =>
+                {
+                    if (pOwner is IGamePresenter igp)
+                    {
+
+                        var grabpres = igp.GetPresenter();
+                        if (grabpres.ai is ReplayInputInjector rii)
+                        {
+                            try
+                            {
+                                //first, if needed, turn FieldStateRecord into an appropriate Queue.
+                                //this means we are currently running a replay.
+                                if (FieldStateRecordQueue == null && FieldStateRecord != null)
+                                {
+                                    //if not initialized, we need to initialize it from the FieldStateRecord.
+
+                                    try
+
+                                    {
+                                        Stopwatch TimeFieldReplayRestore = new Stopwatch();
+                                        TimeFieldReplayRestore.Start();
+                                        //this might take some time to process during a replay, we don't want it to affect the actual replaying though!.
+                                        pOwner.GameTime.Stop();
+                                        FieldStateRecordQueue = new Queue<(GameplayRecordFieldStateElement Element, TetrisField Field)>(FieldStateRecord.Values.Select((s) => (s, TetrisField.LoadField(s.FieldData, pOwner.GetHandler()))));
+                                        TimeFieldReplayRestore.Stop();
+                                        DebugLogger.Log.WriteLine($"REPLAY: {FieldStateRecord.Values.Count} Fields restored in {TimeFieldReplayRestore.ToString()}");
+                                    }
+                                    finally
+                                    {
+
+                                    }
+                                }
+                                else
+                                {
+                                    //it's not null, now time to see if we should compare it to the current field state
+                                    //since this is the same place where we would be saving the state, this shouldn't be super time sensitive.
+                                    if (FieldStateRecordQueue.Count > 0) //possible it is empty if the replay didn't have them for whatever reason.
+                                    {
+                                        var TopElement = FieldStateRecordQueue.Peek();
+                                        if (TopElement.Element.TrueElapsed < pOwner.GetElapsedTime())
+                                        {
+                                            var grabitem = FieldStateRecordQueue.Dequeue();
+                                            if (grabitem != TopElement)
+                                            {
+                                                //race condition?
+                                            }
+                                            else
+                                            {
+
+                                                //TODO: grab current field state to compare to the saved one.
+                                                //TopElement.Field
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //should this even be possible under normal circumstances? Maybe flag it.
+                                            ;
+                                        }
+                                    }
+
+                                }
+                            }
+                            finally
+                            {
+                                pOwner.GameTime.Start();
+                            }
+                        }
+                        else
+                        {
+                            DebugLogger.Log.WriteLine("Sending Field State for Replay to GameRecorder");
+                            //if we are not replaying, than we want to staple a field state record element into the gamerecorder.
+                            GameplayRecordFieldStateElement StateElement = new GameplayRecordFieldStateElement(pOwner.GetElapsedTime(), state.PlayField);
+                            pOwner.GameRecorder.AddRecord(StateElement);
+                            pOwner.GameTime.Start();
+                        }
+
+                    }
+
+
+
+
+
+                });
+
+            //if there are rows found, we'll be using a clear state. In that case we want to add the action to AfterClearActions.
             if (rowsfound > 0)
             {
+                AfterClearActions.Add(ProcessFieldChange);
                 var ClearState = new FieldLineActionGameState(state, CompletedRows.ToArray(), AfterClearActions);
                 ClearState.ClearStyle = TetrisGame.Choose((FieldLineActionGameState.LineClearStyle[])(Enum.GetValues(typeof(FieldLineActionGameState.LineClearStyle))));
 
                 pOwner.CurrentState = ClearState;
             }
+            else
+            {
+                //otherwise, we want to to do the processing now, right after the block has dropped.
+                ProcessFieldChange();
+            }
 
+                //after the clear action completes, we will want to add the current state.
+                //Note: could different field clears being chosen in a replay be the reason for desyncs? We should probably pause elapsed time while the clear is running...
+                
             //if(rowsfound > 0) pOwner.CurrentState = new FieldLineActionDissolve(this,CompletedRows.ToArray(),AfterClearActions);
             var scoreresult = GetScore(rowsfound, HotLines, state, pOwner, Trigger);
             pOwner.Feedback(0.9f * (float)scoreresult, scoreresult * 250);
             FCR.ScoreResult = rowsfound;
+
+
+            //last step: do some validation if we're replaying.
+
+            //FieldStateRecord
+
+           
+
+
+
             return FCR;
 
         }
@@ -451,6 +558,8 @@ namespace BASeTris.GameStates.GameHandlers
             }
             return null;
         }
+        SortedList<TimeSpan,GameplayRecordFieldStateElement> FieldStateRecord = new SortedList<TimeSpan,GameplayRecordFieldStateElement>();
+        Queue<(GameplayRecordFieldStateElement Element,TetrisField Field)> FieldStateRecordQueue = null;
 
         GamePreparerOptions IBlockGameCustomizationHandler.PrepInstance { get { return this.PrepInstance; } set { if (value is StandardTetrisPreparer stp) this.PrepInstance = stp; } }
         GamePreparerOptions IPreparableGame.PrepInstance { get { return this.PrepInstance; }  }
@@ -465,6 +574,20 @@ namespace BASeTris.GameStates.GameHandlers
             }
             //throw new NotImplementedException();
         }
+
+        void IReplayInputAcceptor.AcceptElement(GameplayRecordElement Element)
+        {
+            
+            if (Element is GameplayRecordFieldStateElement grfse)
+            {
+                FieldStateRecord.Add(grfse.TrueElapsed,grfse);
+                //field state elements are slammed into us at the start of a replay.
+                //we need to cache these by their "real" elapsed time, then we can use this to verify the field state for field state changes.
+            }
+        }
+
+
+
     }
 
     

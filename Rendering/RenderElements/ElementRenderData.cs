@@ -13,6 +13,7 @@ namespace BASeTris.Rendering.RenderElements
     {
         public Nomino GroupOwner = null;
         public float FillPercent = 1f;
+        
         public SettingsManager Settings;
         public TetrisBlockDrawParameters(Nomino pGroupOwner, SettingsManager pSettings)
         {

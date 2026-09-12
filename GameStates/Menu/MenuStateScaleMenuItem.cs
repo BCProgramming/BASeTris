@@ -20,10 +20,10 @@ namespace BASeTris.GameStates.Menu
         //Biggliest = 1.6
         private MenuItemScaleItemSelection[] ScaleOptions = new MenuItemScaleItemSelection[]
         {
-            new MenuItemScaleItemSelection() {Text = "Tiny",Scale = 0.75f},
-            new MenuItemScaleItemSelection() {Text = "Small",Scale = 1f},
-            new MenuItemScaleItemSelection() {Text = "Large",Scale = 1.3f},
-            new MenuItemScaleItemSelection() {Text = "Biggliest",Scale = 1.6f}
+            new MenuItemScaleItemSelection() {Text = "Screen Size:Tiny",Scale = 0.75f},
+            new MenuItemScaleItemSelection() {Text = "Screen Size:Small",Scale = 1f},
+            new MenuItemScaleItemSelection() {Text = "Screen Size:Large",Scale = 1.3f},
+            new MenuItemScaleItemSelection() {Text = "Screen Size:Biggliest",Scale = 1.6f}
         };
         public MenuStateScaleMenuItem(IStateOwner pOwner):base(null)
         {

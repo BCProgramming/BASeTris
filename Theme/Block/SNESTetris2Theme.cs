@@ -86,7 +86,7 @@ namespace BASeTris.Theme.Block
             }
             else
             {
-                if (false || Group is Tetromino_T)
+                if (false && Group is Tetromino_T)
                 {
                     var result = base.GetGroupBlockColor(GameHandler, Field, Reason, Group);
                     ShiftColorReplacement.SolidColor = result.SolidColor;

@@ -320,7 +320,6 @@ namespace BASeTris.Rendering.Skia
                     }
                 }
             
-            Debug.Print("Painting Active Groups Finished:" + sw.Elapsed.ToString());
         }
     }
 }

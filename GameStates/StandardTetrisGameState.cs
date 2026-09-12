@@ -36,11 +36,14 @@ using System.Xml.Linq;
 using BASeCamp.Elementizer;
 using System.Reflection;
 using System.IO.Compression;
+using System.Collections.Concurrent;
 
 namespace BASeTris.GameStates
 {
     public class GameplayGameState : GameState,IMouseInputState
     {
+        public record GameplayKeyInputInformation(int index,GameState.GameKeys Key,long inputtick);
+        
         [Flags]
         public enum GameplayStateFlags
         {
@@ -57,6 +60,9 @@ namespace BASeTris.GameStates
         public TetrisField PlayField = null;
         private DateTime lastHorizontalMove = DateTime.MinValue;
         public bool DoRefreshBackground = false;
+        public ConcurrentQueue<GameplayKeyInputInformation> LastKeys = new System.Collections.Concurrent.ConcurrentQueue<GameplayKeyInputInformation>();
+
+        public List<GameplayKeyInputInformation> GetLastKeys() => new List<GameplayKeyInputInformation>(LastKeys);
         public GameplayStateFlags Flags { get; set; } = GameplayStateFlags.Normal;
         BlockGroupChooser overrideChooser = null;
         public MouseStateAggregate MouseInputData { get; private set; } = new MouseStateAggregate();
@@ -451,7 +457,7 @@ namespace BASeTris.GameStates
             return PlayField.GetGhostDrop(pOwner, Source, out dropLength, CancelProximity);
         }
 
-        public void FrameUpdate(IStateOwner pOwner)
+        public void UpdateNextQueueFrame(IStateOwner pOwner)
         {
             if (NextAngleOffset != 0)
             {
@@ -556,7 +562,7 @@ namespace BASeTris.GameStates
                 
                 iextend.GameProc(this, pOwner);
             }
-            FrameUpdate(pOwner);
+            UpdateNextQueueFrame(pOwner);
             
           
             
@@ -801,10 +807,12 @@ namespace BASeTris.GameStates
             return AnyTrue;
 
         }
-        
+        const int MAXLASTKEYS = 5;
+        int inputindex = 0;
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
-
+            LastKeys.Enqueue(new GameplayKeyInputInformation(inputindex++,g,pOwner.GetElapsedTime().Ticks));
+            while (LastKeys.Count > MAXLASTKEYS) LastKeys.TryDequeue(out _);
             if (GameHandler is IExtendedGameCustomizationHandler iextend)
             {
 

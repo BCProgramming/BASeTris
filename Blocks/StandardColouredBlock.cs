@@ -143,7 +143,8 @@ namespace BASeTris.Blocks
         public override XElement GetXmlData(string pNodeName, object pPersistenceData)
         {
             var result = base.GetXmlData(pNodeName, pPersistenceData);
-            DisplayStyle = BlockStyle.Style_Chisel; //a default one. This should all be handled by a theme.... we won't even save the "gummy bitmap".
+            result.Add(new XAttribute("DisplayStyle", DisplayStyle));
+            //DisplayStyle = BlockStyle.Style_Chisel; //a default one. This should all be handled by a theme.... we won't even save the "gummy bitmap".
             return result;
         }
         public StandardColouredBlock():base()
@@ -151,7 +152,7 @@ namespace BASeTris.Blocks
         }
         public StandardColouredBlock(XElement src, Object pPersistenceData) : base(src, pPersistenceData)
         {
-            //no special logic....
+            DisplayStyle = src.GetAttributeEnum<BlockStyle>("DisplayStyle", BlockStyle.Style_Chisel);
         }
 
         internal class ColouredBlockGummyIndexData

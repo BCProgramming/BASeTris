@@ -344,10 +344,18 @@ namespace BASeTris.GameStates.Menu
             //throw new NotImplementedException();
 
         }
-        
-       
+        protected int GetPreviousIndex_ex(int StartPos)
+        {
+            return (StartPos - 1 + MenuElements.Count) % (MenuElements.Count);
+            //int delta = (button == UP) ? -1 : 1; position = (position + delta + numItems) % numItems; 
+        }
+        protected int GetNextIndex_ex(int StartPos)
+        {
+               return (StartPos + 1 + MenuElements.Count ) % (MenuElements.Count);
+        }
         protected int GetPreviousIndex(int StartPos)
         {
+            return GetPreviousIndex_ex(StartPos);
             StartPos--;
             if (StartPos < 0)StartPos= MenuElements.Count - 1;
 
@@ -355,6 +363,7 @@ namespace BASeTris.GameStates.Menu
         }
         protected int GetNextIndex(int StartPos)
         {
+            return GetNextIndex_ex(StartPos);
             StartPos++;
             if (MenuElements.Count - 1 < StartPos)
             {

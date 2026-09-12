@@ -19,6 +19,7 @@ namespace BASeTris.AssetManager
         List<BASSPlayingSound> PlayingSounds = new List<BASSPlayingSound>();
         public BASSLoadedSound(Func<int> pNewStream)
         {
+            
             NewStream = pNewStream;
         }
         public IActiveSound Play(bool playlooped)
@@ -56,6 +57,7 @@ namespace BASeTris.AssetManager
                 {
                     try
                     {
+                        
                         maketempostream = ManagedBass.Fx.BassFx.TempoCreate(ActiveStream, ManagedBass.BassFlags.FxFreeSource);
                     }
                     catch (DllNotFoundException exx)
@@ -65,12 +67,18 @@ namespace BASeTris.AssetManager
                         //oh well. Seems like BASS.NET ignores the call if it doesn't understand the tempo stuff.
                         maketempostream = 0;
                     }
+                    
+
+                    //var makewah = new ManagedBass.Fx.AutoWahEffect() {   };
+                    //    makewah.ApplyOn(maketempostream);
                 }
             }
             var playstream = () => maketempostream == 0 ? ActiveStream : maketempostream;
 
         
-            
+            var ce = new ManagedBass.Fx.CompressorEffect();
+                    ce.IsActive = true;
+                    ce.ApplyOn(maketempostream);
 
 
             ManagedBass.Bass.ChannelSetAttribute(playstream(),ManagedBass.ChannelAttribute.Volume , volume);

@@ -130,6 +130,7 @@ namespace BASeTris
                     }
                 }
             }
+            
             List<Nomino> OwnerList = OwnerDictionary.OrderBy((d) => d.Value).Select((d) => d.Key).ToList();
             XElement OwnerListElement = StandardHelper.SaveList<Nomino>(OwnerList,"Owners",null, true);
 
@@ -139,13 +140,19 @@ namespace BASeTris
 
             XElement ActiveGroupElement = StandardHelper.SaveList<Nomino>(ActiveBlockGroups, "ActiveGroups", null, true);
             ResultNode.Add(ActiveGroupElement);
-
+            
             //another element we will save: the current queue for the blocks!
 
             
 
 
             return ResultNode;
+        }
+        public static TetrisField LoadField(XElement src,IBlockGameCustomizationHandler Handler)
+        {
+            TetrisField tf = new TetrisField(null,Handler);
+            tf.RestoreField(src);
+            return tf;
         }
         public void RestoreField(XElement src)
         {

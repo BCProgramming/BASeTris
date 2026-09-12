@@ -13,6 +13,7 @@ using BASeTris.Rendering.GDIPlus;
 using BASeTris.Blocks;
 using SkiaSharp;
 using BASeTris.AssetManager;
+using BASeCamp.Logging;
 
 namespace BASeTris.GameStates
 {
@@ -47,7 +48,7 @@ namespace BASeTris.GameStates
 
             if (desiredState!=null)
             {
-                desiredState.FrameUpdate(pOwner);
+                desiredState.UpdateNextQueueFrame(pOwner);
                 
             }
         }
@@ -59,6 +60,9 @@ namespace BASeTris.GameStates
 
         public override void HandleGameKey(IStateOwner pOwner, GameKeys g)
         {
+            //Is this causing issues in replays? are timing problems resulting in recorded inputs during line clears
+            //to end up being put through and acted on or vice versa?
+            //do we need to record more information into replays about this?
             //Should we allow Game keys here? probably. We'll block them for the moment though. There shouldn't be an active Nomino during this process
             //so really there shouldn't be anything to control- Aside, of course, from pause for example.
             //throw new NotImplementedException();
@@ -128,6 +132,7 @@ namespace BASeTris.GameStates
 
         public override void GameProc(IStateOwner pOwner)
         {
+            if (pOwner.GameTime.IsRunning) pOwner.GameTime.Stop();
             base.GameProc(pOwner);
             if (pOwner.CurrentState is GameplayGameState stgs1)
             {
@@ -172,6 +177,9 @@ namespace BASeTris.GameStates
 
                 if (ClearResult)
                 {
+                    //lets log the total elapsed time for the clear.
+                    var TotalTime = DateTime.Now - StartOperation;
+                    DebugLogger.Log.WriteLine("Line Clear Time:" + TotalTime.TotalSeconds + "(" + this.GetType().Name + ")");
                     //reset the original State.
                     pOwner.CurrentState = _BaseState;
                    
@@ -230,7 +238,7 @@ namespace BASeTris.GameStates
 
                         CurrentClearIndex++;
                         //_BaseState.PlayField.HasChanged = true;
-                        return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
+                        break;
                     case LineClearStyle.LineClear_Right_To_Left:
                         foreach (var rowClear in ClearRowInfo)
                         {
@@ -241,7 +249,7 @@ namespace BASeTris.GameStates
 
                         CurrentClearIndex++;
                         //_BaseState.PlayField.HasChanged = true;
-                        return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
+                        break;
                     case LineClearStyle.LineClear_Middle_Out:
                         //middle out
                         foreach (var rowClear in ClearRowInfo)
@@ -253,22 +261,23 @@ namespace BASeTris.GameStates
 
                         CurrentClearIndex++;
                         //_BaseState.PlayField.HasChanged = true;
-                        return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
+                        break;
                     case LineClearStyle.LineClear_Outside_In:
+                        
+                        //middle out
+                        foreach (var rowClear in ClearRowInfo)
                         {
-                            //middle out
-                            foreach (var rowClear in ClearRowInfo)
-                            {
-                                if (_Stagger && rowClear.Key % 2 == 0) ClearFrame_Outside_In(pOwner, rowClear, ClearRowInfo.Count);
-                                else
-                                    ClearFrame_Outside_In(pOwner, rowClear, ClearRowInfo.Count);
-                            }
-
-                            CurrentClearIndex++;
-                            //_BaseState.PlayField.HasChanged = true;
-                            return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
+                            if (_Stagger && rowClear.Key % 2 == 0) ClearFrame_Outside_In(pOwner, rowClear, ClearRowInfo.Count);
+                            else
+                                ClearFrame_Outside_In(pOwner, rowClear, ClearRowInfo.Count);
                         }
+
+                        CurrentClearIndex++;
+                        //_BaseState.PlayField.HasChanged = true;
+                        break;
+                        
                 }
+                 return CurrentClearIndex >= _BaseState.PlayField.Contents[0].Length + 2;
             }
             finally
             {

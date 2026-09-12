@@ -13,4 +13,8 @@ namespace BASeTris.Rendering.Skia
             Source.InvokeBeforeDraw(Element);
         }
     }
+
+
+
+
 }

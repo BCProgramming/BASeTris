@@ -16,6 +16,32 @@ namespace BASeTris.Blocks
     
     public abstract class NominoBlock : IXmlPersistable
     {
+        //Draw Modifiers are a concept to help make it easier to create special additives that draw in different ways.
+        //Right now we have a weird hard-coded percentage that changes drawing, ideally we'd have a 'shrink' modifier that gets added to a block instead for that purpose.
+        //This was originally going to try to use the whole rendering provider mechanic but it's a bit problematic to use that way.
+        //note: decided against this for now- it would require a brand new bitmap every single frame, one for each modifier- which seems annoying. will stick with BlockDrawParameters instead, and they can be handled in the RenderingHandler implementation(s)
+        /*public Dictionary<Type,List<TetrisBlockRenderingModifier>> DrawModifiers = new Dictionary<Type,List<TetrisBlockRenderingModifier>>();
+
+        public void AddOrMutateModifier<T>(Func<T> New, Action<T> Modify) where T:TetrisBlockRenderingModifier
+        {
+            if (!DrawModifiers.ContainsKey(typeof(T)))
+            {
+                //if not present in the dictionary, create a new list, add the result of the "new" function, add the list to the dictionary, and return.
+                var MadeList = new List<TetrisBlockRenderingModifier>() { New() };
+                DrawModifiers.Add(typeof(T), MadeList);
+            }
+            else
+            {
+                //modify the existing reference.
+
+                var checklist = DrawModifiers[typeof(T)];
+                foreach (var modifyitem in checklist)
+                    Modify(modifyitem as T); //forced downcast, but since it is in the dictionary indexed by the type it should be that type of list and element...
+            }
+        }*/
+
+
+
         public Action<TetrisBlockDrawParameters> BeforeDraw = null;
         public Nomino? Owner { get; set; }
         public bool Visible { get; set; } = true;

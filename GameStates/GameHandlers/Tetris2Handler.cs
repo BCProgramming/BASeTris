@@ -143,7 +143,7 @@ namespace BASeTris.GameStates.GameHandlers
             PrimaryBlockCount = state.PlayField.AllContents().Count((y) => y != null);
 
             //save a replay injected tag with the field state.
-            GameplayRecordFieldStateElement StateElement = new GameplayRecordFieldStateElement(state.PlayField);
+            GameplayRecordFieldStateElement StateElement = new GameplayRecordFieldStateElement(pOwner.GetElapsedTime(), state.PlayField);
             //inject into Replay
 
             pOwner.GameRecorder.AddRecord(StateElement);

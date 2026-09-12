@@ -78,7 +78,8 @@ namespace BASeTris.Rendering.Skia
                 {
                     var current = parameters.g.TotalMatrix;
                     parameters.g.ResetMatrix();
-                    parameters.g.Concat(ref parameters.ApplyAttributes);
+                    for(int i=0;i<parameters.ApplyAttributes.Length-1;i++)
+                        parameters.g.Concat(ref parameters.ApplyAttributes[i]);
                     parameters.g.RotateDegrees(Degrees, Center.X, Center.Y);
                     if(parameters.ColorFilter==null)
                         parameters.g.DrawImage(useImage, DrawPosition );
@@ -94,7 +95,8 @@ namespace BASeTris.Rendering.Skia
                     lock (useImage)
                     {
                         var current = parameters.g.TotalMatrix;
-                        parameters.g.Concat(ref parameters.ApplyAttributes);
+                        for(int i=0;i<parameters.ApplyAttributes.Length-1;i++)
+                            parameters.g.Concat(ref parameters.ApplyAttributes[i]);
                         DrawPosition.Inflate(0.5f, 0.5f);
                         if(parameters.ColorFilter!=null)
                             parameters.g.DrawImage(useImage, DrawPosition, new SKPaint() { ColorFilter = parameters.ColorFilter });

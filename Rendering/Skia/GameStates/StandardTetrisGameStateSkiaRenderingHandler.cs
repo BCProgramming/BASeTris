@@ -1,4 +1,20 @@
-﻿using System;
+﻿using BASeCamp.Logging;
+using BASeCamp.Rendering;
+using BASeTris.AI;
+using BASeTris.AssetManager;
+using BASeTris.BackgroundDrawers;
+using BASeTris.Blocks;
+using BASeTris.GameStates;
+//using SkiaSharp.Views.Desktop;
+using BASeTris.GameStates.GameHandlers;
+using BASeTris.Particles;
+using BASeTris.Rendering.Adapters;
+using BASeTris.Rendering.GDIPlus;
+using BASeTris.Rendering.RenderElements;
+using BASeTris.Settings;
+using BASeTris.Tetrominoes;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -6,20 +22,6 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BASeCamp.Rendering;
-using BASeTris.AssetManager;
-using BASeTris.BackgroundDrawers;
-using BASeTris.GameStates;
-using BASeTris.Rendering.GDIPlus;
-using BASeTris.Rendering.RenderElements;
-using BASeTris.Blocks;
-using BASeTris.Tetrominoes;
-using SkiaSharp;
-//using SkiaSharp.Views.Desktop;
-using BASeTris.GameStates.GameHandlers;
-using BASeTris.Settings;
-using BASeTris.Particles;
-using BASeCamp.Logging;
 
 namespace BASeTris.Rendering.Skia.GameStates
 {
@@ -242,8 +244,67 @@ namespace BASeTris.Rendering.Skia.GameStates
 
             }
 
-        }
+            //replay indicator.
+            if (pOwner is IGamePresenter p)
+            {
+                var grabpres = p.GetPresenter();
+                if (grabpres.ai is ReplayInputInjector rii)
+                {
+                
+        
 
+
+                    //paint a replay arrow in the upper right corner
+                using SKPaint textforeground = new SKPaint() { Typeface = TetrisGame.ArialFontSK, TextSize = 72, Color = SKColors.Maroon };
+                using SKPaint textshadow = new SKPaint() { Typeface = TetrisGame.ArialFontSK, TextSize = 72, Color = SKColors.White };
+                //RenderHelpers.SetPaintBlur(textshadow);
+                
+                DrawTextInformationSkia tTitle = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow,Text = RightArrow };
+                //DrawTextInformationSkia dtis = new DrawTextInformationSkia() { ForegroundPaint = textforeground, ShadowPaint = textshadow,Text=RightArrow };
+                SKRect bnd = new SKRect();
+
+                tTitle.DrawFont =  new SKFontInfo(TetrisGame.ArialFontSK, 72);
+                textforeground.MeasureText(tTitle.Text, ref bnd);
+                    //Why is this positioning seemingly odd? is the text being measured wrong? Or at the wrong size? It should be the same as the one that gets used to paint...
+                tTitle.Position = new SKPoint(Element.Bounds.Right - bnd.Width*2, Element.Bounds.Top + bnd.Height*3);
+                    var smilli = DateTime.Now.Millisecond;
+                    if(smilli < 500)
+                        pRenderTarget.DrawTextSK(tTitle);
+
+                    using SKPaint smalltextforeground = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = 24, Color = SKColors.White };
+                    using SKPaint smalltextshadow = new SKPaint() { Typeface = TetrisGame.RetroFontSK, TextSize = 24, Color = SKColors.Black };
+                    DrawTextInformationSkia smalltTitle = new DrawTextInformationSkia() { ForegroundPaint = smalltextforeground, ShadowPaint = smalltextshadow,Text = "",DrawFont = new SKFontInfo(TetrisGame.RetroFontSK, 24)};
+                    smalltTitle.CharacterHandler = new DrawCharacterHandlerSkia(new JitterCharacterPositionCalculatorSkia() { Height = 3 });
+                    float DrawKeyYPos = bnd.Height; //Element.Bounds.Top + bnd.Height * 3.5f;
+                    //ideally we'd show the pushed buttons as well, though that might require a few other changes to get that information.
+                    var Showkeys = Source.GetLastKeys();
+                    
+                    foreach (var iterate in Showkeys)
+                    {
+                        if (iterate.inputtick > pOwner.GetElapsedTime().Ticks + 1000) continue;
+                        String sKey = iterate.index.ToString() + ":" + GameState.GetGameKeyAbbreviation(iterate.Key) + " ";
+
+                        SKRect KeyTextSize = new SKRect();
+                        smalltTitle.ForegroundPaint.MeasureText(sKey,ref KeyTextSize);
+                        smalltTitle.Text = sKey;
+                        smalltTitle.Position = new SKPoint(15,DrawKeyYPos);
+                        
+                        pRenderTarget.DrawTextSK(smalltTitle);
+                        DrawKeyYPos += KeyTextSize.Height * 1.1f;
+                        //pRenderTarget.DrawLine(new SKPoint(50, 50), smalltTitle.Position, smalltextforeground);
+
+
+
+                    }
+
+
+                }
+            }
+
+        }
+        static bool Flagger = false;
+        static readonly string RightArrow = "►";
+        
         bool MouseActive = true;
         private String FormatGameTime(IStateOwner stateowner)
         {
