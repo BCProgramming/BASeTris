@@ -9,6 +9,7 @@ using BASeTris.Choosers;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates.GameHandlers.HandlerOptions;
 using BASeTris.GameStates.GameHandlers.HandlerStates;
+using BASeTris.Replay;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Block;
 

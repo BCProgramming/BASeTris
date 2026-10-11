@@ -32,7 +32,5 @@ namespace BASeTris.Theme.Block
 
 
         protected Dictionary<String, NominoTheme> AppliedThemeByKeyDictionary = new Dictionary<string, NominoTheme>();
-
-
     }
 }

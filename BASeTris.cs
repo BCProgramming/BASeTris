@@ -39,6 +39,7 @@ using BASeTris.Rendering.Adapters;
 using BASeTris.Theme.Audio;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.Settings;
+using BASeTris.Replay;
 
 namespace BASeTris
 {

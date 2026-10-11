@@ -26,11 +26,9 @@ BASeTris started partly because I was somewhat disappointed in the availability 
 There is a game mode which effectively allows any number of block sized nominoes. This is made available through a bunch of game modes such as Pentris and Hextris, with "Joke" versions such as Centris. The field size is larger for larger block counts, and the Nominoes are actually generated on the fly as well.
 
 
-
-
-
-
-
-
 I have a Jenkins CI configured which will upload new versions as needed every two days. The latest build's installer can be directly accessed via [this](https://bc-programming.com/blogs/?smd_process_download=1&download_id=2717) URL.
+
+##Human Disclaimer
+
+This project and source code is written by a human without the "assistance" of any AI tooling.
 

@@ -5,6 +5,7 @@ using BASeTris.AssetManager;
 using BASeTris.Choosers;
 using BASeTris.Rendering.GDIPlus;
 using BASeTris.Rendering.Skia.GameStates;
+using BASeTris.Replay;
 using BASeTris.Tetrominoes;
 using SkiaSharp;
 using System;

@@ -12,6 +12,7 @@ using BASeTris.AI;
 using BASeTris.FieldInitializers;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Replay;
 using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;

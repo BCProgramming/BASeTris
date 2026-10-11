@@ -38,6 +38,7 @@ using BASeCamp.Logging;
 using System.Collections.Concurrent;
 using BASeTris.AssetManager;
 using BASeTris.Rendering.FrameBufferEffects;
+using BASeTris.Replay;
 namespace BASeTris
 {
     public class BASeTrisTK : GameWindow,IStateOwner,IGamePresenter, IBufferMultiHistoryProvider<SKImage>

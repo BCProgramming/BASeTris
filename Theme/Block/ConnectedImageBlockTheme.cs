@@ -17,6 +17,8 @@ using OpenTK.Graphics.ES11;
 using BASeTris.AssetManager;
 using BASeCamp.Logging;
 using OpenTK.Graphics.ES20;
+using SkiaSharp.Views.Desktop;
+using BASeTris.Theme.Block.Composite;
 
 
 
@@ -79,8 +81,9 @@ namespace BASeTris.Theme.Block
 
     public abstract class ConnectedImageBlockTheme : ConnectedImageLineSeriesBlockThemeBase<BlockColorInformation, SKImage>
     {
-        
 
+        private SKBitmap _UnderlayBitmap;
+        public SKImage Underlay { get; init; } //image that will underly all the images. This is designed for when the connected blocks are transclucent and intended to overlay over top of say a texture.
         //new feature "concept". some way to do a color filter replacement, like palettes, instead of forcing colorization with a single color.
         protected CardinalImageSetBlockData Red = new CardinalImageSetBlockData();
         protected CardinalImageSetBlockData Yellow = new CardinalImageSetBlockData();
@@ -252,32 +255,51 @@ namespace BASeTris.Theme.Block
             }
             return (blocktype, useColor);
         }
+        private SKImage UnderlayImage(SKImage Result)
+        {
+            if (Underlay != null && Result!=null) return TetrisStandardColouredBlockSkiaRenderingHandler.OverlayImages(Underlay, Result);
+            return Result;
+                    
+        }
+        private SKBitmap UnderlayBitmap(SKBitmap Result)
+        {
+            if (Underlay != null && Result!=null) return SKBitmap.FromImage(TetrisStandardColouredBlockSkiaRenderingHandler.OverlayImages(Underlay, SKImage.FromBitmap(Result)))??Result;
+            return Result;
+        }
         //TODO: need to fix up the themes for various colours here. Fioxed blocks also stopped working.
         protected override void PrepareThemeData()
         {
+            if (this.GetType() == typeof(ConnectedOverlayTileTheme))
+            {
+                ;
+            }
             if (ThemeDataPrepared) return;
             ThemeDataPrepared = true;
             //  TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(getimage, Input);
             Red.Normal = new CardinalImageSet();
-            Red.Normal[CardinalConnectionSet.ConnectedStyles.None] = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_normal")?? TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase()));
+
+            //TODO: underlay image option should be handled here. we should add a helper function that wraps the FromBitmap?? calls here...
+
+
+            Red.Normal[CardinalConnectionSet.ConnectedStyles.None] = UnderlayImage(SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_normal")?? TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase())));
             //"Field" reflects blocks that are part of the field, rather than active block groups.
             Red.Field = new CardinalImageSet();
-            var fieldbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_field");
-            Red.Field[CardinalConnectionSet.ConnectedStyles.None] = fieldbitmap != null ? SKImage.FromBitmap(fieldbitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
+            var fieldbitmap = UnderlayBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_field"));
+            Red.Field[CardinalConnectionSet.ConnectedStyles.None] = fieldbitmap != null ? UnderlayImage(SKImage.FromBitmap(fieldbitmap)) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
             if (this is TetrisDXTheme_Depr)
             {
                 ;
             }
-            var FixedBitmap= TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed");
+            var FixedBitmap= UnderlayBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_fixed"));
             Red.Fixed = new CardinalImageSet();
-            Red.Fixed[CardinalConnectionSet.ConnectedStyles.None] = FixedBitmap != null ? SKImage.FromBitmap(FixedBitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
+            Red.Fixed[CardinalConnectionSet.ConnectedStyles.None] = FixedBitmap != null ? UnderlayImage(SKImage.FromBitmap(FixedBitmap)) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
 
 
-            var PopBitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_pop");
+            var PopBitmap = UnderlayBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_pop"));
 
             Red.Pop = new CardinalImageSet();
 
-            Red.Pop[CardinalConnectionSet.ConnectedStyles.None] = PopBitmap != null ? SKImage.FromBitmap(PopBitmap) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
+            Red.Pop[CardinalConnectionSet.ConnectedStyles.None] = PopBitmap != null ? UnderlayImage(SKImage.FromBitmap(PopBitmap)) : Red.Normal[CardinalConnectionSet.ConnectedStyles.None];
 
             var allContexts = GetAllImageKeyContexts();
             foreach (var additionalentry in allContexts)
@@ -286,12 +308,12 @@ namespace BASeTris.Theme.Block
                 SKBitmap getbitmap = null;
                 try
                 {
-                    getbitmap = TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_" + additionalentry)??fieldbitmap;
+                    getbitmap = UnderlayBitmap(TetrisGame.Imageman.GetSKBitmap(GetImageKeyBase() + "_" + additionalentry)??fieldbitmap);
                 }
                 catch (Exception exr)
                 {
                     DebugLogger.Log.WriteLine(exr.ToString());
-                    getbitmap = fieldbitmap; //default to thge field bitmap...
+                    getbitmap = fieldbitmap; //default to the field bitmap...
                 }
                 Red[additionalentry] = new CardinalImageSet();
                 Red[additionalentry][CardinalConnectionSet.ConnectedStyles.None] = getbitmap==null? Red.Normal[CardinalConnectionSet.ConnectedStyles.None]:SKImage.FromBitmap(getbitmap);
@@ -470,7 +492,7 @@ namespace BASeTris.Theme.Block
             {
                 if (TetrisGame.Imageman.HasSKBitmap(sFindNormalImage))
                 {
-                    var getimage = SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(sFindNormalImage));
+                    var getimage = UnderlayImage(SKImage.FromBitmap(TetrisGame.Imageman.GetSKBitmap(sFindNormalImage)));
                     //todo: implement compositors. If provided, we want to composite a randomly selected element from that array with the Bitmap we retrieved.
                     Target[checkflags] = getimage;
                 }

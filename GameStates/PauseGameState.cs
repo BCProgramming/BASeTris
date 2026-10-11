@@ -18,6 +18,7 @@ using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Rendering;
 using BASeTris.Rendering.Adapters;
+using BASeTris.Replay;
 using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using BASeTris.Theme.Audio;

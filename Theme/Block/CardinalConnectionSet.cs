@@ -167,15 +167,18 @@ namespace BASeTris.Theme.Block
     
     public class CardinalImageSet : CardinalConnectionSet<SKImage, BlockColorInformation>
     {
+        public SKImage Underlay = null;
         public CardinalImageSet()
         {
         }
-        public CardinalImageSet(CardinalImageSet Source, SKColor Colorize):base(Source,Colorize,(c,i)=> TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i,c))
+        
+        public CardinalImageSet(CardinalImageSet Source, SKColor Colorize,SKImage pUnderlay = null):base(Source,Colorize,(c,i)=> TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i,c) )
         {
+            Underlay = pUnderlay;
         }
-        public static CardinalConnectionSet GetImageSet(CardinalImageSet Source, SKColor Colorize)
+        public static CardinalConnectionSet GetImageSet(CardinalImageSet Source, SKColor Colorize,SKImage pUnderlay)
         {
-            return new CardinalConnectionSet<SKImage, BlockColorInformation>(Source, Colorize, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c));
+            return new CardinalConnectionSet<SKImage, BlockColorInformation>(Source, Colorize, (c, i) => TetrisStandardColouredBlockSkiaRenderingHandler.RecolorImage(i, c) );
         }
     }
 

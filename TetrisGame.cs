@@ -480,7 +480,13 @@ namespace BASeTris
                 {
                     var gp = igp.GetPresenter();
                     if (gp != null && gp.ai is ReplayInputInjector)
+                    {
+                        //note replays, we do want to "record", but we want to do it for verification purposes in-memory. The buttons we record this way
+                        //should line up with the buttons that were originally recorded.
+
                         return;
+                    }
+                    
                 }
                 GameRecorder.AddKeyRecord(pOwner,elapsedusage, g);
             }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using BASeCamp.BASeScores;
 using BASeCamp.Elementizer;
+using BASeTris.Replay;
 
 namespace BASeTris
 {

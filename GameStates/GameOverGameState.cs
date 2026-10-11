@@ -10,6 +10,7 @@ using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.GameHandlers;
 using BASeTris.GameStates.Menu;
 using BASeTris.Properties;
+using BASeTris.Replay;
 
 namespace BASeTris.GameStates
 {

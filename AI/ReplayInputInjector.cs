@@ -1,6 +1,7 @@
 ﻿using BASeCamp.Logging;
 using BASeTris.GameStates;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Replay;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace BASeTris.AI
     {
         //Note: still issues with this one. It can get to about 5-6 minutes before a desync, though it's unclear if that's specific to that replay, or if it's a general problem
 
-        //Added notes: Was able to observe exact moment of desync; a piece was moved one extra block/tile beyond where it had been. Possibly the drop input was somehow observed before the input to move the piece?
+        //Added notes: Was able to observe exact moment of desync; a piece was moved one extra block/tile beyond where it had been. Possibly the drop input was somehow observed before the input to move the piece?.      .                   .....  
         ConcurrentQueue<GameplayRecordElement> DataQueue = null;
         
        

@@ -1,6 +1,7 @@
 ﻿using BASeTris.AI;
 using BASeTris.BackgroundDrawers;
 using BASeTris.GameStates.GameHandlers;
+using BASeTris.Replay;
 using BASeTris.Settings;
 using BASeTris.Tetrominoes;
 using System;

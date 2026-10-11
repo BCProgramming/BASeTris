@@ -170,7 +170,36 @@ namespace BASeTris.Rendering.Skia
             return OperatingResult;
             
         }
-     
+        public static SKImage OverlayImages(params SKImage[] Images)
+        {
+            //first we need to find the largest size of the provided images.
+
+            int MaxWidth = 0, MaxHeight = 0;
+            for (int i = 0; i < Images.Length; i++)
+            {
+                if (Images[i].Width > MaxWidth) MaxWidth = Images[i].Width;
+                if (Images[i].Height > MaxHeight) MaxHeight = Images[i].Height;
+            }
+
+            using (SKBitmap skb = new SKBitmap(MaxWidth, MaxHeight, SKColorType.Rgba8888, SKAlphaType.Premul))
+            {
+                using (SKCanvas OverlayCanvas = new SKCanvas(skb))
+                {
+                    for (int i = 0; i < Images.Length; i++)
+                    {
+                        OverlayCanvas.DrawImage(Images[i], new SKRect(0, 0, MaxWidth, MaxHeight));
+                    }
+                }
+                return SKImage.FromBitmap(skb);
+                // using (SKCanvas bgr = new SKCanvas(result))
+                //{
+                //    bgr.DrawImage(Source, new SKRect(0, 0, newSize.Width, newSize.Height));
+
+                //}
+                //return SKImage.FromBitmap(result);
+            }
+        }
+
         public static SKImage RecolorImage(SKImage Source, SKColor Target)
         {
             SKCanvas c;

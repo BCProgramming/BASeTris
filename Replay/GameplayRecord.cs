@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static BASeTris.GameState;
 
-namespace BASeTris
+namespace BASeTris.Replay
 {
     /// <summary>
     /// Class representing a recorded game.
